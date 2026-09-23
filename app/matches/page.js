@@ -1,3 +1,43 @@
 import { getMatches } from '@/lib/data'
+
 export const revalidate=300
-export default async function Matches(){const {matches,run}=await getMatches();return <><div className="section-title"><div><span className="eyebrow">MAÇ MODELİ</span><h1>GW{run?.gameweek||'—'} Maç Tahminleri</h1></div><span className="muted">Beklenen gol kesin skor değildir.</span></div><div className="grid match-grid">{matches.map(m=><article className="card match-card" key={m.match_id}><div className="match-date">{m.kickoff_at?new Intl.DateTimeFormat('tr-TR',{dateStyle:'medium',timeStyle:'short',timeZone:'Europe/Istanbul'}).format(new Date(m.kickoff_at)):'—'}</div><h2>{m.home_team}<span>vs</span>{m.away_team}</h2><div className="match-xg"><b>{Number(m.home_xg).toFixed(2)}</b><span>xG</span><b>{Number(m.away_xg).toFixed(2)}</b></div><div className="score-box"><small>En olası skor</small><strong>{m.top_score}</strong><em>{(Number(m.top_score_probability)*100).toFixed(1)}%</em></div><div className="odds"><span>1 <b>{(Number(m.home_win_probability)*100).toFixed(1)}%</b></span><span>X <b>{(Number(m.draw_probability)*100).toFixed(1)}%</b></span><span>2 <b>{(Number(m.away_win_probability)*100).toFixed(1)}%</b></span></div><div className="mini-metrics"><span>KG Var <b>{(Number(m.btts_probability)*100).toFixed(0)}%</b></span><span>2.5 Üst <b>{(Number(m.over25_probability)*100).toFixed(0)}%</b></span></div></article>)}</div></>}
+
+export default async function Matches(){
+  const {matches,run}=await getMatches()
+  return <>
+    <div className="section-title">
+      <div><span className="eyebrow">MAÇ MODELİ</span><h1>GW{run?.gameweek||'—'} Maç Tahminleri</h1></div>
+      <span className="muted">Skor dağılımı • xG • 1X2 • KG Var</span>
+    </div>
+
+    <div className="grid match-grid modern-match-grid">
+      {matches.map(m=>{
+        const home=Number(m.home_win_probability||0), draw=Number(m.draw_probability||0), away=Number(m.away_win_probability||0)
+        return <article className="card match-card modern-match-card" key={m.match_id}>
+          <div className="match-card-top">
+            <span>{m.kickoff_at?new Intl.DateTimeFormat('tr-TR',{weekday:'short',day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit',timeZone:'Europe/Istanbul'}).format(new Date(m.kickoff_at)):'—'}</span>
+            <b>GW{run?.gameweek||'—'}</b>
+          </div>
+
+          <div className="match-teams">
+            <div><span>EV</span><b>{m.home_team}</b><strong>{Number(m.home_xg||0).toFixed(2)}<small>xG</small></strong></div>
+            <div className="score-prediction"><small>EN OLASI</small><strong>{m.top_score}</strong><em>{(Number(m.top_score_probability||0)*100).toFixed(1)}%</em></div>
+            <div className="away"><span>DEP</span><b>{m.away_team}</b><strong>{Number(m.away_xg||0).toFixed(2)}<small>xG</small></strong></div>
+          </div>
+
+          <div className="outcome-bar" aria-label="1 X 2 olasılıkları">
+            <i className="home" style={{width:`${home*100}%`}}/>
+            <i className="draw" style={{width:`${draw*100}%`}}/>
+            <i className="away" style={{width:`${away*100}%`}}/>
+          </div>
+          <div className="outcome-labels"><span>1 <b>{(home*100).toFixed(0)}%</b></span><span>X <b>{(draw*100).toFixed(0)}%</b></span><span>2 <b>{(away*100).toFixed(0)}%</b></span></div>
+
+          <div className="match-chips">
+            <span>KG Var <b>{(Number(m.btts_probability||0)*100).toFixed(0)}%</b></span>
+            <span>2.5 Üst <b>{(Number(m.over25_probability||0)*100).toFixed(0)}%</b></span>
+          </div>
+        </article>
+      })}
+    </div>
+  </>
+}

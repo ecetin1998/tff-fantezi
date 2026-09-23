@@ -53,13 +53,13 @@ export default function PlayersTable({ players }){
   const playerNote=(p)=>{
     if(p.availability?.reason){
       const checked=formatCheck(p.availability.checked_at)
-      return checked ? `${p.availability.reason} • kontrol ${checked}` : p.availability.reason
+      return checked ? `${p.availability.reason} • ${checked}` : p.availability.reason
     }
-    return 'Aktif havuz'
+    return 'Aktif'
   }
 
   return <>
-    <div className="filters">
+    <div className="filters player-filters">
       <input value={q} onChange={e=>setQ(e.target.value)} placeholder="Oyuncu, takım veya rakip ara..."/>
       <select value={team} onChange={e=>setTeam(e.target.value)}>
         <option value="">Tüm takımlar</option>{teams.map(t=><option key={t}>{t}</option>)}
@@ -67,16 +67,40 @@ export default function PlayersTable({ players }){
       <select value={pos} onChange={e=>setPos(e.target.value)}>
         <option value="">Tüm mevkiler</option><option>GK</option><option>DEF</option><option>MID</option><option>FWD</option>
       </select>
+      <select className="mobile-sort-select" value={sort} onChange={e=>{setSort(e.target.value);setDir(-1)}}>
+        <option value="xfp">xFP'ye göre</option><option value="value">F/P'ye göre</option><option value="minutes">Dakikaya göre</option><option value="six">6+ ihtimaline göre</option><option value="price">Fiyata göre</option>
+      </select>
     </div>
-    <div className="table-summary"><b>{rows.length}</b> oyuncu • başlığa dokunarak sırala</div>
-    <div className="card table-wrap"><table><thead><tr>
+
+    <div className="table-summary"><b>{rows.length}</b> oyuncu • detay için oyuncuya dokun</div>
+
+    <div className="card table-wrap desktop-player-table"><table><thead><tr>
       <th className="rank-col">#</th>{head('name','Oyuncu')}{head('team','Takım')}{head('pos','Mevki')}{head('opp','Rakip')}<th>H/D</th>
       {head('price','Fiyat')}{head('xi','İlk 11')}{head('minutes','xDk')}{head('xfp','xFP')}{head('core','Core')}{head('bonus','xBonus')}
       {head('p25','P25')}{head('p75','P75')}{head('p90','P90')}{head('six','6+ %')}{head('xg','xG')}{head('xa','xA')}{head('value','F/P')}<th>Güven</th>
     </tr></thead><tbody>{rows.map((p,i)=><tr key={p.id}>
-      <td className="rank-col">{i+1}</td><td><Link className="player-link" href={'/players/'+p.id}><b>{p.full_name}</b></Link><small className="cell-note">{playerNote(p)}</small></td><td>{p.team}</td><td><span className={`pos ${p.position}`}>{p.position}</span></td><td>{p.projection?.opponent_name||'—'}</td><td>{p.projection?.venue||'—'}</td>
+      <td className="rank-col">{i+1}</td>
+      <td><Link className="player-link" href={'/players/'+p.id}><b>{p.full_name}</b></Link><small className="cell-note">{playerNote(p)}</small></td>
+      <td>{p.team}</td><td><span className={`pos ${p.position}`}>{p.position}</span></td><td>{p.projection?.opponent_name||'—'}</td><td>{p.projection?.venue||'—'}</td>
       <td>{num(p.price,1)}m</td><td>{pct(p.projection?.xi_probability)}</td><td>{num(p.projection?.x_minutes,1)}</td><td><b>{num(p.projection?.xfp)}</b></td><td>{num(p.projection?.core_xfp)}</td><td>{num(p.projection?.x_bonus)}</td>
       <td>{num(p.projection?.p25,1)}</td><td>{num(p.projection?.p75,1)}</td><td>{num(p.projection?.p90,1)}</td><td>{pct(p.projection?.six_plus_probability)}</td><td>{num(p.projection?.expected_goals)}</td><td>{num(p.projection?.expected_assists)}</td><td>{num(p.projection?.value_score)}</td><td>{p.projection?.data_confidence||'—'}</td>
     </tr>)}</tbody></table></div>
+
+    <div className="player-card-list">
+      {rows.map((p,i)=><Link href={'/players/'+p.id} className="card mobile-player-card" key={p.id}>
+        <div className="mobile-player-top">
+          <div><span className={`pos ${p.position}`}>{p.position}</span><small>#{i+1}</small></div>
+          <div className="mobile-player-name"><b>{p.full_name}</b><span>{p.team} • {num(p.price,1)}m</span></div>
+          <div className="mobile-xfp"><strong>{num(p.projection?.xfp)}</strong><small>xFP</small></div>
+        </div>
+        <div className="mobile-fixture"><span>{p.projection?.venue==='HOME'?'İç saha':'Deplasman'}</span><b>vs {p.projection?.opponent_name||'—'}</b><em>{playerNote(p)}</em></div>
+        <div className="mobile-player-metrics">
+          <div><span>İlk 11</span><b>{pct(p.projection?.xi_probability)}</b></div>
+          <div><span>xDakika</span><b>{num(p.projection?.x_minutes,0)}</b></div>
+          <div><span>6+ puan</span><b>{pct(p.projection?.six_plus_probability)}</b></div>
+          <div><span>P90</span><b>{num(p.projection?.p90,1)}</b></div>
+        </div>
+      </Link>)}
+    </div>
   </>
 }
