@@ -47,6 +47,18 @@ function buildXI(ids,formation,map){
   return out
 }
 
+function formationFromXIIds(ids,map){
+  const players=ids.map(id=>map.get(id)).filter(Boolean)
+  if(players.length!==11)return null
+  const gk=players.filter(p=>p.position==='GK').length
+  const d=players.filter(p=>p.position==='DEF').length
+  const m=players.filter(p=>p.position==='MID').length
+  const f=players.filter(p=>p.position==='FWD').length
+  if(gk!==1 || d<3 || d>5 || m<2 || m>5 || f<1 || f>3)return null
+  const key=`${d}-${m}-${f}`
+  return FORMATIONS[key]?key:null
+}
+
 export default function SquadBuilder({ players, initialState=[], recommendedState=[], plan='free', gameweek }){
   const map=useMemo(()=>new Map(players.map(p=>[p.id,p])),[players])
   const initialIds=useMemo(()=>initialState.map(x=>x.player_id).filter(id=>map.has(id)),[initialState,map])
@@ -74,7 +86,8 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
   const cost=selected.reduce((s,p)=>s+Number(p.price||0),0)
   const bank=100-cost
   const validRoster=ids.length===15&&Object.entries(LIMITS).every(([k,v])=>(counts[k]||0)===v)&&cost<=100.0001
-  const validXI=xiIds.length===11&&xiIds.every(id=>ids.includes(id))
+  const liveFormation=formationFromXIIds(xiIds,map)
+  const validXI=xiIds.length===11&&xiIds.every(id=>ids.includes(id))&&Boolean(liveFormation)
   const valid=validRoster&&validXI&&Boolean(captainId)&&xiIds.includes(captainId)
 
   const xi=xiIds.map(id=>map.get(id)).filter(Boolean)
@@ -165,11 +178,28 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
   function reset(){
     setIds([]);setXiIds([]);setCaptainId(null);setSwapTarget(null);setFormation('4-3-3')
   }
+  function swapResult(benchId){
+    if(!swapTarget)return null
+    const starter=map.get(swapTarget)
+    const incoming=map.get(benchId)
+    if(!starter||!incoming)return null
+
+    // Kaleci slotu fantasy kuralı gereği sadece kaleciyle değişebilir.
+    if(starter.position==='GK' || incoming.position==='GK'){
+      if(starter.position!=='GK' || incoming.position!=='GK')return null
+    }
+
+    const nextXI=xiIds.map(id=>id===swapTarget?benchId:id)
+    const nextFormation=formationFromXIIds(nextXI,map)
+    if(!nextFormation)return null
+    return {nextXI,nextFormation}
+  }
+
   function swapWithBench(benchId){
-    if(!swapTarget)return
-    const a=map.get(swapTarget),b=map.get(benchId)
-    if(!a||!b||a.position!==b.position)return
-    setXiIds(xiIds.map(id=>id===swapTarget?benchId:id))
+    const result=swapResult(benchId)
+    if(!result)return
+    setXiIds(result.nextXI)
+    setFormation(result.nextFormation)
     if(captainId===swapTarget)setCaptainId(benchId)
     setSwapTarget(null)
   }
@@ -222,6 +252,7 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
         </div>
 
         <div className="my-squad-pitch">
+          <div className="formation-live-badge"><span>TAKTİK</span><b>{liveFormation||formation}</b></div>
           <div className="pitch-mark center-line"/>
           <div className="pitch-mark center-circle"/>
           <div className="pitch-mark box top"/>
@@ -260,13 +291,13 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
         <div className="bench-zone">
           <div className="bench-zone-head">
             <div><span className="eyebrow">YEDEKLER</span><b>{bench.length}/4</b></div>
-            {swapTarget?<span className="swap-hint">Aynı mevkideki yedeğe dokun → değiştir</span>:<span>Bir saha oyuncusuna dokunarak swap başlat</span>}
+            {swapTarget?<span className="swap-hint">Uygun yedeğe dokun → taktik otomatik değişir</span>:<span>Bir saha oyuncusuna dokunarak swap başlat</span>}
           </div>
           <div className="my-bench-row">
             {bench.map((p,i)=><button
               type="button"
               key={p.id}
-              className={`my-bench-player ${swapTarget&&map.get(swapTarget)?.position===p.position?'eligible':''}`}
+              className={`my-bench-player ${swapTarget&&swapResult(p.id)?'eligible':''} ${swapTarget&&!swapResult(p.id)?'swap-disabled':''}`}
               onClick={()=>swapTarget?swapWithBench(p.id):null}
             >
               <span className="bench-order">{i+1}</span>

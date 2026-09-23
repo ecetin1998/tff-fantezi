@@ -869,3 +869,41 @@ input,select,textarea,button{max-width:100%}
   .readable-pitch .pitch-row{padding:0;gap:3px}
   .readable-pitch .home-pitch-player{width:min(66px,100%)}
 }
+
+
+
+/* ===== Swap UX + compact mobile menu ===== */
+.formation-live-badge{
+  position:absolute;top:18px;left:50%;transform:translateX(-50%);z-index:5;
+  min-width:82px;padding:6px 10px;border-radius:999px;text-align:center;
+  background:rgba(25,34,70,.82);border:1px solid rgba(255,255,255,.24);
+  backdrop-filter:blur(10px);box-shadow:0 6px 18px rgba(0,0,30,.16)
+}
+.formation-live-badge span,.formation-live-badge b{display:block}
+.formation-live-badge span{font-size:6px;letter-spacing:.12em;color:#b9c1dc}
+.formation-live-badge b{font-size:12px;color:#fff;margin-top:1px}
+.my-bench-player.swap-disabled{opacity:.34;filter:saturate(.45);cursor:not-allowed}
+.my-bench-player.eligible{transform:translateY(-2px);box-shadow:0 0 0 2px rgba(76,229,212,.18),0 8px 20px rgba(0,0,25,.12)}
+
+.compact-mobile-menu{position:relative}
+.compact-mobile-menu-panel{
+  position:absolute!important;right:0!important;top:48px!important;width:min(290px,calc(100vw - 26px))!important;
+  max-height:min(520px,calc(100vh - 84px));overflow:auto;
+  display:grid!important;gap:2px;padding:8px!important;z-index:100;
+  background:#2b3260!important;border:1px solid rgba(220,223,255,.22)!important;
+  border-radius:14px!important;box-shadow:0 24px 60px rgba(7,10,35,.34)!important
+}
+.compact-mobile-menu-panel>a,.compact-mobile-menu-panel form button{
+  width:100%;display:flex;align-items:center;min-height:42px;padding:10px 11px!important;
+  background:transparent!important;border:0!important;border-radius:9px!important;
+  color:#eef0ff!important;text-align:left;font-size:12px;font-weight:760
+}
+.compact-mobile-menu-panel>a:hover,.compact-mobile-menu-panel>a.active,.compact-mobile-menu-panel form button:hover{
+  background:rgba(255,255,255,.075)!important;color:#fff!important
+}
+.compact-mobile-menu-panel>a.active{box-shadow:inset 3px 0 var(--cyan)}
+.mobile-menu-layer,.mobile-menu-backdrop,.mobile-menu-sheet{display:none!important}
+
+@media(max-width:760px){
+  .formation-live-badge{top:11px;min-width:72px;padding:5px 8px}
+}
