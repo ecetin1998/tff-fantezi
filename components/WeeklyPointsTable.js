@@ -48,10 +48,13 @@ export default function WeeklyPointsTable({ players, throughGameweek, finalThrou
       <select value={team} onChange={e=>setTeam(e.target.value)}>
         <option value="">Tüm takımlar</option>{teams.map(t=><option key={t}>{t}</option>)}
       </select>
-      <select className="mobile-sort-select" value={sort} onChange={e=>{setSort(e.target.value);setDir(-1)}}>
-        <option value="total">Toplam puan</option>
-        <option value="avg">Maç ortalaması</option>
-        <option value="played">Maç sayısı</option>
+      <select className="weekly-sort-select" value={sort} onChange={e=>{setSort(e.target.value);setDir(-1)}}>
+        <option value="total">Sırala: Toplam puan</option>
+        <option value="avg">Sırala: Maç ortalaması</option>
+        <option value="played">Sırala: Maç sayısı</option>
+        {gameweeks.filter(g=>g<=finalThroughGameweek).map(g=>
+          <option key={g} value={'gw'+g}>Sırala: GW{g} puanı</option>
+        )}
       </select>
     </div>
 

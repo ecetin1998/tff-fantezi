@@ -37,7 +37,7 @@ export function DesktopNavLinks({ primary, analysis }){
         aria-expanded={open}
         onClick={()=>setOpen(v=>!v)}
       >
-        Analizler <span className={open?'chevron up':'chevron'}>⌄</span>
+        Detaylı Analizler <span className={open?'chevron up':'chevron'}>⌄</span>
       </button>
       {open?<div className="desktop-more-panel">
         {analysis.map(([href,label])=>

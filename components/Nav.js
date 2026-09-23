@@ -4,18 +4,18 @@ import { logout } from '@/app/actions'
 import { DesktopNavLinks, MobileBottomNav, MobileMenu } from '@/components/AppNavLinks'
 
 const primary = [
-  ['/', 'Özet'],
-  ['/players', 'Oyuncular'],
-  ['/points', 'Puanlar'],
-  ['/matches', 'Maçlar'],
-  ['/squads', 'Kadrolar'],
+  ['/', 'Ana Sayfa'],
+  ['/players', 'Oyuncu Analizi'],
+  ['/points', 'Fantasy Puanları'],
+  ['/matches', 'Maç Tahminleri'],
+  ['/squads', 'Kadro Önerileri'],
 ]
 
 const analysis = [
-  ['/teams', 'Takım & Fikstür'],
-  ['/availability', 'Sakatlık & Ceza'],
-  ['/roles', 'Rol Takibi'],
-  ['/model', 'Model & Güven'],
+  ['/teams', 'Takım & Fikstür Analizi'],
+  ['/availability', 'Sakatlık / Ceza Durumu'],
+  ['/roles', 'Rol & Dakika Takibi'],
+  ['/model', 'Model Güveni & Güncellik'],
 ]
 
 const bottom = [
