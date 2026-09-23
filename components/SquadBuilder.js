@@ -1,6 +1,7 @@
 'use client'
 import { useMemo, useState } from 'react'
 import { saveSquad } from '@/app/actions'
+import { teamCssVars } from '@/lib/teamThemes'
 
 const LIMITS={GK:2,DEF:5,MID:5,FWD:3}
 const FORMATIONS={
@@ -233,7 +234,7 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
             >
               <button type="button" className="remove-player" onClick={()=>remove(p.id)} aria-label="Oyuncuyu çıkar">×</button>
               <button type="button" className="player-swap-hit" onClick={()=>setSwapTarget(swapTarget===p.id?null:p.id)} aria-label="Yedekle değiştir">
-                <span className={`fantasy-shirt ${p.position}`}><i>{teamCode(p.team)}</i></span>
+                <span className={`fantasy-shirt ${p.position}`} style={teamCssVars(p.team)}><i>{teamCode(p.team)}</i></span>
                 <b>{shortName(p.full_name)}</b>
                 <small>{p.team}</small>
                 <div className="pitch-player-tags">
@@ -269,7 +270,7 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
               onClick={()=>swapTarget?swapWithBench(p.id):null}
             >
               <span className="bench-order">{i+1}</span>
-              <span className={`fantasy-shirt mini ${p.position}`}><i>{teamCode(p.team)}</i></span>
+              <span className={`fantasy-shirt mini ${p.position}`} style={teamCssVars(p.team)}><i>{teamCode(p.team)}</i></span>
               <span className="bench-copy"><b>{shortName(p.full_name)}</b><small>{posLabel[p.position]} • {Number(p.price||0).toFixed(1)}m • {xfp(p).toFixed(1)} xFP</small></span>
               <i className="bench-remove" onClick={e=>{e.stopPropagation();remove(p.id)}}>×</i>
             </button>)}
@@ -321,8 +322,8 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
             const posFull=(counts[p.position]||0)>=LIMITS[p.position]
             const overBudget=!chosen&&cost+Number(p.price)>100.0001
             const disabled=!chosen&&(ids.length>=15||posFull||overBudget)
-            return <div className={`picker-player ${chosen?'chosen':''} ${disabled?'disabled':''}`} key={p.id}>
-              <div className="picker-shirt-wrap"><span className={`fantasy-shirt tiny ${p.position}`}><i>{teamCode(p.team)}</i></span></div>
+            return <div className={`picker-player ${chosen?'chosen':''} ${disabled?'disabled':''}`} style={teamCssVars(p.team)} key={p.id}>
+              <div className="picker-shirt-wrap"><span className={`fantasy-shirt tiny ${p.position}`} style={teamCssVars(p.team)}><i>{teamCode(p.team)}</i></span></div>
               <div className="picker-copy">
                 <b>{p.full_name}</b>
                 <small>{p.team} • vs {p.projection?.opponent_name||'—'}</small>

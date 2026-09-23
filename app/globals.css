@@ -607,3 +607,124 @@ footer{border-color:rgba(220,223,255,.16);color:#9ba3c6}
   .my-bench-row{grid-template-columns:1fr}.bench-zone{padding:9px}
   .picker-filters>div{grid-template-columns:1fr}.picker-player{grid-template-columns:42px 1fr 42px 28px}
 }
+
+
+
+/* ===== UI SYSTEM v6 • daylight fantasy theme ===== */
+:root{
+  --bg:#edf2fb;
+  --panel:#ffffff;
+  --panel2:#f6f8fe;
+  --panel3:#eef3fb;
+  --line:rgba(40,55,105,.13);
+  --text:#17213d;
+  --muted:#6e7898;
+  --green:#0fa394;
+  --green2:#0a8d81;
+  --cyan:#0fa394;
+  --violet:#665ae0;
+  --violet2:#5146c8;
+  --red:#d94c63;
+  --amber:#c58b18;
+}
+html{background:var(--bg)}
+body{
+  color:var(--text);
+  background:
+    radial-gradient(circle at 8% 0%,rgba(142,159,238,.23),transparent 31rem),
+    radial-gradient(circle at 95% 8%,rgba(82,203,188,.15),transparent 28rem),
+    linear-gradient(180deg,#f8faff 0%,#eef3fc 45%,#e7edf8 100%);
+}
+body:before{opacity:.13;background-image:linear-gradient(rgba(55,72,130,.055) 1px,transparent 1px),linear-gradient(90deg,rgba(55,72,130,.035) 1px,transparent 1px)}
+.card{
+  color:var(--text);
+  background:rgba(255,255,255,.94);
+  border-color:rgba(43,58,110,.12);
+  box-shadow:0 12px 30px rgba(44,58,110,.08),inset 0 1px rgba(255,255,255,.8)
+}
+.card:hover{border-color:rgba(15,163,148,.28);box-shadow:0 16px 36px rgba(44,58,110,.11)}
+.muted,.cell-note{color:var(--muted)!important}
+.eyebrow{color:#0b8e82}
+.pill{background:#eef7f6;color:#24655e;border-color:#cfe9e5}
+.cta,.pro-btn{background:linear-gradient(135deg,#16b4a4,#5ad5c5);color:#073a35;box-shadow:0 8px 22px rgba(15,163,148,.18)}
+.secondary,.ghost-btn,.my-team-btn{background:#f3f5fb;border-color:#d9dfef;color:#263152}
+.secondary:hover,.ghost-btn:hover,.my-team-btn:hover{background:#e9edf8;border-color:#c8d0e6}
+.topbar{background:rgba(250,252,255,.90);border-bottom-color:#dfe5f2;box-shadow:0 8px 25px rgba(52,65,110,.08)}
+.brand-copy b{color:#19233f}.brand-copy small{color:#7e88a6}.desktop-nav>a,.desktop-more summary{color:#536080!important}
+.desktop-nav>a.nav-active,.desktop-more summary.nav-active{color:#203052!important;background:#edf1fb!important;box-shadow:inset 0 0 0 1px #dce3f2}
+.desktop-more-panel,.mobile-menu-panel{background:#fff;border-color:#dce3f2;box-shadow:0 20px 50px rgba(46,59,100,.14)}
+.desktop-more-panel a{color:#33405f!important}
+.mobile-menu summary{background:#f2f5fb;border-color:#dbe2f0;color:#2a3658}
+.gameweek-banner{
+  background:linear-gradient(118deg,#6f79d8,#5064c1 56%,#56aeb2);
+  border-color:rgba(255,255,255,.58);box-shadow:0 22px 50px rgba(55,67,120,.14)
+}
+.gameweek-copy h1,.gameweek-copy p,.gameweek-banner .eyebrow{color:#fff}.gameweek-copy h1 span{color:#bdfbf2}
+.gameweek-banner .hero-score{background:rgba(255,255,255,.16);border-color:rgba(255,255,255,.30)}.gameweek-banner .hero-score span,.gameweek-banner .hero-score small{color:#e8ecff}.gameweek-banner .hero-score strong{color:#fff}
+.model-live-strip,.quick-actions>a,.spotlight-card,.field-panel,.model-strip,.hub-card{
+  background:rgba(255,255,255,.92);border-color:rgba(45,60,110,.12);color:var(--text)
+}
+.quick-actions>a>span{background:#edf0ff;color:#5b57bf}.quick-actions b,.spotlight-card a,.model-strip b,.hub-card b{color:var(--text)}
+.model-live-strip{color:#6d7897}.model-live-strip>div b{color:#26746c}.model-live-strip strong{color:#25304f}.model-live-strip a{color:#0b8e82}
+.spotlight-card>span,.spotlight-card strong small,.quick-actions small,.model-strip span,.hub-card span{color:var(--muted)}
+.spotlight-card strong{color:#0b8e82}
+.table-wrap{background:#fff}.table-wrap th{background:#f2f5fb!important;color:#5d6886!important;border-bottom-color:#dfe5f1}.table-wrap td{color:#25304c;border-bottom-color:#e7ebf3}.table-wrap tbody tr:nth-child(even) td{background:#fbfcff}.table-wrap tr:hover td{background:#f0f8f7!important}
+.filters input,.filters select,.auth-form input,.auth-resend input,.picker-filters input,.picker-filters select,.squad-formation-control select{
+  background:#fff!important;border-color:#d9e0ef!important;color:#263150!important
+}
+.filters input::placeholder,.auth-form input::placeholder,.auth-resend input::placeholder,.picker-filters input::placeholder{color:#98a1b8}
+.team-card,.profile-card,.auth-card,.price-card,.panel,.squad-stage,.player-picker,.squad-control-strip,.squad-insight-bar{
+  background:#fff!important;color:var(--text)!important;border-color:rgba(43,58,110,.12)!important
+}
+.team-metrics div,.profile-mini-grid>div,.profile-stat-grid>div,.season-stat-grid>div,.profile-role-grid div,.week-score,.selected-player,.candidate-list button,.matchup-line>div,.availability-line,.pro-lock,.pro-lock.unlocked,.squad-control-stat,.squad-formation-control,.bench-zone,.my-bench-player{
+  background:#f5f7fc!important;border-color:#dfe5f1!important;color:#24304e!important
+}
+.detail-list>div{border-top-color:#e4e9f2}.profile-note{color:#4f5b79!important}
+.week-score strong,.summary-score b,.mobile-xfp strong,.picker-score b{color:#0b8e82!important}
+.match-date,.match-card span,.score-box small,.odds span,.mini-metrics span{color:var(--muted)}
+.modern-match-card{background:#fff}.score-prediction{background:#f0f2ff;border-color:#d9ddf8;color:#29345a}.outcome-bar{background:#e5e9f3}.match-chips span{background:#f5f7fb;border-color:#e0e6f0;color:#6a7592}.match-chips b{color:#263150}
+.mobile-player-card,.weekly-mobile-card{background:#fff;color:#1d2845}.mobile-player-name span,.mobile-fixture em,.mobile-player-metrics span,.weekly-mobile-head small,.weekly-mobile-meta small{color:var(--muted)}
+.mobile-fixture{border-color:#e2e7f0}.mobile-player-metrics div,.weekly-mobile-meta span,.week-chip-row.scroll-snap-weeks>span{background:#f5f7fc;border-color:#e1e7f1}
+.mobile-bottom-nav{background:rgba(255,255,255,.94);border-color:#dce3f0;box-shadow:0 14px 35px rgba(44,57,100,.14)}.mobile-bottom-nav a{color:#7c86a2}.mobile-bottom-nav a.active{color:#25304f;background:#f0f5fb}.mobile-bottom-nav a.active span{color:#0b8e82}
+footer{border-color:#dbe2ee;color:#7d86a1}
+
+/* club identity */
+.team-accent-card{position:relative;overflow:hidden;border-left:4px solid var(--club1)!important}
+.team-accent-card:after{content:"";position:absolute;right:-36px;top:-36px;width:95px;height:95px;border-radius:50%;background:linear-gradient(135deg,color-mix(in srgb,var(--club1) 20%,transparent),color-mix(in srgb,var(--club2) 20%,transparent));pointer-events:none}
+.team-player-link{display:inline-flex;align-items:center;gap:7px}.club-dot{width:9px;height:9px;border-radius:50%;background:linear-gradient(135deg,var(--club1),var(--club2));box-shadow:0 0 0 2px #fff,0 0 0 3px color-mix(in srgb,var(--club1) 28%,transparent)}
+.team-player-row td:first-child{box-shadow:inset 3px 0 var(--club1)}
+.shirt-dot{background:repeating-linear-gradient(90deg,var(--club1) 0 11px,var(--club2) 11px 22px)!important;color:var(--clubText)!important;border-color:rgba(255,255,255,.58)!important}
+.club-pitch-player{border-color:color-mix(in srgb,var(--club1) 42%,rgba(255,255,255,.4))!important}
+.fantasy-shirt{
+  background:repeating-linear-gradient(90deg,var(--club1) 0 18px,var(--club2) 18px 36px)!important;
+  border-color:rgba(255,255,255,.76)!important
+}
+.fantasy-shirt:before,.fantasy-shirt:after{background:inherit!important}
+.fantasy-shirt i{color:var(--clubText)!important;background:rgba(255,255,255,.80)!important}
+.picker-player{border-left:3px solid transparent}.picker-player[style]{border-left-color:var(--club1)}
+.picker-player.chosen{background:color-mix(in srgb,var(--club1) 8%,#fff)!important}
+.team-player-page{--profileSoft:color-mix(in srgb,var(--club1) 11%,#fff)}
+.team-profile-hero{
+  background:
+    linear-gradient(110deg,color-mix(in srgb,var(--club1) 16%,#fff),color-mix(in srgb,var(--club2) 12%,#fff) 58%,#fff)!important;
+  border-top:5px solid var(--club1)!important;
+  box-shadow:inset 0 -1px #fff,0 16px 40px color-mix(in srgb,var(--club1) 10%,transparent)!important
+}
+.team-profile-hero:after{content:"";position:absolute;right:22px;bottom:0;width:140px;height:6px;border-radius:999px 999px 0 0;background:linear-gradient(90deg,var(--club1),var(--club2))}
+.team-profile-hero{position:relative;overflow:hidden}
+.team-profile-hero .player-hero-main h1,.team-profile-hero .player-hero-main p,.team-profile-hero .player-hero-score span,.team-profile-hero .player-hero-score small{color:#1e2947}
+.team-profile-hero .player-hero-score strong{color:var(--clubText)}
+.team-pos-badge{background:linear-gradient(135deg,var(--club1),var(--club2))!important;color:#fff!important;border:0!important}
+.team-pill{background:color-mix(in srgb,var(--club1) 10%,#fff)!important;color:var(--clubText)!important;border-color:color-mix(in srgb,var(--club1) 25%,#fff)!important}
+.team-player-page .eyebrow{color:var(--clubText)}
+.team-player-page .profile-card{border-top:2px solid color-mix(in srgb,var(--club1) 20%,#fff)!important}
+
+/* light My Squad chrome, keep pitch green */
+.squad-control-strip{background:rgba(255,255,255,.94)!important}.squad-control-stat>span,.squad-formation-control>span,.squad-control-stat>small{color:#76819d}.squad-control-stat>b{color:#25304f}.squad-control-stat>i{background:#e5e9f2}
+.squad-tool-btn{background:#f3f5fa;border-color:#dde3ee;color:#35405d}.squad-tool-btn:hover{background:#e9f7f5;border-color:#b9dfda}.squad-tool-btn.danger{color:#b03d50}
+.squad-stage-head h2,.player-picker-head h2,.squad-insight-bar h2{color:#1f2a46}.squad-stage-legend,.bench-zone-head,.bench-copy small,.picker-copy>small,.picker-score small{color:#77819d}
+.my-bench-player{background:#f7f9fd!important}.bench-order{background:#e9edf6;color:#5f6a87}.bench-copy b{color:#27314d}.bench-remove{color:#cf5367}
+.picker-player{border-bottom-color:#e8ecf3;color:#24304d}.picker-copy>div span{background:#eff2f8;color:#66708c}.picker-player>button{background:#eaf8f6;color:#087b71;border-color:#c9ebe6}.picker-player.chosen>button{background:#d8f1ed}
+.squad-validity span{color:#74809b;border-color:#e0e5ee}.squad-validity span.ok{color:#177b57;border-color:#c7e8da;background:#effaf5}
+.pro-lock{background:#f6f8fc!important}
+@media(max-width:620px){body{background:linear-gradient(180deg,#f5f8ff 0%,#edf2fb 55%,#e7edf8 100%)}}

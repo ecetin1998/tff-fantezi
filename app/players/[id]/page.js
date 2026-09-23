@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { getPlayerDetail } from '@/lib/data'
+import { teamCssVars } from '@/lib/teamThemes'
 
 export const revalidate=300
 
@@ -26,12 +27,14 @@ export default async function PlayerPage({ params }){
   const average=played?actual/played:0
   const opponent=p?.opponent_name || (match ? (Number(match.home_team_id)===Number(player.team_id)?'Deplasman rakibi':'Ev sahibi rakibi') : '—')
 
-  return <>
+  const themeStyle=teamCssVars(player.team)
+
+  return <div className="team-player-page" style={themeStyle}>
     <Link href="/players" className="back-link">← Oyunculara dön</Link>
 
-    <section className="card player-hero-card">
+    <section className="card player-hero-card team-profile-hero">
       <div className="player-hero-main">
-        <span className={`pos ${player.position}`}>{player.position}</span>
+        <span className={`pos ${player.position} team-pos-badge`}>{player.position}</span>
         <div>
           <span className="eyebrow">OYUNCU PROFİLİ</span>
           <h1>{player.full_name}</h1>
@@ -83,7 +86,7 @@ export default async function PlayerPage({ params }){
     <section className="card profile-card season-card">
       <div className="panel-head">
         <div><span className="eyebrow">SEZON GERÇEKLERİ</span><h2>GW1–GW{s?.through_gameweek||'—'}</h2></div>
-        <span className="pill">{actual} fantasy puanı</span>
+        <span className="pill team-pill">{actual} fantasy puanı</span>
       </div>
       <div className="season-stat-grid">
         <div><span>Maç</span><b>{played}</b></div>
@@ -142,5 +145,5 @@ export default async function PlayerPage({ params }){
         )}</div>
         :<p className="muted">Henüz kapanmış hafta verisi yok.</p>}
     </section>
-  </>
+  </div>
 }

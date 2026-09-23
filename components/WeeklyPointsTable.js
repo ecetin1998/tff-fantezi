@@ -1,6 +1,7 @@
 'use client'
 import Link from 'next/link'
 import { useMemo, useState } from 'react'
+import { teamCssVars } from '@/lib/teamThemes'
 
 export default function WeeklyPointsTable({ players, throughGameweek, finalThroughGameweek }){
   const [q,setQ]=useState('')
@@ -91,7 +92,7 @@ export default function WeeklyPointsTable({ players, throughGameweek, finalThrou
     </div>
 
     <div className="weekly-card-list">
-      {rows.map((p,i)=><Link href={'/players/'+p.id} className="card weekly-mobile-card" key={p.id}>
+      {rows.map((p,i)=><Link href={'/players/'+p.id} className="card weekly-mobile-card team-accent-card" style={teamCssVars(p.team)} key={p.id}>
         <div className="weekly-mobile-head">
           <span className="weekly-rank">#{i+1}</span>
           <div><b>{p.full_name}</b><small>{p.team}</small></div>

@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { getMatches, getPlayersWithProjection, getRecommendation, getModelOverview } from '@/lib/data'
+import { teamCssVars } from '@/lib/teamThemes'
 
 export const revalidate=300
 
@@ -70,8 +71,8 @@ export default async function Home(){
           <div className="pitch-center-circle"/>
           {groups.map(pos=><div className={`pitch-row pitch-${pos}`} key={pos}>
             {xi.filter(m=>m.player?.position===pos).map(m=>
-              <Link href={'/players/'+m.player_id} className="pitch-player" key={m.player_id}>
-                <span className={`shirt-dot ${pos}`}>{pos}</span>
+              <Link href={'/players/'+m.player_id} className="pitch-player club-pitch-player" style={teamCssVars(m.team)} key={m.player_id}>
+                <span className={`shirt-dot ${pos}`} style={teamCssVars(m.team)}>{pos}</span>
                 <b>{m.player?.full_name}</b>
                 <small>{Number(m.xfp||0).toFixed(1)} xFP</small>
                 {m.is_captain?<em>C</em>:null}

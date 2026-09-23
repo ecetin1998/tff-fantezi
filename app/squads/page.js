@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { getRecommendation } from '@/lib/data'
+import { teamCssVars } from '@/lib/teamThemes'
 
 export const revalidate=300
 
@@ -19,8 +20,8 @@ function Squad({title,data,variant}){
       <div className="pitch-center-circle"/>
       {groups.map(pos=><div className={`pitch-row pitch-${pos}`} key={pos}>
         {xi.filter(m=>m.player?.position===pos).map(m=>
-          <Link className="pitch-player" href={'/players/'+m.player_id} key={m.player_id}>
-            <span className={`shirt-dot ${pos}`}>{pos}</span>
+          <Link className="pitch-player club-pitch-player" style={teamCssVars(m.team)} href={'/players/'+m.player_id} key={m.player_id}>
+            <span className={`shirt-dot ${pos}`} style={teamCssVars(m.team)}>{pos}</span>
             <b>{m.player?.full_name}</b>
             <small>{m.team}</small>
             <strong>{Number(m.xfp||0).toFixed(1)} xFP</strong>
@@ -33,7 +34,7 @@ function Squad({title,data,variant}){
     <div className="bench bench-cards">
       <div className="bench-title"><span className="eyebrow">YEDEK KULÜBESİ</span><small>15 kişilik kadro</small></div>
       <div className="bench-card-row">{bench.map(m=>
-        <Link href={'/players/'+m.player_id} className="bench-card" key={m.player_id}>
+        <Link href={'/players/'+m.player_id} className="bench-card team-accent-card" style={teamCssVars(m.team)} key={m.player_id}>
           <span className={`pos ${m.player?.position}`}>{m.player?.position}</span>
           <b>{m.player?.full_name}</b>
           <small>{Number(m.player?.price||0).toFixed(1)}m • {Number(m.xfp||0).toFixed(1)} xFP</small>
