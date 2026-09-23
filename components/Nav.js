@@ -5,6 +5,7 @@ import { logout } from '@/app/actions'
 const links = [
   ['/', 'Özet'],
   ['/players', 'Oyuncular'],
+  ['/points', 'Haftalık Puanlar'],
   ['/teams', 'Takım & Fikstür'],
   ['/matches', 'Maç Tahminleri'],
   ['/squads', 'Kadrolar'],
