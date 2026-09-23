@@ -51,7 +51,17 @@ export async function saveSquad(formData) {
   const userId = claimsData?.claims?.sub
   if (!userId) redirect('/login')
   let ids = []
+  let squadState = []
   try { ids = JSON.parse(String(formData.get('player_ids') || '[]')).map(Number).filter(Boolean) } catch {}
+  try {
+    squadState = JSON.parse(String(formData.get('squad_state') || '[]'))
+      .map(x => ({
+        player_id: Number(x.player_id),
+        is_captain: Boolean(x.is_captain),
+        bench_order: x.bench_order === null || x.bench_order === undefined ? null : Number(x.bench_order)
+      }))
+      .filter(x => x.player_id)
+  } catch {}
   ids = [...new Set(ids)]
   if (ids.length !== 15) redirect('/squad?error=' + encodeURIComponent('Kadro tam 15 oyuncu olmalı.'))
   const { data: players } = await supabase.from('scout_players').select('id,position,price').in('id',ids)
@@ -70,7 +80,22 @@ export async function saveSquad(formData) {
     await supabase.from('scout_user_squads').update({bank:Number((100-total).toFixed(2)),updated_at:new Date().toISOString()}).eq('id',squadId)
     await supabase.from('scout_user_squad_members').delete().eq('squad_id',squadId)
   }
-  const payload = ids.map(player_id=>({squad_id:squadId,player_id}))
+  const stateById = new Map(squadState.map(x => [x.player_id, x]))
+  const hasStructuredState =
+    squadState.length === 15 &&
+    squadState.filter(x => x.bench_order === null).length === 11 &&
+    squadState.filter(x => Number.isInteger(x.bench_order) && x.bench_order >= 1 && x.bench_order <= 4).length === 4 &&
+    squadState.filter(x => x.is_captain && x.bench_order === null).length === 1
+
+  const payload = ids.map(player_id => {
+    const state = hasStructuredState ? stateById.get(player_id) : null
+    return {
+      squad_id:squadId,
+      player_id,
+      is_captain:Boolean(state?.is_captain),
+      bench_order:state ? state.bench_order : null
+    }
+  })
   const { error } = await supabase.from('scout_user_squad_members').insert(payload)
   if (error) redirect('/squad?error=' + encodeURIComponent(error.message))
   redirect('/squad?saved=1')
