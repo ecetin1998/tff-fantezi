@@ -45,6 +45,14 @@ export default async function Home(){
       </div>
     </section>
 
+    <section className="model-live-strip">
+      <div><i/><b>Model hazır</b></div>
+      <span>Son veri <strong>{run?.source_updated_at?new Intl.DateTimeFormat('tr-TR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit',timeZone:'Europe/Istanbul'}).format(new Date(run.source_updated_at)):'—'}</strong></span>
+      <span><strong>{players.length}</strong> oyuncu</span>
+      <span><strong>{matches.length}</strong> maç</span>
+      <Link href="/model">Güven & güncellik →</Link>
+    </section>
+
     <section className="quick-actions" aria-label="Hızlı erişim">
       <Link href="/players"><span>◉</span><div><b>Oyuncu bul</b><small>529 kişilik havuz</small></div><i>›</i></Link>
       <Link href="/matches"><span>◎</span><div><b>Maçları incele</b><small>{matches.length} tahmin</small></div><i>›</i></Link>

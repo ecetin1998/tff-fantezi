@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { getAuthState } from '@/lib/data'
 import { logout } from '@/app/actions'
+import { DesktopNavLinks, MobileBottomNav } from '@/components/AppNavLinks'
 
 const primary = [
   ['/', 'Özet'],
@@ -35,15 +36,7 @@ export default async function Nav(){
         <span className="beta">BETA</span>
       </Link>
 
-      <nav className="desktop-nav">
-        {primary.map(([href,label]) => <Link key={href} href={href}>{label}</Link>)}
-        <details className="desktop-more">
-          <summary>Analizler <span>⌄</span></summary>
-          <div className="desktop-more-panel">
-            {analysis.map(([href,label]) => <Link key={href} href={href}>{label}</Link>)}
-          </div>
-        </details>
-      </nav>
+      <DesktopNavLinks primary={primary} analysis={analysis}/>
 
       <div className="nav-actions">
         <Link href="/squad" className="my-team-btn">Benim Kadrom</Link>
@@ -61,9 +54,6 @@ export default async function Nav(){
         </details>
       </div>
     </header>
-
-    <nav className="mobile-bottom-nav" aria-label="Mobil ana navigasyon">
-      {bottom.map(([href,icon,label])=><Link href={href} key={href}><span>{icon}</span><b>{label}</b></Link>)}
-    </nav>
+    <MobileBottomNav items={bottom}/>
   </>
 }

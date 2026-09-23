@@ -29,6 +29,10 @@ export default function SquadBuilder({ players, initialIds=[], recommendedIds=[]
   return <div className="squad-layout">
     <section className="card panel">
       <div className="panel-head"><div><span className="eyebrow">KADRO EDİTÖRÜ</span><h2>15 kişilik takımın</h2></div><div className="budget"><b>{cost.toFixed(1)}m</b><span>{bank.toFixed(1)}m banka</span></div></div>
+      <div className="squad-progress">
+        <div className="squad-progress-top"><span>{ids.length}/15 oyuncu</span><b>{cost.toFixed(1)}m / 100m</b></div>
+        <div className="squad-progress-track"><i style={{width:`${Math.min(100,(ids.length/15)*100)}%`}}/></div>
+      </div>
       <div className="position-counts">{Object.entries(LIMITS).map(([k,v])=><span key={k} className={(counts[k]||0)===v?'ok':''}>{k} {counts[k]||0}/{v}</span>)}</div>
       <div className="selected-list">{selected.length?selected.map(p=><button key={p.id} className="selected-player" onClick={()=>remove(p.id)}><span className={`pos ${p.position}`}>{p.position}</span><b>{p.full_name}</b><small>{p.team} • {Number(p.price).toFixed(1)}m • {Number(p.projection?.xfp||0).toFixed(2)} xFP</small><i>×</i></button>):<div className="empty">Oyuncu ekle veya model kadrosunu yükle.</div>}</div>
       <div className="builder-actions"><button type="button" className="secondary" onClick={fillRecommended}>Önerilen kadroyu yükle</button><form action={saveSquad}><input type="hidden" name="player_ids" value={JSON.stringify(ids)}/><button className="cta" disabled={!valid}>Kadroyu kaydet</button></form></div>

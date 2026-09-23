@@ -56,10 +56,16 @@ export default function WeeklyPointsTable({ players, throughGameweek }){
   const pct=v=>(Number(v||0)*100).toFixed(0)+'%'
 
   return <>
-    <div className="filters">
+    <div className="filters weekly-filters">
       <input value={q} onChange={e=>setQ(e.target.value)} placeholder="Oyuncu veya takım ara..."/>
       <select value={team} onChange={e=>setTeam(e.target.value)}><option value="">Tüm takımlar</option>{teams.map(t=><option key={t}>{t}</option>)}</select>
       <select value={pos} onChange={e=>setPos(e.target.value)}><option value="">Tüm mevkiler</option><option>GK</option><option>DEF</option><option>MID</option><option>FWD</option></select>
+      <select className="mobile-sort-select" value={sort} onChange={e=>{setSort(e.target.value);setDir(-1)}}>
+        <option value="total">Toplam puan</option>
+        <option value="avg">Maç ortalaması</option>
+        <option value="six">6+ yüzdesi</option>
+        <option value="price">Fiyat</option>
+      </select>
     </div>
     <div className="table-summary"><b>{rows.length}</b> oyuncu • ortalama ve 6+ oranı yalnız oynadığı maçlara göre</div>
     <div className="card table-wrap weekly-points-wrap"><table><thead><tr>
@@ -90,5 +96,24 @@ export default function WeeklyPointsTable({ players, throughGameweek }){
         })}
       </tr>)}
     </tbody></table></div>
+
+    <div className="weekly-card-list">
+      {rows.map((p,i)=><Link href={'/players/'+p.id} className="card weekly-mobile-card" key={p.id}>
+        <div className="weekly-mobile-head">
+          <span className="weekly-rank">#{i+1}</span>
+          <div><b>{p.full_name}</b><small>{p.team} • {Number(p.price||0).toFixed(1)}m</small></div>
+          <strong>{p.total}<small>puan</small></strong>
+        </div>
+        <div className="weekly-mobile-meta">
+          <span><small>Maç</small><b>{p.played}</b></span>
+          <span><small>Ort.</small><b>{num(p.avg,2)}</b></span>
+          <span><small>6+</small><b>{pct(p.six)}</b></span>
+          <span><small>Mevki</small><b>{p.position}</b></span>
+        </div>
+        <div className="week-chip-row">
+          {gameweeks.map(g=>{const row=p.pointMap.get(g);return <span className={row&&Number(row.points)>=6?'hot':''} key={g}><small>GW{g}</small><b>{row?row.points:'—'}</b></span>})}
+        </div>
+      </Link>)}
+    </div>
   </>
 }
