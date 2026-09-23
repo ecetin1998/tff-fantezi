@@ -1,12 +1,19 @@
 import Link from 'next/link'
-import { getMatches, getPlayersWithProjection, getRecommendation, getModelOverview } from '@/lib/data'
+import { getMatches, getPlayersWithProjection, getRecommendation } from '@/lib/data'
 import { teamCssVars } from '@/lib/teamThemes'
 
 export const revalidate=300
 
+const compactName=name=>{
+  const parts=String(name||'').trim().split(/\s+/).filter(Boolean)
+  if(parts.length<=1)return parts[0]||'—'
+  const last=parts.at(-1)
+  return last.length<=3&&parts.length>2?parts.at(-2):last
+}
+
 export default async function Home(){
-  const [{players,run},{matches},{recommendation,members},overview]=await Promise.all([
-    getPlayersWithProjection(),getMatches(),getRecommendation('recommended'),getModelOverview()
+  const [{players,run},{matches},{recommendation,members}]=await Promise.all([
+    getPlayersWithProjection(),getMatches(),getRecommendation('recommended')
   ])
 
   const sorted=[...players].sort((a,b)=>Number(b.projection.xfp)-Number(a.projection.xfp))
@@ -17,64 +24,46 @@ export default async function Home(){
   const xi=members.filter(m=>m.squad_slot==='XI')
   const groups=['GK','DEF','MID','FWD']
   const formation=`${xi.filter(m=>m.player?.position==='DEF').length}-${xi.filter(m=>m.player?.position==='MID').length}-${xi.filter(m=>m.player?.position==='FWD').length}`
-
-  const sections=[
-    ['/players','Oyuncu Analizi','xFP • dakika • rol • fiyat'],
-    ['/points','Haftalık Puanlar','Gerçek puanlar • ortalama • 6+'],
-    ['/teams','Takım & Fikstür','Takım xG • CS • rakip'],
-    ['/availability','Sakatlık & Ceza','Güncel availability takibi'],
-    ['/roles','Rol Takibi','Dakika ve ilk 11 değişimleri'],
-    ['/model','Model & Güven','Veri tazeliği ve model sağlığı'],
-  ]
+  const updated=run?.source_updated_at
+    ? new Intl.DateTimeFormat('tr-TR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit',timeZone:'Europe/Istanbul'}).format(new Date(run.source_updated_at))
+    : '—'
 
   return <>
-    <section className="gameweek-banner">
-      <div className="gw-orb"><small>AKTİF</small><strong>GW{run?.gameweek||'—'}</strong></div>
-      <div className="gameweek-copy">
-        <span className="eyebrow">{Number(run?.simulation_count||0).toLocaleString('tr-TR')} SİMÜLASYON</span>
-        <h1>Bu haftanın <span>karar merkezi.</span></h1>
-        <p>Oyuncu seçimi, maç tahmini, rol ve kadro kararlarını tek ekranda topla.</p>
-        <div className="hero-actions">
-          <Link href="/players" className="cta">Oyuncuları keşfet</Link>
-          <Link href="/squad" className="secondary">Kadromu analiz et</Link>
+    <section className="home-gw-strip card">
+      <div className="home-gw-badge"><small>AKTİF HAFTA</small><strong>GW{run?.gameweek||'—'}</strong></div>
+      <div className="home-gw-status"><i/><div><b>Model hazır</b><span>Son veri {updated}</span></div></div>
+      <div className="home-gw-stat"><span>Simülasyon</span><b>{Number(run?.simulation_count||0).toLocaleString('tr-TR')}</b></div>
+      <div className="home-gw-stat"><span>Oyuncu</span><b>{players.length}</b></div>
+      <div className="home-gw-stat"><span>Maç</span><b>{matches.length}</b></div>
+      <div className="home-gw-stat accent"><span>Önerilen XI</span><b>{Number(recommendation?.xi_xfp||0).toFixed(1)} <small>xFP</small></b></div>
+    </section>
+
+    <div className="home-main-grid home-clean-grid">
+      <section className="card field-panel home-squad-panel">
+        <div className="panel-head home-squad-head">
+          <div>
+            <span className="eyebrow">ÖNERİLEN KADRO</span>
+            <h1>GW{run?.gameweek||'—'} • {formation}</h1>
+            <p>Modelin bu hafta için en yüksek dengeli XI seçimi.</p>
+          </div>
+          <Link href="/squads" className="pill">Kadro detayı →</Link>
         </div>
-      </div>
-      <div className="hero-score">
-        <span>Önerilen XI</span>
-        <strong>{Number(recommendation?.xi_xfp||0).toFixed(1)}</strong>
-        <small>xFP • {formation}</small>
-      </div>
-    </section>
 
-    <section className="model-live-strip">
-      <div><i/><b>Model hazır</b></div>
-      <span>Son veri <strong>{run?.source_updated_at?new Intl.DateTimeFormat('tr-TR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit',timeZone:'Europe/Istanbul'}).format(new Date(run.source_updated_at)):'—'}</strong></span>
-      <span><strong>{players.length}</strong> oyuncu</span>
-      <span><strong>{matches.length}</strong> maç</span>
-      <Link href="/model">Güven & güncellik →</Link>
-    </section>
-
-    <section className="quick-actions" aria-label="Hızlı erişim">
-      <Link href="/players"><span>◉</span><div><b>Oyuncu bul</b><small>529 kişilik havuz</small></div><i>›</i></Link>
-      <Link href="/matches"><span>◎</span><div><b>Maçları incele</b><small>{matches.length} tahmin</small></div><i>›</i></Link>
-      <Link href="/squads"><span>▦</span><div><b>Önerilen kadro</b><small>XI + bench</small></div><i>›</i></Link>
-      <Link href="/points"><span>↗</span><div><b>Haftalık puanlar</b><small>Gerçek performans</small></div><i>›</i></Link>
-    </section>
-
-    <div className="home-main-grid">
-      <section className="card field-panel">
-        <div className="panel-head">
-          <div><span className="eyebrow">ÖNERİLEN KADRO</span><h2>GW{run?.gameweek||'—'} • {formation}</h2></div>
-          <Link href="/squads" className="pill">Tüm kadro →</Link>
-        </div>
-        <div className="fantasy-pitch compact-pitch">
+        <div className="fantasy-pitch compact-pitch readable-pitch">
           <div className="pitch-center-circle"/>
           {groups.map(pos=><div className={`pitch-row pitch-${pos}`} key={pos}>
             {xi.filter(m=>m.player?.position===pos).map(m=>
-              <Link href={'/players/'+m.player_id} className="pitch-player club-pitch-player" style={teamCssVars(m.team)} key={m.player_id}>
+              <Link
+                href={'/players/'+m.player_id}
+                className="pitch-player club-pitch-player home-pitch-player"
+                style={teamCssVars(m.team)}
+                title={m.player?.full_name||''}
+                key={m.player_id}
+              >
                 <span className={`shirt-dot ${pos}`} style={teamCssVars(m.team)}>{pos}</span>
-                <b>{m.player?.full_name}</b>
-                <small>{Number(m.xfp||0).toFixed(1)} xFP</small>
+                <b>{compactName(m.player?.full_name)}</b>
+                <small>{m.team}</small>
+                <strong>{Number(m.xfp||0).toFixed(1)} xFP</strong>
                 {m.is_captain?<em>C</em>:null}
               </Link>
             )}
@@ -82,30 +71,20 @@ export default async function Home(){
         </div>
       </section>
 
-      <aside className="insight-stack">
-        <div className="card spotlight-card"><span>Model lideri</span><Link href={best?'/players/'+best.id:'/players'}><b>{best?.full_name||'—'}</b></Link><strong>{Number(best?.projection?.xfp||0).toFixed(2)} <small>xFP</small></strong></div>
-        <div className="card spotlight-card"><span>En iyi F/P</span><Link href={value?'/players/'+value.id:'/players'}><b>{value?.full_name||'—'}</b></Link><strong>{Number(value?.projection?.value_score||0).toFixed(2)} <small>xFP/m</small></strong></div>
-        <div className="card spotlight-card"><span>En güvenli dakika</span><Link href={mins?'/players/'+mins.id:'/players'}><b>{mins?.full_name||'—'}</b></Link><strong>{Number(mins?.projection?.x_minutes||0).toFixed(0)} <small>dk</small></strong></div>
-        <div className="card spotlight-card"><span>6+ puan ihtimali</span><Link href={six?'/players/'+six.id:'/players'}><b>{six?.full_name||'—'}</b></Link><strong>{(Number(six?.projection?.six_plus_probability||0)*100).toFixed(0)}<small>%</small></strong></div>
+      <aside className="insight-stack home-insights">
+        <Link className="card spotlight-card" href={best?'/players/'+best.id:'/players'}>
+          <span>Model lideri</span><b>{best?.full_name||'—'}</b><strong>{Number(best?.projection?.xfp||0).toFixed(2)} <small>xFP</small></strong><i>Oyuncuyu aç →</i>
+        </Link>
+        <Link className="card spotlight-card" href={value?'/players/'+value.id:'/players'}>
+          <span>En iyi F/P</span><b>{value?.full_name||'—'}</b><strong>{Number(value?.projection?.value_score||0).toFixed(2)} <small>xFP/m</small></strong><i>Oyuncuyu aç →</i>
+        </Link>
+        <Link className="card spotlight-card" href={mins?'/players/'+mins.id:'/players'}>
+          <span>En güvenli dakika</span><b>{mins?.full_name||'—'}</b><strong>{Number(mins?.projection?.x_minutes||0).toFixed(0)} <small>dk</small></strong><i>Oyuncuyu aç →</i>
+        </Link>
+        <Link className="card spotlight-card" href={six?'/players/'+six.id:'/players'}>
+          <span>6+ puan ihtimali</span><b>{six?.full_name||'—'}</b><strong>{(Number(six?.projection?.six_plus_probability||0)*100).toFixed(0)}<small>%</small></strong><i>Oyuncuyu aç →</i>
+        </Link>
       </aside>
     </div>
-
-    <section className="analysis-hub">
-      <div className="section-title compact">
-        <div><span className="eyebrow">DAHA FAZLA ANALİZ</span><h2>İhtiyacın olan ekrana direkt git</h2></div>
-      </div>
-      <div className="hub-grid">{sections.map(([href,title,desc])=>
-        <Link href={href} className="card hub-card" key={href}><b>{title}</b><span>{desc}</span><i>→</i></Link>
-      )}</div>
-    </section>
-
-    <section className="card model-strip">
-      <div><span className="eyebrow">MODEL DURUMU</span><b>{run?.model_version||'—'}</b></div>
-      <div><span>Projeksiyon</span><strong>{overview.counts.projectionCount||0}</strong></div>
-      <div><span>Rol sinyali</span><strong>{overview.counts.roleCount||0}</strong></div>
-      <div><span>Availability</span><strong>{overview.counts.availabilityCount||0}</strong></div>
-      <div><span>Maç</span><strong>{overview.counts.matchCount||0}</strong></div>
-      <Link href="/model">Detay →</Link>
-    </section>
   </>
 }
