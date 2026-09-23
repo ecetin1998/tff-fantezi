@@ -1,6 +1,5 @@
 'use server'
 import { createClient } from '@/lib/supabase/server'
-import { headers } from 'next/headers'
 import { redirect } from 'next/navigation'
 
 export async function login(formData) {
@@ -12,15 +11,32 @@ export async function login(formData) {
   redirect('/squad')
 }
 
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://tff-fantezi.vercel.app'
+
 export async function signup(formData) {
   const supabase = await createClient()
   const email = String(formData.get('email') || '').trim()
   const password = String(formData.get('password') || '')
-  const h = await headers()
-  const origin = h.get('origin') || ''
-  const { error } = await supabase.auth.signUp({ email, password, options:{ emailRedirectTo: `${origin}/auth/confirm` } })
+  const { error } = await supabase.auth.signUp({
+    email,
+    password,
+    options:{ emailRedirectTo: `${SITE_URL}/auth/confirm` }
+  })
   if (error) redirect('/login?error=' + encodeURIComponent(error.message))
-  redirect('/login?message=' + encodeURIComponent('Doğrulama e-postasını kontrol et.'))
+  redirect('/login?message=' + encodeURIComponent('Doğrulama e-postasını kontrol et. Mail gelmezse aşağıdan tekrar gönderebilirsin.'))
+}
+
+export async function resendConfirmation(formData) {
+  const supabase = await createClient()
+  const email = String(formData.get('email') || '').trim()
+  if (!email) redirect('/login?error=' + encodeURIComponent('E-posta adresini gir.'))
+  const { error } = await supabase.auth.resend({
+    type: 'signup',
+    email,
+    options: { emailRedirectTo: `${SITE_URL}/auth/confirm` }
+  })
+  if (error) redirect('/login?error=' + encodeURIComponent(error.message))
+  redirect('/login?message=' + encodeURIComponent('Doğrulama e-postası tekrar gönderildi. Gelen kutusu ve spam klasörünü kontrol et.'))
 }
 
 export async function logout() {
