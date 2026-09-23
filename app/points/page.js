@@ -4,15 +4,15 @@ import { getWeeklyPoints } from '@/lib/data'
 export const revalidate=300
 
 export default async function WeeklyPoints(){
-  const {players,throughGameweek}=await getWeeklyPoints()
+  const {players,throughGameweek,finalThroughGameweek}=await getWeeklyPoints()
   return <>
     <div className="section-title">
       <div>
         <span className="eyebrow">GERÇEK FANTASY PUANLARI</span>
         <h1>Haftalık Fantasy Puanları</h1>
       </div>
-      <span className="muted">GW1–GW{throughGameweek||'—'} • final puanlar</span>
+      <span className="muted">GW1–GW{throughGameweek||'—'} • final GW{finalThroughGameweek||'—'}</span>
     </div>
-    <WeeklyPointsTable players={players} throughGameweek={throughGameweek}/>
+    <WeeklyPointsTable players={players} throughGameweek={throughGameweek} finalThroughGameweek={finalThroughGameweek}/>
   </>
 }

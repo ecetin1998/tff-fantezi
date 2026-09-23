@@ -473,3 +473,49 @@ footer{border-color:rgba(220,223,255,.16);color:#9ba3c6}
   .card,.quick-actions>a,.pitch-player,.mobile-player-card,.weekly-mobile-card{transition:transform .16s ease,border-color .16s ease,box-shadow .16s ease}
   .mobile-player-card:active,.weekly-mobile-card:active{transform:scale(.985)}
 }
+
+
+
+/* ===== Weekly points UX v2 ===== */
+.simplified-weekly-filters{display:grid;grid-template-columns:minmax(260px,1.4fr) minmax(180px,.6fr);gap:9px}
+.simplified-weekly-filters .mobile-sort-select{display:none!important}
+.weekly-summary{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.weekly-summary>span{display:inline-flex;gap:4px;align-items:center}
+.live-week-note{color:#d7fbf6;background:rgba(76,229,212,.10);border:1px solid rgba(76,229,212,.20);border-radius:999px;padding:5px 9px}
+.simplified-weekly-table{overflow-x:auto;scrollbar-width:thin;scrollbar-color:rgba(76,229,212,.35) transparent}
+.simplified-weekly-table table{min-width:860px}
+.simplified-weekly-table th,.simplified-weekly-table td{text-align:center}
+.simplified-weekly-table th:nth-child(2),.simplified-weekly-table td:nth-child(2){text-align:left}
+.weekly-player-cell{min-width:210px}.weekly-player-cell small{display:block;color:var(--muted);font-size:9px;margin-top:3px}
+.summary-score b{color:var(--cyan);font-size:15px}
+.pending-score{color:#8f97bb!important;background:rgba(148,140,255,.045)!important}
+.week-scroll-head{display:flex;align-items:center;justify-content:space-between;margin:9px 1px 6px}
+.week-scroll-head b{font-size:9px;color:#d8dcf1;text-transform:uppercase;letter-spacing:.08em}
+.week-scroll-head span{font-size:8px;color:var(--cyan)}
+.week-chip-row.scroll-snap-weeks{
+  position:relative;display:flex;gap:7px;overflow-x:auto;overscroll-behavior-x:contain;scroll-snap-type:x mandatory;
+  padding:2px 18px 5px 1px;scrollbar-width:none;-webkit-overflow-scrolling:touch
+}
+.week-chip-row.scroll-snap-weeks::-webkit-scrollbar{display:none}
+.week-chip-row.scroll-snap-weeks>span{
+  flex:0 0 54px;min-width:54px;scroll-snap-align:start;padding:8px 6px;
+  background:rgba(255,255,255,.06);border:1px solid rgba(220,223,255,.12);border-radius:10px;text-align:center
+}
+.week-chip-row.scroll-snap-weeks>span.hot{background:rgba(76,229,212,.13);border-color:rgba(76,229,212,.28)}
+.week-chip-row.scroll-snap-weeks>span.pending{background:rgba(148,140,255,.07);border-style:dashed;color:#9da5c8}
+.week-chip-row.scroll-snap-weeks small,.week-chip-row.scroll-snap-weeks b{display:block}
+.week-chip-row.scroll-snap-weeks small{font-size:7px;color:var(--muted)}
+.week-chip-row.scroll-snap-weeks b{font-size:13px;margin-top:3px}
+.weekly-mobile-meta.compact{grid-template-columns:1fr 1fr}
+.weekly-mobile-meta.compact span{padding:8px 10px}
+
+@media(max-width:900px){
+  .simplified-weekly-filters{grid-template-columns:1fr 1fr}
+  .simplified-weekly-filters input{grid-column:1/-1}
+  .simplified-weekly-filters .mobile-sort-select{display:block!important}
+}
+@media(max-width:620px){
+  .weekly-summary{gap:7px;font-size:9px}.live-week-note{width:100%;justify-content:center}
+  .weekly-mobile-card{overflow:hidden}
+  .week-chip-row.scroll-snap-weeks{margin-right:-14px;padding-right:28px}
+}
