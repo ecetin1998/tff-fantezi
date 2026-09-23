@@ -1,5 +1,6 @@
 'use client'
 import { useMemo, useState } from 'react'
+import Link from 'next/link'
 
 export default function PlayersTable({ players }){
   const [q,setQ]=useState('')
@@ -73,7 +74,7 @@ export default function PlayersTable({ players }){
       {head('price','Fiyat')}{head('xi','İlk 11')}{head('minutes','xDk')}{head('xfp','xFP')}{head('core','Core')}{head('bonus','xBonus')}
       {head('p25','P25')}{head('p75','P75')}{head('p90','P90')}{head('six','6+ %')}{head('xg','xG')}{head('xa','xA')}{head('value','F/P')}<th>Güven</th>
     </tr></thead><tbody>{rows.map((p,i)=><tr key={p.id}>
-      <td className="rank-col">{i+1}</td><td><b>{p.full_name}</b><small className="cell-note">{playerNote(p)}</small></td><td>{p.team}</td><td><span className={`pos ${p.position}`}>{p.position}</span></td><td>{p.projection?.opponent_name||'—'}</td><td>{p.projection?.venue||'—'}</td>
+      <td className="rank-col">{i+1}</td><td><Link className="player-link" href={'/players/'+p.id}><b>{p.full_name}</b></Link><small className="cell-note">{playerNote(p)}</small></td><td>{p.team}</td><td><span className={`pos ${p.position}`}>{p.position}</span></td><td>{p.projection?.opponent_name||'—'}</td><td>{p.projection?.venue||'—'}</td>
       <td>{num(p.price,1)}m</td><td>{pct(p.projection?.xi_probability)}</td><td>{num(p.projection?.x_minutes,1)}</td><td><b>{num(p.projection?.xfp)}</b></td><td>{num(p.projection?.core_xfp)}</td><td>{num(p.projection?.x_bonus)}</td>
       <td>{num(p.projection?.p25,1)}</td><td>{num(p.projection?.p75,1)}</td><td>{num(p.projection?.p90,1)}</td><td>{pct(p.projection?.six_plus_probability)}</td><td>{num(p.projection?.expected_goals)}</td><td>{num(p.projection?.expected_assists)}</td><td>{num(p.projection?.value_score)}</td><td>{p.projection?.data_confidence||'—'}</td>
     </tr>)}</tbody></table></div>
