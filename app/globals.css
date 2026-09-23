@@ -78,3 +78,50 @@
  .profile-mini-grid,.profile-stat-grid{grid-template-columns:repeat(2,1fr)}.season-stat-grid{grid-template-columns:repeat(3,1fr)}
  .matchup-line{gap:8px}.profile-card{padding:17px}
 }
+
+
+/* player profiles + weekly fantasy points */
+.player-link{color:inherit;text-decoration:none}
+.player-link:hover{color:var(--green)}
+.player-profile-head{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;margin-bottom:24px}
+.player-profile-head h1{font-size:clamp(36px,5vw,58px);line-height:1;margin:10px 0 8px;letter-spacing:-.045em}
+.player-profile-head p{margin:0;color:var(--muted);font-size:16px}
+.back-link{display:inline-flex;margin-bottom:18px;color:var(--muted);font-size:13px;font-weight:750}
+.back-link:hover{color:var(--green)}
+.player-title-row{display:flex;align-items:center;gap:9px}
+.fixture-card{min-width:300px;padding:20px 22px;text-align:right}
+.fixture-card span,.fixture-card small{display:block;color:var(--muted)}
+.fixture-card span{font-size:11px;text-transform:uppercase;letter-spacing:.08em}
+.fixture-card strong{display:block;font-size:25px;margin:7px 0 5px}
+.fixture-card small{font-size:12px}
+.profile-stats{margin-bottom:18px}
+.profile-split{margin-bottom:18px}
+.profile-status{margin-bottom:28px}
+.profile-note{color:#c9d8d0;line-height:1.6;margin:18px 0 0}
+.profile-role-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-top:18px}
+.profile-role-grid div{background:#0a1711;border:1px solid #193126;border-radius:11px;padding:12px}
+.profile-role-grid span,.profile-role-grid b{display:block}
+.profile-role-grid span{color:var(--muted);font-size:11px}
+.profile-role-grid b{margin-top:5px}
+.profile-history{margin-top:4px}
+.weekly-history-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:10px}
+.weekly-history-card{padding:16px;text-align:center}
+.weekly-history-card span,.weekly-history-card small{display:block;color:var(--muted)}
+.weekly-history-card span{font-size:11px;font-weight:800}
+.weekly-history-card strong{display:block;font-size:30px;color:var(--green);margin:5px 0}
+.weekly-history-card small{font-size:10px}
+.weekly-points-wrap table{min-width:1250px}
+.weekly-score{text-align:center!important;font-weight:850;font-variant-numeric:tabular-nums}
+.empty-score{color:#60756a;font-weight:500}
+.weekly-points-wrap th:nth-child(n+10),.weekly-points-wrap td:nth-child(n+10){text-align:center}
+@media(max-width:900px){
+  .player-profile-head{align-items:stretch;flex-direction:column}
+  .fixture-card{min-width:0;text-align:left}
+  .profile-role-grid{grid-template-columns:1fr 1fr}
+  .weekly-history-grid{grid-template-columns:repeat(3,1fr)}
+}
+@media(max-width:570px){
+  .player-profile-head h1{font-size:38px}
+  .weekly-history-grid{grid-template-columns:repeat(2,1fr)}
+  .profile-role-grid{grid-template-columns:1fr 1fr}
+}
