@@ -386,7 +386,7 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
               <div className="picker-shirt-wrap"><span className={`fantasy-shirt tiny ${p.position}`} style={teamCssVars(p.team)}><i>{shirtMark(p)}</i></span></div>
               <div className="picker-copy">
                 <b>{p.full_name}</b>
-                <small>{p.team} • vs {p.projection?.opponent_name||'—'}</small>
+                <small>{p.team} • Rakip: {p.projection?.opponent_name||'—'}</small>
                 <div><span>{posLabel[p.position]}</span><span>{Number(p.price||0).toFixed(1)}m</span><span>{Number(p.projection?.x_minutes||0).toFixed(0)} dk</span></div>
               </div>
               <div className="picker-score"><b>{xfp(p).toFixed(2)}</b><small>xFP</small></div>
