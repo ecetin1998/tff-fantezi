@@ -69,12 +69,24 @@ export async function saveSquad(_prevState, formData) {
   ids = [...new Set(ids)]
   if (ids.length !== 15) return {ok:false,error:'Kadro tam 15 oyuncu olmalı.',signature:''}
 
-  const { data: players, error: playerError } = await supabase
-    .from('scout_players')
-    .select('id,position,price')
-    .in('id',ids)
+  const [playerResult,existingResult] = await Promise.all([
+    supabase
+      .from('scout_players')
+      .select('id,position,price')
+      .in('id',ids),
+    supabase
+      .from('scout_user_squads')
+      .select('id')
+      .eq('user_id',userId)
+      .eq('is_active',true)
+      .maybeSingle()
+  ])
+
+  const {data:players,error:playerError}=playerResult
+  const {data:existing,error:existingError}=existingResult
 
   if (playerError) return {ok:false,error:playerError.message,signature:''}
+  if (existingError) return {ok:false,error:existingError.message,signature:''}
   if ((players||[]).length !== 15) return {ok:false,error:'Oyuncu listesi doğrulanamadı.',signature:''}
 
   const counts = (players||[]).reduce((a,p)=>(a[p.position]=(a[p.position]||0)+1,a),{})
@@ -93,15 +105,6 @@ export async function saveSquad(_prevState, formData) {
     squadState.filter(x => x.is_captain && x.bench_order === null).length === 1
 
   if(!hasStructuredState) return {ok:false,error:'İlk 11, yedek sırası veya kaptan bilgisi eksik.',signature:''}
-
-  const { data: existing, error: existingError } = await supabase
-    .from('scout_user_squads')
-    .select('id')
-    .eq('user_id',userId)
-    .eq('is_active',true)
-    .maybeSingle()
-
-  if(existingError) return {ok:false,error:existingError.message,signature:''}
 
   let squadId = existing?.id
   if (!squadId) {
