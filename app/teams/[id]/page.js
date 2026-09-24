@@ -45,9 +45,20 @@ export default async function TeamPage({params}){
     </div>
 
     <section className="card team-roster-section">
-      <div className="panel-head"><div><span className="eyebrow">OYUNCU HAVUZU</span><h2>{team.name} kadrosu</h2></div><span className="muted">Tam isim • bu hafta xFP</span></div>
+      <div className="panel-head team-roster-head">
+        <div><span className="eyebrow">OYUNCU HAVUZU</span><h2>{team.name} kadrosu</h2></div>
+        <div className="team-roster-summary">
+          <span><small>AKTİF HAVUZ</small><b>{players.length}</b></span>
+          <span><small>TAHMİN</small><b>GW{run?.gameweek||'—'} xFP</b></span>
+        </div>
+      </div>
       <div className="team-roster-grid">{players.map(p=><Link href={'/players/'+p.id} className="team-roster-player" key={p.id}>
-        <span className={'pos '+p.position}>{p.position}</span><div><b>{p.full_name}</b><small>{Number(p.price||0).toFixed(1)}m • {p.availability?.reason||'Aktif havuz'}</small></div><strong>{num(p.projection?.xfp)}<small>xFP</small></strong>
+        <span className={'pos '+p.position}>{p.position}</span>
+        <div className="team-roster-copy">
+          <b>{p.full_name}</b>
+          <small><span>{Number(p.price||0).toFixed(1)}m</span><i>•</i><span>{p.availability?.reason||'Aktif havuz'}</span></small>
+        </div>
+        <div className="team-roster-xfp"><small>GW{run?.gameweek||'—'}</small><strong>{num(p.projection?.xfp)}</strong><em>xFP</em></div>
       </Link>)}</div>
     </section>
 
