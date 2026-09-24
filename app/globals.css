@@ -2105,3 +2105,126 @@ p{color:#66728d}
   }
   .team-roster-xfp strong{font-size:15px!important}
 }
+
+
+/* Player card xFP corner + structured team profile */
+@media(max-width:900px){
+  .mobile-player-card{
+    position:relative;
+    overflow:hidden;
+    padding:14px 14px 13px!important;
+  }
+  .mobile-player-card.team-accent-card:after{
+    width:74px!important;
+    height:74px!important;
+    right:-30px!important;
+    top:-30px!important;
+    opacity:.55;
+  }
+  .mobile-player-top{
+    position:relative;
+    z-index:1;
+    grid-template-columns:48px minmax(0,1fr)!important;
+    padding-right:72px;
+  }
+  .mobile-xfp{
+    position:absolute;
+    z-index:2;
+    top:12px;
+    right:12px;
+    min-width:58px;
+    padding:6px 7px;
+    border:1px solid color-mix(in srgb,var(--club1) 16%,#dfe5ef);
+    border-radius:10px;
+    background:rgba(255,255,255,.88);
+    backdrop-filter:blur(8px);
+    text-align:right!important;
+    box-shadow:0 6px 16px rgba(35,48,83,.06);
+  }
+  .mobile-xfp strong{
+    display:inline!important;
+    font-size:17px!important;
+    line-height:1!important;
+    letter-spacing:-.035em;
+    color:var(--clubText,#0b8e82)!important;
+  }
+  .mobile-xfp small{
+    display:inline!important;
+    margin-left:3px;
+    font-size:6.5px!important;
+    line-height:1!important;
+    font-weight:850;
+    color:#8993a9!important;
+    text-transform:none;
+  }
+}
+@media(max-width:420px){
+  .mobile-player-top{padding-right:66px}
+  .mobile-xfp{top:10px;right:10px;min-width:54px;padding:5px 6px}
+  .mobile-xfp strong{font-size:16px!important}
+}
+
+.team-detail-stat-grid .card small{
+  display:block;
+  margin-top:3px;
+  color:#939db0;
+  font-size:6.5px;
+  font-weight:750;
+}
+.team-profile-breakdown{
+  min-width:0;
+}
+.team-profile-columns{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+  margin-top:14px;
+}
+.team-profile-group{
+  min-width:0;
+  padding:12px 13px 8px;
+  border:1px solid #e3e8f1;
+  border-radius:14px;
+  background:#f8fafe;
+}
+.team-profile-group-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  padding-bottom:8px;
+  border-bottom:1px solid #e8ecf2;
+}
+.team-profile-group-head span{
+  font-size:7px;
+  letter-spacing:.09em;
+  color:#7d88a0;
+  font-weight:950;
+}
+.team-profile-group-head b{
+  font-size:9px;
+  color:#2c3855;
+}
+.team-profile-group .detail-list{
+  margin-top:3px;
+}
+.team-profile-group .detail-list>div{
+  min-height:36px;
+  padding:8px 0!important;
+}
+.team-profile-group .detail-list span{
+  font-size:8px!important;
+}
+.team-profile-group .detail-list b{
+  font-size:10px!important;
+}
+.team-profile-coverage{
+  display:block;
+  margin-top:10px;
+  color:#98a2b5;
+  font-size:6.5px;
+  line-height:1.4;
+}
+@media(max-width:760px){
+  .team-profile-columns{grid-template-columns:1fr}
+}
