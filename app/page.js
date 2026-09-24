@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { getMatches, getPlayersWithProjection, getRecommendation } from '@/lib/data'
-import { teamCssVars } from '@/lib/teamThemes'
+import SquadPitchView from '@/components/SquadPitchView'
 
 export const revalidate=300
 
@@ -21,9 +21,6 @@ export default async function Home(){
   const value=[...players].sort((a,b)=>Number(b.projection.value_score)-Number(a.projection.value_score))[0]
   const mins=[...players].sort((a,b)=>Number(b.projection.x_minutes)-Number(a.projection.x_minutes))[0]
   const six=[...players].sort((a,b)=>Number(b.projection.six_plus_probability)-Number(a.projection.six_plus_probability))[0]
-  const xi=members.filter(m=>m.squad_slot==='XI')
-  const groups=['GK','DEF','MID','FWD']
-  const formation=`${xi.filter(m=>m.player?.position==='DEF').length}-${xi.filter(m=>m.player?.position==='MID').length}-${xi.filter(m=>m.player?.position==='FWD').length}`
   const updated=run?.source_updated_at
     ? new Intl.DateTimeFormat('tr-TR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit',timeZone:'Europe/Istanbul'}).format(new Date(run.source_updated_at))
     : '—'
@@ -40,35 +37,17 @@ export default async function Home(){
 
     <div className="home-main-grid home-clean-grid">
       <section className="card field-panel home-squad-panel">
-        <div className="panel-head home-squad-head">
-          <div>
-            <span className="eyebrow">ÖNERİLEN KADRO</span>
-            <h1>GW{run?.gameweek||'—'} • {formation}</h1>
-            <p>Modelin bu hafta için en yüksek dengeli XI seçimi.</p>
-          </div>
-          <Link href="/squads" className="pill">Kadro detayı →</Link>
-        </div>
-
-        <div className="fantasy-pitch compact-pitch readable-pitch">
-          <div className="pitch-center-circle"/>
-          {groups.map(pos=><div className={`pitch-row pitch-${pos}`} key={pos}>
-            {xi.filter(m=>m.player?.position===pos).map(m=>
-              <Link
-                href={'/players/'+m.player_id}
-                className="pitch-player club-pitch-player home-pitch-player"
-                style={teamCssVars(m.team)}
-                title={m.player?.full_name||''}
-                key={m.player_id}
-              >
-                <span className={`shirt-dot ${pos}`} style={teamCssVars(m.team)}>{pos}</span>
-                <b>{compactName(m.player?.full_name)}</b>
-                <small>{m.team}</small>
-                <strong>{Number(m.xfp||0).toFixed(1)} xFP</strong>
-                {m.is_captain?<em>C</em>:null}
-              </Link>
-            )}
-          </div>)}
-        </div>
+                <SquadPitchView
+          members={members}
+          title="ÖNERİLEN KADRO"
+          gameweek={run?.gameweek}
+          budget={recommendation?.budget}
+          xiXfp={recommendation?.xi_xfp}
+          actionHref="/squads"
+          actionLabel="Kadro detayı →"
+          compact
+          showBench
+        />
       </section>
 
       <aside className="insight-stack home-insights">
