@@ -13,7 +13,7 @@ export default async function Teams(){
 
   return <>
     <div className="section-title">
-      <div><span className="eyebrow">TAKIM ANALİZİ</span><h1>GW{run?.gameweek||'—'} Takım & Fikstür Görünümü</h1></div>
+      <div><span className="eyebrow">TAKIM ANALİZİ</span><h1>MH{run?.gameweek||'—'} Takım & Fikstür Görünümü</h1></div>
       <span className="muted">{teams.length} takım • detay için takıma dokun</span>
     </div>
     <div className="team-grid">
