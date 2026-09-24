@@ -53,7 +53,7 @@ export default async function Squad({searchParams}){
       <div>
         <span className="eyebrow">FANTASY TAKIM YÖNETİMİ</span>
         <h1>Benim Kadrom</h1>
-        <p className="muted">GW{run?.gameweek||'—'} • 15 oyuncu • 100m bütçe</p>
+        <p className="muted">MH{run?.gameweek||'—'} • 15 oyuncu • 100m bütçe</p>
       </div>
       <span className={`plan ${auth.plan}`}>{auth.plan.toUpperCase()}</span>
     </div>
