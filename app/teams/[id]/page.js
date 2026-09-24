@@ -30,7 +30,7 @@ export default async function TeamPage({params}){
 
     <section className="team-detail-stat-grid">
       <div className="card"><span>Maç</span><b>{s?.matches_played||0}</b></div><div className="card"><span>Gol</span><b>{s?.goals_for||0}</b></div><div className="card"><span>Yenen gol</span><b>{s?.goals_against||0}</b></div>
-      <div className="card"><span>xG / maç</span><b>{num(s?.xg_per_match)}</b></div><div className="card"><span>xGA / maç</span><b>{num(s?.xga_per_match)}</b></div><div className="card"><span>xG farkı</span><b>{Number(s?.xg_diff||0)>0?'+':''}{num(s?.xg_diff)}</b></div>
+      <div className="card"><span>xG / maç</span><b>{num(s?.xg_per_match)}</b></div><div className="card"><span>xGA / maç</span><b>{num(s?.xga_per_match)}</b></div><div className="card xg-diff-stat"><span>xG − xGA</span><b>{Number(s?.xg_diff||0)>0?'+':''}{num(s?.xg_diff)}</b><small>{num(s?.xg_total)} − {num(s?.xga_total)}</small></div>
     </section>
 
     <div className="profile-grid team-detail-split">
@@ -48,8 +48,7 @@ export default async function TeamPage({params}){
       <div className="panel-head team-roster-head">
         <div><span className="eyebrow">OYUNCU HAVUZU</span><h2>{team.name} kadrosu</h2></div>
         <div className="team-roster-summary">
-          <span><small>AKTİF HAVUZ</small><b>{players.length}</b></span>
-          <span><small>TAHMİN</small><b>GW{run?.gameweek||'—'} xFP</b></span>
+          <span><small>AKTİF HAVUZ</small><b>{players.length} oyuncu</b></span>
         </div>
       </div>
       <div className="team-roster-grid">{players.map(p=><Link href={'/players/'+p.id} className="team-roster-player" key={p.id}>
@@ -58,7 +57,7 @@ export default async function TeamPage({params}){
           <b>{p.full_name}</b>
           <small><span>{Number(p.price||0).toFixed(1)}m</span><i>•</i><span>{p.availability?.reason||'Aktif havuz'}</span></small>
         </div>
-        <div className="team-roster-xfp"><small>GW{run?.gameweek||'—'}</small><strong>{num(p.projection?.xfp)}</strong><em>xFP</em></div>
+        <div className="team-roster-xfp"><strong>{num(p.projection?.xfp)}</strong><small>xFP</small></div>
       </Link>)}</div>
     </section>
 
