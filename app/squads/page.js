@@ -16,7 +16,7 @@ export default async function Squads(){
 
     <div className="squad-tabs-note">
       <span>● Önerilen: dengeli maksimum beklenen puan</span>
-      <span>◇ Alternatif: farklı oyuncularla ceiling senaryosu</span>
+      <span>◇ Alternatif: farklı oyuncularla tavan senaryosu</span>
     </div>
 
     <div className="unified-squad-list">
