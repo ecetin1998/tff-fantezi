@@ -19,7 +19,7 @@ export default async function Teams(){
     <div className="team-grid">
       {teams.map(t=><Link href={'/teams/'+t.id} className="card team-card team-accent-card team-overview-card" style={teamCssVars(t.name)} key={t.id}>
         <div className="team-card-head"><h2>{t.name}</h2><span className="pill">{t.venue}</span></div>
-        <p className="muted">vs {t.opponent}</p>
+        <p className="muted">Rakip: {t.opponent}</p>
         <div className="team-metrics">
           <div><span>xG</span><b>{Number(t.xg||0).toFixed(2)}</b></div>
           <div><span>Rakip xG</span><b>{Number(t.oppXg||0).toFixed(2)}</b></div>
