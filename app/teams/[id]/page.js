@@ -33,7 +33,7 @@ export default async function TeamPage({params}){
     <section className="card team-detail-hero">
       <div className="team-detail-mark">{team.short_name||team.name.slice(0,3).toUpperCase()}</div>
       <div className="team-detail-copy"><span className="eyebrow">TAKIM PROFİLİ</span><h1>{team.name}</h1><p>MH1–MH{s?.through_gameweek||'—'} sezon görünümü • {players.length} aktif oyuncu</p></div>
-      <div className="team-detail-current"><span>MH{run?.gameweek||'—'} rakibi</span>{opponent?<Link href={'/teams/'+opponent.id}>{opponent.name}</Link>:<b>—</b>}<small>{isHome?'İç saha':'Deplasman'}</small></div>
+      <div className="team-detail-current"><span>MH{run?.gameweek||'—'} rakibi</span>{opponent?<Link href={'/teams/'+opponent.id}>{opponent.name}</Link>:<b>—</b>}<small>{isHome?'Ev':'Dep'}</small></div>
     </section>
 
     <section className="team-detail-stat-grid">
