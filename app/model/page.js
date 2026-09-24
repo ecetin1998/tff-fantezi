@@ -5,7 +5,7 @@ export default async function Model(){
   const fmt=d=>d?new Intl.DateTimeFormat('tr-TR',{dateStyle:'medium',timeStyle:'short',timeZone:'Europe/Istanbul'}).format(new Date(d)):'—'
   return <><div className="section-title"><div><span className="eyebrow">MODEL & GÜVEN</span><h1>Model Durumu</h1></div><span className="pill good">{run?.status||'—'}</span></div>
   <div className="grid stats model-stats">
-    <div className="card stat"><span>Aktif hafta</span><strong>GW{run?.gameweek||'—'}</strong><em>{run?.model_version||'—'}</em></div>
+    <div className="card stat"><span>Aktif hafta</span><strong>MH{run?.gameweek||'—'}</strong><em>{run?.model_version||'—'}</em></div>
     <div className="card stat"><span>Simülasyon</span><strong>{Number(run?.simulation_count||0).toLocaleString('tr-TR')}</strong><em>Monte Carlo</em></div>
     <div className="card stat"><span>Oyuncu tahmini</span><strong>{counts.projectionCount||0}</strong><em>aktif projeksiyon</em></div>
     <div className="card stat"><span>Maç modeli</span><strong>{counts.matchCount||0}</strong><em>fikstür</em></div>
