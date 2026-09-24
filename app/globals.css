@@ -4506,3 +4506,287 @@ p{color:#66728d}
   }
   .picker-copy{padding-left:3px!important}
 }
+
+
+/* ===== Benim Kadrom • readability pass ===== */
+.my-squad-shell .eyebrow{
+  font-size:8px!important;
+  letter-spacing:.11em!important;
+}
+.my-squad-shell .squad-control-stat>span,
+.my-squad-shell .squad-control-stat>small{
+  font-size:8px!important;
+}
+.my-squad-shell .squad-control-stat>b{
+  font-size:20px!important;
+}
+.my-squad-shell .squad-control-stat>b small{
+  font-size:8px!important;
+}
+.my-squad-shell .squad-tool-btn{
+  font-size:9px!important;
+}
+.my-squad-shell .squad-stage-head h2,
+.my-squad-shell .player-picker-head h2{
+  font-size:20px!important;
+}
+.my-squad-shell .roster-stage-foot,
+.my-squad-shell .roster-stage-foot b{
+  font-size:8px!important;
+}
+
+/* 15-player pitch */
+.my-squad-shell .roster-player>b{
+  font-size:7.5px!important;
+  line-height:1.15!important;
+}
+.my-squad-shell .roster-player>small{
+  font-size:6.5px!important;
+  line-height:1.15!important;
+}
+.my-squad-shell .roster-player .pitch-player-tags strong{
+  font-size:6.5px!important;
+}
+.my-squad-shell .empty-roster-slot>b{
+  font-size:7px!important;
+}
+.my-squad-shell .empty-roster-slot>small{
+  font-size:6px!important;
+}
+
+/* player pool */
+.my-squad-shell .picker-filters input,
+.my-squad-shell .picker-filters select{
+  font-size:9px!important;
+}
+.my-squad-shell .picker-table-head button{
+  font-size:8px!important;
+}
+.my-squad-shell .picker-copy>b{
+  font-size:10px!important;
+  line-height:1.2!important;
+}
+.my-squad-shell .picker-copy>small strong{
+  font-size:8px!important;
+}
+.my-squad-shell .picker-copy>small em{
+  font-size:7.5px!important;
+}
+.my-squad-shell .picker-value{
+  font-size:9.5px!important;
+}
+.my-squad-shell .picker-value.active{
+  font-size:11px!important;
+}
+.my-squad-shell .picker-player>button{
+  font-size:15px!important;
+}
+
+/* lineup + tactics */
+.my-squad-shell .lineup-workbench-head h2{
+  font-size:21px!important;
+}
+.my-squad-shell .lineup-workbench-head p{
+  font-size:9px!important;
+}
+.my-squad-shell .formation-option>span{
+  font-size:8px!important;
+}
+.my-squad-shell .formation-option>b{
+  font-size:12px!important;
+}
+.my-squad-shell .formation-option>b small,
+.my-squad-shell .formation-option>em{
+  font-size:6px!important;
+}
+.my-squad-shell .lineup-score-strip small{
+  font-size:7px!important;
+}
+.my-squad-shell .lineup-score-strip b{
+  font-size:15px!important;
+}
+.my-squad-shell .lineup-score-strip .lineup-total b{
+  font-size:18px!important;
+}
+.my-squad-shell .lineup-pitch .my-pitch-player b{
+  font-size:7.5px!important;
+  line-height:1.15!important;
+}
+.my-squad-shell .lineup-pitch .my-pitch-player>button small{
+  font-size:6.5px!important;
+}
+.my-squad-shell .lineup-pitch .pitch-player-tags strong{
+  font-size:6.5px!important;
+}
+.my-squad-shell .formation-live-badge span{
+  font-size:6px!important;
+}
+.my-squad-shell .formation-live-badge b{
+  font-size:10px!important;
+}
+
+/* bench + captain + save */
+.my-squad-shell .bench-zone-head,
+.my-squad-shell .bench-zone-head>span{
+  font-size:8px!important;
+}
+.my-squad-shell .bench-copy b{
+  font-size:8.5px!important;
+}
+.my-squad-shell .bench-copy small{
+  font-size:7px!important;
+}
+.my-squad-shell .captain-panel h3{
+  font-size:17px!important;
+}
+.my-squad-shell .captain-panel>p{
+  font-size:9px!important;
+}
+.my-squad-shell .captain-candidates button div b{
+  font-size:9px!important;
+}
+.my-squad-shell .captain-candidates button div small{
+  font-size:7px!important;
+}
+.my-squad-shell .captain-candidates button>strong{
+  font-size:13px!important;
+}
+.my-squad-shell .captain-candidates button>strong small{
+  font-size:6px!important;
+}
+.my-squad-shell .captain-impact span{
+  font-size:7px!important;
+}
+.my-squad-shell .captain-impact b{
+  font-size:10px!important;
+}
+.my-squad-shell .captain-impact strong{
+  font-size:17px!important;
+}
+.my-squad-shell .squad-validity span{
+  font-size:7.5px!important;
+}
+.my-squad-shell .save-squad-btn{
+  font-size:9px!important;
+}
+.my-squad-shell .squad-insight-bar p{
+  font-size:10px!important;
+}
+
+/* mobile: keep the larger type without breaking the grid */
+@media(max-width:760px){
+  .my-squad-shell .eyebrow{font-size:7.5px!important}
+  .my-squad-shell .squad-control-stat>span,
+  .my-squad-shell .squad-control-stat>small,
+  .my-squad-shell .squad-control-stat>b small{
+    font-size:7.5px!important;
+  }
+  .my-squad-shell .squad-control-stat>b{
+    font-size:18px!important;
+  }
+  .my-squad-shell .squad-tool-btn{
+    font-size:8.5px!important;
+  }
+  .my-squad-shell .squad-stage-head h2,
+  .my-squad-shell .player-picker-head h2,
+  .my-squad-shell .lineup-workbench-head h2{
+    font-size:18px!important;
+  }
+  .my-squad-shell .roster-player>b{
+    font-size:6.4px!important;
+  }
+  .my-squad-shell .roster-player>small{
+    font-size:5.7px!important;
+  }
+  .my-squad-shell .roster-player .pitch-player-tags strong{
+    font-size:5.7px!important;
+  }
+  .my-squad-shell .picker-table-head button{
+    font-size:7px!important;
+  }
+  .my-squad-shell .picker-copy>b{
+    font-size:8.8px!important;
+  }
+  .my-squad-shell .picker-copy>small strong{
+    font-size:6.8px!important;
+  }
+  .my-squad-shell .picker-copy>small em{
+    font-size:6.5px!important;
+  }
+  .my-squad-shell .picker-value{
+    font-size:8.3px!important;
+  }
+  .my-squad-shell .picker-value.active{
+    font-size:9.4px!important;
+  }
+  .my-squad-shell .formation-option>span{
+    font-size:7.5px!important;
+  }
+  .my-squad-shell .formation-option>b{
+    font-size:11px!important;
+  }
+  .my-squad-shell .lineup-score-strip small{
+    font-size:6.3px!important;
+  }
+  .my-squad-shell .lineup-score-strip b{
+    font-size:13px!important;
+  }
+  .my-squad-shell .lineup-pitch .my-pitch-player b{
+    font-size:6.3px!important;
+  }
+  .my-squad-shell .lineup-pitch .my-pitch-player>button small{
+    font-size:5.5px!important;
+  }
+  .my-squad-shell .lineup-pitch .pitch-player-tags strong{
+    font-size:5.7px!important;
+  }
+  .my-squad-shell .bench-copy b{
+    font-size:7.6px!important;
+  }
+  .my-squad-shell .bench-copy small{
+    font-size:6.3px!important;
+  }
+  .my-squad-shell .captain-panel>p{
+    font-size:8px!important;
+  }
+  .my-squad-shell .captain-candidates button div b{
+    font-size:8.3px!important;
+  }
+  .my-squad-shell .captain-candidates button div small{
+    font-size:6.4px!important;
+  }
+  .my-squad-shell .squad-validity span{
+    font-size:6.7px!important;
+  }
+}
+
+@media(max-width:430px){
+  .my-squad-shell .roster-player>b{
+    font-size:6px!important;
+  }
+  .my-squad-shell .roster-player>small{
+    font-size:5.3px!important;
+  }
+  .my-squad-shell .picker-table-head button{
+    font-size:6.7px!important;
+  }
+  .my-squad-shell .picker-copy>b{
+    font-size:8.2px!important;
+  }
+  .my-squad-shell .picker-copy>small strong,
+  .my-squad-shell .picker-copy>small em{
+    font-size:6px!important;
+  }
+  .my-squad-shell .picker-value{
+    font-size:7.8px!important;
+  }
+  .my-squad-shell .picker-value.active{
+    font-size:8.8px!important;
+  }
+  .my-squad-shell .lineup-pitch .my-pitch-player b{
+    font-size:5.9px!important;
+  }
+  .my-squad-shell .lineup-pitch .my-pitch-player>button small{
+    font-size:5.2px!important;
+  }
+}
