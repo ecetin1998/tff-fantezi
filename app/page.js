@@ -18,14 +18,6 @@ export default async function Home(){
     ['6+ puan ihtimali',six,(Number(six?.projection?.six_plus_probability||0)*100).toFixed(0),'%'],
   ]
   return <>
-    <section className="home-gw-strip card home-gw-strip-clean">
-      <div className="home-gw-badge"><small>AKTİF HAFTA</small><strong>GW{run?.gameweek||'—'}</strong></div>
-      <div className="home-gw-status"><i/><div><b>Model hazır</b><span>Son veri {updated}</span></div></div>
-      <div className="home-gw-stat"><span>Simülasyon</span><b>{Number(run?.simulation_count||0).toLocaleString('tr-TR')}</b></div>
-      <div className="home-gw-stat"><span>Oyuncu havuzu</span><b>{players.length}</b></div>
-      <div className="home-gw-stat"><span>Maç</span><b>{matches.length}</b></div>
-    </section>
-
     <section className="home-intro-layout">
       <div className="card home-intro-hero">
         <span className="eyebrow">SÜPER LİG FANTASY ANALİZ PLATFORMU</span>
@@ -41,6 +33,18 @@ export default async function Home(){
         {highlights.map(([label,p,val,unit])=><Link key={label} className="card spotlight-card team-accent-card" style={teamCssVars(p?.team)} href={p?'/players/'+p.id:'/players'}>
           <span>{label}</span><b>{p?.full_name||'—'}</b><small>{p?.team||'—'}</small><strong>{val} <em>{unit}</em></strong>
         </Link>)}
+        <div className="card spotlight-card home-status-card home-status-week">
+          <span>Güncel hafta</span>
+          <b>GW{run?.gameweek||'—'}</b>
+          <small>{matches.length} maç • {players.length} oyuncu</small>
+          <strong>Aktif <em>hafta</em></strong>
+        </div>
+        <div className="card spotlight-card home-status-card home-status-ready">
+          <span>Model durumu</span>
+          <b>Model hazır</b>
+          <small>Son veri {updated}</small>
+          <strong>Güncel <em>veri</em></strong>
+        </div>
       </aside>
     </section>
 
