@@ -75,7 +75,7 @@ export default function WeeklyPointsTable({ players, throughGameweek, finalThrou
           {gameweeks.map(g=>head('gw'+g,'GW'+g))}
         </tr></thead>
         <tbody>{rows.map((p,i)=><tr className="team-player-row" style={teamCssVars(p.team)} key={p.id}>
-          <td className="rank-col">{i+1}</td>
+          <td className="rank-col">#{i+1}</td>
           <td className="weekly-player-cell">
             <Link className="player-link" href={'/players/'+p.id}><b>{p.full_name}</b></Link>
             <small><Link className="team-table-link" href={'/teams/'+p.team_id}>{p.team}</Link></small>
@@ -97,9 +97,9 @@ export default function WeeklyPointsTable({ players, throughGameweek, finalThrou
     <div className="weekly-card-list">
       {rows.map((p,i)=><Link href={'/players/'+p.id} className="card weekly-mobile-card team-accent-card" style={teamCssVars(p.team)} key={p.id}>
         <div className="weekly-mobile-head">
-          <span className="weekly-rank">#{i+1}</span>
-          <div><b>{p.full_name}</b><small>{p.team}</small></div>
-          <strong>{p.total}<small>toplam</small></strong>
+          <div className="mobile-card-badges"><span className="weekly-rank">#{i+1}</span><span className={`pos ${p.position}`}>{p.position}</span></div>
+          <div className="weekly-mobile-player-name"><b>{p.full_name}</b><small>{p.team}</small></div>
+          <div className="weekly-total-score"><strong>{p.total}</strong><small>puan</small></div>
         </div>
 
         <div className="weekly-mobile-meta compact">
