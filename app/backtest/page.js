@@ -4,6 +4,12 @@ export const dynamic='force-dynamic'
 
 const pct=v=>v===null||v===undefined?'—':(Number(v)*100).toFixed(0)+'%'
 const num=(v,d=2)=>v===null||v===undefined?'—':Number(v).toFixed(d)
+const modeLabel={
+  preseason_replay:'Sezon öncesi yeniden oynatma',
+  reconstructed:'Yeniden oluşturulmuş',
+  historical_frozen:'Dondurulmuş geçmiş',
+  live_frozen:'Canlı dondurulmuş',
+}
 const statusLabel={replay_pending:'Yeniden oynatma hazırlanacak',closed:'Kapandı',open:'Canlı / bekliyor'}
 
 export default async function BacktestPage(){
@@ -49,7 +55,7 @@ export default async function BacktestPage(){
           <tbody>
             {weeks.map(w=><tr key={w.gameweek} className={w.status==='open'?'current-backtest-row':''}>
               <td><b>{'MH'+w.gameweek}</b></td>
-              <td>{w.prediction_mode}</td>
+              <td><span className={'backtest-mode '+w.prediction_mode}>{modeLabel[w.prediction_mode]||w.prediction_mode}</span></td>
               <td>{w.training_through_gameweek===0?'Sezon öncesi':'MH1–MH'+w.training_through_gameweek}</td>
               <td>{w.fp_sample??'—'}</td>
               <td><b>{num(w.fp_mae)}</b></td>
@@ -63,6 +69,7 @@ export default async function BacktestPage(){
           </tbody>
         </table>
       </div>
+      <div className="backtest-notes">{weeks.map(w=><div key={'note-'+w.gameweek}><b>{'MH'+w.gameweek}</b><span>{w.notes}</span></div>)}</div>
     </section>
 
     <section className="card learning-section">
