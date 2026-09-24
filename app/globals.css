@@ -2330,3 +2330,46 @@ p{color:#66728d}
   .mobile-bottom-nav .bottom-nav-icon svg{width:18px;height:18px}
   .mobile-bottom-nav b{font-size:8.5px!important}
 }
+
+
+/* Hamburger menu icon polish */
+@media(max-width:900px){
+  .compact-mobile-menu-panel .mobile-menu-row{
+    display:grid!important;
+    grid-template-columns:30px minmax(0,1fr)!important;
+    align-items:center!important;
+    gap:10px!important;
+    min-height:44px;
+    padding:7px 9px!important;
+  }
+  .mobile-menu-row-icon{
+    width:30px;
+    height:30px;
+    display:grid;
+    place-items:center;
+    border-radius:9px;
+    border:1px solid #e2e7ef;
+    background:#f5f8fb;
+    color:#69758f;
+    transition:background .16s ease,border-color .16s ease,color .16s ease;
+  }
+  .mobile-menu-row-icon svg{width:17px;height:17px}
+  .compact-mobile-menu-panel .mobile-menu-row>span:last-child{
+    min-width:0;
+    font-size:11.5px;
+    font-weight:780;
+    color:inherit;
+  }
+  .compact-mobile-menu-panel .mobile-menu-row.active .mobile-menu-row-icon,
+  .compact-mobile-menu-panel .mobile-menu-row:hover .mobile-menu-row-icon{
+    background:#dff3ef;
+    border-color:#c5e7e1;
+    color:#087e72;
+  }
+  .compact-mobile-menu-panel form{margin:0}
+  .compact-mobile-menu-panel form .mobile-menu-logout{
+    width:100%!important;
+    color:#45516d!important;
+    background:transparent!important;
+  }
+}
