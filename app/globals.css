@@ -2057,3 +2057,51 @@ p{color:#66728d}
   .team-roster-player{grid-template-columns:40px minmax(0,1fr) 58px!important;padding:9px!important}
   .team-roster-xfp{min-width:54px;max-width:58px;padding:6px!important}
 }
+
+
+/* Team detail clarity refinements */
+.xg-diff-stat small{
+  display:block;
+  margin-top:3px;
+  color:#909aae;
+  font-size:6.5px;
+  font-weight:800;
+}
+.team-roster-summary>span{
+  min-width:118px;
+}
+.team-roster-xfp{
+  min-width:62px!important;
+  max-width:none!important;
+  display:flex!important;
+  align-items:baseline!important;
+  justify-content:flex-end!important;
+  gap:4px!important;
+  padding:0 0 0 12px!important;
+  border:0!important;
+  border-left:1px solid #e6eaf1!important;
+  border-radius:0!important;
+  background:transparent!important;
+}
+.team-roster-xfp strong{
+  font-size:16px!important;
+  line-height:1!important;
+  color:#22304f!important;
+  letter-spacing:-.025em;
+}
+.team-roster-xfp small{
+  font-size:7px!important;
+  line-height:1!important;
+  color:#8c96aa!important;
+  font-weight:850!important;
+  text-transform:none!important;
+  letter-spacing:0!important;
+}
+@media(max-width:420px){
+  .team-roster-summary>span{min-width:0}
+  .team-roster-xfp{
+    min-width:56px!important;
+    padding-left:9px!important;
+  }
+  .team-roster-xfp strong{font-size:15px!important}
+}
