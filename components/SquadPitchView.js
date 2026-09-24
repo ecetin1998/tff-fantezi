@@ -35,7 +35,7 @@ export default function SquadPitchView({
     <div className="readonly-squad-head">
       <div>
         <span className="eyebrow">{title}</span>
-        <h2>{gameweek?`GW${gameweek} • `:''}{formation}</h2>
+        <h2>{gameweek?`MH${gameweek} • `:''}{formation}</h2>
       </div>
       <div className="readonly-squad-head-right">
         {budget!==undefined&&budget!==null?<span><small>Bütçe</small><b>{Number(budget).toFixed(1)}m</b></span>:null}
@@ -58,7 +58,7 @@ export default function SquadPitchView({
           key={m.player_id}
           title={m.player?.full_name||''}
         >
-          <span className={`fantasy-shirt ${m.player?.position}`} style={teamCssVars(m.team)}><i>{m.player?.position||'—'}</i></span>
+          <span className={`fantasy-shirt ${m.player?.position}`} style={teamCssVars(m.team)}><i>{posLabel[m.player?.position]||m.player?.position||'—'}</i></span>
           <b>{displayName(m.player)}</b>
           <small>{m.team}</small>
           <div className="pitch-player-tags">
@@ -78,7 +78,7 @@ export default function SquadPitchView({
       <div className="my-bench-row readonly-bench-row">
         {bench.map((m,i)=><Link href={'/players/'+m.player_id} className="my-bench-player readonly-bench-player" key={m.player_id}>
           <span className="bench-order">{i+1}</span>
-          <span className={`fantasy-shirt mini ${m.player?.position}`} style={teamCssVars(m.team)}><i>{m.player?.position||'—'}</i></span>
+          <span className={`fantasy-shirt mini ${m.player?.position}`} style={teamCssVars(m.team)}><i>{posLabel[m.player?.position]||m.player?.position||'—'}</i></span>
           <span className="bench-copy"><b>{m.player?.full_name||'—'}</b><small>{posLabel[m.player?.position]||m.player?.position} • {Number(m.player?.price||0).toFixed(1)}m • {Number(m.xfp||0).toFixed(1)} xFP</small></span>
         </Link>)}
       </div>
