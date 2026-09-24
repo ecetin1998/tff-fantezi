@@ -54,7 +54,7 @@ export default async function Matches(){
           <div className="outcome-bar outcome-bar-labeled" aria-label="Maç sonucu olasılıkları">
             <i className="home" style={{width:(home*100)+'%'}} title={`Ev %${(home*100).toFixed(0)}`}><span><b>{(home*100).toFixed(0)}%</b> Ev</span></i>
             <i className="draw" style={{width:(draw*100)+'%'}} title={`Beraberlik %${(draw*100).toFixed(0)}`}><span><b>{(draw*100).toFixed(0)}%</b> Ber.</span></i>
-            <i className="away" style={{width:(away*100)+'%'}} title={`Deplasman %${(away*100).toFixed(0)}`}><span><b>{(away*100).toFixed(0)}%</b> Dep</span></i>
+            <i className="away" style={{width:(away*100)+'%'}} title={`Dep %${(away*100).toFixed(0)}`}><span><b>{(away*100).toFixed(0)}%</b> Dep</span></i>
           </div>
 
           <div className="match-fantasy-meta">
