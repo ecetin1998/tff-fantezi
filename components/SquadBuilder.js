@@ -18,6 +18,11 @@ const POS_ORDER={GK:0,DEF:1,MID:2,FWD:3}
 const posLabel={GK:'KL',DEF:'DEF',MID:'OS',FWD:'FOR'}
 
 function xfp(p){return Number(p?.projection?.xfp||0)}
+function stateSignature(payload=[]){
+  return JSON.stringify([...payload]
+    .map(x=>({player_id:Number(x.player_id),is_captain:Boolean(x.is_captain),bench_order:x.bench_order===null?null:Number(x.bench_order)}))
+    .sort((a,b)=>a.player_id-b.player_id))
+}
 function fallbackName(name=''){
   const parts=String(name).trim().split(/\s+/).filter(Boolean)
   return parts.at(-1)||'—'
@@ -69,10 +74,11 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
   const [ids,setIds]=useState(initialIds)
   const [formation,setFormation]=useState(initialFormation)
   const [xiIds,setXiIds]=useState(initialXI)
-  const [captainId,setCaptainId]=useState(()=>{
+  const initialCaptainId=useMemo(()=>{
     const saved=initialState.find(x=>x.is_captain)?.player_id
     return saved&&initialXI.includes(saved)?saved:(initialXI.map(id=>map.get(id)).sort((a,b)=>xfp(b)-xfp(a))[0]?.id||null)
-  })
+  },[initialState,initialXI,map])
+  const [captainId,setCaptainId]=useState(initialCaptainId)
   const [q,setQ]=useState('')
   const [pos,setPos]=useState('')
   const [team,setTeam]=useState('')
@@ -213,6 +219,20 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
   const benchPayload=bench.map((p,i)=>({player_id:p.id,is_captain:false,bench_order:i+1}))
   const xiPayload=xi.map(p=>({player_id:p.id,is_captain:p.id===captainId,bench_order:null}))
   const savePayload=[...xiPayload,...benchPayload]
+  const initialSignature=useMemo(()=>{
+    const baseSelected=initialIds.map(id=>map.get(id)).filter(Boolean)
+    const baseBench=baseSelected.filter(p=>!initialXI.includes(p.id)).sort((a,b)=>{
+      if(a.position==='GK'&&b.position!=='GK')return -1
+      if(b.position==='GK'&&a.position!=='GK')return 1
+      return xfp(b)-xfp(a)
+    })
+    const basePayload=[
+      ...initialXI.map(id=>({player_id:id,is_captain:id===initialCaptainId,bench_order:null})),
+      ...baseBench.map((p,i)=>({player_id:p.id,is_captain:false,bench_order:i+1}))
+    ]
+    return stateSignature(basePayload)
+  },[initialIds,initialXI,initialCaptainId,map])
+  const hasChanges=stateSignature(savePayload)!==initialSignature
 
   return <div className="my-squad-shell">
     <section className="squad-control-strip card">
@@ -327,7 +347,7 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
           <form action={saveSquad}>
             <input type="hidden" name="player_ids" value={JSON.stringify(ids)}/>
             <input type="hidden" name="squad_state" value={JSON.stringify(savePayload)}/>
-            <button className="cta save-squad-btn" disabled={!valid}>Takımı Kaydet</button>
+            <button className="cta save-squad-btn" disabled={!valid||!hasChanges}>{hasChanges?'Takımı Kaydet':'Kaydedildi'}</button>
           </form>
         </div>
       </section>
