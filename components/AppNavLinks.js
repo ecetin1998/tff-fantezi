@@ -113,7 +113,7 @@ export function MobileMenu({ primary, analysis, signedIn }){
       {analysis.map(([href,label])=>
         <MenuRow onClick={close} active={matches(path,href)} key={href} href={href} label={label}/>
       )}
-      <MenuRow onClick={close} href="/pricing" label="Scout Pro"/>
+      <MenuRow onClick={close} href="/pricing" label="Fantezi Pro"/>
       {signedIn
         ? <form action={logout}><button className="mobile-menu-row mobile-menu-logout" onClick={close} type="submit"><span className="mobile-menu-row-icon"><MenuIcon href="/login"/></span><span>Çıkış</span></button></form>
         : <MenuRow onClick={close} href="/login" label="Giriş / Kayıt"/>}
