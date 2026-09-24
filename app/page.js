@@ -49,7 +49,7 @@ export default async function Home(){
     </section>
 
     <section className="card home-model-guide">
-      <div className="home-guide-copy"><span className="eyebrow">MODELİ NASIL OKUYACAKSIN?</span><h2>Tek sayıya değil, dağılıma bak.</h2><p>xFP başlangıç noktasıdır. Dakika, ilk 11 ihtimali, floor/ceiling ve maç bağlamını birlikte okumak daha doğru karar verir.</p></div>
+      <div className="home-guide-copy"><span className="eyebrow">MODELİ NASIL OKUYACAKSIN?</span><h2>Tek sayıya değil, dağılıma bak.</h2><p>xFP başlangıç noktasıdır. Dakika, ilk 11 ihtimali, taban/tavan ve maç bağlamını birlikte okumak daha doğru karar verir.</p></div>
       <div className="home-guide-metrics">
         <div><b>xFP</b><span>Beklenen fantasy puanı</span></div>
         <div><b>xDakika</b><span>Beklenen oynama süresi</span></div>
