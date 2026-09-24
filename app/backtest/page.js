@@ -77,5 +77,18 @@ export default async function BacktestPage(){
         </article>)}
       </div>
     </section>
+
+    <section className="card learning-rules">
+      <span className="eyebrow">OTOMATİK ÖĞRENME KURALI</span>
+      <h2>Model kendi kendine değişecek ama kontrolsüz değil</h2>
+      <div className="learning-rule-grid">
+        <div><b>1</b><span>Hafta başlamadan tahmini ve girdileri dondur.</span></div>
+        <div><b>2</b><span>Hafta kapanınca xFP, dakika, 6+, sıralama, XI ve kaptan başarısını ölç.</span></div>
+        <div><b>3</b><span>Hatanın dakika, rol, takım süreci, bitiricilik, yaratım, gol yememe/kurtarış veya bonus kaynaklı olup olmadığını ayır.</span></div>
+        <div><b>4</b><span>Aynı yönde en az 3 hafta veya bileşende en az 30 oyuncu-maç kanıtı yoksa sadece izle.</span></div>
+        <div><b>5</b><span>Kanıt yeterliyse yalnız ilgili bileşene küçük ve limitli ayar uygula; dondurulmuş geçmişi değiştirme.</span></div>
+        <div><b>6</b><span>Yeni ayarın sonraki haftalarda gerçekten iyileştirip iyileştirmediğini ayrıca geriye dönük test et.</span></div>
+      </div>
+    </section>
   </main>
 }
