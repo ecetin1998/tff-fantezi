@@ -80,7 +80,7 @@ export default function PlayersTable({ players }){
       {head('price','Fiyat')}{head('xi','İlk 11')}{head('minutes','xDk')}{head('xfp','xFP')}{head('core','Core')}{head('bonus','xBonus')}
       {head('p25','P25')}{head('p75','P75')}{head('p90','P90')}{head('six','6+ %')}{head('xg','xG')}{head('xa','xA')}{head('value','F/P')}<th>Güven</th>
     </tr></thead><tbody>{rows.map((p,i)=><tr className="team-player-row" style={teamCssVars(p.team)} key={p.id}>
-      <td className="rank-col">{i+1}</td>
+      <td className="rank-col">#{i+1}</td>
       <td><Link className="player-link team-player-link" href={'/players/'+p.id}><i className="club-dot"/><b>{p.full_name}</b></Link><small className="cell-note">{playerNote(p)}</small></td>
       <td><Link className="team-table-link" href={'/teams/'+p.team_id}>{p.team}</Link></td><td><span className={`pos ${p.position}`}>{p.position}</span></td><td>{p.projection?.opponent_name||'—'}</td><td>{p.projection?.venue||'—'}</td>
       <td>{num(p.price,1)}m</td><td>{pct(p.projection?.xi_probability)}</td><td>{num(p.projection?.x_minutes,1)}</td><td><b>{num(p.projection?.xfp)}</b></td><td>{num(p.projection?.core_xfp)}</td><td>{num(p.projection?.x_bonus)}</td>
@@ -90,7 +90,7 @@ export default function PlayersTable({ players }){
     <div className="player-card-list">
       {rows.map((p,i)=><Link href={'/players/'+p.id} className="card mobile-player-card team-accent-card" style={teamCssVars(p.team)} key={p.id}>
         <div className="mobile-player-top">
-          <div><span className={`pos ${p.position}`}>{p.position}</span><small>#{i+1}</small></div>
+          <div className="mobile-card-badges"><span className="weekly-rank">#{i+1}</span><span className={`pos ${p.position}`}>{p.position}</span></div>
           <div className="mobile-player-name"><b>{p.full_name}</b><span>{p.team} • {num(p.price,1)}m</span></div>
           <div className="mobile-xfp"><strong>{num(p.projection?.xfp)}</strong><small>xFP</small></div>
         </div>
