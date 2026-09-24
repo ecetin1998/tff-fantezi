@@ -2912,3 +2912,97 @@ p{color:#66728d}
     text-overflow:ellipsis;
   }
 }
+
+
+/* Match card readability v2 */
+.match-date-label{
+  display:flex!important;
+  align-items:baseline;
+  gap:7px;
+  min-width:0;
+  color:#34415f!important;
+  letter-spacing:-.01em;
+}
+.match-date-label b{
+  color:#34415f!important;
+  font-size:9px!important;
+  font-weight:850!important;
+  text-transform:capitalize;
+}
+.match-date-label em{
+  color:#087e72!important;
+  font-size:10px!important;
+  font-weight:950!important;
+  font-style:normal;
+  font-variant-numeric:tabular-nums;
+}
+.outcome-bar-labeled{
+  height:28px!important;
+  margin:15px 0 8px!important;
+  border:0!important;
+  border-radius:10px!important;
+  background:#edf0f5!important;
+  box-shadow:0 4px 12px rgba(35,48,83,.06)!important;
+}
+.outcome-bar-labeled i{
+  position:relative;
+  height:100%!important;
+  min-width:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  overflow:hidden;
+}
+.outcome-bar-labeled i:first-child{border-radius:10px 0 0 10px}
+.outcome-bar-labeled i:last-child{border-radius:0 10px 10px 0}
+.outcome-bar-labeled i span{
+  position:relative;
+  z-index:1;
+  display:flex;
+  align-items:baseline;
+  justify-content:center;
+  gap:3px;
+  min-width:0;
+  max-width:100%;
+  padding:0 3px;
+  color:#fff!important;
+  font-size:7px!important;
+  line-height:1;
+  font-style:normal;
+  font-weight:800;
+  white-space:nowrap;
+  text-shadow:0 1px 2px rgba(0,0,0,.22);
+}
+.outcome-bar-labeled i span b{
+  color:#fff!important;
+  font-size:8px!important;
+  font-weight:950;
+  font-variant-numeric:tabular-nums;
+}
+.outcome-bar-labeled .home{
+  background:linear-gradient(90deg,#12a77c,#087d63)!important;
+}
+.outcome-bar-labeled .draw{
+  background:linear-gradient(90deg,#e9b53b,#c98b14)!important;
+}
+.outcome-bar-labeled .away{
+  background:linear-gradient(90deg,#776be6,#5447bd)!important;
+}
+.match-fantasy-meta .xg-total-meta{
+  background:#eef8f6!important;
+  border-color:#d1e9e4!important;
+}
+.match-fantasy-meta .xg-total-meta small{
+  color:#6e8985!important;
+}
+.match-fantasy-meta .xg-total-meta b{
+  color:#087e72!important;
+}
+@media(max-width:420px){
+  .match-date-label{gap:5px}
+  .match-date-label b{font-size:8px!important}
+  .match-date-label em{font-size:9px!important}
+  .outcome-bar-labeled{height:26px!important}
+  .outcome-bar-labeled i span{gap:2px;font-size:6px!important;padding:0 2px}
+  .outcome-bar-labeled i span b{font-size:7px!important}
+}
