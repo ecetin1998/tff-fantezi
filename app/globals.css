@@ -2493,3 +2493,35 @@ p{color:#66728d}
   .weekly-total-score{top:10px;right:10px;min-width:54px;padding:5px 6px}
   .weekly-total-score strong{font-size:16px!important}
 }
+
+
+/* Weekly sort: metric first, GW selector second */
+.simplified-weekly-filters{
+  grid-template-columns:minmax(240px,1.35fr) minmax(160px,.7fr) minmax(130px,.5fr) minmax(180px,.65fr)!important;
+}
+.weekly-week-filter{
+  grid-column:4;
+  width:100%;
+  min-width:0;
+  background:#f4f8f7!important;
+  color:#087e72!important;
+  border:1px solid #cfe6e2!important;
+  border-radius:11px;
+  padding:10px 11px;
+  font-size:11px;
+  font-weight:850;
+}
+.weekly-week-filter:focus{
+  outline:none;
+  border-color:#8bc9c0!important;
+  box-shadow:0 0 0 3px rgba(11,142,130,.08)!important;
+}
+@media(max-width:900px){
+  .simplified-weekly-filters{grid-template-columns:1fr 1fr!important}
+  .simplified-weekly-filters input{grid-column:1/-1}
+  .weekly-week-filter{grid-column:2}
+}
+@media(max-width:540px){
+  .simplified-weekly-filters{grid-template-columns:1fr!important}
+  .simplified-weekly-filters input,.weekly-week-filter{grid-column:auto}
+}
