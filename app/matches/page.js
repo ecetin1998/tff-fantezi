@@ -19,7 +19,10 @@ export default async function Matches(){
         const totalXg=Number(m.home_xg||0)+Number(m.away_xg||0)
         return <article className="card match-card modern-match-card" key={m.match_id}>
           <div className="match-card-top">
-            <span>{m.kickoff_at?new Intl.DateTimeFormat('tr-TR',{weekday:'short',day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit',timeZone:'Europe/Istanbul'}).format(new Date(m.kickoff_at)):'—'}</span>
+            <span className="match-date-label">
+              <b>{m.kickoff_at?new Intl.DateTimeFormat('tr-TR',{weekday:'short',day:'2-digit',month:'short',timeZone:'Europe/Istanbul'}).format(new Date(m.kickoff_at)):'—'}</b>
+              <em>{m.kickoff_at?new Intl.DateTimeFormat('tr-TR',{hour:'2-digit',minute:'2-digit',timeZone:'Europe/Istanbul'}).format(new Date(m.kickoff_at)):'—'}</em>
+            </span>
             <b>MH{run?.gameweek||'—'}</b>
           </div>
 
@@ -48,20 +51,15 @@ export default async function Matches(){
             </div>
           </div>
 
-          <div className="outcome-labels outcome-labels-top">
-            <span><small>{(home*100).toFixed(0)}%</small><b>Ev</b></span>
-            <span><small>{(draw*100).toFixed(0)}%</small><b>Beraberlik</b></span>
-            <span><small>{(away*100).toFixed(0)}%</small><b>Dep</b></span>
-          </div>
-          <div className="outcome-bar">
-            <i className="home" style={{width:(home*100)+'%'}}/>
-            <i className="draw" style={{width:(draw*100)+'%'}}/>
-            <i className="away" style={{width:(away*100)+'%'}}/>
+          <div className="outcome-bar outcome-bar-labeled" aria-label="Maç sonucu olasılıkları">
+            <i className="home" style={{width:(home*100)+'%'}} title={`Ev %${(home*100).toFixed(0)}`}><span><b>{(home*100).toFixed(0)}%</b> Ev</span></i>
+            <i className="draw" style={{width:(draw*100)+'%'}} title={`Beraberlik %${(draw*100).toFixed(0)}`}><span><b>{(draw*100).toFixed(0)}%</b> Ber.</span></i>
+            <i className="away" style={{width:(away*100)+'%'}} title={`Deplasman %${(away*100).toFixed(0)}`}><span><b>{(away*100).toFixed(0)}%</b> Dep</span></i>
           </div>
 
           <div className="match-fantasy-meta">
-            <span><small>Toplam xG</small><b>{totalXg.toFixed(2)}</b></span>
             <span><small>Ev gol yememe</small><b>{(Number(m.home_cs_probability||0)*100).toFixed(0)}%</b></span>
+            <span className="xg-total-meta"><small>Toplam xG</small><b>{totalXg.toFixed(2)}</b></span>
             <span><small>Dep gol yememe</small><b>{(Number(m.away_cs_probability||0)*100).toFixed(0)}%</b></span>
           </div>
           {eloThroughGameweek?<small className="elo-note">Elo: MH1–MH{eloThroughGameweek} sonuçları</small>:null}
