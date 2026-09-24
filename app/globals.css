@@ -2667,3 +2667,221 @@ p{color:#66728d}
   .match-fantasy-meta>span{padding:7px 5px}
   .match-fantasy-meta small{font-size:6px!important}
 }
+
+
+/* ===== Desktop squad comparison • both squads above the fold ===== */
+@media(min-width:1024px){
+  .unified-squad-list{
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;
+    gap:14px!important;
+    align-items:start;
+  }
+  .unified-squad-card{
+    min-width:0;
+    padding:12px!important;
+    border-radius:16px!important;
+  }
+  .unified-squad-list .readonly-squad-view{
+    min-width:0;
+  }
+  .unified-squad-list .readonly-squad-head{
+    display:flex!important;
+    flex-direction:row!important;
+    align-items:center!important;
+    justify-content:space-between;
+    gap:10px;
+    min-height:58px;
+    padding:0 0 9px!important;
+  }
+  .unified-squad-list .readonly-squad-head>div:first-child{
+    min-width:0;
+  }
+  .unified-squad-list .readonly-squad-head .eyebrow{
+    font-size:6.5px!important;
+  }
+  .unified-squad-list .readonly-squad-head h2{
+    margin-top:2px!important;
+    font-size:18px!important;
+    line-height:1!important;
+    white-space:nowrap;
+  }
+  .unified-squad-list .readonly-squad-head-right{
+    display:flex!important;
+    flex:0 0 auto;
+    gap:5px!important;
+    align-items:center;
+  }
+  .unified-squad-list .readonly-squad-head-right>span{
+    min-width:70px!important;
+    padding:6px 7px!important;
+    border-radius:9px!important;
+  }
+  .unified-squad-list .readonly-squad-head-right small{
+    font-size:5.5px!important;
+  }
+  .unified-squad-list .readonly-squad-head-right b{
+    font-size:10px!important;
+    margin-top:1px!important;
+  }
+
+  .unified-squad-list .readonly-squad-pitch{
+    min-height:430px!important;
+    height:430px;
+    padding:34px 12px 20px!important;
+    gap:4px!important;
+    border-radius:15px!important;
+    clip-path:polygon(5% 0,95% 0,100% 100%,0 100%);
+  }
+  .unified-squad-list .readonly-squad-pitch:before{
+    inset:12px 18px!important;
+  }
+  .unified-squad-list .pitch-mark.center-circle{
+    width:92px!important;
+    height:92px!important;
+  }
+  .unified-squad-list .pitch-mark.box{
+    left:31%!important;
+    right:31%!important;
+    height:62px!important;
+  }
+  .unified-squad-list .pitch-mark.box.top{top:12px!important}
+  .unified-squad-list .pitch-mark.box.bottom{bottom:12px!important}
+  .unified-squad-list .my-pitch-row{
+    gap:3px!important;
+  }
+  .unified-squad-list .readonly-pitch-player{
+    min-width:48px!important;
+    width:min(86px,19%)!important;
+    filter:drop-shadow(0 5px 7px rgba(0,40,35,.18))!important;
+  }
+  .unified-squad-list .fantasy-shirt{
+    width:43px!important;
+    height:47px!important;
+    margin-bottom:3px!important;
+    border-radius:9px 9px 12px 12px!important;
+  }
+  .unified-squad-list .fantasy-shirt:before,
+  .unified-squad-list .fantasy-shirt:after{
+    width:13px!important;
+    height:18px!important;
+    top:6px!important;
+  }
+  .unified-squad-list .fantasy-shirt:before{left:-8px!important}
+  .unified-squad-list .fantasy-shirt:after{right:-8px!important}
+  .unified-squad-list .fantasy-shirt i{
+    font-size:6px!important;
+    padding:2px 3px!important;
+  }
+  .unified-squad-list .readonly-pitch-player>b{
+    padding:3px 4px!important;
+    font-size:6.5px!important;
+    border-radius:4px!important;
+  }
+  .unified-squad-list .readonly-pitch-player>small{
+    display:none!important;
+  }
+  .unified-squad-list .pitch-player-tags{
+    gap:2px!important;
+    margin-top:2px!important;
+  }
+  .unified-squad-list .pitch-player-tags span,
+  .unified-squad-list .pitch-player-tags strong{
+    padding:2px 3px!important;
+    font-size:5.5px!important;
+  }
+  .unified-squad-list .readonly-captain{
+    left:-3px!important;
+    top:-3px!important;
+    width:18px!important;
+    height:18px!important;
+    border-width:1px!important;
+    font-size:7px!important;
+  }
+  .unified-squad-list .formation-live-badge{
+    top:9px!important;
+    min-width:64px!important;
+    padding:4px 7px!important;
+  }
+  .unified-squad-list .formation-live-badge span{font-size:5px!important}
+  .unified-squad-list .formation-live-badge b{font-size:9px!important}
+
+  .unified-squad-list .readonly-bench-zone{
+    margin-top:8px!important;
+    padding:9px!important;
+    border-radius:12px!important;
+  }
+  .unified-squad-list .bench-zone-head{
+    margin-bottom:7px!important;
+    font-size:7px!important;
+  }
+  .unified-squad-list .readonly-bench-row{
+    display:grid!important;
+    grid-template-columns:1fr 1fr!important;
+    gap:5px!important;
+  }
+  .unified-squad-list .readonly-bench-player{
+    min-width:0;
+    min-height:48px!important;
+    grid-template-columns:16px 30px minmax(0,1fr)!important;
+    gap:5px!important;
+    padding:5px 6px!important;
+    border-radius:9px!important;
+  }
+  .unified-squad-list .bench-order{
+    width:16px!important;
+    height:16px!important;
+    font-size:6px!important;
+  }
+  .unified-squad-list .fantasy-shirt.mini{
+    width:28px!important;
+    height:31px!important;
+  }
+  .unified-squad-list .fantasy-shirt.mini:before,
+  .unified-squad-list .fantasy-shirt.mini:after{
+    width:8px!important;
+    height:12px!important;
+    top:4px!important;
+  }
+  .unified-squad-list .fantasy-shirt.mini:before{left:-5px!important}
+  .unified-squad-list .fantasy-shirt.mini:after{right:-5px!important}
+  .unified-squad-list .bench-copy{
+    min-width:0;
+  }
+  .unified-squad-list .bench-copy b{
+    font-size:7px!important;
+  }
+  .unified-squad-list .bench-copy small{
+    margin-top:1px!important;
+    font-size:5.5px!important;
+  }
+
+  .squad-tabs-note{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:18px;
+    min-height:36px;
+    padding:7px 10px!important;
+    margin-bottom:12px;
+    font-size:8px!important;
+  }
+}
+
+@media(min-width:1024px) and (max-width:1180px){
+  .unified-squad-list{gap:10px!important}
+  .unified-squad-card{padding:9px!important}
+  .unified-squad-list .readonly-squad-head-right>span{min-width:62px!important;padding:5px!important}
+  .unified-squad-list .readonly-squad-pitch{height:410px;min-height:410px!important}
+  .unified-squad-list .readonly-pitch-player{min-width:44px!important}
+  .unified-squad-list .pitch-player-tags span{display:none}
+  .unified-squad-list .readonly-bench-player{grid-template-columns:15px 27px minmax(0,1fr)!important}
+  .unified-squad-list .fantasy-shirt.mini{width:25px!important;height:28px!important}
+}
+
+/* Tablet/mobile stays stacked and readable */
+@media(max-width:1023px){
+  .unified-squad-list{
+    grid-template-columns:1fr!important;
+  }
+}
