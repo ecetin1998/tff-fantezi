@@ -13,6 +13,14 @@ const liveStatus={
   open:'Hafta devam ediyor',
   closed:'Tamamlandı',
 }
+const learningStatus={
+  applied:'Uygulandı',
+  applied_pending_refresh:'Refresh bekliyor',
+  ready_to_apply:'Uygulamaya hazır',
+  no_change:'Değişiklik yok',
+  watch:'İzleniyor',
+  baseline:'Başlangıç',
+}
 const tendency=v=>{
   if(v===null||v===undefined)return '—'
   const n=Number(v)
@@ -133,7 +141,7 @@ export default async function BacktestPage(){
         <small>Tek oyuncu veya tek haftalık şansa göre model değiştirmiyoruz.</small>
       </div>
       {learning.length?<div className="learning-grid">{learning.map(item=><article key={item.id} className="learning-card">
-        <div><span>{'MH'+item.after_gameweek+' sonrası'}</span><em>{item.status==='applied'?'Uygulandı':'İzleniyor'}</em></div>
+        <div><span>{'MH'+item.after_gameweek+' sonrası'}</span><em>{learningStatus[item.status]||'İzleniyor'}</em></div>
         <h3>{item.component}</h3><p>{item.signal}</p><strong>{item.evidence}</strong><small>{item.guardrail}</small>
       </article>)}</div>:<div className="empty-learning-state">Güncel kurgu replay’i tamamlanınca öğrenme sinyalleri burada oluşacak.</div>}
     </section>
