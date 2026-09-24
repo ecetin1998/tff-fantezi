@@ -3233,3 +3233,198 @@ p{color:#66728d}
   .squad-save-form{width:100%}
   .save-squad-error{max-width:none;text-align:left}
 }
+
+
+/* ===== Benim Kadrom v2 • 15-player roster first, XI second ===== */
+.roster-counts{
+  font-size:13px!important;
+  line-height:1.25!important;
+  white-space:nowrap;
+}
+.roster-builder-layout{scroll-margin-top:96px}
+.lineup-workbench{scroll-margin-top:96px;margin-top:16px;padding:16px}
+.primary-jump,.jump-link{border-color:#b7ded8!important;background:#edf8f6!important;color:#087e72!important}
+.jump-link{flex:0 0 auto;min-width:110px}
+.roster-stage-foot{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  padding:9px 3px 1px;color:#75809a;font-size:8px
+}
+.roster-stage-foot b{color:#25304d;font-size:8px}
+
+.roster-pitch{
+  position:relative;
+  min-height:575px;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-around;
+  gap:5px;
+  padding:34px 18px 24px;
+  overflow:hidden;
+  border-radius:17px;
+  clip-path:polygon(6% 0,94% 0,100% 100%,0 100%);
+  background:
+    repeating-linear-gradient(0deg,rgba(255,255,255,.028) 0,rgba(255,255,255,.028) 52px,transparent 52px,transparent 104px),
+    linear-gradient(155deg,#1aa96e,#0d8d63 62%,#087350);
+  box-shadow:inset 0 0 75px rgba(0,35,30,.14),0 14px 30px rgba(10,15,45,.12)
+}
+.roster-pitch:before{
+  content:"";position:absolute;inset:13px 22px;border:2px solid rgba(255,255,255,.45);
+  clip-path:polygon(5% 0,95% 0,100% 100%,0 100%);pointer-events:none
+}
+.roster-pitch .pitch-mark.center-line{left:5%;right:5%}
+.roster-pitch .pitch-mark.center-circle{width:108px;height:108px}
+.roster-pitch .pitch-mark.box{left:33%;right:33%;height:68px}
+.roster-pitch .pitch-mark.box.top{top:13px}
+.roster-pitch .pitch-mark.box.bottom{bottom:13px}
+.roster-row{
+  position:relative;z-index:2;display:flex;justify-content:space-evenly;align-items:center;
+  gap:5px;min-height:104px;padding-inline:4px
+}
+.roster-player{
+  position:relative;width:min(95px,18%);min-width:52px;padding:0;border:0;background:transparent;
+  color:#fff;text-align:center;filter:drop-shadow(0 6px 8px rgba(0,40,35,.18))
+}
+.roster-player .fantasy-shirt{width:46px!important;height:51px!important;margin-bottom:3px!important}
+.roster-player .fantasy-shirt:before,.roster-player .fantasy-shirt:after{width:14px!important;height:20px!important;top:6px!important}
+.roster-player .fantasy-shirt:before{left:-9px!important}.roster-player .fantasy-shirt:after{right:-9px!important}
+.roster-player>b{
+  display:block;width:100%;padding:3px 4px;border-radius:5px;background:#1c2850;
+  color:#fff;font-size:7px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  box-shadow:0 3px 8px rgba(0,0,20,.22)
+}
+.roster-player>small{
+  display:block;margin-top:2px;color:#e2eee9;font-size:5.7px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis
+}
+.roster-player .pitch-player-tags{margin-top:2px;gap:2px}
+.roster-player .pitch-player-tags span,.roster-player .pitch-player-tags strong{font-size:5.5px!important;padding:2px 3px!important}
+.roster-remove{right:8px!important;top:-3px!important;width:18px!important;height:18px!important;font-size:9px!important}
+.empty-roster-slot{cursor:pointer;opacity:.88}
+.empty-roster-slot:hover{opacity:1;transform:translateY(-2px)}
+.empty-roster-slot .empty-shirt{
+  background:rgba(22,86,69,.72)!important;
+  border:2px dashed rgba(255,255,255,.56)!important;
+  box-shadow:none!important
+}
+.empty-roster-slot .empty-shirt:before,.empty-roster-slot .empty-shirt:after{background:rgba(22,86,69,.72)!important}
+.empty-roster-slot .empty-shirt i{font-size:18px!important;line-height:1;background:transparent!important;color:#fff!important}
+.empty-roster-slot>b{background:rgba(20,45,55,.72)!important}
+
+.lineup-workbench-head{
+  display:flex;align-items:center;justify-content:space-between;gap:16px;padding:2px 2px 13px
+}
+.lineup-workbench-head h2{margin:4px 0 3px;color:#202b48;font-size:22px}
+.lineup-workbench-head p{margin:0;color:#78829a;font-size:9px}
+.formation-suggestions{
+  display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:6px;margin-bottom:10px
+}
+.formation-option{
+  position:relative;min-width:0;padding:9px 6px;border:1px solid #e0e6ef;border-radius:10px;
+  background:#f7f9fd;color:#26314d;text-align:center;cursor:pointer
+}
+.formation-option>span,.formation-option>b,.formation-option>em{display:block}
+.formation-option>span{font-size:8px;font-weight:900}
+.formation-option>b{margin-top:3px;font-size:13px;color:#26314d}
+.formation-option>b small{font-size:6px;color:#7b859d}
+.formation-option>em{margin-top:2px;font-size:5.5px;font-style:normal;color:#8a93a8}
+.formation-option.selected{border-color:#86cfc4;background:#edf8f6;box-shadow:0 0 0 2px rgba(11,142,130,.06)}
+.formation-option.selected>b,.formation-option.selected>span{color:#087e72}
+.formation-option.best:after{
+  content:"ÖNERİ";position:absolute;right:4px;top:4px;padding:2px 4px;border-radius:999px;
+  background:#0b8e82;color:#fff;font-size:4.5px;font-weight:950;letter-spacing:.06em
+}
+.formation-option:disabled{opacity:.38;cursor:not-allowed}
+
+.lineup-action-row{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  margin-bottom:10px;padding:9px 11px;border:1px solid #e0e6ef;border-radius:11px;background:#f7f9fd
+}
+.lineup-action-row span,.lineup-action-row small{display:block}
+.lineup-action-row span{font-size:9px;color:#4d5977}.lineup-action-row small{font-size:7px;color:#8790a6;margin-top:2px}
+.lineup-action-row .cta{padding:8px 12px;font-size:8px}
+
+.lineup-layout{display:grid;grid-template-columns:minmax(0,1fr) 270px;gap:12px;align-items:start}
+.lineup-field-column{min-width:0}
+.lineup-score-strip{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:8px
+}
+.lineup-score-strip>span{
+  padding:8px 10px;border:1px solid #e1e7f0;border-radius:10px;background:#f7f9fd
+}
+.lineup-score-strip small,.lineup-score-strip b{display:block}
+.lineup-score-strip small{font-size:6px;color:#7e879f}.lineup-score-strip b{margin-top:2px;font-size:15px;color:#26314d}
+.lineup-score-strip .captain-total{background:#fff7e9;border-color:#f0dfba}
+.lineup-score-strip .captain-total b{color:#a86d00}
+.lineup-score-strip .lineup-total{background:#edf8f6;border-color:#cce8e2}
+.lineup-score-strip .lineup-total b{color:#087e72;font-size:18px}
+.lineup-pitch{height:485px!important;min-height:485px!important}
+.my-pitch-player.swap-eligible .fantasy-shirt{outline:3px solid #f0c35a;outline-offset:2px}
+.lineup-bench-zone{margin-top:8px!important}
+.my-bench-player.swap-active{border-color:#0b8e82!important;box-shadow:0 0 0 2px rgba(11,142,130,.12)!important}
+
+.captain-panel{
+  position:sticky;top:94px;padding:14px;border:1px solid #e0e6ef;border-radius:13px;background:#fff
+}
+.captain-panel h3{margin:4px 0 5px;color:#25304d;font-size:17px}
+.captain-panel>p{margin:0 0 11px;color:#7c869e;font-size:8px;line-height:1.45}
+.captain-candidates{display:grid;gap:6px}
+.captain-candidates button{
+  display:grid;grid-template-columns:24px minmax(0,1fr) auto;gap:7px;align-items:center;
+  width:100%;padding:8px;border:1px solid #e1e6ef;border-radius:10px;background:#f8fafd;color:#26314d;text-align:left;cursor:pointer
+}
+.captain-candidates button>span{
+  width:22px;height:22px;display:grid;place-items:center;border-radius:50%;background:#e9edf5;
+  color:#66708a;font-size:7px;font-weight:950
+}
+.captain-candidates button div{min-width:0}.captain-candidates button div b,.captain-candidates button div small{display:block}
+.captain-candidates button div b{font-size:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.captain-candidates button div small{font-size:6px;color:#8a93a8;margin-top:2px}
+.captain-candidates button>strong{font-size:12px;color:#26314d;text-align:right}
+.captain-candidates button>strong small{display:block;font-size:5px;color:#8a93a8}
+.captain-candidates button.active{border-color:#8ed4c9;background:#edf8f6}
+.captain-candidates button.active>span{background:#0b8e82;color:#fff}
+.captain-candidates button.active>strong{color:#087e72}
+.captain-impact{
+  margin-top:10px;padding:10px;border-radius:11px;background:#25304d;color:#fff
+}
+.captain-impact span,.captain-impact b,.captain-impact strong{display:block}
+.captain-impact span{font-size:6px;color:#b8c0d2}.captain-impact b{margin-top:3px;font-size:9px}
+.captain-impact strong{margin-top:5px;color:#8ee6d8;font-size:16px}
+.inline-roster-jump{flex:0 0 auto}
+
+@media(max-width:1100px){
+  .formation-suggestions{grid-template-columns:repeat(4,1fr)}
+  .lineup-layout{grid-template-columns:1fr}
+  .captain-panel{position:static}
+  .captain-candidates{grid-template-columns:repeat(3,1fr)}
+}
+@media(max-width:760px){
+  .roster-pitch{min-height:540px;padding:30px 7px 22px}
+  .roster-pitch:before{inset:12px 14px}
+  .roster-row{gap:2px;min-height:96px}
+  .roster-player{width:min(88px,19%);min-width:48px}
+  .roster-player .fantasy-shirt{width:40px!important;height:45px!important}
+  .roster-player>b{font-size:6px;padding:3px}
+  .roster-player>small{font-size:5px}
+  .roster-remove{right:2px!important}
+  .lineup-workbench{padding:10px}
+  .lineup-workbench-head{align-items:flex-start}
+  .formation-suggestions{grid-template-columns:repeat(4,1fr)}
+  .lineup-action-row{align-items:stretch;flex-direction:column}
+  .lineup-action-row .cta{width:100%}
+  .lineup-score-strip{grid-template-columns:1fr 1fr 1fr}
+  .lineup-pitch{height:auto!important;min-height:590px!important}
+  .captain-candidates{grid-template-columns:1fr}
+}
+@media(max-width:470px){
+  .roster-pitch{min-height:500px}
+  .roster-row{min-height:88px}
+  .roster-player{width:min(72px,19%);min-width:42px}
+  .roster-player .fantasy-shirt{width:35px!important;height:40px!important}
+  .roster-player .pitch-player-tags span{display:none}
+  .formation-suggestions{grid-template-columns:repeat(2,1fr)}
+  .lineup-score-strip{gap:4px}
+  .lineup-score-strip>span{padding:7px 6px}
+  .lineup-score-strip small{font-size:5.5px}
+  .lineup-score-strip b{font-size:13px}
+}
