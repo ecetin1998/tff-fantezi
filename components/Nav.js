@@ -6,7 +6,7 @@ import { DesktopNavLinks, MobileBottomNav, MobileMenu } from '@/components/AppNa
 const primary = [
   ['/', 'Ana Sayfa'],
   ['/players', 'Oyuncu Analizi'],
-  ['/points', 'Fantasy Puanları'],
+  ['/points', 'Fantezi Puanları'],
   ['/matches', 'Maç Tahminleri'],
   ['/squads', 'Kadro Önerileri'],
 ]
