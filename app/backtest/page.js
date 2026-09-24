@@ -7,7 +7,7 @@ const num=(v,d=2)=>v===null||v===undefined?'—':Number(v).toFixed(d)
 const statusLabel={replay_pending:'Yeniden oynatma hazırlanacak',closed:'Kapandı',open:'Canlı / bekliyor'}
 
 export default async function BacktestPage(){
-  const {weeks,learning}=await getBacktestOverview()
+  const {weeks,learning,latestPlayers}=await getBacktestOverview()
   const closed=weeks.filter(w=>w.status==='closed'&&w.fp_mae!==null)
   const weightedN=closed.reduce((s,w)=>s+Number(w.fp_sample||0),0)
   const weightedMae=weightedN?closed.reduce((s,w)=>s+Number(w.fp_mae||0)*Number(w.fp_sample||0),0)/weightedN:null
@@ -90,5 +90,13 @@ export default async function BacktestPage(){
         <div><b>6</b><span>Yeni ayarın sonraki haftalarda gerçekten iyileştirip iyileştirmediğini ayrıca geriye dönük test et.</span></div>
       </div>
     </section>
+
+    {latestPlayers.length?<section className="card backtest-table-card">
+      <div className="panel-head"><div><span className="eyebrow">SON KAPANAN HAFTA</span><h2>En büyük oyuncu sapmaları</h2></div></div>
+      <div className="table-scroll"><table className="backtest-table">
+        <thead><tr><th>Oyuncu</th><th>xFP</th><th>Gerçek</th><th>Fark</th><th>Ana bileşen</th></tr></thead>
+        <tbody>{latestPlayers.map(p=><tr key={String(p.player_id)}><td>{p.player_name}</td><td>{num(p.predicted_xfp)}</td><td>{num(p.actual_points,0)}</td><td>{num(p.prediction_error)}</td><td>{p.error_component||'—'}</td></tr>)}</tbody>
+      </table></div>
+    </section>:null}
   </main>
 }
