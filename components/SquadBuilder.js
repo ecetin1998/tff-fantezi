@@ -1,5 +1,5 @@
 'use client'
-import { useMemo, useState } from 'react'
+import { useActionState, useEffect, useMemo, useState } from 'react'
 import { saveSquad } from '@/app/actions'
 import { teamCssVars } from '@/lib/teamThemes'
 
@@ -82,7 +82,8 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
   const [q,setQ]=useState('')
   const [pos,setPos]=useState('')
   const [team,setTeam]=useState('')
-  const [sort,setSort]=useState('xfp')
+  const [sortKey,setSortKey]=useState('xfp')
+  const [sortDir,setSortDir]=useState('desc')
   const [swapTarget,setSwapTarget]=useState(null)
 
   const selected=ids.map(id=>map.get(id)).filter(Boolean)
@@ -91,7 +92,7 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
   const bank=100-cost
   const validRoster=ids.length===15&&Object.entries(LIMITS).every(([k,v])=>(counts[k]||0)===v)&&cost<=100.0001
   const liveFormation=formationFromXIIds(xiIds,map)
-  const validXI=xiIds.length===11&&xiIds.every(id=>ids.includes(id))&&Boolean(liveFormation)
+  const validXI=xiIds.length===11&&xiIds.every(id=>ids.includes(id))&&Boolean(liveFormation)&&liveFormation===formation
   const valid=validRoster&&validXI&&Boolean(captainId)&&xiIds.includes(captainId)
 
   const xi=xiIds.map(id=>map.get(id)).filter(Boolean)
@@ -110,13 +111,17 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
       (!team||p.team===team)&&
       (!q||(`${p.full_name} ${p.team} ${p.projection?.opponent_name||''}`).toLocaleLowerCase('tr').includes(q.toLocaleLowerCase('tr')))
     )
+    const value=p=>{
+      if(sortKey==='price')return Number(p.price||0)
+      if(sortKey==='minutes')return Number(p.projection?.x_minutes||0)
+      return xfp(p)
+    }
     out=[...out].sort((a,b)=>{
-      if(sort==='price')return Number(a.price||0)-Number(b.price||0)
-      if(sort==='minutes')return Number(b.projection?.x_minutes||0)-Number(a.projection?.x_minutes||0)
-      return xfp(b)-xfp(a)
+      const av=value(a),bv=value(b)
+      return sortDir==='asc'?av-bv:bv-av
     })
     return out.slice(0,180)
-  },[players,pos,team,q,sort])
+  },[players,pos,team,q,sortKey,sortDir])
 
   const bestMove=useMemo(()=>{
     let best=null
@@ -163,10 +168,7 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
   }
   function changeFormation(next){
     setFormation(next)
-    const nextXI=buildXI(ids,next,map)
-    setXiIds(nextXI)
-    const cap=nextXI.map(id=>map.get(id)).filter(Boolean).sort((a,b)=>xfp(b)-xfp(a))[0]
-    if(!nextXI.includes(captainId))setCaptainId(cap?.id||null)
+    setSwapTarget(null)
   }
   function autoXI(){
     const nextXI=buildXI(ids,formation,map)
@@ -232,7 +234,13 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
     ]
     return stateSignature(basePayload)
   },[initialIds,initialXI,initialCaptainId,map])
-  const hasChanges=stateSignature(savePayload)!==initialSignature
+  const currentSignature=stateSignature(savePayload)
+  const [savedSignature,setSavedSignature]=useState(initialSignature)
+  const [saveState,saveAction,isSaving]=useActionState(saveSquad,{ok:false,error:'',signature:''})
+  useEffect(()=>{
+    if(saveState?.ok&&saveState.signature)setSavedSignature(saveState.signature)
+  },[saveState])
+  const hasChanges=currentSignature!==savedSignature
 
   return <div className="my-squad-shell">
     <section className="squad-control-strip card">
@@ -258,7 +266,7 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
         <small>Toplam kadro {selectedTotal.toFixed(1)}</small>
       </div>
       <div className="squad-toolbar">
-        <button type="button" className="squad-tool-btn" onClick={autoXI} disabled={!ids.length}>✦ Otomatik XI</button>
+        <button type="button" className="squad-tool-btn auto-xi-btn" onClick={autoXI} disabled={!ids.length}>✦ Seçili Dizilişe Göre XI</button>
         <button type="button" className="squad-tool-btn" onClick={fillRecommended}>Model kadrosu</button>
         <button type="button" className="squad-tool-btn danger" onClick={reset}>Sıfırla</button>
       </div>
@@ -342,12 +350,16 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
           <div className="squad-validity">
             <span className={validRoster?'ok':''}>{validRoster?'✓':'○'} 2 KL / 5 DEF / 5 OS / 3 FOR</span>
             <span className={cost<=100?'ok':''}>{cost<=100?'✓':'○'} Bütçe limiti</span>
-            <span className={validXI?'ok':''}>{validXI?'✓':'○'} 11 saha oyuncusu</span>
+            <span className={validXI?'ok':''}>{validXI?'✓':'○'} {liveFormation===formation?'Seçili diziliş hazır':'XI dizilişi güncellenmeli'}</span>
           </div>
-          <form action={saveSquad}>
+          <form action={saveAction} className="squad-save-form">
             <input type="hidden" name="player_ids" value={JSON.stringify(ids)}/>
             <input type="hidden" name="squad_state" value={JSON.stringify(savePayload)}/>
-            <button className="cta save-squad-btn" disabled={!valid||!hasChanges}>{hasChanges?'Takımı Kaydet':'Kaydedildi'}</button>
+            <input type="hidden" name="squad_signature" value={currentSignature}/>
+            {saveState?.error?<small className="save-squad-error">{saveState.error}</small>:null}
+            <button className="cta save-squad-btn" disabled={!valid||!hasChanges||isSaving}>
+              {isSaving?'Kaydediliyor…':hasChanges?'Takımı Kaydet':'Kaydedildi'}
+            </button>
           </form>
         </div>
       </section>
@@ -369,11 +381,17 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
               <option value="">Tüm takımlar</option>{teams.map(t=><option key={t}>{t}</option>)}
             </select>
           </div>
-          <select value={sort} onChange={e=>setSort(e.target.value)}>
-            <option value="xfp">xFP yüksek → düşük</option>
-            <option value="price">Fiyat düşük → yüksek</option>
-            <option value="minutes">xDakika yüksek → düşük</option>
-          </select>
+          <div className="picker-sort-row">
+            <select value={sortKey} onChange={e=>setSortKey(e.target.value)}>
+              <option value="xfp">xFP</option>
+              <option value="price">Fiyat</option>
+              <option value="minutes">xDakika</option>
+            </select>
+            <select value={sortDir} onChange={e=>setSortDir(e.target.value)}>
+              <option value="desc">Yüksek → düşük</option>
+              <option value="asc">Düşük → yüksek</option>
+            </select>
+          </div>
         </div>
 
         <div className="picker-list">
