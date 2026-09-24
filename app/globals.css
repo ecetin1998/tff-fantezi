@@ -3428,3 +3428,182 @@ p{color:#66728d}
   .lineup-score-strip small{font-size:5.5px}
   .lineup-score-strip b{font-size:13px}
 }
+
+
+/* ===== Oyuncu havuzu • metric-first rows ===== */
+.picker-filter-center{
+  display:grid!important;
+  grid-template-columns:minmax(0,150px) minmax(0,190px)!important;
+  justify-content:center!important;
+  gap:6px!important;
+}
+.picker-sort-compact{
+  display:grid!important;
+  grid-template-columns:auto minmax(90px,120px) auto!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:6px!important;
+  min-height:0!important;
+}
+.picker-sort-compact>span{
+  color:#7b859d;
+  font-size:6.5px;
+  font-weight:900;
+  text-transform:uppercase;
+  letter-spacing:.08em;
+}
+.picker-sort-compact select{
+  width:100%;
+  min-width:0;
+}
+.picker-sort-compact button{
+  min-height:28px;
+  padding:5px 9px;
+  border:1px solid #dce4ee;
+  border-radius:8px;
+  background:#f7f9fd;
+  color:#4f5a76;
+  font-size:7px;
+  font-weight:900;
+  white-space:nowrap;
+  cursor:pointer;
+}
+.picker-sort-compact button:hover{
+  border-color:#a8d9d1;
+  background:#edf8f6;
+  color:#087e72;
+}
+
+.picker-player{
+  grid-template-columns:38px minmax(120px,1fr) minmax(190px,.9fr) 27px!important;
+  gap:7px!important;
+}
+.picker-copy>b{
+  font-size:9px!important;
+}
+.picker-copy>small{
+  display:flex!important;
+  align-items:center;
+  gap:7px;
+  margin-top:3px!important;
+  color:#75809a!important;
+  font-size:7px!important;
+  line-height:1.15;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.picker-copy>small strong{
+  color:#43506e;
+  font-size:7.2px;
+  font-weight:900;
+  white-space:nowrap;
+}
+.picker-copy>small em{
+  min-width:0;
+  overflow:hidden;
+  color:#7f899f;
+  font-size:6.8px;
+  font-style:normal;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.picker-copy>div{display:none!important}
+
+.picker-metrics{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:4px;
+  align-items:stretch;
+}
+.picker-metrics>span{
+  min-width:0;
+  padding:5px 4px;
+  border:1px solid #e2e7ef;
+  border-radius:8px;
+  background:#f8fafe;
+  text-align:center;
+}
+.picker-metrics small,
+.picker-metrics b{
+  display:block;
+  white-space:nowrap;
+}
+.picker-metrics small{
+  color:#8a93a8;
+  font-size:5.5px;
+  font-weight:800;
+}
+.picker-metrics b{
+  margin-top:1px;
+  color:#46516d;
+  font-size:8.5px;
+  font-weight:950;
+  font-variant-numeric:tabular-nums;
+}
+.picker-metrics>span.active{
+  border-color:#98d5cb;
+  background:#eaf8f5;
+  box-shadow:0 0 0 1px rgba(11,142,130,.06);
+}
+.picker-metrics>span.active small{color:#5f857f}
+.picker-metrics>span.active b{
+  color:#087e72;
+  font-size:10.5px;
+}
+
+@media(min-width:1000px){
+  .picker-filters{
+    padding-bottom:6px!important;
+    gap:4px!important;
+  }
+  .picker-filter-center{
+    grid-template-columns:minmax(0,135px) minmax(0,175px)!important;
+  }
+  .picker-sort-compact{
+    grid-template-columns:auto 100px auto!important;
+    gap:5px!important;
+  }
+  .picker-sort-compact button{
+    min-height:26px!important;
+    padding:4px 8px!important;
+    font-size:6.5px!important;
+  }
+  .picker-player{
+    grid-template-columns:36px minmax(118px,1fr) minmax(184px,.95fr) 25px!important;
+    min-height:60px!important;
+  }
+}
+
+@media(max-width:760px){
+  .picker-filter-center{
+    grid-template-columns:1fr 1fr!important;
+    justify-content:stretch!important;
+  }
+  .picker-sort-compact{
+    grid-template-columns:auto minmax(0,1fr) auto!important;
+    justify-content:stretch!important;
+  }
+  .picker-player{
+    grid-template-columns:38px minmax(0,1fr) 25px!important;
+    align-items:center;
+  }
+  .picker-metrics{
+    grid-column:2/3;
+    grid-row:2;
+    margin-top:1px;
+  }
+  .picker-player>.picker-shirt-wrap{grid-row:1/3}
+  .picker-player>button{grid-column:3;grid-row:1/3}
+  .picker-copy>small{
+    font-size:6.5px!important;
+  }
+}
+@media(max-width:470px){
+  .picker-sort-compact{
+    grid-template-columns:1fr auto!important;
+  }
+  .picker-sort-compact>span{display:none}
+  .picker-metrics b{font-size:8px}
+  .picker-metrics>span.active b{font-size:9.5px}
+}
