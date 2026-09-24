@@ -3055,3 +3055,181 @@ p{color:#66728d}
 .week-chip-row.scroll-snap-weeks>span.selected b{
   color:#087e72!important;
 }
+
+
+/* ===== Benim Kadrom • compact desktop + larger player pool ===== */
+.picker-sort-row{
+  display:grid!important;
+  grid-template-columns:minmax(0,.72fr) minmax(0,1.28fr)!important;
+  gap:7px!important;
+}
+.squad-save-form{
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  gap:8px;
+  min-width:0;
+}
+.save-squad-error{
+  max-width:240px;
+  color:#b23c50;
+  font-size:7px;
+  line-height:1.25;
+  text-align:right;
+}
+.save-squad-btn:disabled{cursor:default}
+.auto-xi-btn{min-width:150px}
+
+@media(min-width:1000px){
+  .my-squad-layout{
+    grid-template-columns:minmax(0,1.42fr) minmax(390px,.88fr)!important;
+    gap:14px!important;
+    align-items:start!important;
+  }
+  .squad-control-strip{
+    padding:9px!important;
+    gap:7px!important;
+  }
+  .squad-control-stat,.squad-formation-control{
+    min-height:58px!important;
+    padding:8px 10px!important;
+    border-radius:11px!important;
+  }
+  .squad-control-stat>span,.squad-formation-control>span{font-size:7px!important}
+  .squad-control-stat>b{font-size:19px!important;margin-top:2px!important}
+  .squad-control-stat>b small,.squad-control-stat>small{font-size:7px!important}
+  .squad-control-stat>i{height:4px!important;margin-top:5px!important}
+  .squad-formation-control select{
+    margin-top:5px!important;
+    padding:6px 7px!important;
+    font-size:9px!important;
+  }
+  .squad-toolbar{gap:5px!important}
+  .squad-tool-btn{
+    min-height:32px!important;
+    padding:6px 7px!important;
+    font-size:8px!important;
+  }
+
+  .squad-stage{padding:11px!important}
+  .squad-stage-head{padding:1px 2px 9px!important}
+  .squad-stage-head h2{font-size:20px!important;margin-top:2px!important}
+  .squad-stage-legend{font-size:7px!important}
+
+  .my-squad-pitch{
+    min-height:475px!important;
+    height:475px!important;
+    padding:32px 12px 20px!important;
+    gap:4px!important;
+    border-radius:15px!important;
+    clip-path:polygon(5% 0,95% 0,100% 100%,0 100%)!important;
+  }
+  .my-squad-pitch:before{inset:12px 18px!important}
+  .my-squad-pitch .pitch-mark.center-circle{width:96px!important;height:96px!important}
+  .my-squad-pitch .pitch-mark.box{left:31%!important;right:31%!important;height:64px!important}
+  .my-squad-pitch .pitch-mark.box.top{top:12px!important}
+  .my-squad-pitch .pitch-mark.box.bottom{bottom:12px!important}
+  .my-pitch-row{gap:3px!important;padding-inline:5px!important}
+  .my-pitch-player{
+    width:min(88px,19%)!important;
+    min-width:48px!important;
+    filter:drop-shadow(0 5px 7px rgba(0,40,35,.16))!important;
+  }
+  .my-squad-shell .fantasy-shirt:not(.mini):not(.tiny){
+    width:44px!important;
+    height:49px!important;
+    margin-bottom:3px!important;
+    border-radius:9px 9px 12px 12px!important;
+  }
+  .my-squad-shell .fantasy-shirt:not(.mini):not(.tiny):before,
+  .my-squad-shell .fantasy-shirt:not(.mini):not(.tiny):after{
+    width:13px!important;height:18px!important;top:6px!important;
+  }
+  .my-squad-shell .fantasy-shirt:not(.mini):not(.tiny):before{left:-8px!important}
+  .my-squad-shell .fantasy-shirt:not(.mini):not(.tiny):after{right:-8px!important}
+  .my-pitch-player b{font-size:6.5px!important;padding:3px 4px!important}
+  .my-pitch-player>button small{display:block!important;font-size:5.5px!important;margin-top:2px!important}
+  .my-pitch-player .pitch-player-tags{gap:2px!important;margin-top:2px!important}
+  .my-pitch-player .pitch-player-tags span,
+  .my-pitch-player .pitch-player-tags strong{font-size:5.5px!important;padding:2px 3px!important}
+  .remove-player,.captain-toggle{
+    width:18px!important;height:18px!important;font-size:7px!important;
+  }
+  .formation-live-badge{top:8px!important;min-width:64px!important;padding:4px 7px!important}
+  .formation-live-badge span{font-size:5px!important}
+  .formation-live-badge b{font-size:9px!important}
+
+  .my-squad-shell .bench-zone{
+    margin-top:8px!important;
+    padding:8px!important;
+    border-radius:11px!important;
+  }
+  .my-squad-shell .bench-zone-head{margin-bottom:6px!important;font-size:7px!important}
+  .my-squad-shell .my-bench-row{gap:5px!important}
+  .my-squad-shell .my-bench-player{
+    min-height:50px!important;
+    grid-template-columns:16px 30px minmax(0,1fr) 12px!important;
+    gap:5px!important;
+    padding:5px 6px!important;
+    border-radius:9px!important;
+  }
+  .my-squad-shell .bench-order{width:16px!important;height:16px!important;font-size:6px!important}
+  .my-squad-shell .fantasy-shirt.mini{width:28px!important;height:31px!important}
+  .my-squad-shell .bench-copy b{font-size:7px!important}
+  .my-squad-shell .bench-copy small{font-size:5.5px!important;margin-top:1px!important}
+  .my-squad-shell .bench-remove{font-size:12px!important}
+
+  .squad-save-row{
+    gap:10px!important;
+    padding:9px 1px 0!important;
+  }
+  .squad-validity{gap:5px!important}
+  .squad-validity span{font-size:6.5px!important;padding:4px 6px!important}
+  .save-squad-btn{min-width:130px!important;padding:8px 10px!important;font-size:8px!important}
+
+  .player-picker{
+    position:static!important;
+    height:690px!important;
+    max-height:690px!important;
+    min-height:690px!important;
+  }
+  .player-picker-head{padding:11px 12px 6px!important}
+  .player-picker-head h2{font-size:18px!important;margin:2px 0!important}
+  .picker-filters{padding:0 9px 7px!important;gap:5px!important}
+  .picker-filters>div{gap:5px!important}
+  .picker-filters input,.picker-filters select{
+    padding:7px 8px!important;
+    font-size:8px!important;
+    border-radius:8px!important;
+  }
+  .picker-sort-row{gap:5px!important}
+  .picker-list{
+    flex:1!important;
+    min-height:0!important;
+    overflow:auto!important;
+    padding:0 6px 7px!important;
+  }
+  .picker-player{
+    grid-template-columns:38px minmax(0,1fr) 43px 27px!important;
+    gap:6px!important;
+    min-height:57px!important;
+    padding:6px 5px!important;
+  }
+  .picker-player .fantasy-shirt.tiny{width:30px!important;height:34px!important}
+  .picker-copy>b{font-size:8.5px!important}
+  .picker-copy>small{font-size:6px!important}
+  .picker-copy>div{gap:3px!important;margin-top:3px!important}
+  .picker-copy>div span{font-size:5.5px!important;padding:2px 3px!important}
+  .picker-score b{font-size:10px!important}
+  .picker-score small{font-size:5.5px!important}
+  .picker-player>button{
+    width:25px!important;height:25px!important;
+    font-size:14px!important;border-radius:7px!important;
+  }
+}
+
+@media(max-width:999px){
+  .picker-sort-row{grid-template-columns:1fr 1fr!important}
+  .squad-save-form{width:100%}
+  .save-squad-error{max-width:none;text-align:left}
+}
