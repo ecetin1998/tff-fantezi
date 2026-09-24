@@ -6,6 +6,7 @@ import { teamCssVars } from '@/lib/teamThemes'
 export default function WeeklyPointsTable({ players, throughGameweek, finalThroughGameweek }){
   const [q,setQ]=useState('')
   const [team,setTeam]=useState('')
+  const [pos,setPos]=useState('')
   const [sort,setSort]=useState('total')
   const [dir,setDir]=useState(-1)
 
@@ -15,6 +16,7 @@ export default function WeeklyPointsTable({ players, throughGameweek, finalThrou
   const rows=useMemo(()=>{
     const out=players.filter(p=>
       (!team||p.team===team) &&
+      (!pos||p.position===pos) &&
       (!q||(((p.full_name||'')+' '+(p.display_name||'')+' '+p.team).toLocaleLowerCase('tr').includes(q.toLocaleLowerCase('tr'))))
     ).map(p=>{
       const map=new Map((p.weekly||[]).map(x=>[Number(x.gameweek),x]))
@@ -37,7 +39,7 @@ export default function WeeklyPointsTable({ players, throughGameweek, finalThrou
       const av=value(a,sort),bv=value(b,sort)
       return typeof av==='string' ? dir*av.localeCompare(bv,'tr') : dir*(av-bv)
     })
-  },[players,q,team,sort,dir])
+  },[players,q,team,pos,sort,dir])
 
   const head=(k,label)=><th onClick={()=>{if(sort===k)setDir(-dir);else{setSort(k);setDir(-1)}}}>{label}{sort===k?<span className="sortmark">{dir===-1?' ↓':' ↑'}</span>:null}</th>
   const num=(v,d=2)=>Number(v||0).toFixed(d)
@@ -47,6 +49,13 @@ export default function WeeklyPointsTable({ players, throughGameweek, finalThrou
       <input value={q} onChange={e=>setQ(e.target.value)} placeholder="Oyuncu veya takım ara..."/>
       <select value={team} onChange={e=>setTeam(e.target.value)}>
         <option value="">Tüm takımlar</option>{teams.map(t=><option key={t}>{t}</option>)}
+      </select>
+      <select value={pos} onChange={e=>setPos(e.target.value)}>
+        <option value="">Tüm mevkiler</option>
+        <option value="GK">GK</option>
+        <option value="DEF">DEF</option>
+        <option value="MID">MID</option>
+        <option value="FWD">FWD</option>
       </select>
       <select className="weekly-sort-select" value={sort} onChange={e=>{setSort(e.target.value);setDir(-1)}}>
         <option value="total">Sırala: Toplam puan</option>
