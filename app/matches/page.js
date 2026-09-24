@@ -25,9 +25,9 @@ export default async function Matches(){
             <div className="away"><span>DEP</span><Link className="match-team-link away-link" style={teamCssVars(m.away_team)} href={'/teams/'+m.away_team_id}><i className="club-dot"/><b>{m.away_team}</b></Link></div>
           </div>
           <div className="outcome-labels outcome-labels-top">
-            <span style={{width:(home*100)+'%'}}><small>{(home*100).toFixed(0)}%</small><b>1</b></span>
-            <span style={{width:(draw*100)+'%'}}><small>{(draw*100).toFixed(0)}%</small><b>X</b></span>
-            <span style={{width:(away*100)+'%'}}><small>{(away*100).toFixed(0)}%</small><b>2</b></span>
+            <span><small>{(home*100).toFixed(0)}%</small><b>1</b></span>
+            <span><small>{(draw*100).toFixed(0)}%</small><b>X</b></span>
+            <span><small>{(away*100).toFixed(0)}%</small><b>2</b></span>
           </div>
           <div className="outcome-bar"><i className="home" style={{width:(home*100)+'%'}}/><i className="draw" style={{width:(draw*100)+'%'}}/><i className="away" style={{width:(away*100)+'%'}}/></div>
           <div className="match-chips"><span>KG Var <b>{(Number(m.btts_probability||0)*100).toFixed(0)}%</b></span><span>2.5 Üst <b>{(Number(m.over25_probability||0)*100).toFixed(0)}%</b></span></div>
