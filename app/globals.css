@@ -1102,3 +1102,35 @@ body{background:linear-gradient(180deg,#ffffff 0%,#fbfcff 34%,#f3f7fc 100%)!impo
   .home-guide-metrics{grid-template-columns:1fr 1fr}.home-guide-metrics>div{padding:11px}
   .team-detail-stat-grid{grid-template-columns:1fr 1fr}.team-history-row{grid-template-columns:38px 26px 1fr auto;gap:6px;padding-inline:4px}
 }
+
+
+/* Fresh site sync • homepage status + one-click squad recommendation */
+.home-highlight-grid .home-status-card{
+  background:linear-gradient(135deg,#ffffff,#f6f9ff)!important;
+  border-color:#e2e8f2;
+}
+.home-highlight-grid .home-status-card>b{
+  font-size:18px;
+  color:#263150;
+  margin-top:8px;
+}
+.home-highlight-grid .home-status-card>small{
+  font-size:8px;
+  color:#8a94ad;
+  margin-top:4px;
+}
+.home-highlight-grid .home-status-card>strong{
+  color:#0b8e82;
+}
+.home-highlight-grid .home-status-ready{
+  background:linear-gradient(135deg,#ffffff,#eefaf7)!important;
+}
+.model-apply-btn{
+  margin-top:12px;
+  border-color:rgba(11,142,130,.24);
+  background:#eef8f6;
+  color:#087e72;
+}
+.model-apply-btn:hover{
+  background:#e2f4f1;
+}
