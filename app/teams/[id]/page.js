@@ -32,8 +32,8 @@ export default async function TeamPage({params}){
     <Link href="/teams" className="back-link">← Takımlara dön</Link>
     <section className="card team-detail-hero">
       <div className="team-detail-mark">{team.short_name||team.name.slice(0,3).toUpperCase()}</div>
-      <div className="team-detail-copy"><span className="eyebrow">TAKIM PROFİLİ</span><h1>{team.name}</h1><p>GW1–GW{s?.through_gameweek||'—'} sezon görünümü • {players.length} aktif oyuncu</p></div>
-      <div className="team-detail-current"><span>GW{run?.gameweek||'—'} rakibi</span>{opponent?<Link href={'/teams/'+opponent.id}>{opponent.name}</Link>:<b>—</b>}<small>{isHome?'İç saha':'Deplasman'}</small></div>
+      <div className="team-detail-copy"><span className="eyebrow">TAKIM PROFİLİ</span><h1>{team.name}</h1><p>MH1–MH{s?.through_gameweek||'—'} sezon görünümü • {players.length} aktif oyuncu</p></div>
+      <div className="team-detail-current"><span>MH{run?.gameweek||'—'} rakibi</span>{opponent?<Link href={'/teams/'+opponent.id}>{opponent.name}</Link>:<b>—</b>}<small>{isHome?'İç saha':'Deplasman'}</small></div>
     </section>
 
     <section className="team-detail-stat-grid">
@@ -84,7 +84,7 @@ export default async function TeamPage({params}){
         </div>
       </div>
       <div className="team-roster-grid">{players.map(p=><Link href={'/players/'+p.id} className="team-roster-player" key={p.id}>
-        <span className={'pos '+p.position}>{p.position}</span>
+        <span className={'pos '+p.position}>{p.position==='GK'?'KL':p.position==='MID'?'OS':p.position==='FWD'?'FOR':p.position}</span>
         <div className="team-roster-copy">
           <b>{p.full_name}</b>
           <small><span>{Number(p.price||0).toFixed(1)}m</span><i>•</i><span>{p.availability?.reason||'Aktif havuz'}</span></small>
@@ -98,13 +98,13 @@ export default async function TeamPage({params}){
       <div className="team-history-list">{played.map(m=>{
         const home=Number(m.home_team_id)===Number(team.id),oppId=home?m.away_team_id:m.home_team_id,oppName=home?m.away_team_name:m.home_team_name
         const gf=home?m.home_goals:m.away_goals,ga=home?m.away_goals:m.home_goals,result=gf>ga?'G':gf===ga?'B':'M'
-        return <div className="team-history-row" key={m.match_id}><span>GW{m.gameweek}</span><i className={'result '+result}>{result}</i><b>{home?'İç':'Dep'} • <Link href={'/teams/'+oppId}>{oppName}</Link></b><strong>{gf} - {ga}</strong></div>
+        return <div className="team-history-row" key={m.match_id}><span>MH{m.gameweek}</span><i className={'result '+result}>{result}</i><b>{home?'İç':'Dep'} • <Link href={'/teams/'+oppId}>{oppName}</Link></b><strong>{gf} - {ga}</strong></div>
       })}</div>
     </section>
 
     <section className="card team-fantasy-history">
       <div className="panel-head"><div><span className="eyebrow">FANTASY ÜRETİMİ</span><h2>Takımın haftalık toplam puanı</h2></div></div>
-      <div className="team-week-points">{fantasyWeeks.map(([gw,pts])=><div key={gw}><span>GW{gw}</span><b>{pts}</b></div>)}</div>
+      <div className="team-week-points">{fantasyWeeks.map(([gw,pts])=><div key={gw}><span>MH{gw}</span><b>{pts}</b></div>)}</div>
     </section>
   </div>
 }
