@@ -7,7 +7,7 @@ const num=(v,d=2)=>v===null||v===undefined?'—':Number(v).toFixed(d)
 const statusLabel={replay_pending:'Yeniden oynatma hazırlanacak',closed:'Kapandı',open:'Canlı / bekliyor'}
 
 export default async function BacktestPage(){
-  const {weeks}=await getBacktestOverview()
+  const {weeks,learning}=await getBacktestOverview()
   const closed=weeks.filter(w=>w.status==='closed'&&w.fp_mae!==null)
   const weightedN=closed.reduce((s,w)=>s+Number(w.fp_sample||0),0)
   const weightedMae=weightedN?closed.reduce((s,w)=>s+Number(w.fp_mae||0)*Number(w.fp_sample||0),0)/weightedN:null
@@ -62,6 +62,19 @@ export default async function BacktestPage(){
             </tr>)}
           </tbody>
         </table>
+      </div>
+    </section>
+
+    <section className="card learning-section">
+      <div className="panel-head">
+        <div><span className="eyebrow">ÖĞRENME GÜNLÜĞÜ</span><h2>Model nerede hata yapıyor?</h2></div>
+        <small>Tek haftalık sapma otomatik olarak modeli değiştirmez.</small>
+      </div>
+      <div className="learning-grid">
+        {learning.map(item=><article key={item.id} className="learning-card">
+          <div><span>{'MH'+item.after_gameweek+' sonrası'}</span><em>{item.status==='baseline'?'Başlangıç':item.status==='applied'?'Uygulandı':'İzleniyor'}</em></div>
+          <h3>{item.component}</h3><p>{item.signal}</p><strong>{item.evidence}</strong><small>{item.guardrail}</small>
+        </article>)}
       </div>
     </section>
   </main>
