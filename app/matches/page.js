@@ -8,7 +8,7 @@ export default async function Matches(){
   const {matches,run}=await getMatches()
   return <>
     <div className="section-title">
-      <div><span className="eyebrow">MAÇ MODELİ</span><h1>GW{run?.gameweek||'—'} Maç Tahminleri</h1></div>
+      <div><span className="eyebrow">MAÇ MODELİ</span><h1>MH{run?.gameweek||'—'} Maç Tahminleri</h1></div>
       <span className="muted">xG • 1X2 • KG Var • 2.5 Üst</span>
     </div>
     <div className="grid match-grid modern-match-grid">
@@ -17,7 +17,7 @@ export default async function Matches(){
         return <article className="card match-card modern-match-card" key={m.match_id}>
           <div className="match-card-top">
             <span>{m.kickoff_at?new Intl.DateTimeFormat('tr-TR',{weekday:'short',day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit',timeZone:'Europe/Istanbul'}).format(new Date(m.kickoff_at)):'—'}</span>
-            <b>GW{run?.gameweek||'—'}</b>
+            <b>MH{run?.gameweek||'—'}</b>
           </div>
           <div className="match-teams">
             <div><span>EV</span><Link className="match-team-link" style={teamCssVars(m.home_team)} href={'/teams/'+m.home_team_id}><i className="club-dot"/><b>{m.home_team}</b></Link></div>
