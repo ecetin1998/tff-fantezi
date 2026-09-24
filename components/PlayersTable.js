@@ -78,7 +78,7 @@ export default function PlayersTable({ players }){
     </div>
 
     <div className="table-summary"><b>{rows.length}</b> oyuncu • detay için oyuncuya dokun</div>
-    <div className="projection-legend">Tahmin aralığı: <b>Temkinli</b> = P25 • <b>İyi senaryo</b> = P75 • <b>Tavan</b> = P90</div>
+    <div className="projection-legend">Tahmin aralığı: <b>Temkinli</b> = alt çeyrek • <b>İyi senaryo</b> = üst çeyreğe giriş • <b>Tavan</b> = üst %10'luk sonuç seviyesi</div>
 
     <div className="card table-wrap desktop-player-table"><table><thead><tr>
       <th className="rank-col">#</th>{head('name','Oyuncu')}{head('team','Takım')}{head('pos','Mevki')}{head('opp','Rakip')}<th>H/D</th>
