@@ -13,12 +13,14 @@ const formatCheck=(value)=>{
 
 export default function AvailabilityTable({ rows }){
   const [team,setTeam]=useState('')
+  const [type,setType]=useState('')
   const [q,setQ]=useState('')
   const teams=useMemo(()=>[...new Set((rows||[]).map(r=>r.team).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'tr')),[rows])
   const filtered=useMemo(()=>rows.filter(r=>
     (!team||r.team===team) &&
+    (!type||r.availability_type===type) &&
     (!q||(`${r.player?.full_name||''} ${r.team||''} ${r.reason||''}`).toLocaleLowerCase('tr').includes(q.toLocaleLowerCase('tr')))
-  ),[rows,team,q])
+  ),[rows,team,type,q])
 
   return <>
     <div className="filters availability-filters">
@@ -26,6 +28,11 @@ export default function AvailabilityTable({ rows }){
       <select value={team} onChange={e=>setTeam(e.target.value)}>
         <option value="">Tüm takımlar</option>
         {teams.map(t=><option key={t} value={t}>{t}</option>)}
+      </select>
+      <select value={type} onChange={e=>setType(e.target.value)}>
+        <option value="">Tüm durumlar</option>
+        <option value="injuries">Sakatlık</option>
+        <option value="suspensions">Ceza</option>
       </select>
     </div>
     <div className="table-summary"><b>{filtered.length}</b> kayıt gösteriliyor</div>
