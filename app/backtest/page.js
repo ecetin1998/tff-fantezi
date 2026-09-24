@@ -6,7 +6,7 @@ const num=(v,d=2)=>v===null||v===undefined?'—':Number(v).toFixed(d)
 const pct=v=>v===null||v===undefined?'—':(Number(v)*100).toFixed(0)+'%'
 const replayStatus={
   cold_start_gap:'Başlangıç modeli eksik',
-  replay_pending:'Yeniden hesaplanacak',
+  replay_pending:'Hesaplanacak',
   closed:'Tamamlandı',
 }
 const liveStatus={
@@ -21,7 +21,7 @@ const tendency=v=>{
 }
 
 export default async function BacktestPage(){
-  const {replayWeeks,liveWeeks,learning,replayPlayers,livePlayers}=await getBacktestOverview()
+  const {replayWeeks,liveWeeks,learning,replayPlayers,livePlayers,preseasonCoverage}=await getBacktestOverview()
   const replayClosed=replayWeeks.filter(w=>w.status==='closed')
   const latestLive=liveWeeks.length?liveWeeks[liveWeeks.length-1]:null
   const benchmark=replayWeeks[0]?.engine_version||'ScoutPlus 3.1'
@@ -42,7 +42,7 @@ export default async function BacktestPage(){
 
     <section className="backtest-summary-grid">
       <article className="card"><span>Güncel kurgu ile tamamlanan test</span><b>{replayClosed.length}<small>/6</small></b><small>MH1–MH6 yeniden çalıştırılıyor</small></article>
-      <article className="card"><span>MH1 durumu</span><b className="summary-word">Başlangıç açığı</b><small>Motor şu an sıfır lig verisiyle takım gücü üretemiyor</small></article>
+      <article className="card"><span>MH1 başlangıç katmanı</span><b className="summary-word">Cold Start v1</b><small>{preseasonCoverage?.teams||0}/18 takım • {preseasonCoverage?.players||0}/{preseasonCoverage?.activePlayers||0} oyuncu bireysel prior • kalan oyuncular pozisyon priorı</small></article>
       <article className="card"><span>Canlı tahmin geçmişi</span><b>{liveWeeks.length}</b><small>MH7 ve sonrası gerçek maç önü kayıtlar</small></article>
       <article className="card"><span>Şu an takip edilen hafta</span><b>{latestLive?'MH'+latestLive.gameweek:'—'}</b><small>{latestLive?liveStatus[latestLive.status]||latestLive.status:'Canlı kayıt yok'}</small></article>
     </section>
@@ -52,9 +52,9 @@ export default async function BacktestPage(){
         <div><span className="eyebrow">TEST KURALI</span><h2>Sonucu görmeden tahmin et</h2></div>
       </div>
       <div className="backtest-explainer">
-        <div><b>Güncel model replay</b><p>MH4 testinde model yalnız MH1–MH3 verisini görebilir. MH4 ve sonrasındaki hiçbir sonuç, dakika, xG veya fantasy puanı tahmine giremez.</p></div>
-        <div><b>Canlı performans</b><p>MH7’den itibaren gerçekten hafta başlamadan önce yayınlanan tahmini ayrıca saklarız. Böylece sonradan yeniden çalıştırılan test ile gerçek kullanım performansını karıştırmayız.</p></div>
-        <div><b>Eski modeller yok</b><p>v4.2, v4.3f veya eski dondurulmuş xFP değerleri güncel modelin başarı hesabına dahil edilmez. Yalnız ham geçmiş gerçekler kullanılabilir.</p></div>
+        <div><b>Güncel model replay</b><p>MH4 testinde model yalnız MH1–MH3 verisini görebilir. MH4 ve sonrasındaki hiçbir sonuç, dakika, xG veya fantezi puanı tahmine giremez.</p></div>
+        <div><b>Cold Start v1</b><p>MH1’de 2025-26 takım gücü, tarihli oyuncu verisi ve pozisyon fallback priorı kullanılır. Mevcut sezon verisi geldikçe bu etki hızla azalır ve MH6’da kapanır.</p></div>
+        <div><b>Eski modeller yok</b><p>v4.2, v4.3f veya eski dondurulmuş xFP değerleri güncel modelin başarı hesabına dahil edilmez. Yalnız o tarihte bilinebilen ham geçmiş gerçekler kullanılır.</p></div>
       </div>
     </section>
 
