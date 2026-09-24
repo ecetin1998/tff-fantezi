@@ -1134,3 +1134,80 @@ body{background:linear-gradient(180deg,#ffffff 0%,#fbfcff 34%,#f3f7fc 100%)!impo
 .model-apply-btn:hover{
   background:#e2f4f1;
 }
+
+
+/* Match model: xG-centered comparison + readable 1X2 probabilities */
+.modern-match-card .match-teams{
+  grid-template-columns:minmax(0,1fr) 118px minmax(0,1fr);
+}
+.modern-match-card .match-teams>div:not(.xg-comparison){
+  display:grid;
+  gap:4px;
+}
+.xg-comparison{
+  text-align:center;
+  padding:10px 8px;
+  border:1px solid #dfe5ef;
+  border-radius:14px;
+  background:linear-gradient(180deg,#f7f9fd,#eef8f6);
+}
+.xg-comparison>small{
+  display:block;
+  font-size:7px;
+  font-weight:900;
+  letter-spacing:.06em;
+  color:#8993ac;
+  margin-bottom:5px;
+}
+.xg-comparison>strong{
+  display:flex;
+  align-items:baseline;
+  justify-content:center;
+  gap:6px;
+}
+.xg-comparison>strong b{
+  min-height:0;
+  font-size:20px;
+  color:#263150;
+}
+.xg-comparison>strong em{
+  font-style:normal;
+  font-size:11px;
+  color:#9aa4ba;
+}
+.outcome-labels-top{
+  display:flex;
+  align-items:flex-end;
+  margin-top:16px;
+  color:#6f7992;
+}
+.outcome-labels-top span{
+  min-width:0;
+  display:grid;
+  justify-items:center;
+  gap:2px;
+}
+.outcome-labels-top small{
+  display:block;
+  font-size:7px;
+  line-height:1;
+  color:#8a94ad;
+  font-weight:800;
+}
+.outcome-labels-top b{
+  font-size:9px;
+  line-height:1;
+  color:#263150;
+}
+.modern-match-card .outcome-bar{
+  margin:5px 0 0;
+}
+.save-squad-btn:disabled{
+  opacity:.48;
+  cursor:not-allowed;
+  filter:saturate(.45);
+}
+@media(max-width:470px){
+  .modern-match-card .match-teams{grid-template-columns:minmax(0,1fr) 102px minmax(0,1fr)}
+  .xg-comparison>strong b{font-size:18px}
+}
