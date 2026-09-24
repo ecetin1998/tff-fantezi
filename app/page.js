@@ -24,9 +24,9 @@ export default async function Home(){
         <h1>Veriyi oku.<br/><span>Kararı sen ver.</span></h1>
         <p>Fantezi Scout; oyuncu rolü, dakika ihtimali, maç modeli ve fantasy puan dağılımını tek yerde birleştirir. Amaç tek bir “doğru kadro” söylemek değil; karar verirken ihtiyacın olan resmi görünür yapmak.</p>
         <div className="home-intro-actions">
-          <Link href="/players" className="cta">Oyuncu analizlerini aç</Link>
-          <Link href="/squad" className="secondary">Kendi kadromu kur</Link>
-          <Link href="/matches" className="text-action">Maç tahminlerine git →</Link>
+          <Link href="/players" className="cta">Oyuncu Analizleri</Link>
+          <Link href="/squad" className="secondary">Benim Kadrom</Link>
+          <Link href="/matches" className="text-action">Maç Tahminleri →</Link>
         </div>
       </div>
       <aside className="home-highlight-grid">
@@ -59,9 +59,9 @@ export default async function Home(){
     </section>
 
     <section className="home-feature-grid">
-      <Link href="/players" className="card home-feature-card"><b>Oyuncu Analizi</b><p>Tam ad, takım, rakip, rol, dakika, xFP ve gerçek haftalık performansı birlikte gör.</p><span>529 oyuncuyu incele →</span></Link>
-      <Link href="/teams" className="card home-feature-card"><b>Takım Profilleri</b><p>Takım renkleri, kadro, geçmiş sonuçlar, xG/xGA profili ve bu haftaki eşleşme.</p><span>18 takımı incele →</span></Link>
-      <Link href="/squad" className="card home-feature-card"><b>Benim Kadrom</b><p>15 oyuncunu sahaya diz, kaptanı seç, yedeklerle dinamik swap yap ve taktiği canlı gör.</p><span>Kadronu yönet →</span></Link>
+      <Link href="/players" className="card home-feature-card"><b>Oyuncu Analizleri</b><p>Tam ad, takım, rakip, rol, dakika, xFP ve gerçek haftalık performansı birlikte gör.</p><span>Oyuncu havuzu →</span></Link>
+      <Link href="/teams" className="card home-feature-card"><b>Takım Profilleri</b><p>Takım renkleri, kadro, geçmiş sonuçlar, xG/xGA profili ve bu haftaki eşleşme.</p><span>Takım analizleri →</span></Link>
+      <Link href="/squad" className="card home-feature-card"><b>Benim Kadrom</b><p>15 oyuncunu sahaya diz, kaptanı seç, yedeklerle dinamik swap yap ve taktiği canlı gör.</p><span>Benim Kadrom →</span></Link>
     </section>
   </>
 }
