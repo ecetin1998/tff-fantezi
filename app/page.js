@@ -35,7 +35,7 @@ export default async function Home(){
         </Link>)}
         <div className="card spotlight-card home-status-card home-status-week">
           <span>Güncel hafta</span>
-          <b>GW{run?.gameweek||'—'}</b>
+          <b>MH{run?.gameweek||'—'}</b>
           <small>{matches.length} maç • {players.length} oyuncu</small>
           <strong>Aktif <em>hafta</em></strong>
         </div>
