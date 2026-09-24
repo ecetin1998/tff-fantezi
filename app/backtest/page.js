@@ -36,6 +36,11 @@ export default async function BacktestPage(){
   const replayN=replayClosed.reduce((s,w)=>s+Number(w.player_sample||0),0)
   const overallBand=replayN?replayClosed.reduce((s,w)=>s+Number(w.band_hit_rate||0)*Number(w.player_sample||0),0)/replayN:null
   const overallOutside=replayN?replayClosed.reduce((s,w)=>s+Number(w.average_outside_distance||0)*Number(w.player_sample||0),0)/replayN:null
+  const latestLearning=[...learning]
+    .sort((a,b)=>Number(b.id||0)-Number(a.id||0))
+    .filter((item,index,rows)=>index===rows.findIndex(other=>other.component===item.component&&other.segment===item.segment))
+  const activeLearning=latestLearning.filter(item=>['watch','ready_to_apply','applied_pending_refresh'].includes(item.status))
+  const resolvedLearning=latestLearning.filter(item=>!['watch','ready_to_apply','applied_pending_refresh'].includes(item.status))
 
   return <main className="page-shell backtest-page">
     <section className="page-hero backtest-hero">
@@ -53,7 +58,7 @@ export default async function BacktestPage(){
 
     <section className="backtest-summary-grid">
       <article className="card"><span>Güncel kurgu ile tamamlanan test</span><b>{replayClosed.length}<small>/6</small></b><small>MH1–MH6 bugünkü kurgu ile tamamlandı</small></article>
-      <article className="card"><span>Tahmin bandında kalan</span><b>{pct(overallBand)}</b><small>P25–P90 bandı • beklenen kapsama yaklaşık %65</small></article>
+      <article className="card"><span>Tahmin bandında kalan</span><b>{pct(overallBand)}</b><small>P25–P90 • aynı MC dağılımının self-coverage seviyesiyle kıyaslanır</small></article>
       <article className="card"><span>Band dışına çıkınca ortalama sapma</span><b>{num(overallOutside)}</b><small>Yalnız tahmin bandının dışındaki puan mesafesi</small></article>
       <article className="card"><span>Şu an takip edilen hafta</span><b>{latestLive?'MH'+latestLive.gameweek:'—'}</b><small>{latestLive?liveStatus[latestLive.status]||latestLive.status:'Canlı kayıt yok'}</small></article>
     </section>
@@ -103,9 +108,9 @@ export default async function BacktestPage(){
     <section className="card metric-guide">
       <div className="panel-head"><div><span className="eyebrow">NE ANLAMA GELİYOR?</span><h2>Terimleri sade okuyalım</h2></div></div>
       <div className="metric-guide-grid">
-        <div><b>Tahmin bandında kalma</b><p>P25–P90 aralığı modelin ürettiği olası sonuç alanıdır. Bu aralığın teorik kapsaması yaklaşık <strong>%65</strong>. Gerçek sonuç bandın içindeyse dağılım tahmini başarılı sayılır; oran çok yüksekse bandın gereğinden geniş olabileceğini de kontrol ederiz.</p></div>
+        <div><b>Tahmin bandında kalma</b><p>P25–P90 aralığı modelin ürettiği olası sonuç alanıdır. Fantasy puanları kesikli olduğu için bu bandın gerçekleşen kapsaması basitçe <strong>%65 olmak zorunda değildir</strong>. Gerçek kapsama oranını aynı Monte Carlo dağılımının kendi beklenen self-coverage seviyesiyle karşılaştırırız.</p></div>
         <div><b>Band dışı sapma</b><p>Gerçek sonuç bandın dışına çıktıysa yalnız en yakın sınırdan uzaklığı ölçeriz. Örn. xFP 5, bant 2–13 ve gerçek 18 ise <strong>13 puan hata değil, band dışı 5 puan</strong> olarak değerlendirilir.</p></div>
-        <div><b>Band genişliği</b><p>Belirsizliği ne kadar geniş bıraktığımızı gösterir. Sadece kapsama oranını yükseltmek için bandı sonsuza kadar açmak başarı değildir; amaç doğru kapsama + mümkün olduğunca keskin aralıktır.</p></div>
+        <div><b>Band genişliği</b><p>Belirsizliği ne kadar geniş bıraktığımızı gösterir. Amaç bandı körlemesine daraltmak değil; kesikli puan dağılımında beklenen self-coverage, gerçekleşen kapsama ve band dışı sapmayı birlikte iyileştirmektir.</p></div>
         <div><b>Model eğilimi</b><p>Merkez xFP’nin uzun vadede sistematik olarak fazla mı az mı kaldığını gösterir. Tek oyuncunun uç sonucu değil, tekrar eden yönlü sapma önemlidir.</p></div>
         <div><b>Sıralama ve dakika</b><p>Sıralama uyumu yüksek gördüğümüz oyuncuların gerçekten yukarı çıkıp çıkmadığını; dakika hatası ise rol/ilk 11 tahminimizin doğruluğunu gösterir. Öğrenme kararlarında ikisini birlikte kullanırız.</p></div>
       </div>
@@ -140,10 +145,18 @@ export default async function BacktestPage(){
         <div><span className="eyebrow">ÖĞRENME GÜNLÜĞÜ</span><h2>Neyi geliştirmemiz gerekiyor?</h2></div>
         <small>Tek oyuncu veya tek haftalık şansa göre model değiştirmiyoruz.</small>
       </div>
-      {learning.length?<div className="learning-grid">{learning.map(item=><article key={item.id} className="learning-card">
-        <div><span>{'MH'+item.after_gameweek+' sonrası'}</span><em>{learningStatus[item.status]||'İzleniyor'}</em></div>
-        <h3>{item.component}</h3><p>{item.signal}</p><strong>{item.evidence}</strong><small>{item.guardrail}</small>
-      </article>)}</div>:<div className="empty-learning-state">Güncel kurgu replay’i tamamlanınca öğrenme sinyalleri burada oluşacak.</div>}
+      {latestLearning.length?<div>
+        <div className="panel-head"><div><span className="eyebrow">AÇIK AKSİYONLAR</span><h3>Takip etmeye devam ettiklerimiz</h3></div><small>{activeLearning.length} aktif sinyal</small></div>
+        {activeLearning.length?<div className="learning-grid">{activeLearning.map(item=><article key={item.id} className="learning-card">
+          <div><span>{'MH'+item.after_gameweek+' sonrası'}</span><em>{learningStatus[item.status]||item.status}</em></div>
+          <h3>{item.component}</h3><p>{item.signal}</p><strong>{item.evidence}</strong><small>{item.guardrail}</small>
+        </article>)}</div>:<div className="empty-learning-state">Şu an müdahale bekleyen açık model sorunu yok.</div>}
+        {resolvedLearning.length?<><div className="panel-head" style={{marginTop:24}}><div><span className="eyebrow">KAPANAN KARARLAR</span><h3>Çözülen veya değişiklik gerektirmeyenler</h3></div><small>{resolvedLearning.length} kayıt</small></div>
+        <div className="learning-grid">{resolvedLearning.map(item=><article key={item.id} className="learning-card">
+          <div><span>{'MH'+item.after_gameweek+' sonrası'}</span><em>{learningStatus[item.status]||item.status}</em></div>
+          <h3>{item.component}</h3><p>{item.signal}</p><strong>{item.evidence}</strong><small>{item.guardrail}</small>
+        </article>)}</div></>:null}
+      </div>:<div className="empty-learning-state">Güncel kurgu replay’i tamamlanınca öğrenme sinyalleri burada oluşacak.</div>}
     </section>
 
     {(replayPlayers.length||livePlayers.length)?<section className="card backtest-table-card">
