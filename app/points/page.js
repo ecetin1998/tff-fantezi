@@ -11,7 +11,7 @@ export default async function WeeklyPoints(){
         <span className="eyebrow">GERÇEK FANTASY PUANLARI</span>
         <h1>Haftalık Fantasy Puanları</h1>
       </div>
-      <span className="muted">GW1–GW{throughGameweek||'—'} • final GW{finalThroughGameweek||'—'}</span>
+      <span className="muted">MH1–MH{throughGameweek||'—'} • final MH{finalThroughGameweek||'—'}</span>
     </div>
     <WeeklyPointsTable players={players} throughGameweek={throughGameweek} finalThroughGameweek={finalThroughGameweek}/>
   </>
