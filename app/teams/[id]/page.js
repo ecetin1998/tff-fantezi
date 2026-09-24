@@ -87,7 +87,7 @@ export default async function TeamPage({params}){
         <span className={'pos '+p.position}>{p.position==='GK'?'KL':p.position==='MID'?'OS':p.position==='FWD'?'FOR':p.position}</span>
         <div className="team-roster-copy">
           <b>{p.full_name}</b>
-          <small><span>{Number(p.price||0).toFixed(1)}m</span><i>•</i><span>{p.availability?.reason||'Aktif havuz'}</span></small>
+          <small><span>{Number(p.price||0).toFixed(1)}m</span>{p.availability?.reason?<><i>•</i><span>{p.availability.reason}</span></>:null}</small>
         </div>
         <div className="team-roster-xfp"><strong>{num(p.projection?.xfp)}</strong><small>xFP</small></div>
       </Link>)}</div>
