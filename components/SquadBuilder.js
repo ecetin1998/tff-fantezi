@@ -1,5 +1,5 @@
 'use client'
-import { useActionState, useEffect, useMemo, useState } from 'react'
+import { useActionState, useEffect, useMemo, useRef, useState } from 'react'
 import { saveSquad } from '@/app/actions'
 import { teamCssVars } from '@/lib/teamThemes'
 
@@ -85,6 +85,9 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
   const [sortKey,setSortKey]=useState('xfp')
   const [sortDir,setSortDir]=useState('desc')
   const [swapTarget,setSwapTarget]=useState(null)
+  const rosterRef=useRef(null)
+  const lineupRef=useRef(null)
+  const pickerRef=useRef(null)
 
   const selected=ids.map(id=>map.get(id)).filter(Boolean)
   const counts=selected.reduce((a,p)=>(a[p.position]=(a[p.position]||0)+1,a),{})
@@ -102,7 +105,22 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
     return xfp(b)-xfp(a)
   })
   const xiTotal=xi.reduce((s,p)=>s+xfp(p),0)
+  const captainBonus=xi.find(p=>p.id===captainId)?xfp(xi.find(p=>p.id===captainId)):0
+  const xiCaptainTotal=xiTotal+captainBonus
   const selectedTotal=selected.reduce((s,p)=>s+xfp(p),0)
+  const rosterByPos=useMemo(()=>Object.fromEntries(['GK','DEF','MID','FWD'].map(position=>[
+    position,
+    ids.map(id=>map.get(id)).filter(p=>p?.position===position).sort((a,b)=>xfp(b)-xfp(a))
+  ])),[ids,map])
+  const formationOptions=useMemo(()=>Object.keys(FORMATIONS).map(key=>{
+    const lineup=buildXI(ids,key,map)
+    const base=lineup.reduce((sum,id)=>sum+xfp(map.get(id)),0)
+    const cap=lineup.map(id=>map.get(id)).filter(Boolean).sort((a,b)=>xfp(b)-xfp(a))[0]
+    const total=lineup.length===11?base+xfp(cap):0
+    return {key,lineup,base,total,captain:cap,complete:lineup.length===11}
+  }).sort((a,b)=>b.total-a.total),[ids,map])
+  const bestFormation=formationOptions.find(x=>x.complete)?.key||formation
+  const captainCandidates=[...xi].sort((a,b)=>xfp(b)-xfp(a)).slice(0,3)
 
   const teams=useMemo(()=>[...new Set(players.map(p=>p.team).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'tr')),[players])
   const candidates=useMemo(()=>{
@@ -192,30 +210,65 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
   function reset(){
     setIds([]);setXiIds([]);setCaptainId(null);setSwapTarget(null);setFormation('4-3-3')
   }
-  function swapResult(benchId){
-    if(!swapTarget)return null
-    const starter=map.get(swapTarget)
-    const incoming=map.get(benchId)
-    if(!starter||!incoming)return null
+  function swapResult(firstId,secondId){
+    if(!firstId||!secondId||firstId===secondId)return null
+    const first=map.get(firstId)
+    const second=map.get(secondId)
+    if(!first||!second)return null
+    const firstInXI=xiIds.includes(firstId)
+    const secondInXI=xiIds.includes(secondId)
+    if(firstInXI===secondInXI)return null
 
-    // Kaleci slotu fantasy kuralı gereği sadece kaleciyle değişebilir.
-    if(starter.position==='GK' || incoming.position==='GK'){
-      if(starter.position!=='GK' || incoming.position!=='GK')return null
+    const starterId=firstInXI?firstId:secondId
+    const benchId=firstInXI?secondId:firstId
+    const starter=map.get(starterId)
+    const incoming=map.get(benchId)
+
+    if(starter.position==='GK'||incoming.position==='GK'){
+      if(starter.position!=='GK'||incoming.position!=='GK')return null
     }
 
-    const nextXI=xiIds.map(id=>id===swapTarget?benchId:id)
+    const nextXI=xiIds.map(id=>id===starterId?benchId:id)
     const nextFormation=formationFromXIIds(nextXI,map)
     if(!nextFormation)return null
-    return {nextXI,nextFormation}
+    return {nextXI,nextFormation,starterId,benchId}
   }
 
-  function swapWithBench(benchId){
-    const result=swapResult(benchId)
-    if(!result)return
+  function handleSwap(id){
+    if(!swapTarget){
+      setSwapTarget(id)
+      return
+    }
+    if(swapTarget===id){
+      setSwapTarget(null)
+      return
+    }
+    const result=swapResult(swapTarget,id)
+    if(!result){
+      setSwapTarget(id)
+      return
+    }
     setXiIds(result.nextXI)
     setFormation(result.nextFormation)
-    if(captainId===swapTarget)setCaptainId(benchId)
+    if(!result.nextXI.includes(captainId)){
+      const cap=result.nextXI.map(playerId=>map.get(playerId)).filter(Boolean).sort((a,b)=>xfp(b)-xfp(a))[0]
+      setCaptainId(cap?.id||null)
+    }
     setSwapTarget(null)
+  }
+
+  function chooseEmptySlot(position){
+    setPos(position)
+    setQ('')
+    pickerRef.current?.scrollIntoView({behavior:'smooth',block:'start'})
+  }
+
+  function goToLineup(){
+    lineupRef.current?.scrollIntoView({behavior:'smooth',block:'start'})
+  }
+
+  function goToRoster(){
+    rosterRef.current?.scrollIntoView({behavior:'smooth',block:'start'})
   }
 
   const benchPayload=bench.map((p,i)=>({player_id:p.id,is_captain:false,bench_order:i+1}))
@@ -245,7 +298,7 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
   return <div className="my-squad-shell">
     <section className="squad-control-strip card">
       <div className="squad-control-stat">
-        <span>Seçilen oyuncular</span>
+        <span>Kadro</span>
         <b>{ids.length}<small>/15</small></b>
         <i><em style={{width:`${Math.min(100,ids.length/15*100)}%`}}/></i>
       </div>
@@ -254,120 +307,66 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
         <b>{cost.toFixed(1)}<small>m / 100m</small></b>
         <small>{bank.toFixed(1)}m banka</small>
       </div>
-      <label className="squad-formation-control">
-        <span>Diziliş</span>
-        <select value={formation} onChange={e=>changeFormation(e.target.value)}>
-          {Object.keys(FORMATIONS).map(f=><option key={f}>{f}</option>)}
-        </select>
-      </label>
       <div className="squad-control-stat">
-        <span>İlk 11 xFP</span>
-        <b>{xiTotal.toFixed(1)}</b>
-        <small>Toplam kadro {selectedTotal.toFixed(1)}</small>
+        <span>Dağılım</span>
+        <b className="roster-counts">{counts.GK||0}/2 <small>KL</small> · {counts.DEF||0}/5 <small>DEF</small> · {counts.MID||0}/5 <small>OS</small> · {counts.FWD||0}/3 <small>FOR</small></b>
+      </div>
+      <div className="squad-control-stat">
+        <span>15 oyuncu xFP</span>
+        <b>{selectedTotal.toFixed(1)}</b>
+        <small>MH{gameweek||'—'} tahmini</small>
       </div>
       <div className="squad-toolbar">
-        <button type="button" className="squad-tool-btn auto-xi-btn" onClick={autoXI} disabled={!ids.length}>✦ Seçili Dizilişe Göre XI</button>
-        <button type="button" className="squad-tool-btn" onClick={fillRecommended}>Model kadrosu</button>
+        <button type="button" className="squad-tool-btn" onClick={fillRecommended}>Model Kadrosu</button>
         <button type="button" className="squad-tool-btn danger" onClick={reset}>Sıfırla</button>
+        <button type="button" className="squad-tool-btn primary-jump" onClick={goToLineup} disabled={!validRoster}>İlk 11’i Diz ↓</button>
       </div>
     </section>
 
-    <div className="my-squad-layout">
-      <section className="squad-stage card">
+    <div className="my-squad-layout roster-builder-layout" ref={rosterRef}>
+      <section className="squad-stage card roster-stage">
         <div className="squad-stage-head">
           <div>
-            <span className="eyebrow">MH{gameweek||'—'} • {formation}</span>
-            <h2>İlk 11</h2>
+            <span className="eyebrow">1. AŞAMA • 15 KİŞİLİK KADRO</span>
+            <h2>Kadronu oluştur</h2>
           </div>
-          <div className="squad-stage-legend">
-            <span><i className="legend-c"/> Kaptan</span>
-            <span><i className="legend-swap"/> Swap modu</span>
-          </div>
+          <button type="button" className="squad-tool-btn jump-link" onClick={goToLineup} disabled={!validRoster}>İlk 11’i Diz ↓</button>
         </div>
 
-        <div className="my-squad-pitch">
-          <div className="formation-live-badge"><span>TAKTİK</span><b>{liveFormation||formation}</b></div>
+        <div className="roster-pitch">
           <div className="pitch-mark center-line"/>
           <div className="pitch-mark center-circle"/>
           <div className="pitch-mark box top"/>
           <div className="pitch-mark box bottom"/>
 
-          {['GK','DEF','MID','FWD'].map(position=><div className={`my-pitch-row row-${position}`} key={position}>
-            {xi.filter(p=>p.position===position).map(p=><div
-              key={p.id}
-              className={`my-pitch-player ${swapTarget===p.id?'swap-active':''}`}
-            >
-              <button type="button" className="remove-player" onClick={()=>remove(p.id)} aria-label="Oyuncuyu çıkar">×</button>
-              <button type="button" className="player-swap-hit" onClick={()=>setSwapTarget(swapTarget===p.id?null:p.id)} aria-label="Yedekle değiştir">
+          {['GK','DEF','MID','FWD'].map(position=><div className={`roster-row roster-${position}`} key={position}>
+            {Array.from({length:LIMITS[position]},(_,slot)=>{
+              const p=rosterByPos[position]?.[slot]
+              if(p)return <div className="roster-player" key={p.id}>
+                <button type="button" className="remove-player roster-remove" onClick={()=>remove(p.id)} aria-label="Oyuncuyu çıkar">×</button>
                 <span className={`fantasy-shirt ${p.position}`} style={teamCssVars(p.team)}><i>{shirtMark(p)}</i></span>
                 <b>{displayName(p)}</b>
                 <small>{p.team}</small>
-                <div className="pitch-player-tags">
-                  <span>{Number(p.price||0).toFixed(1)}m</span>
-                  <strong>{xfp(p).toFixed(1)} xFP</strong>
-                </div>
-              </button>
-              <button
-                type="button"
-                className={`captain-toggle ${p.id===captainId?'active':''}`}
-                onClick={()=>setCaptainId(p.id)}
-                aria-label="Kaptan yap"
-              >C</button>
-            </div>)}
-          </div>)}
-
-          {xi.length<11?<div className="pitch-empty-state">
-            <b>{ids.length<15?'Kadronu oluşturmaya devam et':'Formasyona uygun XI oluşturuluyor'}</b>
-            <span>Sağdaki oyuncu havuzundan seçim yap.</span>
-          </div>:null}
-        </div>
-
-        <div className="bench-zone">
-          <div className="bench-zone-head">
-            <div><span className="eyebrow">YEDEKLER</span><b>{bench.length}/4</b></div>
-            {swapTarget?<span className="swap-hint">Uygun yedeğe dokun → taktik otomatik değişir</span>:<span>Bir saha oyuncusuna dokunarak swap başlat</span>}
-          </div>
-          <div className="my-bench-row">
-            {bench.map((p,i)=>{
-              const preview=swapTarget?swapResult(p.id):null
-              return <button
-                type="button"
-                key={p.id}
-                className={`my-bench-player ${preview?'eligible':''} ${swapTarget&&!preview?'swap-disabled':''}`}
-                onClick={()=>swapTarget?swapWithBench(p.id):null}
-              >
-                <span className="bench-order">{i+1}</span>
-                <span className={`fantasy-shirt mini ${p.position}`} style={teamCssVars(p.team)}><i>{shirtMark(p)}</i></span>
-                <span className="bench-copy"><b>{p.full_name}</b><small>{posLabel[p.position]} • {Number(p.price||0).toFixed(1)}m • {xfp(p).toFixed(1)} xFP {preview?<em className="swap-preview-tag">→ {preview.nextFormation}</em>:null}</small></span>
-                <i className="bench-remove" onClick={e=>{e.stopPropagation();remove(p.id)}}>×</i>
+                <div className="pitch-player-tags"><span>{Number(p.price||0).toFixed(1)}m</span><strong>{xfp(p).toFixed(1)}</strong></div>
+              </div>
+              return <button type="button" className="roster-player empty-roster-slot" key={`${position}-${slot}`} onClick={()=>chooseEmptySlot(position)}>
+                <span className={`fantasy-shirt empty-shirt ${position}`}><i>+</i></span>
+                <b>Oyuncu ekle</b>
+                <small>{posLabel[position]}</small>
               </button>
             })}
-            {Array.from({length:Math.max(0,4-bench.length)},(_,i)=><div className="my-bench-player empty-slot" key={'empty'+i}><span>+</span><small>Yedek</small></div>)}
-          </div>
+          </div>)}
         </div>
-
-        <div className="squad-save-row">
-          <div className="squad-validity">
-            <span className={validRoster?'ok':''}>{validRoster?'✓':'○'} 2 KL / 5 DEF / 5 OS / 3 FOR</span>
-            <span className={cost<=100?'ok':''}>{cost<=100?'✓':'○'} Bütçe limiti</span>
-            <span className={validXI?'ok':''}>{validXI?'✓':'○'} {liveFormation===formation?'Seçili diziliş hazır':'XI dizilişi güncellenmeli'}</span>
-          </div>
-          <form action={saveAction} className="squad-save-form">
-            <input type="hidden" name="player_ids" value={JSON.stringify(ids)}/>
-            <input type="hidden" name="squad_state" value={JSON.stringify(savePayload)}/>
-            <input type="hidden" name="squad_signature" value={currentSignature}/>
-            {saveState?.error?<small className="save-squad-error">{saveState.error}</small>:null}
-            <button className="cta save-squad-btn" disabled={!valid||!hasChanges||isSaving}>
-              {isSaving?'Kaydediliyor…':hasChanges?'Takımı Kaydet':'Kaydedildi'}
-            </button>
-          </form>
+        <div className="roster-stage-foot">
+          <span>Boş slota dokun → oyuncu havuzu o mevkiye filtrelenir.</span>
+          <b>{validRoster?'Kadro tamamlandı ✓':'Önce 15 kişilik kadroyu tamamla'}</b>
         </div>
       </section>
 
-      <aside className="player-picker card">
+      <aside className="player-picker card" ref={pickerRef}>
         <div className="player-picker-head">
           <div><span className="eyebrow">OYUNCU SEÇİMİ</span><h2>Oyuncu havuzu</h2></div>
-          <span>{players.length}</span>
+          <span>{candidates.length}/{players.length}</span>
         </div>
 
         <div className="picker-filters">
@@ -375,7 +374,7 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
           <div>
             <select value={pos} onChange={e=>setPos(e.target.value)}>
               <option value="">Tüm mevkiler</option>
-              <option value="GK">Kaleci</option><option value="DEF">Defans</option><option value="MID">Orta saha</option><option value="FWD">Forvet</option>
+              <option value="GK">KL</option><option value="DEF">DEF</option><option value="MID">OS</option><option value="FWD">FOR</option>
             </select>
             <select value={team} onChange={e=>setTeam(e.target.value)}>
               <option value="">Tüm takımlar</option>{teams.map(t=><option key={t}>{t}</option>)}
@@ -414,6 +413,132 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
         </div>
       </aside>
     </div>
+
+    <section className="card lineup-workbench" ref={lineupRef}>
+      <div className="lineup-workbench-head">
+        <div>
+          <span className="eyebrow">2. AŞAMA • İLK 11 & TAKTİK</span>
+          <h2>15 kişilik kadrodan en iyi 11’i çıkar</h2>
+          <p>Formasyonu seç, xFP karşılaştırmasını gör ve kaptanı belirle.</p>
+        </div>
+        <button type="button" className="squad-tool-btn jump-link" onClick={goToRoster}>Kadroya Dön ↑</button>
+      </div>
+
+      <div className="formation-suggestions">
+        {formationOptions.map(option=><button
+          type="button"
+          key={option.key}
+          className={`formation-option ${formation===option.key?'selected':''} ${bestFormation===option.key&&option.complete?'best':''}`}
+          onClick={()=>changeFormation(option.key)}
+          disabled={!option.complete}
+        >
+          <span>{option.key}</span>
+          <b>{option.complete?option.total.toFixed(1):'—'} <small>xFP</small></b>
+          <em>{bestFormation===option.key&&option.complete?'En yüksek':'Kaptan dahil'}</em>
+        </button>)}
+      </div>
+
+      <div className="lineup-action-row">
+        <div>
+          <span>Seçili diziliş <b>{formation}</b></span>
+          {liveFormation!==formation?<small>Mevcut XI farklı dizilişte. Yeniden diz.</small>:<small>XI seçili dizilişle uyumlu.</small>}
+        </div>
+        <button type="button" className="cta auto-xi-btn" onClick={autoXI} disabled={!validRoster}>✦ Seçili Dizilişe Göre XI</button>
+      </div>
+
+      <div className="lineup-layout">
+        <div className="lineup-field-column">
+          <div className="lineup-score-strip">
+            <span><small>XI taban xFP</small><b>{xiTotal.toFixed(1)}</b></span>
+            <span className="captain-total"><small>Kaptan bonusu</small><b>+{captainBonus.toFixed(1)}</b></span>
+            <span className="lineup-total"><small>İlk 11 xFP</small><b>{xiCaptainTotal.toFixed(1)}</b></span>
+          </div>
+
+          <div className="my-squad-pitch lineup-pitch">
+            <div className="formation-live-badge"><span>DİZİLİŞ</span><b>{liveFormation||formation}</b></div>
+            <div className="pitch-mark center-line"/>
+            <div className="pitch-mark center-circle"/>
+            <div className="pitch-mark box top"/>
+            <div className="pitch-mark box bottom"/>
+
+            {['GK','DEF','MID','FWD'].map(position=><div className={`my-pitch-row row-${position}`} key={position}>
+              {xi.filter(p=>p.position===position).map(p=>{
+                const eligible=swapTarget&&swapTarget!==p.id&&Boolean(swapResult(swapTarget,p.id))
+                return <div key={p.id} className={`my-pitch-player ${swapTarget===p.id?'swap-active':''} ${eligible?'swap-eligible':''}`}>
+                  <button type="button" className="player-swap-hit" onClick={()=>handleSwap(p.id)} aria-label="Yedekle değiştir">
+                    <span className={`fantasy-shirt ${p.position}`} style={teamCssVars(p.team)}><i>{shirtMark(p)}</i></span>
+                    <b>{displayName(p)}</b>
+                    <small>{p.team}</small>
+                    <div className="pitch-player-tags"><span>{Number(p.price||0).toFixed(1)}m</span><strong>{xfp(p).toFixed(1)} xFP</strong></div>
+                  </button>
+                  <button type="button" className={`captain-toggle ${p.id===captainId?'active':''}`} onClick={()=>setCaptainId(p.id)} aria-label="Kaptan yap">K</button>
+                </div>
+              })}
+            </div>)}
+
+            {xi.length<11?<div className="pitch-empty-state"><b>Önce 15 kişilik kadroyu tamamla</b><span>Üst bölümden oyuncu eklemeye devam et.</span></div>:null}
+          </div>
+
+          <div className="bench-zone lineup-bench-zone">
+            <div className="bench-zone-head">
+              <div><span className="eyebrow">YEDEKLER</span><b>{bench.length}/4</b></div>
+              {swapTarget?<span className="swap-hint">Karşı taraftan uygun oyuncuya dokun → swap</span>:<span>İlk 11 veya yedekten bir oyuncuya dokunarak swap başlat</span>}
+            </div>
+            <div className="my-bench-row">
+              {bench.map((p,i)=>{
+                const eligible=swapTarget&&swapTarget!==p.id&&Boolean(swapResult(swapTarget,p.id))
+                return <button
+                  type="button"
+                  key={p.id}
+                  className={`my-bench-player ${swapTarget===p.id?'swap-active':''} ${eligible?'eligible':''} ${swapTarget&&!eligible&&swapTarget!==p.id?'swap-disabled':''}`}
+                  onClick={()=>handleSwap(p.id)}
+                >
+                  <span className="bench-order">{i+1}</span>
+                  <span className={`fantasy-shirt mini ${p.position}`} style={teamCssVars(p.team)}><i>{shirtMark(p)}</i></span>
+                  <span className="bench-copy"><b>{p.full_name}</b><small>{p.team} • {posLabel[p.position]} • {xfp(p).toFixed(1)} xFP</small></span>
+                </button>
+              })}
+            </div>
+          </div>
+        </div>
+
+        <aside className="captain-panel">
+          <span className="eyebrow">KAPTAN ÖNERİSİ</span>
+          <h3>En güçlü 3 aday</h3>
+          <p>Kaptanın xFP’si iki kez sayılır. Seçim toplam İlk 11 xFP’yi anında değiştirir.</p>
+          <div className="captain-candidates">
+            {captainCandidates.map((p,i)=><button type="button" className={p.id===captainId?'active':''} onClick={()=>setCaptainId(p.id)} key={p.id}>
+              <span>#{i+1}</span>
+              <div><b>{p.full_name}</b><small>{p.team}</small></div>
+              <strong>{xfp(p).toFixed(1)}<small>xFP</small></strong>
+            </button>)}
+          </div>
+          <div className="captain-impact">
+            <span>Seçili kaptan</span>
+            <b>{xi.find(p=>p.id===captainId)?.full_name||'—'}</b>
+            <strong>+{captainBonus.toFixed(1)} xFP</strong>
+          </div>
+        </aside>
+      </div>
+
+      <div className="squad-save-row">
+        <div className="squad-validity">
+          <span className={validRoster?'ok':''}>{validRoster?'✓':'○'} 2 KL / 5 DEF / 5 OS / 3 FOR</span>
+          <span className={cost<=100?'ok':''}>{cost<=100?'✓':'○'} Bütçe limiti</span>
+          <span className={validXI?'ok':''}>{validXI?'✓':'○'} {liveFormation===formation?'Seçili diziliş hazır':'XI dizilişi güncellenmeli'}</span>
+          <button type="button" className="squad-tool-btn inline-roster-jump" onClick={goToRoster}>Oyuncu ekle / çıkar ↑</button>
+        </div>
+        <form action={saveAction} className="squad-save-form">
+          <input type="hidden" name="player_ids" value={JSON.stringify(ids)}/>
+          <input type="hidden" name="squad_state" value={JSON.stringify(savePayload)}/>
+          <input type="hidden" name="squad_signature" value={currentSignature}/>
+          {saveState?.error?<small className="save-squad-error">{saveState.error}</small>:null}
+          <button className="cta save-squad-btn" disabled={!valid||!hasChanges||isSaving}>
+            {isSaving?'Kaydediliyor…':hasChanges?'Takımı Kaydet':'Kaydedildi'}
+          </button>
+        </form>
+      </div>
+    </section>
 
     <section className="card squad-insight-bar">
       <div>
