@@ -53,7 +53,7 @@ export default async function Home(){
       <div className="home-guide-metrics">
         <div><b>xFP</b><span>Beklenen fantasy puanı</span></div>
         <div><b>xDakika</b><span>Beklenen oynama süresi</span></div>
-        <div><b>P90</b><span>Yüksek tavan senaryosu</span></div>
+        <div><b>Tavan</b><span>Üst %10'luk puan senaryosu</span></div>
         <div><b>6+%</b><span>Güçlü fantasy dönüş ihtimali</span></div>
       </div>
     </section>
