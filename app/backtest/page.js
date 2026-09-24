@@ -35,7 +35,7 @@ export default async function BacktestPage(){
       </div>
       <div className="backtest-live-badge">
         <small>Bugünkü motor</small>
-        <b>{benchmark.replace('ScoutPlus ','v')}</b>
+        <b>{benchmark.replace('ScoutPlus ','v').replace('Cold Start','Başlangıç Modeli')}</b>
         <span>Eski modeller dahil değil</span>
       </div>
     </section>
