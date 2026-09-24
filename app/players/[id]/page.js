@@ -35,7 +35,7 @@ export default async function PlayerPage({ params }){
 
     <section className="card player-hero-card team-profile-hero">
       <div className="player-hero-main">
-        <span className={`pos ${player.position} team-pos-badge`}>{player.position}</span>
+        <span className={`pos ${player.position} team-pos-badge`}>{player.position==='GK'?'KL':player.position==='MID'?'OS':player.position==='FWD'?'FOR':player.position}</span>
         <div>
           <span className="eyebrow">OYUNCU PROFİLİ</span>
           <h1>{player.full_name}</h1>
@@ -43,7 +43,7 @@ export default async function PlayerPage({ params }){
         </div>
       </div>
       <div className="player-hero-score">
-        <span>GW{run?.gameweek||'—'} xFP</span>
+        <span>MH{run?.gameweek||'—'} xFP</span>
         <strong>{num(p?.xfp)}</strong>
         <small>{p?.data_confidence||'—'} güven</small>
       </div>
@@ -86,7 +86,7 @@ export default async function PlayerPage({ params }){
 
     <section className="card profile-card season-card">
       <div className="panel-head">
-        <div><span className="eyebrow">SEZON GERÇEKLERİ</span><h2>GW1–GW{s?.through_gameweek||'—'}</h2></div>
+        <div><span className="eyebrow">SEZON GERÇEKLERİ</span><h2>MH1–MH{s?.through_gameweek||'—'}</h2></div>
         <span className="pill team-pill">{actual} fantasy puanı</span>
       </div>
       <div className="season-stat-grid">
@@ -139,7 +139,7 @@ export default async function PlayerPage({ params }){
       {weekly?.length?
         <div className="weekly-history-grid">{weekly.map(h=>
           <div className="week-score" key={h.id}>
-            <span>GW{h.gameweek}</span>
+            <span>MH{h.gameweek}</span>
             <strong>{h.points}</strong>
             <small>{h.minutes!==null&&h.minutes!==undefined?`${Number(h.minutes).toFixed(0)} dk`:'final puan'}</small>
           </div>
