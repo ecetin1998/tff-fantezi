@@ -9,7 +9,7 @@ export default async function Squads(){
     <div className="section-title">
       <div>
         <span className="eyebrow">KADRO OPTİMİZASYONU</span>
-        <h1>GW{rec.run?.gameweek||'—'} Kadro Önerileri</h1>
+        <h1>MH{rec.run?.gameweek||'—'} Kadro Önerileri</h1>
       </div>
       <span className="muted">Aynı saha görünümü • ilk 11 • yedek • kaptan • xFP</span>
     </div>
