@@ -8,6 +8,7 @@ export default function WeeklyPointsTable({ players, throughGameweek, finalThrou
   const [team,setTeam]=useState('')
   const [pos,setPos]=useState('')
   const [sort,setSort]=useState('total')
+  const [weekSort,setWeekSort]=useState(()=>Math.max(1,Number(finalThroughGameweek||1)))
   const [dir,setDir]=useState(-1)
 
   const teams=useMemo(()=>[...new Set(players.map(p=>p.team).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'tr')),[players])
@@ -31,6 +32,7 @@ export default function WeeklyPointsTable({ players, throughGameweek, finalThrou
       if(k==='total')return p.total
       if(k==='avg')return p.avg
       if(k==='played')return p.played
+      if(k==='week')return Number(p.pointMap.get(Number(weekSort))?.points ?? -999)
       if(k.startsWith('gw'))return Number(p.pointMap.get(Number(k.slice(2)))?.points ?? -999)
       return p.total
     }
@@ -39,7 +41,7 @@ export default function WeeklyPointsTable({ players, throughGameweek, finalThrou
       const av=value(a,sort),bv=value(b,sort)
       return typeof av==='string' ? dir*av.localeCompare(bv,'tr') : dir*(av-bv)
     })
-  },[players,q,team,pos,sort,dir])
+  },[players,q,team,pos,sort,weekSort,dir])
 
   const head=(k,label)=><th onClick={()=>{if(sort===k)setDir(-dir);else{setSort(k);setDir(-1)}}}>{label}{sort===k?<span className="sortmark">{dir===-1?' ↓':' ↑'}</span>:null}</th>
   const num=(v,d=2)=>Number(v||0).toFixed(d)
@@ -58,13 +60,16 @@ export default function WeeklyPointsTable({ players, throughGameweek, finalThrou
         <option value="FWD">FWD</option>
       </select>
       <select className="weekly-sort-select" value={sort} onChange={e=>{setSort(e.target.value);setDir(-1)}}>
-        <option value="total">Sırala: Toplam puan</option>
-        <option value="avg">Sırala: Maç ortalaması</option>
-        <option value="played">Sırala: Maç sayısı</option>
-        {gameweeks.filter(g=>g<=finalThroughGameweek).map(g=>
-          <option key={g} value={'gw'+g}>Sırala: GW{g} puanı</option>
-        )}
+        <option value="total">Toplam puan</option>
+        <option value="avg">Maç ortalaması</option>
+        <option value="played">Maç sayısı</option>
+        <option value="week">Hafta puanı</option>
       </select>
+      {sort==='week'?<select className="weekly-week-filter" value={weekSort} onChange={e=>{setWeekSort(Number(e.target.value));setDir(-1)}}>
+        {gameweeks.filter(g=>g<=finalThroughGameweek).map(g=>
+          <option key={g} value={g}>GW{g}</option>
+        )}
+      </select>:null}
     </div>
 
     <div className="table-summary weekly-summary">
