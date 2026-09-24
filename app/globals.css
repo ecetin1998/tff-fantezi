@@ -2543,12 +2543,17 @@ p{color:#66728d}
 }
 .availability-filters{
   display:grid!important;
-  grid-template-columns:minmax(260px,1fr) minmax(180px,240px)!important;
+  grid-template-columns:minmax(260px,1fr) minmax(170px,230px) minmax(150px,190px)!important;
   gap:8px!important;
 }
 .availability-filters input{min-width:0!important}
+@media(max-width:760px){
+  .availability-filters{grid-template-columns:1fr 1fr!important}
+  .availability-filters input{grid-column:1/-1}
+}
 @media(max-width:620px){
   .availability-filters{grid-template-columns:1fr!important}
+  .availability-filters input{grid-column:auto}
 }
 
 /* Fantasy-first match cards */
