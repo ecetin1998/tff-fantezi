@@ -7,7 +7,7 @@ export const revalidate=300
 
 const pct=v=>`${(Number(v||0)*100).toFixed(0)}%`
 const num=(v,d=2)=>Number(v||0).toFixed(d)
-const venue=v=>v==='HOME'?'İç saha':v==='AWAY'?'Deplasman':'—'
+const venue=v=>v==='HOME'?'Ev':v==='AWAY'?'Dep':'—'
 const formatCheck=value=>{
   if(!value)return '—'
   return new Intl.DateTimeFormat('tr-TR',{
