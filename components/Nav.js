@@ -15,6 +15,7 @@ const analysis = [
   ['/teams', 'Takım & Fikstür Analizi'],
   ['/availability', 'Sakatlık / Ceza Durumu'],
   ['/roles', 'Rol & Dakika Takibi'],
+  ['/backtest', 'Model Performansı'],
 ]
 
 const bottom = [
