@@ -371,7 +371,7 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
 
         <div className="picker-filters">
           <input value={q} onChange={e=>setQ(e.target.value)} placeholder="Oyuncu veya takım ara..."/>
-          <div>
+          <div className="picker-filter-center">
             <select value={pos} onChange={e=>setPos(e.target.value)}>
               <option value="">Tüm mevkiler</option>
               <option value="GK">KL</option><option value="DEF">DEF</option><option value="MID">OS</option><option value="FWD">FOR</option>
@@ -380,16 +380,16 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
               <option value="">Tüm takımlar</option>{teams.map(t=><option key={t}>{t}</option>)}
             </select>
           </div>
-          <div className="picker-sort-row">
+          <div className="picker-sort-compact">
+            <span>Sırala</span>
             <select value={sortKey} onChange={e=>setSortKey(e.target.value)}>
               <option value="xfp">xFP</option>
               <option value="price">Fiyat</option>
               <option value="minutes">xDakika</option>
             </select>
-            <select value={sortDir} onChange={e=>setSortDir(e.target.value)}>
-              <option value="desc">Yüksek → düşük</option>
-              <option value="asc">Düşük → yüksek</option>
-            </select>
+            <button type="button" onClick={()=>setSortDir(sortDir==='desc'?'asc':'desc')} aria-label="Sıralama yönünü değiştir">
+              {sortDir==='desc'?'↓ Yüksekten':'↑ Düşükten'}
+            </button>
           </div>
         </div>
 
@@ -399,14 +399,22 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
             const posFull=(counts[p.position]||0)>=LIMITS[p.position]
             const overBudget=!chosen&&cost+Number(p.price)>100.0001
             const disabled=!chosen&&(ids.length>=15||posFull||overBudget)
+            const metrics=[
+              {key:'xfp',label:'xFP',value:xfp(p).toFixed(2)},
+              {key:'price',label:'Fiyat',value:`${Number(p.price||0).toFixed(1)}m`},
+              {key:'minutes',label:'xDk',value:Number(p.projection?.x_minutes||0).toFixed(0)}
+            ].sort((a,b)=>(a.key===sortKey?1:0)-(b.key===sortKey?1:0))
             return <div className={`picker-player ${chosen?'chosen':''} ${disabled?'disabled':''}`} style={teamCssVars(p.team)} key={p.id}>
               <div className="picker-shirt-wrap"><span className={`fantasy-shirt tiny ${p.position}`} style={teamCssVars(p.team)}><i>{shirtMark(p)}</i></span></div>
               <div className="picker-copy">
                 <b>{p.full_name}</b>
-                <small>{p.team} • Rakip: {p.projection?.opponent_name||'—'}</small>
-                <div><span>{posLabel[p.position]}</span><span>{Number(p.price||0).toFixed(1)}m</span><span>{Number(p.projection?.x_minutes||0).toFixed(0)} dk</span></div>
+                <small><strong>{p.team}</strong><em>Rakip: {p.projection?.opponent_name||'—'}</em></small>
               </div>
-              <div className="picker-score"><b>{xfp(p).toFixed(2)}</b><small>xFP</small></div>
+              <div className="picker-metrics">
+                {metrics.map(metric=><span className={metric.key===sortKey?'active':''} key={metric.key}>
+                  <small>{metric.label}</small><b>{metric.value}</b>
+                </span>)}
+              </div>
               <button type="button" onClick={()=>chosen?remove(p.id):add(p.id)} disabled={disabled}>{chosen?'✓':'+'}</button>
             </div>
           })}
