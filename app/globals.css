@@ -2373,3 +2373,123 @@ p{color:#66728d}
     background:transparent!important;
   }
 }
+
+
+/* Shared player rank + position badges */
+@media(max-width:900px){
+  .mobile-card-badges{
+    display:flex!important;
+    align-items:center;
+    gap:6px;
+    min-width:max-content;
+  }
+  .mobile-card-badges .weekly-rank{
+    width:auto!important;
+    min-width:31px;
+    height:27px;
+    padding:0 7px;
+    border-radius:9px;
+    display:grid;
+    place-items:center;
+    background:#eef1ff!important;
+    border:1px solid #dde2f6;
+    color:#5d67a8!important;
+    font-size:8px!important;
+    font-weight:950;
+    line-height:1;
+  }
+  .mobile-card-badges .pos{
+    min-width:38px!important;
+    padding:5px 7px!important;
+    font-size:8px!important;
+    line-height:1!important;
+    border-radius:8px!important;
+  }
+
+  .mobile-player-top{
+    grid-template-columns:auto minmax(0,1fr)!important;
+    gap:10px!important;
+    padding-right:72px;
+  }
+
+  .weekly-mobile-card{
+    position:relative;
+    overflow:hidden;
+    padding:14px!important;
+  }
+  .weekly-mobile-card.team-accent-card:after{
+    width:74px!important;
+    height:74px!important;
+    right:-30px!important;
+    top:-30px!important;
+    opacity:.55;
+  }
+  .weekly-mobile-head{
+    position:relative;
+    z-index:1;
+    display:grid!important;
+    grid-template-columns:auto minmax(0,1fr)!important;
+    gap:10px!important;
+    align-items:center!important;
+    padding-right:72px;
+    min-height:36px;
+  }
+  .weekly-mobile-player-name{
+    min-width:0;
+  }
+  .weekly-mobile-player-name b,
+  .weekly-mobile-player-name small{
+    display:block;
+  }
+  .weekly-mobile-player-name b{
+    min-width:0;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+    font-size:13px!important;
+    color:#263150!important;
+  }
+  .weekly-mobile-player-name small{
+    margin-top:3px;
+    color:#7f8aa1!important;
+    font-size:8.5px!important;
+  }
+  .weekly-total-score{
+    position:absolute;
+    z-index:2;
+    top:12px;
+    right:12px;
+    min-width:58px;
+    padding:6px 7px;
+    border:1px solid color-mix(in srgb,var(--club1) 16%,#dfe5ef);
+    border-radius:10px;
+    background:rgba(255,255,255,.88);
+    backdrop-filter:blur(8px);
+    text-align:right;
+    box-shadow:0 6px 16px rgba(35,48,83,.06);
+  }
+  .weekly-total-score strong{
+    display:inline!important;
+    font-size:17px!important;
+    line-height:1!important;
+    letter-spacing:-.035em;
+    color:var(--clubText,#0b8e82)!important;
+  }
+  .weekly-total-score small{
+    display:inline!important;
+    margin-left:3px;
+    font-size:6.5px!important;
+    line-height:1!important;
+    font-weight:850;
+    color:#8993a9!important;
+    text-transform:none;
+  }
+}
+@media(max-width:420px){
+  .mobile-card-badges{gap:5px}
+  .mobile-card-badges .weekly-rank{min-width:29px;height:25px;padding:0 6px}
+  .mobile-card-badges .pos{min-width:35px!important;padding:5px 6px!important}
+  .weekly-mobile-head{padding-right:66px}
+  .weekly-total-score{top:10px;right:10px;min-width:54px;padding:5px 6px}
+  .weekly-total-score strong{font-size:16px!important}
+}
