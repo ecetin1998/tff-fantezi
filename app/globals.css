@@ -3011,3 +3011,47 @@ p{color:#66728d}
   .outcome-bar-labeled i span{gap:2px;font-size:6px!important;padding:0 2px}
   .outcome-bar-labeled i span b{font-size:7px!important}
 }
+
+
+/* Weekly points selected matchweek state */
+.selected-week-summary{
+  padding:4px 8px;
+  border:1px solid #cfe8e3;
+  border-radius:999px;
+  background:#eef8f6;
+  color:#5f7f7a;
+}
+.selected-week-summary b{color:#087e72!important}
+.simplified-weekly-table th.selected-week-col{
+  background:#eaf7f4!important;
+  color:#087e72!important;
+  box-shadow:inset 0 -2px #0b8e82;
+}
+.simplified-weekly-table td.selected-week-cell{
+  background:#eef9f6!important;
+  color:#087e72!important;
+  font-weight:950;
+  box-shadow:inset 0 0 0 1px #d3ebe6;
+}
+.weekly-total-score.selected-week-score{
+  border-color:#bfe3dc!important;
+  background:#edf8f6!important;
+  box-shadow:0 7px 18px rgba(11,142,130,.10)!important;
+}
+.weekly-total-score.selected-week-score strong{
+  color:#087e72!important;
+}
+.weekly-total-score.selected-week-score small{
+  color:#5f817c!important;
+  font-weight:950!important;
+}
+.week-chip-row.scroll-snap-weeks>span.selected{
+  background:#e8f7f3!important;
+  border-color:#9fd6cc!important;
+  box-shadow:0 0 0 2px rgba(11,142,130,.08),0 6px 15px rgba(11,142,130,.08);
+  transform:translateY(-1px);
+}
+.week-chip-row.scroll-snap-weeks>span.selected small,
+.week-chip-row.scroll-snap-weeks>span.selected b{
+  color:#087e72!important;
+}
