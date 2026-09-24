@@ -85,10 +85,7 @@ export function MobileMenu({ primary, analysis, signedIn }){
       {primary.map(([href,label])=>
         <Link onClick={close} className={matches(path,href)?'active':''} key={href} href={href}>{label}</Link>
       )}
-      <Link onClick={close} className={matches(path,'/squad')?'active mobile-menu-team-link':'mobile-menu-team-link'} href="/squad">
-        <span className="mobile-menu-team-icon">♟</span>
-        <span><b>Benim Kadrom</b><small>Kadronu düzenle ve takip et</small></span>
-      </Link>
+      <Link onClick={close} className={matches(path,'/squad')?'active':''} href="/squad">Benim Kadrom</Link>
       {analysis.map(([href,label])=>
         <Link onClick={close} className={matches(path,href)?'active':''} key={href} href={href}>{label}</Link>
       )}
