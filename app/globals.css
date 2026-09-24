@@ -2885,3 +2885,30 @@ p{color:#66728d}
     grid-template-columns:1fr!important;
   }
 }
+
+
+/* Squad recommendations: always identify player teams */
+.unified-squad-list .readonly-pitch-player>small{
+  display:block!important;
+  max-width:100%;
+  margin-top:2px!important;
+  color:rgba(255,255,255,.88)!important;
+  font-size:5.5px!important;
+  line-height:1.1!important;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  text-shadow:0 1px 2px rgba(0,35,30,.28);
+}
+@media(max-width:620px){
+  .unified-squad-list .readonly-pitch-player>small{
+    display:block!important;
+    font-size:5px!important;
+    margin-top:2px!important;
+  }
+  .unified-squad-list .bench-copy small{
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+}
