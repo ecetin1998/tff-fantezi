@@ -45,8 +45,9 @@ export default function WeeklyPointsTable({ players, throughGameweek, finalThrou
     })
   },[players,q,team,pos,sort,weekSort,dir])
 
-  const head=(k,label)=><th onClick={()=>{if(sort===k)setDir(-dir);else{setSort(k);setDir(-1)}}}>{label}{sort===k?<span className="sortmark">{dir===-1?' ↓':' ↑'}</span>:null}</th>
+  const head=(k,label,className='')=><th className={className} onClick={()=>{if(sort===k)setDir(-dir);else{setSort(k);setDir(-1)}}}>{label}{sort===k?<span className="sortmark">{dir===-1?' ↓':' ↑'}</span>:null}</th>
   const num=(v,d=2)=>Number(v||0).toFixed(d)
+  const weekMode=sort==='week'
 
   return <>
     <div className="filters weekly-filters simplified-weekly-filters">
@@ -77,6 +78,7 @@ export default function WeeklyPointsTable({ players, throughGameweek, finalThrou
     <div className="table-summary weekly-summary">
       <span><b>{rows.length}</b> oyuncu</span>
       <span>Final: <b>MH{finalThroughGameweek||'—'}</b></span>
+      {weekMode?<span className="selected-week-summary"><b>MH{weekSort}</b> seçili</span>:null}
       {throughGameweek>finalThroughGameweek?<span className="live-week-note">MH{throughGameweek} açık • kapanınca puanlar otomatik dolacak</span>:null}
     </div>
 
@@ -88,7 +90,7 @@ export default function WeeklyPointsTable({ players, throughGameweek, finalThrou
           {head('total','Toplam')}
           {head('played','Maç')}
           {head('avg','Ort.')}
-          {gameweeks.map(g=>head('gw'+g,'MH'+g))}
+          {gameweeks.map(g=>head('gw'+g,'MH'+g,weekMode&&g===weekSort?'selected-week-col':''))}
         </tr></thead>
         <tbody>{rows.map((p,i)=><tr className="team-player-row" style={teamCssVars(p.team)} key={p.id}>
           <td className="rank-col">#{i+1}</td>
@@ -102,7 +104,9 @@ export default function WeeklyPointsTable({ players, throughGameweek, finalThrou
           {gameweeks.map(g=>{
             const row=p.pointMap.get(g)
             const pending=g>finalThroughGameweek
-            return <td key={g} className={pending?'weekly-score pending-score':row?'weekly-score':'weekly-score empty-score'}>
+            const selected=weekMode&&g===weekSort
+            const stateClass=pending?'pending-score':row?'':'empty-score'
+            return <td key={g} className={`weekly-score ${stateClass} ${selected?'selected-week-cell':''}`.trim()}>
               {row?row.points:'—'}
             </td>
           })}
@@ -115,7 +119,10 @@ export default function WeeklyPointsTable({ players, throughGameweek, finalThrou
         <div className="weekly-mobile-head">
           <div className="mobile-card-badges"><span className="weekly-rank">#{i+1}</span><span className={`pos ${p.position}`}>{posLabel(p.position)}</span></div>
           <div className="weekly-mobile-player-name"><b>{p.full_name}</b><small>{p.team}</small></div>
-          <div className="weekly-total-score"><strong>{p.total}</strong><small>puan</small></div>
+          <div className={weekMode?'weekly-total-score selected-week-score':'weekly-total-score'}>
+            <strong>{weekMode?(p.pointMap.get(Number(weekSort))?.points ?? '—'):p.total}</strong>
+            <small>{weekMode?`MH${weekSort}`:'puan'}</small>
+          </div>
         </div>
 
         <div className="weekly-mobile-meta compact">
@@ -128,7 +135,12 @@ export default function WeeklyPointsTable({ players, throughGameweek, finalThrou
           {gameweeks.map(g=>{
             const row=p.pointMap.get(g)
             const pending=g>finalThroughGameweek
-            return <span className={pending?'pending':row&&Number(row.points)>=6?'hot':''} key={g}>
+            const classes=[
+              pending?'pending':'',
+              row&&Number(row.points)>=6?'hot':'',
+              weekMode&&g===weekSort?'selected':''
+            ].filter(Boolean).join(' ')
+            return <span className={classes} key={g}>
               <small>MH{g}</small><b>{row?row.points:'—'}</b>
             </span>
           })}
