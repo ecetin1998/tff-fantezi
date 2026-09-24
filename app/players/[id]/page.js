@@ -55,7 +55,7 @@ export default async function PlayerPage({ params }){
         <span className="eyebrow">BU HAFTA</span>
         <div className="matchup-line">
           <div><small>Takım</small><Link className="team-inline-link" href={'/teams/'+player.team_id}><b>{player.team}</b></Link></div>
-          <span>vs</span>
+          <span>Rakip</span>
           <div><small>{venue(p?.venue)}</small>{opponentId?<Link className="team-inline-link" href={'/teams/'+opponentId}><b>{opponent}</b></Link>:<b>{opponent}</b>}</div>
         </div>
         <div className="profile-mini-grid">
@@ -75,8 +75,8 @@ export default async function PlayerPage({ params }){
         <p className="projection-explainer">Temkinli: simülasyonların alt çeyreği • İyi senaryo: üst çeyreğe giriş • Tavan: üst %10'luk sonuç seviyesi.</p>
         <div className="profile-stat-grid">
           <div><span>xFP</span><b>{num(p?.xfp)}</b></div>
-          <div><span>Core xFP</span><b>{num(p?.core_xfp)}</b></div>
-          <div><span>xBonus</span><b>{num(p?.x_bonus)}</b></div>
+          <div><span>Temel xFP</span><b>{num(p?.core_xfp)}</b></div>
+          <div><span>Beklenen bonus</span><b>{num(p?.x_bonus)}</b></div>
           <div><span>Temkinli</span><b>{num(p?.p25,1)}</b></div>
           <div><span>İyi senaryo</span><b>{num(p?.p75,1)}</b></div>
           <div><span>Tavan</span><b>{num(p?.p90,1)}</b></div>
@@ -100,7 +100,7 @@ export default async function PlayerPage({ params }){
         <div><span>Asist</span><b>{Number(s?.assists||0)}</b></div>
         <div><span>xG toplam</span><b>{num(s?.xg_total)}</b></div>
         <div><span>6+ maç</span><b>{Number(s?.six_plus_count||0)}</b></div>
-        <div><span>Clean sheet</span><b>{Number(s?.clean_sheets||0)}</b></div>
+        <div><span>Gol yemeden</span><b>{Number(s?.clean_sheets||0)}</b></div>
         <div><span>Kurtarış</span><b>{Number(s?.saves||0)}</b></div>
         <div><span>Sarı</span><b>{Number(s?.yellow_cards||0)}</b></div>
         <div><span>Kırmızı</span><b>{Number(s?.red_cards||0)}</b></div>
@@ -143,7 +143,7 @@ export default async function PlayerPage({ params }){
           <div className="week-score" key={h.id}>
             <span>MH{h.gameweek}</span>
             <strong>{h.points}</strong>
-            <small>{h.minutes!==null&&h.minutes!==undefined?`${Number(h.minutes).toFixed(0)} dk`:'final puan'}</small>
+            <small>{h.minutes!==null&&h.minutes!==undefined?`${Number(h.minutes).toFixed(0)} dk`:'kesinleşmiş puan'}</small>
           </div>
         )}</div>
         :<p className="muted">Henüz kapanmış hafta verisi yok.</p>}
