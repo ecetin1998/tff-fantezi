@@ -5130,3 +5130,166 @@ p{color:#66728d}
   .metric-guide-grid b{font-size:8.5px}
   .metric-guide-grid p{font-size:7.5px}
 }
+
+
+/* ===== Model Performansı • %100 zoom readability ===== */
+.backtest-page .eyebrow{
+  font-size:11px!important;
+  letter-spacing:.09em!important;
+}
+.backtest-hero h1{
+  font-size:36px!important;
+  line-height:1.08!important;
+}
+.backtest-hero p{
+  max-width:900px!important;
+  font-size:14px!important;
+  line-height:1.65!important;
+}
+.backtest-live-badge{
+  min-width:170px!important;
+  padding:16px 18px!important;
+}
+.backtest-live-badge small{font-size:10px!important}
+.backtest-live-badge b{font-size:30px!important}
+.backtest-live-badge span{font-size:11px!important}
+
+.backtest-summary-grid .card{
+  padding:18px!important;
+}
+.backtest-summary-grid span{
+  font-size:11px!important;
+  line-height:1.35!important;
+}
+.backtest-summary-grid b{
+  font-size:28px!important;
+}
+.backtest-summary-grid b small{
+  font-size:13px!important;
+}
+.backtest-summary-grid small{
+  font-size:10px!important;
+  line-height:1.5!important;
+}
+.backtest-summary-grid .summary-word{
+  font-size:20px!important;
+  line-height:1.2!important;
+}
+
+.backtest-page .panel-head h2,
+.learning-rules h2{
+  font-size:24px!important;
+  line-height:1.2!important;
+}
+.backtest-page .panel-head>small{
+  max-width:460px!important;
+  font-size:11px!important;
+  line-height:1.5!important;
+}
+.backtest-explainer b,
+.metric-guide-grid b{
+  font-size:13px!important;
+}
+.backtest-explainer p,
+.metric-guide-grid p{
+  font-size:11px!important;
+  line-height:1.6!important;
+}
+
+.backtest-table{
+  font-size:12px!important;
+}
+.backtest-table th{
+  padding:11px 10px!important;
+  font-size:10px!important;
+}
+.backtest-table td{
+  padding:11px 10px!important;
+  line-height:1.4!important;
+}
+.backtest-mode,
+.replay-status{
+  padding:5px 8px!important;
+  font-size:9px!important;
+}
+.learning-cell{
+  max-width:310px!important;
+  line-height:1.5!important;
+}
+.backtest-notes>div{
+  grid-template-columns:52px minmax(0,1fr)!important;
+  gap:10px!important;
+  padding:9px 10px!important;
+}
+.backtest-notes b,
+.backtest-notes span{
+  font-size:10px!important;
+  line-height:1.5!important;
+}
+
+.learning-card{
+  padding:15px!important;
+}
+.learning-card>div span{
+  font-size:10px!important;
+}
+.learning-card>div em{
+  font-size:9px!important;
+  padding:4px 7px!important;
+}
+.learning-card h3{
+  font-size:16px!important;
+}
+.learning-card p{
+  font-size:12px!important;
+  line-height:1.5!important;
+}
+.learning-card strong{
+  font-size:11px!important;
+  line-height:1.5!important;
+}
+.learning-card small{
+  font-size:10px!important;
+  line-height:1.5!important;
+}
+
+.learning-rule-grid b{
+  width:28px!important;
+  height:28px!important;
+  font-size:11px!important;
+}
+.learning-rule-grid span{
+  font-size:11px!important;
+  line-height:1.55!important;
+}
+.empty-learning-state{
+  font-size:11px!important;
+}
+
+@media(max-width:700px){
+  .backtest-hero h1{font-size:29px!important}
+  .backtest-hero p{font-size:13px!important}
+  .backtest-summary-grid{
+    grid-template-columns:1fr!important;
+  }
+  .backtest-summary-grid span{font-size:10.5px!important}
+  .backtest-summary-grid b{font-size:24px!important}
+  .backtest-summary-grid small{font-size:10px!important}
+  .backtest-page .panel-head h2,
+  .learning-rules h2{font-size:20px!important}
+  .backtest-page .panel-head>small{font-size:10px!important}
+  .backtest-explainer b,
+  .metric-guide-grid b{font-size:12px!important}
+  .backtest-explainer p,
+  .metric-guide-grid p{font-size:10.5px!important}
+  .backtest-table{font-size:11px!important}
+  .backtest-table th{font-size:9.5px!important;padding:10px 8px!important}
+  .backtest-table td{padding:10px 8px!important}
+  .backtest-notes b,
+  .backtest-notes span{font-size:9.5px!important}
+  .learning-card h3{font-size:15px!important}
+  .learning-card p{font-size:11px!important}
+  .learning-card strong{font-size:10.5px!important}
+  .learning-card small{font-size:9.5px!important}
+  .learning-rule-grid span{font-size:10.5px!important}
+}
