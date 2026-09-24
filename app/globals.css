@@ -1211,3 +1211,116 @@ body{background:linear-gradient(180deg,#ffffff 0%,#fbfcff 34%,#f3f7fc 100%)!impo
   .modern-match-card .match-teams{grid-template-columns:minmax(0,1fr) 102px minmax(0,1fr)}
   .xg-comparison>strong b{font-size:18px}
 }
+
+
+/* Team roster polish */
+.team-roster-head{
+  align-items:flex-end;
+}
+.team-roster-summary{
+  display:flex;
+  gap:8px;
+  align-items:center;
+}
+.team-roster-summary>span{
+  min-width:92px;
+  padding:9px 11px;
+  border:1px solid #e1e7f0;
+  border-radius:11px;
+  background:#f7f9fd;
+  text-align:right;
+}
+.team-roster-summary small,
+.team-roster-summary b{
+  display:block;
+}
+.team-roster-summary small{
+  font-size:6.5px;
+  letter-spacing:.08em;
+  color:#8b95ad;
+  font-weight:900;
+}
+.team-roster-summary b{
+  margin-top:3px;
+  font-size:11px;
+  color:#263150;
+}
+.team-roster-player{
+  grid-template-columns:44px minmax(0,1fr) 64px;
+  min-height:67px;
+  padding:11px 12px;
+  border-left:3px solid color-mix(in srgb,var(--club1) 42%,#e5e9f1);
+  transition:transform .16s ease,border-color .16s ease,box-shadow .16s ease,background .16s ease;
+}
+.team-roster-player:hover{
+  transform:translateY(-1px);
+  box-shadow:0 8px 20px color-mix(in srgb,var(--club1) 8%,transparent);
+}
+.team-roster-copy{
+  min-width:0;
+}
+.team-roster-copy>b{
+  display:block;
+  font-size:11px!important;
+  line-height:1.2;
+  color:#263150;
+}
+.team-roster-copy>small{
+  display:flex!important;
+  align-items:center;
+  gap:5px;
+  margin-top:5px!important;
+  color:#8691aa!important;
+}
+.team-roster-copy>small span{
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.team-roster-copy>small i{
+  font-style:normal;
+  color:#c0c7d4;
+}
+.team-roster-xfp{
+  display:grid;
+  grid-template-columns:auto auto;
+  grid-template-areas:
+    "gw gw"
+    "value unit";
+  justify-content:end;
+  align-items:end;
+  column-gap:3px;
+  padding:7px 8px;
+  border-radius:10px;
+  background:color-mix(in srgb,var(--club1) 7%,#f6f8fc);
+  border:1px solid color-mix(in srgb,var(--club1) 15%,#e2e7f0);
+}
+.team-roster-xfp small{
+  grid-area:gw;
+  font-size:6px;
+  color:#8791aa;
+  text-align:right;
+  font-weight:850;
+  letter-spacing:.04em;
+}
+.team-roster-xfp strong{
+  grid-area:value;
+  font-size:16px;
+  line-height:1;
+  color:var(--clubText);
+}
+.team-roster-xfp em{
+  grid-area:unit;
+  font-size:6px;
+  line-height:1.1;
+  font-style:normal;
+  color:#8a94aa;
+  font-weight:850;
+}
+@media(max-width:760px){
+  .team-roster-head{align-items:flex-start}
+  .team-roster-summary{width:100%;margin-top:10px}
+  .team-roster-summary>span{flex:1;text-align:left}
+  .team-roster-grid{grid-template-columns:1fr}
+  .team-roster-player{grid-template-columns:42px minmax(0,1fr) 62px}
+}
