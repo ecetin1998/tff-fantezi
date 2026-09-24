@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { getMatches, getPlayersWithProjection, getRecommendation } from '@/lib/data'
 import SquadPitchView from '@/components/SquadPitchView'
+import { teamCssVars } from '@/lib/teamThemes'
 
 export const revalidate=300
 
@@ -21,6 +22,7 @@ export default async function Home(){
   const value=[...players].sort((a,b)=>Number(b.projection.value_score)-Number(a.projection.value_score))[0]
   const mins=[...players].sort((a,b)=>Number(b.projection.x_minutes)-Number(a.projection.x_minutes))[0]
   const six=[...players].sort((a,b)=>Number(b.projection.six_plus_probability)-Number(a.projection.six_plus_probability))[0]
+  const name=p=>p?.display_name||p?.full_name||'—'
   const updated=run?.source_updated_at
     ? new Intl.DateTimeFormat('tr-TR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit',timeZone:'Europe/Istanbul'}).format(new Date(run.source_updated_at))
     : '—'
@@ -51,19 +53,33 @@ export default async function Home(){
       </section>
 
       <aside className="insight-stack home-insights">
-        <Link className="card spotlight-card" href={best?'/players/'+best.id:'/players'}>
-          <span>Model lideri</span><b>{best?.full_name||'—'}</b><strong>{Number(best?.projection?.xfp||0).toFixed(2)} <small>xFP</small></strong><i>Oyuncuyu aç →</i>
+        <Link className="card spotlight-card team-accent-card" style={teamCssVars(best?.team)} href={best?'/players/'+best.id:'/players'}>
+          <span>Model lideri</span><b>{name(best)}</b><strong>{Number(best?.projection?.xfp||0).toFixed(2)} <small>xFP</small></strong><i>Oyuncuyu aç →</i>
         </Link>
-        <Link className="card spotlight-card" href={value?'/players/'+value.id:'/players'}>
-          <span>En iyi F/P</span><b>{value?.full_name||'—'}</b><strong>{Number(value?.projection?.value_score||0).toFixed(2)} <small>xFP/m</small></strong><i>Oyuncuyu aç →</i>
+        <Link className="card spotlight-card team-accent-card" style={teamCssVars(value?.team)} href={value?'/players/'+value.id:'/players'}>
+          <span>En iyi F/P</span><b>{name(value)}</b><strong>{Number(value?.projection?.value_score||0).toFixed(2)} <small>xFP/m</small></strong><i>Oyuncuyu aç →</i>
         </Link>
-        <Link className="card spotlight-card" href={mins?'/players/'+mins.id:'/players'}>
-          <span>En güvenli dakika</span><b>{mins?.full_name||'—'}</b><strong>{Number(mins?.projection?.x_minutes||0).toFixed(0)} <small>dk</small></strong><i>Oyuncuyu aç →</i>
+        <Link className="card spotlight-card team-accent-card" style={teamCssVars(mins?.team)} href={mins?'/players/'+mins.id:'/players'}>
+          <span>En güvenli dakika</span><b>{name(mins)}</b><strong>{Number(mins?.projection?.x_minutes||0).toFixed(0)} <small>dk</small></strong><i>Oyuncuyu aç →</i>
         </Link>
-        <Link className="card spotlight-card" href={six?'/players/'+six.id:'/players'}>
-          <span>6+ puan ihtimali</span><b>{six?.full_name||'—'}</b><strong>{(Number(six?.projection?.six_plus_probability||0)*100).toFixed(0)}<small>%</small></strong><i>Oyuncuyu aç →</i>
+        <Link className="card spotlight-card team-accent-card" style={teamCssVars(six?.team)} href={six?'/players/'+six.id:'/players'}>
+          <span>6+ puan ihtimali</span><b>{name(six)}</b><strong>{(Number(six?.projection?.six_plus_probability||0)*100).toFixed(0)}<small>%</small></strong><i>Oyuncuyu aç →</i>
         </Link>
       </aside>
     </div>
+
+    <section className="card home-product-intro">
+      <div className="home-product-copy">
+        <span className="eyebrow">FANTEZİ SCOUT</span>
+        <h2>Modeli okuyup kararı sen ver.</h2>
+        <p>Maç tahmini, dakika/rol gerçekliği ve fantasy puan modelini aynı yerde birleştiriyoruz; sonuçları kendi kadrona uygulayabiliyorsun.</p>
+      </div>
+      <div className="home-product-features">
+        <div><b>50K</b><span>Monte Carlo simülasyonu</span></div>
+        <div><b>xFP</b><span>Floor / ceiling / bonus dağılımı</span></div>
+        <div><b>Rol</b><span>İlk 11 ve dakika değişim takibi</span></div>
+        <div><b>Kadro</b><span>Kişisel XI, yedek ve kaptan yönetimi</span></div>
+      </div>
+    </section>
   </>
 }

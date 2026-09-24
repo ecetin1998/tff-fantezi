@@ -18,15 +18,15 @@ const POS_ORDER={GK:0,DEF:1,MID:2,FWD:3}
 const posLabel={GK:'KL',DEF:'DEF',MID:'OS',FWD:'FOR'}
 
 function xfp(p){return Number(p?.projection?.xfp||0)}
-function shortName(name=''){
-  const parts=String(name).trim().split(/\s+/)
-  if(parts.length===1)return parts[0]
-  const last=parts.at(-1)
-  if(last.length<=3&&parts.length>2)return parts.at(-2)
-  return last
+function fallbackName(name=''){
+  const parts=String(name).trim().split(/\s+/).filter(Boolean)
+  return parts.at(-1)||'—'
 }
-function teamCode(team=''){
-  return String(team).replace(/[^A-Za-zÇĞİÖŞÜçğıöşü]/g,'').slice(0,3).toLocaleUpperCase('tr')
+function displayName(player){
+  return player?.display_name || fallbackName(player?.full_name)
+}
+function shirtMark(player){
+  return player?.shirt_number ?? String(player?.team||'').replace(/[^A-Za-zÇĞİÖŞÜçğıöşü]/g,'').slice(0,3).toLocaleUpperCase('tr')
 }
 function formationFromState(state,map){
   const starters=state.filter(x=>x.bench_order===null).map(x=>map.get(x.player_id)).filter(Boolean)
@@ -265,8 +265,8 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
             >
               <button type="button" className="remove-player" onClick={()=>remove(p.id)} aria-label="Oyuncuyu çıkar">×</button>
               <button type="button" className="player-swap-hit" onClick={()=>setSwapTarget(swapTarget===p.id?null:p.id)} aria-label="Yedekle değiştir">
-                <span className={`fantasy-shirt ${p.position}`} style={teamCssVars(p.team)}><i>{teamCode(p.team)}</i></span>
-                <b>{shortName(p.full_name)}</b>
+                <span className={`fantasy-shirt ${p.position}`} style={teamCssVars(p.team)}><i>{shirtMark(p)}</i></span>
+                <b>{displayName(p)}</b>
                 <small>{p.team}</small>
                 <div className="pitch-player-tags">
                   <span>{Number(p.price||0).toFixed(1)}m</span>
@@ -294,17 +294,20 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
             {swapTarget?<span className="swap-hint">Uygun yedeğe dokun → taktik otomatik değişir</span>:<span>Bir saha oyuncusuna dokunarak swap başlat</span>}
           </div>
           <div className="my-bench-row">
-            {bench.map((p,i)=><button
-              type="button"
-              key={p.id}
-              className={`my-bench-player ${swapTarget&&swapResult(p.id)?'eligible':''} ${swapTarget&&!swapResult(p.id)?'swap-disabled':''}`}
-              onClick={()=>swapTarget?swapWithBench(p.id):null}
-            >
-              <span className="bench-order">{i+1}</span>
-              <span className={`fantasy-shirt mini ${p.position}`} style={teamCssVars(p.team)}><i>{teamCode(p.team)}</i></span>
-              <span className="bench-copy"><b>{shortName(p.full_name)}</b><small>{posLabel[p.position]} • {Number(p.price||0).toFixed(1)}m • {xfp(p).toFixed(1)} xFP</small></span>
-              <i className="bench-remove" onClick={e=>{e.stopPropagation();remove(p.id)}}>×</i>
-            </button>)}
+            {bench.map((p,i)=>{
+              const preview=swapTarget?swapResult(p.id):null
+              return <button
+                type="button"
+                key={p.id}
+                className={`my-bench-player ${preview?'eligible':''} ${swapTarget&&!preview?'swap-disabled':''}`}
+                onClick={()=>swapTarget?swapWithBench(p.id):null}
+              >
+                <span className="bench-order">{i+1}</span>
+                <span className={`fantasy-shirt mini ${p.position}`} style={teamCssVars(p.team)}><i>{shirtMark(p)}</i></span>
+                <span className="bench-copy"><b>{displayName(p)}</b><small>{posLabel[p.position]} • {Number(p.price||0).toFixed(1)}m • {xfp(p).toFixed(1)} xFP {preview?<em className="swap-preview-tag">→ {preview.nextFormation}</em>:null}</small></span>
+                <i className="bench-remove" onClick={e=>{e.stopPropagation();remove(p.id)}}>×</i>
+              </button>
+            })}
             {Array.from({length:Math.max(0,4-bench.length)},(_,i)=><div className="my-bench-player empty-slot" key={'empty'+i}><span>+</span><small>Yedek</small></div>)}
           </div>
         </div>
@@ -354,9 +357,9 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
             const overBudget=!chosen&&cost+Number(p.price)>100.0001
             const disabled=!chosen&&(ids.length>=15||posFull||overBudget)
             return <div className={`picker-player ${chosen?'chosen':''} ${disabled?'disabled':''}`} style={teamCssVars(p.team)} key={p.id}>
-              <div className="picker-shirt-wrap"><span className={`fantasy-shirt tiny ${p.position}`} style={teamCssVars(p.team)}><i>{teamCode(p.team)}</i></span></div>
+              <div className="picker-shirt-wrap"><span className={`fantasy-shirt tiny ${p.position}`} style={teamCssVars(p.team)}><i>{shirtMark(p)}</i></span></div>
               <div className="picker-copy">
-                <b>{p.full_name}</b>
+                <b title={p.full_name}>{displayName(p)}</b>
                 <small>{p.team} • vs {p.projection?.opponent_name||'—'}</small>
                 <div><span>{posLabel[p.position]}</span><span>{Number(p.price||0).toFixed(1)}m</span><span>{Number(p.projection?.x_minutes||0).toFixed(0)} dk</span></div>
               </div>
@@ -371,7 +374,7 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
     <section className="card squad-insight-bar">
       <div>
         <span className="eyebrow">MODEL ÖNERİSİ</span>
-        <h2>{bestMove&&bestMove.gain>0?`${shortName(bestMove.out.full_name)} → ${shortName(bestMove.inn.full_name)}`:'Kadron şu an dengeli görünüyor'}</h2>
+        <h2>{bestMove&&bestMove.gain>0?`${displayName(bestMove.out)} → ${displayName(bestMove.inn)}`:'Kadron şu an dengeli görünüyor'}</h2>
         {bestMove&&bestMove.gain>0?<p>Tek transferde yaklaşık <b>+{bestMove.gain.toFixed(2)} xFP</b> potansiyeli.</p>:<p>Mevcut xFP’ye göre pozitif tek transfer bulunamadı.</p>}
       </div>
       <div className={`pro-lock ${plan==='pro'?'unlocked':''}`}>

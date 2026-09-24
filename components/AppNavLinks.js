@@ -87,7 +87,7 @@ export function MobileMenu({ primary, analysis, signedIn }){
       )}
       <Link onClick={close} href="/pricing">Scout Pro</Link>
       {signedIn
-        ? <form action={logout}><button type="submit">Çıkış</button></form>
+        ? <form action={logout}><button onClick={close} type="submit">Çıkış</button></form>
         : <Link onClick={close} href="/login">Giriş / Kayıt</Link>}
     </div>:null}
   </div>

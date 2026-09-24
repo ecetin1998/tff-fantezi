@@ -38,7 +38,7 @@ export default async function PlayerPage({ params }){
         <div>
           <span className="eyebrow">OYUNCU PROFİLİ</span>
           <h1>{player.full_name}</h1>
-          <p>{player.team} • {Number(player.price||0).toFixed(1)}m</p>
+          <p>{player.display_name&&player.display_name!==player.full_name?<><b className="player-match-name">{player.display_name}</b> • </>:null}{player.team} • {Number(player.price||0).toFixed(1)}m</p>
         </div>
       </div>
       <div className="player-hero-score">

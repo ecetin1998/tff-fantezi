@@ -15,7 +15,7 @@ export default function WeeklyPointsTable({ players, throughGameweek, finalThrou
   const rows=useMemo(()=>{
     const out=players.filter(p=>
       (!team||p.team===team) &&
-      (!q||((p.full_name+' '+p.team).toLocaleLowerCase('tr').includes(q.toLocaleLowerCase('tr'))))
+      (!q||(((p.full_name||'')+' '+(p.display_name||'')+' '+p.team).toLocaleLowerCase('tr').includes(q.toLocaleLowerCase('tr'))))
     ).map(p=>{
       const map=new Map((p.weekly||[]).map(x=>[Number(x.gameweek),x]))
       const stats=p.stats||{}
@@ -74,10 +74,10 @@ export default function WeeklyPointsTable({ players, throughGameweek, finalThrou
           {head('avg','Ort.')}
           {gameweeks.map(g=>head('gw'+g,'GW'+g))}
         </tr></thead>
-        <tbody>{rows.map((p,i)=><tr key={p.id}>
+        <tbody>{rows.map((p,i)=><tr className="team-player-row" style={teamCssVars(p.team)} key={p.id}>
           <td className="rank-col">{i+1}</td>
           <td className="weekly-player-cell">
-            <Link className="player-link" href={'/players/'+p.id}><b>{p.full_name}</b></Link>
+            <Link className="player-link" href={'/players/'+p.id}><b>{p.display_name||p.full_name}</b></Link>
             <small>{p.team}</small>
           </td>
           <td className="summary-score"><b>{p.total}</b></td>
@@ -98,7 +98,7 @@ export default function WeeklyPointsTable({ players, throughGameweek, finalThrou
       {rows.map((p,i)=><Link href={'/players/'+p.id} className="card weekly-mobile-card team-accent-card" style={teamCssVars(p.team)} key={p.id}>
         <div className="weekly-mobile-head">
           <span className="weekly-rank">#{i+1}</span>
-          <div><b>{p.full_name}</b><small>{p.team}</small></div>
+          <div><b>{p.display_name||p.full_name}</b><small>{p.team}</small></div>
           <strong>{p.total}<small>toplam</small></strong>
         </div>
 

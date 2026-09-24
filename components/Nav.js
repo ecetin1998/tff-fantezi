@@ -20,10 +20,10 @@ const analysis = [
 
 const bottom = [
   ['/', '⌂', 'Ana'],
-  ['/players', '◉', 'Oyuncu'],
-  ['/matches', '◎', 'Maç'],
-  ['/squads', '▦', 'Kadro'],
-  ['/squad', '◇', 'Benim'],
+  ['/players', '◉', 'Oyuncular'],
+  ['/matches', '◎', 'Maçlar'],
+  ['/squads', '▦', 'Öneriler'],
+  ['/squad', '◇', 'Kadrom'],
 ]
 
 export default async function Nav(){

@@ -3,14 +3,15 @@ import { teamCssVars } from '@/lib/teamThemes'
 
 const posLabel={GK:'KL',DEF:'DEF',MID:'OS',FWD:'FOR'}
 
-function shortName(name=''){
-  const parts=String(name).trim().split(/\s+/)
-  if(parts.length===1)return parts[0]||'—'
-  const last=parts.at(-1)
-  return last.length<=3&&parts.length>2?parts.at(-2):last
+function fallbackName(name=''){
+  const parts=String(name||'').trim().split(/\s+/).filter(Boolean)
+  return parts.at(-1)||'—'
 }
-function teamCode(team=''){
-  return String(team).replace(/[^A-Za-zÇĞİÖŞÜçğıöşü]/g,'').slice(0,3).toLocaleUpperCase('tr')
+function displayName(player){
+  return player?.display_name || fallbackName(player?.full_name)
+}
+function shirtMark(player,team=''){
+  return player?.shirt_number ?? String(team||'').replace(/[^A-Za-zÇĞİÖŞÜçğıöşü]/g,'').slice(0,3).toLocaleUpperCase('tr')
 }
 
 export default function SquadPitchView({
@@ -57,8 +58,8 @@ export default function SquadPitchView({
           key={m.player_id}
           title={m.player?.full_name||''}
         >
-          <span className={`fantasy-shirt ${m.player?.position}`} style={teamCssVars(m.team)}><i>{teamCode(m.team)}</i></span>
-          <b>{shortName(m.player?.full_name)}</b>
+          <span className={`fantasy-shirt ${m.player?.position}`} style={teamCssVars(m.team)}><i>{shirtMark(m.player,m.team)}</i></span>
+          <b>{displayName(m.player)}</b>
           <small>{m.team}</small>
           <div className="pitch-player-tags">
             <span>{Number(m.player?.price||0).toFixed(1)}m</span>
@@ -77,8 +78,8 @@ export default function SquadPitchView({
       <div className="my-bench-row readonly-bench-row">
         {bench.map((m,i)=><Link href={'/players/'+m.player_id} className="my-bench-player readonly-bench-player" key={m.player_id}>
           <span className="bench-order">{i+1}</span>
-          <span className={`fantasy-shirt mini ${m.player?.position}`} style={teamCssVars(m.team)}><i>{teamCode(m.team)}</i></span>
-          <span className="bench-copy"><b>{shortName(m.player?.full_name)}</b><small>{posLabel[m.player?.position]||m.player?.position} • {Number(m.player?.price||0).toFixed(1)}m • {Number(m.xfp||0).toFixed(1)} xFP</small></span>
+          <span className={`fantasy-shirt mini ${m.player?.position}`} style={teamCssVars(m.team)}><i>{shirtMark(m.player,m.team)}</i></span>
+          <span className="bench-copy"><b>{displayName(m.player)}</b><small>{posLabel[m.player?.position]||m.player?.position} • {Number(m.player?.price||0).toFixed(1)}m • {Number(m.xfp||0).toFixed(1)} xFP</small></span>
         </Link>)}
       </div>
     </div>:null}
