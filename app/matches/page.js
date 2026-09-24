@@ -4,33 +4,67 @@ import { teamCssVars } from '@/lib/teamThemes'
 
 export const revalidate=300
 
+const difficultyLabel={easy:'Kolay fikstür',medium:'Orta fikstür',hard:'Zor fikstür'}
+
 export default async function Matches(){
-  const {matches,run}=await getMatches()
+  const {matches,run,eloThroughGameweek}=await getMatches()
   return <>
     <div className="section-title">
       <div><span className="eyebrow">MAÇ MODELİ</span><h1>MH{run?.gameweek||'—'} Maç Tahminleri</h1></div>
-      <span className="muted">xG • 1X2 • KG Var • 2.5 Üst</span>
+      <span className="muted">xG • maç olasılığı • Elo • fikstür zorluğu</span>
     </div>
     <div className="grid match-grid modern-match-grid">
       {matches.map(m=>{
         const home=Number(m.home_win_probability||0),draw=Number(m.draw_probability||0),away=Number(m.away_win_probability||0)
+        const totalXg=Number(m.home_xg||0)+Number(m.away_xg||0)
         return <article className="card match-card modern-match-card" key={m.match_id}>
           <div className="match-card-top">
             <span>{m.kickoff_at?new Intl.DateTimeFormat('tr-TR',{weekday:'short',day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit',timeZone:'Europe/Istanbul'}).format(new Date(m.kickoff_at)):'—'}</span>
             <b>MH{run?.gameweek||'—'}</b>
           </div>
+
           <div className="match-teams">
-            <div><span>EV</span><Link className="match-team-link" style={teamCssVars(m.home_team)} href={'/teams/'+m.home_team_id}><i className="club-dot"/><b>{m.home_team}</b></Link></div>
-            <div className="xg-comparison"><small>xG TAHMİNİ</small><strong><b>{Number(m.home_xg||0).toFixed(2)}</b><em>—</em><b>{Number(m.away_xg||0).toFixed(2)}</b></strong></div>
-            <div className="away"><span>DEP</span><Link className="match-team-link away-link" style={teamCssVars(m.away_team)} href={'/teams/'+m.away_team_id}><i className="club-dot"/><b>{m.away_team}</b></Link></div>
+            <div className="match-team-block">
+              <span>EV</span>
+              <Link className="match-team-link" style={teamCssVars(m.home_team)} href={'/teams/'+m.home_team_id}><i className="club-dot"/><b>{m.home_team}</b></Link>
+              <div className="match-team-meta">
+                <small>Elo {m.home_elo||'—'}</small>
+                <em className={'fixture-difficulty '+(m.home_fixture_level||'medium')}>{difficultyLabel[m.home_fixture_level]||'Orta fikstür'}</em>
+              </div>
+            </div>
+
+            <div className="xg-comparison">
+              <small>xG TAHMİNİ</small>
+              <strong><b>{Number(m.home_xg||0).toFixed(2)}</b><em>—</em><b>{Number(m.away_xg||0).toFixed(2)}</b></strong>
+            </div>
+
+            <div className="away match-team-block">
+              <span>DEP</span>
+              <Link className="match-team-link away-link" style={teamCssVars(m.away_team)} href={'/teams/'+m.away_team_id}><i className="club-dot"/><b>{m.away_team}</b></Link>
+              <div className="match-team-meta away-meta">
+                <small>Elo {m.away_elo||'—'}</small>
+                <em className={'fixture-difficulty '+(m.away_fixture_level||'medium')}>{difficultyLabel[m.away_fixture_level]||'Orta fikstür'}</em>
+              </div>
+            </div>
           </div>
+
           <div className="outcome-labels outcome-labels-top">
-            <span><small>{(home*100).toFixed(0)}%</small><b>1</b></span>
-            <span><small>{(draw*100).toFixed(0)}%</small><b>X</b></span>
-            <span><small>{(away*100).toFixed(0)}%</small><b>2</b></span>
+            <span><small>{(home*100).toFixed(0)}%</small><b>Ev</b></span>
+            <span><small>{(draw*100).toFixed(0)}%</small><b>Beraberlik</b></span>
+            <span><small>{(away*100).toFixed(0)}%</small><b>Dep</b></span>
           </div>
-          <div className="outcome-bar"><i className="home" style={{width:(home*100)+'%'}}/><i className="draw" style={{width:(draw*100)+'%'}}/><i className="away" style={{width:(away*100)+'%'}}/></div>
-          <div className="match-chips"><span>KG Var <b>{(Number(m.btts_probability||0)*100).toFixed(0)}%</b></span><span>2.5 Üst <b>{(Number(m.over25_probability||0)*100).toFixed(0)}%</b></span></div>
+          <div className="outcome-bar">
+            <i className="home" style={{width:(home*100)+'%'}}/>
+            <i className="draw" style={{width:(draw*100)+'%'}}/>
+            <i className="away" style={{width:(away*100)+'%'}}/>
+          </div>
+
+          <div className="match-fantasy-meta">
+            <span><small>Toplam xG</small><b>{totalXg.toFixed(2)}</b></span>
+            <span><small>Ev gol yememe</small><b>{(Number(m.home_cs_probability||0)*100).toFixed(0)}%</b></span>
+            <span><small>Dep gol yememe</small><b>{(Number(m.away_cs_probability||0)*100).toFixed(0)}%</b></span>
+          </div>
+          {eloThroughGameweek?<small className="elo-note">Elo: MH1–MH{eloThroughGameweek} sonuçları</small>:null}
         </article>
       })}
     </div>
