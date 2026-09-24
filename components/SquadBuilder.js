@@ -129,13 +129,13 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
       (!team||p.team===team)&&
       (!q||(`${p.full_name} ${p.team} ${p.projection?.opponent_name||''}`).toLocaleLowerCase('tr').includes(q.toLocaleLowerCase('tr')))
     )
-    const value=p=>{
-      if(sortKey==='price')return Number(p.price||0)
-      if(sortKey==='minutes')return Number(p.projection?.x_minutes||0)
-      return xfp(p)
-    }
     out=[...out].sort((a,b)=>{
-      const av=value(a),bv=value(b)
+      if(sortKey==='name'){
+        const cmp=String(a.full_name||'').localeCompare(String(b.full_name||''),'tr')
+        return sortDir==='asc'?cmp:-cmp
+      }
+      const av=sortKey==='price'?Number(a.price||0):xfp(a)
+      const bv=sortKey==='price'?Number(b.price||0):xfp(b)
       return sortDir==='asc'?av-bv:bv-av
     })
     return out.slice(0,180)
@@ -185,15 +185,21 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
     rebuild(next)
   }
   function changeFormation(next){
+    const nextXI=buildXI(ids,next,map)
     setFormation(next)
-    setSwapTarget(null)
-  }
-  function autoXI(){
-    const nextXI=buildXI(ids,formation,map)
     setXiIds(nextXI)
     const cap=nextXI.map(id=>map.get(id)).filter(Boolean).sort((a,b)=>xfp(b)-xfp(a))[0]
     setCaptainId(cap?.id||null)
     setSwapTarget(null)
+  }
+
+  function changePoolSort(nextKey){
+    if(sortKey===nextKey){
+      setSortDir(sortDir==='desc'?'asc':'desc')
+      return
+    }
+    setSortKey(nextKey)
+    setSortDir(nextKey==='name'?'asc':'desc')
   }
   function fillRecommended(){
     const next=recommendedState.map(x=>x.player_id).filter(id=>map.has(id)).slice(0,15)
@@ -308,10 +314,6 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
         <small>{bank.toFixed(1)}m banka</small>
       </div>
       <div className="squad-control-stat">
-        <span>Dağılım</span>
-        <b className="roster-counts">{counts.GK||0}/2 <small>KL</small> · {counts.DEF||0}/5 <small>DEF</small> · {counts.MID||0}/5 <small>OS</small> · {counts.FWD||0}/3 <small>FOR</small></b>
-      </div>
-      <div className="squad-control-stat">
         <span>15 oyuncu xFP</span>
         <b>{selectedTotal.toFixed(1)}</b>
         <small>MH{gameweek||'—'} tahmini</small>
@@ -347,7 +349,7 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
                 <span className={`fantasy-shirt ${p.position}`} style={teamCssVars(p.team)}><i>{shirtMark(p)}</i></span>
                 <b>{displayName(p)}</b>
                 <small>{p.team}</small>
-                <div className="pitch-player-tags"><span>{Number(p.price||0).toFixed(1)}m</span><strong>{xfp(p).toFixed(1)}</strong></div>
+                <div className="pitch-player-tags"><span>{Number(p.price||0).toFixed(1)}m</span><strong>{xfp(p).toFixed(1)} xFP</strong></div>
               </div>
               return <button type="button" className="roster-player empty-roster-slot" key={`${position}-${slot}`} onClick={()=>chooseEmptySlot(position)}>
                 <span className={`fantasy-shirt empty-shirt ${position}`}><i>+</i></span>
@@ -380,17 +382,13 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
               <option value="">Tüm takımlar</option>{teams.map(t=><option key={t}>{t}</option>)}
             </select>
           </div>
-          <div className="picker-sort-compact">
-            <span>Sırala</span>
-            <select value={sortKey} onChange={e=>setSortKey(e.target.value)}>
-              <option value="xfp">xFP</option>
-              <option value="price">Fiyat</option>
-              <option value="minutes">xDakika</option>
-            </select>
-            <button type="button" onClick={()=>setSortDir(sortDir==='desc'?'asc':'desc')} aria-label="Sıralama yönünü değiştir">
-              {sortDir==='desc'?'↓ Yüksekten':'↑ Düşükten'}
-            </button>
-          </div>
+        </div>
+        <div className="picker-table-head">
+          <span className="picker-shirt-head"/>
+          <button type="button" className={sortKey==='name'?'active':''} onClick={()=>changePoolSort('name')}>Oyuncu {sortKey==='name'?(sortDir==='desc'?'↓':'↑'):''}</button>
+          <button type="button" className={sortKey==='price'?'active':''} onClick={()=>changePoolSort('price')}>Fiyat {sortKey==='price'?(sortDir==='desc'?'↓':'↑'):''}</button>
+          <button type="button" className={sortKey==='xfp'?'active':''} onClick={()=>changePoolSort('xfp')}>xFP {sortKey==='xfp'?(sortDir==='desc'?'↓':'↑'):''}</button>
+          <span/>
         </div>
 
         <div className="picker-list">
@@ -399,22 +397,14 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
             const posFull=(counts[p.position]||0)>=LIMITS[p.position]
             const overBudget=!chosen&&cost+Number(p.price)>100.0001
             const disabled=!chosen&&(ids.length>=15||posFull||overBudget)
-            const metrics=[
-              {key:'xfp',label:'xFP',value:xfp(p).toFixed(2)},
-              {key:'price',label:'Fiyat',value:`${Number(p.price||0).toFixed(1)}m`},
-              {key:'minutes',label:'xDk',value:Number(p.projection?.x_minutes||0).toFixed(0)}
-            ].sort((a,b)=>(a.key===sortKey?1:0)-(b.key===sortKey?1:0))
             return <div className={`picker-player ${chosen?'chosen':''} ${disabled?'disabled':''}`} style={teamCssVars(p.team)} key={p.id}>
               <div className="picker-shirt-wrap"><span className={`fantasy-shirt tiny ${p.position}`} style={teamCssVars(p.team)}><i>{shirtMark(p)}</i></span></div>
               <div className="picker-copy">
                 <b>{p.full_name}</b>
                 <small><strong>{p.team}</strong><em>Rakip: {p.projection?.opponent_name||'—'}</em></small>
               </div>
-              <div className="picker-metrics">
-                {metrics.map(metric=><span className={metric.key===sortKey?'active':''} key={metric.key}>
-                  <small>{metric.label}</small><b>{metric.value}</b>
-                </span>)}
-              </div>
+              <div className={`picker-value price ${sortKey==='price'?'active':''}`}>{Number(p.price||0).toFixed(1)}m</div>
+              <div className={`picker-value xfp ${sortKey==='xfp'?'active':''}`}>{xfp(p).toFixed(2)}</div>
               <button type="button" onClick={()=>chosen?remove(p.id):add(p.id)} disabled={disabled}>{chosen?'✓':'+'}</button>
             </div>
           })}
@@ -444,14 +434,6 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
           <b>{option.complete?option.total.toFixed(1):'—'} <small>xFP</small></b>
           <em>{bestFormation===option.key&&option.complete?'En yüksek':'Kaptan dahil'}</em>
         </button>)}
-      </div>
-
-      <div className="lineup-action-row">
-        <div>
-          <span>Seçili diziliş <b>{formation}</b></span>
-          {liveFormation!==formation?<small>Mevcut XI farklı dizilişte. Yeniden diz.</small>:<small>XI seçili dizilişle uyumlu.</small>}
-        </div>
-        <button type="button" className="cta auto-xi-btn" onClick={autoXI} disabled={!validRoster}>✦ Seçili Dizilişe Göre XI</button>
       </div>
 
       <div className="lineup-layout">
@@ -534,7 +516,6 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
           <span className={validRoster?'ok':''}>{validRoster?'✓':'○'} 2 KL / 5 DEF / 5 OS / 3 FOR</span>
           <span className={cost<=100?'ok':''}>{cost<=100?'✓':'○'} Bütçe limiti</span>
           <span className={validXI?'ok':''}>{validXI?'✓':'○'} {liveFormation===formation?'Seçili diziliş hazır':'XI dizilişi güncellenmeli'}</span>
-          <button type="button" className="squad-tool-btn inline-roster-jump" onClick={goToRoster}>Oyuncu ekle / çıkar ↑</button>
         </div>
         <form action={saveAction} className="squad-save-form">
           <input type="hidden" name="player_ids" value={JSON.stringify(ids)}/>
