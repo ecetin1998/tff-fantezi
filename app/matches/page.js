@@ -9,7 +9,7 @@ export default async function Matches(){
   return <>
     <div className="section-title">
       <div><span className="eyebrow">MAÇ MODELİ</span><h1>GW{run?.gameweek||'—'} Maç Tahminleri</h1></div>
-      <span className="muted">Skor dağılımı • xG • 1X2 • KG Var</span>
+      <span className="muted">xG • 1X2 • KG Var • 2.5 Üst</span>
     </div>
     <div className="grid match-grid modern-match-grid">
       {matches.map(m=>{
@@ -20,12 +20,12 @@ export default async function Matches(){
             <b>GW{run?.gameweek||'—'}</b>
           </div>
           <div className="match-teams">
-            <div><span>EV</span><Link className="match-team-link" style={teamCssVars(m.home_team)} href={'/teams/'+m.home_team_id}><i className="club-dot"/><b>{m.home_team}</b></Link><strong>{Number(m.home_xg||0).toFixed(2)}<small>xG</small></strong></div>
-            <div className="score-prediction"><small>EN OLASI</small><strong>{m.top_score}</strong><em>{(Number(m.top_score_probability||0)*100).toFixed(1)}%</em></div>
-            <div className="away"><span>DEP</span><Link className="match-team-link away-link" style={teamCssVars(m.away_team)} href={'/teams/'+m.away_team_id}><i className="club-dot"/><b>{m.away_team}</b></Link><strong>{Number(m.away_xg||0).toFixed(2)}<small>xG</small></strong></div>
+            <div><span>EV</span><Link className="match-team-link" style={teamCssVars(m.home_team)} href={'/teams/'+m.home_team_id}><i className="club-dot"/><b>{m.home_team}</b></Link></div>
+            <div className="xg-comparison"><small>xG TAHMİNİ</small><strong><b>{Number(m.home_xg||0).toFixed(2)}</b><em>—</em><b>{Number(m.away_xg||0).toFixed(2)}</b></strong></div>
+            <div className="away"><span>DEP</span><Link className="match-team-link away-link" style={teamCssVars(m.away_team)} href={'/teams/'+m.away_team_id}><i className="club-dot"/><b>{m.away_team}</b></Link></div>
           </div>
+          <div className="outcome-labels outcome-labels-top"><span><small>{(home*100).toFixed(0)}%</small><b>1</b></span><span><small>{(draw*100).toFixed(0)}%</small><b>X</b></span><span><small>{(away*100).toFixed(0)}%</small><b>2</b></span></div>
           <div className="outcome-bar"><i className="home" style={{width:(home*100)+'%'}}/><i className="draw" style={{width:(draw*100)+'%'}}/><i className="away" style={{width:(away*100)+'%'}}/></div>
-          <div className="outcome-labels"><span>1 <b>{(home*100).toFixed(0)}%</b></span><span>X <b>{(draw*100).toFixed(0)}%</b></span><span>2 <b>{(away*100).toFixed(0)}%</b></span></div>
           <div className="match-chips"><span>KG Var <b>{(Number(m.btts_probability||0)*100).toFixed(0)}%</b></span><span>2.5 Üst <b>{(Number(m.over25_probability||0)*100).toFixed(0)}%</b></span></div>
         </article>
       })}
