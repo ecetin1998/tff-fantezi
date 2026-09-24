@@ -19,11 +19,11 @@ const analysis = [
 ]
 
 const bottom = [
-  ['/', '⌂', 'Ana'],
-  ['/players', '◉', 'Oyuncular'],
-  ['/matches', '◎', 'Maçlar'],
-  ['/squads', '▦', 'Öneriler'],
-  ['/squad', '◇', 'Kadrom'],
+  ['/', 'home', 'Ana'],
+  ['/players', 'players', 'Oyuncular'],
+  ['/matches', 'matches', 'Maçlar'],
+  ['/squads', 'recommendations', 'Öneriler'],
+  ['/squad', 'squad', 'Kadrom'],
 ]
 
 export default async function Nav(){
