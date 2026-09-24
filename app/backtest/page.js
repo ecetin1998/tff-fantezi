@@ -2,107 +2,140 @@ import { getBacktestOverview } from '@/lib/data'
 
 export const dynamic='force-dynamic'
 
-const pct=v=>v===null||v===undefined?'—':(Number(v)*100).toFixed(0)+'%'
 const num=(v,d=2)=>v===null||v===undefined?'—':Number(v).toFixed(d)
-const modeLabel={
-  preseason_replay:'Sezon öncesi yeniden oynatma',
-  reconstructed:'Yeniden oluşturulmuş',
-  historical_frozen:'Dondurulmuş geçmiş',
-  live_frozen:'Canlı dondurulmuş',
+const pct=v=>v===null||v===undefined?'—':(Number(v)*100).toFixed(0)+'%'
+const replayStatus={
+  cold_start_gap:'Başlangıç modeli eksik',
+  replay_pending:'Yeniden hesaplanacak',
+  closed:'Tamamlandı',
 }
-const statusLabel={replay_pending:'Yeniden oynatma hazırlanacak',closed:'Kapandı',open:'Canlı / bekliyor'}
+const liveStatus={
+  open:'Hafta devam ediyor',
+  closed:'Tamamlandı',
+}
+const tendency=v=>{
+  if(v===null||v===undefined)return '—'
+  const n=Number(v)
+  if(Math.abs(n)<.05)return 'Dengeli'
+  return n>0?num(Math.abs(n))+' puan fazla bekliyor':num(Math.abs(n))+' puan az bekliyor'
+}
 
 export default async function BacktestPage(){
-  const {weeks,learning,latestPlayers}=await getBacktestOverview()
-  const closed=weeks.filter(w=>w.status==='closed'&&w.fp_mae!==null)
-  const weightedN=closed.reduce((s,w)=>s+Number(w.fp_sample||0),0)
-  const weightedMae=weightedN?closed.reduce((s,w)=>s+Number(w.fp_mae||0)*Number(w.fp_sample||0),0)/weightedN:null
-  const frozen=closed.filter(w=>w.prediction_mode==='historical_frozen')
-  const frozenN=frozen.reduce((s,w)=>s+Number(w.fp_sample||0),0)
-  const frozenMae=frozenN?frozen.reduce((s,w)=>s+Number(w.fp_mae||0)*Number(w.fp_sample||0),0)/frozenN:null
-  const latest=weeks.length?weeks[weeks.length-1]:null
+  const {replayWeeks,liveWeeks,learning,replayPlayers,livePlayers}=await getBacktestOverview()
+  const replayClosed=replayWeeks.filter(w=>w.status==='closed')
+  const latestLive=liveWeeks.length?liveWeeks[liveWeeks.length-1]:null
+  const benchmark=replayWeeks[0]?.engine_version||'ScoutPlus 3.1'
 
   return <main className="page-shell backtest-page">
     <section className="page-hero backtest-hero">
       <div>
-        <span className="eyebrow">MODEL ÖĞRENME DÖNGÜSÜ</span>
+        <span className="eyebrow">GÜNCEL MODELİN GERİYE DÖNÜK TESTİ</span>
         <h1>Model Performansı</h1>
-        <p>Her maç haftasında tahmini dondur, gerçekleşen puanla karşılaştır ve hatanın kaynağını izle.</p>
+        <p>Burada eski model sürümlerini değil, bugün kullandığımız kurguyu geçmiş maç haftalarına yeniden uyguluyoruz. Her hafta için yalnız o haftanın ilk maçı başlamadan önce bilinebilecek veriler kullanılıyor; gerçek sonuçlar tahmin tamamlandıktan sonra açılıyor.</p>
       </div>
-      <div className="backtest-live-badge"><small>Güncel takip</small><b>{'MH'+(latest?.gameweek||'—')}</b><span>{statusLabel[latest?.status]||'—'}</span></div>
+      <div className="backtest-live-badge">
+        <small>Bugünkü motor</small>
+        <b>{benchmark.replace('ScoutPlus ','v')}</b>
+        <span>Eski modeller dahil değil</span>
+      </div>
     </section>
 
     <section className="backtest-summary-grid">
-      <article className="card"><span>Karşılaştırılan hafta</span><b>{closed.length}</b><small>Ölçülebilen haftalar</small></article>
-      <article className="card"><span>Tüm kayıtlar ağırlıklı MAE</span><b>{num(weightedMae)}</b><small>Fantezi puanı</small></article>
-      <article className="card"><span>Dondurulmuş haftalar MAE</span><b>{num(frozenMae)}</b><small>Maç öncesi kayıtlar</small></article>
-      <article className="card"><span>Güncel dondurulmuş oyuncu</span><b>{latest?.prediction_count??'—'}</b><small>Hafta kapanınca eşleşecek</small></article>
+      <article className="card"><span>Güncel kurgu ile tamamlanan test</span><b>{replayClosed.length}<small>/6</small></b><small>MH1–MH6 yeniden çalıştırılıyor</small></article>
+      <article className="card"><span>MH1 durumu</span><b className="summary-word">Başlangıç açığı</b><small>Motor şu an sıfır lig verisiyle takım gücü üretemiyor</small></article>
+      <article className="card"><span>Canlı tahmin geçmişi</span><b>{liveWeeks.length}</b><small>MH7 ve sonrası gerçek maç önü kayıtlar</small></article>
+      <article className="card"><span>Şu an takip edilen hafta</span><b>{latestLive?'MH'+latestLive.gameweek:'—'}</b><small>{latestLive?liveStatus[latestLive.status]||latestLive.status:'Canlı kayıt yok'}</small></article>
     </section>
 
-    <section className="card backtest-explainer">
-      <div><b>Dondurulmuş kayıt</b><p>Maç başlamadan önce kaydedilmiş gerçek tahmin.</p></div>
-      <div><b>Yeniden oluşturulmuş</b><p>Yalnız önceki haftalara kadar olan veriyle tekrar çalıştırılmış test.</p></div>
-      <div><b>MH1 başlangıç testi</b><p>Yalnız sezon öncesi bilgiyle üretilecek ayrı test.</p></div>
+    <section className="card backtest-method">
+      <div className="panel-head">
+        <div><span className="eyebrow">TEST KURALI</span><h2>Sonucu görmeden tahmin et</h2></div>
+      </div>
+      <div className="backtest-explainer">
+        <div><b>Güncel model replay</b><p>MH4 testinde model yalnız MH1–MH3 verisini görebilir. MH4 ve sonrasındaki hiçbir sonuç, dakika, xG veya fantasy puanı tahmine giremez.</p></div>
+        <div><b>Canlı performans</b><p>MH7’den itibaren gerçekten hafta başlamadan önce yayınlanan tahmini ayrıca saklarız. Böylece sonradan yeniden çalıştırılan test ile gerçek kullanım performansını karıştırmayız.</p></div>
+        <div><b>Eski modeller yok</b><p>v4.2, v4.3f veya eski dondurulmuş xFP değerleri güncel modelin başarı hesabına dahil edilmez. Yalnız ham geçmiş gerçekler kullanılabilir.</p></div>
+      </div>
     </section>
+
     <section className="card backtest-table-card">
       <div className="panel-head">
-        <div><span className="eyebrow">HAFTALIK KARNE</span><h2>Tahmin ne kadar yaklaştı?</h2></div>
-        <small>Yanlılık + ise model fazla, − ise az puan beklemiş demektir.</small>
+        <div><span className="eyebrow">GÜNCEL KURGU • MH1–MH6</span><h2>Hafta hafta geriye dönük test</h2></div>
+        <small>Bu tablo tamamlandığında bugünkü modelin geçmişte ne yapacağını gösterecek.</small>
+      </div>
+      <div className="table-scroll">
+        <table className="backtest-table replay-table">
+          <thead><tr>
+            <th>MH</th><th>Modelin bildiği veri</th><th>Oyuncu</th><th>Ortalama puan hatası</th><th>Model eğilimi</th><th>Sıralama uyumu</th><th>İlk 25 yakalama</th><th>Ortalama dakika hatası</th><th>Ana öğrenme</th><th>Durum</th>
+          </tr></thead>
+          <tbody>{replayWeeks.map(w=><tr key={w.gameweek} className={w.status==='cold_start_gap'?'replay-gap-row':''}>
+            <td><b>{'MH'+w.gameweek}</b></td>
+            <td>{w.data_through_gameweek===0?'Sezon öncesi / sıfır lig haftası':'MH1–MH'+w.data_through_gameweek}</td>
+            <td>{w.player_sample??'—'}</td>
+            <td><b>{num(w.average_point_error)}</b></td>
+            <td>{tendency(w.model_tendency)}</td>
+            <td>{w.ranking_alignment===null||w.ranking_alignment===undefined?'—':num(w.ranking_alignment,2)+' / 1.00'}</td>
+            <td>{pct(w.top25_hit_rate)}</td>
+            <td>{w.average_minute_error===null||w.average_minute_error===undefined?'—':num(w.average_minute_error,1)+' dk'}</td>
+            <td className="learning-cell">{w.main_learning||'—'}</td>
+            <td><span className={'replay-status '+w.status}>{replayStatus[w.status]||w.status}</span></td>
+          </tr>)}</tbody>
+        </table>
+      </div>
+      <div className="backtest-notes">
+        {replayWeeks.map(w=><div key={'replay-note-'+w.gameweek}><b>{'MH'+w.gameweek}</b><span>{w.notes}</span></div>)}
+      </div>
+    </section>
+
+    <section className="card metric-guide">
+      <div className="panel-head"><div><span className="eyebrow">NE ANLAMA GELİYOR?</span><h2>Terimleri sade okuyalım</h2></div></div>
+      <div className="metric-guide-grid">
+        <div><b>Ortalama puan hatası</b><p>Oyuncu başına tahmin edilen xFP ile gerçek fantasy puanı arasındaki farkın ortalaması. <strong>Düşük olması iyi.</strong> Örn. 1.40 = oyuncu başına ortalama 1.4 puan sapma.</p></div>
+        <div><b>Model eğilimi</b><p>Model sistematik olarak fazla mı az mı puan bekliyor onu gösterir. “0.30 puan fazla bekliyor” gibi doğrudan yazılır.</p></div>
+        <div><b>Sıralama uyumu</b><p>Modelin yüksek gördüğü oyuncular gerçekten üst sıralarda mı? <strong>1.00 tam uyum</strong>, 0 civarı belirgin sıralama ilişkisi yok demektir.</p></div>
+        <div><b>İlk 25 yakalama</b><p>Modelin en yüksek xFP verdiği ilk 25 oyuncudan kaçının gerçek haftanın ilk 25’ine girdiğini gösterir.</p></div>
+        <div><b>Ortalama dakika hatası</b><p>xDakika ile gerçek dakika arasındaki ortalama fark. Rol ve ilk 11 tahminimizin kalitesini doğrudan ölçer.</p></div>
+      </div>
+    </section>
+
+    <section className="card backtest-table-card">
+      <div className="panel-head">
+        <div><span className="eyebrow">GERÇEK ZAMANLI PERFORMANS</span><h2>MH7’den itibaren gerçekten ne tahmin ettik?</h2></div>
+        <small>Buradaki kayıtlar sonradan yeniden hesaplanmaz; o hafta başlamadan önce ne yayınlandıysa o kalır.</small>
       </div>
       <div className="table-scroll">
         <table className="backtest-table">
-          <thead><tr><th>MH</th><th>Kayıt</th><th>Veri sınırı</th><th>Örnek</th><th>MAE</th><th>Yanlılık</th><th>RMSE</th><th>Sıra korelasyonu</th><th>İlk 25</th><th>Veri güveni</th><th>Durum</th></tr></thead>
-          <tbody>
-            {weeks.map(w=><tr key={w.gameweek} className={w.status==='open'?'current-backtest-row':''}>
-              <td><b>{'MH'+w.gameweek}</b></td>
-              <td><span className={'backtest-mode '+w.prediction_mode}>{modeLabel[w.prediction_mode]||w.prediction_mode}</span></td>
-              <td>{w.training_through_gameweek===0?'Sezon öncesi':'MH1–MH'+w.training_through_gameweek}</td>
-              <td>{w.fp_sample??'—'}</td>
-              <td><b>{num(w.fp_mae)}</b></td>
-              <td>{num(w.fp_bias)}</td>
-              <td>{num(w.fp_rmse)}</td>
-              <td>{w.spearman===null||w.spearman===undefined?'—':Number(w.spearman).toFixed(2)}</td>
-              <td>{pct(w.top25_hit_rate)}</td>
-              <td>{w.data_confidence||'—'}</td>
-              <td>{statusLabel[w.status]||w.status}</td>
-            </tr>)}
-          </tbody>
+          <thead><tr><th>MH</th><th>Oyuncu</th><th>Ortalama puan hatası</th><th>Model eğilimi</th><th>Sıralama uyumu</th><th>İlk 25 yakalama</th><th>Ortalama dakika hatası</th><th>Durum</th></tr></thead>
+          <tbody>{liveWeeks.length?liveWeeks.map(w=><tr key={w.gameweek} className={w.status==='open'?'current-backtest-row':''}>
+            <td><b>{'MH'+w.gameweek}</b></td>
+            <td>{w.fp_sample??w.prediction_count??'—'}</td>
+            <td><b>{num(w.fp_mae)}</b></td>
+            <td>{tendency(w.fp_bias)}</td>
+            <td>{w.spearman===null||w.spearman===undefined?'—':num(w.spearman,2)+' / 1.00'}</td>
+            <td>{pct(w.top25_hit_rate)}</td>
+            <td>{w.minute_mae===null||w.minute_mae===undefined?'—':num(w.minute_mae,1)+' dk'}</td>
+            <td>{liveStatus[w.status]||w.status}</td>
+          </tr>):<tr><td colSpan="8">Henüz canlı kapanmış hafta yok.</td></tr>}</tbody>
         </table>
       </div>
-      <div className="backtest-notes">{weeks.map(w=><div key={'note-'+w.gameweek}><b>{'MH'+w.gameweek}</b><span>{w.notes}</span></div>)}</div>
     </section>
 
     <section className="card learning-section">
       <div className="panel-head">
-        <div><span className="eyebrow">ÖĞRENME GÜNLÜĞÜ</span><h2>Model nerede hata yapıyor?</h2></div>
-        <small>Tek haftalık sapma otomatik olarak modeli değiştirmez.</small>
+        <div><span className="eyebrow">ÖĞRENME GÜNLÜĞÜ</span><h2>Neyi geliştirmemiz gerekiyor?</h2></div>
+        <small>Tek oyuncu veya tek haftalık şansa göre model değiştirmiyoruz.</small>
       </div>
-      <div className="learning-grid">
-        {learning.map(item=><article key={item.id} className="learning-card">
-          <div><span>{'MH'+item.after_gameweek+' sonrası'}</span><em>{item.status==='baseline'?'Başlangıç':item.status==='applied'?'Uygulandı':'İzleniyor'}</em></div>
-          <h3>{item.component}</h3><p>{item.signal}</p><strong>{item.evidence}</strong><small>{item.guardrail}</small>
-        </article>)}
-      </div>
+      {learning.length?<div className="learning-grid">{learning.map(item=><article key={item.id} className="learning-card">
+        <div><span>{'MH'+item.after_gameweek+' sonrası'}</span><em>{item.status==='applied'?'Uygulandı':'İzleniyor'}</em></div>
+        <h3>{item.component}</h3><p>{item.signal}</p><strong>{item.evidence}</strong><small>{item.guardrail}</small>
+      </article>)}</div>:<div className="empty-learning-state">Güncel kurgu replay’i tamamlanınca öğrenme sinyalleri burada oluşacak.</div>}
     </section>
 
-    <section className="card learning-rules">
-      <span className="eyebrow">OTOMATİK ÖĞRENME KURALI</span>
-      <h2>Model kendi kendine değişecek ama kontrolsüz değil</h2>
-      <div className="learning-rule-grid">
-        <div><b>1</b><span>Hafta başlamadan tahmini ve girdileri dondur.</span></div>
-        <div><b>2</b><span>Hafta kapanınca xFP, dakika, 6+, sıralama, XI ve kaptan başarısını ölç.</span></div>
-        <div><b>3</b><span>Hatanın dakika, rol, takım süreci, bitiricilik, yaratım, gol yememe/kurtarış veya bonus kaynaklı olup olmadığını ayır.</span></div>
-        <div><b>4</b><span>Aynı yönde en az 3 hafta veya bileşende en az 30 oyuncu-maç kanıtı yoksa sadece izle.</span></div>
-        <div><b>5</b><span>Kanıt yeterliyse yalnız ilgili bileşene küçük ve limitli ayar uygula; dondurulmuş geçmişi değiştirme.</span></div>
-        <div><b>6</b><span>Yeni ayarın sonraki haftalarda gerçekten iyileştirip iyileştirmediğini ayrıca geriye dönük test et.</span></div>
-      </div>
-    </section>
-
-    {latestPlayers.length?<section className="card backtest-table-card">
-      <div className="panel-head"><div><span className="eyebrow">SON KAPANAN HAFTA</span><h2>En büyük oyuncu sapmaları</h2></div></div>
+    {(replayPlayers.length||livePlayers.length)?<section className="card backtest-table-card">
+      <div className="panel-head"><div><span className="eyebrow">OYUNCU BAZINDA</span><h2>En büyük sapmalar</h2></div></div>
       <div className="table-scroll"><table className="backtest-table">
-        <thead><tr><th>Oyuncu</th><th>xFP</th><th>Gerçek</th><th>Fark</th><th>Ana bileşen</th></tr></thead>
-        <tbody>{latestPlayers.map(p=><tr key={String(p.player_id)}><td>{p.player_name}</td><td>{num(p.predicted_xfp)}</td><td>{num(p.actual_points,0)}</td><td>{num(p.prediction_error)}</td><td>{p.error_component||'—'}</td></tr>)}</tbody>
+        <thead><tr><th>Oyuncu</th><th>xFP</th><th>Gerçek</th><th>Fark</th><th>Ana hata alanı</th></tr></thead>
+        <tbody>{[...replayPlayers,...livePlayers].slice(0,20).map((p,i)=><tr key={String(p.player_id)+'-'+i}><td>{p.player_name}</td><td>{num(p.predicted_xfp)}</td><td>{num(p.actual_points,0)}</td><td>{num(p.point_error??p.prediction_error)}</td><td>{p.main_error_area??p.error_component??'—'}</td></tr>)}</tbody>
       </table></div>
     </section>:null}
   </main>
