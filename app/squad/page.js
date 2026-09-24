@@ -42,10 +42,11 @@ export default async function Squad({searchParams}){
     }))
   }
 
-  const recommendedState=(recommended||[]).map((x,i)=>({
+  let recommendedBenchOrder=0
+  const recommendedState=(recommended||[]).map(x=>({
     player_id:Number(x.player_id),
     is_captain:Boolean(x.is_captain),
-    bench_order:x.squad_slot==='XI'?null:(i+1)
+    bench_order:x.squad_slot==='XI'?null:(++recommendedBenchOrder)
   }))
 
   return <>
