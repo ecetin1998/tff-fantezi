@@ -48,8 +48,8 @@ export default async function TeamPage({params}){
     <div className="profile-grid team-detail-split">
       <section className="card profile-card team-current-fixture">
         <span className="eyebrow">BU HAFTA</span>
-        <div className="team-fixture-versus"><div><small>{isHome?'EV':'DEP'}</small><b>{team.name}</b></div><span>vs</span><div><small>{isHome?'DEP':'EV'}</small>{opponent?<Link href={'/teams/'+opponent.id}><b>{opponent.name}</b></Link>:<b>—</b>}</div></div>
-        <div className="profile-mini-grid"><div><span>xG</span><b>{num(teamXg)}</b></div><div><span>Rakip xG</span><b>{num(oppXg)}</b></div><div><span>Galibiyet</span><b>{pct(win)}</b></div><div><span>Clean sheet</span><b>{pct(cs)}</b></div></div>
+        <div className="team-fixture-versus"><div><small>{isHome?'EV':'DEP'}</small><b>{team.name}</b></div><span>Rakip</span><div><small>{isHome?'DEP':'EV'}</small>{opponent?<Link href={'/teams/'+opponent.id}><b>{opponent.name}</b></Link>:<b>—</b>}</div></div>
+        <div className="profile-mini-grid"><div><span>xG</span><b>{num(teamXg)}</b></div><div><span>Rakip xG</span><b>{num(oppXg)}</b></div><div><span>Galibiyet</span><b>{pct(win)}</b></div><div><span>Gol yememe</span><b>{pct(cs)}</b></div></div>
       </section>
       <section className="card profile-card team-profile-breakdown">
         <span className="eyebrow">SEZON PROFİLİ</span>
