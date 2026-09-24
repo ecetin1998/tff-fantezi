@@ -79,7 +79,7 @@ export default function SquadPitchView({
         {bench.map((m,i)=><Link href={'/players/'+m.player_id} className="my-bench-player readonly-bench-player" key={m.player_id}>
           <span className="bench-order">{i+1}</span>
           <span className={`fantasy-shirt mini ${m.player?.position}`} style={teamCssVars(m.team)}><i>{posLabel[m.player?.position]||m.player?.position||'—'}</i></span>
-          <span className="bench-copy"><b>{m.player?.full_name||'—'}</b><small>{posLabel[m.player?.position]||m.player?.position} • {Number(m.player?.price||0).toFixed(1)}m • {Number(m.xfp||0).toFixed(1)} xFP</small></span>
+          <span className="bench-copy"><b>{m.player?.full_name||'—'}</b><small>{m.team||'—'} • {posLabel[m.player?.position]||m.player?.position} • {Number(m.player?.price||0).toFixed(1)}m • {Number(m.xfp||0).toFixed(1)} xFP</small></span>
         </Link>)}
       </div>
     </div>:null}
