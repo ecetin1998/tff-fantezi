@@ -125,6 +125,14 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
     return best
   },[selected,players,ids,bank])
 
+  function applyBestMove(){
+    if(!bestMove||bestMove.gain<=0)return
+    const next=ids.map(id=>id===bestMove.out.id?bestMove.inn.id:id)
+    setIds(next)
+    rebuild(next)
+    setSwapTarget(null)
+  }
+
   function rebuild(nextIds,nextFormation=formation){
     const nextXI=buildXI(nextIds,nextFormation,map)
     setXiIds(nextXI)
@@ -374,6 +382,7 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
         <span className="eyebrow">MODEL ÖNERİSİ</span>
         <h2>{bestMove&&bestMove.gain>0?`${bestMove.out.full_name} → ${bestMove.inn.full_name}`:'Kadron şu an dengeli görünüyor'}</h2>
         {bestMove&&bestMove.gain>0?<p>Tek transferde yaklaşık <b>+{bestMove.gain.toFixed(2)} xFP</b> potansiyeli.</p>:<p>Mevcut xFP’ye göre pozitif tek transfer bulunamadı.</p>}
+        {bestMove&&bestMove.gain>0?<button type="button" className="squad-tool-btn model-apply-btn" onClick={applyBestMove}>Öneriyi Uygula</button>:null}
       </div>
       <div className={`pro-lock ${plan==='pro'?'unlocked':''}`}>
         <span>PRO</span><b>3 GW Planlayıcı</b><small>{plan==='pro'?'Pro erişimin aktif.':'Çok haftalı transfer zinciri ve risk simülasyonu.'}</small>
