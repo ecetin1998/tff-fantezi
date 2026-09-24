@@ -89,7 +89,7 @@ export default async function PlayerPage({ params }){
     <section className="card profile-card season-card">
       <div className="panel-head">
         <div><span className="eyebrow">SEZON GERÇEKLERİ</span><h2>MH1–MH{s?.through_gameweek||'—'}</h2></div>
-        <span className="pill team-pill">{actual} fantasy puanı</span>
+        <span className="pill team-pill">{actual} fantezi puanı</span>
       </div>
       <div className="season-stat-grid">
         <div><span>Maç</span><b>{played}</b></div>
@@ -135,7 +135,7 @@ export default async function PlayerPage({ params }){
 
     <section className="card profile-card weekly-history-card">
       <div className="panel-head">
-        <div><span className="eyebrow">HAFTA HAFTA</span><h2>Gerçek Fantasy Puanları</h2></div>
+        <div><span className="eyebrow">HAFTA HAFTA</span><h2>Gerçek Fantezi Puanları</h2></div>
         <Link className="pill" href="/points">Tüm oyuncular →</Link>
       </div>
       {weekly?.length?
