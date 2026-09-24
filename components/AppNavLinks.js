@@ -82,7 +82,14 @@ export function MobileMenu({ primary, analysis, signedIn }){
     </button>
 
     {open?<div className="mobile-menu-panel compact-mobile-menu-panel">
-      {[...primary,...analysis].map(([href,label])=>
+      {primary.map(([href,label])=>
+        <Link onClick={close} className={matches(path,href)?'active':''} key={href} href={href}>{label}</Link>
+      )}
+      <Link onClick={close} className={matches(path,'/squad')?'active mobile-menu-team-link':'mobile-menu-team-link'} href="/squad">
+        <span className="mobile-menu-team-icon">♟</span>
+        <span><b>Benim Kadrom</b><small>Kadronu düzenle ve takip et</small></span>
+      </Link>
+      {analysis.map(([href,label])=>
         <Link onClick={close} className={matches(path,href)?'active':''} key={href} href={href}>{label}</Link>
       )}
       <Link onClick={close} href="/pricing">Scout Pro</Link>
@@ -93,12 +100,22 @@ export function MobileMenu({ primary, analysis, signedIn }){
   </div>
 }
 
+function BottomNavIcon({ name }){
+  const common={width:22,height:22,viewBox:'0 0 24 24',fill:'none',stroke:'currentColor',strokeWidth:1.9,strokeLinecap:'round',strokeLinejoin:'round','aria-hidden':true}
+  if(name==='home') return <svg {...common}><path d="M3 10.5 12 3l9 7.5"/><path d="M5.5 9.5V21h13V9.5"/><path d="M9.5 21v-6h5v6"/></svg>
+  if(name==='players') return <svg {...common}><circle cx="9" cy="8" r="3"/><path d="M3.5 20c.4-4 2.3-6 5.5-6s5.1 2 5.5 6"/><circle cx="17.5" cy="9" r="2.2"/><path d="M15.5 14.5c3.1-.4 5 1.3 5.3 4.5"/></svg>
+  if(name==='matches') return <svg {...common}><circle cx="12" cy="12" r="8.5"/><path d="m8.7 9.4 3.3-2.1 3.3 2.1-1.2 3.8H9.9z"/><path d="m8.7 9.4-3.4.1M15.3 9.4l3.4.1M9.9 13.2l-1.6 3.4M14.1 13.2l1.6 3.4"/></svg>
+  if(name==='recommendations') return <svg {...common}><path d="M5 4h14v16H5z"/><path d="M8 8h8M8 12h8M8 16h5"/><path d="m16.5 15.5 1 1 2-2"/></svg>
+  return <svg {...common}><path d="M5 6.5 8.2 4 12 6l3.8-2L19 6.5V20H5z"/><path d="M8.2 4 9 9h6l.8-5"/><path d="M9 13h6"/></svg>
+}
+
 export function MobileBottomNav({ items }){
   const path=usePathname()
   return <nav className="mobile-bottom-nav" aria-label="Mobil ana navigasyon">
     {items.map(([href,icon,label])=>
       <Link className={matches(path,href)?'active':''} href={href} key={href}>
-        <span>{icon}</span><b>{label}</b>
+        <span className="bottom-nav-icon"><BottomNavIcon name={icon}/></span>
+        <b>{label}</b>
       </Link>
     )}
   </nav>
