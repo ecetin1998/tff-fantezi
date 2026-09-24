@@ -3,6 +3,8 @@ import Link from 'next/link'
 import { useMemo, useState } from 'react'
 import { teamCssVars } from '@/lib/teamThemes'
 
+const posLabel=p=>({GK:'KL',DEF:'DEF',MID:'OS',FWD:'FOR'}[p]||p||'—')
+
 export default function WeeklyPointsTable({ players, throughGameweek, finalThroughGameweek }){
   const [q,setQ]=useState('')
   const [team,setTeam]=useState('')
@@ -54,10 +56,10 @@ export default function WeeklyPointsTable({ players, throughGameweek, finalThrou
       </select>
       <select value={pos} onChange={e=>setPos(e.target.value)}>
         <option value="">Tüm mevkiler</option>
-        <option value="GK">GK</option>
+        <option value="GK">KL</option>
         <option value="DEF">DEF</option>
-        <option value="MID">MID</option>
-        <option value="FWD">FWD</option>
+        <option value="MID">OS</option>
+        <option value="FWD">FOR</option>
       </select>
       <select className="weekly-sort-select" value={sort} onChange={e=>{setSort(e.target.value);setDir(-1)}}>
         <option value="total">Toplam puan</option>
@@ -67,15 +69,15 @@ export default function WeeklyPointsTable({ players, throughGameweek, finalThrou
       </select>
       {sort==='week'?<select className="weekly-week-filter" value={weekSort} onChange={e=>{setWeekSort(Number(e.target.value));setDir(-1)}}>
         {gameweeks.filter(g=>g<=finalThroughGameweek).map(g=>
-          <option key={g} value={g}>GW{g}</option>
+          <option key={g} value={g}>MH{g}</option>
         )}
       </select>:null}
     </div>
 
     <div className="table-summary weekly-summary">
       <span><b>{rows.length}</b> oyuncu</span>
-      <span>Final: <b>GW{finalThroughGameweek||'—'}</b></span>
-      {throughGameweek>finalThroughGameweek?<span className="live-week-note">GW{throughGameweek} açık • kapanınca puanlar otomatik dolacak</span>:null}
+      <span>Final: <b>MH{finalThroughGameweek||'—'}</b></span>
+      {throughGameweek>finalThroughGameweek?<span className="live-week-note">MH{throughGameweek} açık • kapanınca puanlar otomatik dolacak</span>:null}
     </div>
 
     <div className="card table-wrap weekly-points-wrap simplified-weekly-table">
@@ -86,7 +88,7 @@ export default function WeeklyPointsTable({ players, throughGameweek, finalThrou
           {head('total','Toplam')}
           {head('played','Maç')}
           {head('avg','Ort.')}
-          {gameweeks.map(g=>head('gw'+g,'GW'+g))}
+          {gameweeks.map(g=>head('gw'+g,'MH'+g))}
         </tr></thead>
         <tbody>{rows.map((p,i)=><tr className="team-player-row" style={teamCssVars(p.team)} key={p.id}>
           <td className="rank-col">#{i+1}</td>
@@ -111,7 +113,7 @@ export default function WeeklyPointsTable({ players, throughGameweek, finalThrou
     <div className="weekly-card-list">
       {rows.map((p,i)=><Link href={'/players/'+p.id} className="card weekly-mobile-card team-accent-card" style={teamCssVars(p.team)} key={p.id}>
         <div className="weekly-mobile-head">
-          <div className="mobile-card-badges"><span className="weekly-rank">#{i+1}</span><span className={`pos ${p.position}`}>{p.position}</span></div>
+          <div className="mobile-card-badges"><span className="weekly-rank">#{i+1}</span><span className={`pos ${p.position}`}>{posLabel(p.position)}</span></div>
           <div className="weekly-mobile-player-name"><b>{p.full_name}</b><small>{p.team}</small></div>
           <div className="weekly-total-score"><strong>{p.total}</strong><small>puan</small></div>
         </div>
@@ -127,7 +129,7 @@ export default function WeeklyPointsTable({ players, throughGameweek, finalThrou
             const row=p.pointMap.get(g)
             const pending=g>finalThroughGameweek
             return <span className={pending?'pending':row&&Number(row.points)>=6?'hot':''} key={g}>
-              <small>GW{g}</small><b>{row?row.points:'—'}</b>
+              <small>MH{g}</small><b>{row?row.points:'—'}</b>
             </span>
           })}
         </div>
