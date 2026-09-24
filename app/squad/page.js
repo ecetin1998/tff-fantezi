@@ -10,7 +10,7 @@ export default async function Squad({searchParams}){
   if(!auth.userId) return <div className="auth-wrap">
     <div className="card auth-card squad-login-card">
       <span className="eyebrow">BENİM KADROM</span>
-      <h1>Kendi fantasy takımını kur</h1>
+      <h1>Kendi fantezi takımını kur</h1>
       <p>15 oyuncunu seç; ilk 11, yedekler, kaptan, bütçe ve xFP analizini tek ekranda yönet.</p>
       <Link className="cta" href="/login">Giriş / kayıt</Link>
     </div>
@@ -51,7 +51,7 @@ export default async function Squad({searchParams}){
   return <>
     <div className="section-title squad-page-title">
       <div>
-        <span className="eyebrow">FANTASY TAKIM YÖNETİMİ</span>
+        <span className="eyebrow">FANTEZİ TAKIM YÖNETİMİ</span>
         <h1>Benim Kadrom</h1>
         <p className="muted">MH{run?.gameweek||'—'} • 15 oyuncu • 100m bütçe</p>
       </div>
