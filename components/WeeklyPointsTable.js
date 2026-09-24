@@ -77,8 +77,8 @@ export default function WeeklyPointsTable({ players, throughGameweek, finalThrou
         <tbody>{rows.map((p,i)=><tr className="team-player-row" style={teamCssVars(p.team)} key={p.id}>
           <td className="rank-col">{i+1}</td>
           <td className="weekly-player-cell">
-            <Link className="player-link" href={'/players/'+p.id}><b>{p.display_name||p.full_name}</b></Link>
-            <small>{p.team}</small>
+            <Link className="player-link" href={'/players/'+p.id}><b>{p.full_name}</b></Link>
+            <small><Link className="team-table-link" href={'/teams/'+p.team_id}>{p.team}</Link></small>
           </td>
           <td className="summary-score"><b>{p.total}</b></td>
           <td>{p.played}</td>
@@ -98,7 +98,7 @@ export default function WeeklyPointsTable({ players, throughGameweek, finalThrou
       {rows.map((p,i)=><Link href={'/players/'+p.id} className="card weekly-mobile-card team-accent-card" style={teamCssVars(p.team)} key={p.id}>
         <div className="weekly-mobile-head">
           <span className="weekly-rank">#{i+1}</span>
-          <div><b>{p.display_name||p.full_name}</b><small>{p.team}</small></div>
+          <div><b>{p.full_name}</b><small>{p.team}</small></div>
           <strong>{p.total}<small>toplam</small></strong>
         </div>
 

@@ -1048,3 +1048,57 @@ body{background:linear-gradient(180deg,#fbfdff 0%,#f6f9ff 42%,#eef4fb 100%)!impo
   .fantasy-shirt{width:36px!important;height:41px!important}
   .fantasy-shirt i{font-size:7px!important}
 }
+
+
+
+/* ===== UX v10 • home information, team pages, full-name discipline ===== */
+.home-gw-strip-clean{grid-template-columns:auto minmax(180px,1.25fr) repeat(3,minmax(110px,.55fr))!important}
+.home-intro-layout{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(320px,.8fr);gap:16px;margin-bottom:16px}
+.home-intro-hero{padding:34px 36px;background:linear-gradient(135deg,#ffffff 0%,#f6f9ff 62%,#eefaf8 100%)!important;overflow:hidden;position:relative}
+.home-intro-hero:after{content:"";position:absolute;width:280px;height:280px;border-radius:50%;right:-110px;top:-120px;background:radial-gradient(circle,rgba(33,184,167,.13),transparent 67%)}
+.home-intro-hero h1{font-size:clamp(38px,5vw,64px);line-height:.98;letter-spacing:-.055em;color:#202b48;margin:10px 0 16px;max-width:720px}.home-intro-hero h1 span{color:#0b8e82}
+.home-intro-hero p{max-width:720px;color:#697590;line-height:1.65;font-size:13px;margin:0}
+.home-intro-actions{display:flex;gap:9px;align-items:center;flex-wrap:wrap;margin-top:22px}.text-action{font-size:11px;font-weight:850;color:#0b8e82;padding:9px 4px}
+.home-highlight-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.home-highlight-grid .spotlight-card{min-height:148px;padding:17px}.home-highlight-grid .spotlight-card>b{font-size:11px;color:#263150;line-height:1.28;margin-top:8px}.home-highlight-grid .spotlight-card>small{font-size:8px;color:#8a94ad;margin-top:3px}.home-highlight-grid .spotlight-card>strong{font-size:27px;color:var(--clubText);margin-top:auto}.home-highlight-grid .spotlight-card>strong em{font-size:8px;font-style:normal;color:#8993ac}
+.home-model-guide{display:grid;grid-template-columns:minmax(250px,.75fr) minmax(0,1.25fr);gap:20px;align-items:center;padding:23px 25px;margin-bottom:16px;background:#fff!important}.home-guide-copy h2{margin:5px 0 7px;color:#202b48;font-size:25px}.home-guide-copy p{margin:0;color:#707b96;font-size:11px;line-height:1.55}.home-guide-metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.home-guide-metrics>div{padding:15px 12px;border:1px solid #e2e8f1;border-radius:13px;background:#f8fafe}.home-guide-metrics b,.home-guide-metrics span{display:block}.home-guide-metrics b{font-size:19px;color:#0a8c80}.home-guide-metrics span{font-size:8px;color:#76819c;margin-top:4px;line-height:1.35}
+.home-feature-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.home-feature-card{padding:20px;background:#fff!important}.home-feature-card b{font-size:16px;color:#23304f}.home-feature-card p{font-size:10px;line-height:1.55;color:#727d98;min-height:48px}.home-feature-card span{font-size:9px;font-weight:850;color:#0b8e82}
+
+.team-inline-link,.team-table-link{color:inherit;text-decoration:none;font-weight:800}.team-inline-link:hover,.team-table-link:hover{color:#0b8e82;text-decoration:underline}
+.match-team-link{display:inline-flex!important;align-items:center;gap:6px;color:#25304f}.match-team-link.away-link{justify-content:flex-end}.match-team-link b{min-height:0!important}.team-overview-card{display:block;color:inherit}.team-card-open{display:inline-block;margin-top:12px;color:var(--clubText);font-size:9px;font-weight:850}
+.team-overview-card:hover{transform:translateY(-2px)}
+
+.team-detail-page{display:grid;gap:16px}.team-detail-hero{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:18px;padding:25px 27px;border-top:6px solid var(--club1)!important;background:linear-gradient(110deg,color-mix(in srgb,var(--club1) 13%,#fff),color-mix(in srgb,var(--club2) 10%,#fff) 60%,#fff)!important}
+.team-detail-mark{width:76px;height:76px;border-radius:21px;display:grid;place-items:center;background:repeating-linear-gradient(90deg,var(--club1) 0 18px,var(--club2) 18px 36px);color:var(--clubText);font-weight:950;font-size:13px;border:3px solid rgba(255,255,255,.8);box-shadow:0 10px 22px color-mix(in srgb,var(--club1) 18%,transparent)}
+.team-detail-copy h1{font-size:38px;color:#202b48;margin:5px 0 4px}.team-detail-copy p{margin:0;color:#6f7a95;font-size:10px}.team-detail-current{text-align:right;display:grid;gap:4px}.team-detail-current span,.team-detail-current small{font-size:8px;color:#7f89a2}.team-detail-current a,.team-detail-current b{font-size:18px;color:var(--clubText);font-weight:900}
+.team-detail-stat-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:9px}.team-detail-stat-grid .card{padding:14px 15px;background:#fff!important;border-top:3px solid color-mix(in srgb,var(--club1) 55%,#fff)!important}.team-detail-stat-grid span,.team-detail-stat-grid b{display:block}.team-detail-stat-grid span{font-size:8px;color:#7e88a1}.team-detail-stat-grid b{font-size:18px;color:#26314f;margin-top:4px}
+.team-detail-split{margin:0}.team-current-fixture{border-top:3px solid var(--club1)!important}.team-fixture-versus{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:center;margin:18px 0;text-align:center}.team-fixture-versus>div{padding:13px;background:#f6f8fc;border:1px solid #e3e8f1;border-radius:12px}.team-fixture-versus small,.team-fixture-versus b{display:block}.team-fixture-versus small{font-size:8px;color:#818ba4}.team-fixture-versus span{color:#9aa3b9;font-weight:900}
+.team-roster-section,.team-history-section,.team-fantasy-history{padding:20px 21px;background:#fff!important;border-top:3px solid color-mix(in srgb,var(--club1) 36%,#fff)!important}
+.team-roster-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:14px}.team-roster-player{display:grid;grid-template-columns:42px 1fr auto;gap:10px;align-items:center;padding:10px 11px;border:1px solid #e5e9f1;border-radius:12px;color:#25304f;background:#fafbfe}.team-roster-player:hover{border-color:color-mix(in srgb,var(--club1) 34%,#e5e9f1);background:color-mix(in srgb,var(--club1) 5%,#fff)}.team-roster-player>div{min-width:0}.team-roster-player>div b,.team-roster-player>div small,.team-roster-player>strong,.team-roster-player>strong small{display:block}.team-roster-player>div b{font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.team-roster-player>div small{font-size:7px;color:#8490aa;margin-top:3px}.team-roster-player>strong{text-align:right;font-size:14px;color:var(--clubText)}.team-roster-player>strong small{font-size:6px;color:#8993aa}
+.team-history-list{display:grid;gap:6px;margin-top:13px}.team-history-row{display:grid;grid-template-columns:42px 28px 1fr auto;gap:9px;align-items:center;padding:9px 10px;border-bottom:1px solid #edf0f5;color:#35405d;font-size:10px}.team-history-row b a{color:inherit}.team-history-row strong{font-size:14px}.result{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font-style:normal;font-size:8px;font-weight:950}.result.G{background:#dff6e9;color:#197149}.result.B{background:#fff3d8;color:#8d6615}.result.M{background:#fde4e8;color:#a23a4b}
+.team-week-points{display:flex;gap:8px;overflow-x:auto;margin-top:12px;padding-bottom:3px;scroll-snap-type:x mandatory}.team-week-points>div{flex:0 0 74px;scroll-snap-align:start;padding:10px;border:1px solid #e2e7f0;border-radius:11px;background:#f8fafe;text-align:center}.team-week-points span,.team-week-points b{display:block}.team-week-points span{font-size:7px;color:#8290aa}.team-week-points b{font-size:16px;color:var(--clubText);margin-top:3px}
+
+/* short names only on the pitch; full names everywhere else */
+.picker-copy>b,.bench-copy>b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fantasy-shirt i{font-size:7px!important;font-weight:950!important;letter-spacing:.02em}
+.readonly-pitch-player>b,.my-pitch-player>b{font-weight:900}
+
+/* explicit light surface */
+body{background:linear-gradient(180deg,#ffffff 0%,#fbfcff 34%,#f3f7fc 100%)!important}
+
+@media(max-width:1000px){
+  .home-intro-layout{grid-template-columns:1fr}.home-highlight-grid{grid-template-columns:repeat(4,1fr)}
+  .team-detail-stat-grid{grid-template-columns:repeat(3,1fr)}
+}
+@media(max-width:760px){
+  .home-gw-strip-clean{grid-template-columns:78px 1fr 1fr!important}.home-gw-status{grid-column:2/4}.home-gw-stat:nth-of-type(4){display:none}
+  .home-intro-hero{padding:24px 22px}.home-highlight-grid{grid-template-columns:1fr 1fr}.home-model-guide{grid-template-columns:1fr}.home-feature-grid{grid-template-columns:1fr}
+  .home-guide-metrics{grid-template-columns:1fr 1fr}
+  .team-detail-hero{grid-template-columns:auto 1fr;padding:18px}.team-detail-current{grid-column:1/-1;text-align:left;padding-top:10px;border-top:1px solid #e4e8f0}.team-detail-copy h1{font-size:30px}.team-detail-mark{width:62px;height:62px;border-radius:17px}
+  .team-detail-stat-grid{grid-template-columns:1fr 1fr 1fr}.team-roster-grid{grid-template-columns:1fr}
+}
+@media(max-width:480px){
+  .home-highlight-grid{grid-template-columns:1fr 1fr}.home-highlight-grid .spotlight-card{min-height:120px;padding:13px}.home-highlight-grid .spotlight-card>b{font-size:9px}.home-highlight-grid .spotlight-card>strong{font-size:21px}
+  .home-intro-hero h1{font-size:36px}.home-intro-actions{display:grid}.home-intro-actions>*{width:100%;text-align:center}
+  .home-guide-metrics{grid-template-columns:1fr 1fr}.home-guide-metrics>div{padding:11px}
+  .team-detail-stat-grid{grid-template-columns:1fr 1fr}.team-history-row{grid-template-columns:38px 26px 1fr auto;gap:6px;padding-inline:4px}
+}

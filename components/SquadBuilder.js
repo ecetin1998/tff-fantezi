@@ -25,9 +25,7 @@ function fallbackName(name=''){
 function displayName(player){
   return player?.display_name || fallbackName(player?.full_name)
 }
-function shirtMark(player){
-  return player?.shirt_number ?? String(player?.team||'').replace(/[^A-Za-zÇĞİÖŞÜçğıöşü]/g,'').slice(0,3).toLocaleUpperCase('tr')
-}
+function shirtMark(player){ return player?.position || '—' }
 function formationFromState(state,map){
   const starters=state.filter(x=>x.bench_order===null).map(x=>map.get(x.player_id)).filter(Boolean)
   if(starters.length!==11)return '4-3-3'
@@ -304,7 +302,7 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
               >
                 <span className="bench-order">{i+1}</span>
                 <span className={`fantasy-shirt mini ${p.position}`} style={teamCssVars(p.team)}><i>{shirtMark(p)}</i></span>
-                <span className="bench-copy"><b>{displayName(p)}</b><small>{posLabel[p.position]} • {Number(p.price||0).toFixed(1)}m • {xfp(p).toFixed(1)} xFP {preview?<em className="swap-preview-tag">→ {preview.nextFormation}</em>:null}</small></span>
+                <span className="bench-copy"><b>{p.full_name}</b><small>{posLabel[p.position]} • {Number(p.price||0).toFixed(1)}m • {xfp(p).toFixed(1)} xFP {preview?<em className="swap-preview-tag">→ {preview.nextFormation}</em>:null}</small></span>
                 <i className="bench-remove" onClick={e=>{e.stopPropagation();remove(p.id)}}>×</i>
               </button>
             })}
@@ -359,7 +357,7 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
             return <div className={`picker-player ${chosen?'chosen':''} ${disabled?'disabled':''}`} style={teamCssVars(p.team)} key={p.id}>
               <div className="picker-shirt-wrap"><span className={`fantasy-shirt tiny ${p.position}`} style={teamCssVars(p.team)}><i>{shirtMark(p)}</i></span></div>
               <div className="picker-copy">
-                <b title={p.full_name}>{displayName(p)}</b>
+                <b>{p.full_name}</b>
                 <small>{p.team} • vs {p.projection?.opponent_name||'—'}</small>
                 <div><span>{posLabel[p.position]}</span><span>{Number(p.price||0).toFixed(1)}m</span><span>{Number(p.projection?.x_minutes||0).toFixed(0)} dk</span></div>
               </div>
@@ -374,7 +372,7 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
     <section className="card squad-insight-bar">
       <div>
         <span className="eyebrow">MODEL ÖNERİSİ</span>
-        <h2>{bestMove&&bestMove.gain>0?`${displayName(bestMove.out)} → ${displayName(bestMove.inn)}`:'Kadron şu an dengeli görünüyor'}</h2>
+        <h2>{bestMove&&bestMove.gain>0?`${bestMove.out.full_name} → ${bestMove.inn.full_name}`:'Kadron şu an dengeli görünüyor'}</h2>
         {bestMove&&bestMove.gain>0?<p>Tek transferde yaklaşık <b>+{bestMove.gain.toFixed(2)} xFP</b> potansiyeli.</p>:<p>Mevcut xFP’ye göre pozitif tek transfer bulunamadı.</p>}
       </div>
       <div className={`pro-lock ${plan==='pro'?'unlocked':''}`}>

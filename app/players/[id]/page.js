@@ -25,7 +25,8 @@ export default async function PlayerPage({ params }){
   const played=Number(s?.matches_played||0)
   const actual=Number(s?.actual_points||0)
   const average=played?actual/played:0
-  const opponent=p?.opponent_name || (match ? (Number(match.home_team_id)===Number(player.team_id)?'Deplasman rakibi':'Ev sahibi rakibi') : '—')
+  const opponentId=match ? (Number(match.home_team_id)===Number(player.team_id)?Number(match.away_team_id):Number(match.home_team_id)) : null
+  const opponent=p?.opponent_name || '—'
 
   const themeStyle=teamCssVars(player.team)
 
@@ -38,7 +39,7 @@ export default async function PlayerPage({ params }){
         <div>
           <span className="eyebrow">OYUNCU PROFİLİ</span>
           <h1>{player.full_name}</h1>
-          <p>{player.display_name&&player.display_name!==player.full_name?<><b className="player-match-name">{player.display_name}</b> • </>:null}{player.team} • {Number(player.price||0).toFixed(1)}m</p>
+          <p><Link className="team-inline-link" href={'/teams/'+player.team_id}>{player.team}</Link> • {Number(player.price||0).toFixed(1)}m</p>
         </div>
       </div>
       <div className="player-hero-score">
@@ -52,9 +53,9 @@ export default async function PlayerPage({ params }){
       <section className="card profile-card matchup-card">
         <span className="eyebrow">BU HAFTA</span>
         <div className="matchup-line">
-          <div><small>Takım</small><b>{player.team}</b></div>
+          <div><small>Takım</small><Link className="team-inline-link" href={'/teams/'+player.team_id}><b>{player.team}</b></Link></div>
           <span>vs</span>
-          <div><small>{venue(p?.venue)}</small><b>{opponent}</b></div>
+          <div><small>{venue(p?.venue)}</small>{opponentId?<Link className="team-inline-link" href={'/teams/'+opponentId}><b>{opponent}</b></Link>:<b>{opponent}</b>}</div>
         </div>
         <div className="profile-mini-grid">
           <div><span>İlk 11</span><b>{pct(p?.xi_probability)}</b></div>
