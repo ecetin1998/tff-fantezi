@@ -38,5 +38,31 @@ export default async function BacktestPage(){
       <div><b>Yeniden oluşturulmuş</b><p>Yalnız önceki haftalara kadar olan veriyle tekrar çalıştırılmış test.</p></div>
       <div><b>MH1 başlangıç testi</b><p>Yalnız sezon öncesi bilgiyle üretilecek ayrı test.</p></div>
     </section>
+    <section className="card backtest-table-card">
+      <div className="panel-head">
+        <div><span className="eyebrow">HAFTALIK KARNE</span><h2>Tahmin ne kadar yaklaştı?</h2></div>
+        <small>Yanlılık + ise model fazla, − ise az puan beklemiş demektir.</small>
+      </div>
+      <div className="table-scroll">
+        <table className="backtest-table">
+          <thead><tr><th>MH</th><th>Kayıt</th><th>Veri sınırı</th><th>Örnek</th><th>MAE</th><th>Yanlılık</th><th>RMSE</th><th>Sıra korelasyonu</th><th>İlk 25</th><th>Veri güveni</th><th>Durum</th></tr></thead>
+          <tbody>
+            {weeks.map(w=><tr key={w.gameweek} className={w.status==='open'?'current-backtest-row':''}>
+              <td><b>{'MH'+w.gameweek}</b></td>
+              <td>{w.prediction_mode}</td>
+              <td>{w.training_through_gameweek===0?'Sezon öncesi':'MH1–MH'+w.training_through_gameweek}</td>
+              <td>{w.fp_sample??'—'}</td>
+              <td><b>{num(w.fp_mae)}</b></td>
+              <td>{num(w.fp_bias)}</td>
+              <td>{num(w.fp_rmse)}</td>
+              <td>{w.spearman===null||w.spearman===undefined?'—':Number(w.spearman).toFixed(2)}</td>
+              <td>{pct(w.top25_hit_rate)}</td>
+              <td>{w.data_confidence||'—'}</td>
+              <td>{statusLabel[w.status]||w.status}</td>
+            </tr>)}
+          </tbody>
+        </table>
+      </div>
+    </section>
   </main>
 }
