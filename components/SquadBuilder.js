@@ -405,7 +405,13 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
               </div>
               <div className={`picker-value price ${sortKey==='price'?'active':''}`}>{Number(p.price||0).toFixed(1)}m</div>
               <div className={`picker-value xfp ${sortKey==='xfp'?'active':''}`}>{xfp(p).toFixed(2)}</div>
-              <button type="button" onClick={()=>chosen?remove(p.id):add(p.id)} disabled={disabled}>{chosen?'✓':'+'}</button>
+              <button
+                type="button"
+                className={chosen?'picker-remove-player':'picker-add-player'}
+                onClick={()=>chosen?remove(p.id):add(p.id)}
+                disabled={disabled}
+                aria-label={chosen?'Oyuncuyu kadrodan çıkar':'Oyuncuyu kadroya ekle'}
+              >{chosen?'−':'+'}</button>
             </div>
           })}
         </div>
