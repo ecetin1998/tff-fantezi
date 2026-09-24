@@ -9,7 +9,7 @@ export default async function WeeklyPoints(){
     <div className="section-title">
       <div>
         <span className="eyebrow">GERÇEK FANTASY PUANLARI</span>
-        <h1>Haftalık Fantasy Puanları</h1>
+        <h1>Haftalık Fantezi Puanları</h1>
       </div>
       <span className="muted">MH1–MH{throughGameweek||'—'} • kesinleşen MH{finalThroughGameweek||'—'}</span>
     </div>
