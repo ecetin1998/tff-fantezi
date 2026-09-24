@@ -3,6 +3,8 @@ import { useMemo, useState } from 'react'
 import Link from 'next/link'
 import { teamCssVars } from '@/lib/teamThemes'
 
+const posLabel=p=>({GK:'KL',DEF:'DEF',MID:'OS',FWD:'FOR'}[p]||p||'—')
+
 export default function PlayersTable({ players }){
   const [q,setQ]=useState('')
   const [pos,setPos]=useState('')
@@ -66,7 +68,7 @@ export default function PlayersTable({ players }){
         <option value="">Tüm takımlar</option>{teams.map(t=><option key={t}>{t}</option>)}
       </select>
       <select value={pos} onChange={e=>setPos(e.target.value)}>
-        <option value="">Tüm mevkiler</option><option>GK</option><option>DEF</option><option>MID</option><option>FWD</option>
+        <option value="">Tüm mevkiler</option><option value="GK">KL</option><option value="DEF">DEF</option><option value="MID">OS</option><option value="FWD">FOR</option>
       </select>
       <select className="mobile-sort-select" value={sort} onChange={e=>{setSort(e.target.value);setDir(-1)}}>
         <option value="xfp">xFP'ye göre</option><option value="value">F/P'ye göre</option><option value="minutes">Dakikaya göre</option><option value="six">6+ ihtimaline göre</option><option value="price">Fiyata göre</option>
@@ -82,7 +84,7 @@ export default function PlayersTable({ players }){
     </tr></thead><tbody>{rows.map((p,i)=><tr className="team-player-row" style={teamCssVars(p.team)} key={p.id}>
       <td className="rank-col">#{i+1}</td>
       <td><Link className="player-link team-player-link" href={'/players/'+p.id}><i className="club-dot"/><b>{p.full_name}</b></Link><small className="cell-note">{playerNote(p)}</small></td>
-      <td><Link className="team-table-link" href={'/teams/'+p.team_id}>{p.team}</Link></td><td><span className={`pos ${p.position}`}>{p.position}</span></td><td>{p.projection?.opponent_name||'—'}</td><td>{p.projection?.venue||'—'}</td>
+      <td><Link className="team-table-link" href={'/teams/'+p.team_id}>{p.team}</Link></td><td><span className={`pos ${p.position}`}>{posLabel(p.position)}</span></td><td>{p.projection?.opponent_name||'—'}</td><td>{p.projection?.venue||'—'}</td>
       <td>{num(p.price,1)}m</td><td>{pct(p.projection?.xi_probability)}</td><td>{num(p.projection?.x_minutes,1)}</td><td><b>{num(p.projection?.xfp)}</b></td><td>{num(p.projection?.core_xfp)}</td><td>{num(p.projection?.x_bonus)}</td>
       <td>{num(p.projection?.p25,1)}</td><td>{num(p.projection?.p75,1)}</td><td>{num(p.projection?.p90,1)}</td><td>{pct(p.projection?.six_plus_probability)}</td><td>{num(p.projection?.expected_goals)}</td><td>{num(p.projection?.expected_assists)}</td><td>{num(p.projection?.value_score)}</td><td>{p.projection?.data_confidence||'—'}</td>
     </tr>)}</tbody></table></div>
@@ -90,7 +92,7 @@ export default function PlayersTable({ players }){
     <div className="player-card-list">
       {rows.map((p,i)=><Link href={'/players/'+p.id} className="card mobile-player-card team-accent-card" style={teamCssVars(p.team)} key={p.id}>
         <div className="mobile-player-top">
-          <div className="mobile-card-badges"><span className="weekly-rank">#{i+1}</span><span className={`pos ${p.position}`}>{p.position}</span></div>
+          <div className="mobile-card-badges"><span className="weekly-rank">#{i+1}</span><span className={`pos ${p.position}`}>{posLabel(p.position)}</span></div>
           <div className="mobile-player-name"><b>{p.full_name}</b><span>{p.team} • {num(p.price,1)}m</span></div>
           <div className="mobile-xfp"><strong>{num(p.projection?.xfp)}</strong><small>xFP</small></div>
         </div>
