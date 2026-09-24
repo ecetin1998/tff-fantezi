@@ -27,6 +27,7 @@ export default async function PlayerPage({ params }){
   const average=played?actual/played:0
   const opponentId=match ? (Number(match.home_team_id)===Number(player.team_id)?Number(match.away_team_id):Number(match.home_team_id)) : null
   const opponent=p?.opponent_name || '—'
+  const hasAvailabilityIssue=a && (['injuries','suspensions'].includes(a.availability_type) || Number(a.availability_probability??1)<.99)
 
   const themeStyle=teamCssVars(player.team)
 
@@ -63,21 +64,22 @@ export default async function PlayerPage({ params }){
           <div><span>6+ puan</span><b>{pct(p?.six_plus_probability)}</b></div>
           <div><span>F/P</span><b>{num(p?.value_score)}</b></div>
         </div>
-        <div className="availability-line">
-          <b>{a?.reason||'Aktif havuz'}</b>
+        {hasAvailabilityIssue?<div className="availability-line">
+          <b>{a?.reason||'Uygunluk sorunu'}</b>
           {a?.checked_at?<small>kontrol {formatCheck(a.checked_at)}</small>:null}
-        </div>
+        </div>:null}
       </section>
 
       <section className="card profile-card">
         <span className="eyebrow">TAHMİN DAĞILIMI</span>
+        <p className="projection-explainer">Temkinli: simülasyonların alt çeyreği • İyi senaryo: üst çeyreğe giriş • Tavan: üst %10'luk sonuç seviyesi.</p>
         <div className="profile-stat-grid">
           <div><span>xFP</span><b>{num(p?.xfp)}</b></div>
           <div><span>Core xFP</span><b>{num(p?.core_xfp)}</b></div>
           <div><span>xBonus</span><b>{num(p?.x_bonus)}</b></div>
-          <div><span>P25</span><b>{num(p?.p25,1)}</b></div>
-          <div><span>P75</span><b>{num(p?.p75,1)}</b></div>
-          <div><span>P90</span><b>{num(p?.p90,1)}</b></div>
+          <div><span>Temkinli</span><b>{num(p?.p25,1)}</b></div>
+          <div><span>İyi senaryo</span><b>{num(p?.p75,1)}</b></div>
+          <div><span>Tavan</span><b>{num(p?.p90,1)}</b></div>
           <div><span>Beklenen gol</span><b>{num(p?.expected_goals)}</b></div>
           <div><span>Beklenen asist</span><b>{num(p?.expected_assists)}</b></div>
         </div>
@@ -122,7 +124,7 @@ export default async function PlayerPage({ params }){
       <section className="card profile-card">
         <span className="eyebrow">MODEL NOTU</span>
         <h2>{p?.data_confidence||'—'} güven</h2>
-        <p className="profile-note">{p?.role_note||'Aktif havuz'}</p>
+        {p?.role_note?<p className="profile-note">{p.role_note}</p>:null}
         <div className="detail-list">
           <div><span>Oynama olasılığı</span><b>{pct(p?.appearance_probability)}</b></div>
           <div><span>60+ dakika</span><b>{pct(p?.over60_probability)}</b></div>
