@@ -22,7 +22,7 @@ export default async function Home(){
       <div className="card home-intro-hero">
         <span className="eyebrow">SÜPER LİG FANTASY ANALİZ PLATFORMU</span>
         <h1>Veriyi oku.<br/><span>Kararı sen ver.</span></h1>
-        <p>Fantezi Scout; oyuncu rolü, dakika ihtimali, maç modeli ve fantasy puan dağılımını tek yerde birleştirir. Amaç tek bir “doğru kadro” söylemek değil; karar verirken ihtiyacın olan resmi görünür yapmak.</p>
+        <p>Fantezi Scout; oyuncu rolü, dakika ihtimali, maç modeli ve fantezi puan dağılımını tek yerde birleştirir. Amaç tek bir “doğru kadro” söylemek değil; karar verirken ihtiyacın olan resmi görünür yapmak.</p>
         <div className="home-intro-actions">
           <Link href="/players" className="cta">Oyuncu Analizleri</Link>
           <Link href="/squad" className="secondary">Benim Kadrom</Link>
@@ -51,10 +51,10 @@ export default async function Home(){
     <section className="card home-model-guide">
       <div className="home-guide-copy"><span className="eyebrow">MODELİ NASIL OKUYACAKSIN?</span><h2>Tek sayıya değil, dağılıma bak.</h2><p>xFP başlangıç noktasıdır. Dakika, ilk 11 ihtimali, taban/tavan ve maç bağlamını birlikte okumak daha doğru karar verir.</p></div>
       <div className="home-guide-metrics">
-        <div><b>xFP</b><span>Beklenen fantasy puanı</span></div>
+        <div><b>xFP</b><span>Beklenen fantezi puanı</span></div>
         <div><b>xDakika</b><span>Beklenen oynama süresi</span></div>
         <div><b>Tavan</b><span>Üst %10'luk puan senaryosu</span></div>
-        <div><b>6+%</b><span>Güçlü fantasy dönüş ihtimali</span></div>
+        <div><b>6+%</b><span>Güçlü fantezi dönüş ihtimali</span></div>
       </div>
     </section>
 
