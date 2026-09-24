@@ -5055,3 +5055,78 @@ p{color:#66728d}
   .learning-card h3{font-size:12px}
   .backtest-notes>div{grid-template-columns:34px minmax(0,1fr)}
 }
+
+
+/* ===== Model Performansı • current-logic replay clarity ===== */
+.backtest-summary-grid .summary-word{
+  font-size:16px!important;
+  line-height:1.15!important;
+}
+.backtest-method{padding:14px!important}
+.metric-guide{padding:16px!important}
+.metric-guide-grid{
+  display:grid;
+  grid-template-columns:repeat(5,minmax(0,1fr));
+  gap:7px;
+}
+.metric-guide-grid>div{
+  padding:10px;
+  border:1px solid #e2e7ef;
+  border-radius:10px;
+  background:#f8fafd;
+}
+.metric-guide-grid b{display:block;color:#26324f;font-size:8px}
+.metric-guide-grid p{margin:4px 0 0;color:#748099;font-size:7px;line-height:1.5}
+.metric-guide-grid strong{color:#34415d}
+.replay-status{
+  display:inline-flex;
+  align-items:center;
+  padding:4px 6px;
+  border:1px solid #dfe5ee;
+  border-radius:999px;
+  background:#f7f9fd;
+  color:#65708a;
+  font-size:6px;
+  font-weight:900;
+  white-space:nowrap;
+}
+.replay-status.closed{
+  border-color:#bfe3dc;
+  background:#eaf8f5;
+  color:#087e72;
+}
+.replay-status.replay_pending{
+  border-color:#eadcad;
+  background:#fff8e7;
+  color:#936b16;
+}
+.replay-status.cold_start_gap{
+  border-color:#ecc7cf;
+  background:#fff1f3;
+  color:#b34155;
+}
+.replay-gap-row td{background:#fffafb}
+.learning-cell{
+  max-width:230px;
+  white-space:normal!important;
+  line-height:1.35;
+}
+.empty-learning-state{
+  padding:18px;
+  border:1px dashed #d8dfe9;
+  border-radius:11px;
+  background:#f8fafd;
+  color:#7b859d;
+  font-size:8px;
+  text-align:center;
+}
+
+@media(max-width:1100px){
+  .metric-guide-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+@media(max-width:700px){
+  .metric-guide{padding:10px!important}
+  .metric-guide-grid{grid-template-columns:1fr}
+  .metric-guide-grid b{font-size:8.5px}
+  .metric-guide-grid p{font-size:7.5px}
+}
