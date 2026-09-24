@@ -30,7 +30,7 @@ function fallbackName(name=''){
 function displayName(player){
   return player?.display_name || fallbackName(player?.full_name)
 }
-function shirtMark(player){ return player?.position || '—' }
+function shirtMark(player){ return posLabel[player?.position] || player?.position || '—' }
 function formationFromState(state,map){
   const starters=state.filter(x=>x.bench_order===null).map(x=>map.get(x.player_id)).filter(Boolean)
   if(starters.length!==11)return '4-3-3'
@@ -268,7 +268,7 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
       <section className="squad-stage card">
         <div className="squad-stage-head">
           <div>
-            <span className="eyebrow">GW{gameweek||'—'} • {formation}</span>
+            <span className="eyebrow">MH{gameweek||'—'} • {formation}</span>
             <h2>İlk 11</h2>
           </div>
           <div className="squad-stage-legend">
@@ -405,7 +405,7 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
         {bestMove&&bestMove.gain>0?<button type="button" className="squad-tool-btn model-apply-btn" onClick={applyBestMove}>Öneriyi Uygula</button>:null}
       </div>
       <div className={`pro-lock ${plan==='pro'?'unlocked':''}`}>
-        <span>PRO</span><b>3 GW Planlayıcı</b><small>{plan==='pro'?'Pro erişimin aktif.':'Çok haftalı transfer zinciri ve risk simülasyonu.'}</small>
+        <span>PRO</span><b>3 MH Planlayıcı</b><small>{plan==='pro'?'Pro erişimin aktif.':'Çok haftalı transfer zinciri ve risk simülasyonu.'}</small>
       </div>
     </section>
   </div>
