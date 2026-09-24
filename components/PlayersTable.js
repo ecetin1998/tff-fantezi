@@ -54,11 +54,13 @@ export default function PlayersTable({ players }){
     return `${get('day')}/${get('month')}/${get('year')} ${get('hour')}:${get('minute')}`
   }
   const playerNote=(p)=>{
-    if(p.availability?.reason){
-      const checked=formatCheck(p.availability.checked_at)
-      return checked ? `${p.availability.reason} • ${checked}` : p.availability.reason
+    const a=p.availability
+    const issue=a && (['injuries','suspensions'].includes(a.availability_type) || Number(a.availability_probability??1)<.99)
+    if(issue&&a.reason){
+      const checked=formatCheck(a.checked_at)
+      return checked ? `${a.reason} • ${checked}` : a.reason
     }
-    return 'Aktif'
+    return ''
   }
 
   return <>
@@ -76,14 +78,15 @@ export default function PlayersTable({ players }){
     </div>
 
     <div className="table-summary"><b>{rows.length}</b> oyuncu • detay için oyuncuya dokun</div>
+    <div className="projection-legend">Tahmin aralığı: <b>Temkinli</b> = P25 • <b>İyi senaryo</b> = P75 • <b>Tavan</b> = P90</div>
 
     <div className="card table-wrap desktop-player-table"><table><thead><tr>
       <th className="rank-col">#</th>{head('name','Oyuncu')}{head('team','Takım')}{head('pos','Mevki')}{head('opp','Rakip')}<th>H/D</th>
       {head('price','Fiyat')}{head('xi','İlk 11')}{head('minutes','xDk')}{head('xfp','xFP')}{head('core','Core')}{head('bonus','xBonus')}
-      {head('p25','P25')}{head('p75','P75')}{head('p90','P90')}{head('six','6+ %')}{head('xg','xG')}{head('xa','xA')}{head('value','F/P')}<th>Güven</th>
+      {head('p25','Temkinli')}{head('p75','İyi senaryo')}{head('p90','Tavan')}{head('six','6+ %')}{head('xg','xG')}{head('xa','xA')}{head('value','F/P')}<th>Güven</th>
     </tr></thead><tbody>{rows.map((p,i)=><tr className="team-player-row" style={teamCssVars(p.team)} key={p.id}>
       <td className="rank-col">#{i+1}</td>
-      <td><Link className="player-link team-player-link" href={'/players/'+p.id}><i className="club-dot"/><b>{p.full_name}</b></Link><small className="cell-note">{playerNote(p)}</small></td>
+      <td><Link className="player-link team-player-link" href={'/players/'+p.id}><i className="club-dot"/><b>{p.full_name}</b></Link>{playerNote(p)?<small className="cell-note">{playerNote(p)}</small>:null}</td>
       <td><Link className="team-table-link" href={'/teams/'+p.team_id}>{p.team}</Link></td><td><span className={`pos ${p.position}`}>{posLabel(p.position)}</span></td><td>{p.projection?.opponent_name||'—'}</td><td>{p.projection?.venue||'—'}</td>
       <td>{num(p.price,1)}m</td><td>{pct(p.projection?.xi_probability)}</td><td>{num(p.projection?.x_minutes,1)}</td><td><b>{num(p.projection?.xfp)}</b></td><td>{num(p.projection?.core_xfp)}</td><td>{num(p.projection?.x_bonus)}</td>
       <td>{num(p.projection?.p25,1)}</td><td>{num(p.projection?.p75,1)}</td><td>{num(p.projection?.p90,1)}</td><td>{pct(p.projection?.six_plus_probability)}</td><td>{num(p.projection?.expected_goals)}</td><td>{num(p.projection?.expected_assists)}</td><td>{num(p.projection?.value_score)}</td><td>{p.projection?.data_confidence||'—'}</td>
@@ -96,12 +99,12 @@ export default function PlayersTable({ players }){
           <div className="mobile-player-name"><b>{p.full_name}</b><span>{p.team} • {num(p.price,1)}m</span></div>
           <div className="mobile-xfp"><strong>{num(p.projection?.xfp)}</strong><small>xFP</small></div>
         </div>
-        <div className="mobile-fixture"><span>{p.projection?.venue==='HOME'?'İç saha':'Deplasman'}</span><b>vs {p.projection?.opponent_name||'—'}</b><em>{playerNote(p)}</em></div>
+        <div className="mobile-fixture"><span>{p.projection?.venue==='HOME'?'İç saha':'Deplasman'}</span><b>vs {p.projection?.opponent_name||'—'}</b>{playerNote(p)?<em>{playerNote(p)}</em>:null}</div>
         <div className="mobile-player-metrics">
           <div><span>İlk 11</span><b>{pct(p.projection?.xi_probability)}</b></div>
           <div><span>xDakika</span><b>{num(p.projection?.x_minutes,0)}</b></div>
           <div><span>6+ puan</span><b>{pct(p.projection?.six_plus_probability)}</b></div>
-          <div><span>P90</span><b>{num(p.projection?.p90,1)}</b></div>
+          <div><span>Tavan</span><b>{num(p.projection?.p90,1)}</b></div>
         </div>
       </Link>)}
     </div>
