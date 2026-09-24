@@ -77,7 +77,7 @@ export default function WeeklyPointsTable({ players, throughGameweek, finalThrou
 
     <div className="table-summary weekly-summary">
       <span><b>{rows.length}</b> oyuncu</span>
-      <span>Final: <b>MH{finalThroughGameweek||'—'}</b></span>
+      <span>Kesinleşen: <b>MH{finalThroughGameweek||'—'}</b></span>
       {weekMode?<span className="selected-week-summary"><b>MH{weekSort}</b> seçili</span>:null}
       {throughGameweek>finalThroughGameweek?<span className="live-week-note">MH{throughGameweek} açık • kapanınca puanlar otomatik dolacak</span>:null}
     </div>
