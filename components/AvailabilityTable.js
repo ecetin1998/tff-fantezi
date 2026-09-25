@@ -59,7 +59,7 @@ export default function AvailabilityTable({ rows }){
 
     <div className="table-summary availability-summary">
       <span><b>{filtered.length}</b> kayıt gösteriliyor</span>
-      <span>Detaylı kaynak verisi varsa sakatlık tarihi ve dönüş beklentisi ayrıca gösterilir.</span>
+      <span>Sakatlık tarihi, dönüş beklentisi ve ceza maçı bilgileri varsa ayrıca gösterilir.</span>
     </div>
 
     <div className="card table-wrap availability-table-wrap"><table className="availability-table-v2">
