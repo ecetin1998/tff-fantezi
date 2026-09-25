@@ -2,6 +2,7 @@
 import { useActionState, useEffect, useMemo, useRef, useState } from 'react'
 import { saveSquad } from '@/app/actions'
 import { teamCssVars } from '@/lib/teamThemes'
+import { availabilityCompactNote, availabilityIsIssue } from '@/lib/availability'
 
 const LIMITS={GK:2,DEF:5,MID:5,FWD:3}
 const FORMATIONS={
@@ -399,11 +400,15 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
             const posFull=(counts[p.position]||0)>=LIMITS[p.position]
             const overBudget=!chosen&&cost+Number(p.price)>100.0001
             const disabled=!chosen&&(ids.length>=15||posFull||overBudget)
+            const availabilityNote=(availabilityIsIssue(p.availability)||p.availability?.availability_type==='return')
+              ? availabilityCompactNote(p.availability)
+              : ''
             return <div className={`picker-player ${chosen?'chosen':''} ${disabled?'disabled':''}`} style={teamCssVars(p.team)} key={p.id}>
               <div className="picker-shirt-wrap"><span className={`fantasy-shirt tiny ${p.position}`} style={teamCssVars(p.team)}><i>{shirtMark(p)}</i></span></div>
               <div className="picker-copy">
                 <b>{p.full_name}</b>
                 <small><strong>{p.team}</strong><em>Rakip: {p.projection?.opponent_name||'—'}</em></small>
+                {availabilityNote?<small className="picker-availability-note">{availabilityNote}</small>:null}
               </div>
               <div className={`picker-value price ${sortKey==='price'?'active':''}`}>{Number(p.price||0).toFixed(1)}m</div>
               <div className={`picker-value xfp ${sortKey==='xfp'?'active':''}`}>{xfp(p).toFixed(2)}</div>
