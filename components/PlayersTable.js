@@ -34,7 +34,7 @@ export default function PlayersTable({ players }){
       if(k==='p90')return Number(p.projection?.p90||0)
       if(k==='six')return Number(p.projection?.six_plus_probability||0)
       if(k==='top25')return Number(p.projection?.top25_score||0)
-      if(k==='top25rank')return Number(p.projection?.top25_rank||999)
+      if(k==='top25rank')return -Number(p.projection?.top25_rank||999)
       if(k==='xg')return Number(p.projection?.expected_goals||0)
       if(k==='xa')return Number(p.projection?.expected_assists||0)
       if(k==='value')return Number(p.projection?.value_score||0)
