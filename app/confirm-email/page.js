@@ -1,15 +1,13 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 
-export default function AuthConfirmPage(){
-  const router=useRouter()
+export default function ConfirmEmailPage(){
   const [message,setMessage]=useState('E-posta doğrulanıyor...')
 
   useEffect(()=>{
-    let active=true
+    let cancelled=false
 
     async function confirm(){
       const supabase=createClient()
@@ -17,43 +15,48 @@ export default function AuthConfirmPage(){
       const tokenHash=url.searchParams.get('token_hash')
       const type=url.searchParams.get('type')
       const code=url.searchParams.get('code')
-      const hash=new URLSearchParams(url.hash.replace(/^#/,''))
+      const hash=new URLSearchParams(url.hash.slice(1))
       const accessToken=hash.get('access_token')
       const refreshToken=hash.get('refresh_token')
 
       try{
-        let error=null
+        let authError=null
 
         if(tokenHash&&type){
-          ;({error}=await supabase.auth.verifyOtp({token_hash:tokenHash,type}))
+          const result=await supabase.auth.verifyOtp({token_hash:tokenHash,type})
+          authError=result.error
         }else if(code){
-          ;({error}=await supabase.auth.exchangeCodeForSession(code))
+          const result=await supabase.auth.exchangeCodeForSession(code)
+          authError=result.error
         }else if(accessToken&&refreshToken){
-          ;({error}=await supabase.auth.setSession({
+          const result=await supabase.auth.setSession({
             access_token:accessToken,
             refresh_token:refreshToken,
-          }))
+          })
+          authError=result.error
         }else{
-          const {data,error:sessionError}=await supabase.auth.getSession()
-          error=sessionError
-          if(!error&&!data?.session) throw new Error('Doğrulama bağlantısında geçerli oturum bulunamadı.')
+          const result=await supabase.auth.getSession()
+          authError=result.error
+          if(!authError&&!result.data?.session){
+            throw new Error('Doğrulama bağlantısında geçerli oturum bulunamadı.')
+          }
         }
 
-        if(error) throw error
-        if(!active)return
+        if(authError) throw authError
+        if(cancelled)return
         setMessage('E-posta doğrulandı. Kadrona yönlendiriliyorsun...')
-        window.setTimeout(()=>router.replace('/squad'),350)
+        window.setTimeout(()=>window.location.replace('/squad'),300)
       }catch(error){
-        if(!active)return
+        if(cancelled)return
         const detail=error instanceof Error?error.message:'Doğrulama tamamlanamadı.'
         setMessage('Doğrulama tamamlanamadı.')
-        window.setTimeout(()=>router.replace('/login?error='+encodeURIComponent(detail)),700)
+        window.setTimeout(()=>window.location.replace('/login?error='+encodeURIComponent(detail)),700)
       }
     }
 
     confirm()
-    return()=>{active=false}
-  },[router])
+    return()=>{cancelled=true}
+  },[])
 
   return <div className="auth-wrap"><div className="card auth-card">
     <span className="eyebrow">HESAP DOĞRULAMA</span>

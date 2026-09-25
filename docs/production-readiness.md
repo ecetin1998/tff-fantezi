@@ -9,7 +9,7 @@ Bu dosya domain, auth ve ürünleştirme öncesi teknik kapıları tek yerde tut
 - Replay worker SECURITY DEFINER RPC'leri anon/authenticated rollerine kapalı; yalnız service role çağırabilir.
 - Goal distribution config RLS altında.
 - Backtest sayfası canlı production motorunu, walk-forward replay benchmarkını ve MH7+ live-frozen performansı ayrı gösterir.
-- `/auth/confirm` e-posta doğrulama dönüşünü token hash, PKCE code veya browser session/hash akışlarında karşılar.
+- `/confirm-email` e-posta doğrulama dönüşünü token hash, PKCE code veya browser session/hash akışlarında karşılar.
 - Auth redirect URL üretimi `NEXT_PUBLIC_SITE_URL` varsa onu, yoksa gelen host/protocol bilgisini kullanır; özel domain geçişinde kod değişikliği gerekmez.
 
 ## Domain bağlanmadan önce
@@ -17,7 +17,7 @@ Bu dosya domain, auth ve ürünleştirme öncesi teknik kapıları tek yerde tut
 1. Vercel'e seçilen domaini ekle ve DNS doğrulamasını tamamla.
 2. Production environment'a `NEXT_PUBLIC_SITE_URL=https://<domain>` ekle.
 3. Supabase Auth URL Configuration içinde Site URL'yi production domaine geçir.
-4. İzin verilen redirect URL'lerine en az `https://<domain>/auth/confirm` ve Vercel production fallback `/auth/confirm` adresini ekle.
+4. İzin verilen redirect URL'lerine en az `https://<domain>/confirm-email` ve Vercel production fallback `/confirm-email` adresini ekle.
 5. Kayıt → e-posta → doğrulama → `/squad` → çıkış → tekrar giriş akışını gerçek bir test hesabıyla uçtan uca doğrula.
 
 ## E-posta / auth production kapıları

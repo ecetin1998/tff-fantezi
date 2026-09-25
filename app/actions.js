@@ -30,7 +30,7 @@ export async function signup(formData) {
   const { error } = await supabase.auth.signUp({
     email,
     password,
-    options:{ emailRedirectTo: `${siteUrl}/auth/confirm` }
+    options:{ emailRedirectTo: `${siteUrl}/confirm-email` }
   })
   if (error) redirect('/login?error=' + encodeURIComponent(error.message))
   redirect('/login?message=' + encodeURIComponent('Doğrulama e-postasını kontrol et. Mail gelmezse aşağıdan tekrar gönderebilirsin.'))
@@ -44,7 +44,7 @@ export async function resendConfirmation(formData) {
   const { error } = await supabase.auth.resend({
     type: 'signup',
     email,
-    options: { emailRedirectTo: `${siteUrl}/auth/confirm` }
+    options: { emailRedirectTo: `${siteUrl}/confirm-email` }
   })
   if (error) redirect('/login?error=' + encodeURIComponent(error.message))
   redirect('/login?message=' + encodeURIComponent('Doğrulama e-postası tekrar gönderildi. Gelen kutusu ve spam klasörünü kontrol et.'))
