@@ -1,6 +1,7 @@
 'use server'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
+import { headers } from 'next/headers'
 
 export async function login(formData) {
   const supabase = await createClient()
@@ -11,16 +12,25 @@ export async function login(formData) {
   redirect('/squad')
 }
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://tff-fantezi.vercel.app'
+async function getSiteUrl() {
+  const configured=String(process.env.NEXT_PUBLIC_SITE_URL||'').trim().replace(/\\/+$/,'')
+  if(configured) return configured
+
+  const h=await headers()
+  const host=h.get('x-forwarded-host')||h.get('host')
+  const proto=h.get('x-forwarded-proto')||(host?.includes('localhost')?'http':'https')
+  return host?`${proto}://${host}`:'https://tff-fantezi.vercel.app'
+}
 
 export async function signup(formData) {
   const supabase = await createClient()
+  const siteUrl = await getSiteUrl()
   const email = String(formData.get('email') || '').trim()
   const password = String(formData.get('password') || '')
   const { error } = await supabase.auth.signUp({
     email,
     password,
-    options:{ emailRedirectTo: `${SITE_URL}/auth/confirm` }
+    options:{ emailRedirectTo: `${siteUrl}/auth/confirm` }
   })
   if (error) redirect('/login?error=' + encodeURIComponent(error.message))
   redirect('/login?message=' + encodeURIComponent('Doğrulama e-postasını kontrol et. Mail gelmezse aşağıdan tekrar gönderebilirsin.'))
@@ -28,12 +38,13 @@ export async function signup(formData) {
 
 export async function resendConfirmation(formData) {
   const supabase = await createClient()
+  const siteUrl = await getSiteUrl()
   const email = String(formData.get('email') || '').trim()
   if (!email) redirect('/login?error=' + encodeURIComponent('E-posta adresini gir.'))
   const { error } = await supabase.auth.resend({
     type: 'signup',
     email,
-    options: { emailRedirectTo: `${SITE_URL}/auth/confirm` }
+    options: { emailRedirectTo: `${siteUrl}/auth/confirm` }
   })
   if (error) redirect('/login?error=' + encodeURIComponent(error.message))
   redirect('/login?message=' + encodeURIComponent('Doğrulama e-postası tekrar gönderildi. Gelen kutusu ve spam klasörünü kontrol et.'))

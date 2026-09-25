@@ -30,10 +30,12 @@ const tendency=v=>{
 }
 
 export default async function BacktestPage(){
-  const {replayWeeks,liveWeeks,learning,replayPlayers,livePlayers,preseasonCoverage}=await getBacktestOverview()
+  const {currentRun,currentRunQa,replayWeeks,liveWeeks,learning,replayPlayers,livePlayers,preseasonCoverage}=await getBacktestOverview()
   const replayClosed=replayWeeks.filter(w=>w.status==='closed')
   const latestLive=liveWeeks.length?liveWeeks[liveWeeks.length-1]:null
-  const benchmark=replayWeeks[0]?.engine_version||'ScoutPlus 3.1'
+  const replayBenchmark=replayWeeks[0]?.engine_version||'ScoutPlus 3.1'
+  const replayBenchmarkVersion=replayWeeks[0]?.benchmark_version||'—'
+  const productionQaPass=Boolean(currentRunQa?.pass)
   const replayN=replayClosed.reduce((s,w)=>s+Number(w.player_sample||0),0)
   const overallBand=replayN?replayClosed.reduce((s,w)=>s+Number(w.band_hit_rate||0)*Number(w.player_sample||0),0)/replayN:null
   const overallExpectedBand=replayN?replayClosed.reduce((s,w)=>s+Number(w.expected_band_hit_rate||0)*Number(w.player_sample||0),0)/replayN:null
@@ -55,19 +57,31 @@ export default async function BacktestPage(){
   return <main className="page-shell backtest-page">
     <section className="page-hero backtest-hero">
       <div>
-        <span className="eyebrow">GÜNCEL MODELİN GERİYE DÖNÜK TESTİ</span>
+        <span className="eyebrow">CANLI MODEL + GERİYE DÖNÜK TEST</span>
         <h1>Model Performansı</h1>
-        <p>Burada eski model sürümlerini değil, bugün kullandığımız kurguyu geçmiş maç haftalarına yeniden uyguluyoruz. Her hafta için yalnız o haftanın ilk maçı başlamadan önce bilinebilecek veriler kullanılıyor; gerçek sonuçlar tahmin tamamlandıktan sonra açılıyor.</p>
+        <p>Canlı production motorunu, geçmiş haftalara sonucu görmeden uygulanan walk-forward replay'i ve MH7'den itibaren gerçekten maç öncesi yayınlanan dondurulmuş tahminleri ayrı ayrı izliyoruz. Böylece yeni motor ile tarihsel benchmark birbirine karışmıyor.</p>
       </div>
       <div className="backtest-live-badge">
-        <small>Bugünkü motor</small>
-        <b>{benchmark.replace('ScoutPlus ','v').replace('Cold Start','Başlangıç Modeli')}</b>
-        <span>Eski modeller dahil değil</span>
+        <small>Canlı production</small>
+        <b>{currentRun?.model_version||'—'}</b>
+        <span>{productionQaPass?'QA PASS • yayındaki snapshot':'QA kontrolü bekliyor'}</span>
+      </div>
+    </section>
+
+    <section className="card backtest-method">
+      <div className="panel-head">
+        <div><span className="eyebrow">PRODUCTION QA</span><h2>Current swap koruması</h2></div>
+        <small>{currentRun?.generated_at?new Date(currentRun.generated_at).toLocaleString('tr-TR',{timeZone:'Europe/Istanbul'}):'—'}</small>
+      </div>
+      <div className="backtest-explainer">
+        <div><b>{productionQaPass?'PASS':'BEKLİYOR'} • MH{currentRun?.gameweek||'—'}</b><p>{currentRun?.status||'—'} durumunda • {Number(currentRunQa?.simulation_count||currentRun?.simulation_count||0).toLocaleString('tr-TR')} simülasyon. QA geçmeyen staging run artık current olamaz.</p></div>
+        <div><b>{currentRunQa?.projection_count??'—'} projeksiyon • {currentRunQa?.role_count??'—'} rol</b><p>{currentRunQa?.match_count??'—'} maç / {currentRunQa?.team_count??'—'} takım • hard-zero ihlali {currentRunQa?.hard_zero_violations??'—'} • numeric ihlal {currentRunQa?.projection_range_violations??'—'}.</p></div>
+        <div><b>{currentRunQa?.recommendation_count??'—'} kadro çıktısı</b><p>Geçersiz kadro {currentRunQa?.invalid_recommendations??'—'} • tek current-run kilidi aktif. Current flag yalnız bütün bu kontroller geçince değişebilir.</p></div>
       </div>
     </section>
 
     <section className="backtest-summary-grid">
-      <article className="card"><span>Güncel kurgu ile tamamlanan test</span><b>{replayClosed.length}<small>/6</small></b><small>MH1–MH6 bugünkü kurgu ile tamamlandı</small></article>
+      <article className="card"><span>Walk-forward tamamlanan test</span><b>{replayClosed.length}<small>/6</small></b><small>MH1–MH6 • {replayBenchmark.replace('ScoutPlus ','v').replace('Cold Start','Başlangıç Modeli')}</small></article>
       <article className="card"><span>Tahmin bandında kalan</span><b>{pct(overallBand)}</b><small>MC beklenen {pct(overallExpectedBand)} • fark {pp(overallBandGap)}</small></article>
       <article className="card"><span>Band dışına çıkınca ortalama sapma</span><b>{num(overallOutside)}</b><small>Yalnız tahmin bandının dışındaki puan mesafesi</small></article>
       <article className="card"><span>Top‑25 yakalama • GB</span><b>{pct(overallTop25V2)}</b><small>xFP-only {pct(overallTop25)} • fark {pp(overallTop25Lift)}</small></article>
@@ -87,8 +101,8 @@ export default async function BacktestPage(){
 
     <section className="card backtest-table-card">
       <div className="panel-head">
-        <div><span className="eyebrow">GÜNCEL KURGU • MH1–MH6</span><h2>Hafta hafta geriye dönük test</h2></div>
-        <small>Bu tablo tamamlandığında bugünkü modelin geçmişte ne yapacağını gösterecek.</small>
+        <div><span className="eyebrow">WALK-FORWARD BENCHMARK • MH1–MH6</span><h2>Hafta hafta geriye dönük test</h2></div>
+        <small>{replayBenchmarkVersion} • production motor değiştiğinde yeni benchmark sürümüyle yeniden koşulur.</small>
       </div>
       <div className="table-scroll">
         <table className="backtest-table replay-table">
