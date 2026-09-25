@@ -7785,3 +7785,227 @@ main{
     font-size:8px!important;
   }
 }
+
+/* ===== MOBILE LAYOUT STABILITY PASS v1 ===== */
+/* Readability must not create collisions, clipping or unreachable content. */
+@media(max-width:900px){
+  html{
+    scroll-padding-bottom:calc(112px + env(safe-area-inset-bottom));
+  }
+  body{
+    padding-bottom:calc(108px + env(safe-area-inset-bottom))!important;
+    overflow-x:hidden;
+  }
+  main{
+    min-width:0;
+    max-width:100%;
+    padding-bottom:calc(42px + env(safe-area-inset-bottom))!important;
+  }
+
+  .player-card-list{
+    min-width:0;
+    padding-bottom:22px;
+  }
+
+  /* Search stays full width, team/position share a row, sort gets its own row. */
+  .player-filters{
+    grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;
+    gap:8px!important;
+  }
+  .player-filters>input,
+  .player-filters>.mobile-sort-select{
+    grid-column:1/-1!important;
+  }
+  .player-filters input,
+  .player-filters select{
+    min-width:0!important;
+    width:100%!important;
+  }
+
+  /* Player header: explicitly reserve space for the xFP badge. */
+  .mobile-player-card{
+    min-width:0;
+    overflow:hidden!important;
+    padding:14px!important;
+  }
+  .mobile-player-top{
+    position:relative;
+    display:grid!important;
+    grid-template-columns:auto minmax(0,1fr)!important;
+    align-items:center!important;
+    gap:10px!important;
+    min-width:0;
+    min-height:56px;
+    padding-right:102px!important;
+  }
+  .mobile-card-badges{
+    min-width:0!important;
+    max-width:82px;
+    flex-wrap:wrap;
+    align-content:center;
+  }
+  .mobile-player-name{
+    min-width:0!important;
+    overflow:hidden;
+  }
+  .mobile-player-name b{
+    display:-webkit-box!important;
+    min-width:0;
+    overflow:hidden!important;
+    -webkit-box-orient:vertical;
+    -webkit-line-clamp:2;
+    white-space:normal!important;
+    text-overflow:clip!important;
+    overflow-wrap:anywhere;
+    font-size:14px!important;
+    line-height:1.18!important;
+  }
+  .mobile-player-name span{
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+    font-size:10.5px!important;
+    line-height:1.25!important;
+  }
+
+  .mobile-xfp{
+    top:12px!important;
+    right:12px!important;
+    width:92px;
+    min-width:92px!important;
+    max-width:92px;
+    padding:8px 8px 7px!important;
+    text-align:center!important;
+    box-sizing:border-box;
+  }
+  .mobile-xfp strong{
+    display:inline!important;
+    font-size:18px!important;
+  }
+  .mobile-xfp small{
+    display:inline!important;
+    margin-left:3px!important;
+    font-size:9px!important;
+  }
+  .mobile-xfp em{
+    display:block!important;
+    margin-top:5px;
+    color:#727e9b!important;
+    font-size:8.5px!important;
+    font-style:normal!important;
+    font-weight:800;
+    line-height:1.15;
+    white-space:nowrap;
+  }
+
+  /* Availability text gets its own row instead of fighting the opponent name. */
+  .mobile-fixture{
+    display:grid!important;
+    grid-template-columns:auto minmax(0,1fr);
+    align-items:center!important;
+    gap:5px 8px!important;
+    min-width:0;
+  }
+  .mobile-fixture>b{
+    min-width:0;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+  }
+  .mobile-fixture>em{
+    grid-column:1/-1;
+    max-width:none!important;
+    min-width:0;
+    margin-top:1px;
+    white-space:normal!important;
+    overflow:visible!important;
+    text-overflow:clip!important;
+    line-height:1.35;
+  }
+
+  .mobile-player-metrics{
+    grid-template-columns:repeat(4,minmax(0,1fr))!important;
+    gap:7px!important;
+  }
+  .mobile-player-metrics>div{
+    min-width:0;
+    padding:8px 4px!important;
+  }
+  .mobile-player-metrics span{
+    font-size:9px!important;
+    line-height:1.15!important;
+    white-space:normal;
+  }
+  .mobile-player-metrics b{
+    font-size:12px!important;
+    line-height:1.15!important;
+  }
+
+  /* Bottom nav remains inside the viewport and leaves content room underneath. */
+  .mobile-bottom-nav{
+    box-sizing:border-box;
+    width:auto!important;
+    left:8px!important;
+    right:8px!important;
+    max-width:none!important;
+  }
+}
+
+@media(max-width:430px){
+  .mobile-player-card{
+    padding:12px!important;
+  }
+  .mobile-player-top{
+    padding-right:92px!important;
+    gap:8px!important;
+  }
+  .mobile-card-badges{
+    max-width:76px;
+    gap:4px!important;
+  }
+  .mobile-player-name b{
+    font-size:13.5px!important;
+  }
+  .mobile-xfp{
+    top:10px!important;
+    right:10px!important;
+    width:84px;
+    min-width:84px!important;
+    max-width:84px;
+    padding:7px 6px!important;
+  }
+  .mobile-xfp strong{font-size:17px!important}
+  .mobile-xfp small{font-size:8.5px!important}
+  .mobile-xfp em{
+    font-size:8px!important;
+    white-space:normal;
+  }
+  .mobile-player-metrics{
+    gap:6px!important;
+  }
+  .mobile-player-metrics>div{
+    padding:8px 3px!important;
+  }
+}
+
+@media(max-width:360px){
+  .player-filters{
+    grid-template-columns:1fr!important;
+  }
+  .player-filters>input,
+  .player-filters>select,
+  .player-filters>.mobile-sort-select{
+    grid-column:1!important;
+  }
+  .mobile-player-top{
+    padding-right:86px!important;
+  }
+  .mobile-xfp{
+    width:80px;
+    min-width:80px!important;
+    max-width:80px;
+  }
+  .mobile-player-metrics{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  }
+}
