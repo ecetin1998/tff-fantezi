@@ -13,7 +13,7 @@ export async function login(formData) {
 }
 
 async function getSiteUrl() {
-  const configured=String(process.env.NEXT_PUBLIC_SITE_URL||'').trim().replace(/\\/+$/,'')
+  const configured=String(process.env.NEXT_PUBLIC_SITE_URL||'').trim().replace(/\/+$/,'')
   if(configured) return configured
 
   const h=await headers()
