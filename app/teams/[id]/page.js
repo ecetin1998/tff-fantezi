@@ -2,7 +2,7 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { getTeamDetail } from '@/lib/data'
 import { teamCssVars } from '@/lib/teamThemes'
-import { availabilityCompactNote } from '@/lib/availability'
+import TeamRoster from '@/components/TeamRoster'
 
 export const revalidate=300
 
@@ -122,25 +122,7 @@ export default async function TeamPage({params}){
           <span><small>AKTİF</small><b>{players.length} oyuncu</b></span>
         </div>
       </div>
-      <div className="team-roster-column-head">
-        <span aria-hidden="true"></span><span>Fiyat</span><span>İlk 11</span><span>xDk</span><span>xFP</span>
-      </div>
-      <div className="team-roster-grid">
-        {sortedPlayers.map(p=>{
-          const note=availabilityCompactNote(p.availability)
-          return <Link href={'/players/'+p.id} className="team-roster-player team-roster-player-v2" key={p.id}>
-            <span className={'pos '+p.position}>{posLabel(p.position)}</span>
-            <div className="team-roster-copy">
-              <b>{p.full_name}</b>
-              {note?<small><span className="team-roster-alert">{note}</span></small>:null}
-            </div>
-            <div className="team-roster-metric price"><span>Fiyat</span><b>{Number(p.price||0).toFixed(1)}m</b></div>
-            <div className="team-roster-metric"><span>İlk 11</span><b>{pct(p.projection?.xi_probability)}</b></div>
-            <div className="team-roster-metric"><span>xDk</span><b>{num(p.projection?.x_minutes,0)}</b></div>
-            <div className="team-roster-metric xfp"><span>xFP</span><b>{num(p.projection?.xfp)}</b></div>
-          </Link>
-        })}
-      </div>
+      <TeamRoster players={sortedPlayers}/>
     </section>
 
     <div className="profile-grid team-detail-history-grid">
