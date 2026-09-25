@@ -5614,3 +5614,7 @@ p{color:#66728d}
 @media(max-width:760px){
   .backtest-page .replay-table{min-width:1360px!important}
 }
+
+/* ===== Top25 player analysis ===== */
+.mobile-xfp em{display:block;margin-top:3px;font-style:normal;font-size:8px;font-weight:800;color:var(--muted)}
+@media(max-width:620px){.mobile-xfp em{font-size:7.5px}.desktop-player-table table{min-width:1700px}}
