@@ -7482,3 +7482,306 @@ p{color:#66728d}
     grid-template-columns:1fr 1fr;
   }
 }
+
+/* ===== GLOBAL READABILITY PASS v1 ===== */
+/* Keep layouts compact, but eliminate the 5–8px text that was hard to read. */
+html{
+  -webkit-text-size-adjust:100%;
+  text-size-adjust:100%;
+}
+body{
+  text-rendering:optimizeLegibility;
+}
+main{
+  font-size:14px;
+  line-height:1.45;
+}
+.section-title h1{
+  font-size:clamp(29px,3vw,38px)!important;
+  line-height:1.08!important;
+}
+.section-title>.muted,
+.squad-tabs-note span,
+.footnote{
+  font-size:11px!important;
+  line-height:1.45!important;
+}
+.eyebrow{
+  font-size:10px!important;
+  line-height:1.25!important;
+  letter-spacing:.10em!important;
+}
+.pill,
+.status-chip,
+.signal,
+.fixture-difficulty{
+  font-size:9.5px!important;
+  line-height:1.15!important;
+}
+.table-wrap th,
+.table-wrap td{
+  font-size:11px!important;
+  line-height:1.4!important;
+}
+.table-wrap .cell-note{
+  font-size:9px!important;
+  line-height:1.4!important;
+}
+.stat span,
+.team-metrics span,
+.team-detail-stat-grid span,
+.profile-mini-grid span,
+.profile-stat-grid span,
+.season-stat-grid span,
+.detail-list span{
+  font-size:9.5px!important;
+  line-height:1.3!important;
+}
+.stat em,
+.team-card .muted,
+.detail-list b{
+  font-size:10px!important;
+  line-height:1.35!important;
+}
+.brand-copy small{
+  font-size:10px!important;
+}
+.quick-actions small,
+.spotlight-card>span,
+.model-strip span{
+  font-size:10px!important;
+  line-height:1.35!important;
+}
+.price-card>p,
+.auth-card p,
+.auth-form label{
+  font-size:11.5px!important;
+  line-height:1.55!important;
+}
+
+/* Match cards */
+.match-card-top,
+.match-date-label b,
+.match-date-label em{
+  font-size:10px!important;
+}
+.match-profile-pill{
+  font-size:9px!important;
+  min-height:28px!important;
+  padding:6px 9px!important;
+}
+.modern-match-card .match-team-link b{
+  font-size:11px!important;
+  line-height:1.2!important;
+}
+.match-teams span,
+.match-team-meta small,
+.fantasy-xg-comparison>span{
+  font-size:9px!important;
+}
+.outcome-bar-labeled i span{
+  font-size:8.5px!important;
+  line-height:1!important;
+}
+.outcome-bar-labeled i span b{
+  font-size:9.5px!important;
+}
+.match-fantasy-meta small{
+  font-size:9px!important;
+  line-height:1.2!important;
+}
+.match-fantasy-meta b{
+  font-size:12px!important;
+}
+.match-fantasy-note{
+  padding:13px 14px!important;
+}
+.match-fantasy-note>span{
+  font-size:9px!important;
+  line-height:1.2!important;
+}
+.match-fantasy-note p{
+  font-size:11.5px!important;
+  line-height:1.6!important;
+  margin-top:7px!important;
+}
+.match-technical-details summary{
+  font-size:9.5px!important;
+}
+.match-technical-details small{
+  font-size:9px!important;
+}
+.match-technical-details b{
+  font-size:10px!important;
+}
+
+/* Player / team / role detail */
+.player-hero-score span,
+.player-hero-score small,
+.matchup-line small,
+.week-score span,
+.week-score small,
+.fixture-card span,
+.profile-role-grid span,
+.weekly-history-card span,
+.weekly-history-card small{
+  font-size:9.5px!important;
+  line-height:1.3!important;
+}
+.role-change-metrics small,
+.role-decision-table .signal,
+.role-advanced-details summary small{
+  font-size:8.5px!important;
+}
+.role-change-metrics b,
+.role-advanced-details summary b{
+  font-size:10.5px!important;
+}
+
+/* Squad cards: readable without making the pitch overflow */
+.pitch-player b,
+.bench-card b{
+  font-size:10.5px!important;
+}
+.pitch-player small,
+.pitch-player strong,
+.bench-card small,
+.fantasy-shirt i{
+  font-size:8.5px!important;
+  line-height:1.2!important;
+}
+.unified-squad-list .formation-live-badge span{
+  font-size:7px!important;
+}
+.unified-squad-list .formation-live-badge b{
+  font-size:10px!important;
+}
+
+/* Availability */
+.availability-overview-grid span{
+  font-size:9.5px!important;
+}
+.availability-overview-grid small{
+  font-size:9px!important;
+  line-height:1.35!important;
+}
+.availability-note-cell b{
+  font-size:10.5px!important;
+}
+.availability-note-cell small,
+.player-availability-meta small,
+.picker-availability-note{
+  font-size:9px!important;
+  line-height:1.35!important;
+}
+
+/* Navigation */
+.mobile-bottom-nav a,
+.mobile-bottom-nav b{
+  font-size:10px!important;
+}
+
+@media(max-width:760px){
+  main{
+    font-size:13.5px;
+    padding-left:14px!important;
+    padding-right:14px!important;
+  }
+  .section-title h1{
+    font-size:clamp(25px,7vw,30px)!important;
+  }
+  .section-title>.muted{
+    font-size:10.5px!important;
+  }
+  .eyebrow{
+    font-size:9.5px!important;
+  }
+  .table-wrap th,
+  .table-wrap td{
+    font-size:10.5px!important;
+  }
+  .mobile-player-name b{
+    font-size:14px!important;
+  }
+  .mobile-player-name span,
+  .mobile-player-top>div:first-child small,
+  .mobile-fixture{
+    font-size:10.5px!important;
+  }
+  .mobile-fixture em,
+  .mobile-xfp small,
+  .mobile-player-metrics span{
+    font-size:9px!important;
+  }
+  .mobile-player-metrics b{
+    font-size:11.5px!important;
+  }
+  .match-analysis-card{
+    padding:15px!important;
+  }
+  .match-profile-pill{
+    font-size:8.5px!important;
+  }
+  .modern-match-card .match-team-link b{
+    font-size:10.5px!important;
+  }
+  .match-team-meta small,
+  .fantasy-xg-comparison>span,
+  .match-fantasy-meta small{
+    font-size:8.5px!important;
+  }
+  .outcome-bar-labeled i span{
+    font-size:8px!important;
+  }
+  .outcome-bar-labeled i span b{
+    font-size:9px!important;
+  }
+  .match-fantasy-note p{
+    font-size:11px!important;
+    line-height:1.58!important;
+  }
+  .availability-mobile-head>div b{
+    font-size:11.5px!important;
+  }
+  .availability-mobile-head>div small{
+    font-size:9px!important;
+  }
+  .availability-mobile-card>p{
+    font-size:10.5px!important;
+    line-height:1.55!important;
+  }
+  .availability-mobile-meta small{
+    font-size:8.5px!important;
+  }
+  .availability-mobile-meta b{
+    font-size:9.5px!important;
+  }
+  .role-change-metrics small{
+    font-size:8.5px!important;
+  }
+  .role-change-metrics b{
+    font-size:10px!important;
+  }
+}
+
+@media(max-width:430px){
+  .section-title h1{
+    font-size:25px!important;
+  }
+  .match-analysis-card .match-teams{
+    grid-template-columns:minmax(0,1fr) minmax(78px,92px) minmax(0,1fr)!important;
+  }
+  .match-fantasy-note{
+    padding:12px!important;
+  }
+  .match-fantasy-note p{
+    font-size:10.75px!important;
+  }
+  .pitch-player b{
+    font-size:10px!important;
+  }
+  .pitch-player small,
+  .pitch-player strong{
+    font-size:8px!important;
+  }
+}
