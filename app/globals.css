@@ -7244,3 +7244,18 @@ p{color:#66728d}
     grid-template-columns:1fr 1fr!important;
   }
 }
+
+/* ===== team roster micro cleanup ===== */
+.team-roster-player-v2 .team-roster-copy{
+  align-self:center!important;
+}
+.team-roster-player-v2 .team-roster-copy>b{
+  margin:0!important;
+  line-height:1.2!important;
+}
+.team-roster-player-v2 .team-roster-copy>small{
+  margin-top:3px!important;
+}
+.team-roster-column-head>span:first-child{
+  min-height:1px;
+}
