@@ -39,6 +39,10 @@ export default async function BacktestPage(){
   const overallExpectedBand=replayN?replayClosed.reduce((s,w)=>s+Number(w.expected_band_hit_rate||0)*Number(w.player_sample||0),0)/replayN:null
   const overallBandGap=overallBand!==null&&overallExpectedBand!==null?overallBand-overallExpectedBand:null
   const overallOutside=replayN?replayClosed.reduce((s,w)=>s+Number(w.average_outside_distance||0)*Number(w.player_sample||0),0)/replayN:null
+  const top25V2Weeks=replayClosed.filter(w=>w.top25_v2_hit_rate!==null&&w.top25_v2_hit_rate!==undefined)
+  const overallTop25=replayClosed.length?replayClosed.reduce((s,w)=>s+Number(w.top25_hit_rate||0),0)/replayClosed.length:null
+  const overallTop25V2=top25V2Weeks.length?top25V2Weeks.reduce((s,w)=>s+Number(w.top25_v2_hit_rate||0),0)/top25V2Weeks.length:null
+  const overallTop25Lift=overallTop25!==null&&overallTop25V2!==null?overallTop25V2-overallTop25:null
   const latestLearning=[...learning]
     .sort((a,b)=>Number(b.id||0)-Number(a.id||0))
     .filter((item,index,rows)=>index===rows.findIndex(other=>other.component===item.component&&other.segment===item.segment))
@@ -63,6 +67,7 @@ export default async function BacktestPage(){
       <article className="card"><span>Güncel kurgu ile tamamlanan test</span><b>{replayClosed.length}<small>/6</small></b><small>MH1–MH6 bugünkü kurgu ile tamamlandı</small></article>
       <article className="card"><span>Tahmin bandında kalan</span><b>{pct(overallBand)}</b><small>MC beklenen {pct(overallExpectedBand)} • fark {pp(overallBandGap)}</small></article>
       <article className="card"><span>Band dışına çıkınca ortalama sapma</span><b>{num(overallOutside)}</b><small>Yalnız tahmin bandının dışındaki puan mesafesi</small></article>
+      <article className="card"><span>Top‑25 yakalama • v2.1</span><b>{pct(overallTop25V2)}</b><small>xFP-only {pct(overallTop25)} • fark {pp(overallTop25Lift)}</small></article>
       <article className="card"><span>Şu an takip edilen hafta</span><b>{latestLive?'MH'+latestLive.gameweek:'—'}</b><small>{latestLive?liveStatus[latestLive.status]||latestLive.status:'Canlı kayıt yok'}</small></article>
     </section>
 
@@ -85,7 +90,7 @@ export default async function BacktestPage(){
       <div className="table-scroll">
         <table className="backtest-table replay-table">
           <thead><tr>
-            <th>MH</th><th>Modelin bildiği veri</th><th>Oyuncu</th><th>Band içinde</th><th>MC beklenen</th><th>Kalibrasyon farkı</th><th>Band genişliği</th><th>Band dışı sapma</th><th>Model eğilimi</th><th>Sıralama uyumu</th><th>İlk 25</th><th>Dakika hatası</th><th>Ana öğrenme</th><th>Durum</th>
+            <th>MH</th><th>Modelin bildiği veri</th><th>Oyuncu</th><th>Band içinde</th><th>MC beklenen</th><th>Kalibrasyon farkı</th><th>Band genişliği</th><th>Band dışı sapma</th><th>Model eğilimi</th><th>Sıralama uyumu</th><th>İlk 25 xFP</th><th>İlk 25 v2.1</th><th>Dakika hatası</th><th>Ana öğrenme</th><th>Durum</th>
           </tr></thead>
           <tbody>{replayWeeks.map(w=><tr key={w.gameweek} className={w.status==='cold_start_gap'?'replay-gap-row':''}>
             <td><b>{'MH'+w.gameweek}</b></td>
@@ -99,6 +104,7 @@ export default async function BacktestPage(){
             <td>{tendency(w.model_tendency)}</td>
             <td>{w.ranking_alignment===null||w.ranking_alignment===undefined?'—':num(w.ranking_alignment,2)+' / 1.00'}</td>
             <td>{pct(w.top25_hit_rate)}</td>
+            <td><b>{pct(w.top25_v2_hit_rate)}</b></td>
             <td>{w.average_minute_error===null||w.average_minute_error===undefined?'—':num(w.average_minute_error,1)+' dk'}</td>
             <td className="learning-cell">{w.main_learning||'—'}</td>
             <td><span className={'replay-status '+w.status}>{replayStatus[w.status]||w.status}</span></td>
