@@ -135,7 +135,6 @@ export default async function PlayerPage({ params }){
         <div className="player-availability-meta">
           {a?.injury_date?<small>Başlangıç: {new Intl.DateTimeFormat('tr-TR').format(new Date(a.injury_date+'T12:00:00Z'))}</small>:null}
           {a?.suspension_fixture?<small>Ceza maçı: {a.suspension_fixture}</small>:null}
-          {a?.detail_source_label?<small>Kaynak: {a.detail_source_label}</small>:null}
         </div>
       </div>
       {a?.checked_at?<small className="player-availability-check">Son kontrol: {formatCheck(a.checked_at)}</small>:null}
