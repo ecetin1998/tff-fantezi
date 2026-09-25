@@ -18,6 +18,7 @@ const POS_ORDER={GK:0,DEF:1,MID:2,FWD:3}
 const posLabel={GK:'KL',DEF:'DEF',MID:'OS',FWD:'FOR'}
 
 function xfp(p){return Number(p?.projection?.xfp||0)}
+function totalPoints(p){return Number(p?.total_points||0)}
 function stateSignature(payload=[]){
   return JSON.stringify([...payload]
     .map(x=>({player_id:Number(x.player_id),is_captain:Boolean(x.is_captain),bench_order:x.bench_order===null?null:Number(x.bench_order)}))
@@ -134,8 +135,8 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
         const cmp=String(a.full_name||'').localeCompare(String(b.full_name||''),'tr')
         return sortDir==='asc'?cmp:-cmp
       }
-      const av=sortKey==='price'?Number(a.price||0):xfp(a)
-      const bv=sortKey==='price'?Number(b.price||0):xfp(b)
+      const av=sortKey==='price'?Number(a.price||0):sortKey==='points'?totalPoints(a):xfp(a)
+      const bv=sortKey==='price'?Number(b.price||0):sortKey==='points'?totalPoints(b):xfp(b)
       return sortDir==='asc'?av-bv:bv-av
     })
     return out.slice(0,180)
@@ -388,6 +389,7 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
           <button type="button" className={sortKey==='name'?'active':''} onClick={()=>changePoolSort('name')}>Oyuncu {sortKey==='name'?(sortDir==='desc'?'↓':'↑'):''}</button>
           <button type="button" className={sortKey==='price'?'active':''} onClick={()=>changePoolSort('price')}>Fiyat {sortKey==='price'?(sortDir==='desc'?'↓':'↑'):''}</button>
           <button type="button" className={sortKey==='xfp'?'active':''} onClick={()=>changePoolSort('xfp')}>xFP {sortKey==='xfp'?(sortDir==='desc'?'↓':'↑'):''}</button>
+          <button type="button" className={sortKey==='points'?'active':''} onClick={()=>changePoolSort('points')} title="Toplam Puan">Top. Puan {sortKey==='points'?(sortDir==='desc'?'↓':'↑'):''}</button>
           <span/>
         </div>
 
@@ -405,6 +407,7 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
               </div>
               <div className={`picker-value price ${sortKey==='price'?'active':''}`}>{Number(p.price||0).toFixed(1)}m</div>
               <div className={`picker-value xfp ${sortKey==='xfp'?'active':''}`}>{xfp(p).toFixed(2)}</div>
+              <div className={`picker-value points ${sortKey==='points'?'active':''}`}>{totalPoints(p).toFixed(0)}</div>
               <button
                 type="button"
                 className={chosen?'picker-remove-player':'picker-add-player'}
