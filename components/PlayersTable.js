@@ -33,6 +33,8 @@ export default function PlayersTable({ players }){
       if(k==='p75')return Number(p.projection?.p75||0)
       if(k==='p90')return Number(p.projection?.p90||0)
       if(k==='six')return Number(p.projection?.six_plus_probability||0)
+      if(k==='top25')return Number(p.projection?.top25_score||0)
+      if(k==='top25rank')return Number(p.projection?.top25_rank||999)
       if(k==='xg')return Number(p.projection?.expected_goals||0)
       if(k==='xa')return Number(p.projection?.expected_assists||0)
       if(k==='value')return Number(p.projection?.value_score||0)
@@ -73,7 +75,7 @@ export default function PlayersTable({ players }){
         <option value="">Tüm mevkiler</option><option value="GK">KL</option><option value="DEF">DEF</option><option value="MID">OS</option><option value="FWD">FOR</option>
       </select>
       <select className="mobile-sort-select" value={sort} onChange={e=>{setSort(e.target.value);setDir(-1)}}>
-        <option value="xfp">xFP'ye göre</option><option value="value">F/P'ye göre</option><option value="minutes">Dakikaya göre</option><option value="six">6+ ihtimaline göre</option><option value="price">Fiyata göre</option>
+        <option value="xfp">xFP'ye göre</option><option value="top25">Top25 skoruna göre</option><option value="top25rank">Top25 sırasına göre</option><option value="value">F/P'ye göre</option><option value="minutes">Dakikaya göre</option><option value="six">6+ ihtimaline göre</option><option value="price">Fiyata göre</option>
       </select>
     </div>
 
@@ -82,13 +84,13 @@ export default function PlayersTable({ players }){
 
     <div className="card table-wrap desktop-player-table"><table><thead><tr>
       <th className="rank-col">#</th>{head('name','Oyuncu')}{head('team','Takım')}{head('pos','Mevki')}{head('opp','Rakip')}<th>E/D</th>
-      {head('price','Fiyat')}{head('xi','İlk 11')}{head('minutes','xDk')}{head('xfp','xFP')}{head('core','Temel xFP')}{head('bonus','Beklenen bonus')}
+      {head('price','Fiyat')}{head('xi','İlk 11')}{head('minutes','xDk')}{head('xfp','xFP')}{head('top25rank','Top25 Sıra')}{head('top25','Top25 Skor')}{head('core','Temel xFP')}{head('bonus','Beklenen bonus')}
       {head('p25','Temkinli')}{head('p75','İyi senaryo')}{head('p90','Tavan')}{head('six','6+ %')}{head('xg','xG')}{head('xa','xA')}{head('value','F/P')}<th>Güven</th>
     </tr></thead><tbody>{rows.map((p,i)=><tr className="team-player-row" style={teamCssVars(p.team)} key={p.id}>
       <td className="rank-col">#{i+1}</td>
       <td><Link className="player-link team-player-link" href={'/players/'+p.id}><i className="club-dot"/><b>{p.full_name}</b></Link>{playerNote(p)?<small className="cell-note">{playerNote(p)}</small>:null}</td>
       <td><Link className="team-table-link" href={'/teams/'+p.team_id}>{p.team}</Link></td><td><span className={`pos ${p.position}`}>{posLabel(p.position)}</span></td><td>{p.projection?.opponent_name||'—'}</td><td>{p.projection?.venue==='HOME'?'Ev':p.projection?.venue==='AWAY'?'Dep':'—'}</td>
-      <td>{num(p.price,1)}m</td><td>{pct(p.projection?.xi_probability)}</td><td>{num(p.projection?.x_minutes,1)}</td><td><b>{num(p.projection?.xfp)}</b></td><td>{num(p.projection?.core_xfp)}</td><td>{num(p.projection?.x_bonus)}</td>
+      <td>{num(p.price,1)}m</td><td>{pct(p.projection?.xi_probability)}</td><td>{num(p.projection?.x_minutes,1)}</td><td><b>{num(p.projection?.xfp)}</b></td><td><b>#{Number(p.projection?.top25_rank||0)||'—'}</b></td><td>{num(p.projection?.top25_score,3)}</td><td>{num(p.projection?.core_xfp)}</td><td>{num(p.projection?.x_bonus)}</td>
       <td>{num(p.projection?.p25,1)}</td><td>{num(p.projection?.p75,1)}</td><td>{num(p.projection?.p90,1)}</td><td>{pct(p.projection?.six_plus_probability)}</td><td>{num(p.projection?.expected_goals)}</td><td>{num(p.projection?.expected_assists)}</td><td>{num(p.projection?.value_score)}</td><td>{p.projection?.data_confidence||'—'}</td>
     </tr>)}</tbody></table></div>
 
@@ -97,7 +99,7 @@ export default function PlayersTable({ players }){
         <div className="mobile-player-top">
           <div className="mobile-card-badges"><span className="weekly-rank">#{i+1}</span><span className={`pos ${p.position}`}>{posLabel(p.position)}</span></div>
           <div className="mobile-player-name"><b>{p.full_name}</b><span>{p.team} • {num(p.price,1)}m</span></div>
-          <div className="mobile-xfp"><strong>{num(p.projection?.xfp)}</strong><small>xFP</small></div>
+          <div className="mobile-xfp"><strong>{num(p.projection?.xfp)}</strong><small>xFP</small><em>{p.projection?.top25_rank?`Top25 #${p.projection.top25_rank}`:'Top25 —'}</em></div>
         </div>
         <div className="mobile-fixture"><span>{p.projection?.venue==='HOME'?'Ev':p.projection?.venue==='AWAY'?'Dep':'—'}</span><b>Rakip: {p.projection?.opponent_name||'—'}</b>{playerNote(p)?<em>{playerNote(p)}</em>:null}</div>
         <div className="mobile-player-metrics">
