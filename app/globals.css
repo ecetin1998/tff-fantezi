@@ -6822,3 +6822,425 @@ p{color:#66728d}
     font-size:7.5px;
   }
 }
+
+/* ===== CANONICAL roles + matches + weekly points refresh ===== */
+
+/* --- Role signals: decision-first --- */
+.role-summary-grid{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:10px;
+  margin-bottom:16px;
+}
+.role-summary-grid>.card{
+  min-width:0;
+  padding:16px!important;
+}
+.role-summary-grid span,
+.role-summary-grid b,
+.role-summary-grid small{display:block}
+.role-summary-grid span{
+  color:#7f8ba3;
+  font-size:7px;
+  font-weight:900;
+  letter-spacing:.03em;
+}
+.role-summary-grid b{
+  margin-top:7px;
+  color:#293653;
+  font-size:24px;
+  line-height:1;
+}
+.role-summary-grid small{
+  margin-top:6px;
+  color:#98a2b5;
+  font-size:6.5px;
+}
+.role-summary-grid .role-up{
+  border-top:2px solid #8fd8c8!important;
+}
+.role-summary-grid .role-down{
+  border-top:2px solid #efb5bf!important;
+}
+
+.role-changes-card,
+.role-table-card{
+  margin-bottom:16px;
+  padding:18px!important;
+}
+.role-change-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:9px;
+}
+.role-change-card{
+  min-width:0;
+  padding:12px;
+  border:1px solid #e2e7ef;
+  border-radius:13px;
+  background:#fbfcfe;
+  color:inherit;
+  text-decoration:none;
+}
+.role-change-card:hover{
+  background:#fff;
+  box-shadow:0 8px 24px rgba(34,48,82,.05);
+}
+.role-change-card.up,
+.role-change-card.return{border-left:3px solid #71cdbd}
+.role-change-card.down,
+.role-change-card.out{border-left:3px solid #e69ca9}
+.role-change-head{
+  display:grid;
+  grid-template-columns:34px minmax(0,1fr) auto;
+  gap:8px;
+  align-items:center;
+}
+.role-change-head>div{min-width:0}
+.role-change-head>div b,
+.role-change-head>div small{display:block}
+.role-change-head>div b{
+  overflow:hidden;
+  color:#2b3754;
+  font-size:9.5px;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.role-change-head>div small{
+  margin-top:2px;
+  color:#8b95a9;
+  font-size:6.5px;
+}
+.role-change-head em{
+  max-width:120px;
+  padding:4px 6px;
+  border-radius:999px;
+  background:#f1f4f8;
+  color:#6d7891;
+  font-size:6px;
+  font-style:normal;
+  font-weight:950;
+  text-align:center;
+}
+.role-change-metrics{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:6px;
+  margin-top:10px;
+}
+.role-change-metrics>span{
+  min-width:0;
+  padding:8px;
+  border:1px solid #e6eaf1;
+  border-radius:10px;
+  background:#fff;
+}
+.role-change-metrics small,
+.role-change-metrics b{display:block}
+.role-change-metrics small{
+  color:#909aae;
+  font-size:5.5px;
+}
+.role-change-metrics b{
+  margin-top:3px;
+  color:#34405d;
+  font-size:9px;
+  font-variant-numeric:tabular-nums;
+}
+.role-decision-table table{min-width:980px}
+.role-decision-table .delta-up{color:#087e72;font-weight:900}
+.role-decision-table .delta-down{color:#b24b5e;font-weight:900}
+.role-decision-table .signal{
+  display:inline-flex;
+  min-height:22px;
+  align-items:center;
+  padding:4px 7px;
+  border-radius:999px;
+  background:#f0f3f8;
+  color:#68748d;
+  font-size:6.5px;
+  font-weight:950;
+}
+.role-decision-table .signal.up,
+.role-decision-table .signal.return{background:#ebf8f5;color:#087e72}
+.role-decision-table .signal.down,
+.role-decision-table .signal.out{background:#fff0f3;color:#ad4357}
+
+.role-advanced-details{
+  overflow:hidden;
+  margin-bottom:16px;
+}
+.role-advanced-details summary{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:15px 18px;
+  cursor:pointer;
+  list-style:none;
+}
+.role-advanced-details summary::-webkit-details-marker{display:none}
+.role-advanced-details summary small,
+.role-advanced-details summary b{display:block}
+.role-advanced-details summary small{
+  color:#8792a7;
+  font-size:6px;
+  font-weight:950;
+  letter-spacing:.08em;
+}
+.role-advanced-details summary b{
+  margin-top:4px;
+  color:#2d3956;
+  font-size:10px;
+}
+.role-advanced-details summary i{
+  width:27px;
+  height:27px;
+  display:grid;
+  place-items:center;
+  border:1px solid #dce3ed;
+  border-radius:50%;
+  background:#f8fafe;
+  color:#6c7891;
+  font-size:16px;
+  font-style:normal;
+  transition:transform .16s ease;
+}
+.role-advanced-details[open] summary i{transform:rotate(45deg)}
+.role-advanced-details .table-wrap{
+  border-top:1px solid #edf0f5;
+  border-radius:0!important;
+  box-shadow:none!important;
+}
+
+/* --- Match predictions: fantasy-first --- */
+.match-analysis-grid{
+  align-items:start;
+}
+.match-analysis-card{
+  min-width:0;
+}
+.match-analysis-card .match-card-top{
+  align-items:center;
+}
+.match-profile-pill{
+  display:inline-flex;
+  align-items:center;
+  min-height:25px;
+  padding:5px 8px;
+  border:1px solid #dfe5ee;
+  border-radius:999px;
+  background:#f5f7fb;
+  color:#6c7791;
+  font-size:6.5px;
+  font-weight:950;
+}
+.match-profile-pill.high{
+  border-color:#efd9b0;
+  background:#fff7e9;
+  color:#8d6728;
+}
+.match-profile-pill.low{
+  border-color:#cfe4e8;
+  background:#eef7f9;
+  color:#4d7780;
+}
+.fantasy-xg-comparison>span{
+  display:block;
+  margin-top:4px;
+  color:#8994a9;
+  font-size:6px;
+  font-weight:850;
+}
+.fantasy-first-meta{
+  grid-template-columns:repeat(4,minmax(0,1fr))!important;
+}
+.fantasy-first-meta>span{
+  min-width:0;
+  border:1px solid #e4e9f1;
+  border-radius:11px;
+  background:#fafbfd;
+}
+.fantasy-first-meta>span.edge{
+  border-color:color-mix(in srgb,var(--club1) 24%,#dde4ee);
+  background:color-mix(in srgb,var(--club1) 5%,#fff);
+}
+.fantasy-first-meta small{
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.match-fantasy-note{
+  margin-top:11px;
+  padding:11px 12px;
+  border:1px solid #e3e8f0;
+  border-radius:12px;
+  background:#f8fafe;
+}
+.match-fantasy-note>span{
+  display:block;
+  color:#7a879f;
+  font-size:6px;
+  font-weight:950;
+  letter-spacing:.08em;
+}
+.match-fantasy-note p{
+  margin:5px 0 0!important;
+  color:#5f6c87!important;
+  font-size:7.5px!important;
+  line-height:1.5!important;
+}
+.match-technical-details{
+  margin-top:9px;
+  border-top:1px solid #edf0f5;
+}
+.match-technical-details summary{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  padding-top:9px;
+  color:#8893a8;
+  font-size:6.5px;
+  font-weight:850;
+  cursor:pointer;
+  list-style:none;
+}
+.match-technical-details summary::-webkit-details-marker{display:none}
+.match-technical-details summary span{
+  font-size:12px;
+  transition:transform .16s ease;
+}
+.match-technical-details[open] summary span{transform:rotate(45deg)}
+.match-technical-details>div{
+  display:grid;
+  grid-template-columns:1fr auto;
+  gap:7px 14px;
+  margin-top:8px;
+  padding:9px 10px;
+  border:1px solid #e5e9f1;
+  border-radius:10px;
+  background:#fafbfd;
+}
+.match-technical-details small{
+  color:#8d97aa;
+  font-size:6px;
+}
+.match-technical-details b{
+  color:#48546f;
+  font-size:7px;
+  text-align:right;
+}
+
+/* --- Weekly points: form + 0-minute safe metrics --- */
+.simplified-weekly-table table{
+  min-width:1180px!important;
+}
+.simplified-weekly-table th,
+.simplified-weekly-table td{
+  white-space:nowrap;
+}
+.form-trend,
+.mobile-form-trend{
+  display:inline-grid;
+  place-items:center;
+  border-radius:999px;
+  font-weight:950;
+}
+.form-trend{
+  width:24px;
+  height:24px;
+  font-size:12px;
+}
+.form-trend.up,
+.mobile-form-trend.up{background:#ebf8f5;color:#087e72}
+.form-trend.down,
+.mobile-form-trend.down{background:#fff0f3;color:#b14a5d}
+.form-trend.flat,
+.mobile-form-trend.flat{background:#f1f4f8;color:#758098}
+.weekly-form-meta{
+  grid-template-columns:repeat(5,minmax(0,1fr))!important;
+}
+.weekly-form-meta>span{
+  min-width:0;
+}
+.weekly-form-meta .mobile-form-trend{
+  display:flex!important;
+  align-items:center;
+  justify-content:space-between;
+  gap:6px;
+  min-height:38px;
+  padding:7px 8px;
+}
+.weekly-form-meta .mobile-form-trend small,
+.weekly-form-meta .mobile-form-trend b{
+  margin:0!important;
+}
+.weekly-form-meta .mobile-form-trend b{
+  font-size:13px!important;
+}
+
+@media(max-width:900px){
+  .role-summary-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+  .role-change-grid{
+    grid-template-columns:1fr;
+  }
+  .fantasy-first-meta{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  }
+}
+
+@media(max-width:760px){
+  .role-summary-grid{
+    gap:7px;
+  }
+  .role-summary-grid>.card{
+    padding:13px!important;
+  }
+  .role-summary-grid b{
+    font-size:20px;
+  }
+  .role-change-metrics{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+  .match-analysis-card{
+    padding:15px!important;
+  }
+  .match-analysis-card .match-teams{
+    grid-template-columns:minmax(0,1fr) minmax(82px,100px) minmax(0,1fr)!important;
+  }
+  .match-profile-pill{
+    font-size:6px;
+  }
+  .weekly-form-meta{
+    grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  }
+}
+
+@media(max-width:430px){
+  .role-summary-grid{
+    grid-template-columns:1fr 1fr;
+  }
+  .role-change-head{
+    grid-template-columns:30px minmax(0,1fr);
+  }
+  .role-change-head em{
+    grid-column:1/-1;
+    justify-self:start;
+    max-width:none;
+  }
+  .role-change-metrics{
+    grid-template-columns:1fr 1fr;
+  }
+  .fantasy-first-meta{
+    grid-template-columns:1fr 1fr!important;
+  }
+  .match-fantasy-note p{
+    font-size:7px!important;
+  }
+  .weekly-form-meta{
+    grid-template-columns:1fr 1fr!important;
+  }
+}
