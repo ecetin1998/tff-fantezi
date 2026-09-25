@@ -40,7 +40,7 @@ export default async function BacktestPage(){
   const overallBandGap=overallBand!==null&&overallExpectedBand!==null?overallBand-overallExpectedBand:null
   const overallOutside=replayN?replayClosed.reduce((s,w)=>s+Number(w.average_outside_distance||0)*Number(w.player_sample||0),0)/replayN:null
   const top25V2Weeks=replayClosed.filter(w=>w.top25_v2_hit_rate!==null&&w.top25_v2_hit_rate!==undefined)
-  const overallTop25=replayClosed.length?replayClosed.reduce((s,w)=>s+Number(w.top25_hit_rate||0),0)/replayClosed.length:null
+  const overallTop25=top25V2Weeks.length?top25V2Weeks.reduce((s,w)=>s+Number(w.top25_hit_rate||0),0)/top25V2Weeks.length:null
   const overallTop25V2=top25V2Weeks.length?top25V2Weeks.reduce((s,w)=>s+Number(w.top25_v2_hit_rate||0),0)/top25V2Weeks.length:null
   const overallTop25Lift=overallTop25!==null&&overallTop25V2!==null?overallTop25V2-overallTop25:null
   const latestLearning=[...learning]
