@@ -122,16 +122,14 @@ export default async function TeamPage({params}){
         </div>
       </div>
       <div className="team-roster-column-head">
-        <span>Oyuncu</span><span>Fiyat</span><span>İlk 11</span><span>xDk</span><span>xFP</span>
+        <span aria-hidden="true"></span><span>Fiyat</span><span>İlk 11</span><span>xDk</span><span>xFP</span>
       </div>
       <div className="team-roster-grid">
         {sortedPlayers.map(p=><Link href={'/players/'+p.id} className="team-roster-player team-roster-player-v2" key={p.id}>
           <span className={'pos '+p.position}>{posLabel(p.position)}</span>
           <div className="team-roster-copy">
             <b>{p.full_name}</b>
-            <small>
-              {p.availability?.reason?<span className="team-roster-alert">{p.availability.reason}</span>:<span>{posLabel(p.position)}</span>}
-            </small>
+            {p.availability?.reason?<small><span className="team-roster-alert">{p.availability.reason}</span></small>:null}
           </div>
           <div className="team-roster-metric price"><span>Fiyat</span><b>{Number(p.price||0).toFixed(1)}m</b></div>
           <div className="team-roster-metric"><span>İlk 11</span><b>{pct(p.projection?.xi_probability)}</b></div>
