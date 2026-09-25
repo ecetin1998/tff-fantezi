@@ -67,7 +67,7 @@ export default async function BacktestPage(){
       <article className="card"><span>Güncel kurgu ile tamamlanan test</span><b>{replayClosed.length}<small>/6</small></b><small>MH1–MH6 bugünkü kurgu ile tamamlandı</small></article>
       <article className="card"><span>Tahmin bandında kalan</span><b>{pct(overallBand)}</b><small>MC beklenen {pct(overallExpectedBand)} • fark {pp(overallBandGap)}</small></article>
       <article className="card"><span>Band dışına çıkınca ortalama sapma</span><b>{num(overallOutside)}</b><small>Yalnız tahmin bandının dışındaki puan mesafesi</small></article>
-      <article className="card"><span>Top‑25 yakalama • v2.1</span><b>{pct(overallTop25V2)}</b><small>xFP-only {pct(overallTop25)} • fark {pp(overallTop25Lift)}</small></article>
+      <article className="card"><span>Top‑25 yakalama • v2.3</span><b>{pct(overallTop25V2)}</b><small>xFP-only {pct(overallTop25)} • fark {pp(overallTop25Lift)}</small></article>
       <article className="card"><span>Şu an takip edilen hafta</span><b>{latestLive?'MH'+latestLive.gameweek:'—'}</b><small>{latestLive?liveStatus[latestLive.status]||latestLive.status:'Canlı kayıt yok'}</small></article>
     </section>
 
@@ -90,7 +90,7 @@ export default async function BacktestPage(){
       <div className="table-scroll">
         <table className="backtest-table replay-table">
           <thead><tr>
-            <th>MH</th><th>Modelin bildiği veri</th><th>Oyuncu</th><th>Band içinde</th><th>MC beklenen</th><th>Kalibrasyon farkı</th><th>Band genişliği</th><th>Band dışı sapma</th><th>Model eğilimi</th><th>Sıralama uyumu</th><th>İlk 25 xFP</th><th>İlk 25 v2.1</th><th>Dakika hatası</th><th>Ana öğrenme</th><th>Durum</th>
+            <th>MH</th><th>Modelin bildiği veri</th><th>Oyuncu</th><th>Band içinde</th><th>MC beklenen</th><th>Kalibrasyon farkı</th><th>Band genişliği</th><th>Band dışı sapma</th><th>Model eğilimi</th><th>Sıralama uyumu</th><th>İlk 25 xFP</th><th>İlk 25 v2.3</th><th>Dakika hatası</th><th>Ana öğrenme</th><th>Durum</th>
           </tr></thead>
           <tbody>{replayWeeks.map(w=><tr key={w.gameweek} className={w.status==='cold_start_gap'?'replay-gap-row':''}>
             <td><b>{'MH'+w.gameweek}</b></td>
@@ -123,7 +123,7 @@ export default async function BacktestPage(){
         <div><b>Band dışı sapma</b><p>Gerçek sonuç bandın dışına çıktıysa yalnız en yakın sınırdan uzaklığı ölçeriz. Örn. xFP 5, bant 2–13 ve gerçek 18 ise <strong>13 puan hata değil, band dışı 5 puan</strong> olarak değerlendirilir.</p></div>
         <div><b>Band genişliği</b><p>Belirsizliği ne kadar geniş bıraktığımızı gösterir. Amaç bandı körlemesine daraltmak değil; kesikli puan dağılımında beklenen self-coverage, gerçekleşen kapsama ve band dışı sapmayı birlikte iyileştirmektir.</p></div>
         <div><b>Model eğilimi</b><p>Merkez xFP’nin uzun vadede sistematik olarak fazla mı az mı kaldığını gösterir. Tek oyuncunun uç sonucu değil, tekrar eden yönlü sapma önemlidir.</p></div>
-        <div><b>Sıralama ve dakika</b><p>Sıralama uyumu yüksek gördüğümüz oyuncuların gerçekten yukarı çıkıp çıkmadığını; dakika hatası ise rol/ilk 11 tahminimizin doğruluğunu gösterir. Öğrenme kararlarında ikisini birlikte kullanırız.</p></div>
+        <div><b>Sıralama ve dakika</b><p>Sıralama uyumu yüksek gördüğümüz oyuncuların gerçekten yukarı çıkıp çıkmadığını; dakika hatası ise rol/ilk 11 tahminimizin doğruluğunu gösterir. Öğrenme kararlarında ikisini birlikte kullanırız.</p></div>\n        <div><b>Top‑25 v2.3</b><p><strong>xFP</strong> beklenen fantasy puanını ölçmeye devam eder; Top‑25 v2.3 ise haftalık sıçrama ihtimalini ayrı sıralar. Pozitif 6+ sinyali, son iki maç formu ve MID/FWD hücum tehdidi eklenir. Bu skor optimizerı veya ana xFP’yi değiştirmez.</p></div>
       </div>
     </section>
 
