@@ -385,13 +385,10 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
           </div>
         </div>
         <div className="picker-table-head">
-          <span className="picker-shirt-head"/>
           <button type="button" className={sortKey==='name'?'active':''} onClick={()=>changePoolSort('name')}>Oyuncu {sortKey==='name'?(sortDir==='desc'?'↓':'↑'):''}</button>
           <button type="button" className={sortKey==='price'?'active':''} onClick={()=>changePoolSort('price')}>Fiyat {sortKey==='price'?(sortDir==='desc'?'↓':'↑'):''}</button>
-          <div className="picker-metric-heads">
-            <button type="button" className={sortKey==='xfp'?'active':''} onClick={()=>changePoolSort('xfp')}>xFP {sortKey==='xfp'?(sortDir==='desc'?'↓':'↑'):''}</button>
-            <button type="button" className={sortKey==='points'?'active':''} onClick={()=>changePoolSort('points')} title="Toplam Puan">Puan {sortKey==='points'?(sortDir==='desc'?'↓':'↑'):''}</button>
-          </div>
+          <button type="button" className={sortKey==='xfp'?'active':''} onClick={()=>changePoolSort('xfp')}>xFP {sortKey==='xfp'?(sortDir==='desc'?'↓':'↑'):''}</button>
+          <button type="button" className={sortKey==='points'?'active':''} onClick={()=>changePoolSort('points')} title="Toplam Puan">Puan {sortKey==='points'?(sortDir==='desc'?'↓':'↑'):''}</button>
           <span/>
         </div>
 
@@ -402,16 +399,16 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
             const overBudget=!chosen&&cost+Number(p.price)>100.0001
             const disabled=!chosen&&(ids.length>=15||posFull||overBudget)
             return <div className={`picker-player ${chosen?'chosen':''} ${disabled?'disabled':''}`} style={teamCssVars(p.team)} key={p.id}>
-              <div className="picker-shirt-wrap"><span className={`fantasy-shirt tiny ${p.position}`} style={teamCssVars(p.team)}><i>{shirtMark(p)}</i></span></div>
-              <div className="picker-copy">
-                <b>{p.full_name}</b>
-                <small><strong>{p.team}</strong><em>Rakip: {p.projection?.opponent_name||'—'}</em></small>
+              <div className="picker-player-main">
+                <div className="picker-shirt-wrap"><span className={`fantasy-shirt tiny ${p.position}`} style={teamCssVars(p.team)}><i>{shirtMark(p)}</i></span></div>
+                <div className="picker-copy">
+                  <b>{p.full_name}</b>
+                  <small><strong>{p.team}</strong><em>Rakip: {p.projection?.opponent_name||'—'}</em></small>
+                </div>
               </div>
               <div className={`picker-value price ${sortKey==='price'?'active':''}`}>{Number(p.price||0).toFixed(1)}m</div>
-              <div className="picker-metric-pair">
-                <div className={`picker-value xfp ${sortKey==='xfp'?'active':''}`}>{xfp(p).toFixed(2)}</div>
-                <div className={`picker-value points ${sortKey==='points'?'active':''}`}>{totalPoints(p).toFixed(0)}</div>
-              </div>
+              <div className={`picker-value xfp ${sortKey==='xfp'?'active':''}`}>{xfp(p).toFixed(2)}</div>
+              <div className={`picker-value points ${sortKey==='points'?'active':''}`}>{totalPoints(p).toFixed(0)}</div>
               <button
                 type="button"
                 className={chosen?'picker-remove-player':'picker-add-player'}
