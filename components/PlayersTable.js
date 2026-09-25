@@ -2,6 +2,7 @@
 import { useMemo, useState } from 'react'
 import Link from 'next/link'
 import { teamCssVars } from '@/lib/teamThemes'
+import { availabilityCompactNote, availabilityIsIssue } from '@/lib/availability'
 
 const posLabel=p=>({GK:'KL',DEF:'DEF',MID:'OS',FWD:'FOR'}[p]||p||'—')
 
@@ -50,20 +51,11 @@ export default function PlayersTable({ players }){
   const head=(k,label)=><th onClick={()=>{if(sort===k)setDir(-dir);else{setSort(k);setDir(-1)}}}>{label}{sort===k?<span className="sortmark">{dir===-1?' ↓':' ↑'}</span>:null}</th>
   const pct=v=>`${(Number(v||0)*100).toFixed(0)}%`
   const num=(v,d=2)=>Number(v||0).toFixed(d)
-  const formatCheck=(value)=>{
-    if(!value)return ''
-    const parts=new Intl.DateTimeFormat('en-GB',{timeZone:'Europe/Istanbul',day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit',hour12:false}).formatToParts(new Date(value))
-    const get=t=>parts.find(x=>x.type===t)?.value||''
-    return `${get('day')}/${get('month')}/${get('year')} ${get('hour')}:${get('minute')}`
-  }
   const playerNote=(p)=>{
     const a=p.availability
-    const issue=a && (['injuries','suspensions'].includes(a.availability_type) || Number(a.availability_probability??1)<.99)
-    if(issue&&a.reason){
-      const checked=formatCheck(a.checked_at)
-      return checked ? `${a.reason} • ${checked}` : a.reason
-    }
-    return ''
+    if(!a)return ''
+    const visible=availabilityIsIssue(a) || a.availability_type==='return' || a.expected_return || a.suspension_fixture
+    return visible ? availabilityCompactNote(a) : ''
   }
 
   return <>
