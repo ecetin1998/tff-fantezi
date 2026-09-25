@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { getPlayerDetail } from '@/lib/data'
 import { teamCssVars } from '@/lib/teamThemes'
+import { availabilityCompactNote, availabilityIsIssue } from '@/lib/availability'
 
 export const revalidate=300
 
@@ -38,7 +39,9 @@ export default async function PlayerPage({ params }){
   const average=played?actual/played:0
   const opponentId=match ? (Number(match.home_team_id)===Number(player.team_id)?Number(match.away_team_id):Number(match.home_team_id)) : null
   const opponent=p?.opponent_name || '—'
-  const hasAvailabilityIssue=a && (['injuries','suspensions'].includes(a.availability_type) || Number(a.availability_probability??1)<.99)
+  const hasAvailabilityIssue=availabilityIsIssue(a)
+  const hasAvailabilityInfo=a && (hasAvailabilityIssue || a.availability_type==='return' || a.expected_return || a.suspension_fixture || a.source_reason)
+  const availabilityNote=availabilityCompactNote(a)
   const isGK=player.position==='GK'
   const isDEF=player.position==='DEF'
   const themeStyle=teamCssVars(player.team)
@@ -125,12 +128,17 @@ export default async function PlayerPage({ params }){
       </div>
     </section>
 
-    {hasAvailabilityIssue?<div className="availability-line player-detail-alert">
-      <div>
-        <span>UYGUNLUK UYARISI</span>
-        <b>{a?.reason||'Oynama durumu riskli'}</b>
+    {hasAvailabilityInfo?<div className={`availability-line player-detail-alert ${a?.availability_type==='return'?'is-return':''}`}>
+      <div className="player-availability-copy">
+        <span>{a?.availability_type==='return'?'DÖNÜŞ NOTU':'UYGUNLUK UYARISI'}</span>
+        <b>{availabilityNote||'Oynama durumu takip ediliyor'}</b>
+        <div className="player-availability-meta">
+          {a?.injury_date?<small>Başlangıç: {new Intl.DateTimeFormat('tr-TR').format(new Date(a.injury_date+'T12:00:00Z'))}</small>:null}
+          {a?.suspension_fixture?<small>Ceza maçı: {a.suspension_fixture}</small>:null}
+          {a?.detail_source_label?<small>Kaynak: {a.detail_source_label}</small>:null}
+        </div>
       </div>
-      {a?.checked_at?<small>Son kontrol: {formatCheck(a.checked_at)}</small>:null}
+      {a?.checked_at?<small className="player-availability-check">Son kontrol: {formatCheck(a.checked_at)}</small>:null}
     </div>:null}
 
     <section className="card profile-card player-decision-card">
