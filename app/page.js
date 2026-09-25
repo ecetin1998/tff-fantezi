@@ -9,13 +9,13 @@ export default async function Home(){
   const best=[...players].sort((a,b)=>Number(b.projection?.xfp||0)-Number(a.projection?.xfp||0))[0]
   const value=[...players].sort((a,b)=>Number(b.projection?.value_score||0)-Number(a.projection?.value_score||0))[0]
   const mins=[...players].sort((a,b)=>Number(b.projection?.x_minutes||0)-Number(a.projection?.x_minutes||0))[0]
-  const six=[...players].sort((a,b)=>Number(b.projection?.six_plus_probability||0)-Number(a.projection?.six_plus_probability||0))[0]
+  const top25=[...players].sort((a,b)=>Number(a.projection?.top25_rank||9999)-Number(b.projection?.top25_rank||9999) || Number(b.projection?.top25_score||0)-Number(a.projection?.top25_score||0))[0]
   const updated=run?.source_updated_at?new Intl.DateTimeFormat('tr-TR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit',timeZone:'Europe/Istanbul'}).format(new Date(run.source_updated_at)):'—'
   const highlights=[
     [`MH${run?.gameweek||'—'} xFP lideri`,best,Number(best?.projection?.xfp||0).toFixed(2),'xFP'],
     [`MH${run?.gameweek||'—'} en iyi F/P`,value,Number(value?.projection?.value_score||0).toFixed(2),'xFP/m'],
     [`MH${run?.gameweek||'—'} en güvenli dakika`,mins,Number(mins?.projection?.x_minutes||0).toFixed(0),'dk'],
-    [`MH${run?.gameweek||'—'} 6+ puan ihtimali`,six,(Number(six?.projection?.six_plus_probability||0)*100).toFixed(0),'%'],
+    [`MH${run?.gameweek||'—'} Top-25 GB adayı`,top25,`#${Number(top25?.projection?.top25_rank||1)}`,'Top25'],
   ]
   return <>
     <section className="home-intro-layout">
@@ -54,7 +54,7 @@ export default async function Home(){
         <div><b>xFP</b><span>Beklenen fantezi puanı</span></div>
         <div><b>xDakika</b><span>Beklenen oynama süresi</span></div>
         <div><b>Tavan</b><span>Üst %10'luk puan senaryosu</span></div>
-        <div><b>6+%</b><span>Güçlü fantezi dönüş ihtimali</span></div>
+        <div><b>Top25</b><span>Yüksek skor / tail aday sırası</span></div>
       </div>
     </section>
 
