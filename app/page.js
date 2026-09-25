@@ -12,10 +12,10 @@ export default async function Home(){
   const top25=[...players].sort((a,b)=>Number(a.projection?.top25_rank||9999)-Number(b.projection?.top25_rank||9999) || Number(b.projection?.top25_score||0)-Number(a.projection?.top25_score||0))[0]
   const updated=run?.source_updated_at?new Intl.DateTimeFormat('tr-TR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit',timeZone:'Europe/Istanbul'}).format(new Date(run.source_updated_at)):'—'
   const highlights=[
-    [`MH${run?.gameweek||'—'} xFP lideri`,best,Number(best?.projection?.xfp||0).toFixed(2),'xFP'],
-    [`MH${run?.gameweek||'—'} en iyi F/P`,value,Number(value?.projection?.value_score||0).toFixed(2),'xFP/m'],
-    [`MH${run?.gameweek||'—'} en güvenli dakika`,mins,Number(mins?.projection?.x_minutes||0).toFixed(0),'dk'],
-    [`MH${run?.gameweek||'—'} Top-25 GB adayı`,top25,`#${Number(top25?.projection?.top25_rank||1)}`,'Top25'],
+    [`MH${run?.gameweek||'—'} en yüksek beklenen puan`,best,Number(best?.projection?.xfp||0).toFixed(2),'xFP','xFP • tüm senaryoların ortalamasında en yüksek beklenen puan'],
+    [`MH${run?.gameweek||'—'} en iyi F/P`,value,Number(value?.projection?.value_score||0).toFixed(2),'xFP/m','Bütçe başına beklenen puan verimi'],
+    [`MH${run?.gameweek||'—'} en güvenli dakika`,mins,Number(mins?.projection?.x_minutes||0).toFixed(0),'dk','En yüksek beklenen oynama süresi'],
+    [`MH${run?.gameweek||'—'} Top-25’e girme adayı #1`,top25,`#${Number(top25?.projection?.top25_rank||1)}`,'Top25 sıra','Top25 GB • yüksek skor/tail profili en güçlü aday'],
   ]
   return <>
     <section className="home-intro-layout">
@@ -30,8 +30,8 @@ export default async function Home(){
         </div>
       </div>
       <aside className="home-highlight-grid">
-        {highlights.map(([label,p,val,unit])=><Link key={label} className="card spotlight-card team-accent-card" style={teamCssVars(p?.team)} href={p?'/players/'+p.id:'/players'}>
-          <span>{label}</span><b>{p?.full_name||'—'}</b><small>{p?.team||'—'}</small><strong>{val} <em>{unit}</em></strong>
+        {highlights.map(([label,p,val,unit,note])=><Link key={label} className="card spotlight-card team-accent-card" style={teamCssVars(p?.team)} href={p?'/players/'+p.id:'/players'}>
+          <span>{label}</span><b>{p?.full_name||'—'}</b><small>{p?.team||'—'} • {note}</small><strong>{val} <em>{unit}</em></strong>
         </Link>)}
         <div className="card spotlight-card home-status-card home-status-week">
           <span>Güncel hafta</span>
@@ -49,12 +49,12 @@ export default async function Home(){
     </section>
 
     <section className="card home-model-guide">
-      <div className="home-guide-copy"><span className="eyebrow">MODELİ NASIL OKUYACAKSIN?</span><h2>Tek sayıya değil, dağılıma bak.</h2><p>xFP başlangıç noktasıdır. Dakika, ilk 11 ihtimali, taban/tavan ve maç bağlamını birlikte okumak daha doğru karar verir.</p></div>
+      <div className="home-guide-copy"><span className="eyebrow">MODELİ NASIL OKUYACAKSIN?</span><h2>Tek sayıya değil, dağılıma bak.</h2><p><strong>xFP lideri</strong>, tüm senaryoların ortalamasında en yüksek puanı beklenen oyuncudur. <strong>Top‑25’e girme adayı #1</strong> ise yüksek skor/tail profili en güçlü oyuncudur. Bu yüzden aynı kişi olmak zorunda değildir.</p></div>
       <div className="home-guide-metrics">
         <div><b>xFP</b><span>Beklenen fantezi puanı</span></div>
         <div><b>xDakika</b><span>Beklenen oynama süresi</span></div>
         <div><b>Tavan</b><span>Üst %10'luk puan senaryosu</span></div>
-        <div><b>Top25</b><span>Yüksek skor / tail aday sırası</span></div>
+        <div><b>Top25</b><span>Haftanın üst puan dilimine girme aday sırası</span></div>
       </div>
     </section>
 
