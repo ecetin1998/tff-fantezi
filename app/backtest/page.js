@@ -4,6 +4,7 @@ export const dynamic='force-dynamic'
 
 const num=(v,d=2)=>v===null||v===undefined?'—':Number(v).toFixed(d)
 const pct=v=>v===null||v===undefined?'—':(Number(v)*100).toFixed(0)+'%'
+const pp=v=>v===null||v===undefined?'—':(Number(v)*100>=0?'+':'')+(Number(v)*100).toFixed(1)+' pp'
 const replayStatus={
   cold_start_gap:'Başlangıç modeli eksik',
   replay_pending:'Hesaplanacak',
@@ -35,6 +36,8 @@ export default async function BacktestPage(){
   const benchmark=replayWeeks[0]?.engine_version||'ScoutPlus 3.1'
   const replayN=replayClosed.reduce((s,w)=>s+Number(w.player_sample||0),0)
   const overallBand=replayN?replayClosed.reduce((s,w)=>s+Number(w.band_hit_rate||0)*Number(w.player_sample||0),0)/replayN:null
+  const overallExpectedBand=replayN?replayClosed.reduce((s,w)=>s+Number(w.expected_band_hit_rate||0)*Number(w.player_sample||0),0)/replayN:null
+  const overallBandGap=overallBand!==null&&overallExpectedBand!==null?overallBand-overallExpectedBand:null
   const overallOutside=replayN?replayClosed.reduce((s,w)=>s+Number(w.average_outside_distance||0)*Number(w.player_sample||0),0)/replayN:null
   const latestLearning=[...learning]
     .sort((a,b)=>Number(b.id||0)-Number(a.id||0))
@@ -58,7 +61,7 @@ export default async function BacktestPage(){
 
     <section className="backtest-summary-grid">
       <article className="card"><span>Güncel kurgu ile tamamlanan test</span><b>{replayClosed.length}<small>/6</small></b><small>MH1–MH6 bugünkü kurgu ile tamamlandı</small></article>
-      <article className="card"><span>Tahmin bandında kalan</span><b>{pct(overallBand)}</b><small>P25–P90 • aynı MC dağılımının self-coverage seviyesiyle kıyaslanır</small></article>
+      <article className="card"><span>Tahmin bandında kalan</span><b>{pct(overallBand)}</b><small>MC beklenen {pct(overallExpectedBand)} • fark {pp(overallBandGap)}</small></article>
       <article className="card"><span>Band dışına çıkınca ortalama sapma</span><b>{num(overallOutside)}</b><small>Yalnız tahmin bandının dışındaki puan mesafesi</small></article>
       <article className="card"><span>Şu an takip edilen hafta</span><b>{latestLive?'MH'+latestLive.gameweek:'—'}</b><small>{latestLive?liveStatus[latestLive.status]||latestLive.status:'Canlı kayıt yok'}</small></article>
     </section>
@@ -82,13 +85,15 @@ export default async function BacktestPage(){
       <div className="table-scroll">
         <table className="backtest-table replay-table">
           <thead><tr>
-            <th>MH</th><th>Modelin bildiği veri</th><th>Oyuncu</th><th>Band içinde</th><th>Band genişliği</th><th>Band dışı sapma</th><th>Model eğilimi</th><th>Sıralama uyumu</th><th>İlk 25</th><th>Dakika hatası</th><th>Ana öğrenme</th><th>Durum</th>
+            <th>MH</th><th>Modelin bildiği veri</th><th>Oyuncu</th><th>Band içinde</th><th>MC beklenen</th><th>Kalibrasyon farkı</th><th>Band genişliği</th><th>Band dışı sapma</th><th>Model eğilimi</th><th>Sıralama uyumu</th><th>İlk 25</th><th>Dakika hatası</th><th>Ana öğrenme</th><th>Durum</th>
           </tr></thead>
           <tbody>{replayWeeks.map(w=><tr key={w.gameweek} className={w.status==='cold_start_gap'?'replay-gap-row':''}>
             <td><b>{'MH'+w.gameweek}</b></td>
             <td>{w.data_through_gameweek===0?'Sezon öncesi / sıfır lig haftası':'MH1–MH'+w.data_through_gameweek}</td>
             <td>{w.player_sample??'—'}</td>
             <td><b>{pct(w.band_hit_rate)}</b></td>
+            <td>{pct(w.expected_band_hit_rate)}</td>
+            <td><b>{pp(w.self_band_calibration_gap)}</b></td>
             <td>{w.average_band_width===null||w.average_band_width===undefined?'—':num(w.average_band_width)+' puan'}</td>
             <td>{w.average_outside_distance===null||w.average_outside_distance===undefined?'—':num(w.average_outside_distance)+' puan'}</td>
             <td>{tendency(w.model_tendency)}</td>
@@ -108,7 +113,7 @@ export default async function BacktestPage(){
     <section className="card metric-guide">
       <div className="panel-head"><div><span className="eyebrow">NE ANLAMA GELİYOR?</span><h2>Terimleri sade okuyalım</h2></div></div>
       <div className="metric-guide-grid">
-        <div><b>Tahmin bandında kalma</b><p>P25–P90 aralığı modelin ürettiği olası sonuç alanıdır. Fantasy puanları kesikli olduğu için bu bandın gerçekleşen kapsaması basitçe <strong>%65 olmak zorunda değildir</strong>. Gerçek kapsama oranını aynı Monte Carlo dağılımının kendi beklenen self-coverage seviyesiyle karşılaştırırız.</p></div>
+        <div><b>Tahmin bandında kalma</b><p>P25–P90 aralığı modelin ürettiği olası sonuç alanıdır. Fantasy puanları kesikli olduğu için gerçekleşen kapsama sabit <strong>%65 olmak zorunda değildir</strong>. Artık tabloda aynı Monte Carlo dağılımının beklediği self-coverage ve gerçekleşen farkı ayrı ayrı gösteriyoruz.</p></div>
         <div><b>Band dışı sapma</b><p>Gerçek sonuç bandın dışına çıktıysa yalnız en yakın sınırdan uzaklığı ölçeriz. Örn. xFP 5, bant 2–13 ve gerçek 18 ise <strong>13 puan hata değil, band dışı 5 puan</strong> olarak değerlendirilir.</p></div>
         <div><b>Band genişliği</b><p>Belirsizliği ne kadar geniş bıraktığımızı gösterir. Amaç bandı körlemesine daraltmak değil; kesikli puan dağılımında beklenen self-coverage, gerçekleşen kapsama ve band dışı sapmayı birlikte iyileştirmektir.</p></div>
         <div><b>Model eğilimi</b><p>Merkez xFP’nin uzun vadede sistematik olarak fazla mı az mı kaldığını gösterir. Tek oyuncunun uç sonucu değil, tekrar eden yönlü sapma önemlidir.</p></div>
