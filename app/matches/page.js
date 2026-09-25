@@ -78,7 +78,11 @@ export default async function Matches(){
                   ? 'Savunma ve kaleci seçimleri için daha anlamlı; hücum tavanı daha sınırlı.'
                   : 'Hücum ve savunma seçimleri arasında dengeli bir maç profili.'}
               {' '}
-              {attackEdge==='home'?m.home_team:attackEdge==='away'?m.away_team:'İki takım'} hücum beklentisinde önde.
+              {attackEdge==='home'
+                ? `${m.home_team} hücum beklentisinde önde.`
+                : attackEdge==='away'
+                  ? `${m.away_team} hücum beklentisinde önde.`
+                  : 'İki takımın hücum beklentisi birbirine yakın.'}
             </p>
           </div>
 
