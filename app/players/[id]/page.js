@@ -63,6 +63,8 @@ export default async function PlayerPage({ params }){
           <div><span>xDakika</span><b>{num(p?.x_minutes,1)}</b></div>
           <div><span>6+ puan</span><b>{pct(p?.six_plus_probability)}</b></div>
           <div><span>F/P</span><b>{num(p?.value_score)}</b></div>
+          <div><span>Top25 sıra</span><b>{p?.top25_rank?`#${p.top25_rank}`:'—'}</b></div>
+          <div><span>Top25 skor</span><b>{p?.top25_score===null||p?.top25_score===undefined?'—':num(p.top25_score,3)}</b></div>
         </div>
         {hasAvailabilityIssue?<div className="availability-line">
           <b>{a?.reason||'Uygunluk sorunu'}</b>
