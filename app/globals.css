@@ -7259,3 +7259,226 @@ p{color:#66728d}
 .team-roster-column-head>span:first-child{
   min-height:1px;
 }
+
+/* ===== availability source enrichment ===== */
+.availability-overview-grid{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:9px;
+  margin-bottom:14px;
+}
+.availability-overview-grid>.card{
+  min-width:0;
+  padding:14px!important;
+}
+.availability-overview-grid span,
+.availability-overview-grid b,
+.availability-overview-grid small{display:block}
+.availability-overview-grid span{
+  color:#7d88a1;
+  font-size:7px;
+  font-weight:900;
+}
+.availability-overview-grid b{
+  margin-top:6px;
+  color:#293551;
+  font-size:22px;
+  line-height:1;
+}
+.availability-overview-grid small{
+  margin-top:5px;
+  color:#98a2b4;
+  font-size:6.2px;
+}
+.availability-summary{
+  display:flex!important;
+  justify-content:space-between;
+  gap:12px;
+  flex-wrap:wrap;
+}
+.availability-table-wrap table{
+  min-width:1180px;
+}
+.availability-note-cell{
+  min-width:190px;
+  white-space:normal!important;
+}
+.availability-note-cell b{
+  display:block;
+  color:#39445f;
+  font-size:8px;
+  line-height:1.35;
+}
+.availability-note-cell small{
+  display:block;
+  margin-top:3px;
+  color:#8c96aa;
+  font-size:6px;
+}
+.availability-return-cell{
+  min-width:180px;
+  max-width:240px;
+  white-space:normal!important;
+  line-height:1.35;
+}
+.status-chip.injuries{
+  background:#fff2ee!important;
+  color:#a94f3e!important;
+  border-color:#f0d2c9!important;
+}
+.status-chip.suspensions{
+  background:#fff0f3!important;
+  color:#a94057!important;
+  border-color:#efcdd5!important;
+}
+.status-chip.return{
+  background:#ebf8f5!important;
+  color:#087e72!important;
+  border-color:#cce9e3!important;
+}
+.availability-card-list{
+  display:none;
+}
+
+.player-detail-alert.is-return{
+  border-color:#cce9e3!important;
+  background:#eef8f6!important;
+}
+.player-detail-alert.is-return .player-availability-copy>span{
+  color:#087e72!important;
+}
+.player-detail-alert.is-return .player-availability-copy>b{
+  color:#295f58!important;
+}
+.player-availability-copy{
+  min-width:0;
+}
+.player-availability-meta{
+  display:flex;
+  flex-wrap:wrap;
+  gap:5px 10px;
+  margin-top:6px;
+}
+.player-availability-meta small{
+  margin:0!important;
+  color:#8c7958!important;
+  font-size:6.5px!important;
+}
+.player-detail-alert.is-return .player-availability-meta small{
+  color:#5f817b!important;
+}
+.player-availability-check{
+  flex:0 0 auto;
+}
+
+.picker-availability-note{
+  display:block!important;
+  margin-top:3px!important;
+  color:#aa4d5f!important;
+  font-size:5.8px!important;
+  font-weight:850!important;
+  line-height:1.2!important;
+  white-space:normal!important;
+  overflow:hidden!important;
+  display:-webkit-box!important;
+  -webkit-line-clamp:2;
+  -webkit-box-orient:vertical;
+}
+.picker-player:has(.picker-availability-note){
+  min-height:66px!important;
+}
+
+@media(max-width:900px){
+  .availability-overview-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+}
+
+@media(max-width:760px){
+  .availability-table-wrap{display:none!important}
+  .availability-card-list{
+    display:grid;
+    gap:8px;
+  }
+  .availability-mobile-card{
+    display:block;
+    padding:12px!important;
+    color:inherit;
+    text-decoration:none;
+  }
+  .availability-mobile-head{
+    display:grid;
+    grid-template-columns:34px minmax(0,1fr) auto;
+    gap:8px;
+    align-items:center;
+  }
+  .availability-mobile-head>div{min-width:0}
+  .availability-mobile-head>div b,
+  .availability-mobile-head>div small{display:block}
+  .availability-mobile-head>div b{
+    overflow:hidden;
+    color:#2c3854;
+    font-size:9.5px;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+  }
+  .availability-mobile-head>div small{
+    margin-top:2px;
+    color:#8b95a9;
+    font-size:6.5px;
+  }
+  .availability-mobile-card>p{
+    margin:9px 0!important;
+    padding:8px 9px;
+    border:1px solid #e5e9f0;
+    border-radius:10px;
+    background:#f8fafe;
+    color:#5f6b85!important;
+    font-size:7.2px!important;
+    line-height:1.45!important;
+  }
+  .availability-mobile-meta{
+    display:grid;
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:6px;
+  }
+  .availability-mobile-meta>span{
+    min-width:0;
+    padding:7px 8px;
+    border:1px solid #e5e9f1;
+    border-radius:9px;
+    background:#fbfcfe;
+  }
+  .availability-mobile-meta small,
+  .availability-mobile-meta b{display:block}
+  .availability-mobile-meta small{
+    color:#919bad;
+    font-size:5.5px;
+  }
+  .availability-mobile-meta b{
+    margin-top:2px;
+    color:#3e4965;
+    font-size:7px;
+    overflow-wrap:anywhere;
+  }
+}
+
+@media(max-width:430px){
+  .availability-overview-grid{
+    grid-template-columns:1fr 1fr;
+    gap:7px;
+  }
+  .availability-overview-grid>.card{
+    padding:12px!important;
+  }
+  .availability-mobile-head{
+    grid-template-columns:30px minmax(0,1fr);
+  }
+  .availability-mobile-head>.status-chip{
+    grid-column:1/-1;
+    justify-self:start;
+  }
+  .availability-mobile-meta{
+    grid-template-columns:1fr 1fr;
+  }
+}
