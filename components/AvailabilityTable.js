@@ -33,14 +33,14 @@ export default function AvailabilityTable({ rows }){
   const injuryCount=(rows||[]).filter(r=>r.availability_type==='injuries').length
   const suspensionCount=(rows||[]).filter(r=>r.availability_type==='suspensions').length
   const returnCount=(rows||[]).filter(r=>r.availability_type==='return').length
-  const enrichedCount=(rows||[]).filter(r=>r.detail_source_label==='sakat-ve-cezali.com').length
+  const detailedCount=(rows||[]).filter(r=>r.expected_return||r.suspension_fixture).length
 
   return <>
     <section className="availability-overview-grid">
       <div className="card"><span>Sakatlık</span><b>{injuryCount}</b><small>takip edilen oyuncu</small></div>
       <div className="card"><span>Ceza</span><b>{suspensionCount}</b><small>maç cezası kaydı</small></div>
       <div className="card"><span>Dönüş</span><b>{returnCount}</b><small>dönüş / yeniden kullanım</small></div>
-      <div className="card"><span>Detaylı kaynak</span><b>{enrichedCount}</b><small>sakat-ve-cezali.com eşleşmesi</small></div>
+      <div className="card"><span>Detaylı durum</span><b>{detailedCount}</b><small>dönüş / ceza bilgisi olan</small></div>
     </section>
 
     <div className="filters availability-filters">
@@ -78,7 +78,6 @@ export default function AvailabilityTable({ rows }){
           <td>{(Number(r.availability_probability??1)*100).toFixed(0)}%</td>
           <td className="availability-note-cell">
             <b>{r.reason||r.source_reason||'—'}</b>
-            {r.detail_source_label?<small>{r.detail_source_label}</small>:null}
           </td>
           <td>{formatDateOnly(r.injury_date)}</td>
           <td className="availability-return-cell">{r.suspension_fixture||r.expected_return||'—'}</td>
