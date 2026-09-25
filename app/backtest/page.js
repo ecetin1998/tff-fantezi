@@ -46,7 +46,10 @@ export default async function BacktestPage(){
   const latestLearning=[...learning]
     .sort((a,b)=>Number(b.id||0)-Number(a.id||0))
     .filter((item,index,rows)=>index===rows.findIndex(other=>other.component===item.component&&other.segment===item.segment))
-  const activeLearning=latestLearning.filter(item=>['watch','ready_to_apply','applied_pending_refresh'].includes(item.status))
+  const learningPriority=item=>{const m=String(item.notes||'').match(/SIRA\s+(\d+)\/4/i);return m?Number(m[1]):99}
+  const activeLearning=latestLearning
+    .filter(item=>['watch','ready_to_apply','applied_pending_refresh'].includes(item.status))
+    .sort((a,b)=>learningPriority(a)-learningPriority(b)||Number(a.id||0)-Number(b.id||0))
   const resolvedLearning=latestLearning.filter(item=>!['watch','ready_to_apply','applied_pending_refresh'].includes(item.status))
 
   return <main className="page-shell backtest-page">
@@ -159,7 +162,7 @@ export default async function BacktestPage(){
       {latestLearning.length?<div>
         <div className="panel-head"><div><span className="eyebrow">AÇIK AKSİYONLAR</span><h3>Takip etmeye devam ettiklerimiz</h3></div><small>{activeLearning.length} aktif sinyal</small></div>
         {activeLearning.length?<div className="learning-grid">{activeLearning.map(item=><article key={item.id} className="learning-card">
-          <div><span>{'MH'+item.after_gameweek+' sonrası'}</span><em>{learningStatus[item.status]||item.status}</em></div>
+          <div><span>{learningPriority(item)<99?'Sıra '+learningPriority(item)+' • ':''}{'MH'+item.after_gameweek+' sonrası'}</span><em>{learningStatus[item.status]||item.status}</em></div>
           <h3>{item.component}</h3><p>{item.signal}</p><strong>{item.evidence}</strong><small>{item.guardrail}</small>
         </article>)}</div>:<div className="empty-learning-state">Şu an müdahale bekleyen açık model sorunu yok.</div>}
         {resolvedLearning.length?<><div className="panel-head" style={{marginTop:24}}><div><span className="eyebrow">KAPANAN KARARLAR</span><h3>Çözülen veya değişiklik gerektirmeyenler</h3></div><small>{resolvedLearning.length} kayıt</small></div>
