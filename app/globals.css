@@ -6351,3 +6351,474 @@ p{color:#66728d}
     grid-template-columns:1fr;
   }
 }
+
+/* ===== CANONICAL team detail v2 ===== */
+.team-detail-v2{min-width:0}
+.team-detail-v2 .back-link{color:#6f7b95!important}
+
+.team-detail-hero-v2{
+  display:grid!important;
+  grid-template-columns:auto minmax(0,1fr) minmax(150px,auto)!important;
+  align-items:center!important;
+  gap:18px!important;
+}
+.team-detail-hero-v2 .team-detail-copy{min-width:0}
+.team-detail-hero-v2 .team-detail-copy h1{
+  overflow-wrap:anywhere;
+}
+.team-hero-pills{
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+  margin-top:10px;
+}
+.team-hero-pills span{
+  display:inline-flex;
+  align-items:center;
+  min-height:25px;
+  padding:5px 8px;
+  border:1px solid color-mix(in srgb,var(--club1) 16%,#e0e6ef);
+  border-radius:999px;
+  background:color-mix(in srgb,var(--club1) 5%,#f8fafe);
+  color:#64708c;
+  font-size:7px;
+  font-weight:900;
+}
+
+.team-week-decision{
+  margin-bottom:16px;
+}
+.team-detail-section-head{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:14px;
+  margin-bottom:13px;
+}
+.team-detail-section-head h2{
+  margin:4px 0 0;
+  color:#27334f;
+  font-size:20px;
+  letter-spacing:-.02em;
+}
+.team-fixture-badge{
+  display:flex;
+  align-items:center;
+  gap:7px;
+  flex:0 0 auto;
+  min-height:32px;
+  padding:6px 9px;
+  border:1px solid color-mix(in srgb,var(--club1) 16%,#dde4ee);
+  border-radius:999px;
+  background:color-mix(in srgb,var(--club1) 5%,#f8fafe);
+}
+.team-fixture-badge>span{
+  padding:3px 5px;
+  border-radius:999px;
+  background:#e9eef6;
+  color:#65718b;
+  font-size:6px;
+  font-weight:950;
+}
+.team-fixture-badge a,
+.team-fixture-badge b{
+  color:#2e3b58;
+  font-size:9px;
+  font-weight:950;
+  text-decoration:none;
+}
+
+.team-week-metrics{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:8px;
+}
+.team-week-metrics>div{
+  min-width:0;
+  min-height:88px;
+  padding:12px;
+  border:1px solid #e1e7ef;
+  border-radius:13px;
+  background:#f8fafe;
+}
+.team-week-metrics span,
+.team-week-metrics b,
+.team-week-metrics small{display:block}
+.team-week-metrics span{
+  color:#8390a7;
+  font-size:7px;
+  font-weight:850;
+}
+.team-week-metrics b{
+  margin-top:5px;
+  color:#283551;
+  font-size:20px;
+  line-height:1;
+  font-weight:950;
+  font-variant-numeric:tabular-nums;
+}
+.team-week-metrics small{
+  margin-top:6px;
+  color:#99a3b5;
+  font-size:6px;
+  line-height:1.25;
+}
+
+.team-top-picks{
+  margin-top:14px;
+  padding-top:13px;
+  border-top:1px solid #edf0f5;
+}
+.team-top-picks-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  margin-bottom:8px;
+}
+.team-top-picks-head span{
+  color:#6d7892;
+  font-size:7px;
+  font-weight:950;
+  letter-spacing:.08em;
+}
+.team-top-picks-head small{
+  color:#9ba4b6;
+  font-size:6.5px;
+}
+.team-top-picks-grid{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:8px;
+}
+.team-top-pick{
+  display:grid;
+  grid-template-columns:34px minmax(0,1fr) auto;
+  gap:8px;
+  align-items:center;
+  min-width:0;
+  padding:10px;
+  border:1px solid #e2e7ef;
+  border-radius:12px;
+  background:#fbfcfe;
+  text-decoration:none;
+}
+.team-top-pick:hover{
+  border-color:color-mix(in srgb,var(--club1) 25%,#dce3ed);
+  background:color-mix(in srgb,var(--club1) 4%,#fff);
+}
+.team-top-pick>div{min-width:0}
+.team-top-pick>div small,
+.team-top-pick>div b,
+.team-top-pick>div em{display:block}
+.team-top-pick>div small{
+  color:#98a1b4;
+  font-size:6px;
+}
+.team-top-pick>div b{
+  margin-top:2px;
+  overflow:hidden;
+  color:#2c3854;
+  font-size:9px;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.team-top-pick>div em{
+  margin-top:2px;
+  color:#7d88a0;
+  font-size:6.5px;
+  font-style:normal;
+}
+.team-top-pick>strong{
+  color:var(--clubText);
+  font-size:16px;
+  font-variant-numeric:tabular-nums;
+  text-align:right;
+}
+.team-top-pick>strong small{
+  display:block;
+  margin-top:1px;
+  color:#8994a9;
+  font-size:5.5px;
+}
+
+.team-core-stat-grid{
+  grid-template-columns:repeat(5,minmax(0,1fr))!important;
+  margin-bottom:16px;
+}
+.team-core-stat-grid>div{
+  min-width:0;
+}
+
+.team-roster-v2{
+  margin-bottom:16px;
+}
+.team-roster-column-head{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 58px 62px 52px 64px;
+  gap:7px;
+  align-items:center;
+  padding:0 10px 7px 46px;
+  color:#8b95aa;
+  font-size:6.5px;
+  font-weight:900;
+  text-align:right;
+}
+.team-roster-column-head span:first-child{text-align:left}
+.team-roster-v2 .team-roster-grid{
+  display:grid!important;
+  grid-template-columns:1fr!important;
+  gap:0!important;
+}
+.team-roster-player-v2{
+  display:grid!important;
+  grid-template-columns:34px minmax(0,1fr) 58px 62px 52px 64px!important;
+  gap:7px!important;
+  align-items:center!important;
+  min-width:0!important;
+  padding:9px 10px!important;
+  border-bottom:1px solid #e9edf3!important;
+  border-radius:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+}
+.team-roster-player-v2:last-child{border-bottom:0!important}
+.team-roster-player-v2:hover{
+  background:color-mix(in srgb,var(--club1) 4%,#fff)!important;
+}
+.team-roster-player-v2 .team-roster-copy{
+  min-width:0;
+}
+.team-roster-player-v2 .team-roster-copy>b{
+  display:block;
+  overflow:hidden;
+  color:#2c3854;
+  font-size:9.5px;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.team-roster-player-v2 .team-roster-copy>small{
+  display:block;
+  min-width:0;
+  margin-top:3px;
+  overflow:hidden;
+  color:#8791a6;
+  font-size:6.5px;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.team-roster-alert{color:#a15a42!important}
+.team-roster-metric{
+  min-width:0;
+  text-align:right;
+}
+.team-roster-metric span,
+.team-roster-metric b{
+  display:block;
+}
+.team-roster-metric span{
+  display:none;
+  color:#929bad;
+  font-size:5.5px;
+  font-weight:800;
+}
+.team-roster-metric b{
+  color:#53607b;
+  font-size:9px;
+  font-variant-numeric:tabular-nums;
+}
+.team-roster-metric.xfp b{
+  color:var(--clubText);
+  font-size:11px;
+  font-weight:950;
+}
+
+.team-detail-history-grid{
+  align-items:start;
+  margin-bottom:16px;
+}
+.team-fantasy-summary{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:7px;
+  margin:13px 0;
+}
+.team-fantasy-summary>div{
+  display:flex;
+  align-items:baseline;
+  justify-content:space-between;
+  gap:6px;
+  padding:9px 10px;
+  border:1px solid #e2e7f0;
+  border-radius:11px;
+  background:#fafbfd;
+}
+.team-fantasy-summary span{
+  color:#8792a7;
+  font-size:6.5px;
+  font-weight:850;
+}
+.team-fantasy-summary b{
+  color:#2b3854;
+  font-size:12px;
+  font-variant-numeric:tabular-nums;
+}
+.team-fantasy-history-v2 .team-week-points{
+  grid-template-columns:repeat(auto-fit,minmax(70px,1fr))!important;
+}
+
+.team-advanced-details{
+  overflow:hidden;
+  padding:0!important;
+}
+.team-advanced-details summary{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:16px 18px;
+  cursor:pointer;
+  list-style:none;
+  user-select:none;
+}
+.team-advanced-details summary::-webkit-details-marker{display:none}
+.team-advanced-details summary span small,
+.team-advanced-details summary span b{display:block}
+.team-advanced-details summary span small{
+  color:#8691a6;
+  font-size:6.5px;
+  font-weight:950;
+  letter-spacing:.09em;
+}
+.team-advanced-details summary span b{
+  margin-top:4px;
+  color:#2b3855;
+  font-size:11px;
+}
+.team-advanced-details summary i{
+  width:28px;
+  height:28px;
+  display:grid;
+  place-items:center;
+  flex:0 0 auto;
+  border:1px solid #dce3ee;
+  border-radius:50%;
+  background:#f7f9fd;
+  color:#68748d;
+  font-size:17px;
+  font-style:normal;
+  transition:transform .16s ease;
+}
+.team-advanced-details[open] summary i{transform:rotate(45deg)}
+.team-advanced-body{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:22px;
+  padding:14px 18px 18px;
+  border-top:1px solid #edf0f5;
+}
+.team-advanced-body>.team-profile-coverage{
+  grid-column:1/-1;
+  margin-top:0;
+}
+
+@media(max-width:1000px){
+  .team-detail-hero-v2{
+    grid-template-columns:auto minmax(0,1fr)!important;
+  }
+  .team-detail-hero-v2 .team-detail-current{
+    grid-column:1/-1;
+    width:100%;
+    text-align:left!important;
+  }
+  .team-core-stat-grid{
+    grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  }
+  .team-top-picks-grid{
+    grid-template-columns:1fr;
+  }
+}
+
+@media(max-width:760px){
+  .team-detail-hero-v2{
+    grid-template-columns:auto minmax(0,1fr)!important;
+    gap:12px!important;
+  }
+  .team-detail-hero-v2 .team-detail-current{
+    grid-column:1/-1;
+  }
+  .team-detail-section-head{
+    flex-direction:column;
+    gap:9px;
+  }
+  .team-fixture-badge{
+    align-self:flex-start;
+  }
+  .team-week-metrics{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+  .team-core-stat-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  }
+  .team-roster-column-head{display:none}
+  .team-roster-player-v2{
+    grid-template-columns:30px minmax(0,1fr) 48px 48px 46px!important;
+    gap:5px!important;
+    padding:8px!important;
+  }
+  .team-roster-player-v2 .team-roster-copy{
+    grid-column:2;
+  }
+  .team-roster-player-v2 .team-roster-metric.price{
+    display:none;
+  }
+  .team-roster-metric span{
+    display:block;
+  }
+  .team-roster-metric b{
+    margin-top:2px;
+    font-size:8px;
+  }
+  .team-roster-metric.xfp b{
+    font-size:10px;
+  }
+  .team-fantasy-summary{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+  .team-advanced-body{
+    grid-template-columns:1fr;
+    gap:6px;
+  }
+}
+
+@media(max-width:430px){
+  .team-detail-hero-v2{
+    grid-template-columns:1fr!important;
+  }
+  .team-detail-hero-v2 .team-detail-mark{
+    width:52px;
+    height:52px;
+  }
+  .team-week-metrics{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+  .team-week-metrics b{
+    font-size:17px;
+  }
+  .team-roster-player-v2{
+    grid-template-columns:28px minmax(0,1fr) 43px 43px 43px!important;
+    gap:4px!important;
+  }
+  .team-roster-player-v2 .team-roster-copy>b{
+    font-size:8.5px;
+  }
+  .team-roster-player-v2 .team-roster-copy>small{
+    font-size:5.8px;
+  }
+  .team-roster-metric span{
+    font-size:5px;
+  }
+  .team-roster-metric b{
+    font-size:7.5px;
+  }
+}
