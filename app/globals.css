@@ -5607,3 +5607,10 @@ p{color:#66728d}
   }
 }
 
+/* ===== Top25 v2.1 performance layout ===== */
+@media(min-width:901px){
+  .backtest-page .backtest-summary-grid{grid-template-columns:repeat(5,minmax(0,1fr))!important}
+}
+@media(max-width:760px){
+  .backtest-page .replay-table{min-width:1360px!important}
+}
