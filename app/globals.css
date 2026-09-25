@@ -3609,10 +3609,10 @@ p{color:#66728d}
 }
 
 
-/* ===== Oyuncu havuzu v2 • sortable table headers ===== */
+/* ===== Oyuncu havuzu v2 • sortable five-column table ===== */
 .picker-table-head{
   display:grid;
-  grid-template-columns:36px minmax(112px,1fr) 54px minmax(82px,88px) 27px;
+  grid-template-columns:minmax(0,1fr) 54px 54px 48px 27px;
   gap:7px;
   align-items:center;
   margin:0 6px;
@@ -3633,15 +3633,26 @@ p{color:#66728d}
   cursor:pointer;
   white-space:nowrap;
 }
-.picker-table-head button:nth-of-type(1){text-align:left}
-.picker-table-head button:nth-of-type(4){font-size:6.5px}
+.picker-table-head button:first-child{text-align:left}
 .picker-table-head button.active{color:#087e72}
 .picker-table-head button:hover{color:#087e72}
 
 .picker-player{
-  grid-template-columns:36px minmax(112px,1fr) 54px minmax(82px,88px) 27px!important;
+  grid-template-columns:minmax(0,1fr) 54px 54px 48px 27px!important;
   gap:7px!important;
   align-items:center!important;
+}
+.picker-player-main{
+  min-width:0;
+  display:grid;
+  grid-template-columns:36px minmax(0,1fr);
+  gap:7px;
+  align-items:center;
+}
+.picker-player-main .picker-shirt-wrap{min-width:0}
+.picker-player>button{
+  grid-column:auto!important;
+  grid-row:auto!important;
 }
 .picker-value{
   min-width:0;
@@ -3680,25 +3691,33 @@ p{color:#66728d}
     grid-template-columns:minmax(120px,.7fr) minmax(145px,.85fr) minmax(145px,.85fr) minmax(320px,1.35fr)!important;
   }
   .picker-table-head{
-    grid-template-columns:34px minmax(105px,1fr) 50px 82px 25px;
+    grid-template-columns:minmax(0,1fr) 50px 52px 44px 25px;
     gap:6px;
     margin-inline:6px;
   }
   .picker-player{
-    grid-template-columns:34px minmax(105px,1fr) 50px 82px 25px!important;
+    grid-template-columns:minmax(0,1fr) 50px 52px 44px 25px!important;
     gap:6px!important;
+  }
+  .picker-player-main{
+    grid-template-columns:34px minmax(0,1fr);
+    gap:6px;
   }
 }
 
 @media(max-width:760px){
   .picker-table-head{
-    grid-template-columns:34px minmax(0,1fr) 48px 80px 25px;
+    grid-template-columns:minmax(0,1fr) 48px 50px 44px 25px;
     gap:5px;
     margin-inline:5px;
   }
   .picker-player{
-    grid-template-columns:34px minmax(0,1fr) 48px 80px 25px!important;
+    grid-template-columns:minmax(0,1fr) 48px 50px 44px 25px!important;
     gap:5px!important;
+  }
+  .picker-player-main{
+    grid-template-columns:34px minmax(0,1fr);
+    gap:5px;
   }
   .picker-value{font-size:8px}
   .picker-value.active{font-size:9px}
@@ -3718,12 +3737,16 @@ p{color:#66728d}
 
 @media(max-width:470px){
   .picker-table-head{
-    grid-template-columns:30px minmax(0,1fr) 44px 74px 24px;
+    grid-template-columns:minmax(0,1fr) 44px 46px 40px 24px;
     gap:4px;
   }
   .picker-player{
-    grid-template-columns:30px minmax(0,1fr) 44px 74px 24px!important;
+    grid-template-columns:minmax(0,1fr) 44px 46px 40px 24px!important;
     gap:4px!important;
+  }
+  .picker-player-main{
+    grid-template-columns:30px minmax(0,1fr);
+    gap:4px;
   }
   .picker-table-head button{font-size:6.5px}
   .picker-value{font-size:7.5px}
