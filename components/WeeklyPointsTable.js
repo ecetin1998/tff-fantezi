@@ -24,9 +24,15 @@ export default function WeeklyPointsTable({ players, throughGameweek, finalThrou
     ).map(p=>{
       const map=new Map((p.weekly||[]).map(x=>[Number(x.gameweek),x]))
       const stats=p.stats||{}
-      const played=Number(stats.matches_played||0)
+      const playedWeeks=(p.weekly||[]).filter(x=>Number(x.minutes||0)>0)
+      const played=playedWeeks.length
       const total=Number(stats.actual_points||0)
-      return {...p,pointMap:map,total,avg:played?total/played:0,played}
+      const avg=played?playedWeeks.reduce((sum,x)=>sum+Number(x.points||0),0)/played:0
+      const sixPlus=played?playedWeeks.filter(x=>Number(x.points||0)>=6).length/played:0
+      const recentPlayed=playedWeeks.slice(-3)
+      const last3=recentPlayed.length?recentPlayed.reduce((sum,x)=>sum+Number(x.points||0),0)/recentPlayed.length:0
+      const trend=played&&recentPlayed.length ? last3-avg : 0
+      return {...p,pointMap:map,total,avg,played,sixPlus,last3,trend}
     })
 
     const value=(p,k)=>{
@@ -34,6 +40,8 @@ export default function WeeklyPointsTable({ players, throughGameweek, finalThrou
       if(k==='total')return p.total
       if(k==='avg')return p.avg
       if(k==='played')return p.played
+      if(k==='last3')return p.last3
+      if(k==='six')return p.sixPlus
       if(k==='week')return Number(p.pointMap.get(Number(weekSort))?.points ?? -999)
       if(k.startsWith('gw'))return Number(p.pointMap.get(Number(k.slice(2)))?.points ?? -999)
       return p.total
@@ -65,7 +73,9 @@ export default function WeeklyPointsTable({ players, throughGameweek, finalThrou
       <select className="weekly-sort-select" value={sort} onChange={e=>{setSort(e.target.value);setDir(-1)}}>
         <option value="total">Toplam puan</option>
         <option value="avg">Maç ortalaması</option>
-        <option value="played">Maç sayısı</option>
+        <option value="last3">Son 3 ortalaması</option>
+        <option value="six">6+ yüzdesi</option>
+        <option value="played">Oynanan maç</option>
         <option value="week">Hafta puanı</option>
       </select>
       {sort==='week'?<select className="weekly-week-filter" value={weekSort} onChange={e=>{setWeekSort(Number(e.target.value));setDir(-1)}}>
@@ -90,6 +100,9 @@ export default function WeeklyPointsTable({ players, throughGameweek, finalThrou
           {head('total','Toplam')}
           {head('played','Maç')}
           {head('avg','Ort.')}
+          {head('last3','Son 3')}
+          {head('six','6+ %')}
+          <th>Form</th>
           {gameweeks.map(g=>head('gw'+g,'MH'+g,weekMode&&g===weekSort?'selected-week-col':''))}
         </tr></thead>
         <tbody>{rows.map((p,i)=><tr className="team-player-row" style={teamCssVars(p.team)} key={p.id}>
@@ -101,6 +114,9 @@ export default function WeeklyPointsTable({ players, throughGameweek, finalThrou
           <td className="summary-score"><b>{p.total}</b></td>
           <td>{p.played}</td>
           <td>{num(p.avg)}</td>
+          <td><b>{num(p.last3)}</b></td>
+          <td>{(p.sixPlus*100).toFixed(0)}%</td>
+          <td><span className={`form-trend ${p.trend>.5?'up':p.trend<-.5?'down':'flat'}`}>{p.trend>.5?'↑':p.trend<-.5?'↓':'→'}</span></td>
           {gameweeks.map(g=>{
             const row=p.pointMap.get(g)
             const pending=g>finalThroughGameweek
@@ -125,9 +141,12 @@ export default function WeeklyPointsTable({ players, throughGameweek, finalThrou
           </div>
         </div>
 
-        <div className="weekly-mobile-meta compact">
+        <div className="weekly-mobile-meta compact weekly-form-meta">
           <span><small>Maç</small><b>{p.played}</b></span>
           <span><small>Ortalama</small><b>{num(p.avg)}</b></span>
+          <span><small>Son 3</small><b>{num(p.last3)}</b></span>
+          <span><small>6+ %</small><b>{(p.sixPlus*100).toFixed(0)}%</b></span>
+          <span className={`mobile-form-trend ${p.trend>.5?'up':p.trend<-.5?'down':'flat'}`}><small>Form</small><b>{p.trend>.5?'↑':p.trend<-.5?'↓':'→'}</b></span>
         </div>
 
         <div className="week-scroll-head"><b>Hafta hafta</b><span>kaydır →</span></div>
