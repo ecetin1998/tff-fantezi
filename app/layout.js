@@ -16,4 +16,4 @@ export const metadata={
   },
   twitter:{card:'summary_large_image',title:'Fantezi Scout',description:'Süper Lig fantasy analiz merkezi.'},
 }
-export default function RootLayout({children}){return <html lang="tr"><body><Nav/><main>{children}</main><footer><span>Fantezi Scout • bağımsız analiz platformu</span><span>Resmî TFF ürünü değildir.</span></footer></body></html>}
+export default function RootLayout({children}){return <html lang="tr"><body><Nav/><main>{children}</main><footer><span>Fantezi Scout • bağımsız analiz platformu</span><a href="/sss">SSS & Rehber</a><span>Resmî TFF ürünü değildir.</span></footer></body></html>}
