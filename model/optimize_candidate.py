@@ -8,6 +8,7 @@ import sys
 import numpy as np
 from scipy.optimize import milp, Bounds, LinearConstraint
 from scipy.sparse import coo_matrix
+from optimizer_rules import captain_metric, bench_expected_value, cheap_bench_tiebreak
 
 
 def solve(players, alternative=False, avoid=()):
@@ -22,9 +23,13 @@ def solve(players, alternative=False, avoid=()):
     c = np.zeros(3*n)
     for i, p in enumerate(eligible):
         base = p['xfp'] + (.18 * max(0, p['p90'] - p['xfp']) if alternative else 0)
-        c[i] = -base
-        c[n+i] = -p['xfp'] * 1e-5
-        c[2*n+i] = -p['xfp']
+        bench_value = bench_expected_value(p)
+        bench_cost = cheap_bench_tiebreak(p)
+        # xi and squad are both 1 for starters, so cancel the bench term on XI.
+        # Only true bench players keep the expected-sub value / cheapness signal.
+        c[i] = -base + bench_value - bench_cost
+        c[n+i] = -bench_value + bench_cost
+        c[2*n+i] = -captain_metric(p, alternative)
     rr, cc, dd, lo, hi = [], [], [], [], []
     def add(terms, lower, upper):
         row = len(lo)
@@ -50,7 +55,8 @@ def solve(players, alternative=False, avoid=()):
         add([(i,1) for i,p in enumerate(eligible) if p['id'] in avoid],0,8)
     A=coo_matrix((dd,(rr,cc)),shape=(len(lo),3*n)).tocsr()
     result=milp(c,integrality=np.ones(3*n),bounds=Bounds(0,ub),constraints=LinearConstraint(A,lo,hi),options={'time_limit':60,'mip_rel_gap':.003})
-    if result.x is None: raise RuntimeError('No legal squad: '+str(result.message))
+    if not result.success or result.x is None:
+        raise RuntimeError('Optimizer did not reach a valid optimum: '+str(result.message))
     xi=[p for i,p in enumerate(eligible) if result.x[i]>.5]
     squad=[p for i,p in enumerate(eligible) if result.x[n+i]>.5]
     cap=next(p for i,p in enumerate(eligible) if result.x[2*n+i]>.5)

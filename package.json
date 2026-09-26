@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",
-    "test": "node model/attackAllocation.test.js"
+    "test": "node model/attackAllocation.test.js && node model/simulateScout.test.js && node model/replayAudit.test.js && python3 model/optimizer_rules_test.py"
   },
   "dependencies": {
     "@supabase/ssr": "0.12.7",
