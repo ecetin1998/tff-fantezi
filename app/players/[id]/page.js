@@ -5,6 +5,12 @@ import { teamCssVars } from '@/lib/teamThemes'
 import { availabilityCompactNote, availabilityIsIssue } from '@/lib/availability'
 
 export const revalidate=300
+export async function generateMetadata({params}){
+  const {id}=await params
+  const data=await getPlayerDetail(id)
+  if(!data)return {title:'Oyuncu bulunamadı'}
+  return {title:data.player.full_name+' • Oyuncu Analizi',description:data.player.full_name+' için xFP, dakika, rol ve haftalık fantasy performansı.'}
+}
 
 const pct=v=>`${(Number(v||0)*100).toFixed(0)}%`
 const num=(v,d=2)=>Number(v||0).toFixed(d)
@@ -34,8 +40,10 @@ export default async function PlayerPage({ params }){
   if(!data) notFound()
 
   const {run,player,projection:p,availability:a,role:r,season:s,weekly,match}=data
-  const played=Number(s?.matches_played||0)
-  const actual=Number(s?.actual_points||0)
+  const closedWeeks=[...(weekly||[])].sort((x,y)=>Number(x.gameweek||0)-Number(y.gameweek||0))
+  const playedWeeks=closedWeeks.filter(w=>Number(w.minutes||0)>0)
+  const played=playedWeeks.length
+  const actual=closedWeeks.reduce((sum,w)=>sum+Number(w.points||0),0)
   const average=played?actual/played:0
   const opponentId=match ? (Number(match.home_team_id)===Number(player.team_id)?Number(match.away_team_id):Number(match.home_team_id)) : null
   const opponent=p?.opponent_name || '—'
@@ -46,8 +54,7 @@ export default async function PlayerPage({ params }){
   const isDEF=player.position==='DEF'
   const themeStyle=teamCssVars(player.team)
 
-  const closedWeeks=[...(weekly||[])].sort((x,y)=>Number(x.gameweek||0)-Number(y.gameweek||0))
-  const recentWeeks=closedWeeks.slice(-3)
+  const recentWeeks=playedWeeks.slice(-3)
   const recentAverage=recentWeeks.length?recentWeeks.reduce((sum,w)=>sum+Number(w.points||0),0)/recentWeeks.length:0
   const lastWeek=closedWeeks.at(-1)
   const bestWeek=closedWeeks.length?Math.max(...closedWeeks.map(w=>Number(w.points||0))):0
@@ -57,7 +64,7 @@ export default async function PlayerPage({ params }){
     {label:'İlk 11',value:pct(p?.xi_probability),note:'başlama ihtimali'},
     {label:'xDakika',value:num(p?.x_minutes,0),note:'beklenen süre'},
     {label:'6+ puan',value:pct(p?.six_plus_probability),note:'yüksek getiri ihtimali'},
-    {label:'Tavan',value:num(p?.p90,1),note:'üst %10 senaryo'},
+    {label:'P90',value:num(p?.p90,1),note:'üst %10 eşiği'},
     {label:'F/P',value:num(p?.value_score),note:'fiyat verimliliği'},
   ]
 
@@ -229,7 +236,7 @@ export default async function PlayerPage({ params }){
           {!isGK?<div><span>Takım gol payı</span><b>{pct(r?.team_goal_share)}</b></div>:null}
           {!isGK?<div><span>Takım asist payı</span><b>{pct(r?.team_assist_share)}</b></div>:null}
         </div>
-        {p?.role_note?<div className="player-model-note"><span>Model notu</span><p>{p.role_note}</p></div>:null}
+        <div className="player-model-note"><span>Rol özeti</span><p>{r?.signal||'Belirgin rol değişimi yok.'}</p></div>
       </div>
     </details>
   </div>

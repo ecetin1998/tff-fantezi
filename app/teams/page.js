@@ -2,6 +2,8 @@ import Link from 'next/link'
 import { getMatches } from '@/lib/data'
 import { teamCssVars } from '@/lib/teamThemes'
 
+export const metadata={title:'Takım Analizi'}
+
 export const revalidate=300
 
 export default async function Teams(){

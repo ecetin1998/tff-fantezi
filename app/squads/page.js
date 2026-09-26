@@ -1,6 +1,8 @@
 import { getRecommendation } from '@/lib/data'
 import SquadPitchView from '@/components/SquadPitchView'
 
+export const metadata={title:'Kadro Önerileri'}
+
 export const revalidate=300
 
 export default async function Squads(){

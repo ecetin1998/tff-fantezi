@@ -1,7 +1,7 @@
 'use client'
 import { useMemo, useState } from 'react'
 import Link from 'next/link'
-import { availabilityCompactNote, availabilityStatusLabel } from '@/lib/availability'
+import { availabilityCompactNote, availabilityExpectedReturn, availabilityReason, availabilityStatusLabel } from '@/lib/availability'
 
 const posLabel=p=>({GK:'KL',DEF:'DEF',MID:'OS',FWD:'FOR'}[p]||p||'—')
 
@@ -76,11 +76,9 @@ export default function AvailabilityTable({ rows }){
           <td><span className={`pos ${r.player?.position}`}>{posLabel(r.player?.position)}</span></td>
           <td><span className={`status-chip ${r.availability_type||''}`}>{availabilityStatusLabel(r)}</span></td>
           <td>{(Number(r.availability_probability??1)*100).toFixed(0)}%</td>
-          <td className="availability-note-cell">
-            <b>{r.reason||r.source_reason||'—'}</b>
-          </td>
+          <td className="availability-note-cell"><b>{availabilityReason(r)||'—'}</b></td>
           <td>{formatDateOnly(r.injury_date)}</td>
-          <td className="availability-return-cell">{r.suspension_fixture||r.expected_return||'—'}</td>
+          <td className="availability-return-cell">{r.suspension_fixture||availabilityExpectedReturn(r.expected_return)||'—'}</td>
           <td>{formatCheck(r.checked_at)}</td>
         </tr>
       })}</tbody>

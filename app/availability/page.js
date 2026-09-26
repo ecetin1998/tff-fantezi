@@ -1,6 +1,8 @@
 import AvailabilityTable from '@/components/AvailabilityTable'
 import { getAvailability } from '@/lib/data'
 
+export const metadata={title:'Sakatlık ve Ceza Durumu'}
+
 export const revalidate=300
 
 export default async function Availability(){

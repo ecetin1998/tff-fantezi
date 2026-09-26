@@ -1,4 +1,6 @@
 import { login, signup, resendConfirmation } from '@/app/actions'
+
+export const metadata={title:'Giriş'}
 export default async function Login({searchParams}){
   const sp=await searchParams
   return <div className="auth-wrap"><div className="card auth-card">

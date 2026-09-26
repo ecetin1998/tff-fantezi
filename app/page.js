@@ -10,7 +10,8 @@ export default async function Home(){
   const value=[...players].sort((a,b)=>Number(b.projection?.value_score||0)-Number(a.projection?.value_score||0))[0]
   const mins=[...players].sort((a,b)=>Number(b.projection?.x_minutes||0)-Number(a.projection?.x_minutes||0))[0]
   const top25=[...players].sort((a,b)=>Number(a.projection?.top25_rank||9999)-Number(b.projection?.top25_rank||9999) || Number(b.projection?.top25_score||0)-Number(a.projection?.top25_score||0))[0]
-  const updated=run?.source_updated_at?new Intl.DateTimeFormat('tr-TR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit',timeZone:'Europe/Istanbul'}).format(new Date(run.source_updated_at)):'—'
+  const sourceUpdated=run?.source_updated_at?new Intl.DateTimeFormat('tr-TR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit',timeZone:'Europe/Istanbul'}).format(new Date(run.source_updated_at)):'—'
+  const modelUpdated=run?.generated_at?new Intl.DateTimeFormat('tr-TR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit',timeZone:'Europe/Istanbul'}).format(new Date(run.generated_at)):'—'
   const highlights=[
     [`MH${run?.gameweek||'—'} en yüksek beklenen puan`,best,Number(best?.projection?.xfp||0).toFixed(2),'xFP','xFP • tüm senaryoların ortalamasında en yüksek beklenen puan'],
     [`MH${run?.gameweek||'—'} en iyi F/P`,value,Number(value?.projection?.value_score||0).toFixed(2),'xFP/m','Bütçe başına beklenen puan verimi'],
@@ -42,8 +43,8 @@ export default async function Home(){
         <div className="card spotlight-card home-status-card home-status-ready">
           <span>Model durumu</span>
           <b>Model hazır</b>
-          <small>Son veri {updated}</small>
-          <strong>Güncel <em>veri</em></strong>
+          <small>Kaynak veriler {sourceUpdated}<br/>Model hesaplandı {modelUpdated}</small>
+          <strong>Güncel <em>model</em></strong>
         </div>
       </aside>
     </section>
@@ -53,7 +54,7 @@ export default async function Home(){
       <div className="home-guide-metrics">
         <div><b>xFP</b><span>Beklenen fantezi puanı</span></div>
         <div><b>xDakika</b><span>Beklenen oynama süresi</span></div>
-        <div><b>Tavan</b><span>Üst %10'luk puan senaryosu</span></div>
+        <div><b>P90</b><span>Üst %10 puan eşiği</span></div>
         <div><b>Top25</b><span>Haftanın üst puan dilimine girme aday sırası</span></div>
       </div>
     </section>

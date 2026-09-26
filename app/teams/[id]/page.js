@@ -5,6 +5,12 @@ import { teamCssVars } from '@/lib/teamThemes'
 import TeamRoster from '@/components/TeamRoster'
 
 export const revalidate=300
+export async function generateMetadata({params}){
+  const {id}=await params
+  const data=await getTeamDetail(id)
+  if(!data)return {title:'Takım bulunamadı'}
+  return {title:data.team.name+' • Takım Analizi',description:data.team.name+' için xG/xGA, fikstür ve fantasy oyuncu analizi.'}
+}
 
 const pct=v=>v===null||v===undefined?'—':(Number(v)*100).toFixed(0)+'%'
 const num=(v,d=2)=>v===null||v===undefined?'—':Number(v).toFixed(d)

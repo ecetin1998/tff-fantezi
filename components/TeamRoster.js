@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { availabilityCompactNote } from '@/lib/availability'
 
 const posLabel=p=>({GK:'KL',DEF:'DEF',MID:'OS',FWD:'FOR'}[p]||p||'—')
+const normalizeText=value=>String(value||'').toLocaleLowerCase('tr').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/ı/g,'i')
 const pct=v=>v===null||v===undefined?'—':(Number(v)*100).toFixed(0)+'%'
 const num=(v,d=2)=>v===null||v===undefined?'—':Number(v).toFixed(d)
 
@@ -13,10 +14,10 @@ export default function TeamRoster({players=[]}){
   const [pos,setPos]=useState('')
 
   const rows=useMemo(()=>{
-    const needle=q.trim().toLocaleLowerCase('tr')
+    const needle=normalizeText(q.trim())
     return players.filter(p=>{
       const matchesPos=!pos||p.position===pos
-      const haystack=`${p.full_name||''} ${p.display_name||''} ${posLabel(p.position)} ${p.position||''}`.toLocaleLowerCase('tr')
+      const haystack=normalizeText(`${p.full_name||''} ${p.display_name||''} ${posLabel(p.position)} ${p.position||''}`)
       return matchesPos&&(!needle||haystack.includes(needle))
     })
   },[players,q,pos])

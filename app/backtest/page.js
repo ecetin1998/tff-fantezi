@@ -1,6 +1,7 @@
 import { getBacktestOverview } from '@/lib/data'
 
 export const dynamic='force-dynamic'
+export const metadata={title:'Model Performansı'}
 
 const num=(v,d=2)=>v===null||v===undefined?'—':Number(v).toFixed(d)
 const pct=v=>v===null||v===undefined?'—':(Number(v)*100).toFixed(0)+'%'
@@ -36,6 +37,7 @@ export default async function BacktestPage(){
   const replayBenchmark=replayWeeks[0]?.engine_version||'ScoutPlus 3.1'
   const replayBenchmarkVersion=replayWeeks[0]?.benchmark_version||'—'
   const productionQaPass=Boolean(currentRunQa?.pass)
+  const publicModelVersion=(String(currentRun?.model_version||'').match(/ScoutPlus\s+\d+(?:\.\d+)*/)||['Canlı model'])[0]
   const replayN=replayClosed.reduce((s,w)=>s+Number(w.player_sample||0),0)
   const overallBand=replayN?replayClosed.reduce((s,w)=>s+Number(w.band_hit_rate||0)*Number(w.player_sample||0),0)/replayN:null
   const overallExpectedBand=replayN?replayClosed.reduce((s,w)=>s+Number(w.expected_band_hit_rate||0)*Number(w.player_sample||0),0)/replayN:null
@@ -57,32 +59,32 @@ export default async function BacktestPage(){
   return <main className="page-shell backtest-page">
     <section className="page-hero backtest-hero">
       <div>
-        <span className="eyebrow">CANLI MODEL + GERİYE DÖNÜK TEST</span>
+        <span className="eyebrow">YAYINDAKİ MODEL + GERİYE DÖNÜK TEST</span>
         <h1>Model Performansı</h1>
-        <p>Canlı production motorunu, geçmiş haftalara sonucu görmeden uygulanan walk-forward replay'i ve MH7'den itibaren gerçekten maç öncesi yayınlanan dondurulmuş tahminleri ayrı ayrı izliyoruz. Böylece yeni motor ile tarihsel benchmark birbirine karışmıyor.</p>
+        <p>Yayındaki modeli, geçmiş haftalara sonucu görmeden uygulanan geriye dönük testi ve MH7’den itibaren maç öncesi dondurulan gerçek tahminleri ayrı ayrı izliyoruz. Böylece bugünkü model ile tarihsel test birbirine karışmıyor.</p>
       </div>
       <div className="backtest-live-badge">
-        <small>Canlı production</small>
-        <b>{currentRun?.model_version||'—'}</b>
-        <span>{productionQaPass?'QA PASS • yayındaki snapshot':'QA kontrolü bekliyor'}</span>
+        <small>Yayındaki model</small>
+        <b>{publicModelVersion} • MH{currentRun?.gameweek||'—'}</b>
+        <span>{productionQaPass?'Kontrol geçti • yayındaki sürüm':'Kontrol bekliyor'}</span>
       </div>
     </section>
 
     <section className="card backtest-method">
       <div className="panel-head">
-        <div><span className="eyebrow">PRODUCTION QA</span><h2>Current swap koruması</h2></div>
+        <div><span className="eyebrow">YAYIN KONTROLÜ</span><h2>Yayına geçiş koruması</h2></div>
         <small>{currentRun?.generated_at?new Date(currentRun.generated_at).toLocaleString('tr-TR',{timeZone:'Europe/Istanbul'}):'—'}</small>
       </div>
       <div className="backtest-explainer">
-        <div><b>{productionQaPass?'PASS':'BEKLİYOR'} • MH{currentRun?.gameweek||'—'}</b><p>{currentRun?.status||'—'} durumunda • {Number(currentRunQa?.simulation_count||currentRun?.simulation_count||0).toLocaleString('tr-TR')} simülasyon. QA geçmeyen staging run current olamaz; publish işlemi atomik olduğu için hata halinde eski current korunur.</p></div>
-        <div><b>{currentRunQa?.active_projection_count??'—'} / {currentRunQa?.active_player_count??'—'} aktif projeksiyon • {currentRunQa?.active_role_count??'—'} rol</b><p>Eksik aktif projection {currentRunQa?.missing_active_projections??'—'} • eksik rol {currentRunQa?.missing_active_roles??'—'} • stale inactive projection {currentRunQa?.inactive_positive_projections??'—'} • hard-zero ihlali {currentRunQa?.hard_zero_violations??'—'}.</p></div>
-        <div><b>{currentRunQa?.match_count??'—'} maç • {currentRunQa?.recommendation_count??'—'} kadro • overlap {currentRunQa?.xi_overlap??'—'}/11</b><p>Takım dakika max sapma {currentRunQa?.max_team_minute_gap??'—'} dk • pay closure ihlali {currentRunQa?.share_violations??'—'} • geçersiz kadro {currentRunQa?.invalid_recommendations??'—'} • Top25 eksik {currentRunQa?.top25_missing??'—'}.</p></div>
+        <div><b>{productionQaPass?'PASS':'BEKLİYOR'} • MH{currentRun?.gameweek||'—'}</b><p>{currentRun?.status||'—'} durumunda • {Number(currentRunQa?.simulation_count||currentRun?.simulation_count||0).toLocaleString('tr-TR')} simülasyon. Kontrolleri geçmeyen aday sürüm yayına alınamaz; herhangi bir hata olursa önceki çalışan sürüm korunur.</p></div>
+        <div><b>{currentRunQa?.active_projection_count??'—'} / {currentRunQa?.active_player_count??'—'} aktif oyuncu tahmini • {currentRunQa?.active_role_count??'—'} rol</b><p>Eksik aktif oyuncu {currentRunQa?.missing_active_projections??'—'} • eksik rol {currentRunQa?.missing_active_roles??'—'} • eski/pasif oyuncu sızıntısı {currentRunQa?.inactive_positive_projections??'—'} • oynamayacak oyuncu ihlali {currentRunQa?.hard_zero_violations??'—'}.</p></div>
+        <div><b>{currentRunQa?.match_count??'—'} maç • {currentRunQa?.recommendation_count??'—'} kadro • ortak 11 {currentRunQa?.xi_overlap??'—'}/11</b><p>Takım dakika max sapma {currentRunQa?.max_team_minute_gap??'—'} dk • pay dağılımı ihlali {currentRunQa?.share_violations??'—'} • fikstür eşleşme hatası {currentRunQa?.data_integrity?.fixture_mismatch??'—'} • puan/dakika tutarsızlığı {currentRunQa?.data_integrity?.nonzero_points_zero_minutes??'—'}.</p></div>
       </div>
     </section>
 
     <section className="backtest-summary-grid">
       <article className="card"><span>Walk-forward tamamlanan test</span><b>{replayClosed.length}<small>/6</small></b><small>MH1–MH6 • {replayBenchmark.replace('ScoutPlus ','v').replace('Cold Start','Başlangıç Modeli')}</small></article>
-      <article className="card"><span>Tahmin bandında kalan</span><b>{pct(overallBand)}</b><small>MC beklenen {pct(overallExpectedBand)} • fark {pp(overallBandGap)}</small></article>
+      <article className="card"><span>Tahmin bandında kalan</span><b>{pct(overallBand)}</b><small>Simülasyon beklenen {pct(overallExpectedBand)} • fark {pp(overallBandGap)}</small></article>
       <article className="card"><span>Band dışına çıkınca ortalama sapma</span><b>{num(overallOutside)}</b><small>Yalnız tahmin bandının dışındaki puan mesafesi</small></article>
       <article className="card"><span>Top‑25 yakalama • GB</span><b>{pct(overallTop25V2)}</b><small>xFP-only {pct(overallTop25)} • fark {pp(overallTop25Lift)}</small></article>
       <article className="card"><span>Şu an takip edilen hafta</span><b>{latestLive?'MH'+latestLive.gameweek:'—'}</b><small>{latestLive?liveStatus[latestLive.status]||latestLive.status:'Canlı kayıt yok'}</small></article>
@@ -101,13 +103,13 @@ export default async function BacktestPage(){
 
     <section className="card backtest-table-card">
       <div className="panel-head">
-        <div><span className="eyebrow">WALK-FORWARD BENCHMARK • MH1–MH6</span><h2>Hafta hafta geriye dönük test</h2></div>
-        <small>{replayBenchmarkVersion} • production motor değiştiğinde yeni benchmark sürümüyle yeniden koşulur.</small>
+        <div><span className="eyebrow">GERİYE DÖNÜK TEST • MH1–MH6</span><h2>Hafta hafta geriye dönük test</h2></div>
+        <small>Yayındaki model değiştiğinde bu test yeni sürümle yeniden çalıştırılır.</small>
       </div>
       <div className="table-scroll">
         <table className="backtest-table replay-table">
           <thead><tr>
-            <th>MH</th><th>Modelin bildiği veri</th><th>Oyuncu</th><th>Band içinde</th><th>MC beklenen</th><th>Kalibrasyon farkı</th><th>Band genişliği</th><th>Band dışı sapma</th><th>Model eğilimi</th><th>Sıralama uyumu</th><th>İlk 25 xFP</th><th>İlk 25 GB</th><th>Dakika hatası</th><th>Ana öğrenme</th><th>Durum</th>
+            <th>MH</th><th>Modelin bildiği veri</th><th>Oyuncu</th><th>Band içinde</th><th>Simülasyon beklenen</th><th>Kalibrasyon farkı</th><th>Band genişliği</th><th>Band dışı sapma</th><th>Model eğilimi</th><th>Sıralama uyumu</th><th>İlk 25 xFP</th><th>İlk 25 GB</th><th>Dakika hatası</th><th>Ana öğrenme</th><th>Durum</th>
           </tr></thead>
           <tbody>{replayWeeks.map(w=><tr key={w.gameweek} className={w.status==='cold_start_gap'?'replay-gap-row':''}>
             <td><b>{'MH'+w.gameweek}</b></td>
@@ -128,9 +130,6 @@ export default async function BacktestPage(){
           </tr>)}</tbody>
         </table>
       </div>
-      <div className="backtest-notes">
-        {replayWeeks.map(w=><div key={'replay-note-'+w.gameweek}><b>{'MH'+w.gameweek}</b><span>{w.notes}</span></div>)}
-      </div>
     </section>
 
     <section className="card metric-guide">
@@ -140,7 +139,7 @@ export default async function BacktestPage(){
         <div><b>Band dışı sapma</b><p>Gerçek sonuç bandın dışına çıktıysa yalnız en yakın sınırdan uzaklığı ölçeriz. Örn. xFP 5, bant 2–13 ve gerçek 18 ise <strong>13 puan hata değil, band dışı 5 puan</strong> olarak değerlendirilir.</p></div>
         <div><b>Band genişliği</b><p>Belirsizliği ne kadar geniş bıraktığımızı gösterir. Amaç bandı körlemesine daraltmak değil; kesikli puan dağılımında beklenen self-coverage, gerçekleşen kapsama ve band dışı sapmayı birlikte iyileştirmektir.</p></div>
         <div><b>Model eğilimi</b><p>Merkez xFP’nin uzun vadede sistematik olarak fazla mı az mı kaldığını gösterir. Tek oyuncunun uç sonucu değil, tekrar eden yönlü sapma önemlidir.</p></div>
-        <div><b>Sıralama ve dakika</b><p>Sıralama uyumu yüksek gördüğümüz oyuncuların gerçekten yukarı çıkıp çıkmadığını; dakika hatası ise rol/ilk 11 tahminimizin doğruluğunu gösterir. <strong>İlk 25 GB</strong>, xFP’yi bozmadan yüksek skor/tail adaylarını ayrı bir ranking katmanıyla ölçer.</p></div>\n        <div><b>Top‑25 GB</b><p><strong>xFP</strong> beklenen fantasy puanını ölçmeye devam eder; Top‑25 GB ise yüksek skor/tail adaylarını walk-forward eğitilmiş ayrı bir sıralama katmanıyla tarar. Bu skor optimizerı veya ana xFP’yi değiştirmez ve kapanan her haftada xFP baselineına karşı yeniden ölçülür.</p></div>
+        <div><b>Sıralama ve dakika</b><p>Sıralama uyumu yüksek gördüğümüz oyuncuların gerçekten yukarı çıkıp çıkmadığını; dakika hatası ise rol/ilk 11 tahminimizin doğruluğunu gösterir. <strong>İlk 25 GB</strong>, xFP’yi bozmadan yüksek skor/tail adaylarını ayrı bir ranking katmanıyla ölçer.</p></div>\n        <div><b>Top‑25 modeli</b><p><strong>xFP</strong> beklenen fantasy puanını ölçmeye devam eder; Top‑25 modeli ise yüksek skor/tail adaylarını geçmiş haftalar üzerinde sonucu görmeden eğitilen ayrı bir sıralama katmanıyla tarar. Bu skor optimizerı veya ana xFP’yi değiştirmez ve kapanan her haftada xFP baselineına karşı yeniden ölçülür.</p></div>
       </div>
     </section>
 

@@ -8330,3 +8330,34 @@ main{
 /* deploy trigger: roster mobile fix */
 
 /* deploy retry after Vercel rate-limit cooldown */
+
+
+/* ===== Audit remediation • performance + mobile UX ===== */
+.clickable-row{cursor:pointer}
+.clickable-row:focus{outline:2px solid var(--cyan);outline-offset:-2px}
+.empty-filter-state{padding:28px;text-align:center;color:var(--muted);margin:12px 0}
+.pagination-bar{display:flex;justify-content:center;align-items:center;gap:12px;margin:16px 0 0}
+.pagination-bar button{border:1px solid var(--line);background:rgba(255,255,255,.055);color:var(--text);border-radius:10px;padding:9px 13px;font-weight:800}
+.pagination-bar button:disabled{opacity:.35;cursor:not-allowed}
+.pagination-bar span{font-size:12px;color:var(--muted)}
+.matchup-badges{display:flex;gap:5px;flex-wrap:wrap}
+.away-meta.matchup-badges{justify-content:flex-end}
+.matchup-pill{font-style:normal;font-size:10px;font-weight:850;border-radius:999px;padding:4px 7px;border:1px solid var(--line);white-space:nowrap}
+.matchup-pill.good{color:#80f0c7;border-color:rgba(49,230,210,.35);background:rgba(49,230,210,.09)}
+.matchup-pill.neutral{color:#d5d7eb;background:rgba(255,255,255,.05)}
+.matchup-pill.tough{color:#ffadb9;border-color:rgba(255,117,139,.32);background:rgba(255,117,139,.08)}
+.elo-explainer{margin:10px 0 0;color:var(--muted);font-size:11px;line-height:1.45}
+.formation-summary-pill{display:inline-flex;align-items:center;gap:6px;border:1px solid rgba(49,230,210,.22);background:rgba(49,230,210,.08);border-radius:999px;padding:6px 9px;flex:0 0 auto}
+.formation-summary-pill small{color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.08em}
+.formation-summary-pill b{font-size:12px}
+.ceiling-captain-note{margin:-6px 0 12px;color:var(--muted);font-size:11px;text-align:right}
+.ceiling-captain-note b{color:var(--text)}
+@media(max-width:900px){
+  .filters input,.filters select,.team-roster-tools input,.team-roster-tools select,.availability-filters input,.availability-filters select{font-size:16px!important}
+  .cell-note,.mobile-player-name span,.mobile-fixture em,.weekly-mobile-player-name small,.team-roster-copy small{font-size:11px!important;line-height:1.35}
+  .pagination-bar{position:relative;z-index:2}
+}
+@media(max-width:760px){
+  .ceiling-captain-note{text-align:left;margin:0 0 10px}
+  .matchup-badges,.away-meta.matchup-badges{justify-content:flex-start}
+}

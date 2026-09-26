@@ -3,8 +3,9 @@ import { getMatches } from '@/lib/data'
 import { teamCssVars } from '@/lib/teamThemes'
 
 export const revalidate=300
+export const metadata={title:'Maç Tahminleri'}
 
-const difficultyLabel={easy:'Kolay fikstür',medium:'Orta fikstür',hard:'Zor fikstür'}
+const matchupLabel={good:'İyi',neutral:'Dengeli',tough:'Zor'}
 const profileClass=total=>total>=3?'high':total<=2?'low':'medium'
 const pct=v=>Math.round(Number(v||0)*100)
 
@@ -123,8 +124,9 @@ export default async function Matches(){
             <div className="match-team-block">
               <span>EV</span>
               <Link className="match-team-link" style={teamCssVars(m.home_team)} href={'/teams/'+m.home_team_id}><i className="club-dot"/><b>{m.home_team}</b></Link>
-              <div className="match-team-meta">
-                <em className={'fixture-difficulty '+(m.home_fixture_level||'medium')}>{difficultyLabel[m.home_fixture_level]||'Orta fikstür'}</em>
+              <div className="match-team-meta matchup-badges">
+                <em className={'matchup-pill '+(m.home_attack_level||'neutral')}>Hücum: {matchupLabel[m.home_attack_level]||'Dengeli'}</em>
+                <em className={'matchup-pill '+(m.home_defense_level||'neutral')}>Savunma: {matchupLabel[m.home_defense_level]||'Dengeli'}</em>
               </div>
             </div>
 
@@ -137,8 +139,9 @@ export default async function Matches(){
             <div className="away match-team-block">
               <span>DEP</span>
               <Link className="match-team-link away-link" style={teamCssVars(m.away_team)} href={'/teams/'+m.away_team_id}><i className="club-dot"/><b>{m.away_team}</b></Link>
-              <div className="match-team-meta away-meta">
-                <em className={'fixture-difficulty '+(m.away_fixture_level||'medium')}>{difficultyLabel[m.away_fixture_level]||'Orta fikstür'}</em>
+              <div className="match-team-meta away-meta matchup-badges">
+                <em className={'matchup-pill '+(m.away_attack_level||'neutral')}>Hücum: {matchupLabel[m.away_attack_level]||'Dengeli'}</em>
+                <em className={'matchup-pill '+(m.away_defense_level||'neutral')}>Savunma: {matchupLabel[m.away_defense_level]||'Dengeli'}</em>
               </div>
             </div>
           </div>
@@ -164,11 +167,12 @@ export default async function Matches(){
           <details className="match-technical-details">
             <summary>Teknik maç detayları <span>+</span></summary>
             <div>
-              <small>{m.home_team} Elo</small><b>{m.home_elo||'—'}</b>
-              <small>{m.away_team} Elo</small><b>{m.away_elo||'—'}</b>
+              <small>{m.home_team} form Elo</small><b>{m.home_elo||'—'}</b>
+              <small>{m.away_team} form Elo</small><b>{m.away_elo||'—'}</b>
               <small>Model haftası</small><b>MH{run?.gameweek||'—'}</b>
               <small>Elo veri aralığı</small><b>{eloThroughGameweek?`MH1–MH${eloThroughGameweek}`:'—'}</b>
             </div>
+            <p className="elo-explainer">Form Elo yalnız bu sezon oynanan lig sonuçlarının özetidir; maç kazanma yüzdesi xG ve diğer model girdileriyle ayrıca hesaplanır.</p>
           </details>
         </article>
       })}

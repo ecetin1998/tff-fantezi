@@ -1,6 +1,8 @@
 import Link from 'next/link'
 import { getRoleSignals } from '@/lib/data'
 
+export const metadata={title:'Rol ve Dakika Takibi'}
+
 export const revalidate=300
 
 const pct=v=>`${(Number(v||0)*100).toFixed(0)}%`

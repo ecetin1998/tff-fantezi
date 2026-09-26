@@ -3,6 +3,8 @@ import SquadBuilder from '@/components/SquadBuilder'
 import { createClient } from '@/lib/supabase/server'
 import { getAuthState, getPlayersWithProjection, getRecommendation } from '@/lib/data'
 
+export const metadata={title:'Benim Kadrom'}
+
 export default async function Squad({searchParams}){
   const auth=await getAuthState()
   const sp=await searchParams
