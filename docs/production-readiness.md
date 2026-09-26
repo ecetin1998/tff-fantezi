@@ -32,6 +32,8 @@ Bu dosya audit round 2 sonundaki **canlı** durumu gösterir.
 - [x] Beş internal Edge Function GitHub OIDC ile korunuyor; uzun ömürlü gate secret zorunlu değil.
 - [x] GitHub gate workflow `id-token: write` ile kısa ömürlü OIDC JWT kullanıyor.
 - [x] Altı eksik foreign-key index'i production DB'ye eklendi.
+- [x] Internal/legacy RLS tablolarına explicit browser-deny policy eklendi; security advisor'daki `rls_enabled_no_policy` bulguları kapandı.
+- [x] Security advisor'da DB kaynaklı açık kalmadı; yalnız Free plan native leaked-password WARN'ı mevcut ve uygulama-level HIBP kontrolüyle telafi ediliyor.
 - [x] Güncel model run: model QA PASS + data-integrity PASS + backtest PASS + release gate PASS.
 
 ## RLS doğrulama özeti
