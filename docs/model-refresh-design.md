@@ -60,16 +60,17 @@ A single blind midnight refresh is not enough for fantasy decisions. After appro
 
 The exact clock times should be chosen only after confirming the official game lock behavior and source update latency.
 
-## Required secrets
+## Worker authentication
 
-GitHub:
-- `SUPABASE_FUNCTIONS_URL`
-- `SCOUT_GATE_SECRET`
+GitHub Actions protected workers use GitHub OIDC rather than a long-lived shared secret:
+- workflow permission: `id-token: write`
+- audience: `tff-fantezi-scout`
+- accepted repository: `ecetin1998/tff-fantezi`
+- accepted repository id: `1353738004`
+- accepted ref: `refs/heads/main`
+- accepted event: `workflow_dispatch`
 
-Supabase:
-- `SCOUT_GATE_SECRET`
-
-No service-role value is stored in repository files or exposed to frontend code.
+The Supabase project URL is not secret and is embedded in the workflow. `SCOUT_GATE_SECRET` remains only as an optional backwards-compatible fallback. No service-role value is stored in repository files or exposed to frontend code.
 
 ## Idempotency
 
@@ -86,7 +87,7 @@ No notification connector is hard-coded in this branch.
 
 ## Acceptance before enabling schedule
 
-- protected Edge Functions reject missing/wrong `x-gate-secret`
+- protected Edge Functions reject requests without a valid GitHub OIDC token or an explicitly configured legacy gate secret
 - both QA RPCs are read-only
 - replay runs the same simulator revision as candidate generation
 - release gate is populated only after PASS
