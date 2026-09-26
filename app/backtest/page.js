@@ -44,7 +44,7 @@ export default async function BacktestPage(){
   const overallBandGap=overallBand!==null&&overallExpectedBand!==null?overallBand-overallExpectedBand:null
   const overallOutside=replayN?replayClosed.reduce((s,w)=>s+Number(w.average_outside_distance||0)*Number(w.player_sample||0),0)/replayN:null
   const top25V2Weeks=replayClosed.filter(w=>w.top25_v2_hit_rate!==null&&w.top25_v2_hit_rate!==undefined)
-  const overallTop25=top25V2Weeks.length?top25V2Weeks.reduce((s,w)=>s+Number(w.top25_hit_rate||0),0)/top25V2Weeks.length:null
+  const overallTop25=replayClosed.length?replayClosed.reduce((s,w)=>s+Number(w.top25_hit_rate||0),0)/replayClosed.length:null
   const overallTop25V2=top25V2Weeks.length?top25V2Weeks.reduce((s,w)=>s+Number(w.top25_v2_hit_rate||0),0)/top25V2Weeks.length:null
   const overallTop25Lift=overallTop25!==null&&overallTop25V2!==null?overallTop25V2-overallTop25:null
   const latestLearning=[...learning]
@@ -83,10 +83,10 @@ export default async function BacktestPage(){
     </section>
 
     <section className="backtest-summary-grid">
-      <article className="card"><span>Walk-forward tamamlanan test</span><b>{replayClosed.length}<small>/6</small></b><small>MH1–MH6 • {replayBenchmark.replace('ScoutPlus ','v').replace('Cold Start','Başlangıç Modeli')}</small></article>
+      <article className="card"><span>Sonucu görmeden tamamlanan test</span><b>{replayClosed.length}<small>/6</small></b><small>MH1–MH6 • {replayBenchmark.replace('ScoutPlus ','v').replace('Cold Start','Başlangıç Modeli')}</small></article>
       <article className="card"><span>Tahmin bandında kalan</span><b>{pct(overallBand)}</b><small>Simülasyon beklenen {pct(overallExpectedBand)} • fark {pp(overallBandGap)}</small></article>
       <article className="card"><span>Band dışına çıkınca ortalama sapma</span><b>{num(overallOutside)}</b><small>Yalnız tahmin bandının dışındaki puan mesafesi</small></article>
-      <article className="card"><span>Top‑25 yakalama • GB</span><b>{pct(overallTop25V2)}</b><small>xFP-only {pct(overallTop25)} • fark {pp(overallTop25Lift)}</small></article>
+      <article className="card"><span>Top‑25 yakalama • xFP</span><b>{pct(overallTop25)}</b><small>{overallTop25V2!==null?'Top-25 modeli '+pct(overallTop25V2)+' • fark '+pp(overallTop25Lift):'Top-25 modelinin ilk gerçek dış örnek ölçümü MH7 kapanınca oluşacak'}</small></article>
       <article className="card"><span>Şu an takip edilen hafta</span><b>{latestLive?'MH'+latestLive.gameweek:'—'}</b><small>{latestLive?liveStatus[latestLive.status]||latestLive.status:'Canlı kayıt yok'}</small></article>
     </section>
 
@@ -96,7 +96,7 @@ export default async function BacktestPage(){
       </div>
       <div className="backtest-explainer">
         <div><b>Güncel model testi</b><p>MH4 testinde model yalnız MH1–MH3 verisini görebilir. MH4 ve sonrasındaki hiçbir sonuç, dakika, xG veya fantezi puanı tahmine giremez.</p></div>
-        <div><b>Başlangıç Modeli v1</b><p>MH1’de 2025-26 takım gücü, tarihli oyuncu verisi ve mevki ortalaması kullanılır. {preseasonCoverage?.players||0} oyuncuda bireysel başlangıç verisi vardır; kalanlarda daha düşük güvenli mevki priorı kullanılır.</p></div>
+        <div><b>Başlangıç Modeli v1</b><p>MH1’de 2025-26 takım gücü, tarihli oyuncu verisi ve mevki ortalaması kullanılır. {preseasonCoverage?.players||0} oyuncuda bireysel başlangıç verisi vardır; kalanlarda daha düşük güvenli mevki öncülü kullanılır.</p></div>
         <div><b>Eski modeller yok</b><p>v4.2, v4.3f veya eski dondurulmuş xFP değerleri güncel modelin başarı hesabına dahil edilmez. Yalnız o tarihte bilinebilen ham geçmiş gerçekler kullanılır.</p></div>
       </div>
     </section>
