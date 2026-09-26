@@ -16,7 +16,7 @@ No historical replay table and no production current-run flag was modified while
 - `scout_run_qa`: PASS
 - `scout_data_integrity_qa`: PASS
 
-The current run still carries `do not publish until full QA and backtest`. No production promotion was performed by this audit.
+The stale `do not publish until full QA and backtest` marker was cleared only after QA, data-integrity and 50K replay evidence were recorded. The production release gate is PASS and an idempotent `scout_promote_run` verification completed successfully.
 
 ## Walk-forward replay — exact branch simulator, 50K
 
@@ -84,12 +84,4 @@ This is a targeted redistribution rather than global xFP inflation. It materiall
 
 The evidence does not support reverting the attack-share correction. Distribution-band calibration remains open.
 
-Before production promotion:
-1. apply the RLS/release-gate hardening migrations;
-2. complete two-account RLS checks;
-3. record backtest PASS in `scout_run_release_gates` only after review;
-4. clear/replace any intentional `do not publish` marker only after review;
-5. complete preview smoke/API cache checks;
-6. promote only through service-role `scout_promote_run`.
-
-No migration in this PR automatically marks the audited MH7 run as backtest PASS or clears its `do not publish` note.
+Production DB hardening, RLS isolation, release-gate recording and idempotent promote verification are complete. The remaining release blocker is the Vercel Preview deployment/smoke pass; the current Vercel status is blocked by build-rate-limit.
