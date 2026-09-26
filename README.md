@@ -42,7 +42,7 @@ Tarayıcı yalnız publishable Supabase anahtarını kullanır. Service-role key
 - `NEXT_PUBLIC_SITE_URL` — production site origin'i; ör. `https://tff-fantezi.vercel.app`.
 - `SCOUT_DATA_API_KEY` — yalnız server-side tam/özet Scout API erişimi için. **NEXT_PUBLIC_ öneki verilmez.**
 
-Internal Supabase Edge Function gate secret'ı Vercel env değildir. Supabase secret olarak `SCOUT_GATE_SECRET`, GitHub Actions tarafında GitHub Secret olarak aynı değerin `SCOUT_GATE_SECRET` adıyla tutulması gerekir.
+Internal Supabase Edge Function çağrıları uzun ömürlü bir repo secret'ına bağlı değildir. GitHub Actions `id-token: write` ile kısa ömürlü OIDC JWT alır; Edge Functions token'ın issuer, audience, repository id, repository, ref ve event claim'lerini doğrular. Eski `SCOUT_GATE_SECRET` yalnız geriye uyumlu fallback olarak desteklenir.
 
 ## Kurulum
 
@@ -146,4 +146,4 @@ Hedef payload 50 KB altıdır.
 - Vercel Preview'da smoke test tamamlanmadan merge yapılmaz.
 - Model motoru değişiklikleri uygulama değişikliklerinden ayrı commit'te tutulur ve replay/QA kanıtı olmadan current run'a uygulanmaz.
 
-Production panel ayarları ve manuel doğrulama listesi `docs/production-readiness.md` içindedir.
+Canlı hardening ve doğrulama durumu `docs/production-readiness.md` içindedir.
