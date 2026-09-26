@@ -51,8 +51,8 @@ export default function ResetPasswordForm({serverError=null}){
     {linkError?<div className="alert error">{linkError}</div>:null}
     {!ready&&!linkError?<div className="alert">Şifre yenileme bağlantısı doğrulanıyor...</div>:null}
     {ready?<form className="auth-form" action={updatePassword}>
-      <label>Yeni şifre<input name="password" type="password" autoComplete="new-password" minLength="6" required/></label>
-      <label>Yeni şifre tekrar<input name="confirm_password" type="password" autoComplete="new-password" minLength="6" required/></label>
+      <label>Yeni şifre<input name="password" type="password" autoComplete="new-password" minLength="8" required/></label>
+      <label>Yeni şifre tekrar<input name="confirm_password" type="password" autoComplete="new-password" minLength="8" required/></label>
       <button className="cta" type="submit">Şifreyi güncelle</button>
     </form>:null}
   </>
