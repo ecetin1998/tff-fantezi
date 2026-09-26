@@ -64,6 +64,7 @@ function MenuIcon({ href }){
   if(href==='/roles') return <svg {...common}><circle cx="8" cy="8" r="3"/><path d="M3 20c.4-4 2.1-6 5-6s4.6 2 5 6"/><path d="M16 7h5M16 11h5M16 15h5"/></svg>
   if(href==='/backtest') return <svg {...common}><path d="M4 19V9M10 19V5M16 19v-7M22 19V3"/><path d="m4 14 6-4 6 2 6-6"/></svg>
   if(href==='/pricing') return <svg {...common}><path d="M12 3 5 6v5c0 4.6 2.7 8 7 10 4.3-2 7-5.4 7-10V6z"/><path d="m9 12 2 2 4-5"/></svg>
+  if(href==='/sss') return <svg {...common}><circle cx="12" cy="12" r="9"/><path d="M9.6 9a2.7 2.7 0 1 1 4.2 2.25c-1.15.72-1.8 1.17-1.8 2.25"/><path d="M12 17h.01"/></svg>
   if(href==='/login') return <svg {...common}><path d="M10 17l5-5-5-5"/><path d="M15 12H3"/><path d="M14 4h6v16h-6"/></svg>
   return <svg {...common}><circle cx="12" cy="12" r="8.5"/><path d="M8 12h8"/></svg>
 }
