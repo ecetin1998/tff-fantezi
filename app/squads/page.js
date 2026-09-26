@@ -17,8 +17,8 @@ export default async function Squads(){
     </div>
 
     <div className="squad-tabs-note">
-      <span>● Önerilen: dengeli maksimum beklenen puan</span>
-      <span>◇ Tavan 11: P90 odaklı yüksek tavan • önerilenle en az 3 oyuncu farklı</span>
+      <span>● Önerilen: dengeli maksimum beklenen puan • risk dağıtımı için aynı takımın KL+DEF oyuncularından ilk 11’de en fazla 2 kişi</span>
+      <span>◇ Tavan 11: P90 odaklı yüksek tavan • kaptan en yüksek P90’lı ilk 11 oyuncusu</span>
     </div>
 
     <div className="unified-squad-list">

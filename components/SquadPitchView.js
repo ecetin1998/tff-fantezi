@@ -39,13 +39,13 @@ export default function SquadPitchView({
         <h2>{gameweek?`MH${gameweek} • `:''}{formation}</h2>
       </div>
       <div className="readonly-squad-head-right">
-        {budget!==undefined&&budget!==null?<span><small>Bütçe</small><b>{Number(budget).toFixed(1)}m</b></span>:null}
+        {budget!==undefined&&budget!==null?<span><small>Harcanan</small><b>{Number(budget).toFixed(1)}m • Kalan {(100-Number(budget)).toFixed(1)}m</b></span>:null}
         {xiXfp!==undefined&&xiXfp!==null?<span><small>İlk 11 xFP</small><b>{Number(xiXfp).toFixed(2)}</b></span>:null}
         {actionHref?<Link className="pill" href={actionHref}>{actionLabel}</Link>:null}
       </div>
       <span className="formation-summary-pill"><small>Taktik</small><b>{formation}</b></span>
     </div>
-    {variant==='recommended'&&ceilingCaptain?<div className="ceiling-captain-note">Tavan kaptanı: <b>{displayName(ceilingCaptain.player)}</b> • P90 {Number(ceilingCaptain.p90||0).toFixed(1)}</div>:null}
+    {variant==='recommended'&&ceilingCaptain?<div className="ceiling-captain-note">Alternatif (tavan) kaptan: <b>{displayName(ceilingCaptain.player)}</b> • P90 {Number(ceilingCaptain.p90||0).toFixed(1)}</div>:null}
 
     <div className={`my-squad-pitch readonly-squad-pitch ${compact?'compact':''}`}>
       <div className="pitch-mark center-line"/>
@@ -67,7 +67,7 @@ export default function SquadPitchView({
             <span>{Number(m.player?.price||0).toFixed(1)}m</span>
             <strong>{Number(m.xfp||0).toFixed(1)} xFP</strong>
           </div>
-          {m.is_captain?<em className="readonly-captain">C</em>:null}
+          {m.is_captain?<em className="readonly-captain">K</em>:null}
         </Link>)}
       </div>)}
     </div>

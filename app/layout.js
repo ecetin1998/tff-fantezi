@@ -14,6 +14,6 @@ export const metadata={
     description:'Süper Lig fantasy için oyuncu, maç ve kadro analizleri.',
     url:siteUrl,
   },
-  twitter:{card:'summary',title:'Fantezi Scout',description:'Süper Lig fantasy analiz merkezi.'},
+  twitter:{card:'summary_large_image',title:'Fantezi Scout',description:'Süper Lig fantasy analiz merkezi.'},
 }
 export default function RootLayout({children}){return <html lang="tr"><body><Nav/><main>{children}</main><footer><span>Fantezi Scout • bağımsız analiz platformu</span><span>Resmî TFF ürünü değildir.</span></footer></body></html>}

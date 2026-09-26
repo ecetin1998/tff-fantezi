@@ -1,14 +1,18 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { getPlayerDetail } from '@/lib/data'
+import { getPlayerDetail, getPlayersWithProjection } from '@/lib/data'
 import { teamCssVars } from '@/lib/teamThemes'
 import { availabilityCompactNote, availabilityIsIssue } from '@/lib/availability'
 
 export const revalidate=300
+export async function generateStaticParams(){
+  const {players}=await getPlayersWithProjection()
+  return (players||[]).map(p=>({id:String(p.id)}))
+}
 export async function generateMetadata({params}){
   const {id}=await params
   const data=await getPlayerDetail(id)
-  if(!data)return {title:'Oyuncu bulunamadı'}
+  if(!data)notFound()
   return {title:data.player.full_name+' • Oyuncu Analizi',description:data.player.full_name+' için xFP, dakika, rol ve haftalık fantasy performansı.'}
 }
 

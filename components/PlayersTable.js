@@ -19,17 +19,8 @@ export default function PlayersTable({players,initialFilters={}}){
   const [sort,setSort]=useState(initialFilters.sort||'xfp')
   const [dir,setDir]=useState(initialFilters.dir==='asc'?1:-1)
   const [page,setPage]=useState(Math.max(1,Number(initialFilters.page||1)))
-  const [isMobile,setIsMobile]=useState(false)
 
   const teams=useMemo(()=>[...new Set(players.map(p=>p.team).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'tr')),[players])
-
-  useEffect(()=>{
-    const mq=window.matchMedia('(max-width: 760px)')
-    const sync=()=>setIsMobile(mq.matches)
-    sync()
-    mq.addEventListener?.('change',sync)
-    return()=>mq.removeEventListener?.('change',sync)
-  },[])
 
   const rows=useMemo(()=>{
     const needle=normalizeText(q.trim())
@@ -107,7 +98,7 @@ export default function PlayersTable({players,initialFilters={}}){
     <div className="table-summary"><b>{rows.length}</b> oyuncu • satıra veya karta dokunarak detaya git</div>
     <div className="projection-legend">Karar metrikleri: <b>İlk 11</b> + <b>xDakika</b> oynama ihtimalini, <b>xFP</b> ortalama beklentiyi, <b>P25/P90</b> ise dağılım eşiklerini gösterir.</div>
 
-    {!rows.length?<div className="card empty-filter-state">Bu filtrelerle eşleşen oyuncu bulunamadı.</div>:isMobile?
+    {!rows.length?<div className="card empty-filter-state">Bu filtrelerle eşleşen oyuncu bulunamadı.</div>:<>
       <div className="player-card-list">
         {pageRows.map((p,i)=><Link href={'/players/'+p.id} className="card mobile-player-card team-accent-card" style={teamCssVars(p.team)} key={p.id}>
           <div className="mobile-player-top">
@@ -124,7 +115,6 @@ export default function PlayersTable({players,initialFilters={}}){
           </div>
         </Link>)}
       </div>
-      :
       <div className="card table-wrap desktop-player-table"><table><thead><tr>
         <th className="rank-col">#</th>{head('name','Oyuncu')}{head('team','Takım')}{head('pos','Mevki')}{head('opp','Rakip')}<th>E/D</th>
         {head('price','Fiyat')}{head('points','Toplam Puan')}{head('xi','İlk 11')}{head('minutes','xDk')}{head('xfp','xFP')}
@@ -137,6 +127,7 @@ export default function PlayersTable({players,initialFilters={}}){
         <td>{num(p.price,1)}m</td><td><b>{num(p.total_points,0)}</b></td><td>{pct(p.projection?.xi_probability)}</td><td>{num(p.projection?.x_minutes,0)}</td><td><b>{num(p.projection?.xfp)}</b></td>
         <td>{num(p.projection?.p25,1)}</td><td>{num(p.projection?.p90,1)}</td><td>{pct(p.projection?.six_plus_probability)}</td><td>{num(p.projection?.expected_goals)}</td><td>{num(p.projection?.expected_assists)}</td><td>{num(p.projection?.value_score)}</td>
       </tr>)}</tbody></table></div>
+      </>
     }
 
     {rows.length>PAGE_SIZE?<div className="pagination-bar">

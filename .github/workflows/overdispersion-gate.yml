@@ -1,0 +1,34 @@
+name: Overdispersion Gate
+
+on:
+  workflow_dispatch:
+    inputs:
+      gameweek:
+        description: Replay gameweek
+        required: true
+        default: "6"
+      draws:
+        description: Simulation draws
+        required: true
+        default: "10000"
+
+permissions:
+  contents: read
+
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Run protected replay distribution gate
+        env:
+          SUPABASE_FUNCTIONS_URL: ${{ secrets.SUPABASE_FUNCTIONS_URL }}
+          SCOUT_GATE_SECRET: ${{ secrets.SCOUT_GATE_SECRET }}
+          GAMEWEEK: ${{ inputs.gameweek }}
+          DRAWS: ${{ inputs.draws }}
+        run: |
+          set -euo pipefail
+          test -n "$SUPABASE_FUNCTIONS_URL"
+          test -n "$SCOUT_GATE_SECRET"
+          curl --fail --show-error --silent --max-time 600             --header "x-gate-secret: $SCOUT_GATE_SECRET"             "$SUPABASE_FUNCTIONS_URL/run-replay-distribution-test?gw=$GAMEWEEK&draws=$DRAWS&seed=20260924&dist=poisson&scale=0&target=secure-overdispersion-gw$GAMEWEEK"
+          echo

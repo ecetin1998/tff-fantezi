@@ -5,13 +5,19 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "lint": "eslint .",
+    "test": "node model/attackAllocation.test.js"
   },
   "dependencies": {
     "@supabase/ssr": "0.12.7",
-    "@supabase/supabase-js": "2.117.1",
-    "next": "16.3.5",
+    "@supabase/supabase-js": "2.117.2",
+    "next": "16.3.6",
     "react": "19.3.0",
     "react-dom": "19.3.0"
+  },
+  "devDependencies": {
+    "eslint": "9.39.1",
+    "eslint-config-next": "16.3.6"
   }
 }

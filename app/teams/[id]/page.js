@@ -1,14 +1,19 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { getTeamDetail } from '@/lib/data'
+import { getTeamDetail, getTeamFixturesOverview } from '@/lib/data'
 import { teamCssVars } from '@/lib/teamThemes'
 import TeamRoster from '@/components/TeamRoster'
 
 export const revalidate=300
+export async function generateStaticParams(){
+  const {teams}=await getTeamFixturesOverview()
+  const ids=[...new Set((teams||[]).map(t=>Number(t.id)).filter(Boolean))]
+  return ids.map(id=>({id:String(id)}))
+}
 export async function generateMetadata({params}){
   const {id}=await params
   const data=await getTeamDetail(id)
-  if(!data)return {title:'Takım bulunamadı'}
+  if(!data)notFound()
   return {title:data.team.name+' • Takım Analizi',description:data.team.name+' için xG/xGA, fikstür ve fantasy oyuncu analizi.'}
 }
 
@@ -147,7 +152,7 @@ export default async function TeamPage({params}){
           return <div className="team-history-row" key={m.match_id}>
             <span>MH{m.gameweek}</span>
             <i className={'result '+result}>{result}</i>
-            <b>{home?'İç':'Dep'} • <Link href={'/teams/'+oppId}>{oppName}</Link></b>
+            <b>{home?'Ev':'Dep'} • <Link href={'/teams/'+oppId}>{oppName}</Link></b>
             <strong>{gf} - {ga}</strong>
           </div>
         })}</div>
