@@ -24,8 +24,10 @@ export default function NavAccountControls(){
   },[])
   return <>
     <Link href="/pricing" className="pro-btn">{state.pro?'PRO ✓':'PRO'}</Link>
-    {state.loaded&&state.signedIn
-      ?<form className="desktop-auth" action={logout}><button className="ghost-btn" type="submit">Çıkış</button></form>
-      :<Link className="ghost-btn desktop-auth" href="/login">Giriş</Link>}
+    {!state.loaded
+      ?<span className="ghost-btn desktop-auth" aria-hidden="true">•••</span>
+      :state.signedIn
+        ?<form className="desktop-auth" action={logout}><button className="ghost-btn" type="submit">Çıkış</button></form>
+        :<Link className="ghost-btn desktop-auth" href="/login">Giriş</Link>}
   </>
 }
