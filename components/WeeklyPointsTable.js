@@ -1,5 +1,6 @@
 'use client'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { useEffect, useMemo, useState } from 'react'
 import { teamCssVars } from '@/lib/teamThemes'
 
@@ -12,6 +13,7 @@ const normalizeText=value=>String(value||'')
   .replace(/ı/g,'i')
 
 export default function WeeklyPointsTable({players,throughGameweek,finalThroughGameweek,initialFilters={}}){
+  const router=useRouter()
   const [q,setQ]=useState(initialFilters.q||'')
   const [team,setTeam]=useState(initialFilters.team||'')
   const [pos,setPos]=useState(initialFilters.pos||'')
@@ -86,7 +88,7 @@ export default function WeeklyPointsTable({players,throughGameweek,finalThroughG
   const head=(k,label,className='')=><th className={className} onClick={()=>{setPage(1);if(sort===k)setDir(-dir);else{setSort(k);setDir(-1)}}}>{label}{sort===k?<span className="sortmark">{dir===-1?' ↓':' ↑'}</span>:null}</th>
   const num=(v,d=2)=>Number(v||0).toFixed(d)
   const weekMode=sort==='week'
-  const openRow=(e,id)=>{if(e.target.closest('a,button,input,select'))return;window.location.href='/players/'+id}
+  const openRow=(e,id)=>{if(e.target.closest('a,button,input,select'))return;router.push('/players/'+id)}
 
   return <>
     <div className="filters weekly-filters simplified-weekly-filters">
@@ -136,7 +138,7 @@ export default function WeeklyPointsTable({players,throughGameweek,finalThroughG
       <div className="card table-wrap weekly-points-wrap simplified-weekly-table"><table>
         <thead><tr><th className="rank-col">#</th>{head('name','Oyuncu')}{head('total','Toplam')}{head('played','Maç')}{head('avg','Ort.')}{head('last3','Son 3')}{head('six','6+ %')}<th>Form</th>{gameweeks.map(g=>head('gw'+g,'MH'+g,weekMode&&g===weekSort?'selected-week-col':''))}</tr></thead>
         <tbody>{pageRows.map((p,i)=><tr className="team-player-row clickable-row" style={teamCssVars(p.team)} key={p.id} tabIndex={0}
-          onClick={e=>openRow(e,p.id)} onKeyDown={e=>{if(e.key==='Enter')window.location.href='/players/'+p.id}}>
+          onClick={e=>openRow(e,p.id)} onKeyDown={e=>{if(e.key==='Enter')router.push('/players/'+p.id)}}>
           <td className="rank-col">#{(safePage-1)*PAGE_SIZE+i+1}</td>
           <td className="weekly-player-cell"><Link className="player-link" href={'/players/'+p.id}><b>{p.full_name}</b></Link><small><Link className="team-table-link" href={'/teams/'+p.team_id}>{p.team}</Link></small></td>
           <td className="summary-score"><b>{p.total}</b></td><td>{p.played}</td><td>{num(p.avg)}</td><td><b>{num(p.last3)}</b></td><td>{(p.sixPlus*100).toFixed(0)}%</td>

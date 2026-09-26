@@ -4,8 +4,7 @@ import { getWeeklyPoints } from '@/lib/data'
 export const revalidate=300
 export const metadata={title:'Fantezi Puanları'}
 
-export default async function WeeklyPoints({searchParams}){
-  const sp=await searchParams
+export default async function WeeklyPoints(){
   const {players,throughGameweek,finalThroughGameweek}=await getWeeklyPoints()
   return <>
     <div className="section-title">
@@ -13,6 +12,6 @@ export default async function WeeklyPoints({searchParams}){
       <span className="muted">MH1–MH{throughGameweek||'—'} • kesinleşen MH{finalThroughGameweek||'—'} • 0 dk maçlar form hesabına dahil değil</span>
     </div>
     <WeeklyPointsTable players={players} throughGameweek={throughGameweek} finalThroughGameweek={finalThroughGameweek}
-      initialFilters={{q:sp?.q||'',team:sp?.team||'',pos:sp?.pos||'',sort:sp?.sort||'total',week:sp?.week||'',dir:sp?.dir||'desc',page:sp?.page||1}}/>
+      initialFilters={{q:'',team:'',pos:'',sort:'total',week:'',dir:'desc',page:1}}/>
   </>
 }

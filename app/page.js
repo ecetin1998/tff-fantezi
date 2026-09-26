@@ -16,7 +16,7 @@ export default async function Home(){
     [`MH${run?.gameweek||'—'} en yüksek beklenen puan`,best,Number(best?.projection?.xfp||0).toFixed(2),'xFP','xFP • tüm senaryoların ortalamasında en yüksek beklenen puan'],
     [`MH${run?.gameweek||'—'} en iyi F/P`,value,Number(value?.projection?.value_score||0).toFixed(2),'xFP/m','Bütçe başına beklenen puan verimi'],
     [`MH${run?.gameweek||'—'} en güvenli dakika`,mins,Number(mins?.projection?.x_minutes||0).toFixed(0),'dk','En yüksek beklenen oynama süresi'],
-    [`MH${run?.gameweek||'—'} Top-25’e girme adayı #1`,top25,`#${Number(top25?.projection?.top25_rank||1)}`,'Top25 sıra','Top25 GB • yüksek skor/tail profili en güçlü aday'],
+    [`MH${run?.gameweek||'—'} Top-25’e girme adayı #1`,top25,`#${Number(top25?.projection?.top25_rank||1)}`,'Top25 sıra','Yüksek puan patlaması ihtimali en güçlü aday'],
   ]
   return <>
     <section className="home-intro-layout">
@@ -50,7 +50,7 @@ export default async function Home(){
     </section>
 
     <section className="card home-model-guide">
-      <div className="home-guide-copy"><span className="eyebrow">MODELİ NASIL OKUYACAKSIN?</span><h2>Tek sayıya değil, dağılıma bak.</h2><p><strong>xFP lideri</strong>, tüm senaryoların ortalamasında en yüksek puanı beklenen oyuncudur. <strong>Top‑25’e girme adayı #1</strong> ise yüksek skor/tail profili en güçlü oyuncudur. Bu yüzden aynı kişi olmak zorunda değildir.</p></div>
+      <div className="home-guide-copy"><span className="eyebrow">MODELİ NASIL OKUYACAKSIN?</span><h2>Tek sayıya değil, dağılıma bak.</h2><p><strong>xFP lideri</strong>, tüm senaryoların ortalamasında en yüksek puanı beklenen oyuncudur. <strong>Top‑25’e girme adayı #1</strong> ise yüksek puan patlaması ihtimali en güçlü oyuncudur. Bu yüzden aynı kişi olmak zorunda değildir.</p></div>
       <div className="home-guide-metrics">
         <div><b>xFP</b><span>Beklenen fantezi puanı</span></div>
         <div><b>xDakika</b><span>Beklenen oynama süresi</span></div>

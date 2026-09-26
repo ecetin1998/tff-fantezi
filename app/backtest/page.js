@@ -1,6 +1,6 @@
 import { getBacktestOverview } from '@/lib/data'
 
-export const dynamic='force-dynamic'
+export const revalidate=300
 export const metadata={title:'Model Performansı'}
 
 const num=(v,d=2)=>v===null||v===undefined?'—':Number(v).toFixed(d)
@@ -50,13 +50,13 @@ export default async function BacktestPage(){
   const latestLearning=[...learning]
     .sort((a,b)=>Number(b.id||0)-Number(a.id||0))
     .filter((item,index,rows)=>index===rows.findIndex(other=>other.component===item.component&&other.segment===item.segment))
-  const learningPriority=item=>{const m=String(item.notes||'').match(/SIRA\s+(\d+)\/4/i);return m?Number(m[1]):99}
+  const learningPriority=item=>({ 'Dakika / Rol Dağılımı':1,'Dağılım Kalibrasyonu':2,'Savunma puan dağılımı':3 }[item.component]||99)
   const activeLearning=latestLearning
     .filter(item=>['watch','ready_to_apply','applied_pending_refresh'].includes(item.status))
     .sort((a,b)=>learningPriority(a)-learningPriority(b)||Number(a.id||0)-Number(b.id||0))
   const resolvedLearning=latestLearning.filter(item=>!['watch','ready_to_apply','applied_pending_refresh'].includes(item.status))
 
-  return <main className="page-shell backtest-page">
+  return <div className="page-shell backtest-page">
     <section className="page-hero backtest-hero">
       <div>
         <span className="eyebrow">YAYINDAKİ MODEL + GERİYE DÖNÜK TEST</span>
@@ -83,7 +83,7 @@ export default async function BacktestPage(){
     </section>
 
     <section className="backtest-summary-grid">
-      <article className="card"><span>Sonucu görmeden tamamlanan test</span><b>{replayClosed.length}<small>/6</small></b><small>MH1–MH6 • {replayBenchmark.replace('ScoutPlus ','v').replace('Cold Start','Başlangıç Modeli')}</small></article>
+      <article className="card"><span>Sonucu görmeden tamamlanan test</span><b>{replayClosed.length}<small>/6</small></b><small>MH1–MH6 • Güncel geriye dönük test</small></article>
       <article className="card"><span>Tahmin bandında kalan</span><b>{pct(overallBand)}</b><small>Simülasyon beklenen {pct(overallExpectedBand)} • fark {pp(overallBandGap)}</small></article>
       <article className="card"><span>Band dışına çıkınca ortalama sapma</span><b>{num(overallOutside)}</b><small>Yalnız tahmin bandının dışındaki puan mesafesi</small></article>
       <article className="card"><span>Top‑25 yakalama • xFP</span><b>{pct(overallTop25)}</b><small>{overallTop25V2!==null?'Top-25 modeli '+pct(overallTop25V2)+' • fark '+pp(overallTop25Lift):'Top-25 modelinin ilk gerçek dış örnek ölçümü MH7 kapanınca oluşacak'}</small></article>
@@ -121,7 +121,7 @@ export default async function BacktestPage(){
             <td>{w.average_band_width===null||w.average_band_width===undefined?'—':num(w.average_band_width)+' puan'}</td>
             <td>{w.average_outside_distance===null||w.average_outside_distance===undefined?'—':num(w.average_outside_distance)+' puan'}</td>
             <td>{tendency(w.model_tendency)}</td>
-            <td>{w.ranking_alignment===null||w.ranking_alignment===undefined?'—':num(w.ranking_alignment,2)+' / 1.00'}</td>
+            <td>{w.sıralama_alignment===null||w.sıralama_alignment===undefined?'—':num(w.sıralama_alignment,2)+' / 1.00'}</td>
             <td>{pct(w.top25_hit_rate)}</td>
             <td><b>{pct(w.top25_v2_hit_rate)}</b></td>
             <td>{w.average_minute_error===null||w.average_minute_error===undefined?'—':num(w.average_minute_error,1)+' dk'}</td>
@@ -135,11 +135,11 @@ export default async function BacktestPage(){
     <section className="card metric-guide">
       <div className="panel-head"><div><span className="eyebrow">NE ANLAMA GELİYOR?</span><h2>Terimleri sade okuyalım</h2></div></div>
       <div className="metric-guide-grid">
-        <div><b>Tahmin bandında kalma</b><p>P25–P90 aralığı modelin ürettiği olası sonuç alanıdır. Fantasy puanları kesikli olduğu için gerçekleşen kapsama sabit <strong>%65 olmak zorunda değildir</strong>. Artık tabloda aynı Monte Carlo dağılımının beklediği self-coverage ve gerçekleşen farkı ayrı ayrı gösteriyoruz.</p></div>
+        <div><b>Tahmin bandında kalma</b><p>P25–P90 aralığı modelin ürettiği olası sonuç alanıdır. Fantasy puanları kesikli olduğu için gerçekleşen kapsama sabit <strong>%65 olmak zorunda değildir</strong>. Artık tabloda aynı simülasyon dağılımının beklediği simülasyonun beklediği kapsama ve gerçekleşen farkı ayrı ayrı gösteriyoruz.</p></div>
         <div><b>Band dışı sapma</b><p>Gerçek sonuç bandın dışına çıktıysa yalnız en yakın sınırdan uzaklığı ölçeriz. Örn. xFP 5, bant 2–13 ve gerçek 18 ise <strong>13 puan hata değil, band dışı 5 puan</strong> olarak değerlendirilir.</p></div>
-        <div><b>Band genişliği</b><p>Belirsizliği ne kadar geniş bıraktığımızı gösterir. Amaç bandı körlemesine daraltmak değil; kesikli puan dağılımında beklenen self-coverage, gerçekleşen kapsama ve band dışı sapmayı birlikte iyileştirmektir.</p></div>
+        <div><b>Band genişliği</b><p>Belirsizliği ne kadar geniş bıraktığımızı gösterir. Amaç bandı körlemesine daraltmak değil; kesikli puan dağılımında beklenen simülasyonun beklediği kapsama, gerçekleşen kapsama ve band dışı sapmayı birlikte iyileştirmektir.</p></div>
         <div><b>Model eğilimi</b><p>Merkez xFP’nin uzun vadede sistematik olarak fazla mı az mı kaldığını gösterir. Tek oyuncunun uç sonucu değil, tekrar eden yönlü sapma önemlidir.</p></div>
-        <div><b>Sıralama ve dakika</b><p>Sıralama uyumu yüksek gördüğümüz oyuncuların gerçekten yukarı çıkıp çıkmadığını; dakika hatası ise rol/ilk 11 tahminimizin doğruluğunu gösterir. <strong>İlk 25 GB</strong>, xFP’yi bozmadan yüksek skor/tail adaylarını ayrı bir ranking katmanıyla ölçer.</p></div>\n        <div><b>Top‑25 modeli</b><p><strong>xFP</strong> beklenen fantasy puanını ölçmeye devam eder; Top‑25 modeli ise yüksek skor/tail adaylarını geçmiş haftalar üzerinde sonucu görmeden eğitilen ayrı bir sıralama katmanıyla tarar. Bu skor optimizerı veya ana xFP’yi değiştirmez ve kapanan her haftada xFP baselineına karşı yeniden ölçülür.</p></div>
+        <div><b>Sıralama ve dakika</b><p>Sıralama uyumu yüksek gördüğümüz oyuncuların gerçekten yukarı çıkıp çıkmadığını; dakika hatası ise rol/ilk 11 tahminimizin doğruluğunu gösterir. <strong>İlk 25 GB</strong>, xFP’yi bozmadan yüksek skor/yüksek skor adaylarını ayrı bir sıralama katmanıyla ölçer.</p></div>        <div><b>Top‑25 modeli</b><p><strong>xFP</strong> beklenen fantasy puanını ölçmeye devam eder; Top‑25 modeli ise yüksek skor/yüksek skor adaylarını geçmiş haftalar üzerinde sonucu görmeden eğitilen ayrı bir sıralama katmanıyla tarar. Bu skor optimizerı veya ana xFP’yi değiştirmez ve kapanan her haftada xFP temel modelına karşı yeniden ölçülür.</p></div>
       </div>
     </section>
 
@@ -176,12 +176,12 @@ export default async function BacktestPage(){
         <div className="panel-head"><div><span className="eyebrow">AÇIK AKSİYONLAR</span><h3>Takip etmeye devam ettiklerimiz</h3></div><small>{activeLearning.length} aktif sinyal</small></div>
         {activeLearning.length?<div className="learning-grid">{activeLearning.map(item=><article key={item.id} className="learning-card">
           <div><span>{learningPriority(item)<99?'Sıra '+learningPriority(item)+' • ':''}{'MH'+item.after_gameweek+' sonrası'}</span><em>{learningStatus[item.status]||item.status}</em></div>
-          <h3>{item.component}</h3><p>{item.signal}</p><strong>{item.evidence}</strong><small>{item.guardrail}</small>
+          <h3>{item.component}</h3><p>{item.summary_tr||item.signal}</p>
         </article>)}</div>:<div className="empty-learning-state">Şu an müdahale bekleyen açık model sorunu yok.</div>}
         {resolvedLearning.length?<><div className="panel-head" style={{marginTop:24}}><div><span className="eyebrow">KAPANAN KARARLAR</span><h3>Çözülen veya değişiklik gerektirmeyenler</h3></div><small>{resolvedLearning.length} kayıt</small></div>
         <div className="learning-grid">{resolvedLearning.map(item=><article key={item.id} className="learning-card">
           <div><span>{'MH'+item.after_gameweek+' sonrası'}</span><em>{learningStatus[item.status]||item.status}</em></div>
-          <h3>{item.component}</h3><p>{item.signal}</p><strong>{item.evidence}</strong><small>{item.guardrail}</small>
+          <h3>{item.component}</h3><p>{item.summary_tr||item.signal}</p>
         </article>)}</div></>:null}
       </div>:<div className="empty-learning-state">Güncel kurgu replay’i tamamlanınca öğrenme sinyalleri burada oluşacak.</div>}
     </section>
@@ -195,5 +195,5 @@ export default async function BacktestPage(){
         </tr>})}</tbody>
       </table></div>
     </section>:null}
-  </main>
+  </div>
 }

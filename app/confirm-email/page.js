@@ -48,9 +48,8 @@ export default function ConfirmEmailPage(){
         window.setTimeout(()=>window.location.replace('/squad'),300)
       }catch(error){
         if(cancelled)return
-        const detail=error instanceof Error?error.message:'Doğrulama tamamlanamadı.'
         setMessage('Doğrulama tamamlanamadı.')
-        window.setTimeout(()=>window.location.replace('/login?error='+encodeURIComponent(detail)),700)
+        window.setTimeout(()=>window.location.replace('/login?error=auth_failed'),700)
       }
     }
 

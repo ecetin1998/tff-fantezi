@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
 import { usePathname } from 'next/navigation'
 import { logout } from '@/app/actions'
+import { createClient } from '@/lib/supabase/client'
 
 const matches=(path,href)=>href==='/' ? path==='/' : path===href || path.startsWith(href+'/')
 
@@ -12,6 +13,7 @@ export function DesktopNavLinks({ primary, analysis }){
   const wrapRef=useRef(null)
 
   useEffect(()=>setOpen(false),[path])
+
 
   useEffect(()=>{
     const onPointer=e=>{
@@ -73,12 +75,22 @@ function MenuRow({ href,label,onClick,active=false }){
   </Link>
 }
 
-export function MobileMenu({ primary, analysis, signedIn }){
+export function MobileMenu({ primary, analysis }){
+  const [signedIn,setSignedIn]=useState(false)
   const path=usePathname()
   const [open,setOpen]=useState(false)
   const wrapRef=useRef(null)
 
   useEffect(()=>setOpen(false),[path])
+  useEffect(()=>{
+    const supabase=createClient()
+    let alive=true
+    const sync=async()=>{const {data:{user}}=await supabase.auth.getUser();if(alive)setSignedIn(Boolean(user))}
+    sync()
+    const {data}=supabase.auth.onAuthStateChange((_event,session)=>{if(alive)setSignedIn(Boolean(session?.user))})
+    return()=>{alive=false;data.subscription.unsubscribe()}
+  },[])
+
 
   useEffect(()=>{
     const onPointer=e=>{

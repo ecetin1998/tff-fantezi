@@ -1,5 +1,51 @@
 const {attackWeights}=require('./attackAllocation');
 
+function cardPoints(yellow,red){
+  // The simulator has no separate second-yellow event type. When both flags
+  // occur, treat it as a second-yellow dismissal: total card deduction -3.
+  return red ? -3 : yellow ? -1 : 0;
+}
+
+function makeHistogram(){
+  return {offset:-32,bins:new Int32Array(128),total:0,sum:0,sumSq:0};
+}
+
+function addHistogram(hist,value){
+  const score=Math.trunc(value);
+  if(score<hist.offset || score>=hist.offset+hist.bins.length){
+    let nextOffset=hist.offset;
+    let nextLength=hist.bins.length;
+    while(score<nextOffset){nextOffset-=nextLength;nextLength*=2;}
+    while(score>=nextOffset+nextLength)nextLength*=2;
+    const next=new Int32Array(nextLength);
+    next.set(hist.bins,hist.offset-nextOffset);
+    hist.offset=nextOffset;
+    hist.bins=next;
+  }
+  hist.bins[score-hist.offset]++;
+  hist.total++;
+  hist.sum+=value;
+  hist.sumSq+=value*value;
+}
+
+function histogramValueAt(hist,index){
+  let seen=0;
+  for(let i=0;i<hist.bins.length;i++){
+    const next=seen+hist.bins[i];
+    if(index<next)return hist.offset+i;
+    seen=next;
+  }
+  return 0;
+}
+
+function histogramQuantile(hist,fraction){
+  if(!hist.total)return 0;
+  const x=(hist.total-1)*fraction;
+  const lo=Math.floor(x),hi=Math.ceil(x);
+  const a=histogramValueAt(hist,lo),b=histogramValueAt(hist,hi);
+  return a+(b-a)*(x-lo);
+}
+
 function simulateScout(input, count, seed, attackPolicy = true) {
   const P=input.players, M=P.length, positions=['GK','DEF','MID','FWD'];
   const allocation=P.map(p=>attackPolicy ? attackWeights(p,input.playerMatches||[]) : {
@@ -7,17 +53,24 @@ function simulateScout(input, count, seed, attackPolicy = true) {
     assist:Math.max(1e-6,.7*p.rates[3]+.3*p.rates[2]),
   });
   let state=seed>>>0;
-  const random=()=>{state=(Math.imul(1664525,state)+1013904223)>>>0;return (state+.5)/4294967296;};
+  const random=()=>{
+    state=(state+0x6D2B79F5)>>>0;
+    let t=state;
+    t=Math.imul(t^(t>>>15),t|1);
+    t^=t+Math.imul(t^(t>>>7),t|61);
+    return ((t^(t>>>14))>>>0)/4294967296;
+  };
   const poisson=l=>{let n=0,t=1,L=Math.exp(-l);do{n++;t*=random();}while(t>L);return n-1;};
   const pick=(ids,weight)=>{let sum=0;for(const i of ids)sum+=weight(i);let u=random()*sum;for(const i of ids){u-=weight(i);if(u<=0)return i;}return ids[ids.length-1];};
   const drawDuration=p=>{let u=random();for(let j=0;j<p.durations.length;j++){u-=p.duration_weights[j];if(u<=0)return p.durations[j];}return p.durations[p.durations.length-1];};
   const keys=['appearance','goals','assists','cs','saves','conceded','cards','penalties','own'];
-  const result=P.map(p=>({...p,xi:0,play:0,p60:0,minutes:0,start_minutes:0,core:0,bonus:0,xfp:0,xgoal:0,xassist:0,p6:0,components:Object.fromEntries(keys.map(k=>[k,0])),distribution:[]}));
-  const teams={};for(let c=1;c<=18;c++)teams[c]=P.map((p,i)=>p.club===c?i:-1).filter(i=>i>=0);
-  const quotas=Object.fromEntries(input.team_checks.map(t=>[t.club,t.formation]));
+  const result=P.map(p=>({...p,xi:0,play:0,p60:0,minutes:0,start_minutes:0,core:0,bonus:0,xfp:0,xgoal:0,xassist:0,p6:0,components:Object.fromEntries(keys.map(k=>[k,0])),_hist:makeHistogram()}));
+  const clubIds=[...new Set(input.matches.flatMap(m=>[Number(m.home_id),Number(m.away_id)]).filter(Number.isFinite))];
+  const teams=Object.fromEntries(clubIds.map(club=>[club,P.map((p,i)=>Number(p.club)===club?i:-1).filter(i=>i>=0)]));
+  const quotas=Object.fromEntries(input.team_checks.map(t=>[Number(t.club),t.formation]));
   for(let draw=0;draw<count;draw++){
     const mins=new Int16Array(M),enter=new Int16Array(M).fill(91),leave=new Int16Array(M),start=new Uint8Array(M);
-    for(let c=1;c<=18;c++){
+    for(const c of clubIds){
       const ids=teams[c], available=new Set(ids.filter(i=>random()<P[i].avail)), used=new Set();
       for(const pos of positions){
         const k=quotas[c][pos]||0;if(!k)continue;
@@ -45,10 +98,27 @@ function simulateScout(input, count, seed, attackPolicy = true) {
         for(let e=0;e<score[side];e++){
           const t=random()*90,on=ids.filter(i=>enter[i]<=t&&leave[i]>t),op=opp.filter(i=>enter[i]<=t&&leave[i]>t);
           for(const i of op)gc[i]++;
-          const scorer=pick(on,i=>allocation[i].goal),own=random()<input.own_fraction;
-          if(own)comp.own[pick(op,()=>1)]-=2;
-          else{comp.goals[scorer]+={GK:10,DEF:6,MID:5,FWD:4}[P[scorer].pos];result[scorer].xgoal+=1/count;}
-          if(random()<input.assist_fraction){const a=pick(on.filter(i=>i!==scorer),i=>allocation[i].assist);comp.assists[a]+=3;result[a].xassist+=1/count;}
+          // Draw the attacking candidate before the own-goal flag so baseline
+          // and candidate policies consume the same PRNG stream.
+          const scorerCandidate=pick(on,i=>allocation[i].goal);
+          const own=random()<input.own_fraction;
+          let scorer=null;
+          if(own){
+            comp.own[pick(op,()=>1)]-=2;
+          }else{
+            scorer=scorerCandidate;
+            comp.goals[scorer]+={GK:10,DEF:6,MID:5,FWD:4}[P[scorer].pos];
+            result[scorer].xgoal+=1/count;
+          }
+          // TFF's published rules award +3 for every credited assist and -2 for
+          // an own goal. MH5 actual closure (Murillo/Yakup Kırtay) shows both
+          // can coexist, so an own goal does not automatically suppress assist.
+          const assistPool=scorer===null?on:on.filter(i=>i!==scorer);
+          if(assistPool.length&&random()<input.assist_fraction){
+            const a=pick(assistPool,i=>allocation[i].assist);
+            comp.assists[a]+=3;
+            result[a].xassist+=1/count;
+          }
         }
       }
       const both=teams[clubs[0]].concat(teams[clubs[1]]),base={};
@@ -58,7 +128,7 @@ function simulateScout(input, count, seed, attackPolicy = true) {
         if(p.pos==='GK'||p.pos==='DEF')comp.conceded[i]=-Math.floor(gc[i]/2);
         if(p.pos==='GK')comp.saves[i]=Math.floor(poisson(rates[6]*exposure)/3);
         const yc=random()<Math.min(.8,rates[4]*exposure),rc=random()<Math.min(.15,rates[5]*exposure);
-        comp.cards[i]=-(yc?1:0)-(rc?3:0);if(rc)comp.cs[i]=0;
+        comp.cards[i]=cardPoints(yc,rc);if(rc)comp.cs[i]=0;
         comp.penalties[i]=-2*poisson(rates[7]*exposure)+(p.pos==='GK'?5*poisson(rates[8]*exposure):0);
         base[i]=keys.reduce((s,k)=>s+comp[k][i],0);
       }
@@ -69,18 +139,28 @@ function simulateScout(input, count, seed, attackPolicy = true) {
       for(const i of both){
         const r=result[i],b=bon[i]||0,fp=base[i]+b;
         r.xi+=start[i]/count;r.play+=(mins[i]>0?1:0)/count;r.p60+=(mins[i]>=60?1:0)/count;r.minutes+=mins[i]/count;r.start_minutes+=start[i]*mins[i]/count;
-        r.core+=base[i]/count;r.bonus+=b/count;r.xfp+=fp/count;r.p6+=(fp>=6?1:0)/count;r.distribution.push(fp);
+        r.core+=base[i]/count;r.bonus+=b/count;r.xfp+=fp/count;r.p6+=(fp>=6?1:0)/count;addHistogram(r._hist,fp);
         for(const k of keys)r.components[k]+=comp[k][i]/count;
       }
     }
   }
   for(const r of result){
-    r.start_minutes=r.xi?r.start_minutes/r.xi:0;r.distribution.sort((a,b)=>a-b);
-    const q=f=>{const x=(count-1)*f,a=Math.floor(x);return r.distribution[a]+(r.distribution[Math.ceil(x)]-r.distribution[a])*(x-a);};
-    r.p25=q(.25);r.p75=q(.75);r.p90=q(.9);r.std=Math.sqrt(r.distribution.reduce((s,v)=>s+(v-r.xfp)**2,0)/count);r.mc_se=r.std/Math.sqrt(count);delete r.distribution;
+    r.start_minutes=r.xi?r.start_minutes/r.xi:0;
+    r.p25=histogramQuantile(r._hist,.25);
+    r.p75=histogramQuantile(r._hist,.75);
+    r.p90=histogramQuantile(r._hist,.9);
+    if(r._hist.total){
+      const mean=r._hist.sum/r._hist.total;
+      r.std=Math.sqrt(Math.max(0,r._hist.sumSq/r._hist.total-mean*mean));
+      r.mc_se=r.std/Math.sqrt(r._hist.total);
+    }else{
+      r.std=0;
+      r.mc_se=0;
+    }
+    delete r._hist;
     r.eligible=r.avail>=.8&&r.valid_games>=1&&r.play>=.25;
   }
   return result;
 }
 
-module.exports={simulateScout};
+module.exports={simulateScout,cardPoints,histogramQuantile};

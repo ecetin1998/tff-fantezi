@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { getMatches } from '@/lib/data'
+import { getTeamFixturesOverview } from '@/lib/data'
 import { teamCssVars } from '@/lib/teamThemes'
 
 export const metadata={title:'Takım Analizi'}
@@ -7,11 +7,8 @@ export const metadata={title:'Takım Analizi'}
 export const revalidate=300
 
 export default async function Teams(){
-  const {run,matches}=await getMatches()
-  const teams=matches.flatMap(m=>[
-    {id:m.home_team_id,name:m.home_team,opponent:m.away_team,venue:'Ev',xg:m.home_xg,oppXg:m.away_xg,win:m.home_win_probability,cs:m.home_cs_probability},
-    {id:m.away_team_id,name:m.away_team,opponent:m.home_team,venue:'Dep',xg:m.away_xg,oppXg:m.home_xg,win:m.away_win_probability,cs:m.away_cs_probability},
-  ]).sort((a,b)=>a.name.localeCompare(b.name,'tr'))
+  const {run,teams:rawTeams}=await getTeamFixturesOverview()
+  const teams=[...rawTeams].sort((a,b)=>a.name.localeCompare(b.name,'tr'))
 
   return <>
     <div className="section-title">

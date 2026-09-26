@@ -1,6 +1,7 @@
 'use client'
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { teamCssVars } from '@/lib/teamThemes'
 import { availabilityCompactNote, availabilityIsIssue } from '@/lib/availability'
 
@@ -13,23 +14,15 @@ const normalizeText=value=>String(value||'')
   .replace(/ı/g,'i')
 
 export default function PlayersTable({players,initialFilters={}}){
+  const router=useRouter()
   const [q,setQ]=useState(initialFilters.q||'')
   const [pos,setPos]=useState(initialFilters.pos||'')
   const [team,setTeam]=useState(initialFilters.team||'')
   const [sort,setSort]=useState(initialFilters.sort||'xfp')
   const [dir,setDir]=useState(initialFilters.dir==='asc'?1:-1)
   const [page,setPage]=useState(Math.max(1,Number(initialFilters.page||1)))
-  const [isMobile,setIsMobile]=useState(false)
 
   const teams=useMemo(()=>[...new Set(players.map(p=>p.team).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'tr')),[players])
-
-  useEffect(()=>{
-    const mq=window.matchMedia('(max-width: 760px)')
-    const sync=()=>setIsMobile(mq.matches)
-    sync()
-    mq.addEventListener?.('change',sync)
-    return()=>mq.removeEventListener?.('change',sync)
-  },[])
 
   const rows=useMemo(()=>{
     const needle=normalizeText(q.trim())
@@ -87,7 +80,7 @@ export default function PlayersTable({players,initialFilters={}}){
   }
   const openRow=(e,id)=>{
     if(e.target.closest('a,button,input,select'))return
-    window.location.href='/players/'+id
+    router.push('/players/'+id)
   }
 
   return <>
@@ -107,7 +100,7 @@ export default function PlayersTable({players,initialFilters={}}){
     <div className="table-summary"><b>{rows.length}</b> oyuncu • satıra veya karta dokunarak detaya git</div>
     <div className="projection-legend">Karar metrikleri: <b>İlk 11</b> + <b>xDakika</b> oynama ihtimalini, <b>xFP</b> ortalama beklentiyi, <b>P25/P90</b> ise dağılım eşiklerini gösterir.</div>
 
-    {!rows.length?<div className="card empty-filter-state">Bu filtrelerle eşleşen oyuncu bulunamadı.</div>:isMobile?
+    {!rows.length?<div className="card empty-filter-state">Bu filtrelerle eşleşen oyuncu bulunamadı.</div>:<>
       <div className="player-card-list">
         {pageRows.map((p,i)=><Link href={'/players/'+p.id} className="card mobile-player-card team-accent-card" style={teamCssVars(p.team)} key={p.id}>
           <div className="mobile-player-top">
@@ -124,19 +117,19 @@ export default function PlayersTable({players,initialFilters={}}){
           </div>
         </Link>)}
       </div>
-      :
       <div className="card table-wrap desktop-player-table"><table><thead><tr>
         <th className="rank-col">#</th>{head('name','Oyuncu')}{head('team','Takım')}{head('pos','Mevki')}{head('opp','Rakip')}<th>E/D</th>
         {head('price','Fiyat')}{head('points','Toplam Puan')}{head('xi','İlk 11')}{head('minutes','xDk')}{head('xfp','xFP')}
         {head('p25','P25')}{head('p90','P90')}{head('six','6+ %')}{head('xg','xG')}{head('xa','xA')}{head('value','F/P')}
       </tr></thead><tbody>{pageRows.map((p,i)=><tr className="team-player-row clickable-row" style={teamCssVars(p.team)} key={p.id}
-        tabIndex={0} onClick={e=>openRow(e,p.id)} onKeyDown={e=>{if(e.key==='Enter')window.location.href='/players/'+p.id}}>
+        tabIndex={0} onClick={e=>openRow(e,p.id)} onKeyDown={e=>{if(e.key==='Enter')router.push('/players/'+p.id)}}>
         <td className="rank-col">#{(safePage-1)*PAGE_SIZE+i+1}</td>
         <td><Link className="player-link team-player-link" href={'/players/'+p.id}><i className="club-dot"/><b>{p.full_name}</b></Link>{playerNote(p)?<small className="cell-note">{playerNote(p)}</small>:null}</td>
         <td><Link className="team-table-link" href={'/teams/'+p.team_id}>{p.team}</Link></td><td><span className={'pos '+p.position}>{posLabel(p.position)}</span></td><td>{p.projection?.opponent_name||'—'}</td><td>{p.projection?.venue==='HOME'?'Ev':p.projection?.venue==='AWAY'?'Dep':'—'}</td>
         <td>{num(p.price,1)}m</td><td><b>{num(p.total_points,0)}</b></td><td>{pct(p.projection?.xi_probability)}</td><td>{num(p.projection?.x_minutes,0)}</td><td><b>{num(p.projection?.xfp)}</b></td>
         <td>{num(p.projection?.p25,1)}</td><td>{num(p.projection?.p90,1)}</td><td>{pct(p.projection?.six_plus_probability)}</td><td>{num(p.projection?.expected_goals)}</td><td>{num(p.projection?.expected_assists)}</td><td>{num(p.projection?.value_score)}</td>
       </tr>)}</tbody></table></div>
+      </>
     }
 
     {rows.length>PAGE_SIZE?<div className="pagination-bar">

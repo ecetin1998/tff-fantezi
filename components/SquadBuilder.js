@@ -5,6 +5,7 @@ import { teamCssVars } from '@/lib/teamThemes'
 import { availabilityCompactNote, availabilityIsIssue } from '@/lib/availability'
 
 const LIMITS={GK:2,DEF:5,MID:5,FWD:3}
+const MAX_PER_CLUB=null
 const FORMATIONS={
   '3-4-3':{DEF:3,MID:4,FWD:3},
   '3-5-2':{DEF:3,MID:5,FWD:2},
@@ -52,6 +53,20 @@ function buildXI(ids,formation,map){
   return out
 }
 
+function bestXIPlan(ids,map){
+  let best=null
+  for(const key of Object.keys(FORMATIONS)){
+    const lineup=buildXI(ids,key,map)
+    if(lineup.length!==11)continue
+    const lineupPlayers=lineup.map(id=>map.get(id)).filter(Boolean)
+    const captain=[...lineupPlayers].sort((a,b)=>xfp(b)-xfp(a))[0]||null
+    const base=lineupPlayers.reduce((sum,p)=>sum+xfp(p),0)
+    const total=base+xfp(captain)
+    if(!best||total>best.total)best={key,lineup,captain,base,total}
+  }
+  return best
+}
+
 function formationFromXIIds(ids,map){
   const players=ids.map(id=>map.get(id)).filter(Boolean)
   if(players.length!==11)return null
@@ -95,7 +110,9 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
   const counts=selected.reduce((a,p)=>(a[p.position]=(a[p.position]||0)+1,a),{})
   const cost=selected.reduce((s,p)=>s+Number(p.price||0),0)
   const bank=100-cost
-  const validRoster=ids.length===15&&Object.entries(LIMITS).every(([k,v])=>(counts[k]||0)===v)&&cost<=100.0001
+  const clubCounts=selected.reduce((a,p)=>(a[p.team]=(a[p.team]||0)+1,a),{})
+  const clubLimitOk=!MAX_PER_CLUB||Object.values(clubCounts).every(n=>n<=MAX_PER_CLUB)
+  const validRoster=ids.length===15&&Object.entries(LIMITS).every(([k,v])=>(counts[k]||0)===v)&&cost<=100.0001&&clubLimitOk
   const liveFormation=formationFromXIIds(xiIds,map)
   const validXI=xiIds.length===11&&xiIds.every(id=>ids.includes(id))&&Boolean(liveFormation)&&liveFormation===formation
   const valid=validRoster&&validXI&&Boolean(captainId)&&xiIds.includes(captainId)
@@ -144,23 +161,34 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
   },[players,pos,team,q,sortKey,sortDir])
 
   const bestMove=useMemo(()=>{
+    const currentPlan=bestXIPlan(ids,map)
+    if(!currentPlan)return null
     let best=null
     for(const out of selected){
       for(const inn of players){
         if(ids.includes(inn.id)||inn.position!==out.position)continue
         if(Number(inn.price)>Number(out.price)+bank+0.001)continue
-        const gain=xfp(inn)-xfp(out)
-        if(!best||gain>best.gain)best={out,inn,gain}
+        const nextIds=ids.map(id=>id===out.id?inn.id:id)
+        if(MAX_PER_CLUB){
+          const nextPlayers=nextIds.map(id=>map.get(id)).filter(Boolean)
+          const nextClubCounts=nextPlayers.reduce((a,p)=>(a[p.team]=(a[p.team]||0)+1,a),{})
+          if(Object.values(nextClubCounts).some(n=>n>MAX_PER_CLUB))continue
+        }
+        const plan=bestXIPlan(nextIds,map)
+        if(!plan)continue
+        const gain=plan.total-currentPlan.total
+        if(!best||gain>best.gain)best={out,inn,gain,plan,nextIds}
       }
     }
     return best
-  },[selected,players,ids,bank])
+  },[selected,players,ids,bank,map])
 
   function applyBestMove(){
     if(!bestMove||bestMove.gain<=0)return
-    const next=ids.map(id=>id===bestMove.out.id?bestMove.inn.id:id)
-    setIds(next)
-    rebuild(next)
+    setIds(bestMove.nextIds)
+    setFormation(bestMove.plan.key)
+    setXiIds(bestMove.plan.lineup)
+    setCaptainId(bestMove.plan.captain?.id||null)
     setSwapTarget(null)
   }
 
