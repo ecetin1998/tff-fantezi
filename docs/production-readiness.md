@@ -108,6 +108,12 @@ Bağlı GitHub App repository-admin mutation iznine sahip değil; branch-protect
 
 Eski QA/audit/model-gate dalları main ile 0 ahead / 0 diff durumunda; connector branch-delete aksiyonu sunmadığı için fiziksel silme yapılmadı.
 
+## Canlı `main` uyumluluk köprüsü
+
+Audit migration'ları production DB'ye Vercel deploy'dan önce uygulandığı için eski canlı `main` build'inin `SELECT *` sorguları `scout_model_runs`, `scout_availability` ve `scout_learning_log` üzerinde izin hatasına düşüyordu. Canlı siteyi yeniden bağlamak için yalnız bu eski sorguların ihtiyaç duyduğu eksik SELECT kolonları geçici olarak geri açıldı (`20260926223700_live_main_read_compat.sql`).
+
+Audit branch production'a deploy olduktan sonra **hemen** `20260926223800_post_deploy_restrict_sensitive_public_columns.sql` uygulanmalı; yeni branch zaten explicit safe-column sorguları kullanıyor.
+
 ## Vercel — kalan deploy blocker'ı
 
 PR Preview deployment şu anda Vercel tarafından **build-rate-limit** ile engelleniyor.
