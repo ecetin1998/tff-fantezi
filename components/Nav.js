@@ -3,7 +3,7 @@ import {DesktopNavLinks,MobileBottomNav,MobileMenu} from '@/components/AppNavLin
 import NavAccountControls from '@/components/NavAccountControls'
 
 const primary=[['/','Ana Sayfa'],['/players','Oyuncu Analizi'],['/points','Fantezi Puanları'],['/matches','Maç Tahminleri'],['/squads','Kadro Önerileri']]
-const analysis=[['/teams','Takım & Fikstür Analizi'],['/availability','Sakatlık / Ceza Durumu'],['/roles','Rol & Dakika Takibi'],['/backtest','Model Performansı']]
+const analysis=[['/teams','Takım & Fikstür Analizi'],['/availability','Sakatlık / Ceza Durumu'],['/roles','Rol & Dakika Takibi'],['/backtest','Model Performansı'],['/sss','SSS & Rehber']]
 const bottom=[['/','home','Ana'],['/players','players','Oyuncular'],['/matches','matches','Maçlar'],['/squads','recommendations','Öneriler'],['/squad','squad','Kadrom']]
 
 export default function Nav(){
