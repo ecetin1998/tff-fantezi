@@ -14,21 +14,33 @@ on:
 
 permissions:
   contents: read
+  id-token: write
 
 jobs:
   gate:
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    env:
+      SUPABASE_FUNCTIONS_URL: https://nnoagjayvrwyjtizhnfz.supabase.co/functions/v1
+      OIDC_AUDIENCE: tff-fantezi-scout
+      GAMEWEEK: ${{ inputs.gameweek }}
+      DRAWS: ${{ inputs.draws }}
     steps:
-      - name: Run protected replay distribution gate
-        env:
-          SUPABASE_FUNCTIONS_URL: ${{ secrets.SUPABASE_FUNCTIONS_URL }}
-          SCOUT_GATE_SECRET: ${{ secrets.SCOUT_GATE_SECRET }}
-          GAMEWEEK: ${{ inputs.gameweek }}
-          DRAWS: ${{ inputs.draws }}
+      - name: Request short-lived GitHub OIDC token
+        id: oidc
+        shell: bash
         run: |
           set -euo pipefail
-          test -n "$SUPABASE_FUNCTIONS_URL"
-          test -n "$SCOUT_GATE_SECRET"
-          curl --fail --show-error --silent --max-time 600             --header "x-gate-secret: $SCOUT_GATE_SECRET"             "$SUPABASE_FUNCTIONS_URL/run-replay-distribution-test?gw=$GAMEWEEK&draws=$DRAWS&seed=20260924&dist=poisson&scale=0&target=secure-overdispersion-gw$GAMEWEEK"
+          response="$(curl --fail --show-error --silent             -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN"             "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=${OIDC_AUDIENCE}")"
+          token="$(printf '%s' "$response" | jq -er '.value')"
+          echo "::add-mask::$token"
+          echo "token=$token" >> "$GITHUB_OUTPUT"
+
+      - name: Run protected replay distribution gate
+        env:
+          OIDC_TOKEN: ${{ steps.oidc.outputs.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --show-error --silent --max-time 600             --header "Authorization: Bearer $OIDC_TOKEN"             "$SUPABASE_FUNCTIONS_URL/run-replay-distribution-test?gw=$GAMEWEEK&draws=$DRAWS&seed=20260924&dist=poisson&scale=0&target=secure-overdispersion-gw$GAMEWEEK"
           echo
