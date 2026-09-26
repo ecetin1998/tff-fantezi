@@ -42,10 +42,10 @@ export default function WeeklyPointsTable({players,throughGameweek,finalThroughG
       const finalRows=(p.weekly||[]).filter(x=>x.is_final!==false)
       const map=new Map(finalRows.map(x=>[Number(x.gameweek),x]))
       const playedWeeks=finalRows.filter(x=>Number(x.minutes||0)>0)
-      const played=playedWeeks.length
-      const total=finalRows.reduce((sum,x)=>sum+Number(x.points||0),0)
+      const total=Number(p.stats?.actual_points ?? finalRows.reduce((sum,x)=>sum+Number(x.points||0),0))
+      const played=Number(p.stats?.matches_played ?? playedWeeks.length)
       const avg=played?total/played:0
-      const sixPlus=played?playedWeeks.filter(x=>Number(x.points||0)>=6).length/played:0
+      const sixPlus=played?Number(p.stats?.six_plus_count ?? playedWeeks.filter(x=>Number(x.points||0)>=6).length)/played:0
       const recentPlayed=playedWeeks.slice(-3)
       const last3=recentPlayed.length?recentPlayed.reduce((sum,x)=>sum+Number(x.points||0),0)/recentPlayed.length:0
       const trend=played&&recentPlayed.length?last3-avg:0
