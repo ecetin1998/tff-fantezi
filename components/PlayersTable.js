@@ -1,6 +1,7 @@
 'use client'
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { teamCssVars } from '@/lib/teamThemes'
 import { availabilityCompactNote, availabilityIsIssue } from '@/lib/availability'
 
@@ -13,6 +14,7 @@ const normalizeText=value=>String(value||'')
   .replace(/ı/g,'i')
 
 export default function PlayersTable({players,initialFilters={}}){
+  const router=useRouter()
   const [q,setQ]=useState(initialFilters.q||'')
   const [pos,setPos]=useState(initialFilters.pos||'')
   const [team,setTeam]=useState(initialFilters.team||'')
@@ -78,7 +80,7 @@ export default function PlayersTable({players,initialFilters={}}){
   }
   const openRow=(e,id)=>{
     if(e.target.closest('a,button,input,select'))return
-    window.location.href='/players/'+id
+    router.push('/players/'+id)
   }
 
   return <>
@@ -120,7 +122,7 @@ export default function PlayersTable({players,initialFilters={}}){
         {head('price','Fiyat')}{head('points','Toplam Puan')}{head('xi','İlk 11')}{head('minutes','xDk')}{head('xfp','xFP')}
         {head('p25','P25')}{head('p90','P90')}{head('six','6+ %')}{head('xg','xG')}{head('xa','xA')}{head('value','F/P')}
       </tr></thead><tbody>{pageRows.map((p,i)=><tr className="team-player-row clickable-row" style={teamCssVars(p.team)} key={p.id}
-        tabIndex={0} onClick={e=>openRow(e,p.id)} onKeyDown={e=>{if(e.key==='Enter')window.location.href='/players/'+p.id}}>
+        tabIndex={0} onClick={e=>openRow(e,p.id)} onKeyDown={e=>{if(e.key==='Enter')router.push('/players/'+p.id)}}>
         <td className="rank-col">#{(safePage-1)*PAGE_SIZE+i+1}</td>
         <td><Link className="player-link team-player-link" href={'/players/'+p.id}><i className="club-dot"/><b>{p.full_name}</b></Link>{playerNote(p)?<small className="cell-note">{playerNote(p)}</small>:null}</td>
         <td><Link className="team-table-link" href={'/teams/'+p.team_id}>{p.team}</Link></td><td><span className={'pos '+p.position}>{posLabel(p.position)}</span></td><td>{p.projection?.opponent_name||'—'}</td><td>{p.projection?.venue==='HOME'?'Ev':p.projection?.venue==='AWAY'?'Dep':'—'}</td>
