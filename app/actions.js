@@ -3,6 +3,7 @@ import {createClient} from '@/lib/supabase/server'
 import {redirect} from 'next/navigation'
 import {headers} from 'next/headers'
 import {reportServerError} from '@/lib/observability'
+import {passwordPolicyCode} from '@/lib/passwordSecurity'
 
 const MAX_PER_CLUB=null
 const FORMATIONS=new Set(['3-4-3','3-5-2','4-3-3','4-4-2','4-5-1','5-2-3','5-3-2','5-4-1'])
@@ -59,6 +60,8 @@ export async function signup(formData){
   const siteUrl=await getSiteUrl()
   const email=String(formData.get('email')||'').trim()
   const password=String(formData.get('password')||'')
+  const passwordPolicy=await passwordPolicyCode(password)
+  if(passwordPolicy)redirect('/login?error='+passwordPolicy)
   const {error}=await supabase.auth.signUp({email,password,options:{emailRedirectTo:siteUrl+'/confirm-email'}})
   if(error)redirect('/login?error='+authErrorCode(error))
   redirect('/login?message=check_email')
@@ -88,8 +91,9 @@ export async function updatePassword(formData){
   const supabase=await createClient()
   const password=String(formData.get('password')||'')
   const confirm=String(formData.get('confirm_password')||'')
-  if(password.length<6)redirect('/reset-password?error=weak_password')
   if(password!==confirm)redirect('/reset-password?error=password_mismatch')
+  const passwordPolicy=await passwordPolicyCode(password)
+  if(passwordPolicy)redirect('/reset-password?error='+passwordPolicy)
   const {error}=await supabase.auth.updateUser({password})
   if(error)redirect('/reset-password?error='+authErrorCode(error))
   redirect('/login?message=password_updated')
