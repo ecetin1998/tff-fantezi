@@ -76,7 +76,7 @@ function MenuRow({ href,label,onClick,active=false }){
 }
 
 export function MobileMenu({ primary, analysis }){
-  const [signedIn,setSignedIn]=useState(false)
+  const [auth,setAuth]=useState({loaded:false,signedIn:false})
   const path=usePathname()
   const [open,setOpen]=useState(false)
   const wrapRef=useRef(null)
@@ -85,9 +85,9 @@ export function MobileMenu({ primary, analysis }){
   useEffect(()=>{
     const supabase=createClient()
     let alive=true
-    const sync=async()=>{const {data:{user}}=await supabase.auth.getUser();if(alive)setSignedIn(Boolean(user))}
+    const sync=async()=>{const {data:{user}}=await supabase.auth.getUser();if(alive)setAuth({loaded:true,signedIn:Boolean(user)})}
     sync()
-    const {data}=supabase.auth.onAuthStateChange((_event,session)=>{if(alive)setSignedIn(Boolean(session?.user))})
+    const {data}=supabase.auth.onAuthStateChange((_event,session)=>{if(alive)setAuth({loaded:true,signedIn:Boolean(session?.user)})})
     return()=>{alive=false;data.subscription.unsubscribe()}
   },[])
 
@@ -127,7 +127,7 @@ export function MobileMenu({ primary, analysis }){
         <MenuRow onClick={close} active={matches(path,href)} key={href} href={href} label={label}/>
       )}
       <MenuRow onClick={close} href="/pricing" label="Fantezi Pro"/>
-      {signedIn
+      {!auth.loaded?null:auth.signedIn
         ? <form action={logout}><button className="mobile-menu-row mobile-menu-logout" onClick={close} type="submit"><span className="mobile-menu-row-icon"><MenuIcon href="/login"/></span><span>Çıkış</span></button></form>
         : <MenuRow onClick={close} href="/login" label="Giriş / Kayıt"/>}
     </div>:null}
