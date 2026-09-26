@@ -42,8 +42,8 @@ export default async function PlayerPage({ params }){
   const {run,player,projection:p,availability:a,role:r,season:s,weekly,match}=data
   const closedWeeks=[...(weekly||[])].sort((x,y)=>Number(x.gameweek||0)-Number(y.gameweek||0))
   const playedWeeks=closedWeeks.filter(w=>Number(w.minutes||0)>0)
-  const played=playedWeeks.length
-  const actual=closedWeeks.reduce((sum,w)=>sum+Number(w.points||0),0)
+  const played=Number(s?.matches_played ?? playedWeeks.length)
+  const actual=Number(s?.actual_points ?? closedWeeks.reduce((sum,w)=>sum+Number(w.points||0),0))
   const average=played?actual/played:0
   const opponentId=match ? (Number(match.home_team_id)===Number(player.team_id)?Number(match.away_team_id):Number(match.home_team_id)) : null
   const opponent=p?.opponent_name || '—'
