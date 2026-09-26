@@ -3,7 +3,9 @@ import ResetPasswordForm from '@/components/ResetPasswordForm'
 export const metadata={title:'Şifre Yenile'}
 
 const ERRORS={
-  weak_password:'Şifre en az 6 karakter olmalı.',
+  weak_password:'Şifre en az 8 karakter olmalı.',
+  leaked_password:'Bu şifre bilinen veri sızıntılarında yer alıyor. Başka bir şifre seç.',
+  password_check_failed:'Şifre güvenlik kontrolü tamamlanamadı. Lütfen tekrar dene.',
   password_mismatch:'Şifreler eşleşmiyor.',
   same_password:'Yeni şifre eskisiyle aynı olamaz.',
   auth_failed:'Şifre güncellenemedi. Bağlantıyı yeniden isteyip tekrar dene.',
