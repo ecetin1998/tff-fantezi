@@ -1,41 +1,140 @@
 # Fantezi Scout — Production Readiness
 
-Bu dosya domain, auth ve ürünleştirme öncesi teknik kapıları tek yerde tutar.
+Bu dosya public beta / Pro öncesindeki teknik kapıları ve manuel panel ayarlarını takip eder.
 
-## Şu an hazır
+## Bu audit dalında tamamlananlar
 
-- Supabase current-run QA gate aktif: ready + 50K sim + projection/role coverage + 9 maç/18 takım + iki legal kadro geçmeden bir run current olamaz.
-- Veritabanında tek bir current run bulunmasını zorlayan unique partial index aktif.
-- Replay worker SECURITY DEFINER RPC'leri anon/authenticated rollerine kapalı; yalnız service role çağırabilir.
-- Goal distribution config RLS altında.
-- Backtest sayfası canlı production motorunu, walk-forward replay benchmarkını ve MH7+ live-frozen performansı ayrı gösterir.
-- `/confirm-email` e-posta doğrulama dönüşünü token hash, PKCE code veya browser session/hash akışlarında karşılar.
-- Auth redirect URL üretimi `NEXT_PUBLIC_SITE_URL` varsa onu, yoksa gelen host/protocol bilgisini kullanır; özel domain geçişinde kod değişikliği gerekmez.
+- [x] Public veri okumaları çerezsiz Supabase client'a taşındı.
+- [x] Layout/Nav server-side auth cookie bağımlılığından çıkarıldı.
+- [x] `/api/scout-data` public payload'ı daraltıldı; teknik kaynak alanları ve run notes kaldırıldı.
+- [x] Anahtarlı kompakt `/api/scout-data/summary` endpoint'i eklendi.
+- [x] Scout API hata ayrıntıları response yerine structured server log'a taşındı.
+- [x] RLS/grant audit SQL'i ve hardening migration'ı hazırlandı.
+- [x] Promote/replay write RPC'leri browser rollerinden kapatılacak migration hazırlandı.
+- [x] `scout_promote_run` için QA + data-integrity + backtest release gate tasarlandı.
+- [x] Kadro kaydı tek transaction RPC'sine taşındı; UI ve server doğrulamaları eklendi.
+- [x] Şifre sıfırlama akışı eklendi.
+- [x] Public 404 davranışı oyuncu/takım detaylarında düzeltildi.
+- [x] PR CI: lint + test + build.
+- [x] `package-lock.json`, Dependabot, env örneği ve .gitignore eklendi.
+- [x] Server/API hataları Vercel Function Logs ile uyumlu yapılandırılmış JSON olarak loglanıyor.
+- [x] Model simulator testleri: 990 dakika, 11 starter, own-goal/asist, kart ve quantile edge-case.
+- [x] Optimizer testleri: kaptan metriği, formasyon, kadro kuralları ve yedek değeri.
 
-## Domain bağlanmadan önce
+## Merge öncesi zorunlu manuel doğrulamalar
 
-1. Vercel'e seçilen domaini ekle ve DNS doğrulamasını tamamla.
-2. Production environment'a `NEXT_PUBLIC_SITE_URL=https://<domain>` ekle.
-3. Supabase Auth URL Configuration içinde Site URL'yi production domaine geçir.
-4. İzin verilen redirect URL'lerine en az `https://<domain>/confirm-email` ve Vercel production fallback `/confirm-email` adresini ekle.
-5. Kayıt → e-posta → doğrulama → `/squad` → çıkış → tekrar giriş akışını gerçek bir test hesabıyla uçtan uca doğrula.
+- [ ] SQL migration'ları panelde sırasıyla çalıştır.
+- [ ] İki normal test hesabıyla RLS testini tamamla.
+- [ ] Supabase Edge Function secret `SCOUT_GATE_SECRET` ekle.
+- [ ] GitHub Secrets: `SCOUT_GATE_SECRET`, `SUPABASE_FUNCTIONS_URL`.
+- [ ] Vercel env: `SCOUT_DATA_API_KEY`, `NEXT_PUBLIC_SITE_URL`, Supabase public env'leri.
+- [ ] Vercel Firewall'da `/api/scout-data*` için IP tabanlı rate limit ekle.
+- [ ] Supabase Auth leaked-password protection aç.
+- [ ] Supabase Auth redirect URL'lerine production ve preview confirm/reset yollarını ekle.
+- [ ] Preview smoke test listesinin tamamı PASS olsun.
+- [ ] Güncel model commit'i için iki QA gate + güncel motor backtest PASS olsun.
 
-## E-posta / auth production kapıları
+## Auth redirect URL'leri
 
-- Supabase'in varsayılan mail göndericisi development için kısıtlıdır. Public beta öncesi kendi SMTP sağlayıcımızı bağla.
-- Custom SMTP sonrası confirmation ve resend akışlarını tekrar test et.
-- Supabase Auth'ta leaked password protection özelliğini aç.
-- User squad ve Pro-interest tablolarının RLS politikalarını tekrar advisor + manuel test ile doğrula.
-- Şifre sıfırlama akışını public beta öncesi ekle/test et.
+Production origin örneği:
 
-## Operasyon
+- `https://tff-fantezi.vercel.app/confirm-email`
+- `https://tff-fantezi.vercel.app/reset-password`
 
-- UI değişikliklerini tek tek değil, batch commit/deploy halinde çıkar.
-- Model değişikliği önce staging run üretir; QA PASS olmadan current swap yok.
-- MH7+ live-frozen tahminleri kickoff sonrası overwrite edilmez.
-- Production deploy sonrası en az `/`, `/players`, `/teams`, `/matches`, `/squad`, `/backtest`, `/login` smoke test edilir.
-- Hata takibi ve temel kullanım analitiği public beta öncesi eklenir.
+Özel domain bağlanınca aynı iki path özel domaine de eklenmeli.
 
-## Ürünleştirme sonraki kapı
+Preview üzerinde auth test edilecekse yalnız kontrollü preview pattern'i ekleyin. Geniş ve gereksiz wildcard kullanmayın.
 
-Ödeme/Pro planına ancak auth, custom domain, SMTP, RLS ve birkaç haftalık stabil model otomasyonu tamamlandıktan sonra geçilir.
+## Vercel
+
+### Environment Variables
+
+Production ve Preview için:
+
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
+- `NEXT_PUBLIC_SITE_URL` — production'da gerçek canonical origin
+- `SCOUT_DATA_API_KEY` — server-only, rastgele ve uzun
+
+`SCOUT_DATA_API_KEY` için `NEXT_PUBLIC_` öneki kullanılmaz.
+
+### Firewall
+
+Önerilen başlangıç kuralı:
+
+- path: `/api/scout-data*`
+- key: client IP
+- başlangıç limiti: public feed için 60 istek/dakika/IP
+- aşımda 429
+
+Gerçek trafik gözlendikten sonra limit ayarlanmalı. Anahtarlı summary endpoint'i için daha düşük bir ayrı limit kullanılabilir.
+
+### Observability
+
+Vercel Observability / Function Logs açık tutulmalı. `api:scout-data`, `api:scout-data-summary`, `action:saveSquad:*`, `action:joinProWaitlist` scope'ları alarm/filtre için kullanılabilir.
+
+### Ignored Build Step
+
+Production deploy yalnız `main` merge'lerinden gelmeli. Preview deploylar çalışma dallarında kalır. Repo büyürse dokümantasyon-only commitleri için Vercel Ignored Build Step kullanılabilir; uygulama/model/migration değişikliklerini yanlışlıkla atlayacak geniş bir ignore kuralı yazılmamalıdır.
+
+## GitHub
+
+`main` için branch protection / ruleset:
+
+- pull request zorunlu
+- en az 1 approval
+- merge öncesi branch güncel olmalı
+- required status check: `quality`
+- force-push kapalı
+- branch deletion kapalı
+- doğrudan push kısıtlı
+
+Model gate workflow'u yalnız GitHub Secrets üzerinden internal Supabase function çağırır.
+
+## Supabase Auth
+
+Public beta öncesi:
+
+- custom SMTP bağla ve confirmation/reset maillerini gerçek hesapla test et
+- leaked password protection aç
+- Site URL'yi canonical production origin yap
+- confirmation ve reset redirect URL'lerini ekle
+
+## RLS iki-hesap testi
+
+Normal kullanıcı A ve B ile:
+
+1. A kadro kaydeder, squad id alınır.
+2. B A'nın squad satırını SELECT etmeye çalışır → 0 satır.
+3. B A'nın squad member'larını SELECT/INSERT/UPDATE/DELETE etmeye çalışır → erişim yok.
+4. A kendi kadrosunu okuyup günceller → başarılı.
+5. A kendi subscription satırında INSERT/UPDATE/DELETE dener → başarısız.
+6. A kendi subscription satırını SELECT eder → başarılı; B aynı satırı göremez.
+7. A kendi `scout_pro_interest` satırını INSERT + SELECT edebilir; UPDATE/DELETE yapamaz.
+8. anon model tablolarını yalnız izin verilen kolonlarla okuyabilir; write yapamaz.
+
+## Model release kapısı
+
+Model değişikliği production'a ancak:
+
+1. candidate run,
+2. `scout_run_qa` PASS,
+3. `scout_data_integrity_qa` PASS,
+4. aynı motor sürümüyle replay/backtest PASS,
+5. release gate kaydı PASS,
+6. `scout_promote_run`
+
+sırasıyla çıkar.
+
+Mevcut replay Edge Function'ı repo model motoruyla birebir eşleşmiyorsa onun sonucu yeni model commit'inin kanıtı olarak kabul edilmez.
+
+## Açık kalan operasyon işleri
+
+- [ ] SMTP
+- [ ] panelde migration uygulaması
+- [ ] iki hesaplı RLS testi
+- [ ] Firewall rate limit
+- [ ] branch protection
+- [ ] Preview smoke testi
+- [ ] model backtest/release gate
+- [ ] production trafik sonrası log/alert eşikleri
