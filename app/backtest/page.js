@@ -74,9 +74,9 @@ export default async function BacktestPage(){
         <small>{currentRun?.generated_at?new Date(currentRun.generated_at).toLocaleString('tr-TR',{timeZone:'Europe/Istanbul'}):'—'}</small>
       </div>
       <div className="backtest-explainer">
-        <div><b>{productionQaPass?'PASS':'BEKLİYOR'} • MH{currentRun?.gameweek||'—'}</b><p>{currentRun?.status||'—'} durumunda • {Number(currentRunQa?.simulation_count||currentRun?.simulation_count||0).toLocaleString('tr-TR')} simülasyon. QA geçmeyen staging run artık current olamaz.</p></div>
-        <div><b>{currentRunQa?.projection_count??'—'} projeksiyon • {currentRunQa?.role_count??'—'} rol</b><p>{currentRunQa?.match_count??'—'} maç / {currentRunQa?.team_count??'—'} takım • hard-zero ihlali {currentRunQa?.hard_zero_violations??'—'} • numeric ihlal {currentRunQa?.projection_range_violations??'—'}.</p></div>
-        <div><b>{currentRunQa?.recommendation_count??'—'} kadro çıktısı</b><p>Geçersiz kadro {currentRunQa?.invalid_recommendations??'—'} • tek current-run kilidi aktif. Current flag yalnız bütün bu kontroller geçince değişebilir.</p></div>
+        <div><b>{productionQaPass?'PASS':'BEKLİYOR'} • MH{currentRun?.gameweek||'—'}</b><p>{currentRun?.status||'—'} durumunda • {Number(currentRunQa?.simulation_count||currentRun?.simulation_count||0).toLocaleString('tr-TR')} simülasyon. QA geçmeyen staging run current olamaz; publish işlemi atomik olduğu için hata halinde eski current korunur.</p></div>
+        <div><b>{currentRunQa?.active_projection_count??'—'} / {currentRunQa?.active_player_count??'—'} aktif projeksiyon • {currentRunQa?.active_role_count??'—'} rol</b><p>Eksik aktif projection {currentRunQa?.missing_active_projections??'—'} • eksik rol {currentRunQa?.missing_active_roles??'—'} • stale inactive projection {currentRunQa?.inactive_positive_projections??'—'} • hard-zero ihlali {currentRunQa?.hard_zero_violations??'—'}.</p></div>
+        <div><b>{currentRunQa?.match_count??'—'} maç • {currentRunQa?.recommendation_count??'—'} kadro • overlap {currentRunQa?.xi_overlap??'—'}/11</b><p>Takım dakika max sapma {currentRunQa?.max_team_minute_gap??'—'} dk • pay closure ihlali {currentRunQa?.share_violations??'—'} • geçersiz kadro {currentRunQa?.invalid_recommendations??'—'} • Top25 eksik {currentRunQa?.top25_missing??'—'}.</p></div>
       </div>
     </section>
 
