@@ -44,14 +44,19 @@ export default async function PlayerPage({ params }){
   const data=await getPlayerDetail(id)
   if(!data) notFound()
 
-  const {run,player,projection:p,availability:a,role:r,season:s,weekly,match}=data
+  const {run,player,projection:p,availability:a,role:r,season:s,weekly,matches=[]}=data
   const closedWeeks=[...(weekly||[])].sort((x,y)=>Number(x.gameweek||0)-Number(y.gameweek||0))
   const playedWeeks=closedWeeks.filter(w=>Number(w.minutes||0)>0)
   const played=Number(s?.matches_played ?? playedWeeks.length)
   const actual=Number(s?.actual_points ?? closedWeeks.reduce((sum,w)=>sum+Number(w.points||0),0))
   const average=played?actual/played:0
-  const opponentId=match ? (Number(match.home_team_id)===Number(player.team_id)?Number(match.away_team_id):Number(match.home_team_id)) : null
-  const opponent=p?.opponent_name || '—'
+  const fixtures=(matches||[]).map(match=>({
+    ...match,
+    opponentId:Number(match.home_team_id)===Number(player.team_id)?Number(match.away_team_id):Number(match.home_team_id),
+    opponentName:match.opponent?.name||'—',
+    venue:Number(match.home_team_id)===Number(player.team_id)?'HOME':'AWAY'
+  }))
+  const opponent=p?.opponent_name || fixtures.map(f=>f.opponentName).filter(Boolean).join(' + ') || '—'
   const hasAvailabilityIssue=availabilityIsIssue(a)
   const hasAvailabilityInfo=a && (hasAvailabilityIssue || a.availability_type==='return' || a.expected_return_date || a.suspension_fixture || a.canonical_reason)
   const availabilityNote=availabilityCompactNote(a)
@@ -158,9 +163,11 @@ export default async function PlayerPage({ params }){
           <span className="eyebrow">KARAR ÖZETİ</span>
           <h2>Bu hafta ne bekliyoruz?</h2>
         </div>
-        <div className="player-fixture-chip">
-          <span>{venue(p?.venue)}</span>
-          {opponentId?<Link href={'/teams/'+opponentId}>{opponent}</Link>:<b>{opponent}</b>}
+        <div className="player-fixture-list">
+          {fixtures.length?fixtures.map(f=><div className="player-fixture-chip" key={f.match_id}>
+            <span>{venue(f.venue)}</span>
+            {f.opponentId?<Link href={'/teams/'+f.opponentId}>{f.opponentName}</Link>:<b>{f.opponentName}</b>}
+          </div>):<div className="player-fixture-chip"><span>{venue(p?.venue)}</span><b>{opponent}</b></div>}
         </div>
       </div>
       <MetricGrid items={decisionMetrics} className="decision-metrics"/>
