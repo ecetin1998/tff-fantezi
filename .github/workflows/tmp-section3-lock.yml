@@ -1,0 +1,26 @@
+name: Temp section3 lock
+on:
+  push:
+    branches: [tmp/section3-lock]
+permissions:
+  contents: write
+jobs:
+  lock:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: tmp/section3-lock
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm install --package-lock-only --no-audit --no-fund
+      - run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add package-lock.json
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m "tmp: refresh section3 lockfile"
+          git push origin HEAD:tmp/section3-lock
