@@ -143,6 +143,9 @@ export default async function TeamPage({params}){
         <div className="card"><span>Şut hacmi</span><b>{idx(tactical?.shot_volume_index)}</b><small>lig ortalaması = 1.00</small></div>
         <div className="card"><span>İsabetli şut / maç</span><b>{num(tactical?.shots_on_target_per_match,1)}</b><small>kaleyi bulma hacmi</small></div>
         <div className="card"><span>Büyük fırsat</span><b>{tactical?.big_chances??'—'}</b><small>{tactical?.big_chances_missed??'—'} kaçan</small></div>
+        <div className="card"><span>Ceza sahası dokunuşu</span><b>{tactical?.touches_in_opposition_box??'—'}</b><small>rakip ceza sahası</small></div>
+        <div className="card"><span>Topa sahip olma</span><b>{tactical?.possession_percentage===null||tactical?.possession_percentage===undefined?'—':num(tactical.possession_percentage,1)+'%'}</b><small>maç ortalaması</small></div>
+        <div className="card"><span>Şut dönüşümü</span><b>{tactical?.shot_conversion_rate===null||tactical?.shot_conversion_rate===undefined?'—':num(tactical.shot_conversion_rate,1)+'%'}</b><small>şut → gol verimi</small></div>
         <div className="card"><span>Duran top</span><b>{tactical?.set_piece_goals??'—'} gol</b><small>{num(tactical?.set_piece_xg,1)} xG</small></div>
         <div className="card"><span>Duran top zaafı</span><b>{tactical?.set_piece_goals_conceded??'—'} gol</b><small>{num(tactical?.set_piece_xga,1)} xGA</small></div>
         <div className="card"><span>Rakip isabetli şut baskısı</span><b>{idx(tactical?.keeper_pressure_index)}</b><small>yüksek değer daha fazla baskı</small></div>
