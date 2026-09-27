@@ -76,3 +76,16 @@ Settings → Rules → Rulesets (or Branch protection) → protect `main`:
 - `qa-confirm-minimal-20260926`
 - `audit-remediation-20260926`
 - `model-gate-overdispersion`
+
+
+## Rate-limit-safe release path
+
+Use this path while the Vercel Hobby build limit is a constraint:
+
+1. Batch code changes locally / as Git objects and move the branch ref once; do not use dummy commits to trigger builds.
+2. Automatic Git deployments are limited by `vercel.json` to `main` and `fix/audit-round-2`.
+3. Before another Vercel attempt, require GitHub `quality` to be green and resolve every known build blocker.
+4. Prefer exactly one validated Preview build. If Vercel CLI access is available, promote that READY preview to Production with `vercel promote <preview-url>` so Production reuses the same artifact without rebuilding.
+5. If promotion is not available, merge/push `main` only once after Preview PASS; do not redeploy the same failing artifact repeatedly.
+6. After Production is READY, run the post-deploy migrations in the documented order, then run smoke + privilege checks.
+7. For local/dev smoke runs where Vercel CDN headers do not exist, use `SKIP_CDN_CHECK=1 bash scripts/smoke.sh`; Production smoke must keep the CDN assertion enabled.
