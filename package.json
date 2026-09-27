@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "eslint .",
     "smoke": "bash scripts/smoke.sh",
-    "test": "node model/attackAllocation.test.js && node model/simulateScout.test.js && node model/replayAudit.test.js && python3 model/optimizer_rules_test.py && node model/publicReadCompatibility.test.js && node model/auditHardening.test.js && node model/scoutApiCache.test.js && node model/scoutFeedStructure.test.js && node model/smokeContract.test.js"
+    "test": "node model/attackAllocation.test.js && node model/simulateScout.test.js && node model/replayAudit.test.js && python3 model/optimizer_rules_test.py && node model/publicReadCompatibility.test.js && node model/auditHardening.test.js && node model/scoutApiCache.test.js && node model/scoutFeedStructure.test.js && node model/smokeContract.test.js && node model/proxyMatcher.test.js"
   },
   "dependencies": {
     "@supabase/ssr": "0.12.7",

@@ -6,6 +6,11 @@ export async function proxy(request){
 
 export const config={
   matcher:[
-    '/((?!_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml|opengraph-image|icon|api/scout-data(?:/|$)|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    '/squad/:path*',
+    '/login/:path*',
+    '/reset-password/:path*',
+    '/confirm-email/:path*',
+    '/auth/:path*',
+    '/pricing/:path*',
   ],
 }
