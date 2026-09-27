@@ -85,3 +85,23 @@ This is a targeted redistribution rather than global xFP inflation. It materiall
 The evidence does not support reverting the attack-share correction. Distribution-band calibration remains open.
 
 Production DB hardening, RLS isolation, release-gate recording and idempotent promote verification are complete. The remaining release blocker is the Vercel Preview deployment/smoke pass; the current Vercel status is blocked by build-rate-limit.
+
+
+## MH7 optimizer refresh — 2026-09-27
+
+Current MH7 recommendations were regenerated after the audit optimizer fixes and then rechecked in the same database transaction.
+
+Before → after:
+- recommended bench cost: **23.0m → 16.0m**
+- alternative bench cost: **23.0m → 16.0m**
+- recommended XI xFP: **54.700 → 54.700**
+- alternative XI xFP: **54.262 → 53.779**
+- alternative captain: **Paulo Victor (P90 10) → Gift Emmanuel Orban (P90 13)**
+- recommended/alternative XI overlap after refresh: **8**
+
+Post-write checks:
+- `scout_run_qa`: **PASS**
+- `scout_data_integrity_qa`: **PASS**
+- invalid recommendations: **0**
+- max team count in recommendations: **2**
+- simulation count: **50,000**

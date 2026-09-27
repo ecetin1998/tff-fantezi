@@ -1,9 +1,10 @@
-begin;
+-- Production applied as Supabase migration: 20260927100422 prepare_squad_rpc_v2
+-- Safe before app deploy: prepares the atomic RPC and invariant without revoking
+-- the direct table writes still used by the old live main build.
 
 with ranked as (
   select id,row_number() over(partition by user_id order by updated_at desc nulls last,created_at desc,id desc) rn
-  from public.scout_user_squads
-  where is_active=true
+  from public.scout_user_squads where is_active=true
 )
 update public.scout_user_squads s
 set is_active=false,updated_at=now()
@@ -13,17 +14,19 @@ where s.id=r.id and r.rn>1;
 create unique index if not exists scout_user_squads_one_active_per_user
   on public.scout_user_squads(user_id) where is_active=true;
 
-revoke insert,update,delete on public.scout_user_squads from authenticated;
-revoke insert,update,delete on public.scout_user_squad_members from authenticated;
+create schema if not exists private;
+revoke all on schema private from public;
+revoke all on schema private from anon;
+grant usage on schema private to authenticated;
 
-create or replace function public.save_user_squad(p_members jsonb)
+create or replace function private.save_user_squad_impl(p_members jsonb)
 returns jsonb
 language plpgsql
 security definer
-set search_path='public'
+set search_path = ''
 as $$
 declare
-  v_user uuid := auth.uid();
+  v_user uuid := (select auth.uid());
   v_squad uuid;
   v_count int; v_distinct int; v_active int;
   v_gk int; v_def int; v_mid int; v_fwd int;
@@ -96,7 +99,15 @@ begin
 end;
 $$;
 
+revoke all on function private.save_user_squad_impl(jsonb) from public,anon;
+grant execute on function private.save_user_squad_impl(jsonb) to authenticated;
+
+create or replace function public.save_user_squad(p_members jsonb)
+returns jsonb
+language sql
+security invoker
+set search_path = ''
+as $$ select private.save_user_squad_impl(p_members); $$;
+
 revoke all on function public.save_user_squad(jsonb) from public,anon;
 grant execute on function public.save_user_squad(jsonb) to authenticated;
-
-commit;

@@ -13,11 +13,11 @@ Bu dosya audit round 2 sonundaki **canlı** durumu gösterir.
 - [x] Subscription browser write yetkileri kaldırıldı.
 - [x] Squad ve squad-member tablolarında owner-only RLS doğrulandı.
 - [x] Pro-interest yalnız own SELECT + INSERT; UPDATE/DELETE kaldırıldı.
-- [x] Availability kaynak detayları ile model/learning internal kolonları browser rollerinden gizlendi.
+- [ ] Availability provenance/internal kolonlarını kapatan post-deploy migration hazır; mevcut canlı `main` uyumluluk köprüsü nedeniyle production deploy tamamlanana kadar bilinçli olarak bekliyor.
 - [x] Promote/replay write RPC'leri browser rollerinden kapatıldı.
 - [x] `scout_promote_run` QA + data-integrity + backtest release gate zorunluluğu ile harden edildi.
 - [x] Release gate production'a yazıldı ve MH7 idempotent promote doğrulaması PASS.
-- [x] Kadro kaydı tek transaction `save_user_squad(jsonb)` RPC'sine taşındı.
+- [x] Kadro kaydı için production'da private `SECURITY DEFINER` implementation + public `SECURITY INVOKER` RPC hazır; `auth.uid()` zorunlu, search_path boş ve execute yalnız authenticated. Eski canlı `main` bozulmasın diye direct table DML revoke yalnız post-deploy migrationda bekliyor.
 - [x] Atomic squad RPC rollback'li gerçek 15 oyunculu testte PASS: 2/5/5/3, 4-4-2, 4 bench, 1 captain, 85.50m.
 - [x] İki ayrı JWT `sub` bağlamıyla rollback'li RLS izolasyon testi 14/14 PASS.
 - [x] Şifre sıfırlama akışı eklendi.
@@ -29,7 +29,7 @@ Bu dosya audit round 2 sonundaki **canlı** durumu gösterir.
 - [x] Model simulator testleri: 990 dakika, 11 starter, own-goal/asist, kart ve quantile edge-case.
 - [x] Optimizer testleri: kaptan metriği, formasyon, kadro kuralları ve yedek değeri.
 - [x] MH1–MH6 50K walk-forward replay ve MH7 paired-delta kanıtı kaydedildi.
-- [x] Beş internal Edge Function GitHub OIDC ile korunuyor; uzun ömürlü gate secret zorunlu değil.
+- [x] Beş internal Edge Function GitHub OIDC ile korunuyor; `SCOUT_GATE_SECRET` fallback tamamen kaldırıldı ve canlı function kaynakları repo ile eşleşiyor.
 - [x] GitHub gate workflow `id-token: write` ile kısa ömürlü OIDC JWT kullanıyor.
 - [x] Altı eksik foreign-key index'i production DB'ye eklendi.
 - [x] Internal/legacy RLS tablolarına explicit browser-deny policy eklendi; security advisor'daki `rls_enabled_no_policy` bulguları kapandı.
@@ -85,7 +85,7 @@ Her biri GitHub OIDC token'ında en az şu claim'leri doğrular:
 - ref: `refs/heads/main`
 - event: `workflow_dispatch`
 
-Eski `SCOUT_GATE_SECRET` yalnız opsiyonel geri uyumluluk fallback'idir.
+`SCOUT_GATE_SECRET` fallback kaldırılmıştır; protected workers yalnız doğrulanmış GitHub OIDC JWT kabul eder.
 
 ## Supabase Auth
 
@@ -112,7 +112,7 @@ Eski QA/audit/model-gate dalları main ile 0 ahead / 0 diff durumunda; connector
 
 Audit migration'ları production DB'ye Vercel deploy'dan önce uygulandığı için eski canlı `main` build'inin `SELECT *` sorguları `scout_model_runs`, `scout_availability` ve `scout_learning_log` üzerinde izin hatasına düşüyordu. Canlı siteyi yeniden bağlamak için yalnız bu eski sorguların ihtiyaç duyduğu eksik SELECT kolonları geçici olarak geri açıldı (`20260926223700_live_main_read_compat.sql`).
 
-Audit branch production'a deploy olduktan sonra **hemen** `20260926223800_post_deploy_restrict_sensitive_public_columns.sql` uygulanmalı; yeni branch zaten explicit safe-column sorguları kullanıyor.
+Audit branch production'a deploy olduktan sonra **hemen** sırasıyla `20260927101100_post_deploy_restrict_sensitive_public_columns.sql` ve `20260927101200_post_deploy_squad_write_lockdown.sql` uygulanmalı. Yeni branch explicit safe-column sorguları ve RPC-only squad write yolunu kullanıyor.
 
 ## Vercel — kalan deploy blocker'ı
 
@@ -128,4 +128,4 @@ Bu nedenle sadece Vercel'e bağlı son doğrulamalar bekliyor:
 - keyed summary payload
 - Vercel env/firewall/observability panel kontrolü
 
-Kod/DB/model tarafında bu deploy'u bekleyen başka release-gate yoktur.
+Pre-deploy DB hazırlığı production'da tamamlandı ve rollback'li authenticated test PASS: ilk/ikinci squad save idempotent, tek aktif kadro, 15 member, 3/kulüp limiti ve Pro waitlist first/repeat insert. Deploy sonrası yalnız iki daraltma migrationı uygulanacaktır.

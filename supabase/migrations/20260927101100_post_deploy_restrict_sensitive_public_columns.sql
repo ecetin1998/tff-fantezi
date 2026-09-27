@@ -1,5 +1,6 @@
--- Apply only after the audit branch is deployed to production.
--- The audited app no longer requests internal/provenance columns.
+-- POST-DEPLOY ONLY.
+-- Apply after the audited branch is confirmed live in Production.
+-- The new app no longer requests internal/provenance columns.
 revoke select on table public.scout_model_runs from anon,authenticated;
 grant select(
   id,gameweek,model_version,generated_at,source_updated_at,simulation_count,status,is_current

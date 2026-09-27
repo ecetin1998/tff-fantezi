@@ -63,13 +63,13 @@ Public sayfalar `lib/supabase/public.js` içindeki çerezsiz client'ı kullanır
 Temel güvenlik sınırları:
 
 - `scout_subscriptions`: authenticated kullanıcı yalnız kendi satırını okuyabilir; browser rolleri yazamaz.
-- `scout_user_squads` / `scout_user_squad_members`: yalnız sahibi okuyup yazabilir.
+- `scout_user_squads` / `scout_user_squad_members`: kullanıcı yalnız kendi satırlarını okuyabilir; production deploy sonrasında browser doğrudan DML kapalıdır ve tüm yazma `save_user_squad(jsonb)` RPC'sinden geçer.
 - `scout_pro_interest`: kullanıcı yalnız kendi satırını ekleyip okuyabilir.
 - Model tabloları browser rollerinde read-only'dir.
 - Availability kaynak detayları ve model/learning teknik notları public kolon erişimine açık değildir.
 - Promote/replay write RPC'leri service-role ile sınırlıdır.
 
-Audit ve hardening SQL'leri `supabase/migrations/` altındadır.
+Audit ve hardening SQL'leri `supabase/migrations/` altındadır. `20260927100422_prepare_squad_rpc_v2.sql` production'da uygulanmıştır; `20260927101100_*` ve `20260927101200_*` dosyaları yalnız yeni uygulama production'a çıktıktan sonra uygulanır.
 
 ## Kadro kaydetme
 
@@ -120,6 +120,7 @@ Desteklenen public bölümler:
 - `roles`
 - `weekly`
 - `performance`
+- `summary`
 
 Public cevaplarda run notes, availability `detail_source_*` alanları ve ham replay oyuncu hata kayıtları yoktur. Bilinmeyen query parametreleri veri cache anahtarına girmez. Veri katmanı 300 saniye cache edilir.
 
