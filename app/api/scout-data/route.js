@@ -2,13 +2,13 @@ import {unstable_cache} from 'next/cache'
 import {timingSafeEqual} from 'node:crypto'
 import {reportServerError} from '@/lib/observability'
 import {responseHeadersFor,shouldUsePublicPayloadCache} from '@/lib/scoutApiPolicy.mjs'
+import {buildScoutSummary,SCOUT_FEED_SCOUT_FEED_SCHEMA_VERSION,scoutFeedMatchRow} from '@/lib/scoutFeed'
 import {
   getAvailability,getBacktestOverview,getMatches,getPlayersWithProjection,
   getRecommendation,getRoleSignals,getWeeklyPoints
 } from '@/lib/data'
 
 export const dynamic='force-dynamic'
-const SCHEMA_VERSION='2.0'
 const responseHeaders={
   'Cache-Control':'public, max-age=0, s-maxage=300, stale-while-revalidate=600',
   'CDN-Cache-Control':'public, s-maxage=300, stale-while-revalidate=600',
@@ -49,14 +49,6 @@ function playerRow(p){
     }:null
   }
 }
-function matchRow(m){
-  return {
-    match_id:m.match_id,kickoff_at:m.kickoff_at,home_team_id:m.home_team_id,away_team_id:m.away_team_id,
-    home_team:m.home_team,away_team:m.away_team,home_xg:m.home_xg,away_xg:m.away_xg,
-    home_win_probability:m.home_win_probability,draw_probability:m.draw_probability,away_win_probability:m.away_win_probability,
-    home_cs_probability:m.home_cs_probability,away_cs_probability:m.away_cs_probability
-  }
-}
 function squad(data){
   return {
     recommendation:data?.recommendation?{
@@ -82,14 +74,14 @@ function fullAuthorized(request){
 }
 
 async function buildPayload(section,full){
-  const meta={name:'Fantezi Scout data feed',schema_version:SCHEMA_VERSION,access:full?'keyed-full':'public-read-only'}
+  const meta={name:'Fantezi Scout data feed',schema_version:SCOUT_FEED_SCHEMA_VERSION,access:full?'keyed-full':'public-read-only'}
   if(section==='players'){
     const d=await getPlayersWithProjection()
     return {meta,section,current_run:safeRun(d.run),players:(d.players||[]).map(playerRow)}
   }
   if(section==='matches'){
     const d=await getMatches()
-    return {meta,section,current_run:safeRun(d.run),matches:(d.matches||[]).map(matchRow)}
+    return {meta,section,current_run:safeRun(d.run),matches:(d.matches||[]).map(scoutFeedMatchRow)}
   }
   if(section==='squads'){
     const [a,b]=await Promise.all([getRecommendation('recommended'),getRecommendation('alternative')])
@@ -122,25 +114,8 @@ async function buildPayload(section,full){
       players:(d.players||[]).map(p=>({id:p.id,full_name:p.full_name,display_name:p.display_name,team:p.team,position:p.position,price:p.price,total_points:p.stats?.actual_points||0,weekly:p.weekly}))}
   }
   if(section==='summary'){
-    const [p,m,a,b,av]=await Promise.all([
-      getPlayersWithProjection(),getMatches(),getRecommendation('recommended'),getRecommendation('alternative'),getAvailability()
-    ])
-    const top_players=[...(p.players||[])].sort((x,y)=>Number(y.projection?.xfp||0)-Number(x.projection?.xfp||0)).slice(0,35).map(x=>({
-      id:x.id,name:x.display_name||x.full_name,team:x.team,position:x.position,price:Number(x.price||0),
-      xfp:Number(x.projection?.xfp||0),p90:Number(x.projection?.p90||0),xi_probability:Number(x.projection?.xi_probability||0),
-      x_minutes:Number(x.projection?.x_minutes||0),six_plus_probability:Number(x.projection?.six_plus_probability||0),
-      opponent:x.projection?.opponent_name||null,venue:x.projection?.venue||null,expected_goals:Number(x.projection?.expected_goals||0),
-      expected_assists:Number(x.projection?.expected_assists||0),availability_probability:Number(x.projection?.availability_probability??1)
-    }))
-    const compactSquad=d=>({budget:Number(d?.recommendation?.budget||0),xi_xfp:Number(d?.recommendation?.xi_xfp||0),
-      players:(d?.members||[]).map(x=>({id:x.player_id,name:x.player?.display_name||x.player?.full_name||null,position:x.player?.position||null,price:Number(x.player?.price||0),captain:Boolean(x.is_captain),squad_slot:x.squad_slot}))})
-    return {meta,section,gameweek:Number(p.run?.gameweek||0),model_updated_at:p.run?.generated_at||null,top_players,
-      matches:(m.matches||[]).map(matchRow),squads:{recommended:compactSquad(a),alternative:compactSquad(b)},
-      availability_issues:(av.rows||[]).filter(x=>Number(x.availability_probability??1)<.99).slice(0,50).map(x=>({
-        player_id:x.player_id,name:x.player?.display_name||x.player?.full_name||null,team:x.team||null,
-        probability:Number(x.availability_probability??1),reason:x.reason||x.source_reason||null,
-        expected_return:x.expected_return||null,suspension_fixture:x.suspension_fixture||null
-      }))}
+    const summary=await buildScoutSummary()
+    return {meta,section,...summary}
   }
   if(section==='performance'){
     const d=await getBacktestOverview()
@@ -163,7 +138,7 @@ async function buildPayload(section,full){
   return {
     meta,section:'all',current_run:safeRun(p.run||m.run),
     players:(p.players||[]).map(playerRow),
-    matches:(m.matches||[]).map(matchRow),
+    matches:(m.matches||[]).map(scoutFeedMatchRow),
     squads:{recommended:squad(a),alternative:squad(b)},
     availability_issues:(av.rows||[]).filter(x=>Number(x.availability_probability??1)<.99).map(x=>({
       player_id:x.player_id,name:x.player?.display_name||x.player?.full_name||null,team:x.team,
@@ -190,7 +165,7 @@ export async function GET(request){
       if(requested!=='all')canonical.searchParams.set('section',requested)
       return Response.redirect(canonical,308)
     }
-    if(!allowed.has(requested))return reply({schema_version:SCHEMA_VERSION,error:'Bilinmeyen bölüm.'},400)
+    if(!allowed.has(requested))return reply({schema_version:SCOUT_FEED_SCHEMA_VERSION,error:'Bilinmeyen bölüm.'},400)
     const full=requested==='performance'&&fullAuthorized(request)
     const payload=shouldUsePublicPayloadCache(full)
       ?await buildCached(requested)
@@ -198,6 +173,6 @@ export async function GET(request){
     return reply(payload,200,{privateResponse:full,varyApiKey:requested==='performance'})
   }catch(error){
     reportServerError('api:scout-data',error)
-    return reply({schema_version:SCHEMA_VERSION,error:'Scout verisi şu anda hazırlanamadı.'},500)
+    return reply({schema_version:SCOUT_FEED_SCHEMA_VERSION,error:'Scout verisi şu anda hazırlanamadı.'},500)
   }
 }
