@@ -17,12 +17,20 @@ status_code(){
 
 echo "Smoke target: $BASE_URL"
 
+if [[ -n "${EXPECTED_SHA:-}" ]]; then
+  live_sha="$(curl -fsSL "$BASE_URL/api/health" | node -pe "JSON.parse(require('fs').readFileSync(0,'utf8')).sha")"
+  [[ "$live_sha" == "$EXPECTED_SHA" ]] || fail "live SHA $live_sha != expected $EXPECTED_SHA"
+  echo "PASS deployed SHA $live_sha"
+fi
+
 PUBLIC_ROUTES=(
   "/"
   "/players"
+  "/players/419"
   "/points"
   "/matches"
   "/teams"
+  "/teams/14"
   "/squads"
   "/availability"
   "/roles"
@@ -50,8 +58,7 @@ const fs=require('node:fs')
 const [,,file,section]=process.argv
 const raw=fs.readFileSync(file,'utf8')
 let body
-try{ body=JSON.parse(raw) }catch{ console.error('invalid JSON for '+section); process.exit(1) }
-
+try{body=JSON.parse(raw)}catch{console.error('invalid JSON for '+section);process.exit(1)}
 const expected={
   all:['players','matches','squads','availability_issues'],
   summary:['top_players','matches','squads','availability_issues'],
@@ -63,40 +70,14 @@ const expected={
   weekly:['players'],
   performance:['replay_weeks','learning']
 }
-if(body.schema_version!=='2.0'){
-  console.error(section+': missing/wrong top-level schema_version')
-  process.exit(1)
-}
-if(body.meta?.schema_version!=='2.0'){
-  console.error(section+': missing/wrong meta.schema_version')
-  process.exit(1)
-}
-if(!Array.isArray(body.meta?.sections)||!body.meta.sections.includes('summary')){
-  console.error(section+': meta.sections does not advertise summary')
-  process.exit(1)
-}
-if(body.section!==section){
-  console.error(section+': response section mismatch: '+body.section)
-  process.exit(1)
-}
-for(const key of expected[section]||[]){
-  if(!(key in body)){
-    console.error(section+': missing key '+key)
-    process.exit(1)
-  }
-}
-if(/"notes"\s*:|"model_version"\s*:|detail_source_/i.test(raw)){
-  console.error(section+': internal/provenance field leaked')
-  process.exit(1)
-}
-if(section==='summary' && Object.prototype.hasOwnProperty.call(body,'players')){
-  console.error('summary: players key must not be present')
-  process.exit(1)
-}
-if(section==='players' && Object.prototype.hasOwnProperty.call(body,'matches')){
-  console.error('players: matches key must not be present')
-  process.exit(1)
-}
+if(body.schema_version!=='2.0')throw new Error(section+': wrong schema_version')
+if(body.meta?.schema_version!=='2.0')throw new Error(section+': wrong meta schema_version')
+if(!Array.isArray(body.meta?.sections)||!body.meta.sections.includes('summary'))throw new Error(section+': summary not advertised')
+if(body.section!==section)throw new Error(section+': response section mismatch')
+for(const key of expected[section]||[])if(!(key in body))throw new Error(section+': missing '+key)
+if(/"notes"\s*:|"model_version"\s*:|detail_source_/i.test(raw))throw new Error(section+': internal field leaked')
+if(section==='summary'&&Object.prototype.hasOwnProperty.call(body,'players'))throw new Error('summary must stay compact')
+if(section==='players'&&Object.prototype.hasOwnProperty.call(body,'matches'))throw new Error('players section leaked matches')
 NODE
 
   HASHES+=("$(shasum -a 256 "$body" | awk '{print $1}')")
@@ -107,14 +88,14 @@ unique_hashes="$(printf '%s\n' "${HASHES[@]}" | sort -u | wc -l | tr -d ' ')"
 [[ "$unique_hashes" == "${#SECTIONS[@]}" ]] || fail "different sections returned duplicate payloads ($unique_hashes/${#SECTIONS[@]} unique)"
 
 summary_size="$(wc -c < "$TMP_DIR/summary.json" | tr -d ' ')"
-(( summary_size < 51200 )) || fail "summary payload is ${summary_size} bytes (must be < 51200)"
-echo "PASS summary size ${summary_size} bytes"
+(( summary_size < 51200 )) || fail "summary payload is $summary_size bytes (must be < 51200)"
+echo "PASS summary size $summary_size bytes"
 
-# Live regression: player detail projection must agree with the public player feed.
 curl -fsSL "$BASE_URL/api/scout-data?section=players" > "$TMP_DIR/players-live.json"
 curl -fsSL "$BASE_URL/players/419" > "$TMP_DIR/player-419.html"
 curl -fsSL "$BASE_URL/matches" > "$TMP_DIR/matches.html"
 curl -fsSL "$BASE_URL/" > "$TMP_DIR/home.html"
+
 node - "$TMP_DIR/players-live.json" "$TMP_DIR/player-419.html" "$TMP_DIR/matches.html" "$TMP_DIR/home.html" <<'NODE'
 const fs=require('node:fs')
 const [,,playersFile,playerHtmlFile,matchesHtmlFile,homeHtmlFile]=process.argv
@@ -122,7 +103,7 @@ const payload=JSON.parse(fs.readFileSync(playersFile,'utf8'))
 const player=(payload.players||[]).find(p=>Number(p.id)===419)
 if(!player)throw new Error('player 419 missing from public feed')
 if(player.name!==player.full_name)throw new Error('API name must equal full_name outside the pitch')
-const expected=Number(player.xfp||0).toFixed(2)
+const expected=Number(player.projection?.xfp||0).toFixed(2)
 const playerHtml=fs.readFileSync(playerHtmlFile,'utf8')
 if(!playerHtml.includes(expected))throw new Error('player 419 detail does not contain feed xFP '+expected)
 const matches=fs.readFileSync(matchesHtmlFile,'utf8')
@@ -130,42 +111,20 @@ const home=fs.readFileSync(homeHtmlFile,'utf8')
 for(const [name,html] of [['player',playerHtml],['matches',matches],['home',home]]){
   if(html.includes('vercel.app'))throw new Error(name+' HTML contains old Vercel domain')
 }
-if(matches.includes('%"$(status_code "$BASE_URL/players/99999")"
-[[ "$not_found" == "404" ]] || fail "/players/99999 returned HTTP $not_found instead of 404"
-echo "PASS real 404"
-
-redirect_headers="$TMP_DIR/redirect.headers"
-redirect_code="$(curl -sS -D "$redirect_headers" -o /dev/null -w '%{http_code}' "$BASE_URL/api/scout-data?utm_source=x")"
-[[ "$redirect_code" == "308" ]] || fail "unknown query param returned HTTP $redirect_code instead of 308"
-echo "PASS canonical 308"
-
-if [[ "${SKIP_CDN_CHECK:-0}" == "1" ]]; then
-  echo "SKIP CDN cache header check (SKIP_CDN_CHECK=1)"
-else
-  curl -sS -D "$TMP_DIR/cache.headers" -o /dev/null "$BASE_URL/api/scout-data?section=summary"
-  grep -Eiq '^cache-control:.*s-maxage=300' "$TMP_DIR/cache.headers" || {
-    cat "$TMP_DIR/cache.headers" >&2
-    fail "summary response is missing shared-cache policy"
-  }
-  echo "PASS CDN cache policy"
-fi
-
-echo "SMOKE PASS"
-))throw new Error('matches HTML contains malformed %$ probability')
+if(matches.includes('%$'))throw new Error('matches HTML contains malformed %$ probability')
 NODE
-echo "PASS live player/detail/domain regressions"
+echo "PASS player/detail/domain regressions"
 
 not_found="$(status_code "$BASE_URL/players/99999")"
 [[ "$not_found" == "404" ]] || fail "/players/99999 returned HTTP $not_found instead of 404"
 echo "PASS real 404"
 
-redirect_headers="$TMP_DIR/redirect.headers"
-redirect_code="$(curl -sS -D "$redirect_headers" -o /dev/null -w '%{http_code}' "$BASE_URL/api/scout-data?utm_source=x")"
+redirect_code="$(curl -sS -o /dev/null -w '%{http_code}' "$BASE_URL/api/scout-data?utm_source=x")"
 [[ "$redirect_code" == "308" ]] || fail "unknown query param returned HTTP $redirect_code instead of 308"
 echo "PASS canonical 308"
 
 if [[ "${SKIP_CDN_CHECK:-0}" == "1" ]]; then
-  echo "SKIP CDN cache header check (SKIP_CDN_CHECK=1)"
+  echo "SKIP CDN cache header check"
 else
   curl -sS -D "$TMP_DIR/cache.headers" -o /dev/null "$BASE_URL/api/scout-data?section=summary"
   grep -Eiq '^cache-control:.*s-maxage=300' "$TMP_DIR/cache.headers" || {
