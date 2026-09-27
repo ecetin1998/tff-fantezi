@@ -23,11 +23,11 @@ jobs:
           cache: npm
       - name: Install project dependencies
         run: npm ci --no-audit --no-fund
+      - name: Remove optional Sentry package for OpenNext compatibility
+        run: npm uninstall @sentry/nextjs --save --no-audit --no-fund
       - name: Generate Cloudflare Workers config
         run: npx --yes wrangler@4.142.0 setup --yes
-      - name: Verify OpenNext build
-        run: npx opennextjs-cloudflare build
-      - name: Commit generated configuration
+      - name: Persist generated Cloudflare configuration
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -38,3 +38,5 @@ jobs:
             git commit -m "chore: configure Cloudflare Workers with OpenNext"
             git push origin HEAD:fix/cloudflare-workers-bootstrap
           fi
+      - name: Verify OpenNext build
+        run: npx opennextjs-cloudflare build
