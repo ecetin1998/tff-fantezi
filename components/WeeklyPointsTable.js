@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useEffect, useMemo, useState } from 'react'
 import { teamCssVars } from '@/lib/teamThemes'
+import {playerLabel} from '@/lib/playerPresentation'
 
 const posLabel=p=>({GK:'KL',DEF:'DEF',MID:'OS',FWD:'FOR'}[p]||p||'—')
 const PAGE_SIZE=100
@@ -39,7 +40,7 @@ export default function WeeklyPointsTable({players,throughGameweek,finalThroughG
     const out=players.filter(p=>
       (!team||p.team===team) &&
       (!pos||p.position===pos) &&
-      (!needle||normalizeText((p.full_name||'')+' '+(p.display_name||'')+' '+p.team).includes(needle))
+      (!needle||normalizeText((p.full_name||'')+' '+(p.display_name||'')+' '+(p.short_label||'')+' '+p.team).includes(needle))
     ).map(p=>{
       const finalRows=(p.weekly||[]).filter(x=>x.is_final!==false)
       const map=new Map(finalRows.map(x=>[Number(x.gameweek),x]))
@@ -55,7 +56,7 @@ export default function WeeklyPointsTable({players,throughGameweek,finalThroughG
     })
 
     const value=(p,k)=>{
-      if(k==='name')return p.full_name
+      if(k==='name')return playerLabel(p)
       if(k==='total')return p.total
       if(k==='avg')return p.avg
       if(k==='played')return p.played
@@ -119,7 +120,7 @@ export default function WeeklyPointsTable({players,throughGameweek,finalThroughG
         {pageRows.map((p,i)=><Link href={'/players/'+p.id} className="card weekly-mobile-card team-accent-card" style={teamCssVars(p.team)} key={p.id}>
           <div className="weekly-mobile-head">
             <div className="mobile-card-badges"><span className="weekly-rank">#{(safePage-1)*PAGE_SIZE+i+1}</span><span className={'pos '+p.position}>{posLabel(p.position)}</span></div>
-            <div className="weekly-mobile-player-name"><b>{p.full_name}</b><small>{p.team}</small></div>
+            <div className="weekly-mobile-player-name"><b>{playerLabel(p)}</b><small>{p.team}</small></div>
             <div className={weekMode?'weekly-total-score selected-week-score':'weekly-total-score'}>
               <strong>{weekMode?(p.pointMap.get(Number(weekSort))?.points ?? '—'):p.total}</strong><small>{weekMode?'MH'+weekSort:'puan'}</small>
             </div>
@@ -140,7 +141,7 @@ export default function WeeklyPointsTable({players,throughGameweek,finalThroughG
         <tbody>{pageRows.map((p,i)=><tr className="team-player-row clickable-row" style={teamCssVars(p.team)} key={p.id} tabIndex={0}
           onClick={e=>openRow(e,p.id)} onKeyDown={e=>{if(e.key==='Enter')router.push('/players/'+p.id)}}>
           <td className="rank-col">#{(safePage-1)*PAGE_SIZE+i+1}</td>
-          <td className="weekly-player-cell"><Link className="player-link" href={'/players/'+p.id}><b>{p.full_name}</b></Link><small><Link className="team-table-link" href={'/teams/'+p.team_id}>{p.team}</Link></small></td>
+          <td className="weekly-player-cell"><Link className="player-link" href={'/players/'+p.id}><b>{playerLabel(p)}</b></Link><small><Link className="team-table-link" href={'/teams/'+p.team_id}>{p.team}</Link></small></td>
           <td className="summary-score"><b>{p.total}</b></td><td>{p.played}</td><td>{num(p.avg)}</td><td><b>{num(p.last3)}</b></td><td>{(p.sixPlus*100).toFixed(0)}%</td>
           <td><span className={'form-trend '+(p.trend>.5?'up':p.trend<-.5?'down':'flat')}>{p.trend>.5?'↑':p.trend<-.5?'↓':'→'}</span></td>
           {gameweeks.map(g=>{const row=p.pointMap.get(g),pending=g>finalThroughGameweek,selected=weekMode&&g===weekSort,stateClass=pending?'pending-score':row?'':'empty-score';return <td key={g} className={'weekly-score '+stateClass+' '+(selected?'selected-week-cell':'')}>{row?row.points:'—'}</td>})}

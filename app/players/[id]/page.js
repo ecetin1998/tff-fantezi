@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 import { getPlayerDetail, getPlayersWithProjection } from '@/lib/data'
 import { teamCssVars } from '@/lib/teamThemes'
 import { availabilityCompactNote, availabilityIsIssue } from '@/lib/availability'
+import {playerLabel,predictionConfidenceLabel} from '@/lib/playerPresentation'
 
 export const revalidate=300
 export async function generateStaticParams(){
@@ -52,7 +53,7 @@ export default async function PlayerPage({ params }){
   const opponentId=match ? (Number(match.home_team_id)===Number(player.team_id)?Number(match.away_team_id):Number(match.home_team_id)) : null
   const opponent=p?.opponent_name || '—'
   const hasAvailabilityIssue=availabilityIsIssue(a)
-  const hasAvailabilityInfo=a && (hasAvailabilityIssue || a.availability_type==='return' || a.expected_return || a.suspension_fixture || a.source_reason)
+  const hasAvailabilityInfo=a && (hasAvailabilityIssue || a.availability_type==='return' || a.expected_return_date || a.suspension_fixture || a.canonical_reason)
   const availabilityNote=availabilityCompactNote(a)
   const isGK=player.position==='GK'
   const isDEF=player.position==='DEF'
@@ -120,7 +121,7 @@ export default async function PlayerPage({ params }){
         <span className={`pos ${player.position} team-pos-badge`}>{posLabel(player.position)}</span>
         <div className="player-detail-identity">
           <span className="eyebrow">OYUNCU ANALİZİ</span>
-          <h1>{player.full_name}</h1>
+          <h1>{playerLabel(player)}</h1>
           <p>
             <Link className="team-inline-link" href={'/teams/'+player.team_id}>{player.team}</Link>
             <span>•</span><b>{Number(player.price||0).toFixed(1)}m</b>
@@ -236,7 +237,7 @@ export default async function PlayerPage({ params }){
           <div><span>Beklenen bonus</span><b>{num(p?.x_bonus)}</b></div>
           <div><span>Top25 sıra</span><b>{p?.top25_rank?`#${p.top25_rank}`:'—'}</b></div>
           <div><span>Top25 skor</span><b>{p?.top25_score===null||p?.top25_score===undefined?'—':num(p.top25_score,3)}</b></div>
-          <div><span>Veri güveni</span><b>{p?.data_confidence||'—'}</b></div>
+          <div><span>Veri güveni</span><b>{predictionConfidenceLabel(run,p)}</b></div>
           {!isGK?<div><span>Takım gol payı</span><b>{pct(r?.team_goal_share)}</b></div>:null}
           {!isGK?<div><span>Takım asist payı</span><b>{pct(r?.team_assist_share)}</b></div>:null}
         </div>

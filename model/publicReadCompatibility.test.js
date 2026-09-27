@@ -16,3 +16,10 @@ for(const forbidden of [
 }
 
 console.log('publicReadCompatibility: ok')
+
+assert.equal(/scout_players'\)\.select\([^\n]*\bstatus\b/.test(source),false,'public scout_players selects must not request deprecated status')
+assert.equal(/scout_availability'\)\.select\([^\n]*(?:\breason\b|\bsource_reason\b|\bexpected_return\b)/.test(source),false,'public availability selects must use canonical_reason/expected_return_date only')
+assert.match(source,/\bshort_label\b/)
+assert.match(source,/\bconfidence\b/)
+assert.match(source,/\bcanonical_reason\b/)
+assert.match(source,/\bexpected_return_date\b/)

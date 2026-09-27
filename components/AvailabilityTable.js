@@ -2,6 +2,7 @@
 import { useMemo, useState } from 'react'
 import Link from 'next/link'
 import { availabilityCompactNote, availabilityExpectedReturn, availabilityReason, availabilityStatusLabel } from '@/lib/availability'
+import {playerLabel} from '@/lib/playerPresentation'
 
 const posLabel=p=>({GK:'KL',DEF:'DEF',MID:'OS',FWD:'FOR'}[p]||p||'—')
 
@@ -27,13 +28,13 @@ export default function AvailabilityTable({ rows }){
   const filtered=useMemo(()=>rows.filter(r=>
     (!team||r.team===team) &&
     (!type||r.availability_type===type) &&
-    (!q||(`${r.player?.full_name||''} ${r.team||''} ${r.reason||''} ${r.source_reason||''} ${r.expected_return||''} ${r.suspension_fixture||''}`).toLocaleLowerCase('tr').includes(q.toLocaleLowerCase('tr')))
+    (!q||(`${r.player?.full_name||''} ${r.player?.short_label||''} ${r.team||''} ${r.canonical_reason||''} ${r.expected_return_date||''} ${r.suspension_fixture||''}`).toLocaleLowerCase('tr').includes(q.toLocaleLowerCase('tr')))
   ),[rows,team,type,q])
 
   const injuryCount=(rows||[]).filter(r=>r.availability_type==='injuries').length
   const suspensionCount=(rows||[]).filter(r=>r.availability_type==='suspensions').length
   const returnCount=(rows||[]).filter(r=>r.availability_type==='return').length
-  const detailedCount=(rows||[]).filter(r=>r.expected_return||r.suspension_fixture).length
+  const detailedCount=(rows||[]).filter(r=>r.expected_return_date||r.suspension_fixture).length
 
   return <>
     <section className="availability-overview-grid">
@@ -71,14 +72,14 @@ export default function AvailabilityTable({ rows }){
         const note=availabilityCompactNote(r)
         return <tr key={`${r.player_id}-${i}`}>
           <td>#{i+1}</td>
-          <td>{r.player?<Link className="player-link" href={'/players/'+r.player_id}><b>{r.player.full_name}</b></Link>:'—'}</td>
+          <td>{r.player?<Link className="player-link" href={'/players/'+r.player_id}><b>{playerLabel(r.player)}</b></Link>:'—'}</td>
           <td>{r.team}</td>
           <td><span className={`pos ${r.player?.position}`}>{posLabel(r.player?.position)}</span></td>
           <td><span className={`status-chip ${r.availability_type||''}`}>{availabilityStatusLabel(r)}</span></td>
           <td>{(Number(r.availability_probability??1)*100).toFixed(0)}%</td>
           <td className="availability-note-cell"><b>{availabilityReason(r)||'—'}</b></td>
           <td>{formatDateOnly(r.injury_date)}</td>
-          <td className="availability-return-cell">{r.suspension_fixture||availabilityExpectedReturn(r.expected_return)||'—'}</td>
+          <td className="availability-return-cell">{r.suspension_fixture||availabilityExpectedReturn(r.expected_return_date)||'—'}</td>
           <td>{formatCheck(r.checked_at)}</td>
         </tr>
       })}</tbody>
@@ -90,7 +91,7 @@ export default function AvailabilityTable({ rows }){
         return <Link href={'/players/'+r.player_id} className="card availability-mobile-card" key={'mobile-'+r.player_id+'-'+i}>
           <div className="availability-mobile-head">
             <span className={`pos ${r.player?.position}`}>{posLabel(r.player?.position)}</span>
-            <div><b>{r.player?.full_name||'—'}</b><small>{r.team||'—'}</small></div>
+            <div><b>{playerLabel(r.player)}</b><small>{r.team||'—'}</small></div>
             <span className={`status-chip ${r.availability_type||''}`}>{availabilityStatusLabel(r)}</span>
           </div>
           <p>{note||'Detay yok'}</p>

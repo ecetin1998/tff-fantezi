@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { teamCssVars } from '@/lib/teamThemes'
 import { availabilityCompactNote, availabilityIsIssue } from '@/lib/availability'
+import {playerLabel} from '@/lib/playerPresentation'
 
 const posLabel=p=>({GK:'KL',DEF:'DEF',MID:'OS',FWD:'FOR'}[p]||p||'—')
 const PAGE_SIZE=100
@@ -30,10 +31,10 @@ export default function PlayersTable({players}){
     const out=players.filter(p=>
       (!pos||p.position===pos) &&
       (!team||p.team===team) &&
-      (!needle||normalizeText((p.full_name||'')+' '+(p.display_name||'')+' '+p.team+' '+(p.projection?.opponent_name||'')).includes(needle))
+      (!needle||normalizeText((p.full_name||'')+' '+(p.display_name||'')+' '+(p.short_label||'')+' '+p.team+' '+(p.projection?.opponent_name||'')).includes(needle))
     )
     const val=(p,k)=>{
-      if(k==='name')return p.full_name
+      if(k==='name')return playerLabel(p)
       if(k==='team')return p.team
       if(k==='pos')return p.position
       if(k==='opp')return p.projection?.opponent_name||''
@@ -76,7 +77,7 @@ export default function PlayersTable({players}){
   const playerNote=p=>{
     const a=p.availability
     if(!a)return ''
-    const visible=availabilityIsIssue(a)||a.availability_type==='return'||a.expected_return||a.suspension_fixture
+    const visible=availabilityIsIssue(a)||a.availability_type==='return'||a.expected_return_date||a.suspension_fixture
     return visible?availabilityCompactNote(a):''
   }
   const openRow=(e,id)=>{
@@ -106,7 +107,7 @@ export default function PlayersTable({players}){
         {pageRows.map((p,i)=><Link href={'/players/'+p.id} className="card mobile-player-card team-accent-card" style={teamCssVars(p.team)} key={p.id}>
           <div className="mobile-player-top">
             <div className="mobile-card-badges"><span className="weekly-rank">#{(safePage-1)*PAGE_SIZE+i+1}</span><span className={'pos '+p.position}>{posLabel(p.position)}</span></div>
-            <div className="mobile-player-name"><b>{p.full_name}</b><span>{p.team} • {num(p.price,1)}m</span></div>
+            <div className="mobile-player-name"><b>{playerLabel(p)}</b><span>{p.team} • {num(p.price,1)}m</span></div>
             <div className="mobile-xfp"><strong>{num(p.projection?.xfp)}</strong><small>xFP</small><em>{num(p.total_points,0)} toplam puan</em></div>
           </div>
           <div className="mobile-fixture"><span>{p.projection?.venue==='HOME'?'Ev':p.projection?.venue==='AWAY'?'Dep':'—'}</span><b>Rakip: {p.projection?.opponent_name||'—'}</b>{playerNote(p)?<em>{playerNote(p)}</em>:null}</div>
@@ -125,7 +126,7 @@ export default function PlayersTable({players}){
       </tr></thead><tbody>{pageRows.map((p,i)=><tr className="team-player-row clickable-row" style={teamCssVars(p.team)} key={p.id}
         tabIndex={0} onClick={e=>openRow(e,p.id)} onKeyDown={e=>{if(e.key==='Enter')router.push('/players/'+p.id)}}>
         <td className="rank-col">#{(safePage-1)*PAGE_SIZE+i+1}</td>
-        <td><Link className="player-link team-player-link" href={'/players/'+p.id}><i className="club-dot"/><b>{p.full_name}</b></Link>{playerNote(p)?<small className="cell-note">{playerNote(p)}</small>:null}</td>
+        <td><Link className="player-link team-player-link" href={'/players/'+p.id}><i className="club-dot"/><b>{playerLabel(p)}</b></Link>{playerNote(p)?<small className="cell-note">{playerNote(p)}</small>:null}</td>
         <td><Link className="team-table-link" href={'/teams/'+p.team_id}>{p.team}</Link></td><td><span className={'pos '+p.position}>{posLabel(p.position)}</span></td><td>{p.projection?.opponent_name||'—'}</td><td>{p.projection?.venue==='HOME'?'Ev':p.projection?.venue==='AWAY'?'Dep':'—'}</td>
         <td>{num(p.price,1)}m</td><td><b>{num(p.total_points,0)}</b></td><td>{pct(p.projection?.xi_probability)}</td><td>{num(p.projection?.x_minutes,0)}</td><td><b>{num(p.projection?.xfp)}</b></td>
         <td>{num(p.projection?.p25,1)}</td><td>{num(p.projection?.p90,1)}</td><td>{pct(p.projection?.six_plus_probability)}</td><td>{num(p.projection?.expected_goals)}</td><td>{num(p.projection?.expected_assists)}</td><td>{num(p.projection?.value_score)}</td>

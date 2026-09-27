@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { getMatches, getPlayersWithProjection } from '@/lib/data'
 import { teamCssVars } from '@/lib/teamThemes'
+import {playerLabel} from '@/lib/playerPresentation'
 
 export const revalidate=300
 
@@ -32,7 +33,7 @@ export default async function Home(){
       </div>
       <aside className="home-highlight-grid">
         {highlights.map(([label,p,val,unit,note])=><Link key={label} className="card spotlight-card team-accent-card" style={teamCssVars(p?.team)} href={p?'/players/'+p.id:'/players'}>
-          <span>{label}</span><b>{p?.full_name||'—'}</b><small>{p?.team||'—'} • {note}</small><strong>{val} <em>{unit}</em></strong>
+          <span>{label}</span><b>{playerLabel(p)}</b><small>{p?.team||'—'} • {note}</small><strong>{val} <em>{unit}</em></strong>
         </Link>)}
         <div className="card spotlight-card home-status-card home-status-week">
           <span>Güncel hafta</span>

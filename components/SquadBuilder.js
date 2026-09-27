@@ -4,6 +4,7 @@ import { saveSquad } from '@/app/actions'
 import { teamCssVars } from '@/lib/teamThemes'
 import { availabilityCompactNote, availabilityIsIssue } from '@/lib/availability'
 import {BUDGET,FORMATION_MAP,MAX_PLAYERS_PER_CLUB,SQUAD_LIMITS,SQUAD_SIZE,STARTING_GK,STARTING_XI_SIZE} from '@/lib/rules'
+import {playerLabel} from '@/lib/playerPresentation'
 const POS_ORDER={GK:0,DEF:1,MID:2,FWD:3}
 const posLabel={GK:'KL',DEF:'DEF',MID:'OS',FWD:'FOR'}
 
@@ -14,13 +15,7 @@ function stateSignature(payload=[]){
     .map(x=>({player_id:Number(x.player_id),is_captain:Boolean(x.is_captain),bench_order:x.bench_order===null?null:Number(x.bench_order)}))
     .sort((a,b)=>a.player_id-b.player_id))
 }
-function fallbackName(name=''){
-  const parts=String(name).trim().split(/\s+/).filter(Boolean)
-  return parts.at(-1)||'—'
-}
-function displayName(player){
-  return player?.display_name || fallbackName(player?.full_name)
-}
+function displayName(player){ return playerLabel(player) }
 function shirtMark(player){ return posLabel[player?.position] || player?.position || '—' }
 function formationFromState(state,map){
   const starters=state.filter(x=>x.bench_order===null).map(x=>map.get(x.player_id)).filter(Boolean)
@@ -134,11 +129,11 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
     let out=players.filter(p=>
       (!pos||p.position===pos)&&
       (!team||p.team===team)&&
-      (!q||(`${p.full_name} ${p.team} ${p.projection?.opponent_name||''}`).toLocaleLowerCase('tr').includes(q.toLocaleLowerCase('tr')))
+      (!q||(`${p.full_name} ${p.short_label||''} ${p.team} ${p.projection?.opponent_name||''}`).toLocaleLowerCase('tr').includes(q.toLocaleLowerCase('tr')))
     )
     out=[...out].sort((a,b)=>{
       if(sortKey==='name'){
-        const cmp=String(a.full_name||'').localeCompare(String(b.full_name||''),'tr')
+        const cmp=playerLabel(a).localeCompare(playerLabel(b),'tr')
         return sortDir==='asc'?cmp:-cmp
       }
       const av=sortKey==='price'?Number(a.price||0):sortKey==='points'?totalPoints(a):xfp(a)
@@ -422,7 +417,7 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
             return <div className={`picker-player ${chosen?'chosen':''} ${disabled?'disabled':''}`} style={teamCssVars(p.team)} key={p.id}>
               <div className="picker-shirt-wrap"><span className={`fantasy-shirt tiny ${p.position}`} style={teamCssVars(p.team)}><i>{shirtMark(p)}</i></span></div>
               <div className="picker-copy">
-                <b>{p.full_name}</b>
+                <b>{playerLabel(p)}</b>
                 <small><strong>{p.team}</strong><em>Rakip: {p.projection?.opponent_name||'—'}</em></small>
                 {availabilityNote?<small className="picker-availability-note">{availabilityNote}</small>:null}
               </div>
@@ -515,7 +510,7 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
                 >
                   <span className="bench-order">{i+1}</span>
                   <span className={`fantasy-shirt mini ${p.position}`} style={teamCssVars(p.team)}><i>{shirtMark(p)}</i></span>
-                  <span className="bench-copy"><b>{p.full_name}</b><small>{p.team} • {posLabel[p.position]} • {xfp(p).toFixed(1)} xFP</small></span>
+                  <span className="bench-copy"><b>{playerLabel(p)}</b><small>{p.team} • {posLabel[p.position]} • {xfp(p).toFixed(1)} xFP</small></span>
                 </button>
               })}
             </div>
@@ -529,13 +524,13 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
           <div className="captain-candidates">
             {captainCandidates.map((p,i)=><button type="button" className={p.id===captainId?'active':''} onClick={()=>setCaptainId(p.id)} key={p.id}>
               <span>#{i+1}</span>
-              <div><b>{p.full_name}</b><small>{p.team}</small></div>
+              <div><b>{playerLabel(p)}</b><small>{p.team}</small></div>
               <strong>{xfp(p).toFixed(1)}<small>xFP</small></strong>
             </button>)}
           </div>
           <div className="captain-impact">
             <span>Seçili kaptan</span>
-            <b>{xi.find(p=>p.id===captainId)?.full_name||'—'}</b>
+            <b>{playerLabel(xi.find(p=>p.id===captainId))}</b>
             <strong>+{captainBonus.toFixed(1)} xFP</strong>
           </div>
         </aside>
@@ -563,7 +558,7 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
     <section className="card squad-insight-bar">
       <div>
         <span className="eyebrow">MODEL ÖNERİSİ</span>
-        <h2>{bestMove&&bestMove.gain>0?`${bestMove.out.full_name} → ${bestMove.inn.full_name}`:'Kadron şu an dengeli görünüyor'}</h2>
+        <h2>{bestMove&&bestMove.gain>0?`${playerLabel(bestMove.out)} → ${playerLabel(bestMove.inn)}`:'Kadron şu an dengeli görünüyor'}</h2>
         {bestMove&&bestMove.gain>0?<p>Tek transferde yaklaşık <b>+{bestMove.gain.toFixed(2)} xFP</b> potansiyeli.</p>:<p>Mevcut xFP’ye göre pozitif tek transfer bulunamadı.</p>}
         {bestMove&&bestMove.gain>0?<button type="button" className="squad-tool-btn model-apply-btn" onClick={applyBestMove}>Öneriyi Uygula</button>:null}
       </div>

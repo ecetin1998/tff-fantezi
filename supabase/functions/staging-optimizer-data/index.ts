@@ -67,13 +67,13 @@ Deno.serve(async(req:Request)=>{
   const u=new URL(req.url);
   if (!(await gateAuthorized(req))) return Response.json({error:"unauthorized"},{status:401});const sb=createClient(Deno.env.get("SUPABASE_URL")!,Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
   const {data,error}=await sb.from("scout_player_projections")
-    .select("player_id,xfp,p90,x_minutes,availability_probability,scout_players!inner(team_id,position,price,active,status)")
+    .select("player_id,xfp,p90,x_minutes,availability_probability,confidence,scout_players!inner(team_id,position,price,active)")
     .eq("run_id",RUN);
   if(error)return Response.json({error:error.message},{status:500});
   return Response.json((data||[]).map((x:any)=>({
     player_id:Number(x.player_id),xfp:Number(x.xfp)||0,p90:Number(x.p90)||0,x_minutes:Number(x.x_minutes)||0,
     availability:Number(x.availability_probability)||0,team_id:Number(x.scout_players.team_id),
     position:String(x.scout_players.position),price:Number(x.scout_players.price)||0,
-    active:Boolean(x.scout_players.active),status:String(x.scout_players.status||"")
+    active:Boolean(x.scout_players.active),confidence:String(x.confidence||"medium")
   })));
 });
