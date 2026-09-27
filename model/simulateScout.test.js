@@ -1,5 +1,5 @@
 const assert=require('node:assert/strict')
-const {simulateScout,cardPoints}=require('./simulateScout')
+const {simulateScout,cardPoints,expectedKeeperSaves,bonusByCompetitionRank,redCardExitMinute,isActiveAt}=require('./simulateScout')
 
 function player(id,club,pos='MID'){
   return {
@@ -112,4 +112,11 @@ function zeroEventInput(doubleWeek=false){
   assert.equal(bonus[3],undefined);
 }
 
-console.log('DGW, opponent-aware saves and bonus-tie checks passed');
+{
+  const exit=redCardExitMinute(0,90,.42);
+  assert(exit>0&&exit<90,'red card must end the player minute before full time');
+  assert.equal(isActiveAt(0,exit,exit-1),true);
+  assert.equal(isActiveAt(0,exit,exit),false,'dismissed player cannot be selected for scoring/assist events after red');
+}
+
+console.log('DGW, opponent-aware saves, red-card and bonus-tie checks passed');
