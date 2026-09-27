@@ -45,6 +45,8 @@ assert.equal(roleIsDetailed({primary_role:'FB'}),true)
 const importer=fs.readFileSync('supabase/functions/ingest-scout-enrichment/index.ts','utf8')
 assert.match(importer,/scout_match_attack_events/)
 assert.match(importer,/scout_refresh_enrichment_profiles/)
+assert.match(importer,/xa_per90:xa90/)
+assert.doesNotMatch(importer,/xa_model_per90:xa90/,'observed current xA must not overwrite the prior/model xA')
 assert.match(importer,/workflow_dispatch/)
 assert.doesNotMatch(importer,/fetch\([^)]*sofascore|fetch\([^)]*fotmob/i)
 
