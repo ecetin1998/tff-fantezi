@@ -1,0 +1,62 @@
+{
+  "season": "2026-27",
+  "budget": 100,
+  "squad": {
+    "GK": 2,
+    "DEF": 5,
+    "MID": 5,
+    "FWD": 3
+  },
+  "max_per_club": 3,
+  "formations": [
+    "3-4-3",
+    "3-5-2",
+    "4-3-3",
+    "4-4-2",
+    "4-5-1",
+    "5-2-3",
+    "5-3-2",
+    "5-4-1"
+  ],
+  "scoring": {
+    "appearance": 1,
+    "appearance_60": 1,
+    "goal": {
+      "GK": 10,
+      "DEF": 6,
+      "MID": 5,
+      "FWD": 4
+    },
+    "assist": 3,
+    "clean_sheet": {
+      "GK": 4,
+      "DEF": 4,
+      "MID": 1,
+      "FWD": 0
+    },
+    "conceded_per_2": {
+      "GK": -1,
+      "DEF": -1
+    },
+    "saves_per_3": 1,
+    "yellow": -1,
+    "red": -3,
+    "own_goal": -2,
+    "penalty_miss": -2,
+    "penalty_save": 5,
+    "bonus": [
+      3,
+      2,
+      1
+    ]
+  },
+  "transfers": {
+    "free_per_week": 1,
+    "max_banked": 2,
+    "hit_cost": 4
+  },
+  "vice_captain": true,
+  "optimizer": {
+    "max_defensive_stack_per_team": 2
+  }
+}
