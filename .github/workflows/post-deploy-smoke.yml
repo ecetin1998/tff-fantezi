@@ -1,32 +1,32 @@
 name: Post-deploy smoke
 
 on:
-  deployment_status:
+  workflow_run:
+    workflows: ["Cloudflare Workers deploy"]
+    types: [completed]
 
 permissions:
   contents: read
-  deployments: read
 
 jobs:
   smoke:
-    if: github.event.deployment_status.state == 'success' && (github.event.deployment.production_environment == true || github.event.deployment.environment == 'Production' || github.event.deployment.environment == 'production')
+    if: github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main'
     runs-on: ubuntu-latest
     env:
-      BASE_URL: https://tff-fantezi.vercel.app
+      BASE_URL: https://tff-fantezi.ecetin1998.workers.dev
+      EXPECTED_SHA: ${{ github.event.workflow_run.head_sha }}
     steps:
-      - name: Checkout deployed revision
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.deployment.sha }}
-      - name: Validate deployment URL
+          ref: ${{ github.event.workflow_run.head_sha }}
+      - name: Verify live SHA is main deployment SHA
         shell: bash
         run: |
           set -euo pipefail
-          test -n "$BASE_URL"
-          case "$BASE_URL" in
-            http://*|https://*) ;;
-            *) echo "Invalid deployment URL: $BASE_URL" >&2; exit 1 ;;
-          esac
-      - name: Smoke deployed revision
-        shell: bash
-        run: bash scripts/smoke.sh
+          live_sha="$(curl -fsSL "$BASE_URL/api/health" | node -pe "JSON.parse(require('fs').readFileSync(0,'utf8')).sha")"
+          test "$live_sha" = "$EXPECTED_SHA" || {
+            echo "Live SHA $live_sha does not match expected $EXPECTED_SHA" >&2
+            exit 1
+          }
+      - name: Smoke Workers production
+        run: SKIP_CDN_CHECK=1 bash scripts/smoke.sh
