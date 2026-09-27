@@ -17,6 +17,12 @@ assert.match(migration,/position_prior/)
 assert.match(migration,/Do not backfill historical replay rows/)
 assert.doesNotMatch(migration,/update public\.scout_replay_player_inputs[\s\S]*primary_role/i)
 
+const hardening=fs.readFileSync('supabase/migrations/20260928104000_enrichment_security_indexes.sql','utf8')
+assert.match(hardening,/scout_match_attack_events_no_browser_access/)
+assert.match(hardening,/using\(false\)/)
+assert.match(hardening,/scout_match_attack_events_assist_player_id_idx/)
+assert.match(hardening,/scout_team_tactical_profiles_team_id_idx/)
+
 const data=fs.readFileSync('lib/data.js','utf8')
 assert.match(data,/TEAM_TACTICAL_PUBLIC_COLUMNS/)
 assert.match(data,/xa_model_per90/)
