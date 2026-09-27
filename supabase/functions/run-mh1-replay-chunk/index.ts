@@ -268,6 +268,19 @@ Deno.serve(async (req: Request) => {
     for(const m of matches){
       gc.fill(0);
       for(const i of m.both){base[i]=0;goals[i]=0;assists[i]=0;cs[i]=0;saves[i]=0;conceded[i]=0;cards[i]=0;pen[i]=0;ownc[i]=0}
+      // Draw dismissals before attack events so sent-off players leave the event pool.
+      for(const i of m.both){
+        if(mins[i]<=0) continue;
+        const p=P[i],ex=mins[i]/90;
+        const yc=random()<Math.min(.8,p.rates[4]*ex),rc=random()<Math.min(.15,p.rates[5]*ex);
+        cards[i]=-(yc?1:0)-(rc?3:0);
+        if(rc){
+          const span=Math.max(1,leave[i]-enter[i]);
+          leave[i]=Math.max(enter[i]+1,Math.min(leave[i],Math.floor(enter[i]+random()*span)));
+          mins[i]=Math.max(0,leave[i]-enter[i]);
+          app[i]=(mins[i]>0?1:0)+(mins[i]>60?1:0);
+        }
+      }
       const scores=[poisson(m.hl),poisson(m.al)];
       for(let side=0;side<2;side++){
         const ids=side===0?m.home:m.away,opp=side===0?m.away:m.home;
@@ -286,12 +299,17 @@ Deno.serve(async (req: Request) => {
       let v1=-999,v2=-999,v3=-999;
       for(const i of m.both){
         const p=P[i],ex=mins[i]/90;
-        cs[i]=mins[i]>=60&&gc[i]===0?csPts[p.pc]:0;
+        const oppGoals=p.club===m.home_id?scores[1]:scores[0];
+        const oppLambda=p.club===m.home_id?m.al:m.hl;
+        cs[i]=mins[i]>=60&&oppGoals===0?csPts[p.pc]:0;
         if(p.pc<=1)conceded[i]=-Math.floor(gc[i]/2);
-        if(p.pc===0)saves[i]=Math.floor(poisson(p.rates[6]*ex)/3);
-        const yc=random()<Math.min(.8,p.rates[4]*ex),rc=random()<Math.min(.15,p.rates[5]*ex);
-        cards[i]=-(yc?1:0)-(rc?3:0);if(rc)cs[i]=0;
-        pen[i]=-2*poisson(p.rates[7]*ex)+(p.pc===0?5*poisson(p.rates[8]*ex):0);
+        if(p.pc===0){
+          const saveRate=Math.max(.55,Math.min(.82,.68+.025*((p.rates[6]||0)-3)));
+          const oppSot=Math.max(.05,oppLambda)/Math.max(.12,1-saveRate);
+          saves[i]=Math.floor(poisson(oppSot*saveRate*ex)/3);
+        }
+        const penaltyPressure=Math.max(.25,Math.min(3,oppLambda/1.35));
+        pen[i]=-2*poisson(p.rates[7]*ex)+(p.pc===0?5*poisson(p.rates[8]*ex*penaltyPressure):0);
         const b=app[i]+goals[i]+assists[i]+cs[i]+saves[i]+conceded[i]+cards[i]+pen[i]+ownc[i];
         base[i]=b;
         if(mins[i]>0){if(b>v1){v3=v2;v2=v1;v1=b}else if(b<v1&&b>v2){v3=v2;v2=b}else if(b<v2&&b>v3)v3=b}
@@ -302,8 +320,8 @@ Deno.serve(async (req: Request) => {
         let bon=0;
         if(mins[i]>0){
           if(base[i]===v1)bon=3;
-          else if(base[i]===v2&&c1<3)bon=2;
-          else if(base[i]===v3&&c1+c2<3)bon=1;
+          else if(base[i]===v2&&c1<3)bon=[3,2,1][c1]||0;
+          else if(base[i]===v3&&c1+c2<3)bon=[3,2,1][c1+c2]||0;
         }
         const fp=base[i]+bon;
         sumXi[i]+=start[i];if(mins[i]>0)sumPlay[i]++;if(mins[i]>=60)sumP60[i]++;
