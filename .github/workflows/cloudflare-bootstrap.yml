@@ -20,8 +20,11 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+          cache: npm
+      - name: Install project dependencies
+        run: npm ci --no-audit --no-fund
       - name: Generate Cloudflare Workers config
-        run: npx --yes wrangler@4.119.0 setup --yes
+        run: npx --yes wrangler@4.142.0 setup --yes
       - name: Verify vinext build
         run: npm run build:vinext
       - name: Commit generated configuration
