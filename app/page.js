@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { getMatches, getPlayersWithProjection } from '@/lib/data'
 import { teamCssVars } from '@/lib/teamThemes'
 import {playerLabel} from '@/lib/playerPresentation'
+import DataFreshnessBanner from '@/components/DataFreshnessBanner'
 
 export const revalidate=300
 
@@ -20,6 +21,7 @@ export default async function Home(){
     [`MH${run?.gameweek||'—'} Top-25’e girme adayı #1`,top25,`#${Number(top25?.projection?.top25_rank||1)}`,'Top25 sıra','Yüksek puan patlaması ihtimali en güçlü aday'],
   ]
   return <>
+    <DataFreshnessBanner run={run}/>
     <section className="home-intro-layout">
       <div className="card home-intro-hero">
         <span className="eyebrow">SÜPER LİG FANTASY ANALİZ PLATFORMU</span>

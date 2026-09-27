@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { getMatches } from '@/lib/data'
 import { teamCssVars } from '@/lib/teamThemes'
+import DataFreshnessBanner from '@/components/DataFreshnessBanner'
 
 export const revalidate=300
 export const metadata={title:'Maç Tahminleri'}
@@ -98,6 +99,7 @@ function fantasyReading(m){
 export default async function Matches(){
   const {matches,run}=await getMatches()
   return <>
+    <DataFreshnessBanner run={run}/>
     <div className="section-title">
       <div><span className="eyebrow">MAÇ MODELİ</span><h1>MH{run?.gameweek||'—'} Maç Tahminleri</h1></div>
       <span className="muted">xG • sonuç olasılığı • clean sheet • fantasy maç profili</span>
