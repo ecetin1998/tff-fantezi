@@ -29,6 +29,11 @@ for(const file of jsTests){
   })
 }
 
+test('model/optimize_transfers_test.py',{concurrency:false},()=>{
+  const result=spawnSync('python3',['-m','pytest','-q','model/optimize_transfers_test.py'],{cwd:root,encoding:'utf8'})
+  assert.equal(result.status,0,[result.stdout,result.stderr].filter(Boolean).join('\n'))
+})
+
 test('model/optimizer_rules_test.py',{concurrency:false},()=>{
   const result=spawnSync('python3',['-m','pytest','-q','model/optimizer_rules_test.py'],{cwd:root,encoding:'utf8'})
   assert.equal(result.status,0,[result.stdout,result.stderr].filter(Boolean).join('\n'))
