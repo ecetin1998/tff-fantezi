@@ -2,41 +2,20 @@ name: Cloudflare Workers bootstrap
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - fix/cloudflare-workers-bootstrap
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
-  autoconfig:
-    if: github.actor != 'github-actions[bot]'
+  verify:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          ref: fix/cloudflare-workers-bootstrap
       - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
-      - name: Install project dependencies
+      - name: Install
         run: npm ci --no-audit --no-fund
-      - name: Remove optional Sentry package for OpenNext compatibility
-        run: npm uninstall @sentry/nextjs --save --no-audit --no-fund
-      - name: Generate Cloudflare Workers config
-        run: npx --yes wrangler@4.142.0 setup --yes
-      - name: Persist generated Cloudflare configuration
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -A
-          if git diff --cached --quiet; then
-            echo "No generated changes to commit"
-          else
-            git commit -m "chore: configure Cloudflare Workers with OpenNext"
-            git push origin HEAD:fix/cloudflare-workers-bootstrap
-          fi
       - name: Verify OpenNext build
-        run: npx opennextjs-cloudflare build
+        run: npm run deploy -- --dry-run
