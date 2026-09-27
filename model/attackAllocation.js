@@ -1,26 +1,51 @@
 // Forecast allocation only. Recorded match xG is never changed.
-// A single high-xG shot carries less weight as evidence of a repeatable role.
-function attackWeights(player, matches = []) {
-  const rates = player.rates;
-  const observed = matches.filter(m => Number(m.id) === Number(player.id) && Number(m.mins) > 0);
-  const exposure = observed.reduce((sum, m) => sum + Number(m.mins) / 90, 0);
-  let excess = 0;
-  for (const m of observed) {
-    const shots = Number(m.shots);
-    const xg = Number(m.xg);
-    if (!Number.isFinite(shots) || !Number.isFinite(xg) || shots !== 1 || xg <= 0) continue;
-    // The cap is on the forecast influence of one shot, never on historical xG.
-    const limit = player.pos === 'DEF' ? 0.27 : player.pos === 'MID' ? 0.33 : 0.42;
-    excess += Math.max(0, xg - limit);
+// rates[0] = xG/90, rates[1] = goals/90, rates[2] = assists/90,
+// rates[3] = xA/90. Creation leans more on xA than realized assists.
+
+function normalizedDefenderRole(player={}){
+  const raw=String(
+    player.sub_role ?? player.fotmob_position ?? player.position_detail ?? player.role_detail ?? ''
+  ).trim().toUpperCase().replace(/[ _-]+/g,'');
+  if(['CB','CENTREBACK','CENTERBACK','STOPER'].includes(raw))return 'CB';
+  if(['WB','WINGBACK','LWB','RWB','KANATBEK'].includes(raw))return 'WB';
+  if(['FB','FULLBACK','LB','RB','BEK'].includes(raw))return 'FB';
+  return player.pos==='DEF'?'DEF':player.pos;
+}
+
+function singleShotCap(player={}){
+  const role=normalizedDefenderRole(player);
+  if(role==='CB')return .22;
+  if(role==='FB')return .32;
+  if(role==='WB')return .36;
+  if(player.pos==='DEF')return .27;
+  if(player.pos==='MID')return .33;
+  return .42;
+}
+
+function attackWeights(player,matches=[]){
+  const rates=player.rates||[];
+  const observed=matches.filter(m=>Number(m.id)===Number(player.id)&&Number(m.mins)>0);
+  const exposure=observed.reduce((sum,m)=>sum+Number(m.mins)/90,0);
+  let excess=0;
+  const cap=singleShotCap(player);
+  for(const m of observed){
+    const shots=Number(m.shots);
+    const xg=Number(m.xg);
+    if(!Number.isFinite(shots)||!Number.isFinite(xg)||shots!==1||xg<=0)continue;
+    excess+=Math.max(0,xg-cap);
   }
-  const attenuation = observed.length >= 5 ? 0.55 : 0.85;
-  const adjustedXg = Math.max(rates[0] * 0.45, rates[0] - attenuation * excess / (2 + exposure));
+  const attenuation=observed.length>=5?.55:.85;
+  const xgRate=Number(rates[0]||0),goalRate=Number(rates[1]||0);
+  const assistRate=Number(rates[2]||0),xaRate=Number(rates[3]||0);
+  const adjustedXg=Math.max(xgRate*.45,xgRate-attenuation*excess/(2+exposure));
   return {
-    goal: Math.max(1e-6, 0.75 * adjustedXg + 0.25 * rates[1]),
-    assist: Math.max(1e-6, 0.5 * rates[3] + 0.5 * rates[2]),
+    goal:Math.max(1e-6,.75*adjustedXg+.25*goalRate),
+    assist:Math.max(1e-6,.70*xaRate+.30*assistRate),
     adjustedXg,
-    singleShotExcess: excess,
+    singleShotExcess:excess,
+    singleShotCap:cap,
+    subRole:normalizedDefenderRole(player),
   };
 }
 
-module.exports = { attackWeights };
+module.exports={attackWeights,singleShotCap,normalizedDefenderRole};
