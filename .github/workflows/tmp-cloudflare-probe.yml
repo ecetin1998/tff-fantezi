@@ -1,0 +1,32 @@
+name: Temp Cloudflare resource probe
+on:
+  push:
+    branches: [tmp/cloudflare-resource-probe]
+permissions:
+  contents: read
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - name: Identity
+        run: npx wrangler whoami
+      - name: Worker secret names
+        run: npx wrangler secret list
+      - name: D1 tag cache schema
+        run: npx wrangler d1 execute tff-fantezi-next-tag-cache --remote --file=cloudflare/d1-tag-cache.sql
+      - name: R2 incremental cache
+        run: |
+          set -euo pipefail
+          npx wrangler r2 bucket list
+          if ! npx wrangler r2 bucket list | grep -q 'tff-fantezi-next-inc-cache'; then
+            npx wrangler r2 bucket create tff-fantezi-next-inc-cache
+          fi
