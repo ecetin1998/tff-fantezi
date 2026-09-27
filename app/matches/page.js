@@ -8,6 +8,37 @@ export const revalidate=300
 export const metadata={title:'Maç Tahminleri'}
 
 const matchupLabel={good:'Yüksek',neutral:'Orta',tough:'Düşük'}
+const attackMatchupLevel=xg=>Number(xg)>=1.65?'good':Number(xg)<=1.15?'tough':'neutral'
+const defenseMatchupLevel=cs=>Number(cs)>=.40?'good':Number(cs)<=.25?'tough':'neutral'
+
+function balancedVariant(m){
+  const homeXg=Number(m.home_xg||0),awayXg=Number(m.away_xg||0)
+  const total=homeXg+awayXg
+  const xgGap=Math.abs(homeXg-awayXg)
+  const csGap=Math.abs(Number(m.home_cs_probability||0)-Number(m.away_cs_probability||0))
+  if(total>=2.65&&xgGap<=.30)return 0
+  if(csGap>=.10)return 1
+  return 2
+}
+
+function balancedReading(m,variant){
+  const homeXg=Number(m.home_xg||0),awayXg=Number(m.away_xg||0)
+  const homeCs=Number(m.home_cs_probability||0),awayCs=Number(m.away_cs_probability||0)
+  const attackSide=homeXg>=awayXg?'home':'away'
+  const attackName=attackSide==='home'?m.home_team:m.away_team
+  const attackTop=attackSide==='home'?m.home_fantasy?.top_attack:m.away_fantasy?.top_attack
+  const value=(attackSide==='home'?m.home_fantasy:m.away_fantasy)?.best_value
+  const safer=homeCs>=awayCs?m.home_team:m.away_team
+  const templates=[
+    'Toplam gol beklentisi canlı ama taraflar arasında net bir xG kopuşu yok; bitiricilik, duran top ve ceza sahası rolü oyuncu seçiminde ayrıştırıcı.',
+    `Sonuç tarafı dengeli kalırken clean sheet ihtimali ${safer} lehine ayrışıyor; savunma seçimi ile hücum tavanını aynı maçta birlikte tartmak daha anlamlı.`,
+    'xG ve clean sheet farkları dar; dakika güveni, duran top rolü ve ceza sahası aksiyonları takım isminden daha belirleyici.'
+  ]
+  return {
+    label:'Dengeli risk',
+    text:`${templates[variant]} ${attackTop?`${attackName} tarafında ${attackTop.name} ${attackTop.xfp.toFixed(1)} xFP ile öne çıkıyor.`:''} ${value&&value.player_id!==attackTop?.player_id&&value.xfp>=3.5?`Fiyat/performans tarafında ${value.name} da ${value.price.toFixed(1)}m fiyatıyla dikkat çekiyor.`:''}`.replace(/\s+/g,' ').trim()
+  }
+}
 const profileClass=total=>total>=3?'high':total<=2?'low':'medium'
 const pct=v=>Math.round(Number(v||0)*100)
 
@@ -87,29 +118,24 @@ function fantasyReading(m){
     }
   }
 
-  const attackSide=homeXg>=awayXg?'home':'away'
-  const attackName=attackSide==='home'?m.home_team:m.away_team
-  const attackTop=attackSide==='home'?homeTop:awayTop
-  const value=(attackSide==='home'?m.home_fantasy:m.away_fantasy)?.best_value
-  const xgGap=Math.abs(homeXg-awayXg)
-  const csGap=Math.abs(homeCs-awayCs)
-  let base
-  if(total>=2.65&&xgGap<=.30){
-    base='Toplam gol beklentisi canlı ama taraflar arasında net bir xG kopuşu yok; bitiricilik, duran top ve ceza sahası rolü oyuncu seçiminde ayrıştırıcı.'
-  }else if(csGap>=.10){
-    const safer=homeCs>=awayCs?m.home_team:m.away_team
-    base=`Sonuç tarafı dengeli kalırken clean sheet ihtimali ${safer} lehine ayrışıyor; savunma seçimi ile hücum tavanını aynı maçta dengeli kurmak önemli.`
-  }else{
-    base='xG ve clean sheet farkları dar; dakika güveni, duran top rolü ve ceza sahası aksiyonları takım isminden daha belirleyici.'
-  }
-  return {
-    label:'Dengeli risk',
-    text:`${base} ${attackTop?`${attackName} tarafında ${attackTop.name} ${attackTop.xfp.toFixed(1)} xFP ile öne çıkıyor.`:''} ${value&&value.player_id!==attackTop?.player_id&&value.xfp>=3.5?`Fiyat/performans tarafında ${value.name} da ${value.price.toFixed(1)}m fiyatıyla dikkat çekiyor.`:''}`.replace(/\s+/g,' ').trim()
-  }
+  return null
 }
 
 export default async function Matches(){
   const {matches,run}=await getMatches()
+  const balancedCounts=[0,0,0]
+  const readings=new Map()
+  for(const m of matches){
+    let reading=fantasyReading(m)
+    if(!reading){
+      const preferred=balancedVariant(m)
+      const candidates=[preferred,(preferred+1)%3,(preferred+2)%3]
+      const selected=candidates.find(index=>balancedCounts[index]<2) ?? (Number(m.match_id||0)%3)
+      balancedCounts[selected]+=1
+      reading=balancedReading(m,selected)
+    }
+    readings.set(m.match_id,reading)
+  }
   return <>
     <DataFreshnessBanner run={run}/>
     <div className="section-title">
@@ -125,7 +151,11 @@ export default async function Matches(){
         const homeCs=Number(m.home_cs_probability||0),awayCs=Number(m.away_cs_probability||0)
         const attackEdge=homeXg===awayXg?null:(homeXg>awayXg?'home':'away')
         const cleanEdge=homeCs===awayCs?null:(homeCs>awayCs?'home':'away')
-        const reading=fantasyReading(m)
+        const homeAttackLevel=attackMatchupLevel(homeXg)
+        const awayAttackLevel=attackMatchupLevel(awayXg)
+        const homeDefenseLevel=defenseMatchupLevel(homeCs)
+        const awayDefenseLevel=defenseMatchupLevel(awayCs)
+        const reading=readings.get(m.match_id)
         return <article className="card match-card modern-match-card match-analysis-card" key={m.match_id}>
           <div className="match-card-top">
             <span className="match-date-label">
@@ -140,8 +170,8 @@ export default async function Matches(){
               <span>EV</span>
               <Link className="match-team-link" style={teamCssVars(m.home_team)} href={'/teams/'+m.home_team_id}><i className="club-dot"/><b>{m.home_team}</b></Link>
               <div className="match-team-meta matchup-badges">
-                <em className={'matchup-pill '+(m.home_attack_level||'neutral')}>Gol beklentisi: {matchupLabel[m.home_attack_level]||'Orta'}</em>
-                <em className={'matchup-pill '+(m.home_defense_level||'neutral')}>CS şansı: {matchupLabel[m.home_defense_level]||'Orta'}</em>
+                <em className={'matchup-pill '+homeAttackLevel}>Gol beklentisi: {matchupLabel[homeAttackLevel]||'Orta'}</em>
+                <em className={'matchup-pill '+homeDefenseLevel}>CS şansı: {matchupLabel[homeDefenseLevel]||'Orta'}</em>
               </div>
             </div>
 
@@ -155,8 +185,8 @@ export default async function Matches(){
               <span>DEP</span>
               <Link className="match-team-link away-link" style={teamCssVars(m.away_team)} href={'/teams/'+m.away_team_id}><i className="club-dot"/><b>{m.away_team}</b></Link>
               <div className="match-team-meta away-meta matchup-badges">
-                <em className={'matchup-pill '+(m.away_attack_level||'neutral')}>Gol beklentisi: {matchupLabel[m.away_attack_level]||'Orta'}</em>
-                <em className={'matchup-pill '+(m.away_defense_level||'neutral')}>CS şansı: {matchupLabel[m.away_defense_level]||'Orta'}</em>
+                <em className={'matchup-pill '+awayAttackLevel}>Gol beklentisi: {matchupLabel[awayAttackLevel]||'Orta'}</em>
+                <em className={'matchup-pill '+awayDefenseLevel}>CS şansı: {matchupLabel[awayDefenseLevel]||'Orta'}</em>
               </div>
             </div>
           </div>
