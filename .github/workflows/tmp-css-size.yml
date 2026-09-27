@@ -1,0 +1,36 @@
+name: Temp CSS size test
+on:
+  push:
+    branches: [tmp/cssnano-pass]
+permissions:
+  contents: write
+jobs:
+  css:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: https://example.supabase.co
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable_ci_placeholder
+      NEXT_PUBLIC_SITE_URL: https://tff-fantezi.ecetin1998.workers.dev
+      SCOUT_OFFLINE_BUILD: '1'
+      SCOUT_DATA_API_KEY: runtime-test-key-12345678901234567890
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: tmp/cssnano-pass
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm install --package-lock-only --no-audit --no-fund
+      - run: npm ci --no-audit --no-fund
+      - run: npm run build
+      - name: Commit lockfile
+        if: success()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add package-lock.json
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m "tmp: lock cssnano"
+          git push origin HEAD:tmp/cssnano-pass
