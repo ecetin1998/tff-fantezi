@@ -351,6 +351,28 @@ from public,anon,authenticated;
 grant execute on function private.refresh_scout_team_tactical_profiles(text,integer)
 to service_role;
 
+create or replace function public.scout_refresh_enrichment_profiles(
+  p_season text default '2026-27',
+  p_through_gameweek integer default null
+)
+returns jsonb
+language plpgsql
+security definer
+set search_path=''
+as $fn$
+declare
+  v_qa jsonb;
+begin
+  perform private.refresh_scout_team_tactical_profiles(p_season,p_through_gameweek);
+  select public.scout_enrichment_qa() into v_qa;
+  return v_qa;
+end;
+$fn$;
+
+-- Function body references scout_enrichment_qa, which is defined later in this migration.
+-- Recreate the wrapper after QA definition below.
+drop function public.scout_refresh_enrichment_profiles(text,integer);
+
 select private.refresh_scout_team_tactical_profiles('2026-27',null);
 
 -- Keep the current public card view as the single fast read, with enrichment appended.
@@ -527,5 +549,27 @@ select jsonb_build_object(
 $qa$;
 
 grant execute on function public.scout_enrichment_qa() to anon,authenticated,service_role;
+
+create or replace function public.scout_refresh_enrichment_profiles(
+  p_season text default '2026-27',
+  p_through_gameweek integer default null
+)
+returns jsonb
+language plpgsql
+security definer
+set search_path=''
+as $fn$
+declare
+  v_qa jsonb;
+begin
+  perform private.refresh_scout_team_tactical_profiles(p_season,p_through_gameweek);
+  select public.scout_enrichment_qa() into v_qa;
+  return v_qa;
+end;
+$fn$;
+revoke all on function public.scout_refresh_enrichment_profiles(text,integer)
+from public,anon,authenticated;
+grant execute on function public.scout_refresh_enrichment_profiles(text,integer)
+to service_role;
 
 commit;
