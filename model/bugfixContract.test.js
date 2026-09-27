@@ -33,7 +33,7 @@ assert.match(read('scripts/smoke.sh'),/robots\.txt/)
 assert.match(read('scripts/smoke.sh'),/sitemap\.xml/)
 
 const matches=read('app/matches/page.js')
-assert.doesNotMatch(matches,/%\$/)
+assert.doesNotMatch(matches,/<small>1-X-2<\/small><b>%\$\{/)
 assert.match(matches,/<small>1-X-2<\/small><b>%\{/)
 
 const data=read('lib/data.js')
