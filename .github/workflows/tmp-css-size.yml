@@ -107,7 +107,7 @@ jobs:
             return {map,order}
           }
           function compactLevel(input){
-            const s=input.replace(/\\/\\*[\\s\\S]*?\\*\\//g,'')
+            const s=input
             const nodes=[]
             let i=0
             while(i<s.length){
