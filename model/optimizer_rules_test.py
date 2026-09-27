@@ -1,39 +1,18 @@
 import sys
 from pathlib import Path
-
-ROOT=Path(__file__).resolve().parents[1]
-sys.path.insert(0,str(ROOT/'model'))
-
-from optimizer_rules import (  # noqa: E402
-    BUDGET,FORMATIONS,MAX_PER_CLUB,SQUAD_LIMITS,
-    bench_expected_value,captain_metric,cheap_bench_tiebreak,formation_of,legal_squad,
-)
-
-def test_captain_metric_modes():
-    a={'xfp':6.0,'p90':9.0,'price':8.0,'xi':.95,'minutes':82,'availability':1}
-    b={'xfp':6.8,'p90':8.0,'price':8.0,'xi':.95,'minutes':82,'availability':1}
-    assert captain_metric(b,False)>captain_metric(a,False)
-    assert captain_metric(a,True)>captain_metric(b,True)
-
-def test_canonical_roster_and_formation():
-    squad=[]
-    pid=1
-    for pos,count in [('GK',2),('DEF',5),('MID',5),('FWD',3)]:
-        for _ in range(count):
-            squad.append({'id':pid,'position':pos,'price':5.0})
-            pid+=1
-    assert legal_squad(squad)
-    xi=[squad[0],*squad[2:6],*squad[7:11],*squad[12:14]]
-    assert formation_of(xi)=='4-4-2'
-
-def test_bench_value_and_price_tiebreak():
-    usable={'xfp':4.0,'price':4.5,'xi':.8,'minutes':75,'availability':1}
-    risky={'xfp':4.0,'price':4.5,'xi':.2,'minutes':25,'availability':.7}
-    assert bench_expected_value(usable)>bench_expected_value(risky)
-    assert cheap_bench_tiebreak({'price':4.0})<cheap_bench_tiebreak({'price':7.5})
-
-def test_json_rule_parity_constants():
-    assert BUDGET==100
-    assert MAX_PER_CLUB==3
-    assert SQUAD_LIMITS=={'GK':2,'DEF':5,'MID':5,'FWD':3}
-    assert '4-4-2' in FORMATIONS
+ROOT=Path(__file__).resolve().parents[1];sys.path.insert(0,str(ROOT/'model'))
+from optimizer_rules import *
+def p(i,pos,xfp=4,xi=.9,minutes=80,availability=1,price=5,team=1):return {'id':i,'position':pos,'xfp':xfp,'p90':xfp+2,'xi':xi,'minutes':minutes,'availability':availability,'price':price,'team':team}
+def test_captain_metric_play_probability():
+ assert captain_metric(p(1,'MID',6,.95))>captain_metric(p(2,'MID',7,.3,30))
+def test_four_week_return_date():
+ a=p(1,'MID');a['weeks']=[{'date':f'2026-10-{d:02d}','xfp':5,'xi':1,'minutes':90,'availability':1} for d in (1,8,15,22)];assert four_week_xfp(a)>5;a['expected_return_date']='2026-10-15';assert play_probability(a,0)==0 and play_probability(a,2)>0
+def test_roster_formation():
+ s=[];i=1
+ for pos,n in [('GK',2),('DEF',5),('MID',5),('FWD',3)]:
+  for _ in range(n):s.append(p(i,pos,price=5,team=(i%5)+1));i+=1
+ assert legal_squad(s);assert formation_of([s[0],*s[2:6],*s[7:11],*s[12:14]])=='4-4-2'
+def test_auto_sub_gk():
+ xi=[p(1,'GK',xi=0,minutes=0),*[p(i,'DEF') for i in range(2,6)],*[p(i,'MID') for i in range(6,10)],*[p(i,'FWD') for i in range(10,12)]];b=[p(20,'GK'),p(21,'MID'),p(22,'DEF'),p(23,'FWD')];pr=auto_sub_probabilities(xi,b);assert pr[20]>.8;order,val=best_bench_order(xi,b);assert len(order)==4 and val>=0
+def test_constants():
+ assert BUDGET==100 and MAX_PER_CLUB==3 and SQUAD_LIMITS=={'GK':2,'DEF':5,'MID':5,'FWD':3} and tuple(DISCOUNT_WEIGHTS)==(1.,.85,.72,.61)

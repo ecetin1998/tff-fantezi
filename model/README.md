@@ -22,3 +22,20 @@ The current simulator derives club IDs from the fixture input, uses a seeded Mul
 Own-goal handling follows observed game scoring: the own-goal scorer is not treated as an attacking scorer, but a separately credited assist can still receive +3. The MH5 closure used by this project contains such a credited assist.
 
 A simultaneous yellow+red flag is treated as a second-yellow dismissal and receives -3 total card points. If a future source distinguishes direct red from second-yellow red, split the event model before changing this rule.
+
+
+## Optimizer objective
+
+The optimizer uses a four-matchweek horizon with discount weights [1.0, 0.85, 0.72, 0.61].
+Captain value is xFP times P(play); vice-captain is second by the same metric.
+Bench order uses exact auto-substitution probability subject to legal formations; backup GK only replaces GK.
+The former fixed 0.08 bench multiplier is removed.
+max_defensive_stack_per_team=2 is an optimizer risk-control parameter, not a TFF rule.
+optimize_transfers.py evaluates exactly 0, 1, 2 and 3 transfers and subtracts hit costs.
+
+
+## Fixture and team-strength inputs
+
+Player projections persist `fixture_count` and `blank`. Weekly xFP is the sum of all fixtures in the target matchweek; a player with no fixture is emitted with `xfp=0` and `blank=true`.
+
+Match lambdas are produced in the model layer. Historical results are converted to Elo ratings by `model/elo.js`; the replay/model input applies a conservative 0.15 Elo blend to the base home/away lambdas before Dixon-Coles correction. The UI does not calculate Elo at runtime.
