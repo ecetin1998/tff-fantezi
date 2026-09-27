@@ -107,7 +107,8 @@ export default async function PlayerPage({ params }){
       {label:'xG toplam',value:num(s?.xg_total)},
       {label:'xA / 90',value:s?.xa_per90===null||s?.xa_per90===undefined?num(s?.xa_model_per90):num(s?.xa_per90),note:s?.xa_per90===null||s?.xa_per90===undefined?'model/prior':'gözlenen'},
       {label:'Şut',value:s?.shots===null||s?.shots===undefined?'—':Number(s.shots)},
-      {label:'İsabetli şut',value:s?.shots_on_target===null||s?.shots_on_target===undefined?'—':Number(s.shots_on_target)}
+      {label:'İsabetli şut',value:s?.shots_on_target===null||s?.shots_on_target===undefined?'—':Number(s.shots_on_target)},
+      {label:'Takım hücum katkısı',value:s?.attack_contribution_share===null||s?.attack_contribution_share===undefined?'—':pct(s.attack_contribution_share),note:'xG + etkili xA payı'}
     )
     if(isDEF)seasonMetrics.push({label:'Gol yemeden',value:Number(s?.clean_sheets||0)})
   }

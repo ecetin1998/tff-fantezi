@@ -51,6 +51,10 @@ export default async function TeamPage({params}){
   const pctShare=v=>v===null||v===undefined?'—':(Number(v)*100).toFixed(0)+'%'
 
   const sortedPlayers=[...(players||[])].sort((a,b)=>Number(b.projection?.xfp||0)-Number(a.projection?.xfp||0))
+  const topAttackContributors=[...(players||[])]
+    .filter(p=>Number(p.attack_profile?.attack_contribution_share||0)>0)
+    .sort((a,b)=>Number(b.attack_profile?.attack_contribution_share||0)-Number(a.attack_profile?.attack_contribution_share||0))
+    .slice(0,5)
   const topPicks=sortedPlayers.slice(0,3)
   const fantasyTotal=fantasyWeeks.reduce((sum,[,pts])=>sum+Number(pts||0),0)
   const recentFantasyWeeks=fantasyWeeks.slice(-3)
@@ -135,13 +139,38 @@ export default async function TeamPage({params}){
     <section className="card profile-card team-tactical-profile">
       <div className="panel-head">
         <div><span className="eyebrow">GÜÇLÜ / ZAYIF YANLAR</span><h2>Atak ve savunma profili</h2></div>
-        <small>{tacticalCoverage==='event_complete'?'Detay olay verisi tam':tacticalCoverage==='partial_events'?'Detay olay verisi kısmi':'Genel takım verisi hazır • detay kanal verisi bekleniyor'}</small>
+        <small>{tacticalCoverage==='event_complete'?'Detay olay verisi tam':tacticalCoverage==='partial_events'?'Detay olay verisi kısmi':'Genel hücum/savunma + duran top verisi hazır • yön/şut bölgesi olayı bekleniyor'}</small>
       </div>
       <div className="team-detail-stat-grid team-core-stat-grid">
         <div className="card"><span>Hücum gücü</span><b>{idx(tactical?.attack_strength_index)}</b><small>lig ortalaması = 1.00</small></div>
         <div className="card"><span>Savunma gücü</span><b>{idx(tactical?.defense_strength_index)}</b><small>yüksek değer daha iyi</small></div>
         <div className="card"><span>Şut hacmi</span><b>{idx(tactical?.shot_volume_index)}</b><small>lig ortalaması = 1.00</small></div>
         <div className="card"><span>Rakip isabetli şut baskısı</span><b>{idx(tactical?.keeper_pressure_index)}</b><small>yüksek değer daha fazla baskı</small></div>
+        <div className="card"><span>İsabetli şut / maç</span><b>{num(tactical?.shots_on_target_per_match,1)}</b><small>hücum baskısı</small></div>
+        <div className="card"><span>Büyük şans</span><b>{tactical?.big_chances??'—'}</b><small>kaçan: {tactical?.big_chances_missed??'—'}</small></div>
+        <div className="card"><span>Rakip ceza sahası dokunuşu</span><b>{tactical?.touches_in_opposition_box??'—'}</b><small>sezon toplamı</small></div>
+        <div className="card"><span>Şut dönüşümü</span><b>{tactical?.shot_conversion_rate===null||tactical?.shot_conversion_rate===undefined?'—':Number(tactical.shot_conversion_rate).toFixed(1)+'%'}</b><small>gol / şut</small></div>
+      </div>
+      <div className="profile-grid team-detail-history-grid">
+        <div className="card">
+          <h3>Duran top üretimi</h3>
+          <div className="detail-list">
+            <div><span>Duran top golü</span><b>{tactical?.set_piece_goals??'—'}</b></div>
+            <div><span>Duran top xG</span><b>{num(tactical?.set_piece_xg,1)}</b></div>
+            <div><span>Duran toptan yenilen</span><b>{tactical?.set_piece_goals_conceded??'—'}</b></div>
+            <div><span>Duran top xGA</span><b>{num(tactical?.set_piece_xga,1)}</b></div>
+            <div><span>Topa sahip olma</span><b>{tactical?.possession_percentage===null||tactical?.possession_percentage===undefined?'—':Number(tactical.possession_percentage).toFixed(1)+'%'}</b></div>
+          </div>
+        </div>
+        <div className="card">
+          <h3>Hücuma en çok katkı</h3>
+          <div className="detail-list">
+            {topAttackContributors.length?topAttackContributors.map(p=><div key={p.id}>
+              <span><Link href={'/players/'+p.id}>{playerLabel(p)}</Link></span>
+              <b>{pctShare(p.attack_profile?.attack_contribution_share)}</b>
+            </div>):<div><span>Veri</span><b>—</b></div>}
+          </div>
+        </div>
       </div>
       {hasEventProfile?<div className="profile-grid team-detail-history-grid">
         <div className="card">
