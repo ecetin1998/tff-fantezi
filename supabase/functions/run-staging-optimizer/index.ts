@@ -66,22 +66,51 @@ import solver from "https://esm.sh/javascript-lp-solver@0.4.24";
 
 
 function n(v:any){const x=Number(v);return Number.isFinite(x)?x:0}
-function buildModel(rows:any[], variant:string, recommendedXI:Set<number>) {
-  const constraints:any={
-    budget:{max:100}, total:{equal:15}, xiTotal:{equal:11}, capTotal:{equal:1},
-    ...(variant==="alternative"?{overlap:{max:8}}:{}),
-    squadGK:{equal:2}, squadDEF:{equal:5}, squadMID:{equal:5}, squadFWD:{equal:3},
-    xiGK:{equal:1}, xiDEFmin:{min:3}, xiDEFmax:{max:5},
-    xiMIDmin:{min:2}, xiMIDmax:{max:5}, xiFWDmin:{min:1}, xiFWDmax:{max:3}
-  };
-  for(let t=1;t<=18;t++){
-    constraints["team_"+t]={max:3};
-    constraints["defstack_"+t]={max:2};
+
+function xiBounds(formations:string[]){
+  const rows=formations.map(f=>{
+    const [DEF,MID,FWD]=String(f).split("-").map(Number);
+    return {GK:1,DEF,MID,FWD};
+  });
+  const bounds:any={};
+  for(const pos of ["GK","DEF","MID","FWD"]){
+    bounds[pos]={
+      min:Math.min(...rows.map(r=>r[pos])),
+      max:Math.max(...rows.map(r=>r[pos]))
+    };
   }
-  const variables:any={}, ints:any={};
+  return bounds;
+}
+
+function buildModel(rows:any[],variant:string,recommendedXI:Set<number>,rules:any){
+  const budget=n(rules.budget);
+  const squad=rules.squad||{};
+  const formations=Array.isArray(rules.formations)?rules.formations:[];
+  const maxPerClub=Number(rules.max_per_club||3);
+  const bounds=xiBounds(formations);
+  const constraints:any={
+    budget:{max:budget},
+    total:{equal:Object.values(squad).reduce((s:any,v:any)=>s+Number(v||0),0)},
+    xiTotal:{equal:11},
+    capTotal:{equal:1},
+    ...(variant==="alternative"?{overlap:{max:8}}:{})
+  };
+  for(const pos of ["GK","DEF","MID","FWD"]){
+    constraints["squad"+pos]={equal:Number(squad[pos]||0)};
+    constraints["xi"+pos+"Min"]={min:bounds[pos].min};
+    constraints["xi"+pos+"Max"]={max:bounds[pos].max};
+  }
+  for(const team of [...new Set(rows.map(r=>Number(r.team_id)).filter(Number.isFinite))]){
+    constraints["team_"+team]={max:maxPerClub};
+    constraints["defstack_"+team]={max:2};
+  }
+
+  const variables:any={},ints:any={};
+  const captainLambda=.18;
+  const budgetPenaltyPerM=.03;
   for(const r of rows){
-    const id=Number(r.player_id), pos=String(r.position), team=Number(r.team_id);
-    const price=n(r.price), xfp=n(r.xfp), p90=n(r.p90);
+    const id=Number(r.player_id),pos=String(r.position),team=Number(r.team_id);
+    const price=n(r.price),xfp=n(r.xfp),p90=n(r.p90);
     constraints["one_"+id]={max:1};
     constraints["caplink_"+id]={max:0};
     const availability=n(r.availability_probability);
@@ -90,28 +119,38 @@ function buildModel(rows:any[], variant:string, recommendedXI:Set<number>) {
     const playProbability=Math.max(0,Math.min(1,availability*Math.max(xiProbability,Math.min(1,minutes/90))));
     const benchValue=.08*playProbability*xfp;
     const cheapBench=.0001*price;
+    const spendReward=budgetPenaltyPerM*price;
     const base=variant==="recommended"?xfp:xfp+.18*Math.max(0,p90-xfp);
     const xiEligible=xiProbability>=.5&&minutes>=40;
     if(xiEligible){
-      const v:any={score:base-benchValue+cheapBench,budget:price,total:1,xiTotal:1,["squad"+pos]:1,["team_"+team]:1,["one_"+id]:1,["caplink_"+id]:-1};
-      if(pos==="GK") v.xiGK=1;
-      if(pos==="DEF"){v.xiDEFmin=1;v.xiDEFmax=1}
-      if(pos==="MID"){v.xiMIDmin=1;v.xiMIDmax=1}
-      if(pos==="FWD"){v.xiFWDmin=1;v.xiFWDmax=1}
+      const v:any={
+        score:base-benchValue+cheapBench+spendReward,
+        budget:price,total:1,xiTotal:1,
+        ["squad"+pos]:1,["team_"+team]:1,["one_"+id]:1,["caplink_"+id]:-1,
+        ["xi"+pos+"Min"]:1,["xi"+pos+"Max"]:1
+      };
       if(pos==="GK"||pos==="DEF")v["defstack_"+team]=1;
       if(variant==="alternative"&&recommendedXI.has(id))v.overlap=1;
       variables["x_"+id]=v;ints["x_"+id]=1;
-      variables["c_"+id]={score:variant==="recommended"?xfp:p90,capTotal:1,["caplink_"+id]:1};ints["c_"+id]=1;
+      if(pos!=="GK"){
+        const captainScore=xfp+captainLambda*Math.max(0,p90-xfp);
+        variables["c_"+id]={score:captainScore,capTotal:1,["caplink_"+id]:1};
+        ints["c_"+id]=1;
+      }
     }
-    variables["b_"+id]={score:benchValue-cheapBench,budget:price,total:1,["squad"+pos]:1,["team_"+team]:1,["one_"+id]:1};
+    variables["b_"+id]={
+      score:benchValue-cheapBench+spendReward,budget:price,total:1,
+      ["squad"+pos]:1,["team_"+team]:1,["one_"+id]:1
+    };
     ints["b_"+id]=1;
   }
   return {optimize:"score",opType:"max",constraints,variables,ints};
 }
-function solve(rows:any[],variant:string,recommendedXI:Set<number>){
-  const model=buildModel(rows,variant,recommendedXI);
+
+function solve(rows:any[],variant:string,recommendedXI:Set<number>,rules:any){
+  const model=buildModel(rows,variant,recommendedXI,rules);
   const out:any=(solver as any).Solve(model);
-  if(!out?.feasible) throw new Error("optimizer infeasible "+variant);
+  if(!out?.feasible)throw new Error("optimizer infeasible "+variant);
   const xi:number[]=[],bench:number[]=[];let captain=0;
   for(const [k,v] of Object.entries(out)){
     if(k==="feasible"||k==="result"||k==="bounded"||k==="isIntegral")continue;
@@ -121,6 +160,8 @@ function solve(rows:any[],variant:string,recommendedXI:Set<number>){
     else if(k.startsWith("c_"))captain=Number(k.slice(2));
   }
   if(xi.length!==11||bench.length!==4||!captain)throw new Error("bad solution shape "+variant+" "+xi.length+"/"+bench.length+"/"+captain);
+  const captainRow=rows.find(r=>Number(r.player_id)===captain);
+  if(captainRow?.position==="GK")throw new Error("GK captain invariant violated");
   return {out,xi,bench,captain};
 }
 Deno.serve(async(req:Request)=>{
@@ -135,8 +176,14 @@ Deno.serve(async(req:Request)=>{
       if(rr.error)throw rr.error;
       RUN=rr.data.id;
     }
-    const runMeta=await sb.from("scout_model_runs").select("simulation_count,model_version").eq("id",RUN).single();
+    const [runMeta,rulesRes]=await Promise.all([
+      sb.from("scout_model_runs").select("simulation_count,model_version").eq("id",RUN).single(),
+      sb.from("scout_game_rules").select("rules").order("season",{ascending:false}).limit(1).single()
+    ]);
     if(runMeta.error)throw runMeta.error;
+    if(rulesRes.error)throw rulesRes.error;
+    const rules=rulesRes.data?.rules;
+    if(!rules)throw new Error("GAME_RULES_MISSING");
     const {data,error}=await sb.from("scout_player_projections")
       .select("player_id,xfp,p90,xi_probability,x_minutes,availability_probability,confidence,scout_players!inner(team_id,position,price,active)")
       .eq("run_id",RUN);
@@ -163,7 +210,7 @@ Deno.serve(async(req:Request)=>{
       if(mm.error)throw mm.error;
       recommendedXI=new Set((mm.data||[]).map((x:any)=>Number(x.player_id)));
     }
-    const sol=solve(pool,mode,recommendedXI);
+    const sol=solve(pool,mode,recommendedXI,rules);
     const byId=new Map(pool.map((x:any)=>[Number(x.player_id),x]));
     const old=await sb.from("scout_squad_recommendations").select("id").eq("run_id",RUN).eq("variant",mode);
     if(old.error)throw old.error;
@@ -186,8 +233,8 @@ Deno.serve(async(req:Request)=>{
       const objective=variant==="recommended"?"xi_xfp_bench_ev_v3":"ceiling_p90_bench_ev_v4";
       const sims=Number(runMeta.data.simulation_count||0).toLocaleString("tr-TR");
       const status=variant==="recommended"
-        ? `OPTIMAL • availability-integrated • bütçe ≤100m • ${sims} sim • bench puanı dahil değil`
-        : `OPTIMAL • availability-integrated • Tavan 11 • P90 odaklı • bütçe ≤100m • ${sims} sim • recommended ile en az 3 farklı`;
+        ? `OPTIMAL • availability-integrated • bütçe ≤${Number(rules.budget)}m • ${sims} sim • bench puanı dahil değil`
+        : `OPTIMAL • availability-integrated • Tavan 11 • P90 odaklı • bütçe ≤${Number(rules.budget)}m • ${sims} sim • recommended ile en az 3 farklı`;
       recs.push({id,run_id:RUN,variant,budget,xi_xfp:xiXfp,captain_xfp:xiXfp+n(cap.xfp),formation,objective,status});
       const posOrder:any={GK:0,DEF:1,MID:2,FWD:3};
       const xis=[...sol.xi].sort((a:number,b:number)=>posOrder[byId.get(a).position]-posOrder[byId.get(b).position]||n(byId.get(b).xfp)-n(byId.get(a).xfp));
