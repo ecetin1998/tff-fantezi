@@ -110,6 +110,51 @@ summary_size="$(wc -c < "$TMP_DIR/summary.json" | tr -d ' ')"
 (( summary_size < 51200 )) || fail "summary payload is ${summary_size} bytes (must be < 51200)"
 echo "PASS summary size ${summary_size} bytes"
 
+# Live regression: player detail projection must agree with the public player feed.
+curl -fsSL "$BASE_URL/api/scout-data?section=players" > "$TMP_DIR/players-live.json"
+curl -fsSL "$BASE_URL/players/419" > "$TMP_DIR/player-419.html"
+curl -fsSL "$BASE_URL/matches" > "$TMP_DIR/matches.html"
+curl -fsSL "$BASE_URL/" > "$TMP_DIR/home.html"
+node - "$TMP_DIR/players-live.json" "$TMP_DIR/player-419.html" "$TMP_DIR/matches.html" "$TMP_DIR/home.html" <<'NODE'
+const fs=require('node:fs')
+const [,,playersFile,playerHtmlFile,matchesHtmlFile,homeHtmlFile]=process.argv
+const payload=JSON.parse(fs.readFileSync(playersFile,'utf8'))
+const player=(payload.players||[]).find(p=>Number(p.id)===419)
+if(!player)throw new Error('player 419 missing from public feed')
+if(player.name!==player.full_name)throw new Error('API name must equal full_name outside the pitch')
+const expected=Number(player.xfp||0).toFixed(2)
+const playerHtml=fs.readFileSync(playerHtmlFile,'utf8')
+if(!playerHtml.includes(expected))throw new Error('player 419 detail does not contain feed xFP '+expected)
+const matches=fs.readFileSync(matchesHtmlFile,'utf8')
+const home=fs.readFileSync(homeHtmlFile,'utf8')
+for(const [name,html] of [['player',playerHtml],['matches',matches],['home',home]]){
+  if(html.includes('vercel.app'))throw new Error(name+' HTML contains old Vercel domain')
+}
+if(matches.includes('%"$(status_code "$BASE_URL/players/99999")"
+[[ "$not_found" == "404" ]] || fail "/players/99999 returned HTTP $not_found instead of 404"
+echo "PASS real 404"
+
+redirect_headers="$TMP_DIR/redirect.headers"
+redirect_code="$(curl -sS -D "$redirect_headers" -o /dev/null -w '%{http_code}' "$BASE_URL/api/scout-data?utm_source=x")"
+[[ "$redirect_code" == "308" ]] || fail "unknown query param returned HTTP $redirect_code instead of 308"
+echo "PASS canonical 308"
+
+if [[ "${SKIP_CDN_CHECK:-0}" == "1" ]]; then
+  echo "SKIP CDN cache header check (SKIP_CDN_CHECK=1)"
+else
+  curl -sS -D "$TMP_DIR/cache.headers" -o /dev/null "$BASE_URL/api/scout-data?section=summary"
+  grep -Eiq '^cache-control:.*s-maxage=300' "$TMP_DIR/cache.headers" || {
+    cat "$TMP_DIR/cache.headers" >&2
+    fail "summary response is missing shared-cache policy"
+  }
+  echo "PASS CDN cache policy"
+fi
+
+echo "SMOKE PASS"
+))throw new Error('matches HTML contains malformed %$ probability')
+NODE
+echo "PASS live player/detail/domain regressions"
+
 not_found="$(status_code "$BASE_URL/players/99999")"
 [[ "$not_found" == "404" ]] || fail "/players/99999 returned HTTP $not_found instead of 404"
 echo "PASS real 404"
