@@ -112,7 +112,6 @@ Deno.serve(async(req:Request)=>{
           ...(xaTotal!==null?{xa_total:xaTotal}:{}),
           ...(xa90!==null?{
             xa_per90:xa90,
-            xa_model_per90:xa90,
             xa_source:String(x.xa_source||"current_observed"),
             xa_confidence:Math.max(0,Math.min(1,finite(x.xa_confidence)??1)),
           }:{}),
