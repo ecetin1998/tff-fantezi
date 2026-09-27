@@ -19,6 +19,7 @@ const jsTests=[
   'model/dataQualityContract.test.js',
   'model/scoutApiFilters.test.js',
   'model/observability.test.js',
+  'model/playerPresentationContract.test.js',
 ]
 
 for(const file of jsTests){
