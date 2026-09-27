@@ -1,0 +1,37 @@
+name: Temp branch cleanup
+on:
+  push:
+    branches: [tmp/branch-cleanup]
+permissions:
+  contents: write
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Delete obsolete branches
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          git remote set-url origin "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          branches=(
+            audit-remediation-20260926
+            model-gate-overdispersion
+            qa-actions-build-20260926
+            qa-auth-build-20260926
+            qa-backtest-build-20260926
+            qa-confirm-alt-20260926
+            qa-confirm-build-20260926
+            qa-confirm-full-alt-20260926
+            qa-confirm-minimal-20260926
+            fix/audit-round-2
+            fix/post-audit-hardening
+            fix/prod-smoke-alias
+          )
+          for branch in "${branches[@]}"; do
+            if git ls-remote --exit-code --heads origin "$branch" >/dev/null 2>&1; then
+              git push origin --delete "$branch"
+            fi
+          done
