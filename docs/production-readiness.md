@@ -34,7 +34,7 @@ Bu dosya audit round 2 sonundaki **canlı** durumu gösterir.
 - [x] Altı eksik foreign-key index'i production DB'ye eklendi.
 - [x] Internal/legacy RLS tablolarına explicit browser-deny policy eklendi; security advisor'daki `rls_enabled_no_policy` bulguları kapandı.
 - [x] Security advisor'da DB kaynaklı açık kalmadı; yalnız Free plan native leaked-password WARN'ı mevcut ve uygulama-level HIBP kontrolüyle telafi ediliyor.
-- [x] Güncel model run: model QA PASS + data-integrity PASS + backtest PASS + release gate PASS.
+- [x] Güncel model run: model QA PASS + data-integrity PASS + backtest PASS + release gate PASS.\n- [x] `scout_learning_log.summary_tr` için DB trigger guard production'da aktif; boş özet yazılırsa kullanıcıya teknik `signal` yerine okunabilir Türkçe fallback üretiliyor.
 
 ## RLS doğrulama özeti
 
@@ -128,4 +128,4 @@ Bu nedenle sadece Vercel'e bağlı son doğrulamalar bekliyor:
 - keyed summary payload
 - Vercel env/firewall/observability panel kontrolü
 
-Pre-deploy DB hazırlığı production'da tamamlandı ve rollback'li authenticated test PASS: ilk/ikinci squad save idempotent, tek aktif kadro, 15 member, 3/kulüp limiti ve Pro waitlist first/repeat insert. Deploy sonrası yalnız iki daraltma migrationı uygulanacaktır.
+Pre-deploy DB hazırlığı production'da tamamlandı ve rollback'li authenticated test PASS: ilk/ikinci squad save idempotent, tek aktif kadro, 15 member, 3/kulüp limiti ve Pro waitlist first/repeat insert. Learning-summary trigger da rollback testinde PASS. Deploy sonrası yalnız iki daraltma migrationı uygulanacaktır.
