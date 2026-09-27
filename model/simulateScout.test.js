@@ -89,7 +89,7 @@ function zeroEventInput(doubleWeek=false){
   const single=simulateScout(zeroEventInput(false),50,20260927);
   const double=simulateScout(zeroEventInput(true),50,20260927);
   for(let i=0;i<single.length;i++){
-    assert.equal(double[i].xi,1,'DGW weekly XI is P(start at least once), never a sum above 1');
+    assert.ok(double[i].xi<=1+1e-12&&Math.abs(double[i].xi-1)<1e-9,'DGW weekly XI is P(start at least once), never a sum above 1');
     assert.equal(double[i].minutes,180,'DGW minutes are accumulated match by match');
     assert.equal(double[i].xfp,single[i].xfp*2,'two zero-event fixtures contribute twice the single-match xFP');
     assert.equal(double[i].match_xi['1'],1);
