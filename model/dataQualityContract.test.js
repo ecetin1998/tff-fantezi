@@ -29,5 +29,13 @@ const assert=require('node:assert/strict')
     'expected_return_date'
   ])assert.ok(migration.includes(marker),marker+' missing')
 
+  const dgwIntegrity=fs.readFileSync('supabase/migrations/20260928001000_dgw_aware_projection_integrity.sql','utf8')
+  assert.match(dgwIntegrity,/xi_probability,0\)<0 or coalesce\(p\.xi_probability,0\)>1\.000001/)
+  assert.match(dgwIntegrity,/90\*coalesce\(fc\.fixture_count,0\)\+0\.001/)
+  assert.match(dgwIntegrity,/fc\.fixture_count=1/)
+  assert.match(dgwIntegrity,/not exists \(/)
+  assert.match(dgwIntegrity,/xi_probability_out_of_bounds/)
+  assert.match(dgwIntegrity,/x_minutes_out_of_bounds/)
+
   console.log('dataQualityContract: normalization and query contract ok')
 })().catch(error=>{console.error(error);process.exit(1)})
