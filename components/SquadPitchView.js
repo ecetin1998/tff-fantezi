@@ -1,10 +1,10 @@
 import Link from 'next/link'
 import { teamCssVars } from '@/lib/teamThemes'
-import {playerLabel} from '@/lib/playerPresentation'
+import {pitchPlayerLabel,playerLabel} from '@/lib/playerPresentation'
 
 const posLabel={GK:'KL',DEF:'DEF',MID:'OS',FWD:'FOR'}
 
-function displayName(player){ return playerLabel(player) }
+function displayName(player){ return pitchPlayerLabel(player) }
 function shirtMark(player,team=''){
   return player?.shirt_number ?? ''
 }
