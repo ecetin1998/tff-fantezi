@@ -1,8 +1,8 @@
 # External availability data policy
 
-The application currently contains availability/source provenance related to `sakat-ve-cezali.com`, but this repository does not contain an automated scraper for that site.
+The application currently contains availability/source provenance related to `sakat-ve-cezali.com` and `sahadan.com`, but this repository does not contain an automated scraper for either site.
 
-A public statement granting automated extraction or commercial reuse was not identified during this audit. Therefore automation permission must **not** be assumed.
+A public statement granting automated extraction or commercial reuse was not identified during this audit for either source. Therefore automation permission must **not** be assumed. Existing `source_url` / `detail_source_*` provenance is server-side metadata and must not be exposed through browser roles or public APIs.
 
 Before adding an automated fetcher:
 1. obtain written permission or verify applicable published terms;

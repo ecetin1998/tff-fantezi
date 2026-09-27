@@ -42,7 +42,7 @@ Tarayıcı yalnız publishable Supabase anahtarını kullanır. Service-role key
 - `NEXT_PUBLIC_SITE_URL` — production site origin'i; ör. `https://tff-fantezi.vercel.app`.
 - `SCOUT_DATA_API_KEY` — yalnız server-side tam/özet Scout API erişimi için. **NEXT_PUBLIC_ öneki verilmez.**
 
-Internal Supabase Edge Function çağrıları uzun ömürlü bir repo secret'ına bağlı değildir. GitHub Actions `id-token: write` ile kısa ömürlü OIDC JWT alır; Edge Functions token'ın issuer, audience, repository id, repository, ref ve event claim'lerini doğrular. Eski `SCOUT_GATE_SECRET` yalnız geriye uyumlu fallback olarak desteklenir.
+Internal Supabase Edge Function çağrıları uzun ömürlü bir repo secret'ına bağlı değildir. GitHub Actions `id-token: write` ile kısa ömürlü OIDC JWT alır; Edge Functions token'ın issuer, audience, repository id, repository, ref ve event claim'lerini doğrular. Korumalı Edge Function'lar yalnız doğrulanmış GitHub Actions OIDC JWT'sini kabul eder; uzun ömürlü `SCOUT_GATE_SECRET` fallback'i kullanılmaz.
 
 ## Kurulum
 
@@ -84,7 +84,7 @@ Kullanıcı kadrosu `save_user_squad(p_members jsonb)` RPC'siyle tek transaction
 
 kontrol edilir.
 
-`MAX_PER_CLUB` şu anda bilerek kapalıdır; oyun kuralı kesinleştirildiğinde tek sabitten açılabilir.
+Takım başına maksimum oyuncu sınırı `lib/rules.js` içindeki tek kaynaktan yönetilir ve şu anda **3**'tür; istemci, server action ve DB RPC aynı kuralı uygular.
 
 ## Haftalık model yayın akışı
 
@@ -127,9 +127,15 @@ Public cevaplarda run notes, availability `detail_source_*` alanları ve ham rep
 
 ### Assistant summary feed
 
-`GET /api/scout-data/summary?gw=7`
+Anahtarsız ve yalnız public alanlardan oluşan kompakt feed:
 
-Bu endpoint her zaman `x-api-key` ister ve kadro kararı için kompakt alanları döndürür:
+`GET /api/scout-data?section=summary`
+
+Server-to-server kullanım için anahtarlı feed:
+
+`GET /api/scout-data/summary?gw=7` + `x-api-key`
+
+İki feed de kadro kararı için kompakt alanları döndürür:
 
 - en yüksek xFP oyuncuları,
 - maç xG / 1-X-2 / clean-sheet olasılıkları,

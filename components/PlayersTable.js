@@ -1,7 +1,7 @@
 'use client'
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { teamCssVars } from '@/lib/teamThemes'
 import { availabilityCompactNote, availabilityIsIssue } from '@/lib/availability'
 
@@ -13,14 +13,15 @@ const normalizeText=value=>String(value||'')
   .replace(/[\u0300-\u036f]/g,'')
   .replace(/ı/g,'i')
 
-export default function PlayersTable({players,initialFilters={}}){
+export default function PlayersTable({players}){
   const router=useRouter()
-  const [q,setQ]=useState(initialFilters.q||'')
-  const [pos,setPos]=useState(initialFilters.pos||'')
-  const [team,setTeam]=useState(initialFilters.team||'')
-  const [sort,setSort]=useState(initialFilters.sort||'xfp')
-  const [dir,setDir]=useState(initialFilters.dir==='asc'?1:-1)
-  const [page,setPage]=useState(Math.max(1,Number(initialFilters.page||1)))
+  const searchParams=useSearchParams()
+  const [q,setQ]=useState(()=>searchParams.get('q')||'')
+  const [pos,setPos]=useState(()=>searchParams.get('pos')||'')
+  const [team,setTeam]=useState(()=>searchParams.get('team')||'')
+  const [sort,setSort]=useState(()=>searchParams.get('sort')||'xfp')
+  const [dir,setDir]=useState(()=>searchParams.get('dir')==='asc'?1:-1)
+  const [page,setPage]=useState(()=>Math.max(1,Number(searchParams.get('page')||1)))
 
   const teams=useMemo(()=>[...new Set(players.map(p=>p.team).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'tr')),[players])
 

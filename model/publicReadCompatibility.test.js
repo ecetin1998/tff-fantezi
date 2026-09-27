@@ -10,6 +10,7 @@ for(const forbidden of [
   'detail_source_label',
   'detail_source_url',
   'detail_source_updated_at',
+  'source_url',
 ]){
   assert.equal(source.includes(forbidden),false,`public data layer must not request restricted field/query: ${forbidden}`)
 }

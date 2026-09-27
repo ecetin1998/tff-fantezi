@@ -3,9 +3,9 @@ import { useActionState, useEffect, useMemo, useRef, useState } from 'react'
 import { saveSquad } from '@/app/actions'
 import { teamCssVars } from '@/lib/teamThemes'
 import { availabilityCompactNote, availabilityIsIssue } from '@/lib/availability'
+import {MAX_PLAYERS_PER_CLUB} from '@/lib/rules'
 
 const LIMITS={GK:2,DEF:5,MID:5,FWD:3}
-const MAX_PER_CLUB=null
 const FORMATIONS={
   '3-4-3':{DEF:3,MID:4,FWD:3},
   '3-5-2':{DEF:3,MID:5,FWD:2},
@@ -111,7 +111,7 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
   const cost=selected.reduce((s,p)=>s+Number(p.price||0),0)
   const bank=100-cost
   const clubCounts=selected.reduce((a,p)=>(a[p.team]=(a[p.team]||0)+1,a),{})
-  const clubLimitOk=!MAX_PER_CLUB||Object.values(clubCounts).every(n=>n<=MAX_PER_CLUB)
+  const clubLimitOk=!MAX_PLAYERS_PER_CLUB||Object.values(clubCounts).every(n=>n<=MAX_PLAYERS_PER_CLUB)
   const validRoster=ids.length===15&&Object.entries(LIMITS).every(([k,v])=>(counts[k]||0)===v)&&cost<=100.0001&&clubLimitOk
   const liveFormation=formationFromXIIds(xiIds,map)
   const validXI=xiIds.length===11&&xiIds.every(id=>ids.includes(id))&&Boolean(liveFormation)&&liveFormation===formation
@@ -169,10 +169,10 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
         if(ids.includes(inn.id)||inn.position!==out.position)continue
         if(Number(inn.price)>Number(out.price)+bank+0.001)continue
         const nextIds=ids.map(id=>id===out.id?inn.id:id)
-        if(MAX_PER_CLUB){
+        if(MAX_PLAYERS_PER_CLUB){
           const nextPlayers=nextIds.map(id=>map.get(id)).filter(Boolean)
           const nextClubCounts=nextPlayers.reduce((a,p)=>(a[p.team]=(a[p.team]||0)+1,a),{})
-          if(Object.values(nextClubCounts).some(n=>n>MAX_PER_CLUB))continue
+          if(Object.values(nextClubCounts).some(n=>n>MAX_PLAYERS_PER_CLUB))continue
         }
         const plan=bestXIPlan(nextIds,map)
         if(!plan)continue
@@ -557,6 +557,7 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
         <div className="squad-validity">
           <span className={validRoster?'ok':''}>{validRoster?'✓':'○'} 2 KL / 5 DEF / 5 OS / 3 FOR</span>
           <span className={cost<=100?'ok':''}>{cost<=100?'✓':'○'} Bütçe limiti</span>
+          <span className={clubLimitOk?'ok':''}>{clubLimitOk?'✓':'○'} Kulüp başına en fazla {MAX_PLAYERS_PER_CLUB}</span>
           <span className={validXI?'ok':''}>{validXI?'✓':'○'} {liveFormation===formation?'Seçili diziliş hazır':'XI dizilişi güncellenmeli'}</span>
         </div>
         <form action={saveAction} className="squad-save-form">

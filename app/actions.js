@@ -4,8 +4,7 @@ import {redirect} from 'next/navigation'
 import {headers} from 'next/headers'
 import {reportServerError} from '@/lib/observability'
 import {passwordPolicyCode} from '@/lib/passwordSecurity'
-
-const MAX_PER_CLUB=null
+import {MAX_PLAYERS_PER_CLUB} from '@/lib/rules'
 const FORMATIONS=new Set(['3-4-3','3-5-2','4-3-3','4-4-2','4-5-1','5-2-3','5-3-2','5-4-1'])
 
 function authErrorCode(error){
@@ -21,7 +20,7 @@ function authErrorCode(error){
 }
 
 function squadError(message=''){
-  const key=String(message).match(/(AUTH_REQUIRED|INVALID_SQUAD|SQUAD_MUST_HAVE_15_UNIQUE_PLAYERS|SQUAD_HAS_INACTIVE_OR_UNKNOWN_PLAYER|INVALID_POSITION_COUNTS|BUDGET_EXCEEDED|INVALID_STARTING_XI|INVALID_BENCH|INVALID_BENCH_ORDER|INVALID_CAPTAIN|INVALID_FORMATION)/)?.[1]
+  const key=String(message).match(/(AUTH_REQUIRED|INVALID_SQUAD|SQUAD_MUST_HAVE_15_UNIQUE_PLAYERS|SQUAD_HAS_INACTIVE_OR_UNKNOWN_PLAYER|INVALID_POSITION_COUNTS|BUDGET_EXCEEDED|INVALID_STARTING_XI|INVALID_BENCH|INVALID_BENCH_ORDER|INVALID_CAPTAIN|INVALID_FORMATION|CLUB_LIMIT_EXCEEDED)/)?.[1]
   return ({
     AUTH_REQUIRED:'Oturum bulunamadı. Tekrar giriş yap.',
     INVALID_SQUAD:'Kadro verisi geçersiz.',
@@ -34,6 +33,7 @@ function squadError(message=''){
     INVALID_BENCH_ORDER:'Yedek sıraları 1, 2, 3, 4 olmalı.',
     INVALID_CAPTAIN:'İlk 11 içinde tam bir kaptan seçilmeli.',
     INVALID_FORMATION:'İlk 11 izin verilen dizilişlerden biri olmalı.',
+    CLUB_LIMIT_EXCEEDED:'Aynı takımdan en fazla 3 oyuncu seçebilirsin.',
   })[key]||'Kadro kaydedilemedi. Lütfen tekrar dene.'
 }
 
@@ -140,9 +140,9 @@ export async function saveSquad(_prevState,formData){
   const total=(players||[]).reduce((s,p)=>s+Number(p.price||0),0)
   if(total>100.0001)return {ok:false,error:'100m bütçe aşıldı.',signature:''}
 
-  if(MAX_PER_CLUB){
+  if(MAX_PLAYERS_PER_CLUB){
     const clubCounts=(players||[]).reduce((a,p)=>(a[p.team_id]=(a[p.team_id]||0)+1,a),{})
-    if(Object.values(clubCounts).some(n=>n>MAX_PER_CLUB))return {ok:false,error:'Takım başına oyuncu sınırı aşıldı.',signature:''}
+    if(Object.values(clubCounts).some(n=>n>MAX_PLAYERS_PER_CLUB))return {ok:false,error:'Takım başına oyuncu sınırı aşıldı.',signature:''}
   }
 
   const playerMap=new Map((players||[]).map(p=>[p.id,p]))
@@ -169,7 +169,7 @@ export async function joinProWaitlist(){
   const {data:claimsData}=await supabase.auth.getClaims()
   const userId=claimsData?.claims?.sub
   if(!userId)redirect('/login?message=pro_login_required')
-  const {error}=await supabase.from('scout_pro_interest').upsert({user_id:userId,source:'pricing'},{onConflict:'user_id'})
+  const {error}=await supabase.from('scout_pro_interest').upsert({user_id:userId,source:'pricing'},{onConflict:'user_id',ignoreDuplicates:true})
   if(error){
     reportServerError('action:joinProWaitlist',error)
     redirect('/pricing?error=waitlist_failed')

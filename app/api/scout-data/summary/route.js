@@ -1,3 +1,4 @@
+import {timingSafeEqual} from 'node:crypto'
 import {reportServerError} from '@/lib/observability'
 import { getAvailability, getMatches, getPlayersWithProjection, getRecommendation } from '@/lib/data'
 
@@ -10,7 +11,9 @@ function reply(payload,status=200){ return Response.json(payload,{status,headers
 function authorized(request){
   const expected=String(process.env.SCOUT_DATA_API_KEY||'')
   const supplied=String(request.headers.get('x-api-key')||'')
-  return expected.length>=24 && supplied===expected
+  if(expected.length<24)return false
+  const a=Buffer.from(expected),b=Buffer.from(supplied)
+  return a.length===b.length&&timingSafeEqual(a,b)
 }
 
 export async function GET(request){
