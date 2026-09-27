@@ -1,8 +1,8 @@
 'use server'
 import {createClient} from '@/lib/supabase/server'
 import {redirect} from 'next/navigation'
-import {headers} from 'next/headers'
 import {reportServerError} from '@/lib/observability'
+import {SITE_URL} from '@/lib/config'
 import {passwordPolicyCode} from '@/lib/passwordSecurity'
 import {BENCH_SIZE,BUDGET,FORMATION_SET,MAX_PLAYERS_PER_CLUB,SQUAD_LIMITS,SQUAD_SIZE,STARTING_GK,STARTING_XI_SIZE} from '@/lib/rules'
 
@@ -49,12 +49,7 @@ export async function login(formData){
 }
 
 async function getSiteUrl(){
-  const configured=String(process.env.NEXT_PUBLIC_SITE_URL||'').trim().replace(/\/+$/,'')
-  if(configured)return configured
-  const h=await headers()
-  const host=h.get('x-forwarded-host')||h.get('host')
-  const proto=h.get('x-forwarded-proto')||(host?.includes('localhost')?'http':'https')
-  return host?proto+'://'+host:'https://tff-fantezi.vercel.app'
+  return SITE_URL
 }
 
 export async function signup(formData){

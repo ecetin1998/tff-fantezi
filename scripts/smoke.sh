@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-BASE_URL="${BASE_URL:-https://tff-fantezi.vercel.app}"
+BASE_URL="${BASE_URL:-https://tff-fantezi.ecetin1998.workers.dev}"
 TMP_DIR="$(mktemp -d)"
 trap 'rm -rf "$TMP_DIR"' EXIT
 
@@ -113,6 +113,39 @@ echo "PASS summary size ${summary_size} bytes"
 not_found="$(status_code "$BASE_URL/players/99999")"
 [[ "$not_found" == "404" ]] || fail "/players/99999 returned HTTP $not_found instead of 404"
 echo "PASS real 404"
+
+matches_html="$TMP_DIR/matches.html"
+curl -sS "$BASE_URL/matches" -o "$matches_html"
+if grep -Fq '%
+redirect_headers="$TMP_DIR/redirect.headers"
+redirect_code="$(curl -sS -D "$redirect_headers" -o /dev/null -w '%{http_code}' "$BASE_URL/api/scout-data?utm_source=x")"
+[[ "$redirect_code" == "308" ]] || fail "unknown query param returned HTTP $redirect_code instead of 308"
+echo "PASS canonical 308"
+
+if [[ "${SKIP_CDN_CHECK:-0}" == "1" ]]; then
+  echo "SKIP cache header check (SKIP_CDN_CHECK=1)"
+else
+  curl -sS -D "$TMP_DIR/cache1.headers" -o /dev/null "$BASE_URL/api/scout-data?section=summary"
+  curl -sS -D "$TMP_DIR/cache2.headers" -o /dev/null "$BASE_URL/api/scout-data?section=summary"
+  grep -Eiq '^(cache-control|cdn-cache-control):.*s-maxage=[0-9]+' "$TMP_DIR/cache2.headers" || {
+    echo "Second response headers:" >&2
+    cat "$TMP_DIR/cache2.headers" >&2
+    fail "second summary response is missing s-maxage cache metadata"
+  }
+  echo "PASS cache header includes s-maxage"
+fi
+
+echo "SMOKE PASS"
+ "$matches_html"; then
+  fail "/matches HTML contains the invalid %$ token"
+fi
+echo "PASS matches has no %$ token"
+
+home_html="$TMP_DIR/home.html"
+curl -sS "$BASE_URL/" -o "$home_html"
+grep -Fq 'property="og:url" content="https://tff-fantezi.ecetin1998.workers.dev' "$home_html" || fail "og:url does not point to Workers"
+grep -Fq 'content="https://tff-fantezi.ecetin1998.workers.dev/opengraph-image' "$home_html" || fail "social image does not point to Workers"
+echo "PASS Workers social metadata"
 
 redirect_headers="$TMP_DIR/redirect.headers"
 redirect_code="$(curl -sS -D "$redirect_headers" -o /dev/null -w '%{http_code}' "$BASE_URL/api/scout-data?utm_source=x")"
