@@ -20,7 +20,11 @@
     "react-dom": "19.3.0"
   },
   "devDependencies": {
+    "@fullhuman/postcss-purgecss": "^8.0.0",
+    "@opennextjs/cloudflare": "^1.20.6",
+    "@sentry/cloudflare": "^11.0.0",
     "eslint": "9.39.1",
-    "eslint-config-next": "16.3.6"
+    "eslint-config-next": "16.3.6",
+    "wrangler": "^4.142.0"
   }
 }
