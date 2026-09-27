@@ -35,6 +35,15 @@
 }
 .scope :global(.fantasy-shirt):before,.scope :global(.fantasy-shirt):after{content:"";position:absolute;top:8px;width:19px;height:28px;background:inherit;border-radius:7px}.scope :global(.fantasy-shirt):before{left:-13px;transform:rotate(24deg)}.scope :global(.fantasy-shirt):after{right:-13px;transform:rotate(-24deg)}
 .scope :global(.fantasy-shirt):global(.GK){background:linear-gradient(135deg,#ffd764,#d9a727)}.scope :global(.fantasy-shirt):global(.DEF){background:linear-gradient(135deg,#55e3d0,#1cae9f)}.scope :global(.fantasy-shirt):global(.MID){background:linear-gradient(135deg,#9691ff,#645ee0)}.scope :global(.fantasy-shirt):global(.FWD){background:linear-gradient(135deg,#ff91a4,#d95070)}
+.scope :global(.fantasy-shirt):not(:global(.empty-shirt)){
+  background:linear-gradient(
+    90deg,
+    var(--club1,#6674A8) 0 24%,
+    var(--club2,#DDE3F4) 24% 48%,
+    var(--club1,#6674A8) 48% 72%,
+    var(--club2,#DDE3F4) 72% 100%
+  );
+}
 .scope :global(.fantasy-shirt) i{position:relative;z-index:2;font-style:normal;font-size:9px;font-weight:950;color:#17203e;background:rgba(255,255,255,.70);padding:3px 5px;border-radius:5px}
 .scope :global(.fantasy-shirt):global(.mini){width:42px;height:46px;margin:0}.scope :global(.fantasy-shirt):global(.mini):before,.scope :global(.fantasy-shirt):global(.mini):after{width:12px;height:18px;top:6px}.scope :global(.fantasy-shirt):global(.mini):before{left:-8px}.scope :global(.fantasy-shirt):global(.mini):after{right:-8px}.scope :global(.fantasy-shirt):global(.tiny){width:35px;height:39px;margin:0}.scope :global(.fantasy-shirt):global(.tiny):before,.scope :global(.fantasy-shirt):global(.tiny):after{width:10px;height:15px;top:5px}.scope :global(.fantasy-shirt):global(.tiny):before{left:-7px}.scope :global(.fantasy-shirt):global(.tiny):after{right:-7px}.scope :global(.fantasy-shirt):global(.tiny) i{font-size:6px;padding:2px 3px}
 .scope :global(.my-pitch-player) b{display:block;width:100%;background:#1c2850;border-radius:5px;padding:4px 5px;font-size:9px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;box-shadow:0 3px 9px rgba(0,0,20,.24)}.scope :global(.my-pitch-player)>button small{display:block;font-size:7px;color:#d6e4e0;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
