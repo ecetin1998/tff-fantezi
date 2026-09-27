@@ -1,31 +1,49 @@
 import {defineConfig,globalIgnores} from 'eslint/config'
-import nextVitals from 'eslint-config-next/core-web-vitals'
 
 export default defineConfig([
-  ...nextVitals,
   {
-    settings:{
-      'import/resolver':{
-        typescript:{project:'./jsconfig.json'},
-        node:{extensions:['.js','.jsx','.mjs','.ts','.tsx']}
+    files:['**/*.{js,mjs,cjs,jsx}'],
+    languageOptions:{
+      ecmaVersion:'latest',
+      sourceType:'module',
+      globals:{
+        console:'readonly',
+        process:'readonly',
+        Buffer:'readonly',
+        URL:'readonly',
+        fetch:'readonly',
+        crypto:'readonly',
+        setTimeout:'readonly',
+        clearTimeout:'readonly',
+        structuredClone:'readonly',
+        TextEncoder:'readonly',
+        window:'readonly',
+        document:'readonly',
+        navigator:'readonly',
+        localStorage:'readonly',
+        history:'readonly',
+        location:'readonly',
+        scrollTo:'readonly',
       }
     },
     rules:{
-      'react/no-unescaped-entities':'off',
-      'react-hooks/set-state-in-effect':'off',
-      'react-hooks/immutability':'off',
-      'react-hooks/preserve-manual-memoization':'off',
       'no-undef':'error',
-      'import/named':'error',
-      'import/no-unresolved':['error',{ignore:['^server-only$']}]
+      'no-unreachable':'error',
+      'no-dupe-keys':'error',
+      'no-dupe-args':'error',
+      'no-constant-condition':['error',{checkLoops:false}],
+      'no-control-regex':'error',
+      'no-func-assign':'error',
+      'no-import-assign':'error',
+      'no-self-assign':'error',
+      'no-sparse-arrays':'error',
+      'no-unexpected-multiline':'error',
+      'valid-typeof':'error',
     }
   },
   {
     files:['supabase/functions/**/*.{ts,js}'],
-    rules:{
-      'no-undef':'off',
-      'import/no-unresolved':'off'
-    }
+    rules:{'no-undef':'off'}
   },
   globalIgnores(['.next/**','out/**','node_modules/**'])
 ])
