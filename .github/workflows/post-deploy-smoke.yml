@@ -12,7 +12,7 @@ jobs:
     if: github.event.deployment_status.state == 'success' && (github.event.deployment.production_environment == true || github.event.deployment.environment == 'Production' || github.event.deployment.environment == 'production')
     runs-on: ubuntu-latest
     env:
-      BASE_URL: ${{ github.event.deployment_status.environment_url || github.event.deployment_status.target_url }}
+      BASE_URL: https://tff-fantezi.vercel.app
     steps:
       - name: Checkout deployed revision
         uses: actions/checkout@v4
