@@ -1,6 +1,7 @@
 const fs=require('node:fs')
 const assert=require('node:assert/strict')
-const {playerRoleLabel,roleIsDetailed}=require('../lib/playerRole.js')
+;(async()=>{
+  const {playerRoleLabel,roleIsDetailed}=await import('../lib/playerRole.js')
 
 const migration=fs.readFileSync('supabase/migrations/20260928103000_player_roles_xa_team_tactical_profiles.sql','utf8')
 for(const marker of [
@@ -41,4 +42,5 @@ assert.match(importer,/scout_refresh_enrichment_profiles/)
 assert.match(importer,/workflow_dispatch/)
 assert.doesNotMatch(importer,/fetch\([^)]*sofascore|fetch\([^)]*fotmob/i)
 
-console.log('enrichment contract passed')
+  console.log('enrichment contract passed')
+})().catch(error=>{console.error(error);process.exit(1)})
