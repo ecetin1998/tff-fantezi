@@ -49,6 +49,8 @@ jobs:
           else
             echo "SENTRY_DSN GitHub secret is not configured; console fallback remains active."
           fi
+      - name: Production build
+        run: npm run build
       - name: Deploy
         run: npm run deploy
       - name: Production smoke

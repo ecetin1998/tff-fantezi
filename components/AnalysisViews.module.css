@@ -1885,3 +1885,21 @@
   }
 }
 
+
+.scope :global(.player-fixture-stack),
+.scope :global(.team-fixture-stack){
+  display:flex;align-items:flex-end;justify-content:flex-end;gap:7px;flex-wrap:wrap
+}
+.scope :global(.fixture-count-badge){
+  display:inline-flex;align-items:center;justify-content:center;border-radius:999px;padding:5px 9px;
+  font-size:10px;font-weight:900;letter-spacing:.04em;border:1px solid rgba(245,196,73,.38);
+  background:rgba(245,196,73,.10);color:#f5d77e
+}
+.scope :global(.player-fixture-chip) small,
+.scope :global(.team-fixture-badge) small{
+  color:var(--muted);font-size:10px;font-weight:800
+}
+@media(max-width:720px){
+  .scope :global(.player-fixture-stack),
+  .scope :global(.team-fixture-stack){align-items:stretch;justify-content:flex-start;width:100%}
+}
