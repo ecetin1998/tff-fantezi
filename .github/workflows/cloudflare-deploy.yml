@@ -27,6 +27,9 @@ jobs:
         with:
           node-version: 22
           cache: npm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
       - name: Verify Cloudflare credentials are configured
         shell: bash
         run: |
@@ -34,6 +37,8 @@ jobs:
           test -n "$CLOUDFLARE_ACCOUNT_ID"
       - name: Install
         run: npm ci --no-audit --no-fund
+      - name: Python test dependencies
+        run: python3 -m pip install --disable-pip-version-check pytest
       - name: Quality gate
         run: |
           npm run lint
