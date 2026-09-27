@@ -2,7 +2,7 @@
 
 The site reads the current Supabase Scout run. These scripts describe the GW7 attack allocation correction; running them does **not** publish a run or change the site. A promotion through `scout_promote_run` is the separate publishing step after both QA gates pass.
 
-`attackAllocation.js` tempers a single exceptional shot's influence on future goal allocation by position, while keeping recorded xG intact. Goal weights blend adjusted xG and historical goal rate (75/25); assist weights blend creation and historical assist rates (50/50). The model still uses each player's normal fantasy points for a goal or assist. All players use the same rule.
+`attackAllocation.js` tempers a single exceptional shot's influence on future goal allocation by position, while keeping recorded xG intact. Goal weights blend adjusted xG and historical goal rate (75/25); assist weights blend xA and realized assist rate (70/30). Defender single-shot attenuation is role-aware (CB/FB/WB) when a sourced sub-role exists; otherwise it falls back to the generic DEF cap. The model still uses each player's normal fantasy points for a goal or assist.
 
 To reproduce a comparison, provide `prepared-input.json` with `players`, `matches`, `team_checks`, `temperature`, `assist_fraction`, `own_fraction`, and `playerMatches`. Each player must include `id`, `club`, `pos`, `rates`, `durations`, `duration_weights`, `avail`, `role`, `benchw`, and `valid_games`. Each player match must include `id`, `mins`, `shots`, `xg`. Then run:
 
@@ -22,3 +22,8 @@ The current simulator derives club IDs from the fixture input, uses a seeded Mul
 Own-goal handling follows observed game scoring: the own-goal scorer is not treated as an attacking scorer, but a separately credited assist can still receive +3. The MH5 closure used by this project contains such a credited assist.
 
 A simultaneous yellow+red flag is treated as a second-yellow dismissal and receives -3 total card points. If a future source distinguishes direct red from second-yellow red, split the event model before changing this rule.
+
+
+## Enrichment features
+
+The canonical enrichment contract is in `docs/enrichment-data-contract.md`. Current-season observed xA is kept separate from `xa_model_per90`; the latter is guaranteed through player-prior → position-prior fallback. Historical replay rows may use `effective_xa_per90` and `sub_role` only when those values were snapshotted before the replayed matchweek. Team left/center/right, shot-zone and situation profiles come from `scout_match_attack_events`; missing event data stays missing rather than being imputed as observed.
