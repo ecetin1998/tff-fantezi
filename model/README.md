@@ -32,3 +32,10 @@ Bench order uses exact auto-substitution probability subject to legal formations
 The former fixed 0.08 bench multiplier is removed.
 max_defensive_stack_per_team=2 is an optimizer risk-control parameter, not a TFF rule.
 optimize_transfers.py evaluates exactly 0, 1, 2 and 3 transfers and subtracts hit costs.
+
+
+## Fixture and team-strength inputs
+
+Player projections persist `fixture_count` and `blank`. Weekly xFP is the sum of all fixtures in the target matchweek; a player with no fixture is emitted with `xfp=0` and `blank=true`.
+
+Match lambdas are produced in the model layer. Historical results are converted to Elo ratings by `model/elo.js`; the replay/model input applies a conservative 0.15 Elo blend to the base home/away lambdas before Dixon-Coles correction. The UI does not calculate Elo at runtime.
