@@ -6,6 +6,7 @@ const assert=require('node:assert/strict')
 const root=path.resolve(__dirname,'..')
 const jsTests=[
   'model/attackAllocation.test.js',
+  'model/defenderSubroleContract.test.js',
   'model/simulateScout.test.js',
   'model/replayAudit.test.js',
   'model/publicReadCompatibility.test.js',
