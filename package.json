@@ -29,6 +29,7 @@
     "wrangler": "^4.142.0",
     "@fullhuman/postcss-purgecss": "^8.0.0",
     "cssnano": "^7.1.2",
-    "csso": "^5.0.5"
+    "csso": "^5.0.5",
+    "lightningcss": "^1.30.1"
   }
 }
