@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react'
 import Link from 'next/link'
 import { availabilityCompactNote } from '@/lib/availability'
 import {playerLabel} from '@/lib/playerPresentation'
+import {playerRoleLabel} from '@/lib/playerRole'
 
 const posLabel=p=>({GK:'KL',DEF:'DEF',MID:'OS',FWD:'FOR'}[p]||p||'—')
 const normalizeText=value=>String(value||'').toLocaleLowerCase('tr').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/ı/g,'i')
@@ -18,7 +19,7 @@ export default function TeamRoster({players=[]}){
     const needle=normalizeText(q.trim())
     return players.filter(p=>{
       const matchesPos=!pos||p.position===pos
-      const haystack=normalizeText(`${p.full_name||''} ${p.display_name||''} ${p.short_label||''} ${posLabel(p.position)} ${p.position||''}`)
+      const haystack=normalizeText(`${p.full_name||''} ${p.display_name||''} ${p.short_label||''} ${posLabel(p.position)} ${p.position||''} ${playerRoleLabel(p)}`)
       return matchesPos&&(!needle||haystack.includes(needle))
     })
   },[players,q,pos])
@@ -53,6 +54,7 @@ export default function TeamRoster({players=[]}){
             <span className={'pos '+p.position}>{posLabel(p.position)}</span>
             <div className="team-roster-copy">
               <b>{playerLabel(p)}</b>
+              {playerRoleLabel(p)?<small>{playerRoleLabel(p)}</small>:null}
               {note?<small><span className="team-roster-alert">{note}</span></small>:null}
             </div>
           </div>

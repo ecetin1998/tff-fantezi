@@ -4,6 +4,7 @@ import { getPlayerDetail, getPlayersWithProjection } from '@/lib/data'
 import { teamCssVars } from '@/lib/teamThemes'
 import { availabilityCompactNote, availabilityIsIssue } from '@/lib/availability'
 import {playerLabel,predictionConfidenceLabel} from '@/lib/playerPresentation'
+import {playerRoleLabel} from '@/lib/playerRole'
 
 export const revalidate=300
 export async function generateStaticParams(){
@@ -63,6 +64,7 @@ export default async function PlayerPage({ params }){
   const isGK=player.position==='GK'
   const isDEF=player.position==='DEF'
   const themeStyle=teamCssVars(player.team)
+  const detailedRole=playerRoleLabel(player)
 
   const recentWeeks=playedWeeks.slice(-3)
   const recentAverage=recentWeeks.length?recentWeeks.reduce((sum,w)=>sum+Number(w.points||0),0)/recentWeeks.length:0
@@ -102,7 +104,10 @@ export default async function PlayerPage({ params }){
     seasonMetrics.push(
       {label:'Gol',value:Number(s?.goals||0)},
       {label:'Asist',value:Number(s?.assists||0)},
-      {label:'xG toplam',value:num(s?.xg_total)}
+      {label:'xG toplam',value:num(s?.xg_total)},
+      {label:'xA / 90',value:s?.xa_per90===null||s?.xa_per90===undefined?num(s?.xa_model_per90):num(s?.xa_per90),note:s?.xa_per90===null||s?.xa_per90===undefined?'model/prior':'gözlenen'},
+      {label:'Şut',value:s?.shots===null||s?.shots===undefined?'—':Number(s.shots)},
+      {label:'İsabetli şut',value:s?.shots_on_target===null||s?.shots_on_target===undefined?'—':Number(s.shots_on_target)}
     )
     if(isDEF)seasonMetrics.push({label:'Gol yemeden',value:Number(s?.clean_sheets||0)})
   }
@@ -129,7 +134,7 @@ export default async function PlayerPage({ params }){
           <h1>{playerLabel(player)}</h1>
           <p>
             <Link className="team-inline-link" href={'/teams/'+player.team_id}>{player.team}</Link>
-            <span>•</span><b>{Number(player.price||0).toFixed(1)}m</b>
+            <span>•</span><b>{Number(player.price||0).toFixed(1)}m</b>{detailedRole?<><span>•</span><b>{detailedRole}</b></>:null}
           </p>
           <div className="player-identity-pills">
             <span>{actual} toplam puan</span>
@@ -247,6 +252,8 @@ export default async function PlayerPage({ params }){
           <div><span>Veri güveni</span><b>{predictionConfidenceLabel(run,p)}</b></div>
           {!isGK?<div><span>Takım gol payı</span><b>{pct(r?.team_goal_share)}</b></div>:null}
           {!isGK?<div><span>Takım asist payı</span><b>{pct(r?.team_assist_share)}</b></div>:null}
+          {!isGK?<div><span>xA kaynağı</span><b>{s?.xa_source||'—'}</b></div>:null}
+          {detailedRole?<div><span>Detay rol</span><b>{detailedRole}</b></div>:null}
         </div>
         <div className="player-model-note"><span>Rol özeti</span><p>{r?.signal||'Belirgin rol değişimi yok.'}</p></div>
       </div>

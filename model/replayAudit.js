@@ -11,7 +11,7 @@ function buildReplayInput(payload,playerMatches=[]){
     players:players.map(x=>({
       id:Number(x.player_id),club:Number(x.club_id),pos:String(x.position),price:Number(x.price||0),
       sub_role:x.sub_role||x.fotmob_position||x.position_detail||null,
-      rates:(x.rates||[]).map(Number),durations:(x.durations||[75]).map(Number),
+      rates:(()=>{const rates=(x.rates||[]).map(Number);if(Number.isFinite(Number(x.effective_xa_per90)))rates[3]=Number(x.effective_xa_per90);return rates})(),durations:(x.durations||[75]).map(Number),
       duration_weights:(x.duration_weights||[1]).map(Number),
       avail:Number(x.availability),role:Math.max(1e-7,Math.min(.9999999,Number(x.role_probability)||1e-7)),
       benchw:Math.max(1e-9,Number(x.bench_weight)||1e-9),valid_games:1,
