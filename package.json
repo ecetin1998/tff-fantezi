@@ -25,6 +25,7 @@
     "@sentry/cloudflare": "^11.0.0",
     "eslint": "9.39.1",
     "eslint-config-next": "16.3.6",
-    "wrangler": "^4.142.0"
+    "wrangler": "^4.142.0",
+    "@fullhuman/postcss-purgecss": "^8.0.0"
   }
 }
