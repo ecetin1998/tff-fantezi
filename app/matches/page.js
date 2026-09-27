@@ -55,7 +55,7 @@ function fantasyReading(m){
     const d=highCsFantasy?.top_defense
     return {
       label:'Savunma maçı',
-      text:`Model düşük gol hacmi bekliyor ve ${highCsName} için clean sheet olasılığı %${pct(highCs)}. ${d?`${d.name} (${d.xfp.toFixed(1)} xFP) savunma/kaleci hattında bu maçın en doğal fantasy çıkışlarından biri.`:'Savunma ve kaleci seçimi hücum stack’inden daha temiz görünüyor.'}`
+      text:`Model düşük gol hacmi bekliyor ve ${highCsName} için clean sheet olasılığı ${pct(highCs)}%. ${d?`${d.name} (${d.xfp.toFixed(1)} xFP) savunma/kaleci hattında bu maçın en doğal fantasy çıkışlarından biri.`:'Savunma ve kaleci seçimi hücum stack’inden daha temiz görünüyor.'}`
     }
   }
 
@@ -147,9 +147,9 @@ export default async function Matches(){
           </div>
 
           <div className="outcome-bar outcome-bar-labeled" aria-label="Maç sonucu olasılıkları">
-            <i className="home" style={{width:(home*100)+'%'}} title={`Ev %${(home*100).toFixed(0)}`}><span><b>{(home*100).toFixed(0)}%</b> Ev</span></i>
-            <i className="draw" style={{width:(draw*100)+'%'}} title={`Beraberlik %${(draw*100).toFixed(0)}`}><span><b>{(draw*100).toFixed(0)}%</b> Ber.</span></i>
-            <i className="away" style={{width:(away*100)+'%'}} title={`Dep %${(away*100).toFixed(0)}`}><span><b>{(away*100).toFixed(0)}%</b> Dep</span></i>
+            <i className="home" style={{width:(home*100)+'%'}} title={`Ev ${(home*100).toFixed(0)}%`}><span><b>{(home*100).toFixed(0)}%</b> Ev</span></i>
+            <i className="draw" style={{width:(draw*100)+'%'}} title={`Beraberlik ${(draw*100).toFixed(0)}%`}><span><b>{(draw*100).toFixed(0)}%</b> Ber.</span></i>
+            <i className="away" style={{width:(away*100)+'%'}} title={`Dep ${(away*100).toFixed(0)}%`}><span><b>{(away*100).toFixed(0)}%</b> Dep</span></i>
           </div>
 
           <div className="match-fantasy-meta fantasy-first-meta">
