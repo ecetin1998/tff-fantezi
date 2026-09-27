@@ -21,15 +21,34 @@ Production **and** Preview must contain:
 
 `SCOUT_OFFLINE_BUILD` must **not** exist in Vercel Production or Preview.
 
+## Rate-limit-safe release strategy
+
+Automatic Git deployments are restricted by `vercel.json` to `main` and `fix/audit-round-2`. All other branches are CI-only and must not consume Vercel builds.
+
+Before the release push:
+
+1. Run `npm run lint && npm test && npm run build && npm run test:runtime`.
+2. With real Supabase public env values, start the production build locally and run:
+   `SKIP_CDN_CHECK=1 BASE_URL=http://localhost:3000 bash scripts/smoke.sh`.
+3. Do not push intermediate fix commits to `fix/audit-round-2`; batch them on a deploy-disabled branch and fast-forward the audit branch once.
+
+If the Vercel limit is specifically the **remote build quota**, a local prebuild can reduce remote build consumption:
+
+`vercel pull --yes --environment=production`
+`vercel build --prod`
+`vercel deploy --prebuilt --prod`
+
+If the limit is on **deployment creation** rather than builds, `--prebuilt` does not bypass it.
+
 ## Production deployment order
 
-1. Confirm Preview deploy succeeds and smoke tests pass.
-2. Merge PR into `main`.
-3. Confirm Production deployment is READY.
+1. Confirm the single batched Preview deploy succeeds and `BASE_URL=<preview> bash scripts/smoke.sh` passes.
+2. Merge the audited branch into `main` once; do not drip-push individual commits.
+3. Confirm Production deployment is READY and run `BASE_URL=https://tff-fantezi.vercel.app bash scripts/smoke.sh`.
 4. Immediately apply, in order:
    1. `20260927101100_post_deploy_restrict_sensitive_public_columns.sql`
    2. `20260927101200_post_deploy_squad_write_lockdown.sql`
-5. Run post-deploy privilege and API verification below.
+5. Run production smoke again, then post-deploy privilege and API verification below.
 
 Do not apply the two post-deploy migrations before the new application build is live; the current old `main` build still relies on the compatibility grants/direct squad writes.
 

@@ -2,6 +2,7 @@
 set -euo pipefail
 
 BASE_URL="${BASE_URL:-https://tff-fantezi.vercel.app}"
+SKIP_CDN_CHECK="${SKIP_CDN_CHECK:-0}"
 TMP_DIR="$(mktemp -d)"
 trap 'rm -rf "$TMP_DIR"' EXIT
 
@@ -85,8 +86,16 @@ for(const key of expected[section]||[]){
     process.exit(1)
   }
 }
-if(/"notes"\s*:|detail_source_/i.test(raw)){
+if(/"notes"\s*:|"model_version"\s*:|detail_source_/i.test(raw)){
   console.error(section+': internal/provenance field leaked')
+  process.exit(1)
+}
+if(section==='summary' && Object.prototype.hasOwnProperty.call(body,'players')){
+  console.error('summary: players key must not be present')
+  process.exit(1)
+}
+if(section==='players' && Object.prototype.hasOwnProperty.call(body,'matches')){
+  console.error('players: matches key must not be present')
   process.exit(1)
 }
 NODE
@@ -111,13 +120,17 @@ redirect_code="$(curl -sS -D "$redirect_headers" -o /dev/null -w '%{http_code}' 
 [[ "$redirect_code" == "308" ]] || fail "unknown query param returned HTTP $redirect_code instead of 308"
 echo "PASS canonical 308"
 
-curl -sS -D "$TMP_DIR/cache1.headers" -o /dev/null "$BASE_URL/api/scout-data?section=summary"
-curl -sS -D "$TMP_DIR/cache2.headers" -o /dev/null "$BASE_URL/api/scout-data?section=summary"
-grep -Eiq '^x-vercel-cache:[[:space:]]*HIT' "$TMP_DIR/cache2.headers" || {
-  echo "Second response headers:" >&2
-  cat "$TMP_DIR/cache2.headers" >&2
-  fail "second summary request was not x-vercel-cache: HIT"
-}
-echo "PASS CDN cache HIT"
+if [[ "$SKIP_CDN_CHECK" == "1" ]]; then
+  echo "SKIP CDN cache check (SKIP_CDN_CHECK=1)"
+else
+  curl -sS -D "$TMP_DIR/cache1.headers" -o /dev/null "$BASE_URL/api/scout-data?section=summary"
+  curl -sS -D "$TMP_DIR/cache2.headers" -o /dev/null "$BASE_URL/api/scout-data?section=summary"
+  grep -Eiq '^x-vercel-cache:[[:space:]]*HIT' "$TMP_DIR/cache2.headers" || {
+    echo "Second response headers:" >&2
+    cat "$TMP_DIR/cache2.headers" >&2
+    fail "second summary request was not x-vercel-cache: HIT"
+  }
+  echo "PASS CDN cache HIT"
+fi
 
 echo "SMOKE PASS"
