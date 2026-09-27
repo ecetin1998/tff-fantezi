@@ -33,6 +33,13 @@ assert.match(snapshot,/set_piece_xga/)
 assert.match(snapshot,/shot_conversion_rate/)
 assert.match(snapshot,/xa_observed_covered/)
 
+const xaFill=fs.readFileSync('supabase/migrations/20260928133000_fill_reviewed_xa_v2.sql','utf8')
+assert.match(xaFill,/fotmob_xa_per90_reviewed_2026-09-28/)
+assert.match(xaFill,/and s\.xa_per90 is null/,'reviewed xA fill must never overwrite an observed value')
+assert.match(xaFill,/effective_xa_per90/,'attack share refresh must retain fallback xA for uncovered players')
+assert.match(xaFill,/xa_confidence=\.95/)
+assert.doesNotMatch(xaFill,/set xa_model_per90=/,'observed xA must stay separate from the model prior')
+
 const data=fs.readFileSync('lib/data.js','utf8')
 assert.match(data,/TEAM_TACTICAL_PUBLIC_COLUMNS/)
 assert.match(data,/xa_model_per90/)
