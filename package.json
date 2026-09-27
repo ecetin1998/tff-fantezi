@@ -9,10 +9,11 @@
     "lint": "eslint .",
     "smoke": "bash scripts/smoke.sh",
     "test:runtime": "bash scripts/runtime-route-test.sh",
-    "test": "node --test test/full-suite.test.js"
+    "test": "node --test test/full-suite.test.js",
+    "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
+    "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy"
   },
   "dependencies": {
-    "@sentry/nextjs": "11.0.0",
     "@supabase/ssr": "0.12.7",
     "@supabase/supabase-js": "2.117.2",
     "next": "16.3.6",
@@ -20,7 +21,6 @@
     "react-dom": "19.3.0"
   },
   "devDependencies": {
-    "@fullhuman/postcss-purgecss": "^8.0.0",
     "@opennextjs/cloudflare": "^1.20.6",
     "@sentry/cloudflare": "^11.0.0",
     "eslint": "9.39.1",

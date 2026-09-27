@@ -1,16 +1,13 @@
-name: Temp Workers setup
+name: Temp Workers lock refresh
 on:
   push:
     branches: [tmp/workers-lockgen]
 permissions:
   contents: write
 jobs:
-  setup:
+  lock:
     if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
-    env:
-      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -19,24 +16,17 @@ jobs:
         with:
           node-version: 22
           cache: npm
-      - run: npm ci --no-audit --no-fund
-      - name: Install production tooling
-        run: npm install --save-dev --no-audit --no-fund @opennextjs/cloudflare@1.20.6 wrangler@4.142.0 @sentry/cloudflare @fullhuman/postcss-purgecss
-      - name: Provision D1 tag cache
-        shell: bash
-        run: |
-          set -euo pipefail
-          npx wrangler d1 list --json > /tmp/d1.json
-          if ! node -e "const x=require('/tmp/d1.json');process.exit(x.some(d=>d.name==='tff-fantezi-next-tag-cache')?0:1)"; then
-            npx wrangler d1 create tff-fantezi-next-tag-cache --location weur
-            npx wrangler d1 list --json > /tmp/d1.json
-          fi
-          node -e "const fs=require('fs');const x=require('/tmp/d1.json');const d=x.find(v=>v.name==='tff-fantezi-next-tag-cache');if(!d)process.exit(2);fs.mkdirSync('tmp',{recursive:true});fs.writeFileSync('tmp/cloudflare-resources.json',JSON.stringify({d1_name:d.name,d1_id:d.uuid||d.id,r2_bucket:'tff-fantezi-next-inc-cache',r2_status:'requires_subscription'},null,2)+'\n')"
-      - name: Record resolved dependencies and D1 ID
+      - name: Refresh package lock
+        run: npm install --package-lock-only --no-audit --no-fund
+      - name: Commit package lock
         shell: bash
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add package.json package-lock.json tmp/cloudflare-resources.json
-          git commit -m "tmp: resolve Workers dependencies and D1 cache"
-          git push origin HEAD:tmp/workers-lockgen
+          git add package-lock.json
+          if git diff --cached --quiet; then
+            echo "Lock already current"
+          else
+            git commit -m "tmp: refresh Workers lockfile"
+            git push origin HEAD:tmp/workers-lockgen
+          fi
