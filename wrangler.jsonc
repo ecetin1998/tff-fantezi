@@ -1,0 +1,30 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "main": "worker-entry.mjs",
+  "name": "tff-fantezi",
+  "compatibility_date": "2026-09-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  },
+  "r2_buckets": [
+    {
+      "binding": "NEXT_INC_CACHE_R2_BUCKET",
+      "bucket_name": "tff-fantezi-next-inc-cache"
+    }
+  ],
+  "d1_databases": [
+    {
+      "binding": "NEXT_TAG_CACHE_D1",
+      "database_name": "tff-fantezi-next-tag-cache",
+      "database_id": "a3437c8c-d671-48c4-a431-c8a807b5dc35"
+    }
+  ],
+  "vars": {
+    "NEXT_PUBLIC_SUPABASE_URL": "https://nnoagjayvrwyjtizhnfz.supabase.co",
+    "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY": "sb_publishable_cT2X9dM8D3ct0KLJFXOelA_GgtzPFtY",
+    "NEXT_PUBLIC_SITE_URL": "https://tff-fantezi.ecetin1998.workers.dev"
+  },
+  "observability": {"enabled": true}
+}

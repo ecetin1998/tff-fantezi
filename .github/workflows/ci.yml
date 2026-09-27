@@ -11,7 +11,7 @@ jobs:
     env:
       NEXT_PUBLIC_SUPABASE_URL: https://example.supabase.co
       NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable_ci_placeholder
-      NEXT_PUBLIC_SITE_URL: https://tff-fantezi.vercel.app
+      NEXT_PUBLIC_SITE_URL: https://tff-fantezi.ecetin1998.workers.dev
       SCOUT_OFFLINE_BUILD: '1'
       SCOUT_DATA_API_KEY: runtime-test-key-12345678901234567890
     steps:

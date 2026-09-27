@@ -1,9 +1,10 @@
 import {getPlayersWithProjection,getTeamFixturesOverview} from '@/lib/data'
+import {SITE_URL} from '@/lib/config'
 
 export const revalidate=3600
 
 export default async function sitemap(){
-  const site=process.env.NEXT_PUBLIC_SITE_URL||'https://tff-fantezi.vercel.app'
+  const site=SITE_URL
   const routes=['','/players','/points','/matches','/teams','/squads','/availability','/roles','/backtest','/pricing','/sss']
   const [playerData,teamData]=await Promise.all([getPlayersWithProjection(),getTeamFixturesOverview()])
   return [

@@ -1,10 +1,13 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "git": {
-    "deploymentEnabled": {
-      "main": true,
-      "fix/audit-round-2": true,
-      "*": false
+    "deploymentEnabled": false
+  },
+  "redirects": [
+    {
+      "source": "/:path*",
+      "destination": "https://tff-fantezi.ecetin1998.workers.dev/:path*",
+      "permanent": true
     }
-  }
+  ]
 }
