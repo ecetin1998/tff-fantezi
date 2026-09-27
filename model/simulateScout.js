@@ -1,9 +1,11 @@
 const {attackWeights}=require('./attackAllocation');
+const RULES=require('../rules/tff-fantasy.json');
+const SCORING=RULES.scoring;
 
 function cardPoints(yellow,red){
   // The simulator has no separate second-yellow event type. When both flags
   // occur, treat it as a second-yellow dismissal: total card deduction -3.
-  return red ? -3 : yellow ? -1 : 0;
+  return red ? SCORING.red : yellow ? SCORING.yellow : 0;
 }
 
 function makeHistogram(){
@@ -90,7 +92,7 @@ function simulateScout(input, count, seed, attackPolicy = true) {
       if(ids.reduce((s,i)=>s+mins[i],0)!==990||ids.reduce((s,i)=>s+start[i],0)!==11)throw Error('990 dakika / 11 oyuncu kontrolü başarısız');
     }
     const comp=Object.fromEntries(keys.map(k=>[k,new Int16Array(M)]));
-    for(let i=0;i<M;i++)comp.appearance[i]=(mins[i]>0?1:0)+(mins[i]>60?1:0);
+    for(let i=0;i<M;i++)comp.appearance[i]=(mins[i]>0?SCORING.appearance:0)+(mins[i]>60?SCORING.appearance_60:0);
     for(const match of input.matches){
       const clubs=[match.home_id,match.away_id], score=[poisson(match.home_lambda),poisson(match.away_lambda)], gc=new Int16Array(M);
       for(let side=0;side<2;side++){
@@ -104,10 +106,10 @@ function simulateScout(input, count, seed, attackPolicy = true) {
           const own=random()<input.own_fraction;
           let scorer=null;
           if(own){
-            comp.own[pick(op,()=>1)]-=2;
+            comp.own[pick(op,()=>1)]+=SCORING.own_goal;
           }else{
             scorer=scorerCandidate;
-            comp.goals[scorer]+={GK:10,DEF:6,MID:5,FWD:4}[P[scorer].pos];
+            comp.goals[scorer]+=SCORING.goal[P[scorer].pos];
             result[scorer].xgoal+=1/count;
           }
           // TFF's published rules award +3 for every credited assist and -2 for
@@ -116,7 +118,7 @@ function simulateScout(input, count, seed, attackPolicy = true) {
           const assistPool=scorer===null?on:on.filter(i=>i!==scorer);
           if(assistPool.length&&random()<input.assist_fraction){
             const a=pick(assistPool,i=>allocation[i].assist);
-            comp.assists[a]+=3;
+            comp.assists[a]+=SCORING.assist;
             result[a].xassist+=1/count;
           }
         }
@@ -124,17 +126,17 @@ function simulateScout(input, count, seed, attackPolicy = true) {
       const both=teams[clubs[0]].concat(teams[clubs[1]]),base={};
       for(const i of both){
         const p=P[i],rates=p.rates,exposure=mins[i]/90;
-        comp.cs[i]=mins[i]>=60&&gc[i]===0?({GK:4,DEF:4,MID:1,FWD:0}[p.pos]):0;
-        if(p.pos==='GK'||p.pos==='DEF')comp.conceded[i]=-Math.floor(gc[i]/2);
-        if(p.pos==='GK')comp.saves[i]=Math.floor(poisson(rates[6]*exposure)/3);
+        comp.cs[i]=mins[i]>=60&&gc[i]===0?SCORING.clean_sheet[p.pos]:0;
+        if(p.pos==='GK'||p.pos==='DEF')comp.conceded[i]=Math.floor(gc[i]/2)*SCORING.conceded_per_2[p.pos];
+        if(p.pos==='GK')comp.saves[i]=Math.floor(poisson(rates[6]*exposure)/3)*SCORING.saves_per_3;
         const yc=random()<Math.min(.8,rates[4]*exposure),rc=random()<Math.min(.15,rates[5]*exposure);
         comp.cards[i]=cardPoints(yc,rc);if(rc)comp.cs[i]=0;
-        comp.penalties[i]=-2*poisson(rates[7]*exposure)+(p.pos==='GK'?5*poisson(rates[8]*exposure):0);
+        comp.penalties[i]=SCORING.penalty_miss*poisson(rates[7]*exposure)+(p.pos==='GK'?SCORING.penalty_save*poisson(rates[8]*exposure):0);
         base[i]=keys.reduce((s,k)=>s+comp[k][i],0);
       }
       const scores=[...new Set(both.filter(i=>mins[i]>0).map(i=>base[i]))].sort((a,b)=>b-a),bon={};let awarded=0;
       for(let g=0;g<3&&g<scores.length&&awarded<3;g++){
-        const winners=both.filter(i=>mins[i]>0&&base[i]===scores[g]);for(const i of winners)bon[i]=3-g;awarded+=winners.length;
+        const winners=both.filter(i=>mins[i]>0&&base[i]===scores[g]);for(const i of winners)bon[i]=SCORING.bonus[g]??0;awarded+=winners.length;
       }
       for(const i of both){
         const r=result[i],b=bon[i]||0,fp=base[i]+b;

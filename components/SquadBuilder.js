@@ -3,19 +3,10 @@ import { useActionState, useEffect, useMemo, useRef, useState } from 'react'
 import { saveSquad } from '@/app/actions'
 import { teamCssVars } from '@/lib/teamThemes'
 import { availabilityCompactNote, availabilityIsIssue } from '@/lib/availability'
-import {MAX_PLAYERS_PER_CLUB} from '@/lib/rules'
+import {BUDGET,FORMATION_SHAPES,MAX_PLAYERS_PER_CLUB,SQUAD_LIMITS} from '@/lib/rules'
 
-const LIMITS={GK:2,DEF:5,MID:5,FWD:3}
-const FORMATIONS={
-  '3-4-3':{DEF:3,MID:4,FWD:3},
-  '3-5-2':{DEF:3,MID:5,FWD:2},
-  '4-3-3':{DEF:4,MID:3,FWD:3},
-  '4-4-2':{DEF:4,MID:4,FWD:2},
-  '4-5-1':{DEF:4,MID:5,FWD:1},
-  '5-2-3':{DEF:5,MID:2,FWD:3},
-  '5-3-2':{DEF:5,MID:3,FWD:2},
-  '5-4-1':{DEF:5,MID:4,FWD:1},
-}
+const LIMITS=SQUAD_LIMITS
+const FORMATIONS=FORMATION_SHAPES
 const POS_ORDER={GK:0,DEF:1,MID:2,FWD:3}
 const posLabel={GK:'KL',DEF:'DEF',MID:'OS',FWD:'FOR'}
 
@@ -109,10 +100,10 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
   const selected=ids.map(id=>map.get(id)).filter(Boolean)
   const counts=selected.reduce((a,p)=>(a[p.position]=(a[p.position]||0)+1,a),{})
   const cost=selected.reduce((s,p)=>s+Number(p.price||0),0)
-  const bank=100-cost
+  const bank=BUDGET-cost
   const clubCounts=selected.reduce((a,p)=>(a[p.team]=(a[p.team]||0)+1,a),{})
   const clubLimitOk=!MAX_PLAYERS_PER_CLUB||Object.values(clubCounts).every(n=>n<=MAX_PLAYERS_PER_CLUB)
-  const validRoster=ids.length===15&&Object.entries(LIMITS).every(([k,v])=>(counts[k]||0)===v)&&cost<=100.0001&&clubLimitOk
+  const validRoster=ids.length===15&&Object.entries(LIMITS).every(([k,v])=>(counts[k]||0)===v)&&cost<=BUDGET+0.0001&&clubLimitOk
   const liveFormation=formationFromXIIds(xiIds,map)
   const validXI=xiIds.length===11&&xiIds.every(id=>ids.includes(id))&&Boolean(liveFormation)&&liveFormation===formation
   const valid=validRoster&&validXI&&Boolean(captainId)&&xiIds.includes(captainId)
@@ -204,7 +195,7 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
     const p=map.get(id)
     if(!p||ids.includes(id)||ids.length>=15)return
     if((counts[p.position]||0)>=LIMITS[p.position])return
-    if(cost+Number(p.price)>100.0001)return
+    if(cost+Number(p.price)>BUDGET+0.0001)return
     const next=[...ids,id]
     setIds(next);rebuild(next)
   }
@@ -340,7 +331,7 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
       </div>
       <div className="squad-control-stat">
         <span>Bütçe</span>
-        <b>{cost.toFixed(1)}<small>m / 100m</small></b>
+        <b>{cost.toFixed(1)}<small>m / ${BUDGET}m</small></b>
         <small>{bank.toFixed(1)}m banka</small>
       </div>
       <div className="squad-control-stat">
@@ -426,7 +417,7 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
           {candidates.map(p=>{
             const chosen=ids.includes(p.id)
             const posFull=(counts[p.position]||0)>=LIMITS[p.position]
-            const overBudget=!chosen&&cost+Number(p.price)>100.0001
+            const overBudget=!chosen&&cost+Number(p.price)>BUDGET+0.0001
             const disabled=!chosen&&(ids.length>=15||posFull||overBudget)
             const availabilityNote=(availabilityIsIssue(p.availability)||p.availability?.availability_type==='return')
               ? availabilityCompactNote(p.availability)
@@ -556,7 +547,7 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
       <div className="squad-save-row">
         <div className="squad-validity">
           <span className={validRoster?'ok':''}>{validRoster?'✓':'○'} 2 KL / 5 DEF / 5 OS / 3 FOR</span>
-          <span className={cost<=100?'ok':''}>{cost<=100?'✓':'○'} Bütçe limiti</span>
+          <span className={cost<=BUDGET?'ok':''}>{cost<=BUDGET?'✓':'○'} Bütçe limiti</span>
           <span className={clubLimitOk?'ok':''}>{clubLimitOk?'✓':'○'} Kulüp başına en fazla {MAX_PLAYERS_PER_CLUB}</span>
           <span className={validXI?'ok':''}>{validXI?'✓':'○'} {liveFormation===formation?'Seçili diziliş hazır':'XI dizilişi güncellenmeli'}</span>
         </div>
