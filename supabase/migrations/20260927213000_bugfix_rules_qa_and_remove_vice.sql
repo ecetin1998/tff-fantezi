@@ -113,6 +113,12 @@ begin
     select 1 from jsonb_to_recordset(p_members) x(player_id int,is_captain boolean,bench_order int)
     where is_captain is true and bench_order is null
   ) then raise exception 'INVALID_CAPTAIN'; end if;
+  if exists(
+    select 1
+    from jsonb_to_recordset(p_members) x(player_id int,is_captain boolean,bench_order int)
+    join public.scout_players p on p.id=x.player_id
+    where x.is_captain is true and p.position='GK'
+  ) then raise exception 'INVALID_CAPTAIN'; end if;
 
   v_formation:=v_xi_def::text||'-'||v_xi_mid::text||'-'||v_xi_fwd::text;
   if not(v_formation=any(v_formations)) then raise exception 'INVALID_FORMATION'; end if;
