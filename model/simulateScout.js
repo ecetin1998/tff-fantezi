@@ -130,7 +130,19 @@ function redCardAdjustedLambdas(homeLambda,awayLambda,homeRedMinute=91,awayRedMi
 
 function simulateScout(input,count,seed,attackPolicy=true){
   const P=input.players,M=P.length,positions=['GK','DEF','MID','FWD'];
-  const model=P.map(p=>({role:adjustedRoleProbability(p),duration:normalizedDurationDistribution(p)}));
+  const quotaMap=Object.fromEntries((input.team_checks||[]).map(t=>[Number(t.club),t.formation||{}]));
+  const poolCounts={};
+  for(const p of P){
+    if(Number(p.avail)<=0)continue;
+    const key=Number(p.club)+'|'+String(p.pos);
+    poolCounts[key]=(poolCounts[key]||0)+1;
+  }
+  const model=P.map(p=>{
+    const key=Number(p.club)+'|'+String(p.pos);
+    const slots=Number(quotaMap[Number(p.club)]?.[p.pos]||0);
+    const derivedPrior=poolCounts[key]?clamp(slots/poolCounts[key],ROLE_FLOOR,ROLE_CAP):clamp(Number(p.role)||ROLE_FLOOR,ROLE_FLOOR,ROLE_CAP);
+    return {role:adjustedRoleProbability({...p,team_position_prior:p.team_position_prior??derivedPrior}),duration:normalizedDurationDistribution(p)};
+  });
   const allocation=P.map(p=>attackPolicy?attackWeights(p,input.playerMatches||[]):{
     goal:Math.max(1e-6,.8*p.rates[0]+.2*p.rates[1]),
     assist:Math.max(1e-6,.7*p.rates[3]+.3*p.rates[2]),
@@ -163,7 +175,7 @@ function simulateScout(input,count,seed,attackPolicy=true){
   const result=P.map(p=>({...p,xi:0,play:0,p60:0,minutes:0,start_minutes:0,core:0,bonus:0,xfp:0,xgoal:0,xassist:0,p6:0,fixture_count:0,blank:false,components:Object.fromEntries(keys.map(k=>[k,0])),_hist:makeHistogram(),_starts:0,_startMinutes:0}));
   const clubIds=[...new Set(input.matches.flatMap(m=>[Number(m.home_id),Number(m.away_id)]).filter(Number.isFinite))];
   const teams=Object.fromEntries(clubIds.map(club=>[club,P.map((p,i)=>Number(p.club)===club?i:-1).filter(i=>i>=0)]));
-  const quotas=Object.fromEntries((input.team_checks||[]).map(t=>[Number(t.club),t.formation]));
+  const quotas=quotaMap;
   const fixturesByClub=Object.fromEntries(clubIds.map(c=>[c,input.matches.filter(m=>Number(m.home_id)===c||Number(m.away_id)===c).length]));
   const rho=Number.isFinite(Number(input.rho))?clamp(Number(input.rho),-.3,.3):fitDixonColesRho(input.matchHistory||[],DEFAULT_DC_RHO);
   const saveBaseline=Math.max(.4,Number(input.save_lambda_baseline||1.35));

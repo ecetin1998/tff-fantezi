@@ -16,7 +16,7 @@ function buildReplayInput(payload,playerMatches=[]){
     return Number(base)*(1+eloBlend*(raw-1))
   }
   return {
-    players:players.map(x=>({id:Number(x.player_id),club:Number(x.club_id),pos:String(x.position),price:Number(x.price||0),rates:(x.rates||[]).map(Number),durations:(x.durations||[75]).map(Number),duration_weights:(x.duration_weights||[1]).map(Number),avail:Number(x.availability),role:Number(x.role_probability??x.xi_probability??0),team_position_prior:Number(x.team_position_prior??x.position_prior??x.role_probability??.5),confidence:String(x.confidence||'medium').toLowerCase(),benchw:Math.max(1e-9,Number(x.bench_weight)||1e-9),valid_games:Number(x.valid_games||1)})),
+    players:players.map(x=>({id:Number(x.player_id),club:Number(x.club_id),pos:String(x.position),price:Number(x.price||0),rates:(x.rates||[]).map(Number),durations:(x.durations||[75]).map(Number),duration_weights:(x.duration_weights||[1]).map(Number),avail:Number(x.availability),role:Number(x.role_probability??x.xi_probability??0),team_position_prior:x.team_position_prior===undefined&&x.position_prior===undefined?undefined:Number(x.team_position_prior??x.position_prior),confidence:String(x.confidence||x.data_confidence||'medium').toLowerCase(),benchw:Math.max(1e-9,Number(x.bench_weight)||1e-9),valid_games:Number(x.valid_games||1)})),
     matches:matches.map(m=>({
       match_id:Number(m.match_id||0),home_id:Number(m.home_team_id),away_id:Number(m.away_team_id),
       home_lambda:withElo(m.home_team_id,m.away_team_id,m.home_lambda,true),
