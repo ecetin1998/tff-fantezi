@@ -3,16 +3,16 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "next build && node scripts/purge-built-css.mjs && node scripts/check-css-size.mjs",
+    "dev": "npm run build:css && next dev",
+    "build": "npm run build:css && next build && node scripts/check-css-size.mjs",
     "start": "next start",
     "lint": "eslint .",
     "smoke": "bash scripts/smoke.sh",
     "test:runtime": "bash scripts/runtime-route-test.sh",
     "test": "node --test test/full-suite.test.js",
-    "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
-    "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
-    "check:css": "node scripts/check-css-size.mjs"
+    "preview": "npm run build:css && opennextjs-cloudflare build && opennextjs-cloudflare preview",
+    "deploy": "npm run build:css && opennextjs-cloudflare build && opennextjs-cloudflare deploy",
+    "build:css": "node scripts/build-css.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "0.12.7",
@@ -27,6 +27,9 @@
     "eslint": "9.39.1",
     "eslint-config-next": "16.3.6",
     "wrangler": "^4.142.0",
-    "@fullhuman/postcss-purgecss": "^8.0.0"
+    "@fullhuman/postcss-purgecss": "^8.0.0",
+    "cssnano": "^7.1.2",
+    "csso": "^5.0.5",
+    "postcss": "^8.5.6"
   }
 }
