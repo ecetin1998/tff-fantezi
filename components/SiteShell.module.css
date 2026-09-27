@@ -533,3 +533,5 @@
 
 
 
+
+.scope :global(.data-freshness-banner){display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 18px;padding:12px 14px;border-radius:12px;border:1px solid var(--line);font-size:13px}.scope :global(.data-freshness-banner) b{font-weight:900}.scope :global(.data-freshness-banner.warning){border-color:rgba(243,201,105,.55);background:rgba(243,201,105,.11);color:#ffe4a0}.scope :global(.data-freshness-banner.critical){border-color:rgba(255,109,122,.6);background:rgba(255,109,122,.12);color:#ffb7bf}@media(max-width:640px){.scope :global(.data-freshness-banner){align-items:flex-start;flex-direction:column;gap:4px}}

@@ -16,7 +16,7 @@ export default async function Home(){
   const modelUpdated=run?.generated_at?new Intl.DateTimeFormat('tr-TR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit',timeZone:'Europe/Istanbul'}).format(new Date(run.generated_at)):'—'
   const highlights=[
     [`MH${run?.gameweek||'—'} en yüksek beklenen puan`,best,Number(best?.projection?.xfp||0).toFixed(2),'xFP','xFP • tüm senaryoların ortalamasında en yüksek beklenen puan'],
-    [`MH${run?.gameweek||'—'} en iyi F/P`,value,Number(value?.projection?.value_score||0).toFixed(2),'xFP/m','Bütçe başına beklenen puan verimi'],
+    [`MH${run?.gameweek||'—'} en iyi Fiyat/performans`,value,Number(value?.projection?.value_score||0).toFixed(2),'xFP/m','Bütçe başına beklenen puan verimi'],
     [`MH${run?.gameweek||'—'} en güvenli dakika`,mins,Number(mins?.projection?.x_minutes||0).toFixed(0),'dk','En yüksek beklenen oynama süresi'],
     [`MH${run?.gameweek||'—'} Top-25’e girme adayı #1`,top25,`#${Number(top25?.projection?.top25_rank||1)}`,'Top25 sıra','Yüksek puan patlaması ihtimali en güçlü aday'],
   ]

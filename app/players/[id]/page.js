@@ -4,6 +4,7 @@ import { getPlayerDetail, getPlayersWithProjection } from '@/lib/data'
 import { teamCssVars } from '@/lib/teamThemes'
 import { availabilityCompactNote, availabilityIsIssue } from '@/lib/availability'
 import {playerLabel,predictionConfidenceLabel} from '@/lib/playerPresentation'
+import {roundOneXTwo} from '@/lib/format'
 
 export const revalidate=300
 export async function generateStaticParams(){
@@ -52,6 +53,7 @@ export default async function PlayerPage({ params }){
   const average=played?actual/played:0
   const opponentId=match ? (Number(match.home_team_id)===Number(player.team_id)?Number(match.away_team_id):Number(match.home_team_id)) : null
   const opponent=p?.opponent_name || '—'
+  const oneXTwo=match?roundOneXTwo(match.home_win_probability,match.draw_probability,match.away_win_probability):null
   const hasAvailabilityIssue=availabilityIsIssue(a)
   const hasAvailabilityInfo=a && (hasAvailabilityIssue || a.availability_type==='return' || a.expected_return_date || a.suspension_fixture || a.canonical_reason)
   const availabilityNote=availabilityCompactNote(a)
@@ -70,7 +72,7 @@ export default async function PlayerPage({ params }){
     {label:'xDakika',value:num(p?.x_minutes,0),note:'beklenen süre'},
     {label:'6+ puan',value:pct(p?.six_plus_probability),note:'yüksek getiri ihtimali'},
     {label:'P90',value:num(p?.p90,1),note:'üst %10 eşiği'},
-    {label:'F/P',value:num(p?.value_score),note:'fiyat verimliliği'},
+    {label:'Fiyat/performans',value:num(p?.value_score),note:'fiyat verimliliği'},
   ]
 
   const scenarioMetrics=[
@@ -161,6 +163,7 @@ export default async function PlayerPage({ params }){
         <div className="player-fixture-chip">
           <span>{venue(p?.venue)}</span>
           {opponentId?<Link href={'/teams/'+opponentId}>{opponent}</Link>:<b>{opponent}</b>}
+          {oneXTwo?<small>1-X-2 • %{oneXTwo.home} / %{oneXTwo.draw} / %{oneXTwo.away}</small>:null}
         </div>
       </div>
       <MetricGrid items={decisionMetrics} className="decision-metrics"/>

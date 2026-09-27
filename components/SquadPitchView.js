@@ -1,10 +1,9 @@
 import Link from 'next/link'
 import { teamCssVars } from '@/lib/teamThemes'
-import {playerLabel} from '@/lib/playerPresentation'
+import {pitchPlayerLabel,playerLabel} from '@/lib/playerPresentation'
 
 const posLabel={GK:'KL',DEF:'DEF',MID:'OS',FWD:'FOR'}
 
-function displayName(player){ return playerLabel(player) }
 function shirtMark(player,team=''){
   return player?.shirt_number ?? ''
 }
@@ -40,7 +39,7 @@ export default function SquadPitchView({
       </div>
       <span className="formation-summary-pill"><small>Taktik</small><b>{formation}</b></span>
     </div>
-    {variant==='recommended'&&ceilingCaptain?<div className="ceiling-captain-note">Alternatif (tavan) kaptan: <b>{displayName(ceilingCaptain.player)}</b> • P90 {Number(ceilingCaptain.p90||0).toFixed(1)}</div>:null}
+    {variant==='recommended'&&ceilingCaptain?<div className="ceiling-captain-note">Alternatif (tavan) kaptan: <b>{playerLabel(ceilingCaptain.player)}</b> • P90 {Number(ceilingCaptain.p90||0).toFixed(1)}</div>:null}
 
     <div className={`my-squad-pitch readonly-squad-pitch ${compact?'compact':''}`}>
       <div className="pitch-mark center-line"/>
@@ -56,7 +55,7 @@ export default function SquadPitchView({
           title={playerLabel(m.player)}
         >
           <span className={`fantasy-shirt ${m.player?.position}`} style={teamCssVars(m.team)}><i>{posLabel[m.player?.position]||m.player?.position||'—'}</i></span>
-          <b>{displayName(m.player)}</b>
+          <b>{pitchPlayerLabel(m.player)}</b>
           <small>{m.team}</small>
           <div className="pitch-player-tags">
             <span>{Number(m.player?.price||0).toFixed(1)}m</span>

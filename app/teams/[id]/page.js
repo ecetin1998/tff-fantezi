@@ -4,6 +4,7 @@ import { getTeamDetail, getTeamFixturesOverview } from '@/lib/data'
 import { teamCssVars } from '@/lib/teamThemes'
 import TeamRoster from '@/components/TeamRoster'
 import {playerLabel} from '@/lib/playerPresentation'
+import {roundOneXTwo} from '@/lib/format'
 
 export const revalidate=300
 export async function generateStaticParams(){
@@ -33,6 +34,7 @@ export default async function TeamPage({params}){
   const oppXg=currentMatch?(isHome?currentMatch.away_xg:currentMatch.home_xg):null
   const win=currentMatch?(isHome?currentMatch.home_win_probability:currentMatch.away_win_probability):null
   const cs=currentMatch?(isHome?currentMatch.home_cs_probability:currentMatch.away_cs_probability):null
+  const oneXTwo=currentMatch?roundOneXTwo(currentMatch.home_win_probability,currentMatch.draw_probability,currentMatch.away_win_probability):null
 
   const played=(history||[]).filter(m=>m.home_goals!==null&&m.home_goals!==undefined&&m.away_goals!==null&&m.away_goals!==undefined)
   const fantasyWeeks=Object.entries(fantasyByGameweek||{}).sort((a,b)=>Number(a[0])-Number(b[0]))
@@ -98,6 +100,7 @@ export default async function TeamPage({params}){
         <div><span>Rakip xG</span><b>{num(oppXg)}</b><small>savunma riski</small></div>
         <div><span>Galibiyet</span><b>{pct(win)}</b><small>maç kazanma ihtimali</small></div>
         <div><span>Clean sheet</span><b>{pct(cs)}</b><small>savunma getirisi</small></div>
+        {oneXTwo?<div><span>1-X-2</span><b>%{oneXTwo.home} / %{oneXTwo.draw} / %{oneXTwo.away}</b><small>ev / beraberlik / dep</small></div>:null}
       </div>
 
       <div className="team-top-picks">
