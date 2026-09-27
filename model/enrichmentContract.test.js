@@ -23,6 +23,13 @@ assert.match(hardening,/using\(false\)/)
 assert.match(hardening,/scout_match_attack_events_assist_player_id_idx/)
 assert.match(hardening,/scout_team_tactical_profiles_team_id_idx/)
 
+const fill=fs.readFileSync('supabase/migrations/20260928113000_role_snapshot_team_aggregate_fill.sql','utf8')
+for(const marker of ['big_chances','big_chances_missed','shots_on_target_per_match','set_piece_goals','set_piece_xg','set_piece_goals_conceded','set_piece_xga']){
+  assert.ok(fill.includes(marker),marker+' missing from aggregate fill')
+}
+assert.match(fill,/Reviewed 2026-09-28 real-role snapshot/)
+assert.match(fill,/fotmob_public_team_stats_reviewed_2026-09-28/)
+
 const data=fs.readFileSync('lib/data.js','utf8')
 assert.match(data,/TEAM_TACTICAL_PUBLIC_COLUMNS/)
 assert.match(data,/xa_model_per90/)
@@ -34,6 +41,8 @@ assert.match(playerPage,/playerRoleLabel/)
 assert.match(playerPage,/xA \/ 90/)
 const teamPage=fs.readFileSync('app/teams/[id]/page.js','utf8')
 assert.match(teamPage,/Atak ve savunma profili/)
+assert.match(teamPage,/Büyük fırsat/)
+assert.match(teamPage,/Duran top zaafı/)
 assert.match(teamPage,/Uzaktan goller/)
 assert.match(teamPage,/Soldan yenen atak/)
 
