@@ -19,6 +19,7 @@ jobs:
     env:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      CLOUDFLARE_URL: https://tff-fantezi.ecetin1998.workers.dev
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -37,3 +38,16 @@ jobs:
         run: npx wrangler whoami
       - name: Deploy tff-fantezi
         run: npm run deploy
+      - name: Smoke test Cloudflare production
+        shell: bash
+        run: |
+          for attempt in {1..10}; do
+            if curl --fail --silent --show-error --location --max-time 30 "$CLOUDFLARE_URL/" >/dev/null; then
+              echo "Cloudflare production smoke passed."
+              exit 0
+            fi
+            echo "Smoke attempt $attempt failed; retrying..."
+            sleep 5
+          done
+          echo "Cloudflare production smoke failed."
+          exit 1
