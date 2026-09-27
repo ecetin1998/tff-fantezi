@@ -14,7 +14,6 @@ export const dynamic='force-dynamic'
 const responseHeaders={
   'Cache-Control':'public, max-age=0, s-maxage=300, stale-while-revalidate=600',
   'CDN-Cache-Control':'public, s-maxage=300, stale-while-revalidate=600',
-  'Vercel-CDN-Cache-Control':'public, s-maxage=300, stale-while-revalidate=600',
   'X-Robots-Tag':'noindex, nofollow, noarchive'
 }
 
@@ -191,7 +190,6 @@ export async function GET(request){
       {status:500,headers:{
         'Cache-Control':'private, no-store',
         'CDN-Cache-Control':'no-store',
-        'Vercel-CDN-Cache-Control':'no-store',
         'X-Robots-Tag':'noindex, nofollow, noarchive'
       }}
     )
