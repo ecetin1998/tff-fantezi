@@ -285,6 +285,9 @@ function simulateScout(input,count,seed,attackPolicy=true){
     r.xi=Math.max(0,Math.min(1,r.xi));
     r.play=Math.max(0,Math.min(1,r.play));
     r.p60=Math.max(0,Math.min(1,r.p60));
+    // Average minutes can land a few floating-point ulps below an exact value
+    // (e.g. 179.99999999999983 in a deterministic two-match week).
+    r.minutes=Math.round(r.minutes*1e9)/1e9;
     r.start_minutes=r.xi?r.start_minutes/r.xi:0;
     r.p25=histogramQuantile(r._hist,.25);
     r.p75=histogramQuantile(r._hist,.75);
