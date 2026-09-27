@@ -1,0 +1,60 @@
+name: Cloudflare Workers deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cloudflare-production
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      NEXT_PUBLIC_SITE_URL: https://tff-fantezi.ecetin1998.workers.dev
+      NEXT_PUBLIC_BUILD_SHA: ${{ github.sha }}
+      BASE_URL: https://tff-fantezi.ecetin1998.workers.dev
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Verify Cloudflare credentials are configured
+        shell: bash
+        run: |
+          test -n "$CLOUDFLARE_API_TOKEN"
+          test -n "$CLOUDFLARE_ACCOUNT_ID"
+      - name: Install
+        run: npm ci --no-audit --no-fund
+      - name: Quality gate
+        run: |
+          npm run lint
+          npm test
+      - name: Install Cloudflare build tooling
+        run: npm install --no-save --package-lock=false @opennextjs/cloudflare@1.20.6 wrangler@4.142.0 @opentelemetry/api@1.9.0
+      - name: Deploy
+        run: npm run deploy
+      - name: Verify deployed commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          for attempt in {1..12}; do
+            remote_sha="$(curl -fsSL "$BASE_URL/api/health" | node -pe "JSON.parse(require('fs').readFileSync(0,'utf8')).sha" || true)"
+            if [ "$remote_sha" = "$GITHUB_SHA" ]; then
+              echo "Deployed SHA verified: $remote_sha"
+              exit 0
+            fi
+            echo "Waiting for SHA $GITHUB_SHA; live=$remote_sha"
+            sleep 5
+          done
+          exit 1
+      - name: Production smoke
+        run: SKIP_CDN_CHECK=1 bash scripts/smoke.sh

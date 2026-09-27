@@ -21,6 +21,10 @@ export default defineConfig([
     }
   },
   {
+    files:['open-next.config.ts'],
+    rules:{'import/no-unresolved':'off'}
+  },
+  {
     files:['supabase/functions/**/*.{ts,js}'],
     rules:{
       'no-undef':'off',

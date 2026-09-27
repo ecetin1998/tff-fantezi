@@ -10,13 +10,14 @@ function buildReplayInput(payload,playerMatches=[]){
   return {
     players:players.map(x=>({
       id:Number(x.player_id),club:Number(x.club_id),pos:String(x.position),price:Number(x.price||0),
+      sub_role:x.sub_role||x.fotmob_position||x.position_detail||null,
       rates:(x.rates||[]).map(Number),durations:(x.durations||[75]).map(Number),
       duration_weights:(x.duration_weights||[1]).map(Number),
       avail:Number(x.availability),role:Math.max(1e-7,Math.min(.9999999,Number(x.role_probability)||1e-7)),
       benchw:Math.max(1e-9,Number(x.bench_weight)||1e-9),valid_games:1,
     })),
     matches:matches.map(m=>({
-      home_id:Number(m.home_team_id),away_id:Number(m.away_team_id),
+      match_id:Number(m.match_id||0),home_id:Number(m.home_team_id),away_id:Number(m.away_team_id),
       home_lambda:Number(m.home_lambda),away_lambda:Number(m.away_lambda),
     })),
     team_checks:clubs.map(club=>({club,formation:forms[String(club)]||{GK:1,DEF:4,MID:5,FWD:1}})),
@@ -48,6 +49,44 @@ function rankCorrelation(x,y){
   return dx&&dy?num/Math.sqrt(dx*dy):null
 }
 
+function priceBand(price){
+  const p=Number(price||0);
+  return p<=5?'<=5':p<8?'5-8':'8+';
+}
+
+function biasByPositionPrice(out,actuals){
+  const byId=new Map(out.map(x=>[Number(x.id),x]));
+  const groups=new Map();
+  for(const actual of actuals||[]){
+    const pred=byId.get(Number(actual.player_id));
+    if(!pred)continue;
+    const key=String(pred.pos||'UNK')+'|'+priceBand(pred.price);
+    const row=groups.get(key)||{position:String(pred.pos||'UNK'),price_band:priceBand(pred.price),sample:0,bias:0,mae:0};
+    const err=Number(pred.xfp||0)-Number(actual.points||0);
+    row.sample++;row.bias+=err;row.mae+=Math.abs(err);groups.set(key,row);
+  }
+  return [...groups.values()].map(row=>({...row,bias:row.bias/row.sample,mae:row.mae/row.sample}))
+    .sort((a,b)=>a.position.localeCompare(b.position)||a.price_band.localeCompare(b.price_band));
+}
+
+function defenderContributionFlags(rows,tolerance=.75){
+  const defs=(rows||[]).filter(r=>r.pos==='DEF');
+  const flags=[];
+  for(let a=0;a<defs.length;a++)for(let b=a+1;b<defs.length;b++){
+    const x=defs[a],y=defs[b];
+    if(Number(x.club)!==Number(y.club))continue;
+    if(Math.abs(Number(x.minutes||0)-Number(y.minutes||0))>3)continue;
+    if(Math.abs(Number(x.xi||0)-Number(y.xi||0))>.05)continue;
+    const expected=(Number(x.xgoal||0)-Number(y.xgoal||0))*6
+      +(Number(x.xassist||0)-Number(y.xassist||0))*3
+      +(Number(x.bonus||0)-Number(y.bonus||0));
+    const actual=Number(x.xfp||0)-Number(y.xfp||0);
+    const residual=actual-expected;
+    if(Math.abs(residual)>tolerance)flags.push({a:x.id,b:y.id,club:x.club,actual,expected,residual});
+  }
+  return flags;
+}
+
 function evaluateReplay(out,actuals){
   const byId=new Map(out.map(x=>[Number(x.id),x]))
   const rows=(actuals||[]).filter(x=>byId.has(Number(x.player_id)))
@@ -62,7 +101,9 @@ function evaluateReplay(out,actuals){
     top25_hit_rate:topPred.filter(x=>topActual.has(Number(x.player_id))).length/25,
     average_minute_error:rows.reduce((s,x)=>s+Math.abs(byId.get(Number(x.player_id)).minutes-Number(x.minutes||0)),0)/n,
     band_hit_rate:rows.filter(x=>{const r=byId.get(Number(x.player_id)),v=Number(x.points);return v>=r.p25&&v<=r.p90}).length/n,
+    bias_by_position_price:biasByPositionPrice(out,rows),
+    unexplained_same_team_def_xfp: defenderContributionFlags(out).length,
   }
 }
 
-module.exports={buildReplayInput,evaluateReplay}
+module.exports={buildReplayInput,evaluateReplay,biasByPositionPrice,defenderContributionFlags,priceBand}

@@ -9,14 +9,23 @@ export default async function Home(){
   const [{players,run},{matches}]=await Promise.all([getPlayersWithProjection(),getMatches()])
   const best=[...players].sort((a,b)=>Number(b.projection?.xfp||0)-Number(a.projection?.xfp||0))[0]
   const value=[...players].sort((a,b)=>Number(b.projection?.value_score||0)-Number(a.projection?.value_score||0))[0]
-  const mins=[...players].sort((a,b)=>Number(b.projection?.x_minutes||0)-Number(a.projection?.x_minutes||0))[0]
+  const mins=[...players].sort((a,b)=>{
+    const am=Number(a.projection?.x_minutes||0),bm=Number(b.projection?.x_minutes||0)
+    if(bm!==am)return bm-am
+    const ar=Number(a.projection?.xi_probability||0)*Number(a.projection?.availability_probability??1)
+    const br=Number(b.projection?.xi_probability||0)*Number(b.projection?.availability_probability??1)
+    if(br!==ar)return br-ar
+    const recent=Number(b.projection?.recent4_minutes||0)-Number(a.projection?.recent4_minutes||0)
+    if(recent!==0)return recent
+    return Number(b.projection?.over60_probability||0)-Number(a.projection?.over60_probability||0)
+  })[0]
   const top25=[...players].sort((a,b)=>Number(a.projection?.top25_rank||9999)-Number(b.projection?.top25_rank||9999) || Number(b.projection?.top25_score||0)-Number(a.projection?.top25_score||0))[0]
   const sourceUpdated=run?.source_updated_at?new Intl.DateTimeFormat('tr-TR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit',timeZone:'Europe/Istanbul'}).format(new Date(run.source_updated_at)):'—'
   const modelUpdated=run?.generated_at?new Intl.DateTimeFormat('tr-TR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit',timeZone:'Europe/Istanbul'}).format(new Date(run.generated_at)):'—'
   const highlights=[
     [`MH${run?.gameweek||'—'} en yüksek beklenen puan`,best,Number(best?.projection?.xfp||0).toFixed(2),'xFP','xFP • tüm senaryoların ortalamasında en yüksek beklenen puan'],
     [`MH${run?.gameweek||'—'} en iyi F/P`,value,Number(value?.projection?.value_score||0).toFixed(2),'xFP/m','Bütçe başına beklenen puan verimi'],
-    [`MH${run?.gameweek||'—'} en güvenli dakika`,mins,Number(mins?.projection?.x_minutes||0).toFixed(0),'dk','En yüksek beklenen oynama süresi'],
+    [`MH${run?.gameweek||'—'} en güvenli dakika`,mins,Number(mins?.projection?.x_minutes||0).toFixed(0),'dk','Dakika eşitliğinde ilk 11 × uygunluk, son 4 maç dakikası ve 60+ ihtimaliyle ayrıştırılır'],
     [`MH${run?.gameweek||'—'} Top-25’e girme adayı #1`,top25,`#${Number(top25?.projection?.top25_rank||1)}`,'Top25 sıra','Yüksek puan patlaması ihtimali en güçlü aday'],
   ]
   return <>

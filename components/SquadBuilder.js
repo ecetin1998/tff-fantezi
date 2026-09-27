@@ -3,7 +3,7 @@ import { useActionState, useDeferredValue, useEffect, useMemo, useRef, useState 
 import { saveSquad } from '@/app/actions'
 import { teamCssVars } from '@/lib/teamThemes'
 import { availabilityCompactNote, availabilityIsIssue } from '@/lib/availability'
-import {BUDGET,FORMATION_MAP,MAX_PLAYERS_PER_CLUB,SQUAD_LIMITS,SQUAD_SIZE,STARTING_GK,STARTING_XI_SIZE,VICE_CAPTAIN_ENABLED} from '@/lib/rules'
+import {BUDGET,FORMATION_MAP,MAX_PLAYERS_PER_CLUB,SQUAD_LIMITS,SQUAD_SIZE,STARTING_GK,STARTING_XI_SIZE,TRANSFER_RULES} from '@/lib/rules'
 import {pitchPlayerLabel,playerLabel} from '@/lib/playerPresentation'
 const POS_ORDER={GK:0,DEF:1,MID:2,FWD:3}
 const posLabel={GK:'KL',DEF:'DEF',MID:'OS',FWD:'FOR'}
@@ -47,7 +47,7 @@ function bestXIPlan(ids,map){
     const lineup=buildXI(ids,key,map)
     if(lineup.length!==STARTING_XI_SIZE)continue
     const lineupPlayers=lineup.map(id=>map.get(id)).filter(Boolean)
-    const captain=[...lineupPlayers].sort((a,b)=>xfp(b)-xfp(a))[0]||null
+    const captain=[...lineupPlayers].filter(p=>p.position!=='GK').sort((a,b)=>xfp(b)-xfp(a))[0]||null
     const base=lineupPlayers.reduce((sum,p)=>sum+xfp(p),0)
     const total=base+xfp(captain)
     if(!best||total>best.total)best={key,lineup,captain,base,total}
@@ -67,7 +67,7 @@ function formationFromXIIds(ids,map){
   return FORMATION_MAP[key]?key:null
 }
 
-export default function SquadBuilder({ players, initialState=[], recommendedState=[], plan='free', gameweek, deadlineAt=null, locked=false, initialViceCaptainId=null, transferScenarios=[] }){
+export default function SquadBuilder({ players, initialState=[], recommendedState=[], plan='free', gameweek, deadlineAt=null, locked=false, transferScenarios=[] }){
   const map=useMemo(()=>new Map(players.map(p=>[p.id,p])),[players])
   const initialIds=useMemo(()=>initialState.map(x=>x.player_id).filter(id=>map.has(id)),[initialState,map])
   const initialFormation=useMemo(()=>formationFromState(initialState,map),[initialState,map])
@@ -81,14 +81,10 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
   const [xiIds,setXiIds]=useState(initialXI)
   const initialCaptainId=useMemo(()=>{
     const saved=initialState.find(x=>x.is_captain)?.player_id
-    return saved&&initialXI.includes(saved)?saved:(initialXI.map(id=>map.get(id)).sort((a,b)=>xfp(b)-xfp(a))[0]?.id||null)
+    const savedPlayer=saved?map.get(saved):null
+    return saved&&initialXI.includes(saved)&&savedPlayer?.position!=='GK'?saved:(initialXI.map(id=>map.get(id)).filter(p=>p&&p.position!=='GK').sort((a,b)=>xfp(b)-xfp(a))[0]?.id||null)
   },[initialState,initialXI,map])
   const [captainId,setCaptainId]=useState(initialCaptainId)
-  const initialViceId=useMemo(()=>{
-    if(initialViceCaptainId&&initialXI.includes(initialViceCaptainId)&&initialViceCaptainId!==initialCaptainId)return initialViceCaptainId
-    return initialXI.map(id=>map.get(id)).filter(Boolean).sort((a,b)=>xfp(b)-xfp(a)).find(p=>p.id!==initialCaptainId)?.id||null
-  },[initialViceCaptainId,initialXI,initialCaptainId,map])
-  const [viceCaptainId,setViceCaptainId]=useState(initialViceId)
   const [poolLimit,setPoolLimit]=useState(180)
   const [now,setNow]=useState(0)
   useEffect(()=>{
@@ -114,13 +110,14 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
   const counts=selected.reduce((a,p)=>(a[p.position]=(a[p.position]||0)+1,a),{})
   const cost=selected.reduce((s,p)=>s+Number(p.price||0),0)
   const bank=BUDGET-cost
+  const transfersUsed=initialIds.filter(id=>!ids.includes(id)).length
+  const freeTransfersRemaining=Math.max(0,Number(TRANSFER_RULES.free_per_week||0)-transfersUsed)
   const clubCounts=selected.reduce((a,p)=>(a[p.team_id]=(a[p.team_id]||0)+1,a),{})
   const clubLimitOk=!MAX_PLAYERS_PER_CLUB||Object.values(clubCounts).every(n=>n<=MAX_PLAYERS_PER_CLUB)
   const validRoster=ids.length===SQUAD_SIZE&&Object.entries(SQUAD_LIMITS).every(([k,v])=>(counts[k]||0)===v)&&cost<=BUDGET+.0001&&clubLimitOk
   const liveFormation=formationFromXIIds(xiIds,map)
   const validXI=xiIds.length===STARTING_XI_SIZE&&xiIds.every(id=>ids.includes(id))&&Boolean(liveFormation)&&liveFormation===formation
-  const viceValid=!VICE_CAPTAIN_ENABLED||Boolean(viceCaptainId&&viceCaptainId!==captainId&&xiIds.includes(viceCaptainId))
-  const valid=validRoster&&validXI&&Boolean(captainId)&&xiIds.includes(captainId)&&viceValid
+  const valid=validRoster&&validXI&&Boolean(captainId)&&xiIds.includes(captainId)&&map.get(captainId)?.position!=='GK'
 
   const xi=xiIds.map(id=>map.get(id)).filter(Boolean)
   const benchValue=p=>{
@@ -144,12 +141,12 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
   const formationOptions=useMemo(()=>Object.keys(FORMATION_MAP).map(key=>{
     const lineup=buildXI(ids,key,map)
     const base=lineup.reduce((sum,id)=>sum+xfp(map.get(id)),0)
-    const cap=lineup.map(id=>map.get(id)).filter(Boolean).sort((a,b)=>xfp(b)-xfp(a))[0]
+    const cap=lineup.map(id=>map.get(id)).filter(p=>p&&p.position!=='GK').sort((a,b)=>xfp(b)-xfp(a))[0]
     const total=lineup.length===STARTING_XI_SIZE?base+xfp(cap):0
     return {key,lineup,base,total,captain:cap,complete:lineup.length===STARTING_XI_SIZE}
   }).sort((a,b)=>b.total-a.total),[ids,map])
   const bestFormation=formationOptions.find(x=>x.complete)?.key||formation
-  const captainCandidates=[...xi].sort((a,b)=>xfp(b)-xfp(a)).slice(0,3)
+  const captainCandidates=[...xi].filter(p=>p.position!=='GK').sort((a,b)=>xfp(b)-xfp(a)).slice(0,3)
 
   const teams=useMemo(()=>[...new Set(players.map(p=>p.team).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'tr')),[players])
   const candidates=useMemo(()=>{
@@ -189,20 +186,21 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
         const plan=bestXIPlan(nextIds,map)
         if(!plan)continue
         const gain=plan.total-currentPlan.total
-        if(!best||gain>best.gain)best={out,inn,gain,plan,nextIds}
+        const hitCost=freeTransfersRemaining>0?0:Number(TRANSFER_RULES.hit_cost||4)
+        const netGain=gain-hitCost
+        if(!best||netGain>best.netGain)best={out,inn,gain,netGain,hitCost,plan,nextIds}
       }
     }
     return best
-  },[selected,deferredPlayers,ids,bank,map])
+  },[selected,deferredPlayers,ids,bank,map,freeTransfersRemaining])
 
   function applyBestMove(){
-    if(!bestMove||bestMove.gain<=0)return
+    if(!bestMove||bestMove.netGain<=0)return
     setIds(bestMove.nextIds)
     setFormation(bestMove.plan.key)
     setXiIds(bestMove.plan.lineup)
     const nextCaptain=bestMove.plan.captain?.id||null
     setCaptainId(nextCaptain)
-    setViceCaptainId(bestMove.plan.lineup.map(id=>map.get(id)).filter(Boolean).sort((a,b)=>xfp(b)-xfp(a)).find(p=>p.id!==nextCaptain)?.id||null)
     setSwapTarget(null)
   }
 
@@ -210,12 +208,9 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
     const nextXI=buildXI(nextIds,nextFormation,map)
     setXiIds(nextXI)
     if(!nextXI.includes(captainId)){
-      const cap=nextXI.map(id=>map.get(id)).filter(Boolean).sort((a,b)=>xfp(b)-xfp(a))[0]
+      const cap=nextXI.map(id=>map.get(id)).filter(p=>p&&p.position!=='GK').sort((a,b)=>xfp(b)-xfp(a))[0]
       const nextCaptain=cap?.id||null
       setCaptainId(nextCaptain)
-      if(!nextXI.includes(viceCaptainId)||viceCaptainId===nextCaptain){
-        setViceCaptainId(nextXI.map(id=>map.get(id)).filter(Boolean).sort((a,b)=>xfp(b)-xfp(a)).find(p=>p.id!==nextCaptain)?.id||null)
-      }
     }
   }
   function add(id){
@@ -236,10 +231,9 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
     const nextXI=buildXI(ids,next,map)
     setFormation(next)
     setXiIds(nextXI)
-    const cap=nextXI.map(id=>map.get(id)).filter(Boolean).sort((a,b)=>xfp(b)-xfp(a))[0]
+    const cap=nextXI.map(id=>map.get(id)).filter(p=>p&&p.position!=='GK').sort((a,b)=>xfp(b)-xfp(a))[0]
     const nextCaptain=cap?.id||null
     setCaptainId(nextCaptain)
-    setViceCaptainId(nextXI.map(id=>map.get(id)).filter(Boolean).sort((a,b)=>xfp(b)-xfp(a)).find(p=>p.id!==nextCaptain)?.id||null)
     setSwapTarget(null)
   }
 
@@ -260,13 +254,12 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
     const nextXI=fromRecXI.length===11?fromRecXI:buildXI(next,recommendedFormation,map)
     setXiIds(nextXI)
     const savedCap=recommendedState.find(x=>x.is_captain&&nextXI.includes(x.player_id))?.player_id
-    const nextCaptain=savedCap||nextXI.map(id=>map.get(id)).filter(Boolean).sort((a,b)=>xfp(b)-xfp(a))[0]?.id||null
+    const nextCaptain=savedCap||nextXI.map(id=>map.get(id)).filter(p=>p&&p.position!=='GK').sort((a,b)=>xfp(b)-xfp(a))[0]?.id||null
     setCaptainId(nextCaptain)
-    setViceCaptainId(nextXI.map(id=>map.get(id)).filter(Boolean).sort((a,b)=>xfp(b)-xfp(a)).find(p=>p.id!==nextCaptain)?.id||null)
     setSwapTarget(null)
   }
   function reset(){
-    setIds([]);setXiIds([]);setCaptainId(null);setViceCaptainId(null);setSwapTarget(null);setFormation('4-3-3')
+    setIds([]);setXiIds([]);setCaptainId(null);setSwapTarget(null);setFormation('4-3-3')
   }
   function swapResult(firstId,secondId){
     if(!firstId||!secondId||firstId===secondId)return null
@@ -309,12 +302,9 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
     setXiIds(result.nextXI)
     setFormation(result.nextFormation)
     if(!result.nextXI.includes(captainId)){
-      const cap=result.nextXI.map(playerId=>map.get(playerId)).filter(Boolean).sort((a,b)=>xfp(b)-xfp(a))[0]
+      const cap=result.nextXI.map(playerId=>map.get(playerId)).filter(p=>p&&p.position!=='GK').sort((a,b)=>xfp(b)-xfp(a))[0]
       const nextCaptain=cap?.id||null
       setCaptainId(nextCaptain)
-      if(!result.nextXI.includes(viceCaptainId)||viceCaptainId===nextCaptain){
-        setViceCaptainId(result.nextXI.map(id=>map.get(id)).filter(Boolean).sort((a,b)=>xfp(b)-xfp(a)).find(p=>p.id!==nextCaptain)?.id||null)
-      }
     }
     setSwapTarget(null)
   }
@@ -347,9 +337,9 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
       ...initialXI.map(id=>({player_id:id,is_captain:id===initialCaptainId,bench_order:null})),
       ...baseBench.map((p,i)=>({player_id:p.id,is_captain:false,bench_order:i+1}))
     ]
-    return JSON.stringify({members:stateSignature(basePayload),vice:initialViceId||null})
-  },[initialIds,initialXI,initialCaptainId,initialViceId,map])
-  const currentSignature=JSON.stringify({members:stateSignature(savePayload),vice:viceCaptainId||null})
+    return stateSignature(basePayload)
+  },[initialIds,initialXI,initialCaptainId,map])
+  const currentSignature=stateSignature(savePayload)
   const [savedSignature,setSavedSignature]=useState(initialSignature)
   const [saveState,saveAction,isSaving]=useActionState(saveSquad,{ok:false,error:'',signature:''})
   useEffect(()=>{
@@ -535,7 +525,7 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
                     <small>{p.team}</small>
                     <div className="pitch-player-tags"><span>{Number(p.price||0).toFixed(1)}m</span><strong>{xfp(p).toFixed(1)} xFP</strong></div>
                   </button>
-                  <button type="button" className={`captain-toggle ${p.id===captainId?'active':''}`} onClick={()=>{setCaptainId(p.id);if(viceCaptainId===p.id)setViceCaptainId(xi.find(x=>x.id!==p.id)?.id||null)}} disabled={isLocked} aria-label="Kaptan yap">K</button>
+                  {p.position!=='GK'?<button type="button" className={`captain-toggle ${p.id===captainId?'active':''}`} onClick={()=>setCaptainId(p.id)} disabled={isLocked} aria-label="Kaptan yap">K</button>:null}
                 </div>
               })}
             </div>)}
@@ -570,9 +560,9 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
         <aside className="captain-panel">
           <span className="eyebrow">KAPTAN ÖNERİSİ</span>
           <h3>En güçlü 3 aday</h3>
-          <p>Kaptanın xFP’si iki kez sayılır. Yardımcı kaptan, kaptan oynamazsa devreye girer.</p>
+          <p>Kaptanın xFP’si iki kez sayılır.</p>
           <div className="captain-candidates">
-            {captainCandidates.map((p,i)=><button type="button" className={p.id===captainId?'active':''} onClick={()=>{setCaptainId(p.id);if(viceCaptainId===p.id)setViceCaptainId(xi.find(x=>x.id!==p.id)?.id||null)}} disabled={isLocked} key={p.id}>
+            {captainCandidates.map((p,i)=><button type="button" className={p.id===captainId?'active':''} onClick={()=>setCaptainId(p.id)} disabled={isLocked} key={p.id}>
               <span>#{i+1}</span>
               <div><b>{playerLabel(p)}</b><small>{p.team}</small></div>
               <strong>{xfp(p).toFixed(1)}<small>xFP</small></strong>
@@ -583,13 +573,6 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
             <b>{playerLabel(xi.find(p=>p.id===captainId))}</b>
             <strong>+{captainBonus.toFixed(1)} xFP</strong>
           </div>
-          {VICE_CAPTAIN_ENABLED?<div className="captain-impact">
-            <span>Yardımcı kaptan</span>
-            <select value={viceCaptainId||''} onChange={e=>setViceCaptainId(Number(e.target.value)||null)} disabled={isLocked}>
-              <option value="">Seç</option>
-              {xi.filter(p=>p.id!==captainId).map(p=><option value={p.id} key={p.id}>{playerLabel(p)}</option>)}
-            </select>
-          </div>:null}
         </aside>
       </div>
 
@@ -598,6 +581,7 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
           <div className="club-counts">${Object.entries(clubCounts).sort((a,b)=>b[1]-a[1]).map(([teamId,count])=>{const p=selected.find(x=>String(x.team_id)===String(teamId));return <span className={count>=MAX_PLAYERS_PER_CLUB?'limit':''} key={teamId}>{p?.team||teamId}: {count}/{MAX_PLAYERS_PER_CLUB}</span>})}</div>
           <span className={validRoster?'ok':''}>{validRoster?'✓':'○'} 2 KL / 5 DEF / 5 OS / 3 FOR</span>
           <span className={cost<=BUDGET?'ok':''}>{cost<=BUDGET?'✓':'○'} Bütçe limiti</span>
+          {bank>=5?<span className="budget-warning">⚠ {bank.toFixed(1)}m bütçe kullanılmıyor</span>:null}
           <span className={clubLimitOk?'ok':''}>{clubLimitOk?'✓':'○'} Kulüp başına en fazla {MAX_PLAYERS_PER_CLUB}</span>
           <span className={validXI?'ok':''}>{validXI?'✓':'○'} {liveFormation===formation?'Seçili diziliş hazır':'XI dizilişi güncellenmeli'}</span>
         </div>
@@ -605,7 +589,6 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
           <input type="hidden" name="player_ids" value={JSON.stringify(ids)}/>
           <input type="hidden" name="squad_state" value={JSON.stringify(savePayload)}/>
           <input type="hidden" name="squad_signature" value={currentSignature}/>
-          <input type="hidden" name="vice_captain_id" value={viceCaptainId||''}/>
           {saveState?.error?<small className="save-squad-error">{saveState.error}</small>:null}
           <button className="cta save-squad-btn" disabled={isLocked||!valid||!hasChanges||isSaving}>
             {isSaving?'Kaydediliyor…':hasChanges?'Takımı Kaydet':'Kaydedildi'}
@@ -617,9 +600,9 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
     <section className="card squad-insight-bar">
       <div>
         <span className="eyebrow">MODEL ÖNERİSİ</span>
-        <h2>{bestMove&&bestMove.gain>0?`${playerLabel(bestMove.out)} → ${playerLabel(bestMove.inn)}`:'Kadron şu an dengeli görünüyor'}</h2>
-        {bestMove&&bestMove.gain>0?<p>Tek transferde yaklaşık <b>+{bestMove.gain.toFixed(2)} xFP</b> potansiyeli.</p>:<p>Mevcut xFP’ye göre pozitif tek transfer bulunamadı.</p>}
-        {bestMove&&bestMove.gain>0?<button type="button" className="squad-tool-btn model-apply-btn" onClick={applyBestMove} disabled={isLocked}>Öneriyi Uygula</button>:null}
+        <h2>{bestMove&&bestMove.netGain>0?`${playerLabel(bestMove.out)} → ${playerLabel(bestMove.inn)}`:'Kadron şu an dengeli görünüyor'}</h2>
+        {bestMove&&bestMove.netGain>0?<p>Tek transferde yaklaşık <b>+{bestMove.netGain.toFixed(2)} net xFP</b>{bestMove.hitCost?` (${bestMove.hitCost} puan hit sonrası)`:''}.</p>:<p>Hit maliyeti sonrası pozitif tek transfer bulunamadı.</p>}
+        {bestMove&&bestMove.netGain>0?<button type="button" className="squad-tool-btn model-apply-btn" onClick={applyBestMove} disabled={isLocked}>Öneriyi Uygula</button>:null}
       </div>
       <div className={`pro-lock ${plan==='pro'?'unlocked':''}`}>
         <span>PRO</span><b>4 MH Transfer Planlayıcı</b>

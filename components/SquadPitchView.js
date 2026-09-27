@@ -40,7 +40,7 @@ export default function SquadPitchView({
       </div>
       <span className="formation-summary-pill"><small>Taktik</small><b>{formation}</b></span>
     </div>
-    {variant==='recommended'&&ceilingCaptain?<div className="ceiling-captain-note">Alternatif (tavan) kaptan: <b>{displayName(ceilingCaptain.player)}</b> • P90 {Number(ceilingCaptain.p90||0).toFixed(1)}</div>:null}
+    {variant==='recommended'&&ceilingCaptain?<div className="ceiling-captain-note">Alternatif (tavan) kaptan: <b>{playerLabel(ceilingCaptain.player)}</b> • P90 {Number(ceilingCaptain.p90||0).toFixed(1)}</div>:null}
 
     <div className={`my-squad-pitch readonly-squad-pitch ${compact?'compact':''}`}>
       <div className="pitch-mark center-line"/>

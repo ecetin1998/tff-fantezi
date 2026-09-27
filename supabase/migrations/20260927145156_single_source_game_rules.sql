@@ -37,8 +37,7 @@ values(
     "penalty_miss": -2, "penalty_save": 5,
     "bonus": [3,2,1]
   },
-  "transfers": {"free_per_week": 1, "max_banked": 2, "hit_cost": 4},
-  "vice_captain": true
+  "transfers": {"free_per_week": 1, "max_banked": 2, "hit_cost": 4}
 }$rules$::jsonb
 )
 on conflict(season) do update

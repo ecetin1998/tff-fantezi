@@ -1,28 +1,28 @@
 'use client'
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import { teamCssVars } from '@/lib/teamThemes'
 import { availabilityCompactNote, availabilityIsIssue } from '@/lib/availability'
 import {confidenceLabel,fixtureBadge,playerLabel} from '@/lib/playerPresentation'
 
 const posLabel=p=>({GK:'KL',DEF:'DEF',MID:'OS',FWD:'FOR'}[p]||p||'—')
-const PAGE_SIZE=100
+const PAGE_SIZE=50
 const normalizeText=value=>String(value||'')
   .toLocaleLowerCase('tr')
   .normalize('NFD')
   .replace(/[\u0300-\u036f]/g,'')
   .replace(/ı/g,'i')
 
-export default function PlayersTable({players}){
+export default function PlayersTable({players,initialSearchParams={}}){
   const router=useRouter()
-  const searchParams=useSearchParams()
-  const [q,setQ]=useState(()=>searchParams.get('q')||'')
-  const [pos,setPos]=useState(()=>searchParams.get('pos')||'')
-  const [team,setTeam]=useState(()=>searchParams.get('team')||'')
-  const [sort,setSort]=useState(()=>searchParams.get('sort')||'xfp')
-  const [dir,setDir]=useState(()=>searchParams.get('dir')==='asc'?1:-1)
-  const [page,setPage]=useState(()=>Math.max(1,Number(searchParams.get('page')||1)))
+  const param=value=>Array.isArray(value)?value[0]:value
+  const [q,setQ]=useState(()=>String(param(initialSearchParams.q)||''))
+  const [pos,setPos]=useState(()=>String(param(initialSearchParams.pos)||''))
+  const [team,setTeam]=useState(()=>String(param(initialSearchParams.team)||''))
+  const [sort,setSort]=useState(()=>String(param(initialSearchParams.sort)||'xfp'))
+  const [dir,setDir]=useState(()=>param(initialSearchParams.dir)==='asc'?1:-1)
+  const [page,setPage]=useState(()=>Math.max(1,Number(param(initialSearchParams.page)||1)))
 
   const teams=useMemo(()=>[...new Set(players.map(p=>p.team).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'tr')),[players])
 

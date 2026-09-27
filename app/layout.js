@@ -9,7 +9,7 @@ import Nav from '@/components/Nav'
 
 const cssScopes=[siteShell.scope,squadLegacy.scope,premiumViews.scope,squadWorkspace.scope,analysisViews.scope,dataViews.scope].join(' ')
 
-const siteUrl=process.env.NEXT_PUBLIC_SITE_URL||'https://tff-fantezi.vercel.app'
+const siteUrl=process.env.NEXT_PUBLIC_SITE_URL||'https://tff-fantezi.ecetin1998.workers.dev'
 export const metadata={
   metadataBase:new URL(siteUrl),
   title:{default:'Fantezi Scout — Süper Lig Fantasy',template:'%s | Fantezi Scout'},

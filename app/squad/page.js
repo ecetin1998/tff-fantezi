@@ -40,9 +40,7 @@ function scoreSnapshot(snapshot,pointMap,posMap){
 
   let total=final.reduce((sum,id)=>sum+points(id),0)
   const captain=Number(snapshot.captain_id)
-  const vice=Number(snapshot.vice_captain_id)
   if(final.includes(captain)&&played(captain))total+=points(captain)
-  else if(vice&&final.includes(vice)&&played(vice))total+=points(vice)
   return total
 }
 
@@ -62,7 +60,7 @@ export default async function Squad({searchParams}){
   const [{data:sq,error:sqError},{data:gameweekRow,error:gwError},{data:snapshots,error:snapshotError}]=await Promise.all([
     supabase.from('scout_user_squads').select('id').eq('user_id',auth.userId).eq('is_active',true).maybeSingle(),
     run?.gameweek?supabase.from('scout_gameweeks').select('gameweek,deadline_at,locked_at').eq('gameweek',run.gameweek).maybeSingle():Promise.resolve({data:null,error:null}),
-    supabase.from('scout_user_squad_snapshots').select('gameweek,members,captain_id,vice_captain_id,locked_at,updated_at').eq('user_id',auth.userId).order('gameweek',{ascending:false})
+    supabase.from('scout_user_squad_snapshots').select('gameweek,members,captain_id,locked_at,updated_at').eq('user_id',auth.userId).order('gameweek',{ascending:false})
   ])
   for(const [scope,error] of [['squad:active',sqError],['squad:gameweek',gwError],['squad:snapshots',snapshotError]])if(error)reportServerError(scope,error)
 
@@ -107,15 +105,15 @@ export default async function Squad({searchParams}){
 
     <SquadBuilder players={players} initialState={initialState} recommendedState={recommendedState}
       plan={auth.plan} gameweek={run?.gameweek} deadlineAt={gameweekRow?.deadline_at||null} locked={locked}
-      initialViceCaptainId={currentSnapshot?.vice_captain_id||null} transferScenarios={[]}/>
+      transferScenarios={[]}/>
 
     <section className="card squad-history-card">
       <div className="panel-head"><div><span className="eyebrow">HAFTALIK SNAPSHOT</span><h2>Geçmiş kadro ve puanlar</h2></div></div>
-      <div className="table-scroll"><table><thead><tr><th>MH</th><th>Kaptan</th><th>Yrd. kaptan</th><th>Durum</th><th>Gerçek puan</th></tr></thead>
+      <div className="table-scroll"><table><thead><tr><th>MH</th><th>Kaptan</th><th>Durum</th><th>Gerçek puan</th></tr></thead>
       <tbody>{snapshotHistory.length?snapshotHistory.map(s=><tr key={s.gameweek}><td>MH{s.gameweek}</td>
-        <td>{playerLabel(playerMap.get(Number(s.captain_id)))}</td><td>{s.vice_captain_id?playerLabel(playerMap.get(Number(s.vice_captain_id))):'—'}</td>
+        <td>{playerLabel(playerMap.get(Number(s.captain_id)))}</td>
         <td>{s.locked_at?'Kilitli':'Açık'}</td><td><b>{s.actual_points===null?'—':s.actual_points}</b></td></tr>)
-        :<tr><td colSpan="5">Henüz haftalık snapshot yok.</td></tr>}</tbody></table></div>
+        :<tr><td colSpan="4">Henüz haftalık snapshot yok.</td></tr>}</tbody></table></div>
     </section>
   </>
 }

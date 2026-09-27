@@ -24,7 +24,6 @@ function squadError(message=''){
     AUTH_REQUIRED:'Oturum bulunamadı. Tekrar giriş yap.',
     SQUAD_LOCKED:'Bu maç haftası kilitlendi. Kadro artık değiştirilemez.',
     GAMEWEEK_DEADLINE_MISSING:'Maç haftası son tarihi bulunamadı.',
-    INVALID_VICE_CAPTAIN:'Geçerli bir yardımcı kaptan seç.',
     INVALID_SQUAD:'Kadro verisi geçersiz.',
     SQUAD_MUST_HAVE_15_UNIQUE_PLAYERS:`Kadro ${SQUAD_SIZE} benzersiz oyuncudan oluşmalı.`,
     SQUAD_HAS_INACTIVE_OR_UNKNOWN_PLAYER:'Kadroda aktif olmayan veya bulunamayan oyuncu var.',
@@ -54,7 +53,7 @@ async function getSiteUrl(){
   const h=await headers()
   const host=h.get('x-forwarded-host')||h.get('host')
   const proto=h.get('x-forwarded-proto')||(host?.includes('localhost')?'http':'https')
-  return host?proto+'://'+host:'https://tff-fantezi.vercel.app'
+  return host?proto+'://'+host:'https://tff-fantezi.ecetin1998.workers.dev'
 }
 
 export async function signup(formData){
@@ -114,8 +113,6 @@ export async function saveSquad(_prevState,formData){
   if(!userId)return {ok:false,error:'Oturum bulunamadı. Tekrar giriş yap.',signature:''}
 
   const signature=String(formData.get('squad_signature')||'')
-  const viceRaw=String(formData.get('vice_captain_id')||'').trim()
-  const viceCaptainId=viceRaw?Number(viceRaw):null
   let ids=[]
   let squadState=[]
   try{ids=JSON.parse(String(formData.get('player_ids')||'[]')).map(Number).filter(Number.isFinite)}catch{}
@@ -160,7 +157,7 @@ export async function saveSquad(_prevState,formData){
   if((xiCounts.GK||0)!==STARTING_GK||!FORMATION_SET.has(formation))return {ok:false,error:'İlk 11 izin verilen dizilişlerden biri olmalı.',signature:''}
   if(squadState.filter(x=>x.is_captain).length!==1||xiState.filter(x=>x.is_captain).length!==1)return {ok:false,error:'İlk 11 içinde tam bir kaptan seçilmeli.',signature:''}
 
-  const {error}=await supabase.rpc('save_user_squad',{p_members:squadState,p_vice_captain_id:Number.isFinite(viceCaptainId)?viceCaptainId:null})
+  const {error}=await supabase.rpc('save_user_squad',{p_members:squadState})
   if(error){
     reportServerError('action:saveSquad:rpc',error)
     return {ok:false,error:squadError(error.message),signature:''}

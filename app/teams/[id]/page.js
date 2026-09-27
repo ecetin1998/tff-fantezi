@@ -27,7 +27,7 @@ export default async function TeamPage({params}){
   const data=await getTeamDetail(id)
   if(!data) notFound()
 
-  const {team,run,season:s,history,currentMatch,opponent,players,fantasyByGameweek}=data
+  const {team,run,season:s,history,currentMatches=[],currentMatch,opponent,players,fantasyByGameweek}=data
   const isHome=currentMatch?Number(currentMatch.home_team_id)===Number(team.id):false
   const teamXg=currentMatch?(isHome?currentMatch.home_xg:currentMatch.away_xg):null
   const oppXg=currentMatch?(isHome?currentMatch.away_xg:currentMatch.home_xg):null
@@ -75,9 +75,11 @@ export default async function TeamPage({params}){
         </div>
       </div>
       <div className="team-detail-current">
-        <span>MH{run?.gameweek||'—'} rakibi</span>
-        {opponent?<Link href={'/teams/'+opponent.id}>{opponent.name}</Link>:<b>—</b>}
-        <small>{currentMatch?(isHome?'Ev':'Dep'):'—'}</small>
+        <span>MH{run?.gameweek||'—'} rakip{currentMatches.length>1?'leri':'i'}</span>
+        {currentMatches.length?currentMatches.map(m=><div key={m.match_id}>
+          {m.opponent?<Link href={'/teams/'+m.opponent.id}>{m.opponent.name}</Link>:<b>—</b>}
+          <small>{m.venue==='HOME'?'Ev':'Dep'}</small>
+        </div>):<b>—</b>}
       </div>
     </section>
 
@@ -87,9 +89,11 @@ export default async function TeamPage({params}){
           <span className="eyebrow">BU HAFTA</span>
           <h2>Fantasy karar özeti</h2>
         </div>
-        <div className="team-fixture-badge">
-          <span>{currentMatch?(isHome?'EV':'DEP'):'—'}</span>
-          {opponent?<Link href={'/teams/'+opponent.id}>{opponent.name}</Link>:<b>Rakip yok</b>}
+        <div className="team-fixture-list">
+          {currentMatches.length?currentMatches.map(m=><div className="team-fixture-badge" key={m.match_id}>
+            <span>{m.venue==='HOME'?'EV':'DEP'}</span>
+            {m.opponent?<Link href={'/teams/'+m.opponent.id}>{m.opponent.name}</Link>:<b>Rakip yok</b>}
+          </div>):<div className="team-fixture-badge"><span>—</span><b>Rakip yok</b></div>}
         </div>
       </div>
 

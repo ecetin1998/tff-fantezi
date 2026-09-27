@@ -9,7 +9,11 @@
     "lint": "eslint .",
     "smoke": "bash scripts/smoke.sh",
     "test:runtime": "bash scripts/runtime-route-test.sh",
-    "test": "node --test test/full-suite.test.js"
+    "test": "node --test test/full-suite.test.js",
+    "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
+    "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
+    "upload": "opennextjs-cloudflare build && opennextjs-cloudflare upload",
+    "cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts"
   },
   "dependencies": {
     "@sentry/nextjs": "11.0.0",

@@ -8,7 +8,7 @@ import sys
 import numpy as np
 from scipy.optimize import milp, Bounds, LinearConstraint
 from scipy.sparse import coo_matrix
-from optimizer_rules import BUDGET, MAX_PER_CLUB, SQUAD_LIMITS, XI_BOUNDS, captain_metric, bench_expected_value, cheap_bench_tiebreak
+from optimizer_rules import BUDGET, MAX_PER_CLUB, SQUAD_LIMITS, XI_BOUNDS, captain_metric, bench_expected_value, cheap_bench_tiebreak, budget_spend_reward
 
 
 def solve(players, alternative=False, avoid=(), max_defensive_stack_per_team=2):
@@ -25,11 +25,14 @@ def solve(players, alternative=False, avoid=(), max_defensive_stack_per_team=2):
         base = p['xfp'] + (.18 * max(0, p['p90'] - p['xfp']) if alternative else 0)
         bench_value = bench_expected_value(p)
         bench_cost = cheap_bench_tiebreak(p)
+        spend_reward = budget_spend_reward(p)
         # xi and squad are both 1 for starters, so cancel the bench term on XI.
         # Only true bench players keep the expected-sub value / cheapness signal.
-        c[i] = -base + bench_value - bench_cost
-        c[n+i] = -bench_value + bench_cost
+        c[i] = -base + bench_value - bench_cost - spend_reward
+        c[n+i] = -bench_value + bench_cost - spend_reward
         c[2*n+i] = -captain_metric(p, alternative)
+        if p['position']=='GK':
+            ub[2*n+i] = 0
     rr, cc, dd, lo, hi = [], [], [], [], []
     def add(terms, lower, upper):
         row = len(lo)

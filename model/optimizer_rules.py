@@ -9,6 +9,8 @@ FORMATIONS=set(RULES['formations'])
 BUDGET=float(RULES['budget'])
 SQUAD_LIMITS={k:int(v) for k,v in RULES['squad'].items()}
 MAX_PER_CLUB=int(RULES['max_per_club'])
+CAPTAIN_LAMBDA=0.18
+BUDGET_SPEND_REWARD_PER_M=0.03
 
 def formation_counts(value):
     d,m,f=(int(x) for x in value.split('-'))
@@ -21,7 +23,14 @@ XI_BOUNDS={
 }
 
 def captain_metric(player, alternative=False):
-    return float(player['p90'] if alternative else player['xfp'])
+    if player.get('position')=='GK':
+        return -1e9
+    xfp=float(player['xfp'])
+    p90=float(player.get('p90',xfp))
+    return xfp+CAPTAIN_LAMBDA*max(0.0,p90-xfp)
+
+def budget_spend_reward(player):
+    return BUDGET_SPEND_REWARD_PER_M*float(player.get('price',0))
 
 def bench_expected_value(player):
     appearance=max(float(player.get('xi',0)), min(1.0,float(player.get('minutes',0))/90.0))
