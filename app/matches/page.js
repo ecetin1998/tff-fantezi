@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { getMatches } from '@/lib/data'
 import { teamCssVars } from '@/lib/teamThemes'
+import DataFreshnessBanner from '@/components/DataFreshnessBanner'
 
 export const revalidate=300
 export const metadata={title:'Maç Tahminleri'}
@@ -96,8 +97,9 @@ function fantasyReading(m){
 }
 
 export default async function Matches(){
-  const {matches,run,eloThroughGameweek}=await getMatches()
+  const {matches,run}=await getMatches()
   return <>
+    <DataFreshnessBanner run={run}/>
     <div className="section-title">
       <div><span className="eyebrow">MAÇ MODELİ</span><h1>MH{run?.gameweek||'—'} Maç Tahminleri</h1></div>
       <span className="muted">xG • sonuç olasılığı • clean sheet • fantasy maç profili</span>
@@ -167,12 +169,12 @@ export default async function Matches(){
           <details className="match-technical-details">
             <summary>Teknik maç detayları <span>+</span></summary>
             <div>
-              <small>{m.home_team} form Elo</small><b>{m.home_elo||'—'}</b>
-              <small>{m.away_team} form Elo</small><b>{m.away_elo||'—'}</b>
+              <small>{m.home_team} xG</small><b>{homeXg.toFixed(2)}</b>
+              <small>{m.away_team} xG</small><b>{awayXg.toFixed(2)}</b>
               <small>Model haftası</small><b>MH{run?.gameweek||'—'}</b>
-              <small>Elo veri aralığı</small><b>{eloThroughGameweek?`MH1–MH${eloThroughGameweek}`:'—'}</b>
+              <small>1-X-2</small><b>%${(home*100).toFixed(0)} / %${(draw*100).toFixed(0)} / %${(away*100).toFixed(0)}</b>
             </div>
-            <p className="elo-explainer">Form Elo yalnız bu sezon oynanan lig sonuçlarının özetidir; maç kazanma yüzdesi xG ve diğer model girdileriyle ayrıca hesaplanır.</p>
+            <p className="elo-explainer">Bu alan yalnız yayınlanan maç modeli değerlerini gösterir; arayüzde ayrı bir runtime Elo sinyali hesaplanmaz.</p>
           </details>
         </article>
       })}

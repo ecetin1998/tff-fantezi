@@ -8,10 +8,10 @@ import sys
 import numpy as np
 from scipy.optimize import milp, Bounds, LinearConstraint
 from scipy.sparse import coo_matrix
-from optimizer_rules import captain_metric, bench_expected_value, cheap_bench_tiebreak
+from optimizer_rules import BUDGET, MAX_PER_CLUB, SQUAD_LIMITS, XI_BOUNDS, captain_metric, bench_expected_value, cheap_bench_tiebreak
 
 
-def solve(players, alternative=False, avoid=()):
+def solve(players, alternative=False, avoid=(), max_defensive_stack_per_team=2):
     eligible = [p for p in players if p['availability'] >= .8 and p['price'] > 0]
     n = len(eligible)
     ids = [p['id'] for p in eligible]
@@ -39,15 +39,16 @@ def solve(players, alternative=False, avoid=()):
     add([(i,1) for i in range(n)],11,11)
     add([(n+i,1) for i in range(n)],15,15)
     add([(2*n+i,1) for i in range(n)],1,1)
-    add([(n+i,p['price']) for i,p in enumerate(eligible)],0,100)
-    for position, amount, xi_min, xi_max in [('GK',2,1,1),('DEF',5,3,5),('MID',5,2,5),('FWD',3,1,3)]:
+    add([(n+i,p['price']) for i,p in enumerate(eligible)],0,BUDGET)
+    for position, amount in SQUAD_LIMITS.items():
+        xi_min,xi_max=XI_BOUNDS[position]
         ix=[i for i,p in enumerate(eligible) if p['position']==position]
         add([(n+i,1) for i in ix],amount,amount)
         add([(i,1) for i in ix],xi_min,xi_max)
     for team in sorted({p['team'] for p in eligible}):
         ix=[i for i,p in enumerate(eligible) if p['team']==team]
-        add([(n+i,1) for i in ix],0,3)
-        add([(i,1) for i in ix if eligible[i]['position'] in ('GK','DEF')],0,2)
+        add([(n+i,1) for i in ix],0,MAX_PER_CLUB)
+        add([(i,1) for i in ix if eligible[i]['position'] in ('GK','DEF')],0,max_defensive_stack_per_team)
     for i in range(n):
         add([(i,1),(n+i,-1)],-np.inf,0)
         add([(2*n+i,1),(i,-1)],-np.inf,0)

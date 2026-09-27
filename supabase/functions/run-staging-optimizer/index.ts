@@ -138,12 +138,12 @@ Deno.serve(async(req:Request)=>{
     const runMeta=await sb.from("scout_model_runs").select("simulation_count,model_version").eq("id",RUN).single();
     if(runMeta.error)throw runMeta.error;
     const {data,error}=await sb.from("scout_player_projections")
-      .select("player_id,xfp,p90,xi_probability,x_minutes,availability_probability,scout_players!inner(team_id,position,price,active)")
+      .select("player_id,xfp,p90,xi_probability,x_minutes,availability_probability,confidence,scout_players!inner(team_id,position,price,active)")
       .eq("run_id",RUN);
     if(error)throw error;
     const rows=(data||[]).map((x:any)=>({
       player_id:x.player_id,xfp:x.xfp,p90:x.p90,xi_probability:x.xi_probability,x_minutes:x.x_minutes,availability_probability:x.availability_probability,
-      team_id:x.scout_players.team_id,position:x.scout_players.position,price:x.scout_players.price,active:x.scout_players.active
+      team_id:x.scout_players.team_id,position:x.scout_players.position,price:x.scout_players.price,active:x.scout_players.active,confidence:x.confidence||"medium"
     })).filter((x:any)=>x.active && n(x.availability_probability)>=.8 && n(x.price)>0);
     const byPos:any={GK:[],DEF:[],MID:[],FWD:[]};
     for(const r of rows) byPos[r.position]?.push(r);

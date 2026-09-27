@@ -1,6 +1,8 @@
 import Link from 'next/link'
 import { getMatches, getPlayersWithProjection } from '@/lib/data'
 import { teamCssVars } from '@/lib/teamThemes'
+import {playerLabel} from '@/lib/playerPresentation'
+import DataFreshnessBanner from '@/components/DataFreshnessBanner'
 
 export const revalidate=300
 
@@ -19,6 +21,7 @@ export default async function Home(){
     [`MH${run?.gameweek||'—'} Top-25’e girme adayı #1`,top25,`#${Number(top25?.projection?.top25_rank||1)}`,'Top25 sıra','Yüksek puan patlaması ihtimali en güçlü aday'],
   ]
   return <>
+    <DataFreshnessBanner run={run}/>
     <section className="home-intro-layout">
       <div className="card home-intro-hero">
         <span className="eyebrow">SÜPER LİG FANTASY ANALİZ PLATFORMU</span>
@@ -32,7 +35,7 @@ export default async function Home(){
       </div>
       <aside className="home-highlight-grid">
         {highlights.map(([label,p,val,unit,note])=><Link key={label} className="card spotlight-card team-accent-card" style={teamCssVars(p?.team)} href={p?'/players/'+p.id:'/players'}>
-          <span>{label}</span><b>{p?.full_name||'—'}</b><small>{p?.team||'—'} • {note}</small><strong>{val} <em>{unit}</em></strong>
+          <span>{label}</span><b>{playerLabel(p)}</b><small>{p?.team||'—'} • {note}</small><strong>{val} <em>{unit}</em></strong>
         </Link>)}
         <div className="card spotlight-card home-status-card home-status-week">
           <span>Güncel hafta</span>

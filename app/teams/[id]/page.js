@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 import { getTeamDetail, getTeamFixturesOverview } from '@/lib/data'
 import { teamCssVars } from '@/lib/teamThemes'
 import TeamRoster from '@/components/TeamRoster'
+import {playerLabel} from '@/lib/playerPresentation'
 
 export const revalidate=300
 export async function generateStaticParams(){
@@ -106,7 +107,7 @@ export default async function TeamPage({params}){
             <span className={'pos '+p.position}>{posLabel(p.position)}</span>
             <div>
               <small>#{i+1}</small>
-              <b>{p.full_name}</b>
+              <b>{playerLabel(p)}</b>
               <em>{Number(p.price||0).toFixed(1)}m</em>
             </div>
             <strong>{num(p.projection?.xfp)}<small>xFP</small></strong>

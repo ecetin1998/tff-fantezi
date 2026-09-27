@@ -1,17 +1,12 @@
 import Link from 'next/link'
 import { teamCssVars } from '@/lib/teamThemes'
+import {playerLabel} from '@/lib/playerPresentation'
 
 const posLabel={GK:'KL',DEF:'DEF',MID:'OS',FWD:'FOR'}
 
-function fallbackName(name=''){
-  const parts=String(name||'').trim().split(/\s+/).filter(Boolean)
-  return parts.at(-1)||'—'
-}
-function displayName(player){
-  return player?.display_name || fallbackName(player?.full_name)
-}
+function displayName(player){ return playerLabel(player) }
 function shirtMark(player,team=''){
-  return player?.shirt_number ?? String(team||'').replace(/[^A-Za-zÇĞİÖŞÜçğıöşü]/g,'').slice(0,3).toLocaleUpperCase('tr')
+  return player?.shirt_number ?? ''
 }
 
 export default function SquadPitchView({
@@ -58,7 +53,7 @@ export default function SquadPitchView({
           href={'/players/'+m.player_id}
           className="readonly-pitch-player"
           key={m.player_id}
-          title={m.player?.full_name||''}
+          title={playerLabel(m.player)}
         >
           <span className={`fantasy-shirt ${m.player?.position}`} style={teamCssVars(m.team)}><i>{posLabel[m.player?.position]||m.player?.position||'—'}</i></span>
           <b>{displayName(m.player)}</b>
@@ -81,7 +76,7 @@ export default function SquadPitchView({
         {bench.map((m,i)=><Link href={'/players/'+m.player_id} className="my-bench-player readonly-bench-player" key={m.player_id}>
           <span className="bench-order">{i+1}</span>
           <span className={`fantasy-shirt mini ${m.player?.position}`} style={teamCssVars(m.team)}><i>{posLabel[m.player?.position]||m.player?.position||'—'}</i></span>
-          <span className="bench-copy"><b>{m.player?.full_name||'—'}</b><small>{m.team||'—'} • {posLabel[m.player?.position]||m.player?.position} • {Number(m.player?.price||0).toFixed(1)}m • {Number(m.xfp||0).toFixed(1)} xFP</small></span>
+          <span className="bench-copy"><b>{playerLabel(m.player)}</b><small>{m.team||'—'} • {posLabel[m.player?.position]||m.player?.position} • {Number(m.player?.price||0).toFixed(1)}m • {Number(m.xfp||0).toFixed(1)} xFP</small></span>
         </Link>)}
       </div>
     </div>:null}

@@ -85,8 +85,16 @@ for(const key of expected[section]||[]){
     process.exit(1)
   }
 }
-if(/"notes"\s*:|detail_source_/i.test(raw)){
+if(/"notes"\s*:|"model_version"\s*:|detail_source_/i.test(raw)){
   console.error(section+': internal/provenance field leaked')
+  process.exit(1)
+}
+if(section==='summary' && Object.prototype.hasOwnProperty.call(body,'players')){
+  console.error('summary: players key must not be present')
+  process.exit(1)
+}
+if(section==='players' && Object.prototype.hasOwnProperty.call(body,'matches')){
+  console.error('players: matches key must not be present')
   process.exit(1)
 }
 NODE

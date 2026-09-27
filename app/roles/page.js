@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import {getRoleSignals} from '@/lib/data'
+import {playerLabel} from '@/lib/playerPresentation'
 
 export const metadata={title:'Rol ve Dakika Takibi'}
 export const revalidate=300
@@ -41,7 +42,7 @@ export async function renderRolesPage(page=1){
         const xiDelta=(Number(r.last2_xi_probability||0)-Number(r.previous2_xi_probability||0))*100
         const minDelta=Number(r.last2_minutes||0)-Number(r.previous2_minutes||0)
         return <Link href={'/players/'+r.player_id} className={`role-change-card ${signalClass(r.signal)}`} key={r.player_id}>
-          <div className="role-change-head"><span className={`pos ${r.player?.position}`}>{posLabel(r.player?.position)}</span><div><b>{r.player?.full_name||'—'}</b><small>{r.team||'—'}</small></div><em>{r.signal}</em></div>
+          <div className="role-change-head"><span className={`pos ${r.player?.position}`}>{posLabel(r.player?.position)}</span><div><b>{playerLabel(r.player)}</b><small>{r.team||'—'}</small></div><em>{r.signal}</em></div>
           <div className="role-change-metrics">
             <span><small>XI değişimi</small><b>{xiDelta>0?'+':''}{xiDelta.toFixed(0)} pp</b></span>
             <span><small>Dk değişimi</small><b>{minDelta>0?'+':''}{minDelta.toFixed(0)} dk</b></span>
@@ -61,7 +62,7 @@ export async function renderRolesPage(page=1){
           const minDelta=Number(r.last2_minutes||0)-Number(r.previous2_minutes||0)
           return <tr key={r.player_id}>
             <td>{(safePage-1)*PAGE_SIZE+i+1}</td>
-            <td>{r.player?<Link className="player-link" href={'/players/'+r.player_id}><b>{r.player.full_name}</b></Link>:'—'}</td>
+            <td>{r.player?<Link className="player-link" href={'/players/'+r.player_id}><b>{playerLabel(r.player)}</b></Link>:'—'}</td>
             <td>{r.team}</td><td><span className={`pos ${r.player?.position}`}>{posLabel(r.player?.position)}</span></td>
             <td><span className={`signal ${signalClass(r.signal)}`}>{r.signal}</span></td>
             <td>{pct(r.last2_xi_probability)}</td>

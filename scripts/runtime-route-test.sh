@@ -15,7 +15,7 @@ cleanup(){
 }
 trap cleanup EXIT
 
-SCOUT_OFFLINE_BUILD=1 SCOUT_DATA_API_KEY="$KEY" npm start -- -p "$PORT" >"$LOG_FILE" 2>&1 &
+SCOUT_OFFLINE_BUILD=1 SCOUT_RUNTIME_FIXTURE=1 SCOUT_DATA_API_KEY="$KEY" npm start -- -p "$PORT" >"$LOG_FILE" 2>&1 &
 SERVER_PID=$!
 
 for _ in {1..40}; do
@@ -47,6 +47,14 @@ if(body.schema_version!=='2.0') throw new Error(section+': bad schema_version')
 if(body.meta?.schema_version!=='2.0') throw new Error(section+': bad meta.schema_version')
 if(!Array.isArray(body.meta?.sections)||!body.meta.sections.includes('summary')) throw new Error(section+': missing meta.sections')
 if(body.section!==section) throw new Error(section+': response section mismatch')
+const nonEmpty={
+  summary:()=>Array.isArray(body.top_players)&&body.top_players.length>0,
+  players:()=>Array.isArray(body.players)&&body.players.length>0,
+  matches:()=>Array.isArray(body.matches)&&body.matches.length>0,
+  weekly:()=>Array.isArray(body.players)&&body.players.length>0,
+  performance:()=>Array.isArray(body.replay_weeks)&&body.replay_weeks.length>0,
+}
+if(nonEmpty[section]&&!nonEmpty[section]())throw new Error(section+': fixture payload is unexpectedly empty')
 NODE
   rm -f "$headers" "$body"
 done
@@ -83,5 +91,17 @@ const body=JSON.parse(fs.readFileSync(process.argv[2],'utf8'))
 if('full' in body) throw new Error('public performance leaked full payload after keyed request')
 NODE
 rm -f "$public_body"
+
+filtered_body="$(mktemp)"
+filtered_code="$(curl -sS -o "$filtered_body" -w '%{http_code}' "$BASE_URL/api/scout-data?section=players&position=DEF&limit=2&fields=id,name")"
+[[ "$filtered_code" == "200" ]] || { cat "$filtered_body" >&2; exit 1; }
+node - "$filtered_body" <<'NODE'
+const fs=require('node:fs')
+const body=JSON.parse(fs.readFileSync(process.argv[2],'utf8'))
+if(!body.served_at)throw new Error('served_at missing')
+if((body.players||[]).length>2)throw new Error('limit filter failed')
+for(const row of body.players||[])for(const key of Object.keys(row))if(!['id','name'].includes(key))throw new Error('fields filter failed: '+key)
+NODE
+rm -f "$filtered_body"
 
 echo "ROUTE RUNTIME PASS"

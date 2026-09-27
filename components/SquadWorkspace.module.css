@@ -1,0 +1,1748 @@
+/* ===== Benim Kadrom • compact desktop + larger player pool ===== */
+.scope :global(.picker-sort-row){
+  display:grid;
+  grid-template-columns:minmax(0,.72fr) minmax(0,1.28fr);
+  gap:7px;
+}
+.scope :global(.squad-save-form){
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  gap:8px;
+  min-width:0;
+}
+.scope :global(.save-squad-error){
+  max-width:240px;
+  color:#b23c50;
+  font-size:7px;
+  line-height:1.25;
+  text-align:right;
+}
+.scope :global(.save-squad-btn):disabled{cursor:default}
+.scope :global(.auto-xi-btn){min-width:150px}
+
+@media(min-width:1000px){
+  .scope :global(.my-squad-layout){
+    grid-template-columns:minmax(0,1.42fr) minmax(390px,.88fr);
+    gap:14px;
+    align-items:start;
+  }
+  .scope :global(.squad-control-strip){
+    padding:9px;
+    gap:7px;
+  }
+  .scope :global(.squad-control-stat),.scope :global(.squad-formation-control){
+    min-height:58px;
+    padding:8px 10px;
+    border-radius:11px;
+  }
+  .scope :global(.squad-control-stat)>span,.scope :global(.squad-formation-control)>span{font-size:7px}
+  .scope :global(.squad-control-stat)>b{font-size:19px;margin-top:2px}
+  .scope :global(.squad-control-stat)>b small,.scope :global(.squad-control-stat)>small{font-size:7px}
+  .scope :global(.squad-control-stat)>i{height:4px;margin-top:5px}
+  .scope :global(.squad-formation-control) select{
+    margin-top:5px;
+    padding:6px 7px;
+    font-size:9px;
+  }
+  .scope :global(.squad-toolbar){gap:5px}
+  .scope :global(.squad-tool-btn){
+    min-height:32px;
+    padding:6px 7px;
+    font-size:8px;
+  }
+
+  .scope :global(.squad-stage){padding:11px}
+  .scope :global(.squad-stage-head){padding:1px 2px 9px}
+  .scope :global(.squad-stage-head) h2{font-size:20px;margin-top:2px}
+  .scope :global(.squad-stage-legend){font-size:7px}
+
+  .scope :global(.my-squad-pitch){
+    min-height:475px;
+    height:475px;
+    padding:32px 12px 20px;
+    gap:4px;
+    border-radius:15px;
+    clip-path:polygon(5% 0,95% 0,100% 100%,0 100%);
+  }
+  .scope :global(.my-squad-pitch):before{inset:12px 18px}
+  .scope :global(.my-squad-pitch) :global(.pitch-mark):global(.center-circle){width:96px;height:96px}
+  .scope :global(.my-squad-pitch) :global(.pitch-mark):global(.box){left:31%;right:31%;height:64px}
+  .scope :global(.my-squad-pitch) :global(.pitch-mark):global(.box):global(.top){top:12px}
+  .scope :global(.my-squad-pitch) :global(.pitch-mark):global(.box):global(.bottom){bottom:12px}
+  .scope :global(.my-pitch-row){gap:3px;padding-inline:5px}
+  .scope :global(.my-pitch-player){
+    width:min(88px,19%);
+    min-width:48px;
+    filter:drop-shadow(0 5px 7px rgba(0,40,35,.16));
+  }
+  .scope :global(.my-squad-shell) :global(.fantasy-shirt):not(:global(.mini)):not(:global(.tiny)){
+    width:44px;
+    height:49px;
+    margin-bottom:3px;
+    border-radius:9px 9px 12px 12px;
+  }
+  .scope :global(.my-squad-shell) :global(.fantasy-shirt):not(:global(.mini)):not(:global(.tiny)):before,.scope :global(.my-squad-shell) :global(.fantasy-shirt):not(:global(.mini)):not(:global(.tiny)):after{
+    width:13px;height:18px;top:6px;
+  }
+  .scope :global(.my-squad-shell) :global(.fantasy-shirt):not(:global(.mini)):not(:global(.tiny)):before{left:-8px}
+  .scope :global(.my-squad-shell) :global(.fantasy-shirt):not(:global(.mini)):not(:global(.tiny)):after{right:-8px}
+  .scope :global(.my-pitch-player) b{font-size:6.5px;padding:3px 4px}
+  .scope :global(.my-pitch-player)>button small{display:block;font-size:5.5px;margin-top:2px}
+  .scope :global(.my-pitch-player) :global(.pitch-player-tags){gap:2px;margin-top:2px}
+  .scope :global(.my-pitch-player) :global(.pitch-player-tags) span,.scope :global(.my-pitch-player) :global(.pitch-player-tags) strong{font-size:5.5px;padding:2px 3px}
+  .scope :global(.remove-player),.scope :global(.captain-toggle){
+    width:18px;height:18px;font-size:7px;
+  }
+  .scope :global(.formation-live-badge){top:8px;min-width:64px;padding:4px 7px}
+  .scope :global(.formation-live-badge) span{font-size:5px}
+  .scope :global(.formation-live-badge) b{font-size:9px}
+
+  .scope :global(.my-squad-shell) :global(.bench-zone){
+    margin-top:8px;
+    padding:8px;
+    border-radius:11px;
+  }
+  .scope :global(.my-squad-shell) :global(.bench-zone-head){margin-bottom:6px;font-size:7px}
+  .scope :global(.my-squad-shell) :global(.my-bench-row){gap:5px}
+  .scope :global(.my-squad-shell) :global(.my-bench-player){
+    min-height:50px;
+    grid-template-columns:16px 30px minmax(0,1fr) 12px;
+    gap:5px;
+    padding:5px 6px;
+    border-radius:9px;
+  }
+  .scope :global(.my-squad-shell) :global(.bench-order){width:16px;height:16px;font-size:6px}
+  .scope :global(.my-squad-shell) :global(.fantasy-shirt):global(.mini){width:28px;height:31px}
+  .scope :global(.my-squad-shell) :global(.bench-copy) b{font-size:7px}
+  .scope :global(.my-squad-shell) :global(.bench-copy) small{font-size:5.5px;margin-top:1px}
+  .scope :global(.my-squad-shell) :global(.bench-remove){font-size:12px}
+
+  .scope :global(.squad-save-row){
+    gap:10px;
+    padding:9px 1px 0;
+  }
+  .scope :global(.squad-validity){gap:5px}
+  .scope :global(.squad-validity) span{font-size:6.5px;padding:4px 6px}
+  .scope :global(.save-squad-btn){min-width:130px;padding:8px 10px;font-size:8px}
+
+  .scope :global(.player-picker){
+    position:static;
+    height:690px;
+    max-height:690px;
+    min-height:690px;
+  }
+  .scope :global(.player-picker-head){padding:11px 12px 6px}
+  .scope :global(.player-picker-head) h2{font-size:18px;margin:2px 0}
+  .scope :global(.picker-filters){padding:0 9px 7px;gap:5px}
+  .scope :global(.picker-filters)>div{gap:5px}
+  .scope :global(.picker-filters) input,.scope :global(.picker-filters) select{
+    padding:7px 8px;
+    font-size:8px;
+    border-radius:8px;
+  }
+  .scope :global(.picker-sort-row){gap:5px}
+  .scope :global(.picker-list){
+    flex:1;
+    min-height:0;
+    overflow:auto;
+    padding:0 6px 7px;
+  }
+  .scope :global(.picker-player){
+    grid-template-columns:38px minmax(0,1fr) 43px 27px;
+    gap:6px;
+    min-height:57px;
+    padding:6px 5px;
+  }
+  .scope :global(.picker-player) :global(.fantasy-shirt):global(.tiny){width:30px;height:34px}
+  .scope :global(.picker-copy)>b{font-size:8.5px}
+  .scope :global(.picker-copy)>small{font-size:6px}
+  .scope :global(.picker-copy)>div{gap:3px;margin-top:3px}
+  .scope :global(.picker-copy)>div span{font-size:5.5px;padding:2px 3px}
+  .scope :global(.picker-score) b{font-size:10px}
+  .scope :global(.picker-score) small{font-size:5.5px}
+  .scope :global(.picker-player)>button{
+    width:25px;height:25px;
+    font-size:14px;border-radius:7px;
+  }
+}
+
+@media(max-width:999px){
+  .scope :global(.picker-sort-row){grid-template-columns:1fr 1fr}
+  .scope :global(.squad-save-form){width:100%}
+  .scope :global(.save-squad-error){max-width:none;text-align:left}
+}
+
+
+/* ===== Benim Kadrom v2 • 15-player roster first, XI second ===== */
+.scope :global(.roster-counts){
+  font-size:13px;
+  line-height:1.25;
+  white-space:nowrap;
+}
+.scope :global(.roster-builder-layout){scroll-margin-top:96px}
+.scope :global(.lineup-workbench){scroll-margin-top:96px;margin-top:16px;padding:16px}
+.scope :global(.primary-jump),.scope :global(.jump-link){border-color:#b7ded8;background:#edf8f6;color:#087e72}
+.scope :global(.jump-link){flex:0 0 auto;min-width:110px}
+.scope :global(.roster-stage-foot){
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  padding:9px 3px 1px;color:#75809a;font-size:8px
+}
+.scope :global(.roster-stage-foot) b{color:#25304d;font-size:8px}
+
+.scope :global(.roster-pitch){
+  position:relative;
+  min-height:575px;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-around;
+  gap:5px;
+  padding:34px 18px 24px;
+  overflow:hidden;
+  border-radius:17px;
+  clip-path:polygon(6% 0,94% 0,100% 100%,0 100%);
+  background:
+    repeating-linear-gradient(0deg,rgba(255,255,255,.028) 0,rgba(255,255,255,.028) 52px,transparent 52px,transparent 104px),
+    linear-gradient(155deg,#1aa96e,#0d8d63 62%,#087350);
+  box-shadow:inset 0 0 75px rgba(0,35,30,.14),0 14px 30px rgba(10,15,45,.12)
+}
+.scope :global(.roster-pitch):before{
+  content:"";position:absolute;inset:13px 22px;border:2px solid rgba(255,255,255,.45);
+  clip-path:polygon(5% 0,95% 0,100% 100%,0 100%);pointer-events:none
+}
+.scope :global(.roster-pitch) :global(.pitch-mark):global(.center-line){left:5%;right:5%}
+.scope :global(.roster-pitch) :global(.pitch-mark):global(.center-circle){width:108px;height:108px}
+.scope :global(.roster-pitch) :global(.pitch-mark):global(.box){left:33%;right:33%;height:68px}
+.scope :global(.roster-pitch) :global(.pitch-mark):global(.box):global(.top){top:13px}
+.scope :global(.roster-pitch) :global(.pitch-mark):global(.box):global(.bottom){bottom:13px}
+.scope :global(.roster-row){
+  position:relative;z-index:2;display:flex;justify-content:space-evenly;align-items:center;
+  gap:5px;min-height:104px;padding-inline:4px
+}
+.scope :global(.roster-player){
+  position:relative;width:min(95px,18%);min-width:52px;padding:0;border:0;background:transparent;
+  color:#fff;text-align:center;filter:drop-shadow(0 6px 8px rgba(0,40,35,.18))
+}
+.scope :global(.roster-player) :global(.fantasy-shirt){width:46px;height:51px;margin-bottom:3px}
+.scope :global(.roster-player) :global(.fantasy-shirt):before,.scope :global(.roster-player) :global(.fantasy-shirt):after{width:14px;height:20px;top:6px}
+.scope :global(.roster-player) :global(.fantasy-shirt):before{left:-9px}.scope :global(.roster-player) :global(.fantasy-shirt):after{right:-9px}
+.scope :global(.roster-player)>b{
+  display:block;width:100%;padding:3px 4px;border-radius:5px;background:#1c2850;
+  color:#fff;font-size:7px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  box-shadow:0 3px 8px rgba(0,0,20,.22)
+}
+.scope :global(.roster-player)>small{
+  display:block;margin-top:2px;color:#e2eee9;font-size:5.7px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis
+}
+.scope :global(.roster-player) :global(.pitch-player-tags){margin-top:2px;gap:2px}
+.scope :global(.roster-player) :global(.pitch-player-tags) span,.scope :global(.roster-player) :global(.pitch-player-tags) strong{font-size:5.5px;padding:2px 3px}
+.scope :global(.roster-remove){right:8px;top:-3px;width:18px;height:18px;font-size:9px}
+.scope :global(.empty-roster-slot){cursor:pointer;opacity:.88}
+.scope :global(.empty-roster-slot):hover{opacity:1;transform:translateY(-2px)}
+.scope :global(.empty-roster-slot) :global(.empty-shirt){
+  background:rgba(22,86,69,.72);
+  border:2px dashed rgba(255,255,255,.56);
+  box-shadow:none
+}
+.scope :global(.empty-roster-slot) :global(.empty-shirt):before,.scope :global(.empty-roster-slot) :global(.empty-shirt):after{background:rgba(22,86,69,.72)}
+.scope :global(.empty-roster-slot) :global(.empty-shirt) i{font-size:18px;line-height:1;background:transparent;color:#fff}
+.scope :global(.empty-roster-slot)>b{background:rgba(20,45,55,.72)}
+
+.scope :global(.lineup-workbench-head){
+  display:flex;align-items:center;justify-content:space-between;gap:16px;padding:2px 2px 13px
+}
+.scope :global(.lineup-workbench-head) h2{margin:4px 0 3px;color:#202b48;font-size:22px}
+.scope :global(.lineup-workbench-head) p{margin:0;color:#78829a;font-size:9px}
+.scope :global(.formation-suggestions){
+  display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:6px;margin-bottom:10px
+}
+.scope :global(.formation-option){
+  position:relative;min-width:0;padding:9px 6px;border:1px solid #e0e6ef;border-radius:10px;
+  background:#f7f9fd;color:#26314d;text-align:center;cursor:pointer
+}
+.scope :global(.formation-option)>span,.scope :global(.formation-option)>b,.scope :global(.formation-option)>em{display:block}
+.scope :global(.formation-option)>span{font-size:8px;font-weight:900}
+.scope :global(.formation-option)>b{margin-top:3px;font-size:13px;color:#26314d}
+.scope :global(.formation-option)>b small{font-size:6px;color:#7b859d}
+.scope :global(.formation-option)>em{margin-top:2px;font-size:5.5px;font-style:normal;color:#8a93a8}
+.scope :global(.formation-option):global(.selected){border-color:#86cfc4;background:#edf8f6;box-shadow:0 0 0 2px rgba(11,142,130,.06)}
+.scope :global(.formation-option):global(.selected)>b,.scope :global(.formation-option):global(.selected)>span{color:#087e72}
+.scope :global(.formation-option):global(.best):after{
+  content:"ÖNERİ";position:absolute;right:4px;top:4px;padding:2px 4px;border-radius:999px;
+  background:#0b8e82;color:#fff;font-size:4.5px;font-weight:950;letter-spacing:.06em
+}
+.scope :global(.formation-option):disabled{opacity:.38;cursor:not-allowed}
+
+.scope :global(.lineup-action-row){
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  margin-bottom:10px;padding:9px 11px;border:1px solid #e0e6ef;border-radius:11px;background:#f7f9fd
+}
+.scope :global(.lineup-action-row) span,.scope :global(.lineup-action-row) small{display:block}
+.scope :global(.lineup-action-row) span{font-size:9px;color:#4d5977}.scope :global(.lineup-action-row) small{font-size:7px;color:#8790a6;margin-top:2px}
+.scope :global(.lineup-action-row) :global(.cta){padding:8px 12px;font-size:8px}
+
+.scope :global(.lineup-layout){display:grid;grid-template-columns:minmax(0,1fr) 270px;gap:12px;align-items:start}
+.scope :global(.lineup-field-column){min-width:0}
+.scope :global(.lineup-score-strip){
+  display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:8px
+}
+.scope :global(.lineup-score-strip)>span{
+  padding:8px 10px;border:1px solid #e1e7f0;border-radius:10px;background:#f7f9fd
+}
+.scope :global(.lineup-score-strip) small,.scope :global(.lineup-score-strip) b{display:block}
+.scope :global(.lineup-score-strip) small{font-size:6px;color:#7e879f}.scope :global(.lineup-score-strip) b{margin-top:2px;font-size:15px;color:#26314d}
+.scope :global(.lineup-score-strip) :global(.captain-total){background:#fff7e9;border-color:#f0dfba}
+.scope :global(.lineup-score-strip) :global(.captain-total) b{color:#a86d00}
+.scope :global(.lineup-score-strip) :global(.lineup-total){background:#edf8f6;border-color:#cce8e2}
+.scope :global(.lineup-score-strip) :global(.lineup-total) b{color:#087e72;font-size:18px}
+.scope :global(.lineup-pitch){height:485px;min-height:485px}
+.scope :global(.my-pitch-player):global(.swap-eligible) :global(.fantasy-shirt){outline:3px solid #f0c35a;outline-offset:2px}
+.scope :global(.lineup-bench-zone){margin-top:8px}
+.scope :global(.my-bench-player):global(.swap-active){border-color:#0b8e82;box-shadow:0 0 0 2px rgba(11,142,130,.12)}
+
+.scope :global(.captain-panel){
+  position:sticky;top:94px;padding:14px;border:1px solid #e0e6ef;border-radius:13px;background:#fff
+}
+.scope :global(.captain-panel) h3{margin:4px 0 5px;color:#25304d;font-size:17px}
+.scope :global(.captain-panel)>p{margin:0 0 11px;color:#7c869e;font-size:8px;line-height:1.45}
+.scope :global(.captain-candidates){display:grid;gap:6px}
+.scope :global(.captain-candidates) button{
+  display:grid;grid-template-columns:24px minmax(0,1fr) auto;gap:7px;align-items:center;
+  width:100%;padding:8px;border:1px solid #e1e6ef;border-radius:10px;background:#f8fafd;color:#26314d;text-align:left;cursor:pointer
+}
+.scope :global(.captain-candidates) button>span{
+  width:22px;height:22px;display:grid;place-items:center;border-radius:50%;background:#e9edf5;
+  color:#66708a;font-size:7px;font-weight:950
+}
+.scope :global(.captain-candidates) button div{min-width:0}.scope :global(.captain-candidates) button div b,.scope :global(.captain-candidates) button div small{display:block}
+.scope :global(.captain-candidates) button div b{font-size:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.scope :global(.captain-candidates) button div small{font-size:6px;color:#8a93a8;margin-top:2px}
+.scope :global(.captain-candidates) button>strong{font-size:12px;color:#26314d;text-align:right}
+.scope :global(.captain-candidates) button>strong small{display:block;font-size:5px;color:#8a93a8}
+.scope :global(.captain-candidates) button:global(.active){border-color:#8ed4c9;background:#edf8f6}
+.scope :global(.captain-candidates) button:global(.active)>span{background:#0b8e82;color:#fff}
+.scope :global(.captain-candidates) button:global(.active)>strong{color:#087e72}
+.scope :global(.captain-impact){
+  margin-top:10px;padding:10px;border-radius:11px;background:#25304d;color:#fff
+}
+.scope :global(.captain-impact) span,.scope :global(.captain-impact) b,.scope :global(.captain-impact) strong{display:block}
+.scope :global(.captain-impact) span{font-size:6px;color:#b8c0d2}.scope :global(.captain-impact) b{margin-top:3px;font-size:9px}
+.scope :global(.captain-impact) strong{margin-top:5px;color:#8ee6d8;font-size:16px}
+.scope :global(.inline-roster-jump){flex:0 0 auto}
+
+@media(max-width:1100px){
+  .scope :global(.formation-suggestions){grid-template-columns:repeat(4,1fr)}
+  .scope :global(.lineup-layout){grid-template-columns:1fr}
+  .scope :global(.captain-panel){position:static}
+  .scope :global(.captain-candidates){grid-template-columns:repeat(3,1fr)}
+}
+@media(max-width:760px){
+  .scope :global(.roster-pitch){min-height:540px;padding:30px 7px 22px}
+  .scope :global(.roster-pitch):before{inset:12px 14px}
+  .scope :global(.roster-row){gap:2px;min-height:96px}
+  .scope :global(.roster-player){width:min(88px,19%);min-width:48px}
+  .scope :global(.roster-player) :global(.fantasy-shirt){width:40px;height:45px}
+  .scope :global(.roster-player)>b{font-size:6px;padding:3px}
+  .scope :global(.roster-player)>small{font-size:5px}
+  .scope :global(.roster-remove){right:2px}
+  .scope :global(.lineup-workbench){padding:10px}
+  .scope :global(.lineup-workbench-head){align-items:flex-start}
+  .scope :global(.lineup-action-row){align-items:stretch;flex-direction:column}
+  .scope :global(.lineup-action-row) :global(.cta){width:100%}
+  .scope :global(.lineup-score-strip){grid-template-columns:1fr 1fr 1fr}
+  .scope :global(.lineup-pitch){height:auto;min-height:590px}
+  .scope :global(.captain-candidates){grid-template-columns:1fr}
+}
+@media(max-width:470px){
+  .scope :global(.roster-pitch){min-height:500px}
+  .scope :global(.roster-row){min-height:88px}
+  .scope :global(.roster-player){width:min(72px,19%);min-width:42px}
+  .scope :global(.roster-player) :global(.fantasy-shirt){width:35px;height:40px}
+  .scope :global(.roster-player) :global(.pitch-player-tags) span{display:none}
+  .scope :global(.formation-suggestions){grid-template-columns:repeat(2,1fr)}
+  .scope :global(.lineup-score-strip){gap:4px}
+  .scope :global(.lineup-score-strip)>span{padding:7px 6px}
+  .scope :global(.lineup-score-strip) small{font-size:5.5px}
+  .scope :global(.lineup-score-strip) b{font-size:13px}
+}
+
+
+/* ===== Oyuncu havuzu • metric-first rows ===== */
+.scope :global(.picker-filter-center){
+  display:grid;
+  grid-template-columns:minmax(0,150px) minmax(0,190px);
+  justify-content:center;
+  gap:6px;
+}
+.scope :global(.picker-sort-compact){
+  display:grid;
+  grid-template-columns:auto minmax(90px,120px) auto;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+  min-height:0;
+}
+.scope :global(.picker-sort-compact)>span{
+  color:#7b859d;
+  font-size:6.5px;
+  font-weight:900;
+  text-transform:uppercase;
+  letter-spacing:.08em;
+}
+.scope :global(.picker-sort-compact) select{
+  width:100%;
+  min-width:0;
+}
+.scope :global(.picker-sort-compact) button{
+  min-height:28px;
+  padding:5px 9px;
+  border:1px solid #dce4ee;
+  border-radius:8px;
+  background:#f7f9fd;
+  color:#4f5a76;
+  font-size:7px;
+  font-weight:900;
+  white-space:nowrap;
+  cursor:pointer;
+}
+.scope :global(.picker-sort-compact) button:hover{
+  border-color:#a8d9d1;
+  background:#edf8f6;
+  color:#087e72;
+}
+
+.scope :global(.picker-player){
+  grid-template-columns:38px minmax(120px,1fr) minmax(190px,.9fr) 27px;
+  gap:7px;
+}
+.scope :global(.picker-copy)>b{
+  font-size:9px;
+}
+.scope :global(.picker-copy)>small{
+  display:flex;
+  align-items:center;
+  gap:7px;
+  margin-top:3px;
+  color:#75809a;
+  font-size:7px;
+  line-height:1.15;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.scope :global(.picker-copy)>small strong{
+  color:#43506e;
+  font-size:7.2px;
+  font-weight:900;
+  white-space:nowrap;
+}
+.scope :global(.picker-copy)>small em{
+  min-width:0;
+  overflow:hidden;
+  color:#7f899f;
+  font-size:6.8px;
+  font-style:normal;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.scope :global(.picker-copy)>div{display:none}
+
+.scope :global(.picker-metrics){
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:4px;
+  align-items:stretch;
+}
+.scope :global(.picker-metrics)>span{
+  min-width:0;
+  padding:5px 4px;
+  border:1px solid #e2e7ef;
+  border-radius:8px;
+  background:#f8fafe;
+  text-align:center;
+}
+.scope :global(.picker-metrics) small,.scope :global(.picker-metrics) b{
+  display:block;
+  white-space:nowrap;
+}
+.scope :global(.picker-metrics) small{
+  color:#8a93a8;
+  font-size:5.5px;
+  font-weight:800;
+}
+.scope :global(.picker-metrics) b{
+  margin-top:1px;
+  color:#46516d;
+  font-size:8.5px;
+  font-weight:950;
+  font-variant-numeric:tabular-nums;
+}
+.scope :global(.picker-metrics)>span:global(.active){
+  border-color:#98d5cb;
+  background:#eaf8f5;
+  box-shadow:0 0 0 1px rgba(11,142,130,.06);
+}
+.scope :global(.picker-metrics)>span:global(.active) small{color:#5f857f}
+.scope :global(.picker-metrics)>span:global(.active) b{
+  color:#087e72;
+  font-size:10.5px;
+}
+
+@media(min-width:1000px){
+  .scope :global(.picker-filters){
+    padding-bottom:6px;
+    gap:4px;
+  }
+  .scope :global(.picker-filter-center){
+    grid-template-columns:minmax(0,135px) minmax(0,175px);
+  }
+  .scope :global(.picker-sort-compact){
+    grid-template-columns:auto 100px auto;
+    gap:5px;
+  }
+  .scope :global(.picker-sort-compact) button{
+    min-height:26px;
+    padding:4px 8px;
+    font-size:6.5px;
+  }
+  .scope :global(.picker-player){
+    grid-template-columns:36px minmax(118px,1fr) minmax(184px,.95fr) 25px;
+    min-height:60px;
+  }
+}
+
+@media(max-width:760px){
+  .scope :global(.picker-filter-center){
+    grid-template-columns:1fr 1fr;
+    justify-content:stretch;
+  }
+  .scope :global(.picker-sort-compact){
+    grid-template-columns:auto minmax(0,1fr) auto;
+    justify-content:stretch;
+  }
+  .scope :global(.picker-player){
+    grid-template-columns:38px minmax(0,1fr) 25px;
+    align-items:center;
+  }
+  .scope :global(.picker-metrics){
+    grid-column:2/3;
+    grid-row:2;
+    margin-top:1px;
+  }
+  .scope :global(.picker-player)>:global(.picker-shirt-wrap){grid-row:1/3}
+  .scope :global(.picker-player)>button{grid-column:3;grid-row:1/3}
+  .scope :global(.picker-copy)>small{
+    font-size:6.5px;
+  }
+}
+@media(max-width:470px){
+  .scope :global(.picker-sort-compact){
+    grid-template-columns:1fr auto;
+  }
+  .scope :global(.picker-sort-compact)>span{display:none}
+  .scope :global(.picker-metrics) b{font-size:8px}
+  .scope :global(.picker-metrics)>span:global(.active) b{font-size:9.5px}
+}
+
+
+/* ===== Oyuncu havuzu v2 • sortable five-column table ===== */
+.scope :global(.picker-table-head){
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 54px 54px 48px 27px;
+  gap:7px;
+  align-items:center;
+  margin:0 6px;
+  padding:6px 5px;
+  border-top:1px solid #e6eaf1;
+  border-bottom:1px solid #dfe5ee;
+  background:#f7f9fd;
+}
+.scope :global(.picker-table-head) button{
+  min-width:0;
+  padding:2px 0;
+  border:0;
+  background:transparent;
+  color:#7b859d;
+  font-size:7px;
+  font-weight:900;
+  text-align:right;
+  cursor:pointer;
+  white-space:nowrap;
+}
+.scope :global(.picker-table-head) button:first-child{text-align:left}
+.scope :global(.picker-table-head) button:global(.active){color:#087e72}
+.scope :global(.picker-table-head) button:hover{color:#087e72}
+
+.scope :global(.picker-player){
+  grid-template-columns:minmax(0,1fr) 54px 54px 48px 27px;
+  gap:7px;
+  align-items:center;
+}
+.scope :global(.picker-player-main){
+  min-width:0;
+  display:grid;
+  grid-template-columns:36px minmax(0,1fr);
+  gap:7px;
+  align-items:center;
+}
+.scope :global(.picker-player-main) :global(.picker-shirt-wrap){min-width:0}
+.scope :global(.picker-player)>button{
+  grid-column:auto;
+  grid-row:auto;
+}
+.scope :global(.picker-value){
+  min-width:0;
+  color:#4e5975;
+  font-size:9px;
+  font-weight:900;
+  text-align:right;
+  font-variant-numeric:tabular-nums;
+  white-space:nowrap;
+}
+.scope :global(.picker-value):global(.active){
+  color:#087e72;
+  font-size:10.5px;
+}
+.scope :global(.picker-copy)>small{
+  font-size:7px;
+}
+.scope :global(.picker-copy)>small strong{
+  font-size:7.3px;
+}
+.scope :global(.picker-copy)>small em{
+  font-size:6.8px;
+}
+.scope :global(.picker-filters){
+  padding-bottom:5px;
+}
+.scope :global(.picker-filter-center){
+  grid-template-columns:minmax(0,145px) minmax(0,185px);
+  justify-content:center;
+}
+.scope :global(.picker-sort-compact),.scope :global(.picker-metrics){display:none}
+
+/* compact top summary after removing distribution */
+@media(min-width:1000px){
+  .scope :global(.squad-control-strip){
+    grid-template-columns:minmax(120px,.7fr) minmax(145px,.85fr) minmax(145px,.85fr) minmax(320px,1.35fr);
+  }
+  .scope :global(.picker-table-head){
+    grid-template-columns:minmax(0,1fr) 50px 52px 44px 25px;
+    gap:6px;
+    margin-inline:6px;
+  }
+  .scope :global(.picker-player){
+    grid-template-columns:minmax(0,1fr) 50px 52px 44px 25px;
+    gap:6px;
+  }
+  .scope :global(.picker-player-main){
+    grid-template-columns:34px minmax(0,1fr);
+    gap:6px;
+  }
+}
+
+@media(max-width:760px){
+  .scope :global(.picker-table-head){
+    grid-template-columns:minmax(0,1fr) 48px 50px 44px 25px;
+    gap:5px;
+    margin-inline:5px;
+  }
+  .scope :global(.picker-player){
+    grid-template-columns:minmax(0,1fr) 48px 50px 44px 25px;
+    gap:5px;
+  }
+  .scope :global(.picker-player-main){
+    grid-template-columns:34px minmax(0,1fr);
+    gap:5px;
+  }
+  .scope :global(.picker-value){font-size:8px}
+  .scope :global(.picker-value):global(.active){font-size:9px}
+  .scope :global(.picker-copy)>small{
+    display:block;
+    line-height:1.25;
+    white-space:normal;
+  }
+  .scope :global(.picker-copy)>small strong,.scope :global(.picker-copy)>small em{
+    display:block;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+  }
+}
+
+@media(max-width:470px){
+  .scope :global(.picker-table-head){
+    grid-template-columns:minmax(0,1fr) 44px 46px 40px 24px;
+    gap:4px;
+  }
+  .scope :global(.picker-player){
+    grid-template-columns:minmax(0,1fr) 44px 46px 40px 24px;
+    gap:4px;
+  }
+  .scope :global(.picker-player-main){
+    grid-template-columns:30px minmax(0,1fr);
+    gap:4px;
+  }
+  .scope :global(.picker-table-head) button{font-size:6.5px}
+  .scope :global(.picker-value){font-size:7.5px}
+  .scope :global(.picker-value):global(.active){font-size:8.5px}
+}
+
+
+/* ===== Benim Kadrom • mobile stability pass ===== */
+@media(max-width:760px){
+  .scope :global(.my-squad-shell),.scope :global(.roster-builder-layout),.scope :global(.roster-stage),.scope :global(.player-picker),.scope :global(.lineup-workbench),.scope :global(.lineup-layout),.scope :global(.lineup-field-column),.scope :global(.captain-panel){
+    min-width:0;
+    max-width:100%;
+  }
+
+  .scope :global(.squad-control-strip){
+    position:static;
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:7px;
+    padding:8px;
+  }
+  .scope :global(.squad-control-stat){
+    min-width:0;
+    min-height:58px;
+    padding:8px;
+  }
+  .scope :global(.squad-control-stat)>span{font-size:6.5px}
+  .scope :global(.squad-control-stat)>b{
+    font-size:17px;
+    line-height:1.1;
+    white-space:nowrap;
+  }
+  .scope :global(.squad-control-stat)>b small,.scope :global(.squad-control-stat)>small{font-size:6.5px}
+  .scope :global(.squad-toolbar){
+    grid-column:1/-1;
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:6px;
+    width:100%;
+  }
+  .scope :global(.squad-toolbar) :global(.squad-tool-btn){
+    min-width:0;
+    min-height:34px;
+    padding:6px;
+    font-size:7.5px;
+    white-space:normal;
+  }
+  .scope :global(.squad-toolbar) :global(.primary-jump){
+    grid-column:1/-1;
+  }
+  .scope :global(.squad-toolbar) :global(.danger){grid-column:auto}
+
+  .scope :global(.my-squad-layout){
+    display:grid;
+    grid-template-columns:1fr;
+    gap:10px;
+  }
+  .scope :global(.squad-stage){padding:8px}
+  .scope :global(.squad-stage-head){
+    display:flex;
+    align-items:center;
+    gap:8px;
+    padding:2px 2px 8px;
+  }
+  .scope :global(.squad-stage-head)>div{min-width:0}
+  .scope :global(.squad-stage-head) h2{
+    font-size:17px;
+    line-height:1.1;
+  }
+  .scope :global(.squad-stage-head) :global(.jump-link){
+    min-width:92px;
+    padding:6px;
+    font-size:7px;
+    flex:0 0 auto;
+  }
+
+  .scope :global(.roster-pitch){
+    width:100%;
+    min-height:505px;
+    padding:27px 4px 18px;
+    gap:1px;
+    border-radius:13px;
+    clip-path:polygon(3% 0,97% 0,100% 100%,0 100%);
+  }
+  .scope :global(.roster-pitch):before{inset:10px 9px}
+  .scope :global(.roster-pitch) :global(.pitch-mark):global(.center-circle){width:82px;height:82px}
+  .scope :global(.roster-pitch) :global(.pitch-mark):global(.box){left:28%;right:28%;height:55px}
+  .scope :global(.roster-pitch) :global(.pitch-mark):global(.box):global(.top){top:10px}
+  .scope :global(.roster-pitch) :global(.pitch-mark):global(.box):global(.bottom){bottom:10px}
+  .scope :global(.roster-row){
+    width:100%;
+    min-height:86px;
+    gap:1px;
+    padding:0 1px;
+    justify-content:space-evenly;
+  }
+  .scope :global(.roster-player){
+    width:18.5%;
+    min-width:0;
+    max-width:64px;
+    filter:drop-shadow(0 3px 5px rgba(0,40,35,.16));
+  }
+  .scope :global(.roster-player) :global(.fantasy-shirt){
+    width:31px;
+    height:35px;
+    margin-bottom:2px;
+    border-radius:7px 7px 9px 9px;
+  }
+  .scope :global(.roster-player) :global(.fantasy-shirt):before,.scope :global(.roster-player) :global(.fantasy-shirt):after{
+    width:9px;
+    height:13px;
+    top:4px;
+  }
+  .scope :global(.roster-player) :global(.fantasy-shirt):before{left:-6px}
+  .scope :global(.roster-player) :global(.fantasy-shirt):after{right:-6px}
+  .scope :global(.roster-player) :global(.fantasy-shirt) i{
+    font-size:5.5px;
+    padding:1px 2px;
+  }
+  .scope :global(.empty-roster-slot) :global(.empty-shirt) i{font-size:14px}
+  .scope :global(.roster-player)>b{
+    padding:2px 2px;
+    font-size:5.5px;
+    line-height:1.1;
+  }
+  .scope :global(.roster-player)>small{
+    margin-top:1px;
+    font-size:4.7px;
+  }
+  .scope :global(.roster-player) :global(.pitch-player-tags){
+    margin-top:1px;
+    gap:1px;
+  }
+  .scope :global(.roster-player) :global(.pitch-player-tags) span{display:none}
+  .scope :global(.roster-player) :global(.pitch-player-tags) strong{
+    display:block;
+    max-width:100%;
+    padding:1px 2px;
+    font-size:5px;
+    white-space:nowrap;
+  }
+  .scope :global(.roster-remove){
+    right:0;
+    top:-3px;
+    width:15px;
+    height:15px;
+    font-size:8px;
+    padding:0;
+  }
+  .scope :global(.roster-stage-foot){
+    align-items:flex-start;
+    flex-direction:column;
+    gap:3px;
+    padding:7px 2px 0;
+    font-size:6.5px;
+  }
+  .scope :global(.roster-stage-foot) b{font-size:7px}
+
+  .scope :global(.player-picker){
+    position:static;
+    width:100%;
+    height:auto;
+    min-height:0;
+    max-height:none;
+    overflow:hidden;
+  }
+  .scope :global(.player-picker-head){
+    padding:10px 10px 7px;
+  }
+  .scope :global(.player-picker-head) h2{font-size:17px}
+  .scope :global(.picker-filters){
+    padding:0 8px 6px;
+    gap:6px;
+  }
+  .scope :global(.picker-filters) input,.scope :global(.picker-filters) select{
+    min-height:34px;
+    padding:7px 8px;
+    font-size:8px;
+  }
+  .scope :global(.picker-filter-center){
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:6px;
+    width:100%;
+  }
+
+  .scope :global(.picker-table-head){
+    grid-template-columns:29px minmax(0,1fr) 45px 47px 24px;
+    gap:4px;
+    margin:0 4px;
+    padding:6px 4px;
+  }
+  .scope :global(.picker-table-head) button{
+    font-size:6.5px;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .scope :global(.picker-list){
+    width:100%;
+    max-height:500px;
+    overflow-y:auto;
+    overflow-x:hidden;
+    padding:4px;
+  }
+  .scope :global(.picker-player){
+    width:100%;
+    min-width:0;
+    grid-template-columns:29px minmax(0,1fr) 45px 47px 24px;
+    gap:4px;
+    min-height:54px;
+    padding:5px 4px;
+    margin-bottom:4px;
+  }
+  .scope :global(.picker-player) :global(.fantasy-shirt):global(.tiny){
+    width:27px;
+    height:31px;
+  }
+  .scope :global(.picker-copy){
+    min-width:0;
+    overflow:hidden;
+  }
+  .scope :global(.picker-copy)>b{
+    font-size:7.8px;
+    line-height:1.15;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .scope :global(.picker-copy)>small{
+    display:block;
+    margin-top:2px;
+    line-height:1.15;
+    white-space:nowrap;
+    overflow:hidden;
+  }
+  .scope :global(.picker-copy)>small strong,.scope :global(.picker-copy)>small em{
+    display:block;
+    max-width:100%;
+    font-size:5.8px;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+  }
+  .scope :global(.picker-value){
+    font-size:7.5px;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .scope :global(.picker-value):global(.active){font-size:8.5px}
+  .scope :global(.picker-player)>button{
+    width:23px;
+    height:23px;
+    padding:0;
+    font-size:13px;
+    border-radius:7px;
+  }
+
+  .scope :global(.lineup-workbench){
+    margin-top:10px;
+    padding:8px;
+    overflow:hidden;
+  }
+  .scope :global(.lineup-workbench-head){
+    display:flex;
+    align-items:flex-start;
+    gap:8px;
+    padding:2px 2px 9px;
+  }
+  .scope :global(.lineup-workbench-head)>div{min-width:0}
+  .scope :global(.lineup-workbench-head) h2{
+    font-size:17px;
+    line-height:1.15;
+  }
+  .scope :global(.lineup-workbench-head) p{
+    font-size:7px;
+    line-height:1.35;
+  }
+  .scope :global(.lineup-workbench-head) :global(.jump-link){
+    min-width:88px;
+    padding:6px;
+    font-size:7px;
+  }
+  .scope :global(.formation-suggestions){
+    grid-template-columns:repeat(4,minmax(0,1fr));
+    gap:4px;
+    margin-bottom:8px;
+  }
+  .scope :global(.formation-option){
+    min-width:0;
+    padding:7px 3px;
+  }
+  .scope :global(.formation-option)>span{font-size:7px}
+  .scope :global(.formation-option)>b{font-size:10px}
+  .scope :global(.formation-option)>b small{font-size:5px}
+  .scope :global(.formation-option)>em{font-size:4.8px}
+  .scope :global(.formation-option):global(.best):after{
+    right:2px;
+    top:2px;
+    padding:1px 2px;
+    font-size:3.8px;
+  }
+
+  .scope :global(.lineup-layout){
+    display:grid;
+    grid-template-columns:1fr;
+    gap:9px;
+  }
+  .scope :global(.lineup-score-strip){
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:4px;
+  }
+  .scope :global(.lineup-score-strip)>span{
+    min-width:0;
+    padding:6px 5px;
+  }
+  .scope :global(.lineup-score-strip) small{
+    font-size:5.2px;
+    line-height:1.1;
+  }
+  .scope :global(.lineup-score-strip) b{
+    font-size:12px;
+  }
+  .scope :global(.lineup-score-strip) :global(.lineup-total) b{font-size:14px}
+
+  .scope :global(.lineup-pitch){
+    width:100%;
+    min-height:510px;
+    height:510px;
+    padding:29px 4px 20px;
+    gap:2px;
+    clip-path:polygon(3% 0,97% 0,100% 100%,0 100%);
+  }
+  .scope :global(.lineup-pitch):before{inset:10px 10px}
+  .scope :global(.lineup-pitch) :global(.pitch-mark):global(.center-circle){width:84px;height:84px}
+  .scope :global(.lineup-pitch) :global(.pitch-mark):global(.box){left:28%;right:28%;height:58px}
+  .scope :global(.lineup-pitch) :global(.pitch-mark):global(.box):global(.top){top:10px}
+  .scope :global(.lineup-pitch) :global(.pitch-mark):global(.box):global(.bottom){bottom:10px}
+  .scope :global(.lineup-pitch) :global(.my-pitch-row){
+    width:100%;
+    gap:1px;
+    padding:0 1px;
+    justify-content:space-evenly;
+  }
+  .scope :global(.lineup-pitch) :global(.my-pitch-player){
+    width:18.5%;
+    min-width:0;
+    max-width:64px;
+  }
+  .scope :global(.lineup-pitch) :global(.fantasy-shirt){
+    width:31px;
+    height:35px;
+    margin-bottom:2px;
+  }
+  .scope :global(.lineup-pitch) :global(.fantasy-shirt):before,.scope :global(.lineup-pitch) :global(.fantasy-shirt):after{
+    width:9px;
+    height:13px;
+    top:4px;
+  }
+  .scope :global(.lineup-pitch) :global(.fantasy-shirt):before{left:-6px}
+  .scope :global(.lineup-pitch) :global(.fantasy-shirt):after{right:-6px}
+  .scope :global(.lineup-pitch) :global(.fantasy-shirt) i{font-size:5.5px;padding:1px 2px}
+  .scope :global(.lineup-pitch) :global(.my-pitch-player) b{
+    padding:2px;
+    font-size:5.5px;
+  }
+  .scope :global(.lineup-pitch) :global(.my-pitch-player)>button small{
+    display:block;
+    margin-top:1px;
+    font-size:4.7px;
+  }
+  .scope :global(.lineup-pitch) :global(.pitch-player-tags){
+    gap:1px;
+    margin-top:1px;
+  }
+  .scope :global(.lineup-pitch) :global(.pitch-player-tags) span{display:none}
+  .scope :global(.lineup-pitch) :global(.pitch-player-tags) strong{
+    font-size:5px;
+    padding:1px 2px;
+  }
+  .scope :global(.lineup-pitch) :global(.captain-toggle){
+    left:0;
+    top:-2px;
+    width:16px;
+    height:16px;
+    border-width:1px;
+    font-size:6px;
+    padding:0;
+  }
+
+  .scope :global(.lineup-bench-zone){
+    width:100%;
+    margin-top:7px;
+    padding:7px;
+  }
+  .scope :global(.bench-zone-head){
+    align-items:flex-start;
+    flex-direction:column;
+    gap:3px;
+    margin-bottom:6px;
+  }
+  .scope :global(.bench-zone-head)>span{
+    max-width:100%;
+    text-align:left;
+    font-size:6.5px;
+  }
+  .scope :global(.my-bench-row){
+    grid-template-columns:1fr 1fr;
+    gap:5px;
+  }
+  .scope :global(.my-bench-player){
+    min-width:0;
+    min-height:52px;
+    grid-template-columns:15px 27px minmax(0,1fr);
+    gap:4px;
+    padding:5px;
+  }
+  .scope :global(.my-bench-player) :global(.fantasy-shirt):global(.mini){
+    width:25px;
+    height:28px;
+  }
+  .scope :global(.bench-copy) b{
+    font-size:6.8px;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .scope :global(.bench-copy) small{
+    font-size:5.3px;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+
+  .scope :global(.captain-panel){
+    position:static;
+    width:100%;
+    padding:10px;
+  }
+  .scope :global(.captain-panel) h3{font-size:15px}
+  .scope :global(.captain-panel)>p{font-size:7px}
+  .scope :global(.captain-candidates){
+    grid-template-columns:1fr;
+    gap:5px;
+  }
+  .scope :global(.captain-candidates) button{
+    min-width:0;
+    grid-template-columns:22px minmax(0,1fr) auto;
+    padding:7px;
+  }
+
+  .scope :global(.squad-save-row){
+    align-items:stretch;
+    flex-direction:column;
+    gap:8px;
+    padding-top:9px;
+  }
+  .scope :global(.squad-validity){
+    justify-content:flex-start;
+    gap:4px;
+  }
+  .scope :global(.squad-validity) span{
+    padding:4px 6px;
+    font-size:6px;
+  }
+  .scope :global(.squad-save-form){
+    width:100%;
+    flex-direction:column;
+    align-items:stretch;
+    gap:5px;
+  }
+  .scope :global(.save-squad-error){
+    max-width:none;
+    text-align:left;
+  }
+  .scope :global(.save-squad-btn){
+    width:100%;
+    min-width:0;
+  }
+
+  .scope :global(.squad-insight-bar){
+    grid-template-columns:1fr;
+    gap:10px;
+    padding:12px;
+  }
+}
+
+@media(max-width:430px){
+  .scope :global(.squad-page-title){
+    align-items:flex-start;
+  }
+  .scope :global(.squad-control-stat)>b{font-size:15px}
+  .scope :global(.squad-stage-head),.scope :global(.lineup-workbench-head){
+    flex-direction:column;
+    align-items:stretch;
+  }
+  .scope :global(.squad-stage-head) :global(.jump-link),.scope :global(.lineup-workbench-head) :global(.jump-link){
+    width:100%;
+    min-width:0;
+  }
+  .scope :global(.roster-pitch){
+    min-height:475px;
+    padding-inline:2px;
+  }
+  .scope :global(.roster-row){min-height:81px}
+  .scope :global(.roster-player){
+    width:18.2%;
+    max-width:58px;
+  }
+  .scope :global(.roster-player) :global(.fantasy-shirt){
+    width:28px;
+    height:32px;
+  }
+  .scope :global(.roster-player)>b{font-size:5px}
+  .scope :global(.roster-player)>small{font-size:4.4px}
+  .scope :global(.roster-player) :global(.pitch-player-tags) strong{font-size:4.6px}
+
+  .scope :global(.picker-table-head){
+    grid-template-columns:26px minmax(0,1fr) 41px 43px 22px;
+    gap:3px;
+    padding-inline:3px;
+  }
+  .scope :global(.picker-player){
+    grid-template-columns:26px minmax(0,1fr) 41px 43px 22px;
+    gap:3px;
+    padding-inline:3px;
+  }
+  .scope :global(.picker-player) :global(.fantasy-shirt):global(.tiny){
+    width:24px;
+    height:28px;
+  }
+  .scope :global(.picker-table-head) button{font-size:6px}
+  .scope :global(.picker-copy)>b{font-size:7.2px}
+  .scope :global(.picker-copy)>small strong,.scope :global(.picker-copy)>small em{font-size:5.3px}
+  .scope :global(.picker-value){font-size:7px}
+  .scope :global(.picker-value):global(.active){font-size:7.8px}
+  .scope :global(.picker-player)>button{
+    width:21px;
+    height:21px;
+    font-size:12px;
+  }
+
+  .scope :global(.formation-suggestions){
+    grid-template-columns:1fr 1fr;
+  }
+  .scope :global(.lineup-score-strip){
+    grid-template-columns:1fr;
+  }
+  .scope :global(.lineup-score-strip)>span{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+  }
+  .scope :global(.lineup-score-strip) small,.scope :global(.lineup-score-strip) b{margin:0}
+
+  .scope :global(.lineup-pitch){
+    min-height:480px;
+    height:480px;
+    padding-inline:2px;
+  }
+  .scope :global(.lineup-pitch) :global(.my-pitch-player){
+    width:18.2%;
+    max-width:58px;
+  }
+  .scope :global(.lineup-pitch) :global(.fantasy-shirt){
+    width:28px;
+    height:32px;
+  }
+  .scope :global(.lineup-pitch) :global(.my-pitch-player) b{font-size:5px}
+  .scope :global(.lineup-pitch) :global(.my-pitch-player)>button small{font-size:4.3px}
+  .scope :global(.lineup-pitch) :global(.pitch-player-tags) strong{font-size:4.5px}
+  .scope :global(.my-bench-row){grid-template-columns:1fr}
+}
+
+
+/* ===== Oyuncu havuzu • fixed column alignment ===== */
+.scope :global(.picker-table-head) :global(.picker-shirt-head){grid-column:1}
+.scope :global(.picker-table-head) button:nth-of-type(1){grid-column:2}
+.scope :global(.picker-table-head) button:nth-of-type(2){grid-column:3;justify-self:end;text-align:right}
+.scope :global(.picker-table-head) button:nth-of-type(3){grid-column:4;justify-self:end;text-align:right}
+.scope :global(.picker-table-head)>span:last-child{grid-column:5}
+
+.scope :global(.picker-player)>:global(.picker-shirt-wrap){grid-column:1;grid-row:auto}
+.scope :global(.picker-player)>:global(.picker-copy){grid-column:2;grid-row:auto}
+.scope :global(.picker-player)>:global(.picker-value):global(.price){
+  grid-column:3;
+  grid-row:auto;
+  justify-self:end;
+  width:100%;
+  text-align:right;
+}
+.scope :global(.picker-player)>:global(.picker-value):global(.xfp){
+  grid-column:4;
+  grid-row:auto;
+  justify-self:end;
+  width:100%;
+  text-align:right;
+}
+.scope :global(.picker-player)>button{
+  grid-column:5;
+  grid-row:auto;
+  justify-self:end;
+  align-self:center;
+}
+.scope :global(.picker-player)>button:global(.picker-remove-player){
+  border-color:#efc7cd;
+  background:#fff1f3;
+  color:#c5485b;
+  font-weight:950;
+}
+.scope :global(.picker-player)>button:global(.picker-remove-player):hover{
+  border-color:#e7aab4;
+  background:#ffe8ec;
+  color:#ad3348;
+}
+.scope :global(.picker-player)>button:global(.picker-add-player){
+  border-color:#bfe3dc;
+  background:#eaf8f5;
+  color:#087e72;
+  font-weight:950;
+}
+
+@media(max-width:760px){
+  .scope :global(.picker-table-head) button:nth-of-type(2),.scope :global(.picker-table-head) button:nth-of-type(3){
+    justify-self:end;
+    text-align:right;
+  }
+  .scope :global(.picker-player)>:global(.picker-value):global(.price),.scope :global(.picker-player)>:global(.picker-value):global(.xfp){
+    justify-self:end;
+    text-align:right;
+  }
+  .scope :global(.picker-player)>button{
+    grid-column:5;
+    grid-row:auto;
+  }
+}
+
+/* ===== Oyuncu havuzu • compact centered columns ===== */
+.scope :global(.picker-table-head),.scope :global(.picker-player){
+  grid-template-columns:42px minmax(180px,250px) 62px 62px 30px;
+  justify-content:center;
+  column-gap:8px;
+}
+.scope :global(.picker-table-head){
+  padding-inline:12px;
+}
+.scope :global(.picker-player){
+  padding-inline:12px;
+}
+.scope :global(.picker-player)>:global(.picker-shirt-wrap){
+  width:42px;
+  min-width:42px;
+  display:grid;
+  place-items:center;
+  overflow:visible;
+}
+.scope :global(.picker-player) :global(.fantasy-shirt):global(.tiny){
+  width:26px;
+  height:30px;
+}
+.scope :global(.picker-player) :global(.fantasy-shirt):global(.tiny):before,.scope :global(.picker-player) :global(.fantasy-shirt):global(.tiny):after{
+  width:8px;
+  height:11px;
+  top:4px;
+}
+.scope :global(.picker-player) :global(.fantasy-shirt):global(.tiny):before{left:-5px}
+.scope :global(.picker-player) :global(.fantasy-shirt):global(.tiny):after{right:-5px}
+
+.scope :global(.picker-copy){
+  padding-left:3px;
+}
+.scope :global(.picker-copy)>b{
+  font-size:8.8px;
+}
+.scope :global(.picker-copy)>small strong{
+  font-size:7px;
+}
+.scope :global(.picker-copy)>small em{
+  font-size:6.6px;
+}
+.scope :global(.picker-table-head) button:nth-of-type(1){
+  padding-left:3px;
+}
+.scope :global(.picker-table-head) button:nth-of-type(2),.scope :global(.picker-table-head) button:nth-of-type(3),.scope :global(.picker-player)>:global(.picker-value):global(.price),.scope :global(.picker-player)>:global(.picker-value):global(.xfp){
+  justify-self:center;
+  text-align:center;
+  width:auto;
+}
+.scope :global(.picker-player)>button{
+  justify-self:center;
+}
+
+@media(min-width:1000px){
+  .scope :global(.picker-table-head),.scope :global(.picker-player){
+    grid-template-columns:40px minmax(165px,225px) 58px 58px 28px;
+    column-gap:7px;
+  }
+  .scope :global(.picker-table-head),.scope :global(.picker-player){
+    padding-inline:10px;
+  }
+}
+
+@media(max-width:760px){
+  .scope :global(.picker-table-head),.scope :global(.picker-player){
+    grid-template-columns:34px minmax(140px,1fr) 48px 50px 25px;
+    justify-content:stretch;
+    column-gap:5px;
+    padding-inline:8px;
+  }
+  .scope :global(.picker-player)>:global(.picker-shirt-wrap){
+    width:34px;
+    min-width:34px;
+  }
+  .scope :global(.picker-player) :global(.fantasy-shirt):global(.tiny){
+    width:23px;
+    height:27px;
+  }
+  .scope :global(.picker-player) :global(.fantasy-shirt):global(.tiny):before,.scope :global(.picker-player) :global(.fantasy-shirt):global(.tiny):after{
+    width:7px;
+    height:10px;
+    top:4px;
+  }
+  .scope :global(.picker-player) :global(.fantasy-shirt):global(.tiny):before{left:-4px}
+  .scope :global(.picker-player) :global(.fantasy-shirt):global(.tiny):after{right:-4px}
+  .scope :global(.picker-copy){
+    padding-left:4px;
+  }
+  .scope :global(.picker-table-head) button:nth-of-type(2),.scope :global(.picker-table-head) button:nth-of-type(3),.scope :global(.picker-player)>:global(.picker-value):global(.price),.scope :global(.picker-player)>:global(.picker-value):global(.xfp){
+    justify-self:center;
+    text-align:center;
+  }
+}
+
+@media(max-width:430px){
+  .scope :global(.picker-table-head),.scope :global(.picker-player){
+    grid-template-columns:30px minmax(118px,1fr) 43px 45px 23px;
+    column-gap:4px;
+    padding-inline:5px;
+  }
+  .scope :global(.picker-player)>:global(.picker-shirt-wrap){
+    width:30px;
+    min-width:30px;
+  }
+  .scope :global(.picker-copy){padding-left:3px}
+}
+
+
+/* ===== Benim Kadrom • readability pass ===== */
+.scope :global(.my-squad-shell) :global(.eyebrow){
+  font-size:8px;
+  letter-spacing:.11em;
+}
+.scope :global(.my-squad-shell) :global(.squad-control-stat)>span,.scope :global(.my-squad-shell) :global(.squad-control-stat)>small{
+  font-size:8px;
+}
+.scope :global(.my-squad-shell) :global(.squad-control-stat)>b{
+  font-size:20px;
+}
+.scope :global(.my-squad-shell) :global(.squad-control-stat)>b small{
+  font-size:8px;
+}
+.scope :global(.my-squad-shell) :global(.squad-tool-btn){
+  font-size:9px;
+}
+.scope :global(.my-squad-shell) :global(.squad-stage-head) h2,.scope :global(.my-squad-shell) :global(.player-picker-head) h2{
+  font-size:20px;
+}
+.scope :global(.my-squad-shell) :global(.roster-stage-foot),.scope :global(.my-squad-shell) :global(.roster-stage-foot) b{
+  font-size:8px;
+}
+
+/* 15-player pitch */
+.scope :global(.my-squad-shell) :global(.roster-player)>b{
+  font-size:7.5px;
+  line-height:1.15;
+}
+.scope :global(.my-squad-shell) :global(.roster-player)>small{
+  font-size:6.5px;
+  line-height:1.15;
+}
+.scope :global(.my-squad-shell) :global(.roster-player) :global(.pitch-player-tags) strong{
+  font-size:6.5px;
+}
+.scope :global(.my-squad-shell) :global(.empty-roster-slot)>b{
+  font-size:7px;
+}
+.scope :global(.my-squad-shell) :global(.empty-roster-slot)>small{
+  font-size:6px;
+}
+
+/* player pool */
+.scope :global(.my-squad-shell) :global(.picker-filters) input,.scope :global(.my-squad-shell) :global(.picker-filters) select{
+  font-size:9px;
+}
+.scope :global(.my-squad-shell) :global(.picker-table-head) button{
+  font-size:8px;
+}
+.scope :global(.my-squad-shell) :global(.picker-copy)>b{
+  font-size:10px;
+  line-height:1.2;
+}
+.scope :global(.my-squad-shell) :global(.picker-copy)>small strong{
+  font-size:8px;
+}
+.scope :global(.my-squad-shell) :global(.picker-copy)>small em{
+  font-size:7.5px;
+}
+.scope :global(.my-squad-shell) :global(.picker-value){
+  font-size:9.5px;
+}
+.scope :global(.my-squad-shell) :global(.picker-value):global(.active){
+  font-size:11px;
+}
+.scope :global(.my-squad-shell) :global(.picker-player)>button{
+  font-size:15px;
+}
+
+/* lineup + tactics */
+.scope :global(.my-squad-shell) :global(.lineup-workbench-head) h2{
+  font-size:21px;
+}
+.scope :global(.my-squad-shell) :global(.lineup-workbench-head) p{
+  font-size:9px;
+}
+.scope :global(.my-squad-shell) :global(.formation-option)>span{
+  font-size:8px;
+}
+.scope :global(.my-squad-shell) :global(.formation-option)>b{
+  font-size:12px;
+}
+.scope :global(.my-squad-shell) :global(.formation-option)>b small,.scope :global(.my-squad-shell) :global(.formation-option)>em{
+  font-size:6px;
+}
+.scope :global(.my-squad-shell) :global(.lineup-score-strip) small{
+  font-size:7px;
+}
+.scope :global(.my-squad-shell) :global(.lineup-score-strip) b{
+  font-size:15px;
+}
+.scope :global(.my-squad-shell) :global(.lineup-score-strip) :global(.lineup-total) b{
+  font-size:18px;
+}
+.scope :global(.my-squad-shell) :global(.lineup-pitch) :global(.my-pitch-player) b{
+  font-size:7.5px;
+  line-height:1.15;
+}
+.scope :global(.my-squad-shell) :global(.lineup-pitch) :global(.my-pitch-player)>button small{
+  font-size:6.5px;
+}
+.scope :global(.my-squad-shell) :global(.lineup-pitch) :global(.pitch-player-tags) strong{
+  font-size:6.5px;
+}
+.scope :global(.my-squad-shell) :global(.formation-live-badge) span{
+  font-size:6px;
+}
+.scope :global(.my-squad-shell) :global(.formation-live-badge) b{
+  font-size:10px;
+}
+
+/* bench + captain + save */
+.scope :global(.my-squad-shell) :global(.bench-zone-head),.scope :global(.my-squad-shell) :global(.bench-zone-head)>span{
+  font-size:8px;
+}
+.scope :global(.my-squad-shell) :global(.bench-copy) b{
+  font-size:8.5px;
+}
+.scope :global(.my-squad-shell) :global(.bench-copy) small{
+  font-size:7px;
+}
+.scope :global(.my-squad-shell) :global(.captain-panel) h3{
+  font-size:17px;
+}
+.scope :global(.my-squad-shell) :global(.captain-panel)>p{
+  font-size:9px;
+}
+.scope :global(.my-squad-shell) :global(.captain-candidates) button div b{
+  font-size:9px;
+}
+.scope :global(.my-squad-shell) :global(.captain-candidates) button div small{
+  font-size:7px;
+}
+.scope :global(.my-squad-shell) :global(.captain-candidates) button>strong{
+  font-size:13px;
+}
+.scope :global(.my-squad-shell) :global(.captain-candidates) button>strong small{
+  font-size:6px;
+}
+.scope :global(.my-squad-shell) :global(.captain-impact) span{
+  font-size:7px;
+}
+.scope :global(.my-squad-shell) :global(.captain-impact) b{
+  font-size:10px;
+}
+.scope :global(.my-squad-shell) :global(.captain-impact) strong{
+  font-size:17px;
+}
+.scope :global(.my-squad-shell) :global(.squad-validity) span{
+  font-size:7.5px;
+}
+.scope :global(.my-squad-shell) :global(.save-squad-btn){
+  font-size:9px;
+}
+.scope :global(.my-squad-shell) :global(.squad-insight-bar) p{
+  font-size:10px;
+}
+
+/* mobile: keep the larger type without breaking the grid */
+@media(max-width:760px){
+  .scope :global(.my-squad-shell) :global(.eyebrow){font-size:7.5px}
+  .scope :global(.my-squad-shell) :global(.squad-control-stat)>span,.scope :global(.my-squad-shell) :global(.squad-control-stat)>small,.scope :global(.my-squad-shell) :global(.squad-control-stat)>b small{
+    font-size:7.5px;
+  }
+  .scope :global(.my-squad-shell) :global(.squad-control-stat)>b{
+    font-size:18px;
+  }
+  .scope :global(.my-squad-shell) :global(.squad-tool-btn){
+    font-size:8.5px;
+  }
+  .scope :global(.my-squad-shell) :global(.squad-stage-head) h2,.scope :global(.my-squad-shell) :global(.player-picker-head) h2,.scope :global(.my-squad-shell) :global(.lineup-workbench-head) h2{
+    font-size:18px;
+  }
+  .scope :global(.my-squad-shell) :global(.roster-player)>b{
+    font-size:6.4px;
+  }
+  .scope :global(.my-squad-shell) :global(.roster-player)>small{
+    font-size:5.7px;
+  }
+  .scope :global(.my-squad-shell) :global(.roster-player) :global(.pitch-player-tags) strong{
+    font-size:5.7px;
+  }
+  .scope :global(.my-squad-shell) :global(.picker-table-head) button{
+    font-size:7px;
+  }
+  .scope :global(.my-squad-shell) :global(.picker-copy)>b{
+    font-size:8.8px;
+  }
+  .scope :global(.my-squad-shell) :global(.picker-copy)>small strong{
+    font-size:6.8px;
+  }
+  .scope :global(.my-squad-shell) :global(.picker-copy)>small em{
+    font-size:6.5px;
+  }
+  .scope :global(.my-squad-shell) :global(.picker-value){
+    font-size:8.3px;
+  }
+  .scope :global(.my-squad-shell) :global(.picker-value):global(.active){
+    font-size:9.4px;
+  }
+  .scope :global(.my-squad-shell) :global(.formation-option)>span{
+    font-size:7.5px;
+  }
+  .scope :global(.my-squad-shell) :global(.formation-option)>b{
+    font-size:11px;
+  }
+  .scope :global(.my-squad-shell) :global(.lineup-score-strip) small{
+    font-size:6.3px;
+  }
+  .scope :global(.my-squad-shell) :global(.lineup-score-strip) b{
+    font-size:13px;
+  }
+  .scope :global(.my-squad-shell) :global(.lineup-pitch) :global(.my-pitch-player) b{
+    font-size:6.3px;
+  }
+  .scope :global(.my-squad-shell) :global(.lineup-pitch) :global(.my-pitch-player)>button small{
+    font-size:5.5px;
+  }
+  .scope :global(.my-squad-shell) :global(.lineup-pitch) :global(.pitch-player-tags) strong{
+    font-size:5.7px;
+  }
+  .scope :global(.my-squad-shell) :global(.bench-copy) b{
+    font-size:7.6px;
+  }
+  .scope :global(.my-squad-shell) :global(.bench-copy) small{
+    font-size:6.3px;
+  }
+  .scope :global(.my-squad-shell) :global(.captain-panel)>p{
+    font-size:8px;
+  }
+  .scope :global(.my-squad-shell) :global(.captain-candidates) button div b{
+    font-size:8.3px;
+  }
+  .scope :global(.my-squad-shell) :global(.captain-candidates) button div small{
+    font-size:6.4px;
+  }
+  .scope :global(.my-squad-shell) :global(.squad-validity) span{
+    font-size:6.7px;
+  }
+}
+
+@media(max-width:430px){
+  .scope :global(.my-squad-shell) :global(.roster-player)>b{
+    font-size:6px;
+  }
+  .scope :global(.my-squad-shell) :global(.roster-player)>small{
+    font-size:5.3px;
+  }
+  .scope :global(.my-squad-shell) :global(.picker-table-head) button{
+    font-size:6.7px;
+  }
+  .scope :global(.my-squad-shell) :global(.picker-copy)>b{
+    font-size:8.2px;
+  }
+  .scope :global(.my-squad-shell) :global(.picker-copy)>small strong,.scope :global(.my-squad-shell) :global(.picker-copy)>small em{
+    font-size:6px;
+  }
+  .scope :global(.my-squad-shell) :global(.picker-value){
+    font-size:7.8px;
+  }
+  .scope :global(.my-squad-shell) :global(.picker-value):global(.active){
+    font-size:8.8px;
+  }
+  .scope :global(.my-squad-shell) :global(.lineup-pitch) :global(.my-pitch-player) b{
+    font-size:5.9px;
+  }
+  .scope :global(.my-squad-shell) :global(.lineup-pitch) :global(.my-pitch-player)>button small{
+    font-size:5.2px;
+  }
+}
+
+
+/* ===== Pitch player tags • show price + xFP ===== */
+.scope :global(.my-squad-shell) :global(.roster-player) :global(.pitch-player-tags),.scope :global(.my-squad-shell) :global(.lineup-pitch) :global(.pitch-player-tags){
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:2px;
+  flex-wrap:nowrap;
+}
+.scope :global(.my-squad-shell) :global(.roster-player) :global(.pitch-player-tags) span,.scope :global(.my-squad-shell) :global(.roster-player) :global(.pitch-player-tags) strong,.scope :global(.my-squad-shell) :global(.lineup-pitch) :global(.pitch-player-tags) span,.scope :global(.my-squad-shell) :global(.lineup-pitch) :global(.pitch-player-tags) strong{
+  display:block;
+  max-width:none;
+  white-space:nowrap;
+  padding:2px 3px;
+  border-radius:999px;
+  line-height:1;
+}
+.scope :global(.my-squad-shell) :global(.roster-player) :global(.pitch-player-tags) span,.scope :global(.my-squad-shell) :global(.lineup-pitch) :global(.pitch-player-tags) span{
+  color:#e8edf5;
+  background:rgba(24,37,70,.72);
+}
+.scope :global(.my-squad-shell) :global(.roster-player) :global(.pitch-player-tags) strong,.scope :global(.my-squad-shell) :global(.lineup-pitch) :global(.pitch-player-tags) strong{
+  color:#8df6e8;
+  background:rgba(13,25,55,.82);
+}
+
+@media(max-width:760px){
+  .scope :global(.my-squad-shell) :global(.roster-player) :global(.pitch-player-tags) span,.scope :global(.my-squad-shell) :global(.roster-player) :global(.pitch-player-tags) strong,.scope :global(.my-squad-shell) :global(.lineup-pitch) :global(.pitch-player-tags) span,.scope :global(.my-squad-shell) :global(.lineup-pitch) :global(.pitch-player-tags) strong{
+    display:block;
+    padding:1px 2px;
+    font-size:5.2px;
+  }
+}
+
+@media(max-width:430px){
+  .scope :global(.my-squad-shell) :global(.roster-player) :global(.pitch-player-tags),.scope :global(.my-squad-shell) :global(.lineup-pitch) :global(.pitch-player-tags){
+    gap:1px;
+  }
+  .scope :global(.my-squad-shell) :global(.roster-player) :global(.pitch-player-tags) span,.scope :global(.my-squad-shell) :global(.roster-player) :global(.pitch-player-tags) strong,.scope :global(.my-squad-shell) :global(.lineup-pitch) :global(.pitch-player-tags) span,.scope :global(.my-squad-shell) :global(.lineup-pitch) :global(.pitch-player-tags) strong{
+    font-size:4.8px;
+    padding:1px 2px;
+  }
+}
+
+
