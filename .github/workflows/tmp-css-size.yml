@@ -61,8 +61,33 @@ jobs:
           const raw=files.map(file=>fs.readFileSync(file,'utf8')).join('\n')
           const css=unwrapGlobal(raw).split('.scope').join('')
           fs.writeFileSync('/tmp/all.css',css)
+          function walk(dir){
+            return fs.readdirSync(dir,{withFileTypes:true}).flatMap(entry=>{
+              const full=dir+'/'+entry.name
+              return entry.isDirectory()?walk(full):(entry.isFile()&&full.endsWith('.js')?[full]:[])
+            })
+          }
+          const appFiles=walk('app')
+          const reachable=new Set(appFiles)
+          const queue=[...appFiles]
+          while(queue.length){
+            const file=queue.pop()
+            const source=fs.readFileSync(file,'utf8')
+            const imports=[...source.matchAll(/(?:from\s+|import\s*)['"](@\/components\/[^'"]+|\.\.?\/[^'"]+)['"]/g)].map(m=>m[1])
+            for(const spec of imports){
+              let candidate=null
+              if(spec.startsWith('@/components/'))candidate='components/'+spec.slice('@/components/'.length)
+              else if(spec.startsWith('.'))candidate=new URL(spec,'file://'+process.cwd()+'/'+file).pathname.slice(process.cwd().length+1)
+              if(!candidate)continue
+              const variants=[candidate,candidate+'.js',candidate+'/index.js']
+              const resolved=variants.find(x=>fs.existsSync(x)&&fs.statSync(x).isFile())
+              if(resolved&&!reachable.has(resolved)){reachable.add(resolved);queue.push(resolved)}
+            }
+          }
+          const contentFiles=[...reachable]
+          console.log('purge content files',contentFiles.length,'of',appFiles.length+walk('components').length)
           const result=await new PurgeCSS().purge({
-            content:['app/**/*.js','components/**/*.js'],
+            content:contentFiles,
             css:[{raw:css}],
             safelist:{
               standard:[
