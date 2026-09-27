@@ -948,6 +948,9 @@ export type Database = {
           position: string
           price: number
           shirt_number: number | null
+          source_position: string | null
+          sub_role: string | null
+          sub_role_source: string | null
           status: string | null
           team_id: number | null
           updated_at: string
@@ -960,6 +963,9 @@ export type Database = {
           position: string
           price: number
           shirt_number?: number | null
+          source_position?: string | null
+          sub_role?: string | null
+          sub_role_source?: string | null
           status?: string | null
           team_id?: number | null
           updated_at?: string
@@ -972,6 +978,9 @@ export type Database = {
           position?: string
           price?: number
           shirt_number?: number | null
+          source_position?: string | null
+          sub_role?: string | null
+          sub_role_source?: string | null
           status?: string | null
           team_id?: number | null
           updated_at?: string
@@ -1456,6 +1465,8 @@ export type Database = {
           rates: Json
           role_probability: number
           source_note: string | null
+          source_position: string | null
+          sub_role: string | null
         }
         Insert: {
           availability: number
@@ -1475,6 +1486,8 @@ export type Database = {
           rates: Json
           role_probability: number
           source_note?: string | null
+          source_position?: string | null
+          sub_role?: string | null
         }
         Update: {
           availability?: number
@@ -1494,6 +1507,8 @@ export type Database = {
           rates?: Json
           role_probability?: number
           source_note?: string | null
+          source_position?: string | null
+          sub_role?: string | null
         }
         Relationships: []
       }
