@@ -32,6 +32,7 @@ jobs:
           import postcss from 'postcss'
           import cssnano from 'cssnano'
           import {minify as cssoMinify} from 'csso'
+          import {transform as lightningTransform} from 'lightningcss'
           const files=[
             'components/SiteShell.module.css',
             'components/PremiumViews.module.css',
