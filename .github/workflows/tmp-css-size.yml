@@ -84,10 +84,14 @@ jobs:
               if(resolved&&!reachable.has(resolved)){reachable.add(resolved);queue.push(resolved)}
             }
           }
-          const contentFiles=[...reachable]
-          console.log('purge content files',contentFiles.length,'of',appFiles.length+walk('components').length)
+          const contentFiles=[...new Set([...reachable].map(file=>file.replaceAll('/../','/')))]
+          const stringContent=contentFiles.map(file=>{
+            const source=fs.readFileSync(file,'utf8')
+            return [...source.matchAll(/["'\`]([^"'\`]{1,1000})["'\`]/g)].map(match=>match[1]).join(' ')
+          }).join(' ')
+          console.log('purge content files',contentFiles.length,'of',appFiles.length+walk('components').length,'string bytes',Buffer.byteLength(stringContent))
           const result=await new PurgeCSS().purge({
-            content:contentFiles,
+            content:[{raw:stringContent,extension:'html'}],
             css:[{raw:css}],
             safelist:{
               standard:[
