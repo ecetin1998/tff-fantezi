@@ -95,10 +95,12 @@ curl -fsSL "$BASE_URL/api/scout-data?section=players" > "$TMP_DIR/players-live.j
 curl -fsSL "$BASE_URL/players/419" > "$TMP_DIR/player-419.html"
 curl -fsSL "$BASE_URL/matches" > "$TMP_DIR/matches.html"
 curl -fsSL "$BASE_URL/" > "$TMP_DIR/home.html"
+curl -fsSL "$BASE_URL/robots.txt" > "$TMP_DIR/robots.txt"
+curl -fsSL "$BASE_URL/sitemap.xml" > "$TMP_DIR/sitemap.xml"
 
-node - "$TMP_DIR/players-live.json" "$TMP_DIR/player-419.html" "$TMP_DIR/matches.html" "$TMP_DIR/home.html" <<'NODE'
+node - "$TMP_DIR/players-live.json" "$TMP_DIR/player-419.html" "$TMP_DIR/matches.html" "$TMP_DIR/home.html" "$TMP_DIR/robots.txt" "$TMP_DIR/sitemap.xml" <<'NODE'
 const fs=require('node:fs')
-const [,,playersFile,playerHtmlFile,matchesHtmlFile,homeHtmlFile]=process.argv
+const [,,playersFile,playerHtmlFile,matchesHtmlFile,homeHtmlFile,robotsFile,sitemapFile]=process.argv
 const payload=JSON.parse(fs.readFileSync(playersFile,'utf8'))
 const player=(payload.players||[]).find(p=>Number(p.id)===419)
 if(!player)throw new Error('player 419 missing from public feed')
@@ -108,8 +110,10 @@ const playerHtml=fs.readFileSync(playerHtmlFile,'utf8')
 if(!playerHtml.includes(expected))throw new Error('player 419 detail does not contain feed xFP '+expected)
 const matches=fs.readFileSync(matchesHtmlFile,'utf8')
 const home=fs.readFileSync(homeHtmlFile,'utf8')
-for(const [name,html] of [['player',playerHtml],['matches',matches],['home',home]]){
-  if(html.includes('vercel.app'))throw new Error(name+' HTML contains old Vercel domain')
+const robots=fs.readFileSync(robotsFile,'utf8')
+const sitemap=fs.readFileSync(sitemapFile,'utf8')
+for(const [name,html] of [['player',playerHtml],['matches',matches],['home',home],['robots',robots],['sitemap',sitemap]]){
+  if(html.includes('vercel.app'))throw new Error(name+' contains old Vercel domain')
 }
 if(matches.includes('%$'))throw new Error('matches HTML contains malformed %$ probability')
 NODE
