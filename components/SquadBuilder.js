@@ -67,7 +67,7 @@ function formationFromXIIds(ids,map){
   return FORMATION_MAP[key]?key:null
 }
 
-export default function SquadBuilder({ players, initialState=[], recommendedState=[], plan='free', gameweek, deadlineAt=null, locked=false, transferScenarios=[], freeTransfers=1 }){
+export default function SquadBuilder({ players, initialState=[], recommendedState=[], plan='free', gameweek, deadlineAt=null, locked=false, transferScenarios=[] }){
   const map=useMemo(()=>new Map(players.map(p=>[p.id,p])),[players])
   const initialIds=useMemo(()=>initialState.map(x=>x.player_id).filter(id=>map.has(id)),[initialState,map])
   const initialFormation=useMemo(()=>formationFromState(initialState,map),[initialState,map])
@@ -109,6 +109,8 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
   const counts=selected.reduce((a,p)=>(a[p.position]=(a[p.position]||0)+1,a),{})
   const cost=selected.reduce((s,p)=>s+Number(p.price||0),0)
   const bank=BUDGET-cost
+  const transfersUsed=initialIds.filter(id=>!ids.includes(id)).length
+  const freeTransfersRemaining=Math.max(0,Number(TRANSFER_RULES.free_per_week||0)-transfersUsed)
   const clubCounts=selected.reduce((a,p)=>(a[p.team_id]=(a[p.team_id]||0)+1,a),{})
   const clubLimitOk=!MAX_PLAYERS_PER_CLUB||Object.values(clubCounts).every(n=>n<=MAX_PLAYERS_PER_CLUB)
   const validRoster=ids.length===SQUAD_SIZE&&Object.entries(SQUAD_LIMITS).every(([k,v])=>(counts[k]||0)===v)&&cost<=BUDGET+.0001&&clubLimitOk
@@ -183,13 +185,13 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
         const plan=bestXIPlan(nextIds,map)
         if(!plan)continue
         const gain=plan.total-currentPlan.total
-        const hitCost=freeTransfers>0?0:Number(TRANSFER_RULES.hit_cost||4)
+        const hitCost=freeTransfersRemaining>0?0:Number(TRANSFER_RULES.hit_cost||4)
         const netGain=gain-hitCost
         if(!best||netGain>best.netGain)best={out,inn,gain,netGain,hitCost,plan,nextIds}
       }
     }
     return best
-  },[selected,deferredPlayers,ids,bank,map,freeTransfers])
+  },[selected,deferredPlayers,ids,bank,map,freeTransfersRemaining])
 
   function applyBestMove(){
     if(!bestMove||bestMove.netGain<=0)return
@@ -578,6 +580,7 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
           <div className="club-counts">${Object.entries(clubCounts).sort((a,b)=>b[1]-a[1]).map(([teamId,count])=>{const p=selected.find(x=>String(x.team_id)===String(teamId));return <span className={count>=MAX_PLAYERS_PER_CLUB?'limit':''} key={teamId}>{p?.team||teamId}: {count}/{MAX_PLAYERS_PER_CLUB}</span>})}</div>
           <span className={validRoster?'ok':''}>{validRoster?'✓':'○'} 2 KL / 5 DEF / 5 OS / 3 FOR</span>
           <span className={cost<=BUDGET?'ok':''}>{cost<=BUDGET?'✓':'○'} Bütçe limiti</span>
+          {bank>=5?<span className="budget-warning">⚠ {bank.toFixed(1)}m bütçe kullanılmıyor</span>:null}
           <span className={clubLimitOk?'ok':''}>{clubLimitOk?'✓':'○'} Kulüp başına en fazla {MAX_PLAYERS_PER_CLUB}</span>
           <span className={validXI?'ok':''}>{validXI?'✓':'○'} {liveFormation===formation?'Seçili diziliş hazır':'XI dizilişi güncellenmeli'}</span>
         </div>
