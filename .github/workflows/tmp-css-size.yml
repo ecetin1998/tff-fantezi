@@ -74,92 +74,58 @@ jobs:
               ]
             }
           })
-          function matchingBrace(s,open){
-            let depth=1,quote=null,escaped=false
-            for(let i=open+1;i<s.length;i++){
-              const ch=s[i]
-              if(quote){if(escaped)escaped=false;else if(ch==='\\\\')escaped=true;else if(ch===quote)quote=null;continue}
-              if(ch==='"'||ch==="'"){quote=ch;continue}
-              if(ch==='{')depth++
-              else if(ch==='}'&&--depth===0)return i
+          function compactContainer(container){
+            if(!container.nodes)return
+            const groupMap=new Map()
+            for(const node of [...container.nodes]){
+              if(node.type!=='atrule'||!['media','supports','container','layer'].includes(node.name))continue
+              const key=node.name+'|'+node.params.replace(/\\s+/g,' ').trim()
+              const list=groupMap.get(key)||[]
+              list.push(node);groupMap.set(key,list)
             }
-            return s.length-1
-          }
-          function declarations(body){
-            const map=new Map(),order=[]
-            let start=0,quote=null,depth=0,escaped=false
-            for(let i=0;i<=body.length;i++){
-              const ch=body[i]||';'
-              if(quote){if(escaped)escaped=false;else if(ch==='\\\\')escaped=true;else if(ch===quote)quote=null;continue}
-              if(ch==='"'||ch==="'"){quote=ch;continue}
-              if(ch==='(')depth++
-              else if(ch===')')depth=Math.max(0,depth-1)
-              else if(ch===';'&&depth===0){
-                const part=body.slice(start,i).trim();start=i+1
-                const colon=part.indexOf(':')
-                if(colon>0){
-                  const prop=part.slice(0,colon).trim(),value=part.slice(colon+1).trim()
-                  if(!map.has(prop))order.push(prop)
-                  map.set(prop,value)
+            for(const list of groupMap.values()){
+              if(list.length<2)continue
+              const last=list[list.length-1]
+              const merged=[]
+              for(const at of list)for(const child of at.nodes||[])merged.push(child.clone())
+              last.removeAll()
+              for(const child of merged)last.append(child)
+              for(const at of list.slice(0,-1))at.remove()
+            }
+
+            const ruleMap=new Map()
+            for(const node of [...container.nodes]){
+              if(node.type!=='rule')continue
+              const key=node.selector.replace(/\\s+/g,' ').trim()
+              const list=ruleMap.get(key)||[]
+              list.push(node);ruleMap.set(key,list)
+            }
+            for(const list of ruleMap.values()){
+              if(list.length<2)continue
+              const last=list[list.length-1]
+              const chosen=new Set(),chunks=[]
+              for(let i=list.length-1;i>=0;i--){
+                const rule=list[i]
+                const propsInRule=new Set()
+                const kept=[]
+                for(const node of rule.nodes||[]){
+                  if(node.type!=='decl')continue
+                  if(chosen.has(node.prop))continue
+                  kept.push(node.clone())
+                  propsInRule.add(node.prop)
                 }
+                for(const prop of propsInRule)chosen.add(prop)
+                chunks.unshift(kept)
               }
+              last.removeAll()
+              for(const chunk of chunks)for(const decl of chunk)last.append(decl)
+              for(const rule of list.slice(0,-1))rule.remove()
             }
-            return {map,order}
+            for(const node of [...(container.nodes||[])])if(node.nodes)compactContainer(node)
           }
-          function compactLevel(input){
-            const s=input
-            const nodes=[]
-            let i=0
-            while(i<s.length){
-              while(i<s.length&&/\\s/.test(s[i]))i++
-              if(i>=s.length)break
-              let open=-1,quote=null,escaped=false,semicolon=-1
-              for(let j=i;j<s.length;j++){
-                const ch=s[j]
-                if(quote){if(escaped)escaped=false;else if(ch==='\\\\')escaped=true;else if(ch===quote)quote=null;continue}
-                if(ch==='"'||ch==="'"){quote=ch;continue}
-                if(ch==='{'){open=j;break}
-                if(ch===';'){semicolon=j;break}
-              }
-              if(semicolon>=0&&(open<0||semicolon<open)){
-                nodes.push({type:'raw',raw:s.slice(i,semicolon+1).trim()});i=semicolon+1;continue
-              }
-              if(open<0){const rest=s.slice(i).trim();if(rest)nodes.push({type:'raw',raw:rest});break}
-              const header=s.slice(i,open).trim(),close=matchingBrace(s,open),body=s.slice(open+1,close)
-              if(/^@(media|supports|container|layer)\\b/i.test(header))nodes.push({type:'group',header,body})
-              else if(/^@/i.test(header))nodes.push({type:'rawblock',header,body})
-              else nodes.push({type:'rule',header:header.replace(/\\s+/g,' '),body})
-              i=close+1
-            }
-            const lastRule=new Map(),mergedRule=new Map(),lastGroup=new Map(),groupBodies=new Map()
-            nodes.forEach((node,index)=>{
-              if(node.type==='rule'){
-                lastRule.set(node.header,index)
-                const d=declarations(node.body),m=mergedRule.get(node.header)||{map:new Map(),order:[]}
-                for(const prop of d.order){if(!m.map.has(prop))m.order.push(prop);m.map.set(prop,d.map.get(prop))}
-                mergedRule.set(node.header,m)
-              }else if(node.type==='group'){
-                const key=node.header.replace(/\\s+/g,' ')
-                lastGroup.set(key,index)
-                groupBodies.set(key,(groupBodies.get(key)||'')+'\\n'+node.body)
-              }
-            })
-            let out=''
-            nodes.forEach((node,index)=>{
-              if(node.type==='rule'){
-                if(lastRule.get(node.header)!==index)return
-                const m=mergedRule.get(node.header)
-                out+=node.header+'{'+m.order.map(prop=>prop+':'+m.map.get(prop)).join(';')+'}'
-              }else if(node.type==='group'){
-                const key=node.header.replace(/\\s+/g,' ')
-                if(lastGroup.get(key)!==index)return
-                out+=key+'{'+compactLevel(groupBodies.get(key))+'}'
-              }else if(node.type==='rawblock')out+=node.header+'{'+node.body+'}'
-              else out+=node.raw
-            })
-            return out
-          }
-          const compacted=compactLevel(result[0].css)
+          const ast=postcss.parse(result[0].css)
+          compactContainer(ast)
+          const compacted=ast.toString()
           const optimized=await postcss([cssnano({preset:'default'})]).process(compacted,{from:undefined})
           fs.writeFileSync('app/generated.css',optimized.css)
           console.log('raw css bytes',Buffer.byteLength(raw),'globalized bytes',Buffer.byteLength(css),'purged bytes',Buffer.byteLength(result[0].css),'compacted bytes',Buffer.byteLength(compacted),'optimized bytes',Buffer.byteLength(optimized.css))
