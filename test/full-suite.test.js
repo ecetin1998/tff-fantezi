@@ -23,6 +23,7 @@ const jsTests=[
   'model/bugfixContract.test.js',
   'model/fullAuditContract.test.js',
   'model/cloudflareDeployContract.test.js',
+  'model/enrichmentContract.test.js',
 ]
 
 for(const file of jsTests){
