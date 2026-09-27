@@ -25,16 +25,16 @@ jobs:
         run: npm ci --no-audit --no-fund
       - name: Generate Cloudflare Workers config
         run: npx --yes wrangler@4.142.0 setup --yes
-      - name: Verify vinext build
-        run: npm run build:vinext
+      - name: Verify OpenNext build
+        run: npx opennextjs-cloudflare build
       - name: Commit generated configuration
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add package.json package-lock.json wrangler.jsonc vite.config.* .gitignore .assetsignore
+          git add -A
           if git diff --cached --quiet; then
             echo "No generated changes to commit"
           else
-            git commit -m "chore: configure Cloudflare Workers with vinext"
+            git commit -m "chore: configure Cloudflare Workers with OpenNext"
             git push origin HEAD:fix/cloudflare-workers-bootstrap
           fi
