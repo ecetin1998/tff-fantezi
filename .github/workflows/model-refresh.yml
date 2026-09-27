@@ -5,12 +5,6 @@ on:
   schedule:
     - cron: "0 6 * * *"
     - cron: "0 */6 * * 4-5"
-  push:
-    branches:
-      - fix/workers-prod-hardening
-    paths:
-      - ".github/workflows/model-refresh.yml"
-      - "scripts/model-refresh.sh"
 
 permissions:
   contents: read
