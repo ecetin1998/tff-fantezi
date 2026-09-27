@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-BASE_URL="${BASE_URL:-https://tff-fantezi.vercel.app}"
+BASE_URL="${BASE_URL:-https://tff-fantezi.ecetin1998.workers.dev}"
 TMP_DIR="$(mktemp -d)"
 trap 'rm -rf "$TMP_DIR"' EXIT
 
@@ -120,16 +120,14 @@ redirect_code="$(curl -sS -D "$redirect_headers" -o /dev/null -w '%{http_code}' 
 echo "PASS canonical 308"
 
 if [[ "${SKIP_CDN_CHECK:-0}" == "1" ]]; then
-  echo "SKIP CDN cache HIT check (SKIP_CDN_CHECK=1)"
+  echo "SKIP CDN cache header check (SKIP_CDN_CHECK=1)"
 else
-  curl -sS -D "$TMP_DIR/cache1.headers" -o /dev/null "$BASE_URL/api/scout-data?section=summary"
-  curl -sS -D "$TMP_DIR/cache2.headers" -o /dev/null "$BASE_URL/api/scout-data?section=summary"
-  grep -Eiq '^x-vercel-cache:[[:space:]]*HIT' "$TMP_DIR/cache2.headers" || {
-    echo "Second response headers:" >&2
-    cat "$TMP_DIR/cache2.headers" >&2
-    fail "second summary request was not x-vercel-cache: HIT"
+  curl -sS -D "$TMP_DIR/cache.headers" -o /dev/null "$BASE_URL/api/scout-data?section=summary"
+  grep -Eiq '^cache-control:.*s-maxage=300' "$TMP_DIR/cache.headers" || {
+    cat "$TMP_DIR/cache.headers" >&2
+    fail "summary response is missing shared-cache policy"
   }
-  echo "PASS CDN cache HIT"
+  echo "PASS CDN cache policy"
 fi
 
 echo "SMOKE PASS"
