@@ -27,7 +27,7 @@ export default async function TeamPage({params}){
   const data=await getTeamDetail(id)
   if(!data) notFound()
 
-  const {team,run,season:s,history,currentMatches=[],currentMatch,opponent,players,fantasyByGameweek}=data
+  const {team,run,season:s,tactical,history,currentMatches=[],currentMatch,opponent,players,fantasyByGameweek}=data
   const isHome=currentMatch?Number(currentMatch.home_team_id)===Number(team.id):false
   const teamXg=currentMatch?(isHome?currentMatch.home_xg:currentMatch.away_xg):null
   const oppXg=currentMatch?(isHome?currentMatch.away_xg:currentMatch.home_xg):null
@@ -45,6 +45,10 @@ export default async function TeamPage({params}){
   const finishingDelta=Number(s?.goals_for||0)-Number(s?.xg_total||0)
   const defensiveDelta=Number(s?.xga_total||0)-Number(s?.goals_against||0)
   const xgDiffPerMatch=Number(s?.xg_diff||0)/safeMatches
+  const tacticalCoverage=tactical?.coverage||'aggregate_only'
+  const hasEventProfile=Number(tactical?.event_shot_sample||0)>0
+  const idx=v=>v===null||v===undefined?'—':Number(v).toFixed(2)+'×'
+  const pctShare=v=>v===null||v===undefined?'—':(Number(v)*100).toFixed(0)+'%'
 
   const sortedPlayers=[...(players||[])].sort((a,b)=>Number(b.projection?.xfp||0)-Number(a.projection?.xfp||0))
   const topPicks=sortedPlayers.slice(0,3)
@@ -126,6 +130,45 @@ export default async function TeamPage({params}){
       <div className="card"><span>Yenen / maç</span><b>{num(concededPerMatch)}</b><small>{s?.goals_against||0} gol</small></div>
       <div className="card"><span>xGA / maç</span><b>{num(s?.xga_per_match)}</b><small>{num(s?.xga_total)} toplam</small></div>
       <div className="card xg-diff-stat"><span>xG farkı / maç</span><b>{xgDiffPerMatch>0?'+':''}{num(xgDiffPerMatch)}</b><small>toplam {Number(s?.xg_diff||0)>0?'+':''}{num(s?.xg_diff)}</small></div>
+    </section>
+
+    <section className="card profile-card team-tactical-profile">
+      <div className="panel-head">
+        <div><span className="eyebrow">GÜÇLÜ / ZAYIF YANLAR</span><h2>Atak ve savunma profili</h2></div>
+        <small>{tacticalCoverage==='event_complete'?'Detay olay verisi tam':tacticalCoverage==='partial_events'?'Detay olay verisi kısmi':'Genel takım verisi hazır • detay kanal verisi bekleniyor'}</small>
+      </div>
+      <div className="team-detail-stat-grid team-core-stat-grid">
+        <div className="card"><span>Hücum gücü</span><b>{idx(tactical?.attack_strength_index)}</b><small>lig ortalaması = 1.00</small></div>
+        <div className="card"><span>Savunma gücü</span><b>{idx(tactical?.defense_strength_index)}</b><small>yüksek değer daha iyi</small></div>
+        <div className="card"><span>Şut hacmi</span><b>{idx(tactical?.shot_volume_index)}</b><small>lig ortalaması = 1.00</small></div>
+        <div className="card"><span>Rakip isabetli şut baskısı</span><b>{idx(tactical?.keeper_pressure_index)}</b><small>yüksek değer daha fazla baskı</small></div>
+      </div>
+      {hasEventProfile?<div className="profile-grid team-detail-history-grid">
+        <div className="card">
+          <h3>Atak yönü</h3>
+          <div className="detail-list">
+            <div><span>Sol</span><b>{pctShare(tactical?.attack_left_share)}</b></div>
+            <div><span>Merkez</span><b>{pctShare(tactical?.attack_center_share)}</b></div>
+            <div><span>Sağ</span><b>{pctShare(tactical?.attack_right_share)}</b></div>
+            <div><span>Ceza sahası içi goller</span><b>{pctShare(tactical?.goals_box_share)}</b></div>
+            <div><span>Uzaktan goller</span><b>{pctShare(tactical?.goals_outside_box_share)}</b></div>
+            <div><span>Duran top golleri</span><b>{pctShare(tactical?.goals_set_piece_share)}</b></div>
+            <div><span>Kontra golleri</span><b>{pctShare(tactical?.goals_counter_share)}</b></div>
+          </div>
+        </div>
+        <div className="card">
+          <h3>Savunma zaafı</h3>
+          <div className="detail-list">
+            <div><span>Soldan yenen atak</span><b>{pctShare(tactical?.conceded_left_share)}</b></div>
+            <div><span>Merkezden yenen atak</span><b>{pctShare(tactical?.conceded_center_share)}</b></div>
+            <div><span>Sağdan yenen atak</span><b>{pctShare(tactical?.conceded_right_share)}</b></div>
+            <div><span>Ceza sahası içi yenilen</span><b>{pctShare(tactical?.conceded_box_share)}</b></div>
+            <div><span>Uzaktan yenilen</span><b>{pctShare(tactical?.conceded_outside_box_share)}</b></div>
+            <div><span>Duran toptan yenilen</span><b>{pctShare(tactical?.conceded_set_piece_share)}</b></div>
+            <div><span>Kontradan yenilen</span><b>{pctShare(tactical?.conceded_counter_share)}</b></div>
+          </div>
+        </div>
+      </div>:<p className="muted">Sol/merkez/sağ, ceza sahası/uzak mesafe ve duran top/kontra kırılımları için olay-seviyesi veri tabanı hazır. Onaylı veri kaynağı geldikçe bu bölüm otomatik dolacak; eksik alanlarda veri uydurulmuyor.</p>}
     </section>
 
     <section className="card team-roster-section team-roster-v2">
