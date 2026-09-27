@@ -64,6 +64,16 @@ function expectedKeeperSaves(opponentGoalLambda,per90Saves,exposure=1){
   return Math.max(0,opponentSot*saveRate*Math.max(0,exposure));
 }
 
+function redCardExitMinute(enter,leave,u){
+  const start=Math.max(0,Number(enter)||0),end=Math.max(start+1,Number(leave)||90);
+  const draw=Math.max(0,Math.min(.999999999,Number(u)||0));
+  return Math.max(start+1,Math.min(end-1,Math.floor(start+draw*(end-start))));
+}
+
+function isActiveAt(enter,leave,minute){
+  return Number(enter)<=Number(minute)&&Number(leave)>Number(minute);
+}
+
 function bonusByCompetitionRank(ids,base,minutes){
   const ordered=ids.filter(i=>minutes[i]>0).sort((a,b)=>base[b]-base[a]||a-b);
   const bonus={};
@@ -172,8 +182,6 @@ function simulateScout(input,count,seed,attackPolicy=true){
       drawTeamLineup(clubs[1],mins,enter,leave,start);
 
       const comp=Object.fromEntries(keys.map(k=>[k,new Int16Array(M)]));
-      const red=new Uint8Array(M);
-
       // Discipline is drawn before scoring events so a dismissed player cannot
       // score or assist after the dismissal minute.
       for(const i of both){
@@ -183,10 +191,7 @@ function simulateScout(input,count,seed,attackPolicy=true){
         const rc=random()<Math.min(.15,Math.max(0,P[i].rates[5]*scheduledExposure));
         comp.cards[i]=cardPoints(yc,rc);
         if(rc){
-          red[i]=1;
-          const span=Math.max(1,leave[i]-enter[i]);
-          const t=Math.max(enter[i]+1,Math.min(leave[i],Math.floor(enter[i]+random()*span)));
-          leave[i]=t;
+          leave[i]=redCardExitMinute(enter[i],leave[i],random());
           mins[i]=Math.max(0,leave[i]-enter[i]);
         }
         comp.appearance[i]=(mins[i]>0?SCORING.appearance:0)+(mins[i]>60?SCORING.appearance_60:0);
@@ -198,8 +203,8 @@ function simulateScout(input,count,seed,attackPolicy=true){
         const ids=teams[clubs[side]]||[],opp=teams[clubs[1-side]]||[];
         for(let e=0;e<score[side];e++){
           const t=random()*90;
-          const on=ids.filter(i=>enter[i]<=t&&leave[i]>t);
-          const op=opp.filter(i=>enter[i]<=t&&leave[i]>t);
+          const on=ids.filter(i=>isActiveAt(enter[i],leave[i],t));
+          const op=opp.filter(i=>isActiveAt(enter[i],leave[i],t));
           for(const i of op)gc[i]++;
           if(!on.length)continue;
           const scorerCandidate=pick(on,i=>allocation[i].goal);
@@ -295,5 +300,5 @@ function simulateScout(input,count,seed,attackPolicy=true){
 
 module.exports={
   simulateScout,cardPoints,histogramQuantile,
-  expectedKeeperSaves,goalkeeperSaveRate,bonusByCompetitionRank
+  expectedKeeperSaves,goalkeeperSaveRate,bonusByCompetitionRank,redCardExitMinute,isActiveAt
 };
