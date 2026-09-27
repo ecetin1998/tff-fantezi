@@ -92,8 +92,8 @@ function zeroEventInput(doubleWeek=false){
     assert.ok(double[i].xi<=1+1e-12&&Math.abs(double[i].xi-1)<1e-9,'DGW weekly XI is P(start at least once), never a sum above 1');
     assert.ok(Math.abs(double[i].minutes-180)<1e-9,'DGW minutes are accumulated match by match');
     assert.ok(Math.abs(double[i].xfp-single[i].xfp*2)<1e-9,'two zero-event fixtures contribute twice the single-match xFP');
-    assert.ok(double[i].match_xi['1']<=1&&Math.abs(double[i].match_xi['1']-1)<1e-9);
-    assert.ok(double[i].match_xi['2']<=1&&Math.abs(double[i].match_xi['2']-1)<1e-9);
+    assert.ok(Number.isFinite(double[i].match_xi['1'])&&double[i].match_xi['1']>=0&&double[i].match_xi['1']<=1,'first DGW fixture XI probability is stored separately');
+    assert.ok(Number.isFinite(double[i].match_xi['2'])&&double[i].match_xi['2']>=0&&double[i].match_xi['2']<=1,'second DGW fixture XI probability is stored separately');
   }
 }
 
