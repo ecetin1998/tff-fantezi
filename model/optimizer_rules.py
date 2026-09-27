@@ -1,4 +1,15 @@
-FORMATIONS={'3-4-3','3-5-2','4-3-3','4-4-2','4-5-1','5-2-3','5-3-2','5-4-1'}
+import json
+from pathlib import Path
+
+RULES_PATH=Path(__file__).resolve().parents[1]/'rules'/'tff-fantasy.json'
+with RULES_PATH.open(encoding='utf8') as _f:
+    RULES=json.load(_f)
+
+FORMATIONS=set(RULES['formations'])
+SQUAD={k:int(v) for k,v in RULES['squad'].items()}
+BUDGET=float(RULES['budget'])
+MAX_PER_CLUB=int(RULES['max_per_club'])
+MAX_DEFENSIVE_STACK_PER_TEAM=int(RULES.get('optimizer',{}).get('max_defensive_stack_per_team',2))
 
 def captain_metric(player, alternative=False):
     return float(player['p90'] if alternative else player['xfp'])
@@ -20,4 +31,12 @@ def formation_of(players):
 
 def legal_squad(players):
     counts={p:sum(1 for x in players if x['position']==p) for p in ('GK','DEF','MID','FWD')}
-    return len(players)==15 and counts=={'GK':2,'DEF':5,'MID':5,'FWD':3} and sum(float(x['price']) for x in players)<=100.0001
+    clubs={}
+    for player in players:
+        clubs[player['team']]=clubs.get(player['team'],0)+1
+    return (
+        len(players)==sum(SQUAD.values())
+        and counts==SQUAD
+        and sum(float(x['price']) for x in players)<=BUDGET+0.0001
+        and all(n<=MAX_PER_CLUB for n in clubs.values())
+    )

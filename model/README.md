@@ -22,3 +22,10 @@ The current simulator derives club IDs from the fixture input, uses a seeded Mul
 Own-goal handling follows observed game scoring: the own-goal scorer is not treated as an attacking scorer, but a separately credited assist can still receive +3. The MH5 closure used by this project contains such a credited assist.
 
 A simultaneous yellow+red flag is treated as a second-yellow dismissal and receives -3 total card points. If a future source distinguishes direct red from second-yellow red, split the event model before changing this rule.
+
+
+## Shared fantasy rules
+
+Roster, scoring and optimizer constraints are sourced from `rules/tff-fantasy.json`.
+The optimizer-specific defensive-stack guard is explicit as
+`optimizer.max_defensive_stack_per_team`; it is not a TFF roster rule.
