@@ -3,19 +3,7 @@ import { useActionState, useEffect, useMemo, useRef, useState } from 'react'
 import { saveSquad } from '@/app/actions'
 import { teamCssVars } from '@/lib/teamThemes'
 import { availabilityCompactNote, availabilityIsIssue } from '@/lib/availability'
-import {MAX_PLAYERS_PER_CLUB} from '@/lib/rules'
-
-const LIMITS={GK:2,DEF:5,MID:5,FWD:3}
-const FORMATIONS={
-  '3-4-3':{DEF:3,MID:4,FWD:3},
-  '3-5-2':{DEF:3,MID:5,FWD:2},
-  '4-3-3':{DEF:4,MID:3,FWD:3},
-  '4-4-2':{DEF:4,MID:4,FWD:2},
-  '4-5-1':{DEF:4,MID:5,FWD:1},
-  '5-2-3':{DEF:5,MID:2,FWD:3},
-  '5-3-2':{DEF:5,MID:3,FWD:2},
-  '5-4-1':{DEF:5,MID:4,FWD:1},
-}
+import {BUDGET,FORMATION_MAP,MAX_PLAYERS_PER_CLUB,SQUAD_LIMITS,SQUAD_SIZE,STARTING_GK,STARTING_XI_SIZE} from '@/lib/rules'
 const POS_ORDER={GK:0,DEF:1,MID:2,FWD:3}
 const posLabel={GK:'KL',DEF:'DEF',MID:'OS',FWD:'FOR'}
 
@@ -36,15 +24,15 @@ function displayName(player){
 function shirtMark(player){ return posLabel[player?.position] || player?.position || '—' }
 function formationFromState(state,map){
   const starters=state.filter(x=>x.bench_order===null).map(x=>map.get(x.player_id)).filter(Boolean)
-  if(starters.length!==11)return '4-3-3'
+  if(starters.length!==STARTING_XI_SIZE)return '4-3-3'
   const d=starters.filter(p=>p.position==='DEF').length
   const m=starters.filter(p=>p.position==='MID').length
   const f=starters.filter(p=>p.position==='FWD').length
   const key=`${d}-${m}-${f}`
-  return FORMATIONS[key]?key:'4-3-3'
+  return FORMATION_MAP[key]?key:'4-3-3'
 }
 function buildXI(ids,formation,map){
-  const need={GK:1,...FORMATIONS[formation]}
+  const need={GK:STARTING_GK,...FORMATION_MAP[formation]}
   const out=[]
   for(const pos of ['GK','DEF','MID','FWD']){
     const arr=ids.map(id=>map.get(id)).filter(p=>p?.position===pos).sort((a,b)=>xfp(b)-xfp(a))
@@ -55,9 +43,9 @@ function buildXI(ids,formation,map){
 
 function bestXIPlan(ids,map){
   let best=null
-  for(const key of Object.keys(FORMATIONS)){
+  for(const key of Object.keys(FORMATION_MAP)){
     const lineup=buildXI(ids,key,map)
-    if(lineup.length!==11)continue
+    if(lineup.length!==STARTING_XI_SIZE)continue
     const lineupPlayers=lineup.map(id=>map.get(id)).filter(Boolean)
     const captain=[...lineupPlayers].sort((a,b)=>xfp(b)-xfp(a))[0]||null
     const base=lineupPlayers.reduce((sum,p)=>sum+xfp(p),0)
@@ -69,14 +57,14 @@ function bestXIPlan(ids,map){
 
 function formationFromXIIds(ids,map){
   const players=ids.map(id=>map.get(id)).filter(Boolean)
-  if(players.length!==11)return null
+  if(players.length!==STARTING_XI_SIZE)return null
   const gk=players.filter(p=>p.position==='GK').length
   const d=players.filter(p=>p.position==='DEF').length
   const m=players.filter(p=>p.position==='MID').length
   const f=players.filter(p=>p.position==='FWD').length
-  if(gk!==1 || d<3 || d>5 || m<2 || m>5 || f<1 || f>3)return null
+  if(gk!==STARTING_GK)return null
   const key=`${d}-${m}-${f}`
-  return FORMATIONS[key]?key:null
+  return FORMATION_MAP[key]?key:null
 }
 
 export default function SquadBuilder({ players, initialState=[], recommendedState=[], plan='free', gameweek }){
@@ -109,12 +97,12 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
   const selected=ids.map(id=>map.get(id)).filter(Boolean)
   const counts=selected.reduce((a,p)=>(a[p.position]=(a[p.position]||0)+1,a),{})
   const cost=selected.reduce((s,p)=>s+Number(p.price||0),0)
-  const bank=100-cost
-  const clubCounts=selected.reduce((a,p)=>(a[p.team]=(a[p.team]||0)+1,a),{})
+  const bank=BUDGET-cost
+  const clubCounts=selected.reduce((a,p)=>(a[p.team_id]=(a[p.team_id]||0)+1,a),{})
   const clubLimitOk=!MAX_PLAYERS_PER_CLUB||Object.values(clubCounts).every(n=>n<=MAX_PLAYERS_PER_CLUB)
-  const validRoster=ids.length===15&&Object.entries(LIMITS).every(([k,v])=>(counts[k]||0)===v)&&cost<=100.0001&&clubLimitOk
+  const validRoster=ids.length===SQUAD_SIZE&&Object.entries(SQUAD_LIMITS).every(([k,v])=>(counts[k]||0)===v)&&cost<=BUDGET+.0001&&clubLimitOk
   const liveFormation=formationFromXIIds(xiIds,map)
-  const validXI=xiIds.length===11&&xiIds.every(id=>ids.includes(id))&&Boolean(liveFormation)&&liveFormation===formation
+  const validXI=xiIds.length===STARTING_XI_SIZE&&xiIds.every(id=>ids.includes(id))&&Boolean(liveFormation)&&liveFormation===formation
   const valid=validRoster&&validXI&&Boolean(captainId)&&xiIds.includes(captainId)
 
   const xi=xiIds.map(id=>map.get(id)).filter(Boolean)
@@ -131,12 +119,12 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
     position,
     ids.map(id=>map.get(id)).filter(p=>p?.position===position).sort((a,b)=>xfp(b)-xfp(a))
   ])),[ids,map])
-  const formationOptions=useMemo(()=>Object.keys(FORMATIONS).map(key=>{
+  const formationOptions=useMemo(()=>Object.keys(FORMATION_MAP).map(key=>{
     const lineup=buildXI(ids,key,map)
     const base=lineup.reduce((sum,id)=>sum+xfp(map.get(id)),0)
     const cap=lineup.map(id=>map.get(id)).filter(Boolean).sort((a,b)=>xfp(b)-xfp(a))[0]
-    const total=lineup.length===11?base+xfp(cap):0
-    return {key,lineup,base,total,captain:cap,complete:lineup.length===11}
+    const total=lineup.length===STARTING_XI_SIZE?base+xfp(cap):0
+    return {key,lineup,base,total,captain:cap,complete:lineup.length===STARTING_XI_SIZE}
   }).sort((a,b)=>b.total-a.total),[ids,map])
   const bestFormation=formationOptions.find(x=>x.complete)?.key||formation
   const captainCandidates=[...xi].sort((a,b)=>xfp(b)-xfp(a)).slice(0,3)
@@ -171,7 +159,7 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
         const nextIds=ids.map(id=>id===out.id?inn.id:id)
         if(MAX_PLAYERS_PER_CLUB){
           const nextPlayers=nextIds.map(id=>map.get(id)).filter(Boolean)
-          const nextClubCounts=nextPlayers.reduce((a,p)=>(a[p.team]=(a[p.team]||0)+1,a),{})
+          const nextClubCounts=nextPlayers.reduce((a,p)=>(a[p.team_id]=(a[p.team_id]||0)+1,a),{})
           if(Object.values(nextClubCounts).some(n=>n>MAX_PLAYERS_PER_CLUB))continue
         }
         const plan=bestXIPlan(nextIds,map)
@@ -202,9 +190,9 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
   }
   function add(id){
     const p=map.get(id)
-    if(!p||ids.includes(id)||ids.length>=15)return
-    if((counts[p.position]||0)>=LIMITS[p.position])return
-    if(cost+Number(p.price)>100.0001)return
+    if(!p||ids.includes(id)||ids.length>=SQUAD_SIZE)return
+    if((counts[p.position]||0)>=SQUAD_LIMITS[p.position])return
+    if(cost+Number(p.price)>BUDGET+.0001)return
     const next=[...ids,id]
     setIds(next);rebuild(next)
   }
@@ -232,7 +220,7 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
     setSortDir(nextKey==='name'?'asc':'desc')
   }
   function fillRecommended(){
-    const next=recommendedState.map(x=>x.player_id).filter(id=>map.has(id)).slice(0,15)
+    const next=recommendedState.map(x=>x.player_id).filter(id=>map.has(id)).slice(0,SQUAD_SIZE)
     const recommendedFormation=formationFromState(recommendedState,map)
     const fromRecXI=recommendedState.filter(x=>x.bench_order===null).map(x=>x.player_id).filter(id=>next.includes(id))
     setIds(next)
@@ -335,8 +323,8 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
     <section className="squad-control-strip card">
       <div className="squad-control-stat">
         <span>Kadro</span>
-        <b>{ids.length}<small>/15</small></b>
-        <i><em style={{width:`${Math.min(100,ids.length/15*100)}%`}}/></i>
+        <b>{ids.length}<small>/{SQUAD_SIZE}</small></b>
+        <i><em style={{width:`${Math.min(100,ids.length/SQUAD_SIZE*100)}%`}}/></i>
       </div>
       <div className="squad-control-stat">
         <span>Bütçe</span>
@@ -344,7 +332,7 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
         <small>{bank.toFixed(1)}m banka</small>
       </div>
       <div className="squad-control-stat">
-        <span>15 oyuncu xFP</span>
+        <span>{SQUAD_SIZE} oyuncu xFP</span>
         <b>{selectedTotal.toFixed(1)}</b>
         <small>MH{gameweek||'—'} tahmini</small>
       </div>
@@ -359,7 +347,7 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
       <section className="squad-stage card roster-stage">
         <div className="squad-stage-head">
           <div>
-            <span className="eyebrow">1. AŞAMA • 15 KİŞİLİK KADRO</span>
+            <span className="eyebrow">1. AŞAMA • {SQUAD_SIZE} KİŞİLİK KADRO</span>
             <h2>Kadronu oluştur</h2>
           </div>
           <button type="button" className="squad-tool-btn jump-link" onClick={goToLineup} disabled={!validRoster}>İlk 11’i Diz ↓</button>
@@ -372,7 +360,7 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
           <div className="pitch-mark box bottom"/>
 
           {['GK','DEF','MID','FWD'].map(position=><div className={`roster-row roster-${position}`} key={position}>
-            {Array.from({length:LIMITS[position]},(_,slot)=>{
+            {Array.from({length:SQUAD_LIMITS[position]},(_,slot)=>{
               const p=rosterByPos[position]?.[slot]
               if(p)return <div className="roster-player" key={p.id}>
                 <button type="button" className="remove-player roster-remove" onClick={()=>remove(p.id)} aria-label="Oyuncuyu çıkar">×</button>
@@ -391,7 +379,7 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
         </div>
         <div className="roster-stage-foot">
           <span>Boş slota dokun → oyuncu havuzu o mevkiye filtrelenir.</span>
-          <b>{validRoster?'Kadro tamamlandı ✓':'Önce 15 kişilik kadroyu tamamla'}</b>
+          <b>{validRoster?'Kadro tamamlandı ✓':'Önce {SQUAD_SIZE} kişilik kadroyu tamamla'}</b>
         </div>
       </section>
 
@@ -425,9 +413,9 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
         <div className="picker-list">
           {candidates.map(p=>{
             const chosen=ids.includes(p.id)
-            const posFull=(counts[p.position]||0)>=LIMITS[p.position]
+            const posFull=(counts[p.position]||0)>=SQUAD_LIMITS[p.position]
             const overBudget=!chosen&&cost+Number(p.price)>100.0001
-            const disabled=!chosen&&(ids.length>=15||posFull||overBudget)
+            const disabled=!chosen&&(ids.length>=SQUAD_SIZE||posFull||overBudget)
             const availabilityNote=(availabilityIsIssue(p.availability)||p.availability?.availability_type==='return')
               ? availabilityCompactNote(p.availability)
               : ''
@@ -458,7 +446,7 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
       <div className="lineup-workbench-head">
         <div>
           <span className="eyebrow">2. AŞAMA • İLK 11 & TAKTİK</span>
-          <h2>15 kişilik kadrodan en iyi 11’i çıkar</h2>
+          <h2>{SQUAD_SIZE} kişilik kadrodan en iyi {STARTING_XI_SIZE}’i çıkar</h2>
           <p>Formasyonu seç, xFP karşılaştırmasını gör ve kaptanı belirle.</p>
         </div>
         <button type="button" className="squad-tool-btn jump-link" onClick={goToRoster}>Kadroya Dön ↑</button>
@@ -508,7 +496,7 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
               })}
             </div>)}
 
-            {xi.length<11?<div className="pitch-empty-state"><b>Önce 15 kişilik kadroyu tamamla</b><span>Üst bölümden oyuncu eklemeye devam et.</span></div>:null}
+            {xi.length<STARTING_XI_SIZE?<div className="pitch-empty-state"><b>Önce {SQUAD_SIZE} kişilik kadroyu tamamla</b><span>Üst bölümden oyuncu eklemeye devam et.</span></div>:null}
           </div>
 
           <div className="bench-zone lineup-bench-zone">
@@ -556,7 +544,7 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
       <div className="squad-save-row">
         <div className="squad-validity">
           <span className={validRoster?'ok':''}>{validRoster?'✓':'○'} 2 KL / 5 DEF / 5 OS / 3 FOR</span>
-          <span className={cost<=100?'ok':''}>{cost<=100?'✓':'○'} Bütçe limiti</span>
+          <span className={cost<=BUDGET?'ok':''}>{cost<=BUDGET?'✓':'○'} Bütçe limiti</span>
           <span className={clubLimitOk?'ok':''}>{clubLimitOk?'✓':'○'} Kulüp başına en fazla {MAX_PLAYERS_PER_CLUB}</span>
           <span className={validXI?'ok':''}>{validXI?'✓':'○'} {liveFormation===formation?'Seçili diziliş hazır':'XI dizilişi güncellenmeli'}</span>
         </div>

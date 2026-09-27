@@ -4,8 +4,7 @@ import {redirect} from 'next/navigation'
 import {headers} from 'next/headers'
 import {reportServerError} from '@/lib/observability'
 import {passwordPolicyCode} from '@/lib/passwordSecurity'
-import {MAX_PLAYERS_PER_CLUB} from '@/lib/rules'
-const FORMATIONS=new Set(['3-4-3','3-5-2','4-3-3','4-4-2','4-5-1','5-2-3','5-3-2','5-4-1'])
+import {BENCH_SIZE,BUDGET,FORMATION_SET,MAX_PLAYERS_PER_CLUB,SQUAD_LIMITS,SQUAD_SIZE,STARTING_GK,STARTING_XI_SIZE} from '@/lib/rules'
 
 function authErrorCode(error){
   const code=String(error?.code||'').toLowerCase()
@@ -24,16 +23,16 @@ function squadError(message=''){
   return ({
     AUTH_REQUIRED:'Oturum bulunamadı. Tekrar giriş yap.',
     INVALID_SQUAD:'Kadro verisi geçersiz.',
-    SQUAD_MUST_HAVE_15_UNIQUE_PLAYERS:'Kadro 15 benzersiz oyuncudan oluşmalı.',
+    SQUAD_MUST_HAVE_15_UNIQUE_PLAYERS:`Kadro ${SQUAD_SIZE} benzersiz oyuncudan oluşmalı.`,
     SQUAD_HAS_INACTIVE_OR_UNKNOWN_PLAYER:'Kadroda aktif olmayan veya bulunamayan oyuncu var.',
-    INVALID_POSITION_COUNTS:'Kadro dağılımı 2 KL / 5 DEF / 5 OS / 3 FOR olmalı.',
-    BUDGET_EXCEEDED:'100m bütçe aşıldı.',
+    INVALID_POSITION_COUNTS:`Kadro dağılımı ${SQUAD_LIMITS.GK} KL / ${SQUAD_LIMITS.DEF} DEF / ${SQUAD_LIMITS.MID} OS / ${SQUAD_LIMITS.FWD} FOR olmalı.`,
+    BUDGET_EXCEEDED:`${BUDGET}m bütçe aşıldı.`,
     INVALID_STARTING_XI:'İlk 11 geçersiz.',
     INVALID_BENCH:'Yedek kulübesi tam 4 oyuncu olmalı.',
     INVALID_BENCH_ORDER:'Yedek sıraları 1, 2, 3, 4 olmalı.',
     INVALID_CAPTAIN:'İlk 11 içinde tam bir kaptan seçilmeli.',
     INVALID_FORMATION:'İlk 11 izin verilen dizilişlerden biri olmalı.',
-    CLUB_LIMIT_EXCEEDED:'Aynı takımdan en fazla 3 oyuncu seçebilirsin.',
+    CLUB_LIMIT_EXCEEDED:`Aynı takımdan en fazla ${MAX_PLAYERS_PER_CLUB} oyuncu seçebilirsin.`,
   })[key]||'Kadro kaydedilemedi. Lütfen tekrar dene.'
 }
 
@@ -125,7 +124,7 @@ export async function saveSquad(_prevState,formData){
 
   ids=[...new Set(ids)]
   const stateIds=[...new Set(squadState.map(x=>x.player_id))]
-  if(ids.length!==15||squadState.length!==15||stateIds.length!==15)return {ok:false,error:'Kadro 15 benzersiz oyuncudan oluşmalı.',signature:''}
+  if(ids.length!==SQUAD_SIZE||squadState.length!==SQUAD_SIZE||stateIds.length!==SQUAD_SIZE)return {ok:false,error:`Kadro ${SQUAD_SIZE} benzersiz oyuncudan oluşmalı.`,signature:''}
   if(ids.some(id=>!stateIds.includes(id))||stateIds.some(id=>!ids.includes(id)))return {ok:false,error:'Kadro ile ilk 11/yedek bilgileri eşleşmiyor.',signature:''}
 
   const {data:players,error:playerError}=await supabase.from('scout_players').select('id,team_id,position,price,active').in('id',ids)
@@ -133,12 +132,12 @@ export async function saveSquad(_prevState,formData){
     reportServerError('action:saveSquad:players',playerError)
     return {ok:false,error:'Oyuncu listesi doğrulanamadı.',signature:''}
   }
-  if((players||[]).length!==15||(players||[]).some(p=>!p.active))return {ok:false,error:'Kadroda aktif olmayan veya bulunamayan oyuncu var.',signature:''}
+  if((players||[]).length!==SQUAD_SIZE||(players||[]).some(p=>!p.active))return {ok:false,error:'Kadroda aktif olmayan veya bulunamayan oyuncu var.',signature:''}
 
   const counts=(players||[]).reduce((a,p)=>(a[p.position]=(a[p.position]||0)+1,a),{})
-  if(counts.GK!==2||counts.DEF!==5||counts.MID!==5||counts.FWD!==3)return {ok:false,error:'Kadro dağılımı 2 KL / 5 DEF / 5 OS / 3 FOR olmalı.',signature:''}
+  if(!Object.entries(SQUAD_LIMITS).every(([position,required])=>(counts[position]||0)===required))return {ok:false,error:`Kadro dağılımı ${SQUAD_LIMITS.GK} KL / ${SQUAD_LIMITS.DEF} DEF / ${SQUAD_LIMITS.MID} OS / ${SQUAD_LIMITS.FWD} FOR olmalı.`,signature:''}
   const total=(players||[]).reduce((s,p)=>s+Number(p.price||0),0)
-  if(total>100.0001)return {ok:false,error:'100m bütçe aşıldı.',signature:''}
+  if(total>BUDGET+.0001)return {ok:false,error:`${BUDGET}m bütçe aşıldı.`,signature:''}
 
   if(MAX_PLAYERS_PER_CLUB){
     const clubCounts=(players||[]).reduce((a,p)=>(a[p.team_id]=(a[p.team_id]||0)+1,a),{})
@@ -149,11 +148,11 @@ export async function saveSquad(_prevState,formData){
   const xiState=squadState.filter(x=>x.bench_order===null)
   const benchState=squadState.filter(x=>x.bench_order!==null)
   const benchOrders=benchState.map(x=>x.bench_order).sort((a,b)=>a-b)
-  if(xiState.length!==11||benchState.length!==4||benchOrders.join(',')!=='1,2,3,4')return {ok:false,error:'İlk 11 veya yedek sırası geçersiz.',signature:''}
+  if(xiState.length!==STARTING_XI_SIZE||benchState.length!==BENCH_SIZE||benchOrders.join(',')!==Array.from({length:BENCH_SIZE},(_,i)=>i+1).join(','))return {ok:false,error:'İlk 11 veya yedek sırası geçersiz.',signature:''}
   const xi=xiState.map(x=>playerMap.get(x.player_id)).filter(Boolean)
   const xiCounts=xi.reduce((a,p)=>(a[p.position]=(a[p.position]||0)+1,a),{})
   const formation=(xiCounts.DEF||0)+'-'+(xiCounts.MID||0)+'-'+(xiCounts.FWD||0)
-  if((xiCounts.GK||0)!==1||!FORMATIONS.has(formation))return {ok:false,error:'İlk 11 izin verilen dizilişlerden biri olmalı.',signature:''}
+  if((xiCounts.GK||0)!==STARTING_GK||!FORMATION_SET.has(formation))return {ok:false,error:'İlk 11 izin verilen dizilişlerden biri olmalı.',signature:''}
   if(squadState.filter(x=>x.is_captain).length!==1||xiState.filter(x=>x.is_captain).length!==1)return {ok:false,error:'İlk 11 içinde tam bir kaptan seçilmeli.',signature:''}
 
   const {error}=await supabase.rpc('save_user_squad',{p_members:squadState})

@@ -1,4 +1,4 @@
-from optimizer_rules import captain_metric, bench_expected_value, cheap_bench_tiebreak, formation_of, legal_squad
+from optimizer_rules import BUDGET, FORMATIONS, MAX_PER_CLUB, SQUAD_LIMITS, captain_metric, bench_expected_value, cheap_bench_tiebreak, formation_of, legal_squad
 
 a={'xfp':6.0,'p90':9.0,'price':8.0,'xi':.95,'minutes':82,'availability':1}
 b={'xfp':6.8,'p90':8.0,'price':8.0,'xi':.95,'minutes':82,'availability':1}
@@ -22,3 +22,8 @@ assert bench_expected_value(usable)>bench_expected_value(risky)
 assert cheap_bench_tiebreak({'price':4.0})<cheap_bench_tiebreak({'price':7.5})
 
 print('optimizer rule checks passed')
+
+assert BUDGET == 100
+assert MAX_PER_CLUB == 3
+assert SQUAD_LIMITS == {'GK':2,'DEF':5,'MID':5,'FWD':3}
+assert '4-4-2' in FORMATIONS
