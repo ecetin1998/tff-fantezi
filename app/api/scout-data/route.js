@@ -1,13 +1,13 @@
 import {unstable_cache} from 'next/cache'
 import {timingSafeEqual} from 'node:crypto'
 import {reportServerError} from '@/lib/observability'
+import {responseHeadersFor,shouldUsePublicPayloadCache} from '@/lib/scoutApiPolicy.mjs'
 import {
   getAvailability,getBacktestOverview,getMatches,getPlayersWithProjection,
   getRecommendation,getRoleSignals,getWeeklyPoints
 } from '@/lib/data'
 
 export const dynamic='force-dynamic'
-export const revalidate=300
 const SCHEMA_VERSION='2.0'
 const responseHeaders={
   'Cache-Control':'public, max-age=0, s-maxage=300, stale-while-revalidate=600',
@@ -16,14 +16,8 @@ const responseHeaders={
   'X-Robots-Tag':'noindex, nofollow, noarchive'
 }
 
-function reply(payload,status=200){
-  const headers=status>=400?{
-    ...responseHeaders,
-    'Cache-Control':'private, no-store',
-    'CDN-Cache-Control':'no-store',
-    'Vercel-CDN-Cache-Control':'no-store',
-  }:responseHeaders
-  return Response.json(payload,{status,headers})
+function reply(payload,status=200,options={}){
+  return Response.json(payload,{status,headers:responseHeadersFor(responseHeaders,{status,...options})})
 }
 function safeRun(run){
   if(!run)return null
@@ -87,7 +81,7 @@ function fullAuthorized(request){
   return safeKeyEqual(expected,supplied)
 }
 
-const buildCached=unstable_cache(async(section,full)=>{
+async function buildPayload(section,full){
   const meta={name:'Fantezi Scout data feed',schema_version:SCHEMA_VERSION,access:full?'keyed-full':'public-read-only'}
   if(section==='players'){
     const d=await getPlayersWithProjection()
@@ -177,7 +171,13 @@ const buildCached=unstable_cache(async(section,full)=>{
       reason:x.reason||x.source_reason||null,expected_return:x.expected_return||null,suspension_fixture:x.suspension_fixture||null
     }))
   }
-},['scout-data-v2'],{revalidate:300})
+}
+
+const buildCached=unstable_cache(
+  async(section)=>buildPayload(section,false),
+  ['scout-data-v2-public'],
+  {revalidate:300}
+)
 
 export async function GET(request){
   try{
@@ -192,8 +192,10 @@ export async function GET(request){
     }
     if(!allowed.has(requested))return reply({schema_version:SCHEMA_VERSION,error:'Bilinmeyen bölüm.'},400)
     const full=requested==='performance'&&fullAuthorized(request)
-    const payload=await buildCached(requested,full)
-    return reply(payload)
+    const payload=shouldUsePublicPayloadCache(full)
+      ?await buildCached(requested)
+      :await buildPayload(requested,true)
+    return reply(payload,200,{privateResponse:full,varyApiKey:requested==='performance'})
   }catch(error){
     reportServerError('api:scout-data',error)
     return reply({schema_version:SCHEMA_VERSION,error:'Scout verisi şu anda hazırlanamadı.'},500)
