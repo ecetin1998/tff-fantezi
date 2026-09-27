@@ -20,6 +20,7 @@ const jsTests=[
   'model/scoutApiFilters.test.js',
   'model/observability.test.js',
   'model/playerPresentationContract.test.js',
+  'model/bugfixContract.test.js',
   'model/fullAuditContract.test.js',
   'model/cloudflareDeployContract.test.js',
 ]
