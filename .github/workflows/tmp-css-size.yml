@@ -74,9 +74,95 @@ jobs:
               ]
             }
           })
-          const optimized=await postcss([cssnano({preset:'default'})]).process(result[0].css,{from:undefined})
+          function matchingBrace(s,open){
+            let depth=1,quote=null,escaped=false
+            for(let i=open+1;i<s.length;i++){
+              const ch=s[i]
+              if(quote){if(escaped)escaped=false;else if(ch==='\\\\')escaped=true;else if(ch===quote)quote=null;continue}
+              if(ch==='"'||ch==="'"){quote=ch;continue}
+              if(ch==='{')depth++
+              else if(ch==='}'&&--depth===0)return i
+            }
+            return s.length-1
+          }
+          function declarations(body){
+            const map=new Map(),order=[]
+            let start=0,quote=null,depth=0,escaped=false
+            for(let i=0;i<=body.length;i++){
+              const ch=body[i]||';'
+              if(quote){if(escaped)escaped=false;else if(ch==='\\\\')escaped=true;else if(ch===quote)quote=null;continue}
+              if(ch==='"'||ch==="'"){quote=ch;continue}
+              if(ch==='(')depth++
+              else if(ch===')')depth=Math.max(0,depth-1)
+              else if(ch===';'&&depth===0){
+                const part=body.slice(start,i).trim();start=i+1
+                const colon=part.indexOf(':')
+                if(colon>0){
+                  const prop=part.slice(0,colon).trim(),value=part.slice(colon+1).trim()
+                  if(!map.has(prop))order.push(prop)
+                  map.set(prop,value)
+                }
+              }
+            }
+            return {map,order}
+          }
+          function compactLevel(input){
+            const s=input.replace(/\\/\\*[\\s\\S]*?\\*\\//g,'')
+            const nodes=[]
+            let i=0
+            while(i<s.length){
+              while(i<s.length&&/\\s/.test(s[i]))i++
+              if(i>=s.length)break
+              let open=-1,quote=null,escaped=false,semicolon=-1
+              for(let j=i;j<s.length;j++){
+                const ch=s[j]
+                if(quote){if(escaped)escaped=false;else if(ch==='\\\\')escaped=true;else if(ch===quote)quote=null;continue}
+                if(ch==='"'||ch==="'"){quote=ch;continue}
+                if(ch==='{'){open=j;break}
+                if(ch===';'){semicolon=j;break}
+              }
+              if(semicolon>=0&&(open<0||semicolon<open)){
+                nodes.push({type:'raw',raw:s.slice(i,semicolon+1).trim()});i=semicolon+1;continue
+              }
+              if(open<0){const rest=s.slice(i).trim();if(rest)nodes.push({type:'raw',raw:rest});break}
+              const header=s.slice(i,open).trim(),close=matchingBrace(s,open),body=s.slice(open+1,close)
+              if(/^@(media|supports|container|layer)\\b/i.test(header))nodes.push({type:'group',header,body})
+              else if(/^@/i.test(header))nodes.push({type:'rawblock',header,body})
+              else nodes.push({type:'rule',header:header.replace(/\\s+/g,' '),body})
+              i=close+1
+            }
+            const lastRule=new Map(),mergedRule=new Map(),lastGroup=new Map(),groupBodies=new Map()
+            nodes.forEach((node,index)=>{
+              if(node.type==='rule'){
+                lastRule.set(node.header,index)
+                const d=declarations(node.body),m=mergedRule.get(node.header)||{map:new Map(),order:[]}
+                for(const prop of d.order){if(!m.map.has(prop))m.order.push(prop);m.map.set(prop,d.map.get(prop))}
+                mergedRule.set(node.header,m)
+              }else if(node.type==='group'){
+                const key=node.header.replace(/\\s+/g,' ')
+                lastGroup.set(key,index)
+                groupBodies.set(key,(groupBodies.get(key)||'')+'\\n'+node.body)
+              }
+            })
+            let out=''
+            nodes.forEach((node,index)=>{
+              if(node.type==='rule'){
+                if(lastRule.get(node.header)!==index)return
+                const m=mergedRule.get(node.header)
+                out+=node.header+'{'+m.order.map(prop=>prop+':'+m.map.get(prop)).join(';')+'}'
+              }else if(node.type==='group'){
+                const key=node.header.replace(/\\s+/g,' ')
+                if(lastGroup.get(key)!==index)return
+                out+=key+'{'+compactLevel(groupBodies.get(key))+'}'
+              }else if(node.type==='rawblock')out+=node.header+'{'+node.body+'}'
+              else out+=node.raw
+            })
+            return out
+          }
+          const compacted=compactLevel(result[0].css)
+          const optimized=await postcss([cssnano({preset:'default'})]).process(compacted,{from:undefined})
           fs.writeFileSync('app/generated.css',optimized.css)
-          console.log('raw css bytes',Buffer.byteLength(raw),'globalized bytes',Buffer.byteLength(css),'purged bytes',Buffer.byteLength(result[0].css),'optimized bytes',Buffer.byteLength(optimized.css))
+          console.log('raw css bytes',Buffer.byteLength(raw),'globalized bytes',Buffer.byteLength(css),'purged bytes',Buffer.byteLength(result[0].css),'compacted bytes',Buffer.byteLength(compacted),'optimized bytes',Buffer.byteLength(optimized.css))
           NODE
           node scripts/tmp-purge.mjs
           python3 - <<'PY'
