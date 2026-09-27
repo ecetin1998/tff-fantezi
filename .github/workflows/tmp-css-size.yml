@@ -36,7 +36,27 @@ jobs:
             'components/AnalysisViews.module.css',
             'components/DataViews.module.css'
           ]
-          const css=files.map(file=>fs.readFileSync(file,'utf8')).join('\n')
+          function unwrapGlobal(input){
+            let out='',i=0
+            while(i<input.length){
+              const start=input.indexOf(':global(',i)
+              if(start<0){out+=input.slice(i);break}
+              out+=input.slice(i,start)
+              let p=start+8,depth=1,q=null,esc=false
+              for(;p<input.length;p++){
+                const ch=input[p]
+                if(q){if(esc)esc=false;else if(ch==='\\\\')esc=true;else if(ch===q)q=null;continue}
+                if(ch==='"'||ch==="'"){q=ch;continue}
+                if(ch==='(')depth++
+                else if(ch===')'&&--depth===0)break
+              }
+              out+=input.slice(start+8,p)
+              i=p+1
+            }
+            return out
+          }
+          const raw=files.map(file=>fs.readFileSync(file,'utf8')).join('\n')
+          const css=unwrapGlobal(raw).replace(/\\.scope\\b/g,'')
           fs.writeFileSync('/tmp/all.css',css)
           const result=await new PurgeCSS().purge({
             content:['app/**/*.js','components/**/*.js'],
@@ -52,8 +72,8 @@ jobs:
               ]
             }
           })
-          fs.writeFileSync('components/AppStyles.module.css',result[0].css)
-          console.log('raw css bytes',Buffer.byteLength(css),'purged bytes',Buffer.byteLength(result[0].css))
+          fs.writeFileSync('app/generated.css',result[0].css)
+          console.log('raw css bytes',Buffer.byteLength(raw),'globalized bytes',Buffer.byteLength(css),'purged bytes',Buffer.byteLength(result[0].css))
           NODE
           node scripts/tmp-purge.mjs
           python3 - <<'PY'
@@ -67,8 +87,10 @@ jobs:
             "import analysisViews from '@/components/AnalysisViews.module.css'\n",
             "import dataViews from '@/components/DataViews.module.css'\n",
           ]: s=s.replace(line,'')
-          s=s.replace("import Nav from '@/components/Nav'","import appStyles from '@/components/AppStyles.module.css'\nimport Nav from '@/components/Nav'")
-          s=s.replace("const cssScopes=[siteShell.scope,premiumViews.scope,squadWorkspace.scope,analysisViews.scope,dataViews.scope].join(' ')","const cssScopes=appStyles.scope")
+          s=s.replace("import './globals.css'","import './globals.css'\nimport './generated.css'")
+          import re
+          s=re.sub(r"const cssScopes=.*?\\n","",s)
+          s=s.replace('<html lang="tr" className={cssScopes}><body className={cssScopes}>','<html lang="tr"><body>')
           p.write_text(s)
           PY
       - name: Next build
