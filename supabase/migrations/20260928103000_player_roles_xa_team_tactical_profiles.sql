@@ -490,13 +490,11 @@ grant select on public.v_scout_player_model_features to anon,authenticated;
 -- Replay/live model inputs can now carry the detailed role explicitly.
 alter table public.scout_replay_player_inputs
   add column if not exists sub_role text,
-  add column if not exists role_side text;
+  add column if not exists role_side text,
+  add column if not exists effective_xa_per90 numeric;
 
-update public.scout_replay_player_inputs ri
-set sub_role=p.primary_role,
-    role_side=p.role_side
-from public.scout_players p
-where p.id=ri.player_id and (ri.sub_role is null or ri.role_side is null);
+-- Do not backfill historical replay rows from today's roles/xA: that would leak future information.
+-- The replay input builder must snapshot these fields using only data available before the target MH.
 
 -- Enrichment QA is informational until approved source coverage is complete.
 create or replace function public.scout_enrichment_qa()
