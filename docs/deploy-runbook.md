@@ -4,7 +4,8 @@
 
 - Branch: `fix/audit-round-2`.
 - GitHub quality CI must be green.
-- Production Supabase migration `20260927100422 prepare_squad_rpc_v2` is already applied.\n- Production Supabase migration `20260927101018 ensure_learning_summary_tr` is already applied.
+- Production Supabase migration `20260927100422 prepare_squad_rpc_v2` is already applied.
+- Production Supabase migration `20260927101018 ensure_learning_summary_tr` is already applied.
 - Five protected Edge Functions are deployed from `supabase/functions/` and accept GitHub OIDC only.
 - MH7 recommendation refresh is live and QA/data-integrity PASS.
 - Current live `main` compatibility grants remain intentionally open until the audited app is live.

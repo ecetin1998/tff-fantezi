@@ -74,7 +74,7 @@ function fullAuthorized(request){
 }
 
 async function buildPayload(section,full){
-  const meta={name:'Fantezi Scout data feed',schema_version:SCOUT_FEED_SCHEMA_VERSION,access:full?'keyed-full':'public-read-only'}
+  const meta={name:'Fantezi Scout data feed',schema_version:SCOUT_FEED_SCHEMA_VERSION,access:full?'keyed-full':'public-read-only',sections:SCOUT_FEED_SECTIONS}
   if(section==='players'){
     const d=await getPlayersWithProjection()
     return {meta,section,current_run:safeRun(d.run),players:(d.players||[]).map(playerRow)}
@@ -158,7 +158,7 @@ export async function GET(request){
   try{
     const url=new URL(request.url)
     const requested=String(url.searchParams.get('section')||'all').toLowerCase()
-    const allowed=new Set(['all','summary','players','matches','squads','availability','roles','weekly','performance'])
+    const allowed=new Set(SCOUT_FEED_SECTIONS)
     const unknown=[...url.searchParams.keys()].filter(k=>k!=='section')
     if(unknown.length){
       const canonical=new URL(url.origin+url.pathname)
@@ -170,7 +170,8 @@ export async function GET(request){
     const payload=shouldUsePublicPayloadCache(full)
       ?await buildCached(requested)
       :await buildPayload(requested,true)
-    return reply(payload,200,{privateResponse:full,varyApiKey:requested==='performance'})
+    const versioned=payload?.schema_version?payload:{schema_version:SCOUT_FEED_SCHEMA_VERSION,...payload}
+    return reply(versioned,200,{privateResponse:full,varyApiKey:requested==='performance'})
   }catch(error){
     reportServerError('api:scout-data',error)
     return reply({schema_version:SCOUT_FEED_SCHEMA_VERSION,error:'Scout verisi şu anda hazırlanamadı.'},500)

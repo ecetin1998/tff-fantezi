@@ -1,0 +1,19 @@
+const fs=require('node:fs')
+const assert=require('node:assert/strict')
+
+const route=fs.readFileSync('app/api/scout-data/route.js','utf8')
+const feed=fs.readFileSync('lib/scoutFeed.js','utf8')
+const smoke=fs.readFileSync('scripts/smoke.sh','utf8')
+const readme=fs.readFileSync('README.md','utf8')
+
+assert.match(feed,/SCOUT_FEED_SECTIONS=.*summary/)
+assert.match(route,/sections:SCOUT_FEED_SECTIONS/)
+assert.match(route,/schema_version:SCOUT_FEED_SCHEMA_VERSION/)
+assert.match(smoke,/detail_source_/)
+assert.match(smoke,/players\/99999/)
+assert.match(smoke,/x-vercel-cache/)
+assert.match(smoke,/summary_size/)
+assert.match(readme,/20260927101100_post_deploy_restrict_sensitive_public_columns\.sql/)
+assert.match(readme,/20260927101200_post_deploy_squad_write_lockdown\.sql/)
+
+console.log('smokeContract: deployment smoke contract is versioned and sanitized')

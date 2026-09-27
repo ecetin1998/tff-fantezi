@@ -147,6 +147,14 @@ Hedef payload 50 KB altıdır.
 
 ## Deploy ve geliştirme süreci
 
+Production'a audit branch çıktıktan sonra DB daraltma adımları **bu sırayla ve deployment READY doğrulandıktan sonra** uygulanır:
+
+1. `20260927101100_post_deploy_restrict_sensitive_public_columns.sql`
+2. `20260927101200_post_deploy_squad_write_lockdown.sql`
+3. `BASE_URL=https://tff-fantezi.vercel.app bash scripts/smoke.sh`
+
+Bu iki migration yeni build canlı olmadan uygulanmaz; eski `main` compatibility grant/direct-write yoluna ihtiyaç duyar.
+
 - `main` üzerine doğrudan çalışma yapılmaz.
 - Değişiklikler çalışma dalında anlamlı commit'ler halinde hazırlanır.
 - PR'da `quality` check'i zorunlu olmalıdır.
