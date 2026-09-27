@@ -58,7 +58,7 @@ jobs:
             return out
           }
           const raw=files.map(file=>fs.readFileSync(file,'utf8')).join('\n')
-          const css=unwrapGlobal(raw).replace(/\\.scope\\b/g,'')
+          const css=unwrapGlobal(raw).split('.scope').join('')
           fs.writeFileSync('/tmp/all.css',css)
           const result=await new PurgeCSS().purge({
             content:['app/**/*.js','components/**/*.js'],
