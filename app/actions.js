@@ -22,6 +22,9 @@ function squadError(message=''){
   const key=String(message).match(/(AUTH_REQUIRED|INVALID_SQUAD|SQUAD_MUST_HAVE_15_UNIQUE_PLAYERS|SQUAD_HAS_INACTIVE_OR_UNKNOWN_PLAYER|INVALID_POSITION_COUNTS|BUDGET_EXCEEDED|INVALID_STARTING_XI|INVALID_BENCH|INVALID_BENCH_ORDER|INVALID_CAPTAIN|INVALID_FORMATION|CLUB_LIMIT_EXCEEDED)/)?.[1]
   return ({
     AUTH_REQUIRED:'Oturum bulunamadı. Tekrar giriş yap.',
+    SQUAD_LOCKED:'Bu maç haftası kilitlendi. Kadro artık değiştirilemez.',
+    GAMEWEEK_DEADLINE_MISSING:'Maç haftası son tarihi bulunamadı.',
+    INVALID_VICE_CAPTAIN:'Geçerli bir yardımcı kaptan seç.',
     INVALID_SQUAD:'Kadro verisi geçersiz.',
     SQUAD_MUST_HAVE_15_UNIQUE_PLAYERS:`Kadro ${SQUAD_SIZE} benzersiz oyuncudan oluşmalı.`,
     SQUAD_HAS_INACTIVE_OR_UNKNOWN_PLAYER:'Kadroda aktif olmayan veya bulunamayan oyuncu var.',
@@ -111,6 +114,8 @@ export async function saveSquad(_prevState,formData){
   if(!userId)return {ok:false,error:'Oturum bulunamadı. Tekrar giriş yap.',signature:''}
 
   const signature=String(formData.get('squad_signature')||'')
+  const viceRaw=String(formData.get('vice_captain_id')||'').trim()
+  const viceCaptainId=viceRaw?Number(viceRaw):null
   let ids=[]
   let squadState=[]
   try{ids=JSON.parse(String(formData.get('player_ids')||'[]')).map(Number).filter(Number.isFinite)}catch{}
@@ -155,7 +160,7 @@ export async function saveSquad(_prevState,formData){
   if((xiCounts.GK||0)!==STARTING_GK||!FORMATION_SET.has(formation))return {ok:false,error:'İlk 11 izin verilen dizilişlerden biri olmalı.',signature:''}
   if(squadState.filter(x=>x.is_captain).length!==1||xiState.filter(x=>x.is_captain).length!==1)return {ok:false,error:'İlk 11 içinde tam bir kaptan seçilmeli.',signature:''}
 
-  const {error}=await supabase.rpc('save_user_squad',{p_members:squadState})
+  const {error}=await supabase.rpc('save_user_squad',{p_members:squadState,p_vice_captain_id:Number.isFinite(viceCaptainId)?viceCaptainId:null})
   if(error){
     reportServerError('action:saveSquad:rpc',error)
     return {ok:false,error:squadError(error.message),signature:''}

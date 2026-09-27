@@ -84,4 +84,16 @@ if('full' in body) throw new Error('public performance leaked full payload after
 NODE
 rm -f "$public_body"
 
+filtered_body="$(mktemp)"
+filtered_code="$(curl -sS -o "$filtered_body" -w '%{http_code}' "$BASE_URL/api/scout-data?section=players&position=DEF&limit=2&fields=id,name")"
+[[ "$filtered_code" == "200" ]] || { cat "$filtered_body" >&2; exit 1; }
+node - "$filtered_body" <<'NODE'
+const fs=require('node:fs')
+const body=JSON.parse(fs.readFileSync(process.argv[2],'utf8'))
+if(!body.served_at)throw new Error('served_at missing')
+if((body.players||[]).length>2)throw new Error('limit filter failed')
+for(const row of body.players||[])for(const key of Object.keys(row))if(!['id','name'].includes(key))throw new Error('fields filter failed: '+key)
+NODE
+rm -f "$filtered_body"
+
 echo "ROUTE RUNTIME PASS"

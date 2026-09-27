@@ -2,6 +2,7 @@ import {unstable_cache} from 'next/cache'
 import {timingSafeEqual} from 'node:crypto'
 import {reportServerError} from '@/lib/observability'
 import {responseHeadersFor,shouldUsePublicPayloadCache} from '@/lib/scoutApiPolicy.mjs'
+import {applyScoutFilters,parseScoutQuery,SCOUT_QUERY_KEYS} from '@/lib/scoutApiFilters.mjs'
 import {buildScoutSummary,SCOUT_FEED_SCHEMA_VERSION,SCOUT_FEED_SECTIONS,scoutFeedMatchRow} from '@/lib/scoutFeed'
 import {
   getAvailability,getBacktestOverview,getMatches,getPlayersWithProjection,
@@ -90,7 +91,7 @@ async function buildPayload(section,full){
   if(section==='availability'){
     const d=await getAvailability()
     return {meta,section,current_run:safeRun(d.run),rows:(d.rows||[]).map(a=>({
-      player_id:a.player_id,availability_type:a.availability_type,availability_probability:a.availability_probability,
+      player_id:a.player_id,team_id:a.player?.team_id||null,position:a.player?.position||null,availability_type:a.availability_type,availability_probability:a.availability_probability,
       reason:a.canonical_reason||null,checked_at:a.checked_at,injury_date:a.injury_date,
       expected_return_date:a.expected_return_date,suspension_fixture:a.suspension_fixture,
       player:a.player?{id:a.player.id,full_name:a.player.full_name,display_name:a.player.display_name,short_label:a.player.short_label,position:a.player.position,price:a.player.price}:null,
@@ -100,7 +101,7 @@ async function buildPayload(section,full){
   if(section==='roles'){
     const d=await getRoleSignals()
     return {meta,section,current_run:safeRun(d.run),rows:(d.rows||[]).map(r=>({
-      player_id:r.player_id,signal:r.signal,predicted_xi_probability:r.predicted_xi_probability,x_minutes:r.x_minutes,
+      player_id:r.player_id,team_id:r.player?.team_id||null,position:r.player?.position||null,signal:r.signal,predicted_xi_probability:r.predicted_xi_probability,x_minutes:r.x_minutes,
       last2_xi_probability:r.last2_xi_probability,previous2_xi_probability:r.previous2_xi_probability,
       last2_minutes:r.last2_minutes,previous2_minutes:r.previous2_minutes,
       team_goal_share:r.team_goal_share,team_assist_share:r.team_assist_share,
@@ -111,7 +112,7 @@ async function buildPayload(section,full){
   if(section==='weekly'){
     const d=await getWeeklyPoints()
     return {meta,section,through_gameweek:d.throughGameweek,final_through_gameweek:d.finalThroughGameweek,
-      players:(d.players||[]).map(p=>({id:p.id,name:p.short_label||p.display_name||p.full_name,short_label:p.short_label||null,team:p.team,position:p.position,price:p.price,total_points:p.stats?.actual_points||0,weekly:p.weekly}))}
+      players:(d.players||[]).map(p=>({id:p.id,name:p.short_label||p.display_name||p.full_name,short_label:p.short_label||null,team:p.team,team_id:p.team_id,position:p.position,price:p.price,total_points:p.stats?.actual_points||0,weekly:p.weekly}))}
   }
   if(section==='summary'){
     const summary=await buildScoutSummary()
@@ -149,8 +150,10 @@ async function buildPayload(section,full){
 }
 
 const buildCached=unstable_cache(
-  async(section)=>buildPayload(section,false),
-  ['scout-data-v2-public'],
+  async(section,team,position,limit,fieldsKey)=>applyScoutFilters(await buildPayload(section,false),{
+    team:team||null,position:position||null,limit:limit||null,fields:fieldsKey?fieldsKey.split(','):[]
+  }),
+  ['scout-data-v3-public'],
   {revalidate:300}
 )
 
@@ -159,19 +162,23 @@ export async function GET(request){
     const url=new URL(request.url)
     const requested=String(url.searchParams.get('section')||'all').toLowerCase()
     const allowed=new Set(SCOUT_FEED_SECTIONS)
-    const unknown=[...url.searchParams.keys()].filter(k=>k!=='section')
-    if(unknown.length){
+    const parsed=parseScoutQuery(url)
+    if(parsed.error)return reply({schema_version:SCOUT_FEED_SCHEMA_VERSION,error:parsed.error},400)
+    if(parsed.unknown.length){
       const canonical=new URL(url.origin+url.pathname)
-      if(requested!=='all')canonical.searchParams.set('section',requested)
+      for(const key of SCOUT_QUERY_KEYS){
+        const value=url.searchParams.get(key)
+        if(value!==null&&(key!=='section'||value!=='all'))canonical.searchParams.set(key,value)
+      }
       return Response.redirect(canonical,308)
     }
     if(!allowed.has(requested))return reply({schema_version:SCOUT_FEED_SCHEMA_VERSION,error:'Bilinmeyen bölüm.'},400)
     const full=requested==='performance'&&fullAuthorized(request)
     const payload=shouldUsePublicPayloadCache(full)
-      ?await buildCached(requested)
-      :await buildPayload(requested,true)
+      ?await buildCached(requested,parsed.team,parsed.position,parsed.limit,parsed.fieldsKey)
+      :applyScoutFilters(await buildPayload(requested,true),parsed)
     const versioned=payload?.schema_version?payload:{schema_version:SCOUT_FEED_SCHEMA_VERSION,...payload}
-    return reply(versioned,200,{privateResponse:full,varyApiKey:requested==='performance'})
+    return reply({...versioned,served_at:new Date().toISOString()},200,{privateResponse:full,varyApiKey:requested==='performance'})
   }catch(error){
     reportServerError('api:scout-data',error)
     return Response.json(
