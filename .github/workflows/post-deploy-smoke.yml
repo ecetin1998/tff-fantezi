@@ -1,0 +1,32 @@
+name: Post-deploy smoke
+
+on:
+  deployment_status:
+
+permissions:
+  contents: read
+  deployments: read
+
+jobs:
+  smoke:
+    if: github.event.deployment_status.state == 'success'
+    runs-on: ubuntu-latest
+    env:
+      BASE_URL: ${{ github.event.deployment_status.environment_url || github.event.deployment_status.target_url }}
+    steps:
+      - name: Checkout deployed revision
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.deployment.sha }}
+      - name: Validate deployment URL
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$BASE_URL"
+          case "$BASE_URL" in
+            http://*|https://*) ;;
+            *) echo "Invalid deployment URL: $BASE_URL" >&2; exit 1 ;;
+          esac
+      - name: Smoke deployed revision
+        shell: bash
+        run: bash scripts/smoke.sh
