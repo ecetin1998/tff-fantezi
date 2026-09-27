@@ -170,7 +170,7 @@ export default async function Matches(){
               <small>{m.home_team} xG</small><b>{homeXg.toFixed(2)}</b>
               <small>{m.away_team} xG</small><b>{awayXg.toFixed(2)}</b>
               <small>Model haftası</small><b>MH{run?.gameweek||'—'}</b>
-              <small>1-X-2</small><b>%${(home*100).toFixed(0)} / %${(draw*100).toFixed(0)} / %${(away*100).toFixed(0)}</b>
+              <small>1-X-2</small><b>%{(home*100).toFixed(0)} / %{(draw*100).toFixed(0)} / %{(away*100).toFixed(0)}</b>
             </div>
             <p className="elo-explainer">Bu alan yalnız yayınlanan maç modeli değerlerini gösterir; arayüzde ayrı bir runtime Elo sinyali hesaplanmaz.</p>
           </details>
