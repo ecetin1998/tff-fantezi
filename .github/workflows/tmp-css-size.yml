@@ -26,7 +26,7 @@ jobs:
       - name: Build consolidated purged CSS
         shell: bash
         run: |
-          cat > /tmp/purge.mjs <<'NODE'
+          cat > scripts/tmp-purge.mjs <<'NODE'
           import fs from 'node:fs'
           import {PurgeCSS} from 'purgecss'
           const files=[
@@ -55,7 +55,7 @@ jobs:
           fs.writeFileSync('components/AppStyles.module.css',result[0].css)
           console.log('raw css bytes',Buffer.byteLength(css),'purged bytes',Buffer.byteLength(result[0].css))
           NODE
-          node /tmp/purge.mjs
+          node scripts/tmp-purge.mjs
           python3 - <<'PY'
           from pathlib import Path
           p=Path('app/layout.js')
