@@ -141,6 +141,10 @@ export default async function TeamPage({params}){
         <div className="card"><span>Hücum gücü</span><b>{idx(tactical?.attack_strength_index)}</b><small>lig ortalaması = 1.00</small></div>
         <div className="card"><span>Savunma gücü</span><b>{idx(tactical?.defense_strength_index)}</b><small>yüksek değer daha iyi</small></div>
         <div className="card"><span>Şut hacmi</span><b>{idx(tactical?.shot_volume_index)}</b><small>lig ortalaması = 1.00</small></div>
+        <div className="card"><span>İsabetli şut / maç</span><b>{num(tactical?.shots_on_target_per_match,1)}</b><small>kaleyi bulma hacmi</small></div>
+        <div className="card"><span>Büyük fırsat</span><b>{tactical?.big_chances??'—'}</b><small>{tactical?.big_chances_missed??'—'} kaçan</small></div>
+        <div className="card"><span>Duran top</span><b>{tactical?.set_piece_goals??'—'} gol</b><small>{num(tactical?.set_piece_xg,1)} xG</small></div>
+        <div className="card"><span>Duran top zaafı</span><b>{tactical?.set_piece_goals_conceded??'—'} gol</b><small>{num(tactical?.set_piece_xga,1)} xGA</small></div>
         <div className="card"><span>Rakip isabetli şut baskısı</span><b>{idx(tactical?.keeper_pressure_index)}</b><small>yüksek değer daha fazla baskı</small></div>
       </div>
       {hasEventProfile?<div className="profile-grid team-detail-history-grid">
