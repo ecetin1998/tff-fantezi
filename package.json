@@ -11,7 +11,8 @@
     "test:runtime": "bash scripts/runtime-route-test.sh",
     "test": "node --test test/full-suite.test.js",
     "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
-    "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy"
+    "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
+    "check:css": "node scripts/check-css-size.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "0.12.7",
@@ -25,6 +26,7 @@
     "@sentry/cloudflare": "^11.0.0",
     "eslint": "9.39.1",
     "eslint-config-next": "16.3.6",
-    "wrangler": "^4.142.0"
+    "wrangler": "^4.142.0",
+    "@fullhuman/postcss-purgecss": "^8.0.0"
   }
 }
