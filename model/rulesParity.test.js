@@ -14,7 +14,7 @@ const py=spawnSync('python3',['-c',
 assert.equal(py.status,0,py.stderr)
 assert.deepEqual(JSON.parse(py.stdout),canonical)
 
-const sql=fs.readFileSync(path.join(root,'supabase/migrations/20260927130000_single_source_game_rules.sql'),'utf8')
+const sql=fs.readFileSync(path.join(root,'supabase/migrations/20260927145156_single_source_game_rules.sql'),'utf8')
 const match=sql.match(/\$rules\$([\s\S]*?)\$rules\$::jsonb/)
 assert.ok(match,'SQL rules seed not found')
 assert.deepEqual(JSON.parse(match[1]),canonical)

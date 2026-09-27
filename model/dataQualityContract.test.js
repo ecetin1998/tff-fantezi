@@ -17,7 +17,7 @@ const assert=require('node:assert/strict')
   assert.match(data,/expected_return_date/)
   assert.match(data,/eq\('season',CURRENT_SEASON\)/)
 
-  const migration=fs.readFileSync('supabase/migrations/20260927132000_data_quality_normalization.sql','utf8')
+  const migration=fs.readFileSync('supabase/migrations/20260927145203_data_quality_normalization.sql','utf8')
   for(const marker of [
     'scout_model_runs_one_current',
     'availability_freshness',
