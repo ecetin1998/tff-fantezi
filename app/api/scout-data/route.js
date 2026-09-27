@@ -30,7 +30,8 @@ function safeRun(run){
 function playerRow(p){
   return {
     id:p.id,name:p.full_name||p.display_name||p.short_label,full_name:p.full_name,short_label:p.short_label||null,team:p.team,
-    team_id:p.team_id,position:p.position,price:Number(p.price||0),
+    team_id:p.team_id,position:p.position,primary_role:p.primary_role||null,role_side:p.role_side||null,price:Number(p.price||0),
+    xa_per90:p.attack_profile?.xa_per90??null,xa_model_per90:p.attack_profile?.xa_model_per90??null,
     total_points:Number(p.total_points||0),
     projection:p.projection?{
       opponent_name:p.projection.opponent_name,venue:p.projection.venue,
@@ -98,7 +99,7 @@ async function buildPayload(section,full){
       player_id:a.player_id,team_id:a.player?.team_id||null,position:a.player?.position||null,availability_type:a.availability_type,availability_probability:a.availability_probability,
       reason:a.canonical_reason||null,checked_at:a.checked_at,injury_date:a.injury_date,
       expected_return_date:a.expected_return_date,suspension_fixture:a.suspension_fixture,
-      player:a.player?{id:a.player.id,full_name:a.player.full_name,display_name:a.player.display_name,short_label:a.player.short_label,position:a.player.position,price:a.player.price}:null,
+      player:a.player?{id:a.player.id,full_name:a.player.full_name,display_name:a.player.display_name,short_label:a.player.short_label,position:a.player.position,primary_role:a.player.primary_role||null,role_side:a.player.role_side||null,price:a.player.price}:null,
       team:a.team
     }))}
   }
@@ -109,7 +110,7 @@ async function buildPayload(section,full){
       last2_xi_probability:r.last2_xi_probability,previous2_xi_probability:r.previous2_xi_probability,
       last2_minutes:r.last2_minutes,previous2_minutes:r.previous2_minutes,
       team_goal_share:r.team_goal_share,team_assist_share:r.team_assist_share,
-      player:r.player?{id:r.player.id,full_name:r.player.full_name,display_name:r.player.display_name,short_label:r.player.short_label,position:r.player.position,price:r.player.price}:null,
+      player:r.player?{id:r.player.id,full_name:r.player.full_name,display_name:r.player.display_name,short_label:r.player.short_label,position:r.player.position,primary_role:r.player.primary_role||null,role_side:r.player.role_side||null,price:r.player.price}:null,
       team:r.team
     }))}
   }
