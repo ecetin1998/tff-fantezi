@@ -29,6 +29,13 @@ for(const marker of ['big_chances','big_chances_missed','shots_on_target_per_mat
 }
 assert.match(fill,/Reviewed 2026-09-28 real-role snapshot/)
 assert.match(fill,/fotmob_public_team_stats_reviewed_2026-09-28/)
+const pressure=fs.readFileSync('supabase/migrations/20260928115000_team_pressure_profile_refresh.sql','utf8')
+for(const marker of ['touches_in_opposition_box','possession_percentage','shot_conversion_rate']){
+  assert.ok(pressure.includes(marker),marker+' missing from pressure refresh')
+}
+assert.match(pressure,/fotmob_public_team_stats_reviewed_2026-09-28/)
+const xaFill=fs.readFileSync('supabase/migrations/20260928114500_observed_xa_exact_id_fill.sql','utf8')
+assert.match(xaFill,/Exact-ID correction pass/)
 
 const data=fs.readFileSync('lib/data.js','utf8')
 assert.match(data,/TEAM_TACTICAL_PUBLIC_COLUMNS/)
@@ -39,10 +46,14 @@ assert.match(data,/scout_team_tactical_profiles/)
 const playerPage=fs.readFileSync('app/players/[id]/page.js','utf8')
 assert.match(playerPage,/playerRoleLabel/)
 assert.match(playerPage,/xA \/ 90/)
+assert.match(playerPage,/Hücum katkı payı/)
 const teamPage=fs.readFileSync('app/teams/[id]/page.js','utf8')
 assert.match(teamPage,/Atak ve savunma profili/)
 assert.match(teamPage,/Büyük fırsat/)
 assert.match(teamPage,/Duran top zaafı/)
+assert.match(teamPage,/Ceza sahası dokunuşu/)
+assert.match(teamPage,/Topa sahip olma/)
+assert.match(teamPage,/Şut dönüşümü/)
 assert.match(teamPage,/Uzaktan goller/)
 assert.match(teamPage,/Soldan yenen atak/)
 
