@@ -111,13 +111,17 @@ redirect_code="$(curl -sS -D "$redirect_headers" -o /dev/null -w '%{http_code}' 
 [[ "$redirect_code" == "308" ]] || fail "unknown query param returned HTTP $redirect_code instead of 308"
 echo "PASS canonical 308"
 
-curl -sS -D "$TMP_DIR/cache1.headers" -o /dev/null "$BASE_URL/api/scout-data?section=summary"
-curl -sS -D "$TMP_DIR/cache2.headers" -o /dev/null "$BASE_URL/api/scout-data?section=summary"
-grep -Eiq '^x-vercel-cache:[[:space:]]*HIT' "$TMP_DIR/cache2.headers" || {
-  echo "Second response headers:" >&2
-  cat "$TMP_DIR/cache2.headers" >&2
-  fail "second summary request was not x-vercel-cache: HIT"
-}
-echo "PASS CDN cache HIT"
+if [[ "${SKIP_CDN_CHECK:-0}" == "1" ]]; then
+  echo "SKIP CDN cache HIT check (SKIP_CDN_CHECK=1)"
+else
+  curl -sS -D "$TMP_DIR/cache1.headers" -o /dev/null "$BASE_URL/api/scout-data?section=summary"
+  curl -sS -D "$TMP_DIR/cache2.headers" -o /dev/null "$BASE_URL/api/scout-data?section=summary"
+  grep -Eiq '^x-vercel-cache:[[:space:]]*HIT' "$TMP_DIR/cache2.headers" || {
+    echo "Second response headers:" >&2
+    cat "$TMP_DIR/cache2.headers" >&2
+    fail "second summary request was not x-vercel-cache: HIT"
+  }
+  echo "PASS CDN cache HIT"
+fi
 
 echo "SMOKE PASS"
