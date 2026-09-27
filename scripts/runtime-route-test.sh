@@ -15,7 +15,7 @@ cleanup(){
 }
 trap cleanup EXIT
 
-SCOUT_OFFLINE_BUILD=1 SCOUT_DATA_API_KEY="$KEY" npm start -- -p "$PORT" >"$LOG_FILE" 2>&1 &
+SCOUT_OFFLINE_BUILD=1 SCOUT_RUNTIME_FIXTURE=1 SCOUT_DATA_API_KEY="$KEY" npm start -- -p "$PORT" >"$LOG_FILE" 2>&1 &
 SERVER_PID=$!
 
 for _ in {1..40}; do
@@ -47,6 +47,14 @@ if(body.schema_version!=='2.0') throw new Error(section+': bad schema_version')
 if(body.meta?.schema_version!=='2.0') throw new Error(section+': bad meta.schema_version')
 if(!Array.isArray(body.meta?.sections)||!body.meta.sections.includes('summary')) throw new Error(section+': missing meta.sections')
 if(body.section!==section) throw new Error(section+': response section mismatch')
+const nonEmpty={
+  summary:()=>Array.isArray(body.top_players)&&body.top_players.length>0,
+  players:()=>Array.isArray(body.players)&&body.players.length>0,
+  matches:()=>Array.isArray(body.matches)&&body.matches.length>0,
+  weekly:()=>Array.isArray(body.players)&&body.players.length>0,
+  performance:()=>Array.isArray(body.replay_weeks)&&body.replay_weeks.length>0,
+}
+if(nonEmpty[section]&&!nonEmpty[section]())throw new Error(section+': fixture payload is unexpectedly empty')
 NODE
   rm -f "$headers" "$body"
 done

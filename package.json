@@ -9,7 +9,7 @@
     "lint": "eslint .",
     "smoke": "bash scripts/smoke.sh",
     "test:runtime": "bash scripts/runtime-route-test.sh",
-    "test": "node model/attackAllocation.test.js && node model/simulateScout.test.js && node model/replayAudit.test.js && python3 model/optimizer_rules_test.py && node model/publicReadCompatibility.test.js && node model/auditHardening.test.js && node model/scoutApiCache.test.js && node model/scoutFeedStructure.test.js && node model/smokeContract.test.js && node model/proxyMatcher.test.js && node model/routeRuntimeContract.test.js && node model/rulesParity.test.js && node model/dataQualityContract.test.js && node model/scoutApiFilters.test.js && node model/observability.test.js"
+    "test": "node --test test/full-suite.test.js"
   },
   "dependencies": {
     "@sentry/nextjs": "11.0.0",

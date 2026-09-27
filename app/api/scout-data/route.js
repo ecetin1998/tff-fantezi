@@ -3,6 +3,7 @@ import {timingSafeEqual} from 'node:crypto'
 import {reportServerError} from '@/lib/observability'
 import {responseHeadersFor,shouldUsePublicPayloadCache} from '@/lib/scoutApiPolicy.mjs'
 import {applyScoutFilters,parseScoutQuery,SCOUT_QUERY_KEYS} from '@/lib/scoutApiFilters.mjs'
+import runtimeFixture from '@/test/fixtures/scout-runtime.json'
 import {buildScoutSummary,SCOUT_FEED_SCHEMA_VERSION,SCOUT_FEED_SECTIONS,scoutFeedMatchRow} from '@/lib/scoutFeed'
 import {
   getAvailability,getBacktestOverview,getMatches,getPlayersWithProjection,
@@ -76,6 +77,10 @@ function fullAuthorized(request){
 
 async function buildPayload(section,full){
   const meta={name:'Fantezi Scout data feed',schema_version:SCOUT_FEED_SCHEMA_VERSION,access:full?'keyed-full':'public-read-only',sections:SCOUT_FEED_SECTIONS}
+  if(process.env.SCOUT_OFFLINE_BUILD==='1'&&process.env.SCOUT_RUNTIME_FIXTURE==='1'){
+    const base=structuredClone(runtimeFixture[section]||runtimeFixture.all)
+    return {meta,section,...base,...(full&&section==='performance'?{full:structuredClone(runtimeFixture.performance_full)}:{})}
+  }
   if(section==='players'){
     const d=await getPlayersWithProjection()
     return {meta,section,current_run:safeRun(d.run),players:(d.players||[]).map(playerRow)}

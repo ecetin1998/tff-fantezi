@@ -1,0 +1,265 @@
+{
+  "all": {
+    "current_run": {
+      "id": "fixture-run",
+      "gameweek": 7,
+      "generated_at": "2026-09-27T10:00:00Z",
+      "source_updated_at": "2026-09-27T09:00:00Z",
+      "status": "ready",
+      "is_current": true
+    },
+    "players": [
+      {
+        "id": 1,
+        "name": "Def One",
+        "team": "Fixture FC",
+        "team_id": 10,
+        "position": "DEF",
+        "price": 5,
+        "total_points": 20,
+        "projection": {
+          "xfp": 4.2,
+          "xi_probability": 0.8,
+          "x_minutes": 75,
+          "availability_probability": 1
+        }
+      }
+    ],
+    "matches": [
+      {
+        "match_id": 1,
+        "kickoff_at": "2026-09-28T17:00:00Z",
+        "home_team_id": 10,
+        "away_team_id": 20,
+        "home_team": "Fixture FC",
+        "away_team": "Demo SK",
+        "home_xg": 1.4,
+        "away_xg": 1.1,
+        "home_win_probability": 0.45,
+        "draw_probability": 0.3,
+        "away_win_probability": 0.25,
+        "home_cs_probability": 0.32,
+        "away_cs_probability": 0.24
+      }
+    ],
+    "squads": {
+      "recommended": {
+        "recommendation": null,
+        "members": []
+      },
+      "alternative": {
+        "recommendation": null,
+        "members": []
+      }
+    },
+    "availability_issues": []
+  },
+  "summary": {
+    "schema_version": "2.0",
+    "gameweek": 7,
+    "cached_at": "2026-09-27T10:05:00Z",
+    "model_updated_at": "2026-09-27T10:00:00Z",
+    "source_updated_at": "2026-09-27T09:00:00Z",
+    "top_players": [
+      {
+        "id": 1,
+        "name": "Def One",
+        "team": "Fixture FC",
+        "team_id": 10,
+        "position": "DEF",
+        "price": 5,
+        "xfp": 4.2,
+        "p90": 8,
+        "xi_probability": 0.8,
+        "x_minutes": 75,
+        "six_plus_probability": 0.35,
+        "opponent": "Demo SK",
+        "venue": "HOME",
+        "expected_goals": 0.1,
+        "expected_assists": 0.08,
+        "availability_probability": 1
+      }
+    ],
+    "matches": [
+      {
+        "match_id": 1,
+        "kickoff_at": "2026-09-28T17:00:00Z",
+        "home_team_id": 10,
+        "away_team_id": 20,
+        "home_team": "Fixture FC",
+        "away_team": "Demo SK",
+        "home_xg": 1.4,
+        "away_xg": 1.1,
+        "home_win_probability": 0.45,
+        "draw_probability": 0.3,
+        "away_win_probability": 0.25,
+        "home_cs_probability": 0.32,
+        "away_cs_probability": 0.24
+      }
+    ],
+    "squads": {
+      "recommended": {
+        "budget": 90,
+        "xi_xfp": 55,
+        "players": []
+      },
+      "alternative": {
+        "budget": 89,
+        "xi_xfp": 54,
+        "players": []
+      }
+    },
+    "availability_issues": []
+  },
+  "players": {
+    "current_run": {
+      "id": "fixture-run",
+      "gameweek": 7,
+      "status": "ready",
+      "is_current": true
+    },
+    "players": [
+      {
+        "id": 1,
+        "name": "Def One",
+        "team": "Fixture FC",
+        "team_id": 10,
+        "position": "DEF",
+        "price": 5,
+        "total_points": 20,
+        "projection": {
+          "xfp": 4.2,
+          "xi_probability": 0.8,
+          "x_minutes": 75,
+          "availability_probability": 1
+        }
+      },
+      {
+        "id": 2,
+        "name": "Mid Two",
+        "team": "Demo SK",
+        "team_id": 20,
+        "position": "MID",
+        "price": 7,
+        "total_points": 24,
+        "projection": {
+          "xfp": 5.1,
+          "xi_probability": 0.9,
+          "x_minutes": 82,
+          "availability_probability": 1
+        }
+      }
+    ]
+  },
+  "matches": {
+    "current_run": {
+      "id": "fixture-run",
+      "gameweek": 7,
+      "status": "ready",
+      "is_current": true
+    },
+    "matches": [
+      {
+        "match_id": 1,
+        "home_team_id": 10,
+        "away_team_id": 20,
+        "home_team": "Fixture FC",
+        "away_team": "Demo SK"
+      }
+    ]
+  },
+  "squads": {
+    "current_run": {
+      "id": "fixture-run",
+      "gameweek": 7,
+      "status": "ready",
+      "is_current": true
+    },
+    "recommended": {
+      "recommendation": null,
+      "members": []
+    },
+    "alternative": {
+      "recommendation": null,
+      "members": []
+    }
+  },
+  "availability": {
+    "current_run": {
+      "id": "fixture-run",
+      "gameweek": 7,
+      "status": "ready",
+      "is_current": true
+    },
+    "rows": [
+      {
+        "player_id": 1,
+        "team_id": 10,
+        "position": "DEF",
+        "availability_type": "active",
+        "availability_probability": 1,
+        "reason": null
+      }
+    ]
+  },
+  "roles": {
+    "current_run": {
+      "id": "fixture-run",
+      "gameweek": 7,
+      "status": "ready",
+      "is_current": true
+    },
+    "rows": [
+      {
+        "player_id": 1,
+        "team_id": 10,
+        "position": "DEF",
+        "signal": "stable",
+        "predicted_xi_probability": 0.8,
+        "x_minutes": 75
+      }
+    ]
+  },
+  "weekly": {
+    "through_gameweek": 6,
+    "final_through_gameweek": 6,
+    "players": [
+      {
+        "id": 1,
+        "name": "Def One",
+        "team": "Fixture FC",
+        "team_id": 10,
+        "position": "DEF",
+        "price": 5,
+        "total_points": 20,
+        "weekly": [
+          {
+            "gameweek": 6,
+            "points": 4,
+            "minutes": 90
+          }
+        ]
+      }
+    ]
+  },
+  "performance": {
+    "current_run": {
+      "id": "fixture-run",
+      "gameweek": 7,
+      "status": "ready",
+      "is_current": true
+    },
+    "qa_pass": true,
+    "replay_weeks": [
+      {
+        "gameweek": 6,
+        "status": "closed",
+        "player_sample": 100
+      }
+    ],
+    "learning": []
+  },
+  "performance_full": {
+    "secret_fixture_detail": true
+  }
+}

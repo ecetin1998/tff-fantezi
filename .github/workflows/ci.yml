@@ -19,8 +19,13 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
       - name: Install
         run: npm ci --no-audit --no-fund
+      - name: Python test dependencies
+        run: python3 -m pip install --disable-pip-version-check pytest
       - name: Lint
         run: npm run lint
       - name: Test
