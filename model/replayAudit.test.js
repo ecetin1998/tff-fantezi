@@ -5,7 +5,7 @@ const payload={
   meta:{temperature:1.7,assist_fraction:.7,own_goal_fraction:.02,team_formations:{'101':{GK:1,DEF:4,MID:5,FWD:1}}},
   players:[
     {player_id:2,club_id:205,position:'FWD',price:6,availability:.9,role_probability:.7,bench_weight:.8,rates:[0,0,0,0],durations:[75],duration_weights:[1]},
-    {player_id:1,club_id:101,position:'MID',position_detail:'RWB',price:5,availability:1,role_probability:.8,bench_weight:1,rates:[0,0,0,0],durations:[90],duration_weights:[1]},
+    {player_id:1,club_id:101,position:'MID',position_detail:'RWB',price:5,availability:1,role_probability:.8,bench_weight:1,rates:[0,0,0,.02],effective_xa_per90:.21,durations:[90],duration_weights:[1]},
   ],
   matches:[{match_id:9,home_team_id:101,away_team_id:205,home_lambda:1.2,away_lambda:.8}],
 }
@@ -17,6 +17,7 @@ assert.equal(input.team_checks[0].formation.MID,5)
 assert.equal(input.team_checks[1].formation.DEF,4)
 assert.deepEqual(input.players.map(x=>x.id),[1,2])
 assert.equal(input.players[0].sub_role,'RWB')
+assert.equal(input.players[0].rates[3],.21,'snapshotted effective xA must override the raw assist-creation slot')
 assert.deepEqual(input.playerMatches.map(x=>x.id),[1,2])
 
 const out=[
