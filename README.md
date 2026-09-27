@@ -6,10 +6,10 @@ Süper Lig fantasy için canlı xFP, dakika/rol tahmini, maç olasılıkları, m
 
 - Next.js 16 App Router + React 19
 - Supabase Auth + Postgres + RLS
-- Vercel
+- Cloudflare Workers + OpenNext
 - Model/replay yardımcıları: Node.js + Python
 
-Canlı havuzda şu anda **449 aktif oyuncu** bulunuyor.
+Canlı havuzda şu anda **449 aktif oyuncu** bulunuyor. Lig **18 takım / 34 maç haftası** üzerinden çalışır.
 
 ## Mimari
 
@@ -39,7 +39,7 @@ Tarayıcı yalnız publishable Supabase anahtarını kullanır. Service-role key
 
 - `NEXT_PUBLIC_SUPABASE_URL` — Supabase proje URL'si.
 - `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` — tarayıcıda kullanılabilen publishable key.
-- `NEXT_PUBLIC_SITE_URL` — production site origin'i; ör. `https://tff-fantezi.vercel.app`.
+- `NEXT_PUBLIC_SITE_URL` — production site origin'i; ör. `https://tff-fantezi.ecetin1998.workers.dev`.
 - `SCOUT_DATA_API_KEY` — yalnız server-side tam/özet Scout API erişimi için. **NEXT_PUBLIC_ öneki verilmez.**
 
 Internal Supabase Edge Function çağrıları uzun ömürlü bir repo secret'ına bağlı değildir. GitHub Actions `id-token: write` ile kısa ömürlü OIDC JWT alır; Edge Functions token'ın issuer, audience, repository id, repository, ref ve event claim'lerini doğrular. Korumalı Edge Function'lar yalnız doğrulanmış GitHub Actions OIDC JWT'sini kabul eder; uzun ömürlü `SCOUT_GATE_SECRET` fallback'i kullanılmaz.
@@ -54,7 +54,7 @@ npm run build
 npm run dev
 ```
 
-PR CI'sı lint + model testleri + production build çalıştırır. CI sırasında dış Supabase bağımlılığı `SCOUT_OFFLINE_BUILD=1` ile devreden çıkarılır; Vercel Preview gerçek environment ile ayrıca build edilir.
+PR CI'sı lint + model testleri + production build çalıştırır. CI sırasında dış Supabase bağımlılığı `SCOUT_OFFLINE_BUILD=1` ile devreden çıkarılır. `main` push'u OpenNext ile Cloudflare Workers'a deploy edilir ve `/api/health` üzerinden commit SHA doğrulanır.
 
 ## Veri erişimi ve RLS
 
@@ -151,14 +151,15 @@ Production'a audit branch çıktıktan sonra DB daraltma adımları **bu sırayl
 
 1. `20260927101100_post_deploy_restrict_sensitive_public_columns.sql`
 2. `20260927101200_post_deploy_squad_write_lockdown.sql`
-3. `BASE_URL=https://tff-fantezi.vercel.app bash scripts/smoke.sh`
+3. `BASE_URL=https://tff-fantezi.ecetin1998.workers.dev bash scripts/smoke.sh`
 
 Bu iki migration yeni build canlı olmadan uygulanmaz; eski `main` compatibility grant/direct-write yoluna ihtiyaç duyar.
 
 - `main` üzerine doğrudan çalışma yapılmaz.
 - Değişiklikler çalışma dalında anlamlı commit'ler halinde hazırlanır.
 - PR'da `quality` check'i zorunlu olmalıdır.
-- Vercel Preview'da smoke test tamamlanmadan merge yapılmaz.
+- Merge sonrası Cloudflare Workers deploy ve workers.dev smoke testi PASS olmalıdır.
+- `/api/health` SHA'sı `main` HEAD ile eşleşmeden deploy tamamlanmış sayılmaz.
 - Model motoru değişiklikleri uygulama değişikliklerinden ayrı commit'te tutulur ve replay/QA kanıtı olmadan current run'a uygulanmaz.
 
 Canlı hardening ve doğrulama durumu `docs/production-readiness.md` içindedir.
