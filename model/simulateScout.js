@@ -285,6 +285,9 @@ function simulateScout(input,count,seed,attackPolicy=true){
     r.xi=Math.max(0,Math.min(1,r.xi));
     r.play=Math.max(0,Math.min(1,r.play));
     r.p60=Math.max(0,Math.min(1,r.p60));
+    for(const key of Object.keys(r.match_xi)){
+      r.match_xi[key]=Math.max(0,Math.min(1,r.match_xi[key]));
+    }
     // Average minutes can land a few floating-point ulps below an exact value
     // (e.g. 179.99999999999983 in a deterministic two-match week).
     r.minutes=Math.round(r.minutes*1e9)/1e9;
