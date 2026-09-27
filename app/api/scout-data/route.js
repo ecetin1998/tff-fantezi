@@ -2,7 +2,7 @@ import {unstable_cache} from 'next/cache'
 import {timingSafeEqual} from 'node:crypto'
 import {reportServerError} from '@/lib/observability'
 import {responseHeadersFor,shouldUsePublicPayloadCache} from '@/lib/scoutApiPolicy.mjs'
-import {buildScoutSummary,SCOUT_FEED_SCOUT_FEED_SCHEMA_VERSION,scoutFeedMatchRow} from '@/lib/scoutFeed'
+import {buildScoutSummary,SCOUT_FEED_SCHEMA_VERSION,SCOUT_FEED_SECTIONS,scoutFeedMatchRow} from '@/lib/scoutFeed'
 import {
   getAvailability,getBacktestOverview,getMatches,getPlayersWithProjection,
   getRecommendation,getRoleSignals,getWeeklyPoints
@@ -174,6 +174,14 @@ export async function GET(request){
     return reply(versioned,200,{privateResponse:full,varyApiKey:requested==='performance'})
   }catch(error){
     reportServerError('api:scout-data',error)
-    return reply({schema_version:SCOUT_FEED_SCHEMA_VERSION,error:'Scout verisi şu anda hazırlanamadı.'},500)
+    return Response.json(
+      {schema_version:'2.0',error:'Scout verisi şu anda hazırlanamadı.'},
+      {status:500,headers:{
+        'Cache-Control':'private, no-store',
+        'CDN-Cache-Control':'no-store',
+        'Vercel-CDN-Cache-Control':'no-store',
+        'X-Robots-Tag':'noindex, nofollow, noarchive'
+      }}
+    )
   }
 }

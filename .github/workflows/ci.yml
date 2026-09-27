@@ -13,6 +13,7 @@ jobs:
       NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable_ci_placeholder
       NEXT_PUBLIC_SITE_URL: https://tff-fantezi.vercel.app
       SCOUT_OFFLINE_BUILD: '1'
+      SCOUT_DATA_API_KEY: runtime-test-key-12345678901234567890
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -26,3 +27,5 @@ jobs:
         run: npm test
       - name: Build
         run: npm run build
+      - name: Route runtime
+        run: bash scripts/runtime-route-test.sh
