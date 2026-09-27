@@ -1,6 +1,5 @@
 import './globals.css'
 import siteShell from '@/components/SiteShell.module.css'
-import squadLegacy from '@/components/SquadBuilderLegacy.module.css'
 import premiumViews from '@/components/PremiumViews.module.css'
 import squadWorkspace from '@/components/SquadWorkspace.module.css'
 import analysisViews from '@/components/AnalysisViews.module.css'
@@ -8,7 +7,7 @@ import dataViews from '@/components/DataViews.module.css'
 import Nav from '@/components/Nav'
 import {SITE_URL} from '@/lib/config'
 
-const cssScopes=[siteShell.scope,squadLegacy.scope,premiumViews.scope,squadWorkspace.scope,analysisViews.scope,dataViews.scope].join(' ')
+const cssScopes=[siteShell.scope,premiumViews.scope,squadWorkspace.scope,analysisViews.scope,dataViews.scope].join(' ')
 
 const siteUrl=SITE_URL
 export const metadata={

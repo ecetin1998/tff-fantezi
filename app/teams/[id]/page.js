@@ -28,13 +28,20 @@ export default async function TeamPage({params}){
   const data=await getTeamDetail(id)
   if(!data) notFound()
 
-  const {team,run,season:s,history,currentMatch,opponent,players,fantasyByGameweek}=data
+  const {team,run,season:s,history,players,fantasyByGameweek}=data
+  const fixtures=data.currentMatches||[]
+  const currentMatch=fixtures[0]||data.currentMatch||null
+  const opponent=data.opponent||null
   const isHome=currentMatch?Number(currentMatch.home_team_id)===Number(team.id):false
   const resultPct=currentMatch?outcomePercentages(currentMatch):null
-  const teamXg=currentMatch?(isHome?currentMatch.home_xg:currentMatch.away_xg):null
-  const oppXg=currentMatch?(isHome?currentMatch.away_xg:currentMatch.home_xg):null
-  const win=resultPct?(isHome?resultPct[0]:resultPct[2])/100:null
-  const cs=currentMatch?(isHome?currentMatch.home_cs_probability:currentMatch.away_cs_probability):null
+  const teamXg=fixtures.length?fixtures.reduce((sum,m)=>sum+Number(Number(m.home_team_id)===Number(team.id)?m.home_xg:m.away_xg),0):null
+  const oppXg=fixtures.length?fixtures.reduce((sum,m)=>sum+Number(Number(m.home_team_id)===Number(team.id)?m.away_xg:m.home_xg),0):null
+  const win=fixtures.length?fixtures.reduce((sum,m)=>{
+    const [h,,a]=outcomePercentages(m)
+    return sum+(Number(m.home_team_id)===Number(team.id)?h:a)/100
+  },0)/fixtures.length:null
+  const cs=fixtures.length?fixtures.reduce((sum,m)=>sum+Number(Number(m.home_team_id)===Number(team.id)?m.home_cs_probability:m.away_cs_probability),0)/fixtures.length:null
+  const fixtureStatus=fixtures.length>1?'ÇİFT MAÇ':fixtures.length===0?'MAÇ YOK':null
 
   const played=(history||[]).filter(m=>m.home_goals!==null&&m.home_goals!==undefined&&m.away_goals!==null&&m.away_goals!==undefined)
   const fantasyWeeks=Object.entries(fantasyByGameweek||{}).sort((a,b)=>Number(a[0])-Number(b[0]))
@@ -77,9 +84,9 @@ export default async function TeamPage({params}){
         </div>
       </div>
       <div className="team-detail-current">
-        <span>MH{run?.gameweek||'—'} rakibi</span>
-        {opponent?<Link href={'/teams/'+opponent.id}>{opponent.name}</Link>:<b>—</b>}
-        <small>{currentMatch?(isHome?'Ev':'Dep'):'—'}</small>
+        <span>MH{run?.gameweek||'—'} fikstürü</span>
+        {fixtureStatus?<b>{fixtureStatus}</b>:opponent?<Link href={'/teams/'+opponent.id}>{opponent.name}</Link>:<b>MAÇ YOK</b>}
+        <small>{fixtures.length?fixtures.length+' maç':'Fikstür yok'}</small>
       </div>
     </section>
 
@@ -89,9 +96,19 @@ export default async function TeamPage({params}){
           <span className="eyebrow">BU HAFTA</span>
           <h2>Fantasy karar özeti</h2>
         </div>
-        <div className="team-fixture-badge">
-          <span>{currentMatch?(isHome?'EV':'DEP'):'—'}</span>
-          {opponent?<Link href={'/teams/'+opponent.id}>{opponent.name}</Link>:<b>Rakip yok</b>}
+        <div className="team-fixture-stack">
+          {fixtureStatus?<span className="fixture-count-badge">{fixtureStatus}</span>:null}
+          {fixtures.length?fixtures.map((fixture,index)=>{
+            const home=Number(fixture.home_team_id)===Number(team.id)
+            const opponentId=home?Number(fixture.away_team_id):Number(fixture.home_team_id)
+            const opponentName=home?fixture.away_team_name:fixture.home_team_name
+            const [h,d,aPct]=outcomePercentages(fixture)
+            return <div className="team-fixture-badge" key={fixture.match_id||index}>
+              <span>{home?'EV':'DEP'}</span>
+              <Link href={'/teams/'+opponentId}>{opponentName||'—'}</Link>
+              <small>{h}/{d}/{aPct}</small>
+            </div>
+          }):<div className="team-fixture-badge"><b>MAÇ YOK</b></div>}
         </div>
       </div>
 
@@ -100,7 +117,7 @@ export default async function TeamPage({params}){
         <div><span>Rakip xG</span><b>{num(oppXg)}</b><small>savunma riski</small></div>
         <div><span>Galibiyet</span><b>{pct(win)}</b><small>maç kazanma ihtimali</small></div>
         <div><span>Clean sheet</span><b>{pct(cs)}</b><small>savunma getirisi</small></div>
-        <div><span>1-X-2</span><b>{resultPct?resultPct.join(' / '):'—'}</b><small>ev / beraberlik / deplasman</small></div>
+        <div><span>1-X-2</span><b>{fixtures.length===1&&resultPct?resultPct.join(' / '):fixtures.length>1?'Maç bazında':'—'}</b><small>ev / beraberlik / deplasman</small></div>
       </div>
 
       <div className="team-top-picks">
