@@ -1,5 +1,5 @@
 const assert=require('node:assert/strict')
-const {simulateScout,cardPoints,adjustedRoleProbability,normalizedDurationDistribution,dixonColesTau,allocateBonus,redCardAdjustedLambdas,ROLE_CAP}=require('./simulateScout')
+const {simulateScout,simulateMatchProbabilities,cardPoints,adjustedRoleProbability,normalizedDurationDistribution,dixonColesTau,allocateBonus,redCardAdjustedLambdas,ROLE_CAP}=require('./simulateScout')
 function player(id,club,pos='MID',overrides={}){return {id,club,pos,rates:[.25,.15,.12,.10,0,0,0,0,0],durations:[90],duration_weights:[1],avail:1,role:.9,confidence:'medium',team_position_prior:.75,benchw:1,valid_games:1,...overrides}}
 function baseInput(extraHome=1){const players=[];for(let i=0;i<11+extraHome;i++)players.push(player(100+i,101));for(let i=0;i<12;i++)players.push(player(200+i,205));players.push(player(999,999));return {players,matches:[{home_id:101,away_id:205,home_lambda:0,away_lambda:0}],team_checks:[{club:101,formation:{GK:0,DEF:0,MID:11,FWD:0}},{club:205,formation:{GK:0,DEF:0,MID:11,FWD:0}}],temperature:1,assist_fraction:0,own_fraction:0,playerMatches:[],rho:-.08}}
 assert.ok(adjustedRoleProbability(player(1,1,'MID',{role:1,confidence:'high'}))<=ROLE_CAP)
@@ -13,3 +13,5 @@ assert.ok(dixonColesTau(0,0,1.2,.9,-.08)>1)
 {const a=redCardAdjustedLambdas(1.5,1,45,91);assert.ok(a.homeLambda<1.5&&a.awayLambda>1)}
 assert.equal(cardPoints(true,false),-1);assert.equal(cardPoints(false,true),-3);assert.equal(cardPoints(true,true),-3)
 console.log('simulateScout checks passed')
+
+{const p=simulateMatchProbabilities({rho:0,matches:[{match_id:1,home_lambda:1.5,away_lambda:.8}]},5000,7)[0];assert.ok(p.home_win_probability>p.away_win_probability);assert.ok(Math.abs(p.home_win_probability+p.draw_probability+p.away_win_probability-1)<1e-9)}

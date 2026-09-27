@@ -286,4 +286,33 @@ function simulateScout(input,count,seed,attackPolicy=true){
   return result;
 }
 
-module.exports={simulateScout,cardPoints,histogramQuantile,adjustedRoleProbability,normalizedDurationDistribution,dixonColesTau,fitDixonColesRho,allocateBonus,redCardAdjustedLambdas,teamAssistFraction,ROLE_CAP,DURATION_90_CAP,DEFAULT_DC_RHO};
+
+function simulateMatchProbabilities(input,count,seed){
+  let state=seed>>>0;
+  const random=()=>{state=(state+0x6D2B79F5)>>>0;let t=state;t=Math.imul(t^(t>>>15),t|1);t^=t+Math.imul(t^(t>>>7),t|61);return ((t^(t>>>14))>>>0)/4294967296;};
+  const poisson=l=>{if(!(l>0))return 0;let n=0,t=1,L=Math.exp(-l);do{n++;t*=random();}while(t>L);return n-1;};
+  const rho=Number.isFinite(Number(input.rho))?clamp(Number(input.rho),-.3,.3):DEFAULT_DC_RHO;
+  const draw=(hl,al)=>{
+    const maxTau=Math.max(1,dixonColesTau(0,0,hl,al,rho),dixonColesTau(0,1,hl,al,rho),dixonColesTau(1,0,hl,al,rho),dixonColesTau(1,1,hl,al,rho));
+    for(let tries=0;tries<80;tries++){
+      const hg=poisson(hl),ag=poisson(al),tau=dixonColesTau(hg,ag,hl,al,rho);
+      if(tau>0&&random()<=tau/maxTau)return [hg,ag];
+    }
+    return [poisson(hl),poisson(al)];
+  };
+  return (input.matches||[]).map(m=>{
+    let home=0,drawn=0,away=0;
+    for(let i=0;i<count;i++){
+      const [hg,ag]=draw(Number(m.home_lambda||0),Number(m.away_lambda||0));
+      if(hg>ag)home++;else if(hg<ag)away++;else drawn++;
+    }
+    return {
+      match_id:Number(m.match_id||0),
+      home_win_probability:home/count,
+      draw_probability:drawn/count,
+      away_win_probability:away/count
+    };
+  });
+}
+
+module.exports={simulateScout,simulateMatchProbabilities,cardPoints,histogramQuantile,adjustedRoleProbability,normalizedDurationDistribution,dixonColesTau,fitDixonColesRho,allocateBonus,redCardAdjustedLambdas,teamAssistFraction,ROLE_CAP,DURATION_90_CAP,DEFAULT_DC_RHO};
