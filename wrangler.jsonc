@@ -3,7 +3,9 @@
   "main": "worker-entry.mjs",
   "name": "tff-fantezi",
   "compatibility_date": "2026-09-01",
-  "compatibility_flags": ["nodejs_compat"],
+  "compatibility_flags": [
+    "nodejs_compat"
+  ],
   "assets": {
     "directory": ".open-next/assets",
     "binding": "ASSETS"
@@ -26,5 +28,13 @@
     "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY": "sb_publishable_cT2X9dM8D3ct0KLJFXOelA_GgtzPFtY",
     "NEXT_PUBLIC_SITE_URL": "https://tff-fantezi.ecetin1998.workers.dev"
   },
-  "observability": {"enabled": true}
+  "observability": {
+    "enabled": true
+  },
+  "services": [
+    {
+      "binding": "WORKER_SELF_REFERENCE",
+      "service": "tff-fantezi"
+    }
+  ]
 }

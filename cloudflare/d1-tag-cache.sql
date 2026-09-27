@@ -1,0 +1,5 @@
+CREATE TABLE IF NOT EXISTS revalidations (
+  tag TEXT NOT NULL,
+  revalidatedAt INTEGER NOT NULL,
+  UNIQUE(tag) ON CONFLICT REPLACE
+);
