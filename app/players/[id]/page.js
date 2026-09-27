@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation'
 import { getPlayerDetail, getPlayersWithProjection } from '@/lib/data'
 import { teamCssVars } from '@/lib/teamThemes'
 import { availabilityCompactNote, availabilityIsIssue } from '@/lib/availability'
-import {playerLabel,predictionConfidenceLabel} from '@/lib/playerPresentation'
+import {fixtureBadge,playerLabel,predictionConfidenceLabel} from '@/lib/playerPresentation'
 import {outcomePercentages} from '@/lib/format'
 
 export const revalidate=300
@@ -45,8 +45,11 @@ export default async function PlayerPage({ params }){
   const data=await getPlayerDetail(id)
   if(!data) notFound()
 
-  const {run,player,projection:p,availability:a,role:r,season:s,weekly,match}=data
+  const {run,player,projection:p,availability:a,role:r,season:s,weekly}=data
+  const fixtures=data.matches||[]
+  const match=fixtures[0]||data.match||null
   const resultPct=match?outcomePercentages(match):null
+  const fixtureStatus=fixtureBadge({fixture_count:fixtures.length})
   const closedWeeks=[...(weekly||[])].sort((x,y)=>Number(x.gameweek||0)-Number(y.gameweek||0))
   const playedWeeks=closedWeeks.filter(w=>Number(w.minutes||0)>0)
   const played=Number(s?.matches_played ?? playedWeeks.length)
@@ -161,9 +164,19 @@ export default async function PlayerPage({ params }){
           <span className="eyebrow">KARAR ÖZETİ</span>
           <h2>Bu hafta ne bekliyoruz?</h2>
         </div>
-        <div className="player-fixture-chip">
-          <span>{venue(p?.venue)}</span>
-          {opponentId?<Link href={'/teams/'+opponentId}>{opponent}</Link>:<b>{opponent}</b>}
+        <div className="player-fixture-stack">
+          {fixtureStatus?<span className="fixture-count-badge">{fixtureStatus}</span>:null}
+          {fixtures.length?fixtures.map((fixture,index)=>{
+            const home=Number(fixture.home_team_id)===Number(player.team_id)
+            const opponentId=home?Number(fixture.away_team_id):Number(fixture.home_team_id)
+            const opponentName=home?fixture.away_team_name:fixture.home_team_name
+            const [h,d,aPct]=outcomePercentages(fixture)
+            return <div className="player-fixture-chip" key={fixture.match_id||index}>
+              <span>{home?'Ev':'Dep'}</span>
+              <Link href={'/teams/'+opponentId}>{opponentName||'—'}</Link>
+              <small>{h}/{d}/{aPct}</small>
+            </div>
+          }):<div className="player-fixture-chip"><b>MAÇ YOK</b></div>}
         </div>
       </div>
       <MetricGrid items={decisionMetrics} className="decision-metrics"/>

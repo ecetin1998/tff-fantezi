@@ -23,6 +23,7 @@ values(
   '2026-27',
   $rules${
   "budget": 100,
+  "deadline_offset_minutes": 60,
   "squad": {"GK":2,"DEF":5,"MID":5,"FWD":3},
   "max_per_club": 3,
   "formations": ["3-4-3","3-5-2","4-3-3","4-4-2","4-5-1","5-2-3","5-3-2","5-4-1"],
