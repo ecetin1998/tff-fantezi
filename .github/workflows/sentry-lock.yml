@@ -1,0 +1,21 @@
+name: Generate Sentry lockfile
+on:
+  push:
+    branches: ['tmp/sentry-lock']
+permissions:
+  contents: read
+jobs:
+  lockfile:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install @sentry/nextjs --save-exact --no-audit --no-fund
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sentry-lockfile
+          path: |
+            package.json
+            package-lock.json
