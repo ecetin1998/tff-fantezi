@@ -342,46 +342,56 @@ Deno.serve(async (req: Request) => {
     const app=new Int8Array(M),goals=new Int16Array(M),assists=new Int16Array(M),cs=new Int8Array(M),
       saves=new Int16Array(M),conceded=new Int8Array(M),cards=new Int8Array(M),pen=new Int16Array(M),ownc=new Int8Array(M);
 
-    const started=Date.now();
-    for(let draw=0;draw<draws;draw++){
-      mins.fill(0);enter.fill(91);leave.fill(0);start.fill(0);used.fill(0);
-      app.fill(0);goals.fill(0);assists.fill(0);cs.fill(0);saves.fill(0);conceded.fill(0);cards.fill(0);pen.fill(0);ownc.fill(0);
-
-      for(let c=1;c<=18;c++){
-        const f=resolvedFormations[String(c)] || {GK:1,DEF:4,MID:5,FWD:1};
-        const qs=[Number(f.GK)||0,Number(f.DEF)||0,Number(f.MID)||0,Number(f.FWD)||0];
-        for(let pc=0;pc<4;pc++){
-          const chosen=choose(activeGroups[c][pc],qs[pc]);
-          for(const i of chosen){
-            used[i]=1;start[i]=1;enter[i]=0;
-            leave[i]=P[i].pc===0?90:sampleDuration(i);
-          }
-        }
-        const starters:number[]=[];
-        for(const i of teamsIdx[c]) if(start[i] && leave[i]<90) starters.push(i);
-        starters.sort((a,b)=>leave[a]-leave[b]);
-        let subs=0;
-        for(const i of starters){
-          if(subs>=5){leave[i]=90;continue}
-          const cand:number[]=[];
-          for(const j of groups[c][P[i].pc]) if(!used[j] && P[j].pc!==0 && P[j].availability>0 && P[j].benchw>0) cand.push(j);
-          if(!cand.length){leave[i]=90;continue}
-          const j=weightedPick(cand,j=>P[j].benchw);
-          if(j<0){leave[i]=90;continue}
-          if(bimodal && P[j].targetMin>=15 && P[j].targetMin<lowMinuteThreshold && random()>lowBenchKeep){
-            leave[i]=90;
-            continue;
-          }
-          enter[j]=leave[i];leave[j]=90;used[j]=1;subs++;
-        }
-        for(const i of teamsIdx[c]){
-          mins[i]=Math.max(0,leave[i]-enter[i]);
-          app[i]=(mins[i]>0?1:0)+(mins[i]>60?1:0);
+    const drawClub=(c:number)=>{
+      const f=resolvedFormations[String(c)] || {GK:1,DEF:4,MID:5,FWD:1};
+      const qs=[Number(f.GK)||0,Number(f.DEF)||0,Number(f.MID)||0,Number(f.FWD)||0];
+      for(let pc=0;pc<4;pc++){
+        const chosen=choose(activeGroups[c][pc],qs[pc]);
+        for(const i of chosen){
+          used[i]=1;start[i]=1;enter[i]=0;
+          leave[i]=P[i].pc===0?90:sampleDuration(i);
         }
       }
+      const starters:number[]=[];
+      for(const i of teamsIdx[c]) if(start[i] && leave[i]<90) starters.push(i);
+      starters.sort((a,b)=>leave[a]-leave[b]);
+      let subs=0;
+      for(const i of starters){
+        if(subs>=5){leave[i]=90;continue}
+        const cand:number[]=[];
+        for(const j of groups[c][P[i].pc]) if(!used[j] && P[j].pc!==0 && P[j].availability>0 && P[j].benchw>0) cand.push(j);
+        if(!cand.length){leave[i]=90;continue}
+        const j=weightedPick(cand,j=>P[j].benchw);
+        if(j<0){leave[i]=90;continue}
+        if(bimodal && P[j].targetMin>=15 && P[j].targetMin<lowMinuteThreshold && random()>lowBenchKeep){
+          leave[i]=90;continue;
+        }
+        enter[j]=leave[i];leave[j]=90;used[j]=1;subs++;
+      }
+      for(const i of teamsIdx[c]){
+        mins[i]=Math.max(0,leave[i]-enter[i]);
+        app[i]=(mins[i]>0?1:0)+(mins[i]>60?1:0);
+      }
+      const minuteCheck=teamsIdx[c].reduce((s,i)=>s+mins[i],0);
+      const starterCheck=teamsIdx[c].reduce((s,i)=>s+start[i],0);
+      if(Math.abs(minuteCheck-990)>1e-6||starterCheck!==11)throw new Error("990 minute / 11 starter invariant club "+c);
+    };
+
+    const started=Date.now();
+    for(let draw=0;draw<draws;draw++){
+      const drawXi=new Uint8Array(M),drawPlay=new Uint8Array(M),drawP60=new Uint8Array(M);
+      const drawMin=new Float64Array(M),drawCore=new Float64Array(M),drawBonus=new Float64Array(M),drawFP=new Float64Array(M);
 
       for(const m of matches){
-        gc.fill(0);
+        for(const i of m.both){
+          mins[i]=0;enter[i]=91;leave[i]=0;start[i]=0;used[i]=0;gc[i]=0;base[i]=0;
+          app[i]=0;goals[i]=0;assists[i]=0;cs[i]=0;saves[i]=0;conceded[i]=0;cards[i]=0;pen[i]=0;ownc[i]=0;
+        }
+
+        // DGW fixtures are independent matches: redraw XI and minutes each time.
+        drawClub(m.home_id);
+        drawClub(m.away_id);
+
         if(shareKappa>0){
           for(const i of m.both){
             goalShare[i]=gamma(shareKappa)/shareKappa;
@@ -390,7 +400,22 @@ Deno.serve(async (req: Request) => {
         } else {
           for(const i of m.both){goalShare[i]=1;assistShare[i]=1}
         }
-        for(const i of m.both){base[i]=0;goals[i]=0;assists[i]=0;cs[i]=0;saves[i]=0;conceded[i]=0;cards[i]=0;pen[i]=0;ownc[i]=0}
+
+        // Draw cards before goal events; red cards truncate the player's spell.
+        for(const i of m.both){
+          if(mins[i]<=0)continue;
+          const p=P[i],scheduledExposure=mins[i]/90;
+          const yc=random()<Math.min(.8,Math.max(0,(p.rates[4]||0)*scheduledExposure));
+          const rc=random()<Math.min(.15,Math.max(0,(p.rates[5]||0)*scheduledExposure));
+          cards[i]=-(yc?1:0)-(rc?3:0);
+          if(rc){
+            const span=Math.max(1,leave[i]-enter[i]);
+            leave[i]=Math.max(enter[i]+1,Math.min(leave[i],Math.floor(enter[i]+random()*span)));
+            mins[i]=Math.max(0,leave[i]-enter[i]);
+            app[i]=(mins[i]>0?1:0)+(mins[i]>60?1:0);
+          }
+        }
+
         const scores=[teamGoals(m.hl),teamGoals(m.al)];
         for(let side=0;side<2;side++){
           const ids=side===0?m.home:m.away,opp=side===0?m.away:m.home;
@@ -398,16 +423,17 @@ Deno.serve(async (req: Request) => {
             const tm=random()*90,on:number[]=[],op:number[]=[];
             for(const i of ids) if(enter[i]<=tm && leave[i]>tm) on.push(i);
             for(const i of opp) if(enter[i]<=tm && leave[i]>tm){op.push(i);gc[i]++}
-            if(!on.length) continue;
+            if(!on.length)continue;
             const scorer=weightedPick(on,i=>Math.max(1e-6,((P[i].rates[0]||0)+.15*(P[i].rates[1]||0)+.10*(P[i].rates[11]||0)+.025*(P[i].rates[10]||0))*goalShare[i]));
             if(random()<ownFraction && op.length){
-              const oi=weightedPick(op,()=>1); if(oi>=0) ownc[oi]-=2;
-            } else if(scorer>=0) goals[scorer]+=goalPts[P[scorer].pc];
+              const oi=weightedPick(op,()=>1);if(oi>=0)ownc[oi]-=2;
+            }else if(scorer>=0)goals[scorer]+=goalPts[P[scorer].pc];
             if(scorer>=0 && random()<assistFraction){
               const elig=on.filter(i=>i!==scorer);
               if(elig.length){
+                // rates[2] = assists/90, rates[3] = xA/90.
                 const ai=weightedPick(elig,i=>Math.max(1e-6,(.7*(P[i].rates[3]||0)+.3*(P[i].rates[2]||0))*assistShare[i]));
-                if(ai>=0) assists[ai]+=3;
+                if(ai>=0)assists[ai]+=3;
               }
             }
           }
@@ -416,13 +442,18 @@ Deno.serve(async (req: Request) => {
         let v1=-999,v2=-999,v3=-999;
         for(const i of m.both){
           const p=P[i],ex=mins[i]/90;
-          cs[i]=mins[i]>=60 && gc[i]===0 ? csPts[p.pc] : 0;
-          if(p.pc<=1) conceded[i]=-Math.floor(gc[i]/2);
-          if(p.pc===0) saves[i]=Math.floor(poisson(Math.max(0,(p.rates[6]||0)*ex))/3);
-          const yc=random()<Math.min(.8,Math.max(0,(p.rates[4]||0)*ex));
-          const rc=random()<Math.min(.15,Math.max(0,(p.rates[5]||0)*ex));
-          cards[i]=-(yc?1:0)-(rc?3:0); if(rc) cs[i]=0;
-          pen[i]=-2*poisson(Math.max(0,(p.rates[7]||0)*ex))+(p.pc===0?5*poisson(Math.max(0,(p.rates[8]||0)*ex)):0);
+          const isHome=Number(p.club)===Number(m.home_id);
+          const oppGoals=isHome?scores[1]:scores[0];
+          const oppLambda=isHome?m.al:m.hl;
+          cs[i]=mins[i]>=60 && oppGoals===0 ? csPts[p.pc] : 0;
+          if(p.pc<=1)conceded[i]=-Math.floor(gc[i]/2);
+          if(p.pc===0){
+            const saveRate=Math.max(.55,Math.min(.82,.68+.025*((p.rates[6]||0)-3)));
+            const oppSot=Math.max(.05,oppLambda)/Math.max(.12,1-saveRate);
+            saves[i]=Math.floor(poisson(oppSot*saveRate*ex)/3);
+          }
+          const penaltyPressure=Math.max(.25,Math.min(3,oppLambda/1.35));
+          pen[i]=-2*poisson(Math.max(0,(p.rates[7]||0)*ex))+(p.pc===0?5*poisson(Math.max(0,(p.rates[8]||0)*ex*penaltyPressure)):0);
           const b=app[i]+goals[i]+assists[i]+cs[i]+saves[i]+conceded[i]+cards[i]+pen[i]+ownc[i];
           base[i]=b;
           if(mins[i]>0){
@@ -431,20 +462,29 @@ Deno.serve(async (req: Request) => {
             else if(b<v2&&b>v3)v3=b;
           }
         }
+
         let c1=0,c2=0;
-        for(const i of m.both) if(mins[i]>0){if(base[i]===v1)c1++;else if(base[i]===v2)c2++}
+        for(const i of m.both)if(mins[i]>0){if(base[i]===v1)c1++;else if(base[i]===v2)c2++}
         for(const i of m.both){
           let bon=0;
           if(mins[i]>0){
             if(base[i]===v1)bon=3;
-            else if(base[i]===v2&&c1<3)bon=2;
-            else if(base[i]===v3&&c1+c2<3)bon=1;
+            else if(base[i]===v2&&c1<3)bon=[3,2,1][c1]||0;
+            else if(base[i]===v3&&c1+c2<3)bon=[3,2,1][c1+c2]||0;
           }
-          const fp=base[i]+bon;
-          sumXi[i]+=start[i]; if(mins[i]>0)sumPlay[i]++; if(mins[i]>=60)sumP60[i]++;
-          sumMin[i]+=mins[i]; sumCore[i]+=base[i]; sumBonus[i]+=bon; sumFP[i]+=fp; if(fp>=6)sumP6[i]++;
-          hist[i][Math.max(0,Math.min(bins-1,Math.round(fp)+off))]++;
+          drawXi[i]=Math.max(drawXi[i],start[i]);
+          drawPlay[i]=Math.max(drawPlay[i],mins[i]>0?1:0);
+          drawP60[i]=Math.max(drawP60[i],mins[i]>=60?1:0);
+          drawMin[i]+=mins[i];drawCore[i]+=base[i];drawBonus[i]+=bon;drawFP[i]+=base[i]+bon;
         }
+      }
+
+      // Weekly metrics aggregate every fixture before updating probabilities/quantiles.
+      for(let i=0;i<M;i++){
+        sumXi[i]+=drawXi[i];sumPlay[i]+=drawPlay[i];sumP60[i]+=drawP60[i];
+        sumMin[i]+=drawMin[i];sumCore[i]+=drawCore[i];sumBonus[i]+=drawBonus[i];sumFP[i]+=drawFP[i];
+        if(drawFP[i]>=6)sumP6[i]++;
+        hist[i][Math.max(0,Math.min(bins-1,Math.round(drawFP[i])+off))]++;
       }
     }
 
