@@ -78,22 +78,31 @@ grant select(
   possession_percentage,shot_conversion_rate
 ) on public.scout_team_tactical_profiles to anon,authenticated;
 
-with totals as (
-  select p.team_id,sum(coalesce(s.xg_total,0)+coalesce(s.xa_total,0)) denom
+with features as (
+  select s.player_id,p.team_id,
+         coalesce(s.xg_total,0) xg_total,
+         coalesce(
+           s.xa_total,
+           f.effective_xa_per90*coalesce(s.minutes,0)/90.0,
+           0
+         ) effective_xa_total
   from public.scout_player_season_stats s
-  join public.scout_players p on p.id=s.player_id
-  where s.season='2026-27' and p.active=true
-  group by p.team_id
+  join public.scout_players p on p.id=s.player_id and p.active=true
+  left join public.v_scout_player_model_features f on f.player_id=s.player_id
+  where s.season='2026-27'
+), totals as (
+  select team_id,sum(xg_total+effective_xa_total) denom
+  from features group by team_id
 )
 update public.scout_player_season_stats s
 set attack_contribution_share=
       case when totals.denom>0
-           then (coalesce(s.xg_total,0)+coalesce(s.xa_total,0))/totals.denom
+           then (features.xg_total+features.effective_xa_total)/totals.denom
            else 0 end,
     advanced_updated_at=coalesce(s.advanced_updated_at,now())
-from public.scout_players p
-join totals on totals.team_id=p.team_id
-where s.season='2026-27' and s.player_id=p.id and p.active=true;
+from features
+join totals on totals.team_id=features.team_id
+where s.season='2026-27' and s.player_id=features.player_id;
 
 create or replace function public.scout_enrichment_qa()
 returns jsonb
