@@ -31,6 +31,7 @@ jobs:
           import {PurgeCSS} from 'purgecss'
           import postcss from 'postcss'
           import cssnano from 'cssnano'
+          import {minify as cssoMinify} from 'csso'
           const files=[
             'components/SiteShell.module.css',
             'components/PremiumViews.module.css',
@@ -127,8 +128,9 @@ jobs:
           compactContainer(ast)
           const compacted=ast.toString()
           const optimized=await postcss([cssnano({preset:'default'})]).process(compacted,{from:undefined})
-          fs.writeFileSync('app/generated.css',optimized.css)
-          console.log('raw css bytes',Buffer.byteLength(raw),'globalized bytes',Buffer.byteLength(css),'purged bytes',Buffer.byteLength(result[0].css),'compacted bytes',Buffer.byteLength(compacted),'optimized bytes',Buffer.byteLength(optimized.css))
+          const restructured=cssoMinify(optimized.css,{restructure:true}).css
+          fs.writeFileSync('app/generated.css',restructured)
+          console.log('raw css bytes',Buffer.byteLength(raw),'globalized bytes',Buffer.byteLength(css),'purged bytes',Buffer.byteLength(result[0].css),'compacted bytes',Buffer.byteLength(compacted),'optimized bytes',Buffer.byteLength(optimized.css),'csso bytes',Buffer.byteLength(restructured))
           NODE
           node scripts/tmp-purge.mjs
           python3 - <<'PY'
