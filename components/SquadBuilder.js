@@ -81,7 +81,8 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
   const [xiIds,setXiIds]=useState(initialXI)
   const initialCaptainId=useMemo(()=>{
     const saved=initialState.find(x=>x.is_captain)?.player_id
-    return saved&&initialXI.includes(saved)?saved:(initialXI.map(id=>map.get(id)).sort((a,b)=>xfp(b)-xfp(a))[0]?.id||null)
+    const savedPlayer=saved?map.get(saved):null
+    return saved&&initialXI.includes(saved)&&savedPlayer?.position!=='GK'?saved:(initialXI.map(id=>map.get(id)).filter(p=>p&&p.position!=='GK').sort((a,b)=>xfp(b)-xfp(a))[0]?.id||null)
   },[initialState,initialXI,map])
   const [captainId,setCaptainId]=useState(initialCaptainId)
   const [poolLimit,setPoolLimit]=useState(180)
@@ -116,7 +117,7 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
   const validRoster=ids.length===SQUAD_SIZE&&Object.entries(SQUAD_LIMITS).every(([k,v])=>(counts[k]||0)===v)&&cost<=BUDGET+.0001&&clubLimitOk
   const liveFormation=formationFromXIIds(xiIds,map)
   const validXI=xiIds.length===STARTING_XI_SIZE&&xiIds.every(id=>ids.includes(id))&&Boolean(liveFormation)&&liveFormation===formation
-  const valid=validRoster&&validXI&&Boolean(captainId)&&xiIds.includes(captainId)
+  const valid=validRoster&&validXI&&Boolean(captainId)&&xiIds.includes(captainId)&&map.get(captainId)?.position!=='GK'
 
   const xi=xiIds.map(id=>map.get(id)).filter(Boolean)
   const benchValue=p=>{
@@ -140,7 +141,7 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
   const formationOptions=useMemo(()=>Object.keys(FORMATION_MAP).map(key=>{
     const lineup=buildXI(ids,key,map)
     const base=lineup.reduce((sum,id)=>sum+xfp(map.get(id)),0)
-    const cap=lineup.map(id=>map.get(id)).filter(Boolean).sort((a,b)=>xfp(b)-xfp(a))[0]
+    const cap=lineup.map(id=>map.get(id)).filter(p=>p&&p.position!=='GK').sort((a,b)=>xfp(b)-xfp(a))[0]
     const total=lineup.length===STARTING_XI_SIZE?base+xfp(cap):0
     return {key,lineup,base,total,captain:cap,complete:lineup.length===STARTING_XI_SIZE}
   }).sort((a,b)=>b.total-a.total),[ids,map])
@@ -524,7 +525,7 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
                     <small>{p.team}</small>
                     <div className="pitch-player-tags"><span>{Number(p.price||0).toFixed(1)}m</span><strong>{xfp(p).toFixed(1)} xFP</strong></div>
                   </button>
-                  <button type="button" className={`captain-toggle ${p.id===captainId?'active':''}`} onClick={()=>setCaptainId(p.id)} disabled={isLocked} aria-label="Kaptan yap">K</button>
+                  {p.position!=='GK'?<button type="button" className={`captain-toggle ${p.id===captainId?'active':''}`} onClick={()=>setCaptainId(p.id)} disabled={isLocked} aria-label="Kaptan yap">K</button>:null}
                 </div>
               })}
             </div>)}
