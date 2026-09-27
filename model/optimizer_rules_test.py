@@ -9,7 +9,7 @@ squad=[]
 pid=1
 for pos,count in [('GK',2),('DEF',5),('MID',5),('FWD',3)]:
     for _ in range(count):
-        squad.append({'id':pid,'position':pos,'price':5.0})
+        squad.append({'id':pid,'position':pos,'price':5.0,'team':f'T{((pid-1)//3)+1}'})
         pid+=1
 assert legal_squad(squad)
 
