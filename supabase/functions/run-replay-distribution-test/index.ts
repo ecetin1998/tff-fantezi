@@ -407,7 +407,7 @@ Deno.serve(async (req: Request) => {
           const p=P[i],scheduledExposure=mins[i]/90;
           const yc=random()<Math.min(.8,Math.max(0,(p.rates[4]||0)*scheduledExposure));
           const rc=random()<Math.min(.15,Math.max(0,(p.rates[5]||0)*scheduledExposure));
-          cards[i]=-(yc?1:0)-(rc?3:0);
+          cards[i]=rc?-3:(yc?-1:0);
           if(rc){
             const span=Math.max(1,leave[i]-enter[i]);
             leave[i]=Math.max(enter[i]+1,Math.min(leave[i],Math.floor(enter[i]+random()*span)));
