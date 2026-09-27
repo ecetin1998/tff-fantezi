@@ -3,10 +3,9 @@ on:
   push:
     branches: [tmp/cssnano-pass]
 permissions:
-  contents: write
+  contents: read
 jobs:
   css:
-    if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
     env:
       NEXT_PUBLIC_SUPABASE_URL: https://example.supabase.co
@@ -24,13 +23,55 @@ jobs:
           cache: npm
       - run: npm install --package-lock-only --no-audit --no-fund
       - run: npm ci --no-audit --no-fund
-      - run: npm run build
-      - name: Commit lockfile
-        if: success()
+      - name: Build consolidated purged CSS
+        shell: bash
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add package-lock.json
-          if git diff --cached --quiet; then exit 0; fi
-          git commit -m "tmp: lock cssnano"
-          git push origin HEAD:tmp/cssnano-pass
+          cat > /tmp/purge.mjs <<'NODE'
+          import fs from 'node:fs'
+          import {PurgeCSS} from 'purgecss'
+          const files=[
+            'components/SiteShell.module.css',
+            'components/PremiumViews.module.css',
+            'components/SquadWorkspace.module.css',
+            'components/AnalysisViews.module.css',
+            'components/DataViews.module.css'
+          ]
+          const css=files.map(file=>fs.readFileSync(file,'utf8')).join('\n')
+          fs.writeFileSync('/tmp/all.css',css)
+          const result=await new PurgeCSS().purge({
+            content:['app/**/*.js','components/**/*.js'],
+            css:[{raw:css}],
+            safelist:{
+              standard:[
+                'scope','active','compact','recommended','alternative','warning','critical',
+                'good','neutral','tough','high','medium','low','edge','G','B','M',
+                'GK','DEF','MID','FWD','is-return','is-emphasis',
+                'historical_frozen','live_frozen','reconstructed','preseason_replay',
+                'closed','replay_pending','cold_start_gap','bias-up','bias-down',
+                /^position-(gk|def|mid|fwd)$/i
+              ]
+            }
+          })
+          fs.writeFileSync('components/AppStyles.module.css',result[0].css)
+          console.log('raw css bytes',Buffer.byteLength(css),'purged bytes',Buffer.byteLength(result[0].css))
+          NODE
+          node /tmp/purge.mjs
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('app/layout.js')
+          s=p.read_text()
+          for line in [
+            "import siteShell from '@/components/SiteShell.module.css'\n",
+            "import premiumViews from '@/components/PremiumViews.module.css'\n",
+            "import squadWorkspace from '@/components/SquadWorkspace.module.css'\n",
+            "import analysisViews from '@/components/AnalysisViews.module.css'\n",
+            "import dataViews from '@/components/DataViews.module.css'\n",
+          ]: s=s.replace(line,'')
+          s=s.replace("import Nav from '@/components/Nav'","import appStyles from '@/components/AppStyles.module.css'\nimport Nav from '@/components/Nav'")
+          s=s.replace("const cssScopes=[siteShell.scope,premiumViews.scope,squadWorkspace.scope,analysisViews.scope,dataViews.scope].join(' ')","const cssScopes=appStyles.scope")
+          p.write_text(s)
+          PY
+      - name: Next build
+        run: npx next build
+      - name: Measure CSS
+        run: node scripts/check-css-size.mjs
