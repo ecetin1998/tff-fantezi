@@ -20,6 +20,8 @@ const jsTests=[
   'model/scoutApiFilters.test.js',
   'model/observability.test.js',
   'model/playerPresentationContract.test.js',
+  'model/fullAuditContract.test.js',
+  'model/cloudflareDeployContract.test.js',
 ]
 
 for(const file of jsTests){
