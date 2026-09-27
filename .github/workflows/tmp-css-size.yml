@@ -29,6 +29,8 @@ jobs:
           cat > scripts/tmp-purge.mjs <<'NODE'
           import fs from 'node:fs'
           import {PurgeCSS} from 'purgecss'
+          import postcss from 'postcss'
+          import cssnano from 'cssnano'
           const files=[
             'components/SiteShell.module.css',
             'components/PremiumViews.module.css',
@@ -72,8 +74,9 @@ jobs:
               ]
             }
           })
-          fs.writeFileSync('app/generated.css',result[0].css)
-          console.log('raw css bytes',Buffer.byteLength(raw),'globalized bytes',Buffer.byteLength(css),'purged bytes',Buffer.byteLength(result[0].css))
+          const optimized=await postcss([cssnano({preset:'default'})]).process(result[0].css,{from:undefined})
+          fs.writeFileSync('app/generated.css',optimized.css)
+          console.log('raw css bytes',Buffer.byteLength(raw),'globalized bytes',Buffer.byteLength(css),'purged bytes',Buffer.byteLength(result[0].css),'optimized bytes',Buffer.byteLength(optimized.css))
           NODE
           node scripts/tmp-purge.mjs
           python3 - <<'PY'
@@ -89,7 +92,7 @@ jobs:
           ]: s=s.replace(line,'')
           s=s.replace("import './globals.css'","import './globals.css'\nimport './generated.css'")
           import re
-          s=re.sub(r"const cssScopes=.*?\\n","",s)
+          s=re.sub(r"const cssScopes=.*?\n","",s)
           s=s.replace('<html lang="tr" className={cssScopes}><body className={cssScopes}>','<html lang="tr"><body>')
           p.write_text(s)
           PY
