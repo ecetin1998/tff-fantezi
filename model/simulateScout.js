@@ -281,6 +281,10 @@ function simulateScout(input,count,seed,attackPolicy=true){
   }
 
   for(const r of result){
+    // Probability accumulators can drift a few ulps above 1 after many draws.
+    r.xi=Math.max(0,Math.min(1,r.xi));
+    r.play=Math.max(0,Math.min(1,r.play));
+    r.p60=Math.max(0,Math.min(1,r.p60));
     r.start_minutes=r.xi?r.start_minutes/r.xi:0;
     r.p25=histogramQuantile(r._hist,.25);
     r.p75=histogramQuantile(r._hist,.75);
