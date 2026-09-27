@@ -4,7 +4,7 @@ import { saveSquad } from '@/app/actions'
 import { teamCssVars } from '@/lib/teamThemes'
 import { availabilityCompactNote, availabilityIsIssue } from '@/lib/availability'
 import {BUDGET,FORMATION_MAP,MAX_PLAYERS_PER_CLUB,SQUAD_LIMITS,SQUAD_SIZE,STARTING_GK,STARTING_XI_SIZE,VICE_CAPTAIN_ENABLED} from '@/lib/rules'
-import {playerLabel} from '@/lib/playerPresentation'
+import {pitchPlayerLabel,playerLabel} from '@/lib/playerPresentation'
 const POS_ORDER={GK:0,DEF:1,MID:2,FWD:3}
 const posLabel={GK:'KL',DEF:'DEF',MID:'OS',FWD:'FOR'}
 
@@ -20,7 +20,7 @@ function stateSignature(payload=[]){
     .map(x=>({player_id:Number(x.player_id),is_captain:Boolean(x.is_captain),bench_order:x.bench_order===null?null:Number(x.bench_order)}))
     .sort((a,b)=>a.player_id-b.player_id))
 }
-function displayName(player){ return playerLabel(player) }
+function displayName(player){ return pitchPlayerLabel(player) }
 function shirtMark(player){ return posLabel[player?.position] || player?.position || '—' }
 function formationFromState(state,map){
   const starters=state.filter(x=>x.bench_order===null).map(x=>map.get(x.player_id)).filter(Boolean)

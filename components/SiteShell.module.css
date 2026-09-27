@@ -533,3 +533,13 @@
 
 
 
+
+.scope :global(.data-freshness-banner){
+  margin:0 0 18px;padding:12px 14px;border-radius:14px;border:1px solid rgba(245,196,73,.42);
+  display:flex;gap:10px;align-items:center;flex-wrap:wrap;background:rgba(245,196,73,.10);color:#f5d77e
+}
+.scope :global(.data-freshness-banner) b{font-weight:900}
+.scope :global(.data-freshness-banner) span{font-size:13px}
+.scope :global(.data-freshness-banner.critical){
+  border-color:rgba(255,92,112,.46);background:rgba(255,92,112,.11);color:#ffb3bf
+}

@@ -2,11 +2,12 @@ import Link from 'next/link'
 import { getMatches } from '@/lib/data'
 import { teamCssVars } from '@/lib/teamThemes'
 import DataFreshnessBanner from '@/components/DataFreshnessBanner'
+import {outcomePercentages} from '@/lib/format'
 
 export const revalidate=300
 export const metadata={title:'Maç Tahminleri'}
 
-const matchupLabel={good:'İyi',neutral:'Dengeli',tough:'Zor'}
+const matchupLabel={good:'Yüksek',neutral:'Orta',tough:'Düşük'}
 const profileClass=total=>total>=3?'high':total<=2?'low':'medium'
 const pct=v=>Math.round(Number(v||0)*100)
 
@@ -90,9 +91,20 @@ function fantasyReading(m){
   const attackName=attackSide==='home'?m.home_team:m.away_team
   const attackTop=attackSide==='home'?homeTop:awayTop
   const value=(attackSide==='home'?m.home_fantasy:m.away_fantasy)?.best_value
+  const xgGap=Math.abs(homeXg-awayXg)
+  const csGap=Math.abs(homeCs-awayCs)
+  let base
+  if(total>=2.65&&xgGap<=.30){
+    base='Toplam gol beklentisi canlı ama taraflar arasında net bir xG kopuşu yok; bitiricilik, duran top ve ceza sahası rolü oyuncu seçiminde ayrıştırıcı.'
+  }else if(csGap>=.10){
+    const safer=homeCs>=awayCs?m.home_team:m.away_team
+    base=`Sonuç tarafı dengeli kalırken clean sheet ihtimali ${safer} lehine ayrışıyor; savunma seçimi ile hücum tavanını aynı maçta dengeli kurmak önemli.`
+  }else{
+    base='xG ve clean sheet farkları dar; dakika güveni, duran top rolü ve ceza sahası aksiyonları takım isminden daha belirleyici.'
+  }
   return {
     label:'Dengeli risk',
-    text:`Maç ne net bir savunma ne de saf gol düellosu profiline giriyor; küçük rol farkları oyuncu seçiminde takım isminden daha önemli. ${attackTop?`${attackName} tarafında ${attackTop.name} ${attackTop.xfp.toFixed(1)} xFP ile öne çıkıyor.`:''} ${value&&value.player_id!==attackTop?.player_id&&value.xfp>=3.5?`F/P tarafında ${value.name} da ${value.price.toFixed(1)}m fiyatıyla dikkat çekiyor.`:''}`.replace(/\s+/g,' ').trim()
+    text:`${base} ${attackTop?`${attackName} tarafında ${attackTop.name} ${attackTop.xfp.toFixed(1)} xFP ile öne çıkıyor.`:''} ${value&&value.player_id!==attackTop?.player_id&&value.xfp>=3.5?`Fiyat/performans tarafında ${value.name} da ${value.price.toFixed(1)}m fiyatıyla dikkat çekiyor.`:''}`.replace(/\s+/g,' ').trim()
   }
 }
 
@@ -108,6 +120,7 @@ export default async function Matches(){
     <div className="grid match-grid modern-match-grid match-analysis-grid">
       {matches.map(m=>{
         const home=Number(m.home_win_probability||0),draw=Number(m.draw_probability||0),away=Number(m.away_win_probability||0)
+        const [homePct,drawPct,awayPct]=outcomePercentages(m)
         const homeXg=Number(m.home_xg||0),awayXg=Number(m.away_xg||0),totalXg=homeXg+awayXg
         const homeCs=Number(m.home_cs_probability||0),awayCs=Number(m.away_cs_probability||0)
         const attackEdge=homeXg===awayXg?null:(homeXg>awayXg?'home':'away')
@@ -127,8 +140,8 @@ export default async function Matches(){
               <span>EV</span>
               <Link className="match-team-link" style={teamCssVars(m.home_team)} href={'/teams/'+m.home_team_id}><i className="club-dot"/><b>{m.home_team}</b></Link>
               <div className="match-team-meta matchup-badges">
-                <em className={'matchup-pill '+(m.home_attack_level||'neutral')}>Hücum: {matchupLabel[m.home_attack_level]||'Dengeli'}</em>
-                <em className={'matchup-pill '+(m.home_defense_level||'neutral')}>Savunma: {matchupLabel[m.home_defense_level]||'Dengeli'}</em>
+                <em className={'matchup-pill '+(m.home_attack_level||'neutral')}>Gol beklentisi: {matchupLabel[m.home_attack_level]||'Orta'}</em>
+                <em className={'matchup-pill '+(m.home_defense_level||'neutral')}>CS şansı: {matchupLabel[m.home_defense_level]||'Orta'}</em>
               </div>
             </div>
 
@@ -142,16 +155,16 @@ export default async function Matches(){
               <span>DEP</span>
               <Link className="match-team-link away-link" style={teamCssVars(m.away_team)} href={'/teams/'+m.away_team_id}><i className="club-dot"/><b>{m.away_team}</b></Link>
               <div className="match-team-meta away-meta matchup-badges">
-                <em className={'matchup-pill '+(m.away_attack_level||'neutral')}>Hücum: {matchupLabel[m.away_attack_level]||'Dengeli'}</em>
-                <em className={'matchup-pill '+(m.away_defense_level||'neutral')}>Savunma: {matchupLabel[m.away_defense_level]||'Dengeli'}</em>
+                <em className={'matchup-pill '+(m.away_attack_level||'neutral')}>Gol beklentisi: {matchupLabel[m.away_attack_level]||'Orta'}</em>
+                <em className={'matchup-pill '+(m.away_defense_level||'neutral')}>CS şansı: {matchupLabel[m.away_defense_level]||'Orta'}</em>
               </div>
             </div>
           </div>
 
           <div className="outcome-bar outcome-bar-labeled" aria-label="Maç sonucu olasılıkları">
-            <i className="home" style={{width:(home*100)+'%'}} title={`Ev %${(home*100).toFixed(0)}`}><span><b>{(home*100).toFixed(0)}%</b> Ev</span></i>
-            <i className="draw" style={{width:(draw*100)+'%'}} title={`Beraberlik %${(draw*100).toFixed(0)}`}><span><b>{(draw*100).toFixed(0)}%</b> Ber.</span></i>
-            <i className="away" style={{width:(away*100)+'%'}} title={`Dep %${(away*100).toFixed(0)}`}><span><b>{(away*100).toFixed(0)}%</b> Dep</span></i>
+<i className="home" style={{width:homePct+'%'}} title={`Ev %${homePct}`}><span><b>{homePct}%</b> Ev</span></i>
+<i className="draw" style={{width:drawPct+'%'}} title={`Beraberlik %${drawPct}`}><span><b>{drawPct}%</b> Ber.</span></i>
+<i className="away" style={{width:awayPct+'%'}} title={`Dep %${awayPct}`}><span><b>{awayPct}%</b> Dep</span></i>
           </div>
 
           <div className="match-fantasy-meta fantasy-first-meta">
@@ -172,7 +185,7 @@ export default async function Matches(){
               <small>{m.home_team} xG</small><b>{homeXg.toFixed(2)}</b>
               <small>{m.away_team} xG</small><b>{awayXg.toFixed(2)}</b>
               <small>Model haftası</small><b>MH{run?.gameweek||'—'}</b>
-              <small>1-X-2</small><b>%${(home*100).toFixed(0)} / %${(draw*100).toFixed(0)} / %${(away*100).toFixed(0)}</b>
+<small>1-X-2</small><b>{homePct}% / {drawPct}% / {awayPct}%</b>
             </div>
             <p className="elo-explainer">Bu alan yalnız yayınlanan maç modeli değerlerini gösterir; arayüzde ayrı bir runtime Elo sinyali hesaplanmaz.</p>
           </details>

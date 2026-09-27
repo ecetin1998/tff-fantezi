@@ -41,7 +41,7 @@ const glossary=[
   ['6+ %', 'Oyuncunun model dağılımında en az 6 fantasy puanına ulaşma olasılığıdır.'],
   ['xG', 'Expected Goals; gol pozisyonlarının kalitesini ve beklenen gol üretimini ölçen istatistiktir. Tek başına maç skoru tahmini değildir.'],
   ['xA', 'Expected Assists; bir oyuncunun ürettiği pasların asist olma beklentisini ölçen istatistiktir.'],
-  ['F/P', 'Fiyat/performans göstergesi. Oyuncunun fiyatına göre model beklentisinin ne kadar verimli olduğunu karşılaştırmaya yardım eder.'],
+  ['Fiyat/performans', 'Fiyat/performans göstergesi. Oyuncunun fiyatına göre model beklentisinin ne kadar verimli olduğunu karşılaştırmaya yardım eder.'],
   ['ELO', 'Takımların geçmiş sonuçlarından türetilen göreli güç derecesidir. Rakibin gücünü ve fikstür bağlamını yorumlamak için yardımcı sinyal olarak kullanılır.'],
   ['Puan bandı', 'P25–P90 gibi aralıklar tek bir xFP sayısından daha geniş olası sonuç alanını gösterir. Fantasy puanı doğal olarak değişken olduğu için bandın dışına çıkan sonuçlar da mümkündür.'],
   ['Top‑25', 'Yüksek skor adaylarını xFP’den ayrı bir üst-tavan sıralama katmanıyla tarar. Ana xFP hesabının veya optimizerın yerine geçmez.'],

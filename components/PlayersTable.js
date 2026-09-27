@@ -95,7 +95,7 @@ export default function PlayersTable({players,run}){
         <option value="">Tüm mevkiler</option><option value="GK">KL</option><option value="DEF">DEF</option><option value="MID">OS</option><option value="FWD">FOR</option>
       </select>
       <select className="mobile-sort-select" value={sort} onChange={e=>{setSort(e.target.value);setDir(-1);setPage(1)}}>
-        <option value="xfp">xFP'ye göre</option><option value="xi">İlk 11 ihtimaline göre</option><option value="minutes">Dakikaya göre</option><option value="p90">P90'a göre</option><option value="six">6+ ihtimaline göre</option><option value="points">Toplam puana göre</option><option value="value">F/P'ye göre</option><option value="price">Fiyata göre</option>
+        <option value="xfp">xFP'ye göre</option><option value="xi">İlk 11 ihtimaline göre</option><option value="minutes">Dakikaya göre</option><option value="p90">P90'a göre</option><option value="six">6+ ihtimaline göre</option><option value="points">Toplam puana göre</option><option value="value">Fiyat/performansa göre</option><option value="price">Fiyata göre</option>
       </select>
     </div>
 
@@ -122,7 +122,7 @@ export default function PlayersTable({players,run}){
       <div className="card table-wrap desktop-player-table"><table><thead><tr>
         <th className="rank-col">#</th>{head('name','Oyuncu')}{head('team','Takım')}{head('pos','Mevki')}{head('opp','Rakip')}<th>E/D</th>
         {head('price','Fiyat')}{head('points','Toplam Puan')}{head('xi','İlk 11')}{head('minutes','xDk')}{head('xfp','xFP')}
-        {head('p25','P25')}{head('p90','P90')}{head('six','6+ %')}{head('xg','xG')}{head('xa','xA')}{head('value','F/P')}
+        {head('p25','P25')}{head('p90','P90')}{head('six','6+ %')}{head('xg','xG')}{head('xa','xA')}{head('value','Fiyat/performans')}
       </tr></thead><tbody>{pageRows.map((p,i)=><tr className="team-player-row clickable-row" style={teamCssVars(p.team)} key={p.id}
         tabIndex={0} onClick={e=>openRow(e,p.id)} onKeyDown={e=>{if(e.key==='Enter')router.push('/players/'+p.id)}}>
         <td className="rank-col">#{(safePage-1)*PAGE_SIZE+i+1}</td>

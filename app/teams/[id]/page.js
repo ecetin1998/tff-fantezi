@@ -4,6 +4,7 @@ import { getTeamDetail, getTeamFixturesOverview } from '@/lib/data'
 import { teamCssVars } from '@/lib/teamThemes'
 import TeamRoster from '@/components/TeamRoster'
 import {playerLabel} from '@/lib/playerPresentation'
+import {outcomePercentages} from '@/lib/format'
 
 export const revalidate=300
 export async function generateStaticParams(){
@@ -29,9 +30,10 @@ export default async function TeamPage({params}){
 
   const {team,run,season:s,history,currentMatch,opponent,players,fantasyByGameweek}=data
   const isHome=currentMatch?Number(currentMatch.home_team_id)===Number(team.id):false
+  const resultPct=currentMatch?outcomePercentages(currentMatch):null
   const teamXg=currentMatch?(isHome?currentMatch.home_xg:currentMatch.away_xg):null
   const oppXg=currentMatch?(isHome?currentMatch.away_xg:currentMatch.home_xg):null
-  const win=currentMatch?(isHome?currentMatch.home_win_probability:currentMatch.away_win_probability):null
+  const win=resultPct?(isHome?resultPct[0]:resultPct[2])/100:null
   const cs=currentMatch?(isHome?currentMatch.home_cs_probability:currentMatch.away_cs_probability):null
 
   const played=(history||[]).filter(m=>m.home_goals!==null&&m.home_goals!==undefined&&m.away_goals!==null&&m.away_goals!==undefined)
@@ -98,6 +100,7 @@ export default async function TeamPage({params}){
         <div><span>Rakip xG</span><b>{num(oppXg)}</b><small>savunma riski</small></div>
         <div><span>Galibiyet</span><b>{pct(win)}</b><small>maç kazanma ihtimali</small></div>
         <div><span>Clean sheet</span><b>{pct(cs)}</b><small>savunma getirisi</small></div>
+        <div><span>1-X-2</span><b>{resultPct?resultPct.join(' / '):'—'}</b><small>ev / beraberlik / deplasman</small></div>
       </div>
 
       <div className="team-top-picks">

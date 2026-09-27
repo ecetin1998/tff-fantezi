@@ -4,6 +4,7 @@ import { getPlayerDetail, getPlayersWithProjection } from '@/lib/data'
 import { teamCssVars } from '@/lib/teamThemes'
 import { availabilityCompactNote, availabilityIsIssue } from '@/lib/availability'
 import {playerLabel,predictionConfidenceLabel} from '@/lib/playerPresentation'
+import {outcomePercentages} from '@/lib/format'
 
 export const revalidate=300
 export async function generateStaticParams(){
@@ -45,6 +46,7 @@ export default async function PlayerPage({ params }){
   if(!data) notFound()
 
   const {run,player,projection:p,availability:a,role:r,season:s,weekly,match}=data
+  const resultPct=match?outcomePercentages(match):null
   const closedWeeks=[...(weekly||[])].sort((x,y)=>Number(x.gameweek||0)-Number(y.gameweek||0))
   const playedWeeks=closedWeeks.filter(w=>Number(w.minutes||0)>0)
   const played=Number(s?.matches_played ?? playedWeeks.length)
@@ -70,7 +72,8 @@ export default async function PlayerPage({ params }){
     {label:'xDakika',value:num(p?.x_minutes,0),note:'beklenen süre'},
     {label:'6+ puan',value:pct(p?.six_plus_probability),note:'yüksek getiri ihtimali'},
     {label:'P90',value:num(p?.p90,1),note:'üst %10 eşiği'},
-    {label:'F/P',value:num(p?.value_score),note:'fiyat verimliliği'},
+    {label:'Fiyat/performans',value:num(p?.value_score),note:'fiyat verimliliği'},
+    {label:'1-X-2',value:resultPct?resultPct.join(' / '):'—',note:'ev / beraberlik / deplasman'},
   ]
 
   const scenarioMetrics=[
