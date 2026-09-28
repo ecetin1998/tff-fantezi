@@ -7,6 +7,7 @@ import {playerLabel,predictionConfidenceLabel} from '@/lib/playerPresentation'
 import {playerRoleLabel} from '@/lib/playerRole'
 
 export const revalidate=300
+export const dynamicParams=false
 export async function generateStaticParams(){
   const {players}=await getPlayersWithProjection()
   return (players||[]).map(p=>({id:String(p.id)}))
