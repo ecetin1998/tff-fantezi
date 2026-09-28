@@ -1,12 +1,12 @@
 # Model Refresh Automation Design
 
-**Status:** design only. No schedule/cron is installed by this audit branch.
+**Status:** implemented. The generic weekly lifecycle is scheduled hourly; it advances only after the current MH is fully closed and all release gates pass.
 
 ## Goal
 
 Automate the weekly Scout lifecycle without ever promoting a run that has not passed the same release gates used manually.
 
-## Proposed pipeline
+## Active pipeline
 
 1. **Acquire inputs**
    - fixtures and kickoff times
@@ -38,9 +38,9 @@ Automate the weekly Scout lifecycle without ever promoting a run that has not pa
    - send a notification containing stage, run id, model revision and sanitized error
    - leave the previous current run untouched
 
-## Recommended scheduler
+## Scheduler
 
-Use **GitHub Actions schedule** for orchestration and Supabase Edge Functions only as protected workers.
+GitHub Actions is the active orchestrator and Supabase Edge Functions are protected workers.
 
 Reasons:
 - repository revision is explicit in every run;
@@ -49,16 +49,9 @@ Reasons:
 - secrets remain in GitHub/Supabase secret stores;
 - promotion can be a final explicit job with dependencies on all gates.
 
-Do not install the schedule until this design is approved.
+## Cadence
 
-## Proposed cadence
-
-A single blind midnight refresh is not enough for fantasy decisions. After approval, use:
-- daily input refresh during the gameweek;
-- a stronger refresh after the previous MH is fully closed;
-- a final pre-lock refresh sufficiently before first kickoff.
-
-The exact clock times should be chosen only after confirming the official game lock behavior and source update latency.
+A single blind midnight refresh is not enough for fantasy decisions. The workflow runs an hourly lightweight source/closure check. It performs no model mutation while the current MH is open. Once every current-MH fixture is `Bitti` + `KAPANDI`, official weekly rows are final, and the next MH fixtures exist, it performs the full rollover exactly once. The new run is snapshotted before the next first kickoff.
 
 ## Worker authentication
 
@@ -85,7 +78,7 @@ On failure, notify only after a stage genuinely fails. Recommended options:
 
 No notification connector is hard-coded in this branch.
 
-## Acceptance before enabling schedule
+## Runtime guarantees
 
 - protected Edge Functions reject requests without a valid GitHub OIDC token or an explicitly configured legacy gate secret
 - both QA RPCs are read-only
