@@ -178,6 +178,16 @@ jobs:
           set -euo pipefail
           jq -n --arg run "$RUN_ID" --slurpfile closed "$RUNNER_TEMP/closed-week.json"             '{stage:"replay",run_id:$run,pass:true,details:{pass:true,kind:"closed_live_week",closed_week:$closed[0]}}' |             curl --fail --show-error --silent -H "Authorization: Bearer $OIDC_TOKEN" -H "Content-Type: application/json" --data-binary @-             "$FUNCTIONS_URL/model-refresh-control" | jq .
 
+      - name: Inherit validated model gate
+        if: steps.status.outputs.ready == 'true'
+        shell: bash
+        env:
+          OIDC_TOKEN: ${{ steps.oidc.outputs.token }}
+          RUN_ID: ${{ steps.prepare.outputs.run_id }}
+        run: |
+          set -euo pipefail
+          jq -n --arg run "$RUN_ID" '{stage:"model_gate",run_id:$run}' |             curl --fail --show-error --silent -H "Authorization: Bearer $OIDC_TOKEN" -H "Content-Type: application/json" --data-binary @-             "$FUNCTIONS_URL/model-refresh-control" | jq .
+
       - name: Freeze next-MH live benchmark before promotion
         if: steps.status.outputs.ready == 'true'
         shell: bash

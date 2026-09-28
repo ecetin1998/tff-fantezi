@@ -44,6 +44,7 @@ const clamp=(lo:number,hi:number,v:number)=>Math.max(lo,Math.min(hi,v))
 const avg=(xs:number[])=>xs.length?xs.reduce((a,b)=>a+b,0)/xs.length:0
 const per90=(v:any,minutes:any,fallback=0)=>n(minutes)>0?n(v)*90/n(minutes):fallback
 const newer=(...xs:any[])=>xs.filter(Boolean).map(x=>new Date(x).getTime()).filter(Number.isFinite).sort((a,b)=>b-a)[0]||Date.now()
+const sourceRevision=(value:any)=>new Date(value).toISOString().replace(/[-:TZ.]/g,"").slice(0,14)
 
 function poisson(lambda:number,max=12){
   const out:number[]=[]
@@ -98,16 +99,17 @@ function normalizedWeights(length:number){
 
 async function sourceStatus(sb:any,current:any){
   const gw=Number(current.gameweek),target=gw+1
-  const [preds,hist,weekly,teamStats,playerStats,players,targetHist]=await Promise.all([
+  const [preds,hist,weekly,teamStats,playerStats,players,targetHist,availability]=await Promise.all([
     sb.from("scout_match_predictions").select("match_id").eq("run_id",current.id),
     sb.from("scout_match_history").select("match_id,match_status,fantasy_closure,source_updated_at").eq("season","2026-27").eq("gameweek",gw),
     sb.from("scout_player_weekly_points").select("match_id,is_final,source_updated_at").eq("gameweek",gw),
     sb.from("scout_team_season_stats").select("team_id,source_updated_at").eq("through_gameweek",gw),
     sb.from("scout_player_season_stats").select("player_id,updated_at").eq("season","2026-27").eq("through_gameweek",gw),
-    sb.from("scout_players").select("id,team_id").eq("active",true),
-    sb.from("scout_match_history").select("match_id,home_team_id,away_team_id,kickoff_at,source_updated_at").eq("season","2026-27").eq("gameweek",target)
+    sb.from("scout_players").select("id,team_id,updated_at").eq("active",true),
+    sb.from("scout_match_history").select("match_id,home_team_id,away_team_id,kickoff_at,source_updated_at").eq("season","2026-27").eq("gameweek",target),
+    sb.from("scout_availability").select("player_id,checked_at").eq("run_id",current.id)
   ])
-  for(const q of [preds,hist,weekly,teamStats,playerStats,players,targetHist])if(q.error)throw q.error
+  for(const q of [preds,hist,weekly,teamStats,playerStats,players,targetHist,availability])if(q.error)throw q.error
   const fixtureCount=(preds.data||[]).length
   const closed=(hist.data||[]).filter((m:any)=>m.match_status==="Bitti"&&m.fantasy_closure==="KAPANDI").length
   const finalMatches=new Set((weekly.data||[]).filter((w:any)=>w.is_final).map((w:any)=>String(w.match_id))).size
@@ -128,6 +130,8 @@ async function sourceStatus(sb:any,current:any){
       ...(weekly.data||[]).map((x:any)=>x.source_updated_at),
       ...(teamStats.data||[]).map((x:any)=>x.source_updated_at),
       ...(playerStats.data||[]).map((x:any)=>x.updated_at),
+      ...(players.data||[]).map((x:any)=>x.updated_at),
+      ...(availability.data||[]).map((x:any)=>x.checked_at),
       ...(targetHist.data||[]).map((x:any)=>x.source_updated_at)
     )).toISOString()
   }
@@ -141,7 +145,8 @@ async function prepare(sb:any,current:any,status:any){
   if(priorMetaQ.error)throw priorMetaQ.error
   if(!priorMetaQ.data)throw new Error("CURRENT_SIM_INPUT_META_MISSING")
   const priorBenchmark=String(priorMetaQ.data.benchmark_version)
-  const key="weekly-auto:"+current.id+":mh"+target
+  const revision=sourceRevision(status.latest_source_at)
+  const key="weekly-auto:"+current.id+":mh"+target+":"+revision
   const existing=await sb.from("scout_model_runs").select("*").eq("gameweek",target).eq("is_current",false)
     .ilike("notes","%"+key+"%").order("generated_at",{ascending:false}).limit(1).maybeSingle()
   if(existing.error)throw existing.error
@@ -166,14 +171,15 @@ async function prepare(sb:any,current:any,status:any){
   }else{
     runId=crypto.randomUUID()
     const ins=await sb.from("scout_model_runs").insert({
-      id:runId,gameweek:target,model_version:"ScoutPlus Weekly Auto v1",
+      id:runId,gameweek:target,
+      model_version:String(current.model_version||"ScoutPlus 3.3").replace(/(GW|MH)\s*\d+/i,"GW"+target),
       generated_at:new Date().toISOString(),source_updated_at:status.latest_source_at,
       simulation_count:0,status:"building",is_current:false,notes:key+" • fail-closed weekly lifecycle"
     })
     if(ins.error)throw ins.error
   }
 
-  const benchmark="weekly-auto-mh"+target+"-"+String(current.id).slice(0,8)
+  const benchmark="weekly-auto-mh"+target+"-"+String(current.id).slice(0,8)+"-"+revision
   for(const table of ["scout_replay_sim_accum","scout_replay_player_inputs","scout_replay_match_inputs","scout_replay_input_meta"]){
     const del=await sb.from(table).delete().eq("gameweek",target).eq("benchmark_version",benchmark)
     if(del.error)throw del.error
