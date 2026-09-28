@@ -162,21 +162,57 @@ function legalSquad(xi:PlayerRow[],bench:PlayerRow[],rules:any){
   return true;
 }
 
+function benchCandidateShortlist(
+  xi:PlayerRow[],
+  bench:PlayerRow[],
+  candidates:PlayerRow[],
+){
+  const xiIds=new Set(xi.map(player=>num(player.player_id)));
+  const keep=new Map<number,PlayerRow>();
+  const add=(player:PlayerRow)=>{
+    const id=num(player.player_id);
+    if(!xiIds.has(id))keep.set(id,player);
+  };
+  bench.forEach(add);
+  for(const pos of POSITIONS){
+    const pool=candidates.filter(player=>player.position===pos&&!xiIds.has(num(player.player_id)));
+    [...pool]
+      .sort((a,b)=>num(b.xfp)-num(a.xfp)||playProbability(b)-playProbability(a)||num(a.price)-num(b.price))
+      .slice(0,5)
+      .forEach(add);
+    [...pool]
+      .sort((a,b)=>num(a.price)-num(b.price)||num(b.xfp)-num(a.xfp))
+      .slice(0,5)
+      .forEach(add);
+  }
+  return [...keep.values()];
+}
+
 export function optimizeBenchForAutosubs(xi:PlayerRow[],bench:PlayerRow[],candidates:PlayerRow[],rules:any){
   const formations=Array.isArray(rules.formations)?rules.formations.map(String):[];
-  let current=bestBenchOrder(xi,bench,formations);
-  for(let iteration=0;iteration<8;iteration++){
+  const shortlist=benchCandidateShortlist(xi,bench,candidates);
+  const cache=new Map<string,{bench:PlayerRow[],autosubEv:number}>();
+  const evaluate=(trial:PlayerRow[])=>{
+    const key=trial.map(player=>num(player.player_id)).sort((a,b)=>a-b).join(',');
+    const cached=cache.get(key);
+    if(cached)return cached;
+    const result=bestBenchOrder(xi,trial,formations);
+    cache.set(key,result);
+    return result;
+  };
+  let current=evaluate(bench);
+  for(let iteration=0;iteration<4;iteration++){
     let best=current;
     let bestCost=current.bench.reduce((sum,p)=>sum+num(p.price),0);
     const selected=new Set([...xi,...current.bench].map(p=>num(p.player_id)));
     for(let slot=0;slot<current.bench.length;slot++){
       const old=current.bench[slot];
-      for(const candidate of candidates){
+      for(const candidate of shortlist){
         const candidateId=num(candidate.player_id);
         if(candidate.position!==old.position||selected.has(candidateId))continue;
         const trial=[...current.bench];trial[slot]=candidate;
         if(!legalSquad(xi,trial,rules))continue;
-        const ordered=bestBenchOrder(xi,trial,formations);
+        const ordered=evaluate(trial);
         const cost=ordered.bench.reduce((sum,p)=>sum+num(p.price),0);
         if(
           ordered.autosubEv>best.autosubEv+1e-9||
