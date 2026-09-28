@@ -180,10 +180,17 @@
 
 /* --- Match predictions: fantasy-first --- */
 .scope :global(.match-analysis-grid){
-  align-items:start;
+  align-items:stretch;
 }
 .scope :global(.match-analysis-card){
   min-width:0;
+  height:570px;
+  display:flex;
+  flex-direction:column;
+}
+.scope :global(.match-analysis-card):has(:global(.match-technical-details)[open]){
+  height:auto;
+  min-height:570px;
 }
 .scope :global(.match-analysis-card) :global(.match-card-top){
   align-items:center;
@@ -235,9 +242,80 @@
   text-overflow:ellipsis;
   white-space:nowrap;
 }
+.scope :global(.match-team-xfp-strip){
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:7px;
+  margin-top:10px;
+}
+.scope :global(.match-team-xfp-side){
+  min-width:0;
+  min-height:67px;
+  display:grid;
+  grid-template-columns:minmax(74px,.72fr) minmax(0,1.28fr);
+  gap:8px;
+  align-items:center;
+  padding:8px 9px;
+  border:1px solid #e3e8f0;
+  border-left:3px solid var(--club1);
+  border-radius:11px;
+  background:linear-gradient(135deg,color-mix(in srgb,var(--club1) 5%,#fff),#fafbfd 72%);
+}
+.scope :global(.match-team-xfp-side):global(.away){
+  border-left:1px solid #e3e8f0;
+  border-right:3px solid var(--club1);
+}
+.scope :global(.match-team-xfp-side)>span,.scope :global(.match-team-xfp-side)>a{
+  min-width:0;
+}
+.scope :global(.match-team-xfp-side) small{
+  display:block;
+  color:#8b95a9;
+  font-size:6.5px;
+  font-weight:850;
+  line-height:1.2;
+}
+.scope :global(.match-team-xfp-side)>span b{
+  display:block;
+  margin-top:3px;
+  color:var(--clubText);
+  font-size:14px;
+  line-height:1;
+}
+.scope :global(.match-team-xfp-side)>a{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  column-gap:5px;
+  align-items:end;
+}
+.scope :global(.match-team-xfp-side)>a small{
+  grid-column:1/-1;
+}
+.scope :global(.match-team-xfp-side)>a b{
+  display:-webkit-box;
+  min-width:0;
+  overflow:hidden;
+  color:#35415d;
+  font-size:8px;
+  font-weight:900;
+  line-height:1.15;
+  -webkit-box-orient:vertical;
+  -webkit-line-clamp:2;
+}
+.scope :global(.match-team-xfp-side)>a em{
+  color:var(--clubText);
+  font-size:7px;
+  font-style:normal;
+  font-weight:950;
+  white-space:nowrap;
+}
+
 .scope :global(.match-fantasy-note){
+  height:103px;
+  flex:0 0 103px;
   margin-top:11px;
   padding:11px 12px;
+  overflow:hidden;
   border:1px solid #e3e8f0;
   border-radius:12px;
   background:#f8fafe;
@@ -250,13 +328,18 @@
   letter-spacing:.08em;
 }
 .scope :global(.match-fantasy-note) p{
+  display:-webkit-box;
   margin:5px 0 0;
+  overflow:hidden;
   color:#5f6c87;
   font-size:7.5px;
   line-height:1.5;
+  -webkit-box-orient:vertical;
+  -webkit-line-clamp:5;
 }
 .scope :global(.match-technical-details){
-  margin-top:9px;
+  margin-top:auto;
+  padding-top:9px;
   border-top:1px solid #edf0f5;
 }
 .scope :global(.match-technical-details) summary{
@@ -352,6 +435,13 @@
 }
 
 @media(max-width:760px){
+  .scope :global(.match-analysis-card){
+    height:585px;
+  }
+  .scope :global(.match-analysis-card):has(:global(.match-technical-details)[open]){
+    height:auto;
+    min-height:585px;
+  }
   .scope :global(.role-summary-grid){
     gap:7px;
   }
@@ -379,6 +469,28 @@
 }
 
 @media(max-width:430px){
+  .scope :global(.match-analysis-card){
+    height:600px;
+  }
+  .scope :global(.match-analysis-card):has(:global(.match-technical-details)[open]){
+    height:auto;
+    min-height:600px;
+  }
+  .scope :global(.match-team-xfp-strip){
+    gap:5px;
+  }
+  .scope :global(.match-team-xfp-side){
+    min-height:70px;
+    grid-template-columns:64px minmax(0,1fr);
+    gap:6px;
+    padding:7px;
+  }
+  .scope :global(.match-team-xfp-side)>span b{
+    font-size:13px;
+  }
+  .scope :global(.match-team-xfp-side)>a b{
+    font-size:7.5px;
+  }
   .scope :global(.role-summary-grid){
     grid-template-columns:1fr 1fr;
   }
