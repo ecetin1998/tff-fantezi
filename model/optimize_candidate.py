@@ -8,7 +8,7 @@ import sys
 import numpy as np
 from scipy.optimize import milp, Bounds, LinearConstraint
 from scipy.sparse import coo_matrix
-from optimizer_rules import BUDGET, MAX_PER_CLUB, SQUAD_LIMITS, XI_BOUNDS, captain_metric, cheap_bench_tiebreak, formation_of, lineup_metric
+from optimizer_rules import BUDGET, MAX_PER_CLUB, SQUAD_LIMITS, XI_BOUNDS, captain_metric, cheap_bench_tiebreak, formation_of, lineup_metric, optimize_bench_for_autosubs
 
 
 def solve(players, alternative=False, avoid=(), max_defensive_stack_per_team=2):
@@ -60,16 +60,21 @@ def solve(players, alternative=False, avoid=(), max_defensive_stack_per_team=2):
     if not result.success or result.x is None:
         raise RuntimeError('Optimizer did not reach a valid optimum: '+str(result.message))
     xi=[p for i,p in enumerate(eligible) if result.x[i]>.5]
-    squad=[p for i,p in enumerate(eligible) if result.x[n+i]>.5]
+    raw_squad=[p for i,p in enumerate(eligible) if result.x[n+i]>.5]
     cap=next(p for i,p in enumerate(eligible) if result.x[2*n+i]>.5)
-    if len(xi)!=11 or len(squad)!=15: raise RuntimeError('Invalid squad size')
+    if len(xi)!=11 or len(raw_squad)!=15: raise RuntimeError('Invalid squad size')
     formation=formation_of(xi)
     if not formation: raise RuntimeError('Invalid starting formation')
+    raw_bench=[p for p in raw_squad if p not in xi]
+    bench,autosub_ev=optimize_bench_for_autosubs(xi,raw_bench,eligible)
+    squad=xi+bench
     return {'variant':'alternative' if alternative else 'recommended','xi':[p['id'] for p in xi],
-            'bench':[p['id'] for p in squad if p not in xi], 'captain':cap['id'],
+            'bench':[p['id'] for p in bench], 'captain':cap['id'],
             'budget':round(sum(p['price'] for p in squad),2),
             'xi_xfp':round(sum(p['xfp'] for p in xi),3),
             'xi_xfp_with_captain':round(sum(p['xfp'] for p in xi)+cap['xfp'],3),
+            'autosub_ev':round(autosub_ev,3),
+            'objective_xfp':round(sum(p['xfp'] for p in xi)+cap['xfp']+autosub_ev,3),
             'formation':formation,
             'solver':result.message}
 
