@@ -1,16 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const AUTH_HASH="ab1f975176f9a8e4c357dbcf1b7e9ca7de13473e5c7b03fbb91c5fb0147dec49";
-const SCORING={
-  appearance:1,appearance_60:1,
-  goal:{GK:10,DEF:6,MID:5,FWD:4},
-  assist:3,
-  clean_sheet:{GK:4,DEF:4,MID:1,FWD:0},
-  conceded_per_2:{GK:-1,DEF:-1},
-  saves_per_3:1,yellow:-1,red:-3,own_goal:-2,penalty_miss:-2,penalty_save:5,
-  bonus:[3,2,1]
-};
-
 async function sha256Hex(s){
   const d=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(s));
   return [...new Uint8Array(d)].map(x=>x.toString(16).padStart(2,"0")).join("");
@@ -53,7 +43,7 @@ async function authorized(req){
   try{return await verifyGithubOidc(auth.slice(7))}catch{return false}
 }
 function num(x,d=0){const n=Number(x);return Number.isFinite(n)?n:d}
-function cardPoints(yellow,red){return red?SCORING.red:yellow?SCORING.yellow:0}
+function cardPoints(yellow,red,scoring){return red?num(scoring.red,-3):yellow?num(scoring.yellow,-1):0}
 function goalkeeperSaveRate(per90Saves){return Math.max(.55,Math.min(.82,.68+.025*(num(per90Saves)-3)))}
 function expectedKeeperSaves(opponentGoalLambda,per90Saves,exposure=1){
   const saveRate=goalkeeperSaveRate(per90Saves);
@@ -67,15 +57,16 @@ function redCardExitMinute(enter,leave,u){
   return Math.max(start+1,Math.min(end-1,Math.floor(start+draw*(end-start))));
 }
 function isActiveAt(enter,leave,minute){return num(enter)<=num(minute)&&num(leave)>num(minute)}
-function bonusByCompetitionRank(ids,base,minutes){
+function bonusByCompetitionRank(ids,base,minutes,scoring){
+  const bonusValues=(scoring.bonus||[3,2,1]).map(Number);
   const ordered=ids.filter(i=>minutes[i]>0).sort((a,b)=>base[b]-base[a]||a-b);
   const bonus={}; let previousScore=null,rank=-1;
   for(let index=0;index<ordered.length;index++){
     const i=ordered[index],score=base[i];
     if(previousScore===null||score!==previousScore)rank=index;
     previousScore=score;
-    if(rank>=SCORING.bonus.length)break;
-    bonus[i]=SCORING.bonus[rank];
+    if(rank>=bonusValues.length)break;
+    bonus[i]=bonusValues[rank];
   }
   return bonus;
 }
@@ -151,13 +142,16 @@ Deno.serve(async(req)=>{
       return Response.json({ok:true,mode:"finalize",run_id:RUN_ID,gameweek:GAMEWEEK,benchmark:BENCHMARK,draws:minDraws,result:finalized.data});
     }
 
-    const [pq,mq,metaq,aq]=await Promise.all([
+    const [pq,mq,metaq,aq,rulesq]=await Promise.all([
       sb.from("scout_replay_player_inputs").select("*").eq("gameweek",GAMEWEEK).eq("benchmark_version",BENCHMARK).order("player_id"),
       sb.from("scout_replay_match_inputs").select("*").eq("gameweek",GAMEWEEK).eq("benchmark_version",BENCHMARK).order("match_id"),
       sb.from("scout_replay_input_meta").select("*").eq("gameweek",GAMEWEEK).eq("benchmark_version",BENCHMARK).single(),
-      sb.from("scout_player_single_shot_adjustments").select("*").eq("through_gameweek",GAMEWEEK-1)
+      sb.from("scout_player_single_shot_adjustments").select("*").eq("through_gameweek",GAMEWEEK-1),
+      sb.from("scout_game_rules").select("rules").order("season",{ascending:false}).limit(1).single()
     ]);
-    for(const q of [pq,mq,metaq,aq])if(q.error)throw q.error;
+    for(const q of [pq,mq,metaq,aq,rulesq])if(q.error)throw q.error;
+    const SCORING=rulesq.data?.rules?.scoring;
+    if(!SCORING)throw new Error("canonical scoring rules missing");
     if(!(pq.data||[]).length)throw new Error("no player inputs for gameweek "+GAMEWEEK);
     if(!(mq.data||[]).length)throw new Error("no match inputs for gameweek "+GAMEWEEK);
 
@@ -268,7 +262,7 @@ Deno.serve(async(req)=>{
           if(mins[i]<=0)continue;
           const yc=random()<Math.min(.8,Math.max(0,P[i].rates[4]*scheduledExposure));
           const rc=random()<Math.min(.15,Math.max(0,P[i].rates[5]*scheduledExposure));
-          comp.cards[i]=cardPoints(yc,rc);
+          comp.cards[i]=cardPoints(yc,rc,SCORING);
           if(rc){
             leave[i]=redCardExitMinute(enter[i],leave[i],random());
             mins[i]=Math.max(0,leave[i]-enter[i]);
@@ -323,7 +317,7 @@ Deno.serve(async(req)=>{
             +(p.pos==="GK"?SCORING.penalty_save*poisson(rates[8]*exposure*penaltyPressure):0);
           base[i]=keys.reduce((sum,k)=>sum+comp[k][i],0);
         }
-        const bon=bonusByCompetitionRank(both,base,mins);
+        const bon=bonusByCompetitionRank(both,base,mins,SCORING);
         for(const i of both){
           const b=bon[i]||0,fp=base[i]+b;
           startedAny[i]=Math.max(startedAny[i],start[i]);
