@@ -10,15 +10,19 @@ fail(){
   exit 1
 }
 
+curl_retry(){
+  curl --retry 4 --retry-delay 2 --retry-all-errors --retry-max-time 60 --connect-timeout 10 --max-time 45 "$@"
+}
+
 status_code(){
   local url="$1"
-  curl -sS -o /dev/null -w '%{http_code}' "$url"
+  curl_retry -sS -o /dev/null -w '%{http_code}' "$url"
 }
 
 echo "Smoke target: $BASE_URL"
 
 if [[ -n "${EXPECTED_SHA:-}" ]]; then
-  live_sha="$(curl -fsSL "$BASE_URL/api/health" | node -pe "JSON.parse(require('fs').readFileSync(0,'utf8')).sha")"
+  live_sha="$(curl_retry -fsSL "$BASE_URL/api/health" | node -pe "JSON.parse(require('fs').readFileSync(0,'utf8')).sha")"
   [[ "$live_sha" == "$EXPECTED_SHA" ]] || fail "live SHA $live_sha != expected $EXPECTED_SHA"
   echo "PASS deployed SHA $live_sha"
 fi
@@ -50,7 +54,7 @@ declare -a HASHES=()
 
 for section in "${SECTIONS[@]}"; do
   body="$TMP_DIR/$section.json"
-  code="$(curl -sS -o "$body" -w '%{http_code}' "$BASE_URL/api/scout-data?section=$section")"
+  code="$(curl_retry -sS -o "$body" -w '%{http_code}' "$BASE_URL/api/scout-data?section=$section")"
   [[ "$code" == "200" ]] || fail "section=$section returned HTTP $code"
 
   node - "$body" "$section" <<'NODE'
@@ -91,12 +95,12 @@ summary_size="$(wc -c < "$TMP_DIR/summary.json" | tr -d ' ')"
 (( summary_size < 51200 )) || fail "summary payload is $summary_size bytes (must be < 51200)"
 echo "PASS summary size $summary_size bytes"
 
-curl -fsSL "$BASE_URL/api/scout-data?section=players" > "$TMP_DIR/players-live.json"
-curl -fsSL "$BASE_URL/players/419" > "$TMP_DIR/player-419.html"
-curl -fsSL "$BASE_URL/matches" > "$TMP_DIR/matches.html"
-curl -fsSL "$BASE_URL/" > "$TMP_DIR/home.html"
-curl -fsSL "$BASE_URL/robots.txt" > "$TMP_DIR/robots.txt"
-curl -fsSL "$BASE_URL/sitemap.xml" > "$TMP_DIR/sitemap.xml"
+curl_retry -fsSL "$BASE_URL/api/scout-data?section=players" > "$TMP_DIR/players-live.json"
+curl_retry -fsSL "$BASE_URL/players/419" > "$TMP_DIR/player-419.html"
+curl_retry -fsSL "$BASE_URL/matches" > "$TMP_DIR/matches.html"
+curl_retry -fsSL "$BASE_URL/" > "$TMP_DIR/home.html"
+curl_retry -fsSL "$BASE_URL/robots.txt" > "$TMP_DIR/robots.txt"
+curl_retry -fsSL "$BASE_URL/sitemap.xml" > "$TMP_DIR/sitemap.xml"
 
 node - "$TMP_DIR/players-live.json" "$TMP_DIR/player-419.html" "$TMP_DIR/matches.html" "$TMP_DIR/home.html" "$TMP_DIR/robots.txt" "$TMP_DIR/sitemap.xml" <<'NODE'
 const fs=require('node:fs')
@@ -123,14 +127,14 @@ not_found="$(status_code "$BASE_URL/players/99999")"
 [[ "$not_found" == "404" ]] || fail "/players/99999 returned HTTP $not_found instead of 404"
 echo "PASS real 404"
 
-redirect_code="$(curl -sS -o /dev/null -w '%{http_code}' "$BASE_URL/api/scout-data?utm_source=x")"
+redirect_code="$(curl_retry -sS -o /dev/null -w '%{http_code}' "$BASE_URL/api/scout-data?utm_source=x")"
 [[ "$redirect_code" == "308" ]] || fail "unknown query param returned HTTP $redirect_code instead of 308"
 echo "PASS canonical 308"
 
 if [[ "${SKIP_CDN_CHECK:-0}" == "1" ]]; then
   echo "SKIP CDN cache header check"
 else
-  curl -sS -D "$TMP_DIR/cache.headers" -o /dev/null "$BASE_URL/api/scout-data?section=summary"
+  curl_retry -sS -D "$TMP_DIR/cache.headers" -o /dev/null "$BASE_URL/api/scout-data?section=summary"
   grep -Eiq '^cache-control:.*s-maxage=300' "$TMP_DIR/cache.headers" || {
     cat "$TMP_DIR/cache.headers" >&2
     fail "summary response is missing shared-cache policy"
