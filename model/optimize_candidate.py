@@ -8,7 +8,7 @@ import sys
 import numpy as np
 from scipy.optimize import milp, Bounds, LinearConstraint
 from scipy.sparse import coo_matrix
-from optimizer_rules import BUDGET, MAX_PER_CLUB, SQUAD_LIMITS, XI_BOUNDS, captain_metric, bench_expected_value, cheap_bench_tiebreak, budget_spend_reward
+from optimizer_rules import BUDGET, MAX_PER_CLUB, SQUAD_LIMITS, XI_BOUNDS, captain_metric, cheap_bench_tiebreak, formation_of, lineup_metric
 
 
 def solve(players, alternative=False, avoid=(), max_defensive_stack_per_team=2):
@@ -22,15 +22,13 @@ def solve(players, alternative=False, avoid=(), max_defensive_stack_per_team=2):
             ub[i] = 0
     c = np.zeros(3*n)
     for i, p in enumerate(eligible):
-        base = p['xfp'] + (.18 * max(0, p['p90'] - p['xfp']) if alternative else 0)
-        bench_value = bench_expected_value(p)
+        base = lineup_metric(p, alternative)
         bench_cost = cheap_bench_tiebreak(p)
-        spend_reward = budget_spend_reward(p)
-        # xi and squad are both 1 for starters, so cancel the bench term on XI.
-        # Only true bench players keep the expected-sub value / cheapness signal.
-        c[i] = -base + bench_value - bench_cost - spend_reward
-        c[n+i] = -bench_value + bench_cost - spend_reward
-        c[2*n+i] = -captain_metric(p, alternative)
+        # xi and squad are both 1 for starters, so the tiny price tie-break
+        # cancels for starters and applies only to true bench players.
+        c[i] = -base - bench_cost
+        c[n+i] = bench_cost
+        c[2*n+i] = -captain_metric(p)
         if p['position']=='GK':
             ub[2*n+i] = 0
     rr, cc, dd, lo, hi = [], [], [], [], []
@@ -65,12 +63,14 @@ def solve(players, alternative=False, avoid=(), max_defensive_stack_per_team=2):
     squad=[p for i,p in enumerate(eligible) if result.x[n+i]>.5]
     cap=next(p for i,p in enumerate(eligible) if result.x[2*n+i]>.5)
     if len(xi)!=11 or len(squad)!=15: raise RuntimeError('Invalid squad size')
+    formation=formation_of(xi)
+    if not formation: raise RuntimeError('Invalid starting formation')
     return {'variant':'alternative' if alternative else 'recommended','xi':[p['id'] for p in xi],
             'bench':[p['id'] for p in squad if p not in xi], 'captain':cap['id'],
             'budget':round(sum(p['price'] for p in squad),2),
             'xi_xfp':round(sum(p['xfp'] for p in xi),3),
-            'captain_xfp':round(sum(p['xfp'] for p in xi)+cap['xfp'],3),
-            'formation':'-'.join(str(sum(p['position']==position for p in xi)) for position in pos[1:]),
+            'xi_xfp_with_captain':round(sum(p['xfp'] for p in xi)+cap['xfp'],3),
+            'formation':formation,
             'solver':result.message}
 
 if __name__=='__main__':
