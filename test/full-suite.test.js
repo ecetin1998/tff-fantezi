@@ -28,6 +28,7 @@ const jsTests=[
   'model/enrichmentReplayContract.test.js',
   'model/currentRunAlignmentContract.test.js',
   'model/weeklyLifecycleContract.test.js',
+  'model/matchCardXfpContract.test.js',
 ]
 
 for(const file of jsTests){
