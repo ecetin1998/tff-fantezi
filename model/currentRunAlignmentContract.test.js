@@ -21,8 +21,10 @@ const matches=section('async function _getMatches','async function _getRecommend
 const recommendation=section('async function _getRecommendation','async function _getAvailability')
 const squadPool=section('async function _loadSquadPlayerPool','async function _getSquadPlayerPool')
 
+assert.match(playerLoader,/\.eq\('run_id',runId\)/)
+assert.match(data,/players-for-current-run-v1/)
 assert.match(players,/const run=await getCurrentRun\(\)/)
-assert.match(players,/\.eq\('run_id',run\.id\)/)
+assert.match(players,/getPlayersForRunShared\(run\.id\)/)
 assert.match(availability,/\.eq\('run_id',run\.id\)/)
 assert.match(roles,/\.eq\('run_id',run\.id\)/)
 assert.match(team,/v_current_player_cards[\s\S]*\.eq\('run_id',run\.id\)/)
