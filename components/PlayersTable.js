@@ -15,15 +15,27 @@ const normalizeText=value=>String(value||'')
   .replace(/[\u0300-\u036f]/g,'')
   .replace(/ı/g,'i')
 
-export default function PlayersTable({players,initialSearchParams={}}){
+export default function PlayersTable({players}){
   const router=useRouter()
-  const param=value=>Array.isArray(value)?value[0]:value
-  const [q,setQ]=useState(()=>String(param(initialSearchParams.q)||''))
-  const [pos,setPos]=useState(()=>String(param(initialSearchParams.pos)||''))
-  const [team,setTeam]=useState(()=>String(param(initialSearchParams.team)||''))
-  const [sort,setSort]=useState(()=>String(param(initialSearchParams.sort)||'xfp'))
-  const [dir,setDir]=useState(()=>param(initialSearchParams.dir)==='asc'?1:-1)
-  const [page,setPage]=useState(()=>Math.max(1,Number(param(initialSearchParams.page)||1)))
+  const [q,setQ]=useState('')
+  const [pos,setPos]=useState('')
+  const [team,setTeam]=useState('')
+  const [sort,setSort]=useState('xfp')
+  const [dir,setDir]=useState(-1)
+  const [page,setPage]=useState(1)
+  const [urlReady,setUrlReady]=useState(false)
+
+  useEffect(()=>{
+    if(!urlReady)return
+    const params=new URLSearchParams(window.location.search)
+    setQ(params.get('q')||'')
+    setTeam(params.get('team')||'')
+    setPos(params.get('pos')||'')
+    setSort(params.get('sort')||'xfp')
+    setDir(params.get('dir')==='asc'?1:-1)
+    setPage(Math.max(1,Number(params.get('page')||1)))
+    setUrlReady(true)
+  },[])
 
   const teams=useMemo(()=>[...new Set(players.map(p=>p.team).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'tr')),[players])
 
@@ -69,7 +81,7 @@ export default function PlayersTable({players,initialSearchParams={}}){
     put('dir',dir===1?'asc':'desc','desc');put('page',safePage,1)
     const next=params.toString()
     window.history.replaceState(null,'',window.location.pathname+(next?'?'+next:''))
-  },[q,team,pos,sort,dir,safePage])
+  },[q,team,pos,sort,dir,safePage,urlReady])
 
   const change=setter=>e=>{setter(e.target.value);setPage(1)}
   const head=(k,label)=><th onClick={()=>{setPage(1);if(sort===k)setDir(-dir);else{setSort(k);setDir(-1)}}}>{label}{sort===k?<span className="sortmark">{dir===-1?' ↓':' ↑'}</span>:null}</th>
