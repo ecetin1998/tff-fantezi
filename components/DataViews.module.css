@@ -824,15 +824,15 @@
   font-size:9px;
 }
 .scope :global(.outcome-bar-labeled){
-  height:34px;
-  margin:12px 0 8px;
+  height:42px;
+  margin:12px 0 10px;
 }
 .scope :global(.outcome-bar-labeled) i span{
-  font-size:8.5px;
+  font-size:9.5px;
   line-height:1;
 }
 .scope :global(.outcome-bar-labeled) i span b{
-  font-size:9.5px;
+  font-size:11px;
 }
 .scope :global(.match-fantasy-meta) small{
   font-size:9px;
@@ -913,7 +913,7 @@
 
 @media(max-width:760px){
   .scope :global(.outcome-bar-labeled){
-    height:32px;
+    height:38px;
   }
   .scope main{
     font-size:13.5px;
