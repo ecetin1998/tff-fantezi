@@ -1638,3 +1638,41 @@
   .scope :global(.faq-cta){align-items:flex-start;flex-direction:column}
   .scope :global(.faq-cta)>div:last-child{width:100%;flex-wrap:wrap}
 }
+
+
+/* ===== Match cards • lock matchup badges to team edges ===== */
+.scope :global(.match-analysis-card) :global(.match-team-block){
+  min-width:0;
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+}
+.scope :global(.match-analysis-card) :global(.match-team-block):global(.away){
+  align-items:flex-end;
+  text-align:right;
+}
+.scope :global(.match-analysis-card) :global(.match-team-meta):global(.matchup-badges){
+  width:100%;
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  justify-content:flex-start;
+  gap:7px;
+  margin-top:8px;
+}
+.scope :global(.match-analysis-card) :global(.match-team-meta):global(.away-meta):global(.matchup-badges){
+  align-items:flex-end;
+  justify-content:flex-start;
+}
+.scope :global(.match-analysis-card) :global(.matchup-pill){
+  display:inline-flex;
+  width:max-content;
+  max-width:100%;
+  margin:0;
+}
+.scope :global(.match-analysis-card) :global(.match-team-meta):global(.matchup-badges) :global(.matchup-pill){
+  align-self:flex-start;
+}
+.scope :global(.match-analysis-card) :global(.match-team-meta):global(.away-meta):global(.matchup-badges) :global(.matchup-pill){
+  align-self:flex-end;
+}
