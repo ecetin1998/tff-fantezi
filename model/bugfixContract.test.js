@@ -85,6 +85,12 @@ assert.match(edge,/score:base,/)
 assert.match(edge,/score:-cheapBench/)
 assert.doesNotMatch(edge,/\[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18\]/)
 
+const optimizerRefresh=read('.github/workflows/optimizer-refresh.yml')
+assert.match(optimizerRefresh,/workflow_dispatch:/)
+assert.match(optimizerRefresh,/run-staging-optimizer\\?mode=recommended/)
+assert.match(optimizerRefresh,/run-staging-optimizer\\?mode=alternative/)
+assert.doesNotMatch(optimizerRefresh,/schedule:/)
+
 const replayEdge=read('supabase/functions/run-replay-distribution-test/index.ts')
 assert.match(replayEdge,/DGW fixtures are independent matches/)
 assert.match(replayEdge,/drawXi\[i\]=Math\.max\(drawXi\[i\],start\[i\]\)/)
