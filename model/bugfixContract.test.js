@@ -67,6 +67,9 @@ assert.match(pitch,/Alternatif \(tavan\) kaptan: <b>\{playerLabel\(ceilingCaptai
 assert.match(builder,/p=>p&&p\.position!=='GK'/)
 assert.match(builder,/p\.position!=='GK'\?<button[^\n]+captain-toggle/)
 assert.match(builder,/map\.get\(captainId\)\?\.position!=='GK'/)
+assert.doesNotMatch(builder,/club-counts">\$/)
+assert.doesNotMatch(builder,/bütçe kullanılmıyor/i)
+assert.match(builder,/Kalan: \{bank\.toFixed\(1\)\}m/)
 for(const file of ['app/actions.js','app/squad/page.js','components/SquadBuilder.js','rules/tff-fantasy.json','lib/rules.js']){
   assert.doesNotMatch(read(file),/vice_captain|VICE_CAPTAIN|Yardımcı kaptan|Yrd\. kaptan/i,file+' must not expose vice captain')
 }
@@ -76,7 +79,10 @@ assert.match(edge,/const budget=n\(rules\.budget\)/)
 assert.match(edge,/new Set\(rows\.map\(r=>Number\(r\.team_id\)/)
 assert.match(edge,/if\(pos!=="GK"\)/)
 assert.match(edge,/captainLambda=\.18/)
-assert.match(edge,/budgetPenaltyPerM=\.03/)
+assert.doesNotMatch(edge,/budgetPenaltyPerM|spendReward|benchValue|\.08\*playProbability/)
+assert.match(edge,/const cheapBench=\.0001\*price/)
+assert.match(edge,/score:base,/)
+assert.match(edge,/score:-cheapBench/)
 assert.doesNotMatch(edge,/\[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18\]/)
 
 const replayEdge=read('supabase/functions/run-replay-distribution-test/index.ts')
