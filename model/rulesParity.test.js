@@ -28,4 +28,11 @@ assert.match(optimizerTs,/captainLambda=\.18/)
 assert.match(optimizerPy,/\* 1e-4/)
 assert.match(optimizerTs,/cheapBench=\.0001\*price/)
 
+const autosubTs=fs.readFileSync(path.join(root,'supabase/functions/_shared/autosub.ts'),'utf8')
+assert.match(optimizerPy,/def expected_autosub_value\(/)
+assert.match(optimizerPy,/def optimize_bench_for_autosubs\(/)
+assert.match(autosubTs,/export function expectedAutosubValue\(/)
+assert.match(autosubTs,/export function optimizeBenchForAutosubs\(/)
+assert.match(optimizerTs,/import \{ optimizeBenchForAutosubs \} from "\.\.\/_shared\/autosub\.ts"/)
+
 console.log('rulesParity: canonical rules and optimizer objective constants are aligned')
