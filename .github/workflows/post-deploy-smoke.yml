@@ -23,7 +23,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          live_sha="$(curl -fsSL "$BASE_URL/api/health" | node -pe "JSON.parse(require('fs').readFileSync(0,'utf8')).sha")"
+          live_sha="$(curl --retry 4 --retry-delay 2 --retry-all-errors --retry-max-time 60 --connect-timeout 10 -fsSL "$BASE_URL/api/health" | node -pe "JSON.parse(require('fs').readFileSync(0,'utf8')).sha")"
           test "$live_sha" = "$EXPECTED_SHA" || {
             echo "Live SHA $live_sha does not match expected $EXPECTED_SHA" >&2
             exit 1
