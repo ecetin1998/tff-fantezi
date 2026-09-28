@@ -40,6 +40,17 @@ assert.match(xaFill,/effective_xa_per90/,'attack share refresh must retain fallb
 assert.match(xaFill,/xa_confidence=\.95/)
 assert.doesNotMatch(xaFill,/set xa_model_per90=/,'observed xA must stay separate from the model prior')
 
+const xaFillV3=fs.readFileSync('supabase/migrations/20260928150000_fill_reviewed_xa_v3.sql','utf8')
+assert.match(xaFillV3,/fotmob_xa_total_exact_reviewed_2026-09-28/)
+assert.match(xaFillV3,/fotmob_xa_total_1dp_reviewed_2026-09-28/)
+assert.match(xaFillV3,/xa_confidence=\.95/)
+assert.match(xaFillV3,/xa_confidence=\.70/)
+assert.match(xaFillV3,/and s\.xa_per90 is null/,'v3 must never overwrite observed xA')
+assert.match(xaFillV3,/\(420::bigint,0\.01::numeric/)
+assert.match(xaFillV3,/\(258::bigint,0\.3::numeric/)
+assert.match(xaFillV3,/effective_xa_per90/,'attack contribution refresh must use effective xA')
+assert.doesNotMatch(xaFillV3,/set xa_model_per90=/,'observed xA must not overwrite the model prior')
+
 const data=fs.readFileSync('lib/data.js','utf8')
 assert.match(data,/TEAM_TACTICAL_PUBLIC_COLUMNS/)
 assert.match(data,/xa_model_per90/)
