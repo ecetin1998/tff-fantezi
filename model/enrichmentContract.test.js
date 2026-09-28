@@ -61,6 +61,16 @@ assert.match(xaFillV4,/s\.player_id=500/,'Taşkın player id should be targeted'
 assert.match(xaFillV4,/effective_xa_per90/,'attack contribution refresh must retain fallback for uncovered players')
 assert.doesNotMatch(xaFillV4,/set xa_model_per90=/,'observed xA must not overwrite the model prior')
 
+const finalPlayerGap=fs.readFileSync('supabase/migrations/20260928160000_close_player_enrichment_gaps.sql','utf8')
+assert.match(finalPlayerGap,/player_id=236/,'Emircan Gürlük must close the last played observed-xA gap')
+assert.match(finalPlayerGap,/xa_total=0\.1/)
+assert.match(finalPlayerGap,/and s\.xa_per90 is null/,'identity-reviewed xA must never overwrite an observed value')
+assert.match(finalPlayerGap,/canonical_wm_to_w_v1/)
+assert.match(finalPlayerGap,/primary_role='WM'/)
+assert.match(finalPlayerGap,/set primary_role='W'/)
+assert.match(finalPlayerGap,/effective_xa_per90/,'attack contribution refresh must preserve effective xA fallback')
+assert.doesNotMatch(finalPlayerGap,/set xa_model_per90=/,'observed xA must remain separate from model prior')
+
 const teamAdvancedSchema=fs.readFileSync('supabase/migrations/20260928111500_team_advanced_profiles_from_fresh_data.sql','utf8')
 for(const field of [
   'advanced_profile_through_gameweek','set_piece_xg_share','opponent_set_piece_xg_share',
