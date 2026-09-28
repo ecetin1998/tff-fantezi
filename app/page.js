@@ -1,19 +1,40 @@
 import Link from 'next/link'
 import { getHomeOverview } from '@/lib/data'
-import { teamCssVars } from '@/lib/teamThemes'
+import { teamCssVars, teamHref } from '@/lib/teamThemes'
 import {playerLabel} from '@/lib/playerPresentation'
 
 export const revalidate=300
 
 export default async function Home(){
-  const {run,best,value,mins,top25,playerCount,matchCount}=await getHomeOverview()
+  const {run,best,value,teamXfpLeader,top25,playerCount,matchCount}=await getHomeOverview()
   const sourceUpdated=run?.source_updated_at?new Intl.DateTimeFormat('tr-TR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit',timeZone:'Europe/Istanbul'}).format(new Date(run.source_updated_at)):'—'
   const modelUpdated=run?.generated_at?new Intl.DateTimeFormat('tr-TR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit',timeZone:'Europe/Istanbul'}).format(new Date(run.generated_at)):'—'
   const highlights=[
-    [`MH${run?.gameweek||'—'} en yüksek beklenen puan`,best,Number(best?.projection?.xfp||0).toFixed(2),'xFP','xFP • tüm senaryoların ortalamasında en yüksek beklenen puan'],
-    [`MH${run?.gameweek||'—'} en iyi F/P`,value,Number(value?.projection?.value_score||0).toFixed(2),'xFP/m','Bütçe başına beklenen puan verimi'],
-    [`MH${run?.gameweek||'—'} en güvenli dakika`,mins,Number(mins?.projection?.x_minutes||0).toFixed(0),'dk','Dakika eşitliğinde ilk 11 × uygunluk, son 4 maç dakikası ve 60+ ihtimaliyle ayrıştırılır'],
-    [`MH${run?.gameweek||'—'} Top-25’e girme adayı #1`,top25,`#${Number(top25?.projection?.top25_rank||1)}`,'Top25 sıra','Yüksek puan patlaması ihtimali en güçlü aday'],
+    {
+      label:`MH${run?.gameweek||'—'} en yüksek beklenen puan`,
+      title:playerLabel(best),meta:`${best?.team||'—'} • xFP • tüm senaryoların ortalamasında en yüksek beklenen puan`,
+      val:Number(best?.projection?.xfp||0).toFixed(2),unit:'xFP',
+      href:best?'/players/'+best.id:'/players',team:best?.team,
+    },
+    {
+      label:`MH${run?.gameweek||'—'} en iyi F/P`,
+      title:playerLabel(value),meta:`${value?.team||'—'} • Bütçe başına beklenen puan verimi`,
+      val:Number(value?.projection?.value_score||0).toFixed(2),unit:'xFP/m',
+      href:value?'/players/'+value.id:'/players',team:value?.team,
+    },
+    {
+      label:`MH${run?.gameweek||'—'} takım xFP lideri`,
+      title:teamXfpLeader?.name||'—',
+      meta:`${teamXfpLeader?.player_count||0} aktif oyuncu • takımın bu haftaki toplam beklenen fantasy puanı`,
+      val:Number(teamXfpLeader?.total_xfp||0).toFixed(2),unit:'xFP',
+      href:teamHref(teamXfpLeader?.name,teamXfpLeader?.id),team:teamXfpLeader?.name,
+    },
+    {
+      label:`MH${run?.gameweek||'—'} Top-25’e girme adayı #1`,
+      title:playerLabel(top25),meta:`${top25?.team||'—'} • Yüksek puan patlaması ihtimali en güçlü aday`,
+      val:`#${Number(top25?.projection?.top25_rank||1)}`,unit:'Top25 sıra',
+      href:top25?'/players/'+top25.id:'/players',team:top25?.team,
+    },
   ]
   return <>
 <section className="home-intro-layout">
@@ -28,8 +49,8 @@ export default async function Home(){
         </div>
       </div>
       <aside className="home-highlight-grid">
-        {highlights.map(([label,p,val,unit,note])=><Link key={label} className="card spotlight-card team-accent-card" style={teamCssVars(p?.team)} href={p?'/players/'+p.id:'/players'}>
-          <span>{label}</span><b>{playerLabel(p)}</b><small>{p?.team||'—'} • {note}</small><strong>{val} <em>{unit}</em></strong>
+        {highlights.map(h=><Link key={h.label} className="card spotlight-card team-accent-card" style={teamCssVars(h.team)} href={h.href}>
+          <span>{h.label}</span><b>{h.title}</b><small>{h.meta}</small><strong>{h.val} <em>{h.unit}</em></strong>
         </Link>)}
         <div className="card spotlight-card home-status-card home-status-week">
           <span>Güncel hafta</span>
