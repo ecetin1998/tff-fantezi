@@ -1,6 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-const AUTH_HASH="218766dca32efa8821ae0f93f2a3bcbbe875f53808a23485b3550cd89af1bb25";
 const DEFAULT_BENCHMARK="scoutplus-3.3-enrichment-replay-v2-2026-09-28";
 const SCORING={
   appearance:1,appearance_60:1,
@@ -12,10 +11,6 @@ const SCORING={
   bonus:[3,2,1]
 };
 
-async function sha256Hex(s){
-  const d=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(s));
-  return [...new Uint8Array(d)].map(x=>x.toString(16).padStart(2,"0")).join("");
-}
 const GITHUB_OIDC_AUDIENCE="tff-fantezi-scout";
 const GITHUB_OIDC_ISSUER="https://token.actions.githubusercontent.com";
 const GITHUB_REPOSITORY_ID="1353738004";
@@ -46,9 +41,12 @@ async function verifyGithubOidc(token){
   const key=await crypto.subtle.importKey("jwk",jwk,{name:"RSASSA-PKCS1-v1_5",hash:"SHA-256"},false,["verify"]);
   return crypto.subtle.verify({name:"RSASSA-PKCS1-v1_5"},key,decodeJwtBytes(parts[2]),new TextEncoder().encode(parts[0]+"."+parts[1]));
 }
-async function authorized(req){
+async function authorized(req,sb){
   const tok=req.headers.get("x-run-token")||"";
-  if(tok && (await sha256Hex(tok))===AUTH_HASH)return true;
+  if(tok){
+    const {data,error}=await sb.rpc("validate_enrichment_replay_worker_token",{p_token:tok});
+    if(!error&&data===true)return true;
+  }
   const auth=req.headers.get("authorization")||"";
   if(!auth.startsWith("Bearer "))return false;
   try{return await verifyGithubOidc(auth.slice(7))}catch{return false}
@@ -111,17 +109,18 @@ function addHist(hist,score){
 
 Deno.serve(async(req)=>{
   try{
-    if(!(await authorized(req)))return Response.json({error:"unauthorized"},{status:401});
+    const sb=createClient(Deno.env.get("SUPABASE_URL"),Deno.env.get("SUPABASE_SERVICE_ROLE_KEY"));
+    if(!(await authorized(req,sb)))return Response.json({error:"unauthorized"},{status:401});
     const u=new URL(req.url);
+    const mode=u.searchParams.get("mode")||"";
+    if(mode==="health")return Response.json({ok:true,auth:true,benchmark:DEFAULT_BENCHMARK});
     const GAMEWEEK=Math.trunc(num(u.searchParams.get("gw"),0));
     if(GAMEWEEK<1||GAMEWEEK>6)return Response.json({error:"gw must be 1..6"},{status:400});
     const BENCHMARK=u.searchParams.get("benchmark")||DEFAULT_BENCHMARK;
     if(BENCHMARK!==DEFAULT_BENCHMARK)return Response.json({error:"unsupported benchmark"},{status:400});
     const draws=Math.max(1,Math.min(10000,Math.trunc(num(u.searchParams.get("draws"),10000))));
     const seed=Math.trunc(num(u.searchParams.get("seed"),2026092801+GAMEWEEK*1000))>>>0;
-    const sb=createClient(Deno.env.get("SUPABASE_URL"),Deno.env.get("SUPABASE_SERVICE_ROLE_KEY"));
-
-    if((u.searchParams.get("mode")||"")==="reset"){
+    if(mode==="reset"){
       const del=await sb.from("scout_replay_sim_accum").delete()
         .eq("gameweek",GAMEWEEK).eq("benchmark_version",BENCHMARK);
       if(del.error)throw del.error;
