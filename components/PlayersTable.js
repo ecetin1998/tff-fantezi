@@ -26,7 +26,6 @@ export default function PlayersTable({players}){
   const [urlReady,setUrlReady]=useState(false)
 
   useEffect(()=>{
-    if(!urlReady)return
     const params=new URLSearchParams(window.location.search)
     setQ(params.get('q')||'')
     setTeam(params.get('team')||'')
@@ -75,6 +74,7 @@ export default function PlayersTable({players}){
 
   useEffect(()=>{if(page>pageCount)setPage(pageCount)},[page,pageCount])
   useEffect(()=>{
+    if(!urlReady)return
     const params=new URLSearchParams(window.location.search)
     const put=(key,value,defaultValue='')=>value&&value!==defaultValue?params.set(key,String(value)):params.delete(key)
     put('q',q);put('team',team);put('pos',pos);put('sort',sort,'xfp')
