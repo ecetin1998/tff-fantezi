@@ -108,7 +108,13 @@ export default async function PlayerPage({ params }){
       {label:'xA / 90',value:s?.xa_per90===null||s?.xa_per90===undefined?num(s?.xa_model_per90):num(s?.xa_per90),note:s?.xa_per90===null||s?.xa_per90===undefined?'model/prior':'gözlenen'},
       {label:'Şut',value:s?.shots===null||s?.shots===undefined?'—':Number(s.shots)},
       {label:'İsabetli şut',value:s?.shots_on_target===null||s?.shots_on_target===undefined?'—':Number(s.shots_on_target)},
-      {label:'Takım hücum katkısı',value:s?.attack_contribution_share===null||s?.attack_contribution_share===undefined?'—':pct(s.attack_contribution_share),note:'xG + etkili xA payı'}
+      {label:'Şut payı',value:s?.shot_share===null||s?.shot_share===undefined?'—':pct(s.shot_share),note:'takım şutları içindeki pay'},
+      {label:'Yaratılan şans',value:s?.key_passes===null||s?.key_passes===undefined?'—':Number(s.key_passes)},
+      {label:'Şans yaratma payı',value:s?.chance_creation_share===null||s?.chance_creation_share===undefined?'—':pct(s.chance_creation_share),note:'takım yaratılan şans payı'},
+      {label:'Cross',value:s?.crosses===null||s?.crosses===undefined?'—':`${Number(s.successful_crosses||0)}/${Number(s.crosses)}`,note:'başarılı / toplam'},
+      {label:'Dripling',value:s?.takeons===null||s?.takeons===undefined?'—':`${Number(s.successful_takeons||0)}/${Number(s.takeons)}`,note:'başarılı / toplam'},
+      {label:'Takım hücum katkısı',value:s?.attack_contribution_share===null||s?.attack_contribution_share===undefined?'—':pct(s.attack_contribution_share),note:'xG + etkili xA payı'},
+      {label:'İleri veri kapsamı',value:s?.advanced_through_gameweek?`MH1–MH${s.advanced_through_gameweek}`:'—',note:s?.advanced_source||undefined}
     )
     if(isDEF)seasonMetrics.push({label:'Gol yemeden',value:Number(s?.clean_sheets||0)})
   }
