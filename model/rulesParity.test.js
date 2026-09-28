@@ -33,6 +33,9 @@ assert.match(optimizerPy,/def expected_autosub_value\(/)
 assert.match(optimizerPy,/def optimize_bench_for_autosubs\(/)
 assert.match(autosubTs,/export function expectedAutosubValue\(/)
 assert.match(autosubTs,/export function optimizeBenchForAutosubs\(/)
+assert.match(autosubTs,/function benchCandidateShortlist\(/)
+assert.match(autosubTs,/const cache=new Map</)
+assert.match(autosubTs,/iteration<4/)
 assert.match(optimizerTs,/import \{ optimizeBenchForAutosubs \} from "\.\.\/_shared\/autosub\.ts"/)
 
 const scoring=canonical.scoring
