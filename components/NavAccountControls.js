@@ -10,7 +10,8 @@ export default function NavAccountControls(){
     const supabase=createClient()
     let alive=true
     const refresh=async()=>{
-      const {data:{user}}=await supabase.auth.getUser()
+      const {data:{session}}=await supabase.auth.getSession()
+      const user=session?.user||null
       let pro=false
       if(user){
         const {data:sub}=await supabase.from('scout_subscriptions').select('plan,status,valid_until').eq('user_id',user.id).maybeSingle()

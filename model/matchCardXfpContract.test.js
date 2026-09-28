@@ -16,9 +16,10 @@ assert.match(page,/awayFantasy\.top_player/)
 assert.match(page,/En yüksek xFP/)
 assert.doesNotMatch(page,/short_label/,'Match cards must not render short player labels.')
 
-assert.match(css,/\.scope :global\(\.match-analysis-card\)\{[\s\S]*?height:570px;/)
+assert.match(css,/\.scope :global\(\.match-analysis-card\)\{[\s\S]*?height:670px;/)
 assert.match(css,/\.scope :global\(\.match-analysis-card\):has\(:global\(\.match-technical-details\)\[open\]\)/)
 assert.match(css,/\.scope :global\(\.match-team-xfp-strip\)/)
-assert.match(css,/-webkit-line-clamp:5/)
+assert.doesNotMatch(css,/-webkit-line-clamp:5/,'Fantasy reading must not be clipped.')
+assert.match(css,/match-team-xfp-side\)>a b\{[\s\S]*?white-space:normal;[\s\S]*?overflow-wrap:anywhere;/,'Top-player full names must wrap instead of clipping.')
 
 console.log('match card team xFP contract ok')
