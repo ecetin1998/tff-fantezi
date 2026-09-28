@@ -1719,3 +1719,44 @@
 }
 
 
+
+
+/* Fast route loading shells */
+.scope :global(.player-loading-grid){
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:10px;
+}
+.scope :global(.squad-loading-grid){
+  grid-template-columns:minmax(0,1.4fr) minmax(300px,.8fr);
+  gap:12px;
+  margin-top:12px;
+}
+.scope :global(.route-loading-card){
+  min-height:94px;
+  padding:16px;
+  overflow:hidden;
+  position:relative;
+}
+.scope :global(.route-loading-card):before{
+  content:"";
+  position:absolute;
+  inset:0;
+  transform:translateX(-100%);
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.72),transparent);
+  animation:route-loading-sheen 1.15s infinite;
+}
+.scope :global(.route-loading-card)>span,.scope :global(.route-loading-card)>b,.scope :global(.route-loading-card)>i{
+  display:block;
+  border-radius:999px;
+  background:#edf1f6;
+}
+.scope :global(.route-loading-card)>span{width:30%;height:8px}
+.scope :global(.route-loading-card)>b{width:62%;height:16px;margin-top:12px}
+.scope :global(.route-loading-card)>i{width:85%;height:8px;margin-top:14px}
+.scope :global(.route-loading-wide){min-height:88px}
+.scope :global(.route-loading-tall){min-height:420px}
+@keyframes route-loading-sheen{to{transform:translateX(100%)}}
+@media(max-width:760px){
+  .scope :global(.player-loading-grid),.scope :global(.squad-loading-grid){grid-template-columns:1fr}
+  .scope :global(.route-loading-tall){min-height:260px}
+}
