@@ -1,0 +1,209 @@
+name: Weekly model lifecycle
+
+on:
+  schedule:
+    - cron: '17 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: write
+  id-token: write
+
+concurrency:
+  group: weekly-model-lifecycle
+  cancel-in-progress: true
+
+jobs:
+  lifecycle:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      FUNCTIONS_URL: https://nnoagjayvrwyjtizhnfz.supabase.co/functions/v1
+      OIDC_AUDIENCE: tff-fantezi-scout
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Mint GitHub OIDC token
+        id: oidc
+        shell: bash
+        run: |
+          set -euo pipefail
+          response="$(curl --fail --show-error --silent             -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN"             "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=${OIDC_AUDIENCE}")"
+          token="$(printf '%s' "$response" | jq -er '.value')"
+          echo "::add-mask::$token"
+          echo "token=$token" >> "$GITHUB_OUTPUT"
+
+      - name: Refresh upstream inputs
+        id: ingest
+        shell: bash
+        env:
+          OIDC_TOKEN: ${{ steps.oidc.outputs.token }}
+        run: |
+          set -euo pipefail
+          response="$(curl --fail --show-error --silent --max-time 240             -H "Authorization: Bearer $OIDC_TOKEN"             -H "Content-Type: application/json"             --data '{"stage":"ingest","strict":false}'             "$FUNCTIONS_URL/model-refresh-control")"
+          echo "$response" | jq .
+          echo "configured=$(printf '%s' "$response" | jq -r '.upstream_configured // false')" >> "$GITHUB_OUTPUT"
+
+      - name: Check whether current MH is fully closed
+        id: status
+        shell: bash
+        env:
+          OIDC_TOKEN: ${{ steps.oidc.outputs.token }}
+        run: |
+          set -euo pipefail
+          response="$(curl --fail --show-error --silent             -H "Authorization: Bearer $OIDC_TOKEN"             -H "Content-Type: application/json"             --data '{"action":"status"}'             "$FUNCTIONS_URL/weekly-model-lifecycle")"
+          echo "$response" | jq .
+          echo "ready=$(printf '%s' "$response" | jq -r '.ready_to_advance // false')" >> "$GITHUB_OUTPUT"
+          echo "current_gw=$(printf '%s' "$response" | jq -r '.current_gameweek')" >> "$GITHUB_OUTPUT"
+          echo "target_gw=$(printf '%s' "$response" | jq -r '.target_gameweek')" >> "$GITHUB_OUTPUT"
+
+      - name: Wait for complete closure
+        if: steps.status.outputs.ready != 'true'
+        run: |
+          echo "Current MH is not fully closed or next-MH fixtures are not ready. No model state changed."
+          echo "Next hourly check will retry."
+
+      - name: Require fresh source data before advancing
+        if: steps.status.outputs.ready == 'true'
+        shell: bash
+        env:
+          OIDC_TOKEN: ${{ steps.oidc.outputs.token }}
+        run: |
+          set -euo pipefail
+          curl --fail --show-error --silent --max-time 240             -H "Authorization: Bearer $OIDC_TOKEN"             -H "Content-Type: application/json"             --data '{"stage":"ingest","strict":true}'             "$FUNCTIONS_URL/model-refresh-control" | jq .
+
+      - name: Close live performance for finished MH
+        if: steps.status.outputs.ready == 'true'
+        id: close
+        shell: bash
+        env:
+          OIDC_TOKEN: ${{ steps.oidc.outputs.token }}
+        run: |
+          set -euo pipefail
+          response="$(curl --fail --show-error --silent             -H "Authorization: Bearer $OIDC_TOKEN"             -H "Content-Type: application/json"             --data '{"action":"close_backtest"}'             "$FUNCTIONS_URL/weekly-model-lifecycle")"
+          echo "$response" | jq .
+          printf '%s' "$response" > "$RUNNER_TEMP/closed-week.json"
+
+      - name: Build next-MH candidate inputs
+        if: steps.status.outputs.ready == 'true'
+        id: prepare
+        shell: bash
+        env:
+          OIDC_TOKEN: ${{ steps.oidc.outputs.token }}
+        run: |
+          set -euo pipefail
+          response="$(curl --fail --show-error --silent --max-time 240             -H "Authorization: Bearer $OIDC_TOKEN"             -H "Content-Type: application/json"             --data '{"action":"prepare"}'             "$FUNCTIONS_URL/weekly-model-lifecycle")"
+          echo "$response" | jq .
+          echo "run_id=$(printf '%s' "$response" | jq -r '.run_id')" >> "$GITHUB_OUTPUT"
+          echo "gameweek=$(printf '%s' "$response" | jq -r '.gameweek')" >> "$GITHUB_OUTPUT"
+          echo "benchmark=$(printf '%s' "$response" | jq -r '.benchmark')" >> "$GITHUB_OUTPUT"
+
+      - name: Run 50K Monte Carlo
+        if: steps.status.outputs.ready == 'true'
+        shell: bash
+        env:
+          OIDC_TOKEN: ${{ steps.oidc.outputs.token }}
+          RUN_ID: ${{ steps.prepare.outputs.run_id }}
+          GAMEWEEK: ${{ steps.prepare.outputs.gameweek }}
+          BENCHMARK: ${{ steps.prepare.outputs.benchmark }}
+        run: |
+          set -euo pipefail
+          common=(-H "Authorization: Bearer $OIDC_TOKEN")
+          curl --fail --show-error --silent --max-time 240 "${common[@]}"             "$FUNCTIONS_URL/run-live-sim-chunk?mode=reset&gw=$GAMEWEEK&run=$RUN_ID&benchmark=$BENCHMARK" | jq .
+          for part in $(seq 0 24); do
+            seed=$((2026000000 + GAMEWEEK * 100000 + part * 2000 + 1))
+            echo "Simulation chunk $((part+1))/25"
+            curl --fail --show-error --silent --max-time 240 "${common[@]}"               "$FUNCTIONS_URL/run-live-sim-chunk?gw=$GAMEWEEK&run=$RUN_ID&benchmark=$BENCHMARK&draws=2000&seed=$seed" | jq -c .
+          done
+          curl --fail --show-error --silent --max-time 240 "${common[@]}"             "$FUNCTIONS_URL/run-live-sim-chunk?mode=finalize&gw=$GAMEWEEK&run=$RUN_ID&benchmark=$BENCHMARK" | jq .
+
+      - name: Optimize recommended squad
+        if: steps.status.outputs.ready == 'true'
+        shell: bash
+        env:
+          OIDC_TOKEN: ${{ steps.oidc.outputs.token }}
+          RUN_ID: ${{ steps.prepare.outputs.run_id }}
+        run: |
+          set -euo pipefail
+          curl --fail --show-error --silent --max-time 300             -H "Authorization: Bearer $OIDC_TOKEN"             "$FUNCTIONS_URL/run-staging-optimizer?mode=recommended&run=$RUN_ID" | jq .
+
+      - name: Optimize ceiling squad
+        if: steps.status.outputs.ready == 'true'
+        shell: bash
+        env:
+          OIDC_TOKEN: ${{ steps.oidc.outputs.token }}
+          RUN_ID: ${{ steps.prepare.outputs.run_id }}
+        run: |
+          set -euo pipefail
+          curl --fail --show-error --silent --max-time 300             -H "Authorization: Bearer $OIDC_TOKEN"             "$FUNCTIONS_URL/run-staging-optimizer?mode=alternative&run=$RUN_ID" | jq .
+
+      - name: Model QA
+        if: steps.status.outputs.ready == 'true'
+        shell: bash
+        env:
+          OIDC_TOKEN: ${{ steps.oidc.outputs.token }}
+          RUN_ID: ${{ steps.prepare.outputs.run_id }}
+        run: |
+          set -euo pipefail
+          jq -n --arg run "$RUN_ID" '{stage:"qa",run_id:$run}' |             curl --fail --show-error --silent -H "Authorization: Bearer $OIDC_TOKEN" -H "Content-Type: application/json" --data-binary @-             "$FUNCTIONS_URL/model-refresh-control" | jq .
+
+      - name: Data-integrity and availability QA
+        if: steps.status.outputs.ready == 'true'
+        shell: bash
+        env:
+          OIDC_TOKEN: ${{ steps.oidc.outputs.token }}
+          RUN_ID: ${{ steps.prepare.outputs.run_id }}
+        run: |
+          set -euo pipefail
+          jq -n --arg run "$RUN_ID" '{stage:"integrity",run_id:$run}' |             curl --fail --show-error --silent -H "Authorization: Bearer $OIDC_TOKEN" -H "Content-Type: application/json" --data-binary @-             "$FUNCTIONS_URL/model-refresh-control" | jq .
+
+      - name: Bugfix invariants QA
+        if: steps.status.outputs.ready == 'true'
+        shell: bash
+        env:
+          OIDC_TOKEN: ${{ steps.oidc.outputs.token }}
+          RUN_ID: ${{ steps.prepare.outputs.run_id }}
+        run: |
+          set -euo pipefail
+          jq -n --arg run "$RUN_ID" '{stage:"bugfix",run_id:$run}' |             curl --fail --show-error --silent -H "Authorization: Bearer $OIDC_TOKEN" -H "Content-Type: application/json" --data-binary @-             "$FUNCTIONS_URL/model-refresh-control" | jq .
+
+      - name: Record closed-week live backtest gate
+        if: steps.status.outputs.ready == 'true'
+        shell: bash
+        env:
+          OIDC_TOKEN: ${{ steps.oidc.outputs.token }}
+          RUN_ID: ${{ steps.prepare.outputs.run_id }}
+        run: |
+          set -euo pipefail
+          jq -n --arg run "$RUN_ID" --slurpfile closed "$RUNNER_TEMP/closed-week.json"             '{stage:"replay",run_id:$run,pass:true,details:{pass:true,kind:"closed_live_week",closed_week:$closed[0]}}' |             curl --fail --show-error --silent -H "Authorization: Bearer $OIDC_TOKEN" -H "Content-Type: application/json" --data-binary @-             "$FUNCTIONS_URL/model-refresh-control" | jq .
+
+      - name: Freeze next-MH live benchmark before promotion
+        if: steps.status.outputs.ready == 'true'
+        shell: bash
+        env:
+          OIDC_TOKEN: ${{ steps.oidc.outputs.token }}
+          RUN_ID: ${{ steps.prepare.outputs.run_id }}
+        run: |
+          set -euo pipefail
+          jq -n --arg run "$RUN_ID" '{action:"snapshot",run_id:$run}' |             curl --fail --show-error --silent -H "Authorization: Bearer $OIDC_TOKEN" -H "Content-Type: application/json" --data-binary @-             "$FUNCTIONS_URL/weekly-model-lifecycle" | jq .
+
+      - name: Promote candidate
+        if: steps.status.outputs.ready == 'true'
+        shell: bash
+        env:
+          OIDC_TOKEN: ${{ steps.oidc.outputs.token }}
+          RUN_ID: ${{ steps.prepare.outputs.run_id }}
+        run: |
+          set -euo pipefail
+          jq -n --arg run "$RUN_ID" '{stage:"promote",run_id:$run}' |             curl --fail --show-error --silent -H "Authorization: Bearer $OIDC_TOKEN" -H "Content-Type: application/json" --data-binary @-             "$FUNCTIONS_URL/model-refresh-control" | jq .
+
+      - name: Verify exactly one new current run
+        if: steps.status.outputs.ready == 'true'
+        shell: bash
+        env:
+          OIDC_TOKEN: ${{ steps.oidc.outputs.token }}
+          GAMEWEEK: ${{ steps.prepare.outputs.gameweek }}
+        run: |
+          set -euo pipefail
+          jq -n --argjson gw "$GAMEWEEK" '{action:"verify",gameweek:$gw}' |             curl --fail --show-error --silent -H "Authorization: Bearer $OIDC_TOKEN" -H "Content-Type: application/json" --data-binary @-             "$FUNCTIONS_URL/weekly-model-lifecycle" | jq .
