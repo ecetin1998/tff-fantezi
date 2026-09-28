@@ -184,13 +184,10 @@
 }
 .scope :global(.match-analysis-card){
   min-width:0;
-  height:670px;
+  min-height:670px;
+  height:auto;
   display:flex;
   flex-direction:column;
-}
-.scope :global(.match-analysis-card):has(:global(.match-technical-details)[open]){
-  height:auto;
-  min-height:670px;
 }
 .scope :global(.match-analysis-card) :global(.match-card-top){
   align-items:center;
@@ -429,10 +426,6 @@
 
 @media(max-width:760px){
   .scope :global(.match-analysis-card){
-    height:710px;
-  }
-  .scope :global(.match-analysis-card):has(:global(.match-technical-details)[open]){
-    height:auto;
     min-height:710px;
   }
   .scope :global(.role-summary-grid){
@@ -463,10 +456,6 @@
 
 @media(max-width:430px){
   .scope :global(.match-analysis-card){
-    height:740px;
-  }
-  .scope :global(.match-analysis-card):has(:global(.match-technical-details)[open]){
-    height:auto;
     min-height:740px;
   }
   .scope :global(.match-team-xfp-strip){
