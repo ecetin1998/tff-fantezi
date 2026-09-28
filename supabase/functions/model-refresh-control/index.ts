@@ -227,6 +227,16 @@ Deno.serve(async(req:Request)=>{
       return Response.json({ok:pass,pass,same_engine:sameEngine,inherited_from:parent.data.id},{status:pass?200:409})
     }
 
+    if(stage==="block"){
+      if(!runId)return Response.json({error:"run_id required"},{status:400})
+      const upd=await sb.from("scout_weekly_cycles").update({
+        status:"blocked",last_stage:String(body.failed_stage||"unknown"),
+        last_error:String(body.reason||"blocked").slice(0,1000),updated_at:new Date().toISOString()
+      }).eq("candidate_run_id",runId)
+      if(upd.error)throw upd.error
+      return Response.json({ok:true,blocked:true})
+    }
+
     if(stage==="promote"){
       if(!runId)return Response.json({error:"run_id required"},{status:400})
       const q=await sb.rpc("scout_promote_run",{p_run_id:runId})
