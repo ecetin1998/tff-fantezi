@@ -823,6 +823,10 @@
 .scope :global(.match-teams) span,.scope :global(.match-team-meta) small,.scope :global(.fantasy-xg-comparison)>span{
   font-size:9px;
 }
+.scope :global(.outcome-bar-labeled){
+  height:34px;
+  margin:12px 0 8px;
+}
 .scope :global(.outcome-bar-labeled) i span{
   font-size:8.5px;
   line-height:1;
@@ -908,6 +912,9 @@
 }
 
 @media(max-width:760px){
+  .scope :global(.outcome-bar-labeled){
+    height:32px;
+  }
   .scope main{
     font-size:13.5px;
     padding-left:14px;
