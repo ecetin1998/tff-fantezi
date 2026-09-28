@@ -22,7 +22,7 @@ const recommendation=section('async function _getRecommendation','async function
 const squadPool=section('async function _loadSquadPlayerPool','async function _getSquadPlayerPool')
 
 assert.match(playerLoader,/\.eq\('run_id',runId\)/)
-assert.match(data,/players-for-current-run-v1/)
+assert.match(data,/players-for-current-run-v2/)
 assert.match(players,/const run=await getCurrentRun\(\)/)
 assert.match(players,/getPlayersForRunShared\(run\.id\)/)
 assert.match(availability,/\.eq\('run_id',run\.id\)/)
@@ -45,6 +45,7 @@ assert.doesNotMatch(home,/getPlayersWithProjection|getMatches\(/)
 
 assert.match(squad,/getSquadPlayerPool/)
 assert.doesNotMatch(squad,/getPlayersWithProjection/)
-assert.match(squad,/scout_user_squad_snapshots[\s\S]*\.limit\(34\)/)
+assert.match(squad,/scout_my_squad_page/)
+assert.doesNotMatch(squad,/scout_user_squad_snapshots[\s\S]*\.limit\(34\)/)
 
 console.log('current-run alignment and hot-path contract ok')
