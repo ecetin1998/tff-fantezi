@@ -123,4 +123,12 @@ assert.match(migration,/'gk_captain'/)
 assert.match(migration,/'xi_over_1'/)
 assert.match(migration,/'unexplained_same_team_def_xfp_diff'/)
 
+const guardrails=read('supabase/migrations/20260928083313_optimizer_audit_guardrails.sql')
+assert.match(guardrails,/scout_squad_members_captain_guard/)
+assert.match(guardrails,/GK_CAPTAIN_NOT_ALLOWED/)
+assert.match(guardrails,/CAPTAIN_MUST_BE_STARTER/)
+assert.match(guardrails,/\)>\.3/)
+assert.match(guardrails,/security invoker/)
+assert.doesNotMatch(guardrails,/security definer/)
+
 console.log('bugfix contract passed')
