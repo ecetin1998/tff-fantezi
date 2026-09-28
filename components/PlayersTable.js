@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { teamCssVars } from '@/lib/teamThemes'
 import { availabilityCompactNote, availabilityIsIssue } from '@/lib/availability'
-import {confidenceLabel,fixtureBadge,playerLabel} from '@/lib/playerPresentation'
+import {fixtureBadge,playerLabel} from '@/lib/playerPresentation'
 import {playerRoleLabel} from '@/lib/playerRole'
 
 const posLabel=p=>({GK:'KL',DEF:'DEF',MID:'OS',FWD:'FOR'}[p]||p||'—')
@@ -108,7 +108,7 @@ export default function PlayersTable({players,initialSearchParams={}}){
         {pageRows.map((p,i)=><Link href={'/players/'+p.id} className="card mobile-player-card team-accent-card" style={teamCssVars(p.team)} key={p.id}>
           <div className="mobile-player-top">
             <div className="mobile-card-badges"><span className="weekly-rank">#{(safePage-1)*PAGE_SIZE+i+1}</span><span className={'pos '+p.position}>{posLabel(p.position)}</span></div>
-            <div className="mobile-player-name"><b>{playerLabel(p)}</b><span>{p.team}{playerRoleLabel(p)?' • '+playerRoleLabel(p):''} • {num(p.price,1)}m</span><small className="player-meta-badges"><em>{confidenceLabel(p.projection)} güven</em>{fixtureBadge(p.projection)?<em>{fixtureBadge(p.projection)}</em>:null}</small></div>
+            <div className="mobile-player-name"><b>{playerLabel(p)}</b><span>{p.team}{playerRoleLabel(p)?' • '+playerRoleLabel(p):''} • {num(p.price,1)}m</span><small className="player-meta-badges">{fixtureBadge(p.projection)?<em>{fixtureBadge(p.projection)}</em>:null}</small></div>
             <div className="mobile-xfp"><strong>{num(p.projection?.xfp)}</strong><small>xFP</small><em>{num(p.total_points,0)} toplam puan</em></div>
           </div>
           <div className="mobile-fixture"><span>{p.projection?.venue==='HOME'?'Ev':p.projection?.venue==='AWAY'?'Dep':'—'}</span><b>Rakip: {p.projection?.opponent_name||'—'}</b>{playerNote(p)?<em>{playerNote(p)}</em>:null}</div>
@@ -127,7 +127,7 @@ export default function PlayersTable({players,initialSearchParams={}}){
       </tr></thead><tbody>{pageRows.map((p,i)=><tr className="team-player-row clickable-row" style={teamCssVars(p.team)} key={p.id}
         tabIndex={0} onClick={e=>openRow(e,p.id)} onKeyDown={e=>{if(e.key==='Enter')router.push('/players/'+p.id)}}>
         <td className="rank-col">#{(safePage-1)*PAGE_SIZE+i+1}</td>
-        <td><Link className="player-link team-player-link" href={'/players/'+p.id}><i className="club-dot"/><b>{playerLabel(p)}</b></Link><small className="cell-note">{confidenceLabel(p.projection)} güven{fixtureBadge(p.projection)?' • '+fixtureBadge(p.projection):''}</small>{playerNote(p)?<small className="cell-note">{playerNote(p)}</small>:null}</td>
+        <td><Link className="player-link team-player-link" href={'/players/'+p.id}><i className="club-dot"/><b>{playerLabel(p)}</b></Link>{fixtureBadge(p.projection)?<small className="cell-note">{fixtureBadge(p.projection)}</small>:null}{playerNote(p)?<small className="cell-note">{playerNote(p)}</small>:null}</td>
         <td><Link className="team-table-link" href={'/teams/'+p.team_id}>{p.team}</Link></td><td><span className={'pos '+p.position}>{posLabel(p.position)}</span>{playerRoleLabel(p)?<small className="cell-note">{playerRoleLabel(p)}</small>:null}</td><td>{p.projection?.opponent_name||'—'}</td><td>{p.projection?.venue==='HOME'?'Ev':p.projection?.venue==='AWAY'?'Dep':'—'}</td>
         <td>{num(p.price,1)}m</td><td><b>{num(p.total_points,0)}</b></td><td>{pct(p.projection?.xi_probability)}</td><td>{num(p.projection?.x_minutes,0)}</td><td><b>{num(p.projection?.xfp)}</b></td>
         <td>{num(p.projection?.p25,1)}</td><td>{num(p.projection?.p90,1)}</td><td>{pct(p.projection?.six_plus_probability)}</td><td>{num(p.projection?.expected_goals)}</td><td>{num(p.projection?.expected_assists)}</td><td>{num(p.projection?.value_score)}</td>
