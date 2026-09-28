@@ -5,7 +5,7 @@ import { teamCssVars } from '@/lib/teamThemes'
 export const revalidate=300
 export const metadata={title:'Maç Tahminleri'}
 
-const matchupLabel={good:'İyi',neutral:'Dengeli',tough:'Zor'}
+const matchupLabel={good:'Avantajlı',neutral:'Dengeli',tough:'Dezavantajlı'}
 const profileClass=total=>total>=3?'high':total<=2?'low':'medium'
 const pct=v=>Math.round(Number(v||0)*100)
 
