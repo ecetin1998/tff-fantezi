@@ -1,0 +1,198 @@
+name: Weekly model lifecycle
+
+on:
+  schedule:
+    - cron: "17 */2 * * *"
+  workflow_dispatch:
+    inputs:
+      source:
+        description: "Trigger source"
+        required: false
+        default: "manual"
+      probe_only:
+        description: "Check lifecycle readiness without mutating model data"
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+  actions: write
+  id-token: write
+
+concurrency:
+  group: weekly-model-lifecycle
+  cancel-in-progress: false
+
+jobs:
+  dispatch:
+    if: github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Dispatch protected lifecycle run
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run weekly-lifecycle.yml --repo "${{ github.repository }}" --ref main -f source=schedule -f probe_only=false
+
+  lifecycle:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 55
+    env:
+      FUNCTIONS_URL: https://nnoagjayvrwyjtizhnfz.supabase.co/functions/v1
+      OIDC_AUDIENCE: tff-fantezi-scout
+      PROBE_ONLY: ${{ inputs.probe_only }}
+    steps:
+      - name: Mint GitHub OIDC token
+        id: oidc
+        shell: bash
+        run: |
+          set -euo pipefail
+          response="$(curl --fail --show-error --silent             -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN"             "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=${OIDC_AUDIENCE}")"
+          token="$(printf '%s' "$response" | jq -er '.value')"
+          echo "::add-mask::$token"
+          echo "token=$token" >> "$GITHUB_OUTPUT"
+
+      - name: Advance model only after a fully closed matchweek
+        shell: bash
+        env:
+          OIDC_TOKEN: ${{ steps.oidc.outputs.token }}
+        run: |
+          set -euo pipefail
+
+          request() {
+            local url="$1"
+            local data="$2"
+            local tmp
+            tmp="$(mktemp)"
+            HTTP_CODE="$(curl --show-error --silent --max-time 600               -o "$tmp" -w "%{http_code}"               -H "Authorization: Bearer $OIDC_TOKEN"               -H "Content-Type: application/json"               -X POST --data "$data" "$url")"
+            BODY="$(cat "$tmp")"
+            rm -f "$tmp"
+          }
+
+          require_2xx() {
+            local label="$1"
+            if [[ "$HTTP_CODE" -lt 200 || "$HTTP_CODE" -ge 300 ]]; then
+              echo "::error::$label failed with HTTP $HTTP_CODE"
+              echo "$BODY"
+              exit 1
+            fi
+          }
+
+          control() {
+            request "$FUNCTIONS_URL/model-refresh-control" "$1"
+          }
+
+          block_cycle() {
+            local run_id="$1"
+            local stage="$2"
+            local reason="$3"
+            control "$(jq -nc --arg run "$run_id" --arg stage "$stage" --arg reason "$reason"               '{stage:"block",run_id:$run,failed_stage:$stage,reason:$reason}')"
+            echo "::notice::Weekly lifecycle blocked safely at $stage. Current live run was not changed."
+            exit 0
+          }
+
+          control '{"stage":"status"}'
+          require_2xx "status"
+          STATUS="$BODY"
+          echo "Lifecycle status: $STATUS"
+
+          if [[ "$PROBE_ONLY" == "true" ]]; then
+            control '{"stage":"health"}'
+            require_2xx "health"
+            echo "Lifecycle health: $BODY"
+            exit 0
+          fi
+
+          POLL="$(jq -r '.poll // false' <<<"$STATUS")"
+          if [[ "$POLL" != "true" ]]; then
+            echo "::notice::Current matchweek is not near full closure yet. Nothing to do."
+            exit 0
+          fi
+
+          control '{"stage":"ingest"}'
+          require_2xx "ingest"
+          if [[ "$(jq -r '.ok // false' <<<"$BODY")" != "true" ]]; then
+            echo "::notice::Waiting for fresh source data: $(jq -c '.' <<<"$BODY")"
+            exit 0
+          fi
+
+          control '{"stage":"status"}'
+          require_2xx "post-ingest status"
+          STATUS="$BODY"
+          if [[ "$(jq -r '.fully_closed // false' <<<"$STATUS")" != "true" ]]; then
+            echo "::notice::Not all matches/official fantasy rows are closed yet. Current week stays live."
+            exit 0
+          fi
+
+          CURRENT_RUN="$(jq -er '.current_run.id' <<<"$STATUS")"
+          CURRENT_GW="$(jq -er '.current_gameweek' <<<"$STATUS")"
+
+          control "$(jq -nc --arg run "$CURRENT_RUN" '{stage:"close",run_id:$run}')"
+          require_2xx "close live backtest"
+          if [[ "$(jq -r '.ok // false' <<<"$BODY")" != "true" ]]; then
+            echo "::notice::Live backtest closure is waiting: $BODY"
+            exit 0
+          fi
+
+          control "$(jq -nc --arg run "$CURRENT_RUN" '{stage:"prepare",run_id:$run}')"
+          require_2xx "prepare next week"
+          if [[ "$(jq -r '.season_complete // false' <<<"$BODY")" == "true" ]]; then
+            echo "::notice::Season complete."
+            exit 0
+          fi
+          if [[ "$(jq -r '.ok // false' <<<"$BODY")" != "true" ]]; then
+            echo "::notice::Next-week candidate is waiting: $BODY"
+            exit 0
+          fi
+
+          CANDIDATE_RUN="$(jq -er '.candidate_run_id' <<<"$BODY")"
+          TARGET_GW="$(jq -er '.target_gameweek' <<<"$BODY")"
+          BENCHMARK="$(jq -er '.benchmark_version' <<<"$BODY")"
+          echo "Prepared MH$TARGET_GW candidate $CANDIDATE_RUN with $BENCHMARK"
+
+          request "$FUNCTIONS_URL/run-live-week-sim?mode=reset&gw=$TARGET_GW&run=$CANDIDATE_RUN&benchmark=$BENCHMARK" '{}'
+          require_2xx "simulation reset"
+
+          for part in 1 2 3 4 5; do
+            seed=$((2026000000 + TARGET_GW * 1000 + part))
+            request "$FUNCTIONS_URL/run-live-week-sim?gw=$TARGET_GW&run=$CANDIDATE_RUN&benchmark=$BENCHMARK&draws=10000&seed=$seed" '{}'
+            require_2xx "simulation chunk $part"
+            echo "Simulation chunk $part/5 complete"
+          done
+
+          request "$FUNCTIONS_URL/run-live-week-sim?mode=finalize&gw=$TARGET_GW&run=$CANDIDATE_RUN&benchmark=$BENCHMARK" '{}'
+          require_2xx "simulation finalize"
+
+          control "$(jq -nc --arg run "$CANDIDATE_RUN" --argjson gw "$TARGET_GW" --arg benchmark "$BENCHMARK"             '{stage:"top25",run_id:$run,gameweek:$gw,benchmark:$benchmark}')"
+          require_2xx "top25 refresh"
+
+          request "$FUNCTIONS_URL/run-staging-optimizer?mode=recommended&run=$CANDIDATE_RUN" '{}'
+          require_2xx "recommended optimizer"
+          request "$FUNCTIONS_URL/run-staging-optimizer?mode=alternative&run=$CANDIDATE_RUN" '{}'
+          require_2xx "alternative optimizer"
+
+          control "$(jq -nc --arg run "$CANDIDATE_RUN" --argjson gw "$TARGET_GW" --arg benchmark "$BENCHMARK"             '{stage:"ready",run_id:$run,gameweek:$gw,benchmark:$benchmark}')"
+          require_2xx "candidate ready"
+
+          control "$(jq -nc --arg run "$CANDIDATE_RUN" '{stage:"qa",run_id:$run}')"
+          if [[ "$HTTP_CODE" != "200" ]]; then
+            block_cycle "$CANDIDATE_RUN" "qa" "$BODY"
+          fi
+
+          control "$(jq -nc --arg run "$CANDIDATE_RUN" '{stage:"integrity",run_id:$run}')"
+          if [[ "$HTTP_CODE" != "200" ]]; then
+            block_cycle "$CANDIDATE_RUN" "integrity" "$BODY"
+          fi
+
+          control "$(jq -nc --arg run "$CANDIDATE_RUN" '{stage:"model_gate",run_id:$run}')"
+          if [[ "$HTTP_CODE" != "200" ]]; then
+            block_cycle "$CANDIDATE_RUN" "model_gate" "$BODY"
+          fi
+
+          control "$(jq -nc --arg run "$CANDIDATE_RUN" '{stage:"promote",run_id:$run}')"
+          require_2xx "promote"
+
+          control "$(jq -nc --arg run "$CANDIDATE_RUN" '{stage:"complete",run_id:$run}')"
+          require_2xx "complete"
+          echo "Weekly lifecycle complete: MH$CURRENT_GW -> MH$TARGET_GW"
