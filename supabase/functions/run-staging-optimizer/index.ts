@@ -107,24 +107,19 @@ function buildModel(rows:any[],variant:string,recommendedXI:Set<number>,rules:an
 
   const variables:any={},ints:any={};
   const captainLambda=.18;
-  const budgetPenaltyPerM=.03;
   for(const r of rows){
     const id=Number(r.player_id),pos=String(r.position),team=Number(r.team_id);
     const price=n(r.price),xfp=n(r.xfp),p90=n(r.p90);
     constraints["one_"+id]={max:1};
     constraints["caplink_"+id]={max:0};
-    const availability=n(r.availability_probability);
     const minutes=n(r.x_minutes);
     const xiProbability=n(r.xi_probability);
-    const playProbability=Math.max(0,Math.min(1,availability*Math.max(xiProbability,Math.min(1,minutes/90))));
-    const benchValue=.08*playProbability*xfp;
     const cheapBench=.0001*price;
-    const spendReward=budgetPenaltyPerM*price;
     const base=variant==="recommended"?xfp:xfp+.18*Math.max(0,p90-xfp);
     const xiEligible=xiProbability>=.5&&minutes>=40;
     if(xiEligible){
       const v:any={
-        score:base-benchValue+cheapBench+spendReward,
+        score:base,
         budget:price,total:1,xiTotal:1,
         ["squad"+pos]:1,["team_"+team]:1,["one_"+id]:1,["caplink_"+id]:-1,
         ["xi"+pos+"Min"]:1,["xi"+pos+"Max"]:1
@@ -139,7 +134,7 @@ function buildModel(rows:any[],variant:string,recommendedXI:Set<number>,rules:an
       }
     }
     variables["b_"+id]={
-      score:benchValue-cheapBench+spendReward,budget:price,total:1,
+      score:-cheapBench,budget:price,total:1,
       ["squad"+pos]:1,["team_"+team]:1,["one_"+id]:1
     };
     ints["b_"+id]=1;
@@ -162,7 +157,12 @@ function solve(rows:any[],variant:string,recommendedXI:Set<number>,rules:any){
   if(xi.length!==11||bench.length!==4||!captain)throw new Error("bad solution shape "+variant+" "+xi.length+"/"+bench.length+"/"+captain);
   const captainRow=rows.find(r=>Number(r.player_id)===captain);
   if(captainRow?.position==="GK")throw new Error("GK captain invariant violated");
-  return {out,xi,bench,captain};
+  const xiRows=xi.map(id=>rows.find(r=>Number(r.player_id)===id)).filter(Boolean);
+  const counts:any={DEF:0,MID:0,FWD:0};
+  for(const r of xiRows)if(r.position!=="GK")counts[r.position]=(counts[r.position]||0)+1;
+  const formation=`${counts.DEF}-${counts.MID}-${counts.FWD}`;
+  if(!Array.isArray(rules.formations)||!rules.formations.includes(formation))throw new Error("invalid starting formation "+formation);
+  return {out,xi,bench,captain,formation};
 }
 Deno.serve(async(req:Request)=>{
   try{
@@ -227,10 +227,8 @@ Deno.serve(async(req:Request)=>{
       const budget=allRows.reduce((s:number,r:any)=>s+n(r.price),0);
       const xiXfp=xiRows.reduce((s:number,r:any)=>s+n(r.xfp),0);
       const cap=byId.get(sol.captain);
-      const counts:any={DEF:0,MID:0,FWD:0};
-      for(const r of xiRows)if(r.position!=="GK")counts[r.position]=(counts[r.position]||0)+1;
-      const formation=`${counts.DEF}-${counts.MID}-${counts.FWD}`;
-      const objective=variant==="recommended"?"xi_xfp_bench_ev_v3":"ceiling_p90_bench_ev_v4";
+      const formation=sol.formation;
+      const objective=variant==="recommended"?"xi_xfp_budget_neutral_v1":"ceiling_p90_budget_neutral_v1";
       const sims=Number(runMeta.data.simulation_count||0).toLocaleString("tr-TR");
       const status=variant==="recommended"
         ? `OPTIMAL • availability-integrated • bütçe ≤${Number(rules.budget)}m • ${sims} sim • bench puanı dahil değil`
