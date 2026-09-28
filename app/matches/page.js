@@ -111,6 +111,10 @@ export default async function Matches(){
         const attackEdge=homeXg===awayXg?null:(homeXg>awayXg?'home':'away')
         const cleanEdge=homeCs===awayCs?null:(homeCs>awayCs?'home':'away')
         const reading=fantasyReading(m)
+        const homeFantasy=m.home_fantasy||{}
+        const awayFantasy=m.away_fantasy||{}
+        const homeTop=homeFantasy.top_player
+        const awayTop=awayFantasy.top_player
         return <article className="card match-card modern-match-card match-analysis-card" key={m.match_id}>
           <div className="match-card-top">
             <span className="match-date-label">
@@ -157,6 +161,25 @@ export default async function Matches(){
             <span className={cleanEdge==='home'?'edge':''}><small>{m.home_team} CS</small><b>{(homeCs*100).toFixed(0)}%</b></span>
             <span className={attackEdge==='away'?'edge':''}><small>{m.away_team} hücum</small><b>{awayXg.toFixed(2)} xG</b></span>
             <span className={cleanEdge==='away'?'edge':''}><small>{m.away_team} CS</small><b>{(awayCs*100).toFixed(0)}%</b></span>
+          </div>
+
+          <div className="match-team-xfp-strip">
+            <div className="match-team-xfp-side" style={teamCssVars(m.home_team)}>
+              <span><small>{m.home_team} toplam xFP</small><b>{Number(homeFantasy.total_xfp||0).toFixed(2)}</b></span>
+              <Link href={homeTop?'/players/'+homeTop.player_id:'/players'} title={homeTop?.name||''}>
+                <small>En yüksek xFP</small>
+                <b>{homeTop?.name||'—'}</b>
+                <em>{homeTop?homeTop.xfp.toFixed(2)+' xFP':'—'}</em>
+              </Link>
+            </div>
+            <div className="match-team-xfp-side away" style={teamCssVars(m.away_team)}>
+              <span><small>{m.away_team} toplam xFP</small><b>{Number(awayFantasy.total_xfp||0).toFixed(2)}</b></span>
+              <Link href={awayTop?'/players/'+awayTop.player_id:'/players'} title={awayTop?.name||''}>
+                <small>En yüksek xFP</small>
+                <b>{awayTop?.name||'—'}</b>
+                <em>{awayTop?awayTop.xfp.toFixed(2)+' xFP':'—'}</em>
+              </Link>
+            </div>
           </div>
 
           <div className="match-fantasy-note">
