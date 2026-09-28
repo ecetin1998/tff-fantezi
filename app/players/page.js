@@ -7,11 +7,10 @@ export const metadata={
   description:'Süper Lig fantasy oyuncuları için xFP, ilk 11 ihtimali, beklenen dakika, puan aralığı ve fiyat/performans analizi.'
 }
 
-export default async function Players({searchParams}){
-  const params=await searchParams
+export default async function Players(){
   const {players,run}=await getPlayersWithProjection()
   return <>
-<div className="section-title"><div><span className="eyebrow">OYUNCU HAVUZU</span><h1>MH{run?.gameweek||'—'} Oyuncu Analizi</h1></div><span className="muted">{players.length} oyuncu • karar odaklı görünüm</span></div>
-    <PlayersTable players={players} initialSearchParams={params||{}}/>
+    <div className="section-title"><div><span className="eyebrow">OYUNCU HAVUZU</span><h1>MH{run?.gameweek||'—'} Oyuncu Analizi</h1></div><span className="muted">{players.length} oyuncu • karar odaklı görünüm</span></div>
+    <PlayersTable players={players}/>
   </>
 }
