@@ -1,0 +1,368 @@
+{
+  "season": "2026-27",
+  "reviewed_at": "2026-09-28T06:10:00Z",
+  "source_updated_at": "2026-09-25T18:54:00Z",
+  "source_url": "https://sakat-ve-cezali.com/turkiye-super-lig.php",
+  "target_gameweek": 7,
+  "policy": {
+    "suspended_target_fixture": 0,
+    "long_out_after_gameweek": 0,
+    "doubtful": 0.5,
+    "early_oct_before_gameweek": 0.75,
+    "returned_to_training": 0.75
+  },
+  "players": [
+    {
+      "player_id": 420,
+      "availability_type": "injuries",
+      "model_probability": 0.75,
+      "reason": "Kas sakatlığı",
+      "expected_return": "Ekim ayı başında 2026",
+      "policy_key": "early_oct_before_gameweek"
+    },
+    {
+      "player_id": 328,
+      "availability_type": "injuries",
+      "model_probability": 0,
+      "reason": "Çapraz bağ yırtılması",
+      "expected_return": "Kasım ayı başında 2026",
+      "policy_key": "long_out_after_gameweek"
+    },
+    {
+      "player_id": 586,
+      "availability_type": "injuries",
+      "model_probability": 0.75,
+      "reason": "Kas sakatlığı",
+      "expected_return": "Ekim ayı başında 2026",
+      "policy_key": "early_oct_before_gameweek"
+    },
+    {
+      "player_id": 154,
+      "availability_type": "suspensions",
+      "model_probability": 0,
+      "reason": "1 maç cezalı",
+      "expected_return": "11.10.2026 • Gençlerbirliği - Amed",
+      "policy_key": "suspended_target_fixture"
+    },
+    {
+      "player_id": 408,
+      "availability_type": "injuries",
+      "model_probability": 0.5,
+      "reason": "Fiziki Rahatsızlık",
+      "expected_return": "Şüpheli",
+      "policy_key": "doubtful"
+    },
+    {
+      "player_id": 380,
+      "availability_type": "injuries",
+      "model_probability": 0.5,
+      "reason": "Kas sakatlığı",
+      "expected_return": "Şüpheli",
+      "policy_key": "doubtful"
+    },
+    {
+      "player_id": 273,
+      "availability_type": "injuries",
+      "model_probability": 0.75,
+      "reason": "Topuk Sakatlığı",
+      "expected_return": "Ekim ayı başında 2026",
+      "policy_key": "early_oct_before_gameweek"
+    },
+    {
+      "player_id": 593,
+      "availability_type": "injuries",
+      "model_probability": 0.75,
+      "reason": "Baldır sakatlığı",
+      "expected_return": "Ekim ayı başında 2026",
+      "policy_key": "early_oct_before_gameweek"
+    },
+    {
+      "player_id": 281,
+      "availability_type": "injuries",
+      "model_probability": 0.75,
+      "reason": "Parmak sakatlığı",
+      "expected_return": "Yaklaşık bir hafta",
+      "policy_key": "early_oct_before_gameweek"
+    },
+    {
+      "player_id": 478,
+      "availability_type": "injuries",
+      "model_probability": 0.75,
+      "reason": "Kas sakatlığı",
+      "expected_return": "Ekim ayı başında 2026",
+      "policy_key": "early_oct_before_gameweek"
+    },
+    {
+      "player_id": 188,
+      "availability_type": "injuries",
+      "model_probability": 0,
+      "reason": "Menisküs sakatlığı",
+      "expected_return": "Aralık ayı ortasında 2026",
+      "policy_key": "long_out_after_gameweek"
+    },
+    {
+      "player_id": 537,
+      "availability_type": "injuries",
+      "model_probability": 0.75,
+      "reason": "Diz sakatlığı",
+      "expected_return": "Ekim ayı başında 2026",
+      "policy_key": "early_oct_before_gameweek"
+    },
+    {
+      "player_id": 507,
+      "availability_type": "injuries",
+      "model_probability": 0.75,
+      "reason": "Kas sakatlığı",
+      "expected_return": "Ekim ayı başında 2026",
+      "policy_key": "early_oct_before_gameweek"
+    },
+    {
+      "player_id": 525,
+      "availability_type": "injuries",
+      "model_probability": 0.75,
+      "reason": "Kasık sakatlığı",
+      "expected_return": "Ekim ayı başında 2026",
+      "policy_key": "early_oct_before_gameweek"
+    },
+    {
+      "player_id": 545,
+      "availability_type": "injuries",
+      "model_probability": 0,
+      "reason": "Uyluk sakatlığı",
+      "expected_return": "Ekim ayı sonunda 2026",
+      "policy_key": "long_out_after_gameweek"
+    },
+    {
+      "player_id": 515,
+      "availability_type": "suspensions",
+      "model_probability": 0,
+      "reason": "1 maç cezalı",
+      "expected_return": "11.10.2026 • Galatasaray - Kasımpaşa",
+      "policy_key": "suspended_target_fixture"
+    },
+    {
+      "player_id": 575,
+      "availability_type": "injuries",
+      "model_probability": 0.75,
+      "reason": "Kas sakatlığı",
+      "expected_return": "Ekim ayı başında 2026",
+      "policy_key": "early_oct_before_gameweek"
+    },
+    {
+      "player_id": 565,
+      "availability_type": "injuries",
+      "model_probability": 0.75,
+      "reason": "Kas sakatlığı",
+      "expected_return": "Ekim ayı başında 2026",
+      "policy_key": "early_oct_before_gameweek"
+    },
+    {
+      "player_id": 566,
+      "availability_type": "injuries",
+      "model_probability": 0.75,
+      "reason": "Kas sakatlığı",
+      "expected_return": "Ekim ayı başında 2026",
+      "policy_key": "early_oct_before_gameweek"
+    },
+    {
+      "player_id": 332,
+      "availability_type": "injuries",
+      "model_probability": 0.5,
+      "reason": "Kas sakatlığı",
+      "expected_return": "Şüpheli",
+      "policy_key": "doubtful"
+    },
+    {
+      "player_id": 813,
+      "availability_type": "injuries",
+      "model_probability": 0.75,
+      "reason": "Kas sakatlığı",
+      "expected_return": "Ekim ayı başında 2026",
+      "policy_key": "early_oct_before_gameweek"
+    },
+    {
+      "player_id": 345,
+      "availability_type": "injuries",
+      "model_probability": 0.5,
+      "reason": "Kas sakatlığı",
+      "expected_return": "Şüpheli",
+      "policy_key": "doubtful"
+    },
+    {
+      "player_id": 301,
+      "availability_type": "injuries",
+      "model_probability": 0.5,
+      "reason": "Kas sakatlığı",
+      "expected_return": "Şüpheli",
+      "policy_key": "doubtful"
+    },
+    {
+      "player_id": 305,
+      "availability_type": "injuries",
+      "model_probability": 0.75,
+      "reason": "Kas sakatlığı",
+      "expected_return": "Ekim ayı başında 2026",
+      "policy_key": "early_oct_before_gameweek"
+    },
+    {
+      "player_id": 286,
+      "availability_type": "injuries",
+      "model_probability": 0.75,
+      "reason": "Kas sakatlığı",
+      "expected_return": "Ekim ayı başında 2026",
+      "policy_key": "early_oct_before_gameweek"
+    },
+    {
+      "player_id": 298,
+      "availability_type": "injuries",
+      "model_probability": 0.75,
+      "reason": "Kas sakatlığı",
+      "expected_return": "Ekim ayı başında 2026",
+      "policy_key": "early_oct_before_gameweek"
+    },
+    {
+      "player_id": 95,
+      "availability_type": "injuries",
+      "model_probability": 0,
+      "reason": "Aşil tendonu sakatlığı",
+      "expected_return": "Kasım ayı başında 2026",
+      "policy_key": "long_out_after_gameweek"
+    },
+    {
+      "player_id": 75,
+      "availability_type": "injuries",
+      "model_probability": 0,
+      "reason": "Bilek kırığı",
+      "expected_return": "Ekim ayı sonunda 2026",
+      "policy_key": "long_out_after_gameweek"
+    },
+    {
+      "player_id": 116,
+      "availability_type": "injuries",
+      "model_probability": 0.75,
+      "reason": "Diz sakatlığı",
+      "expected_return": "Ekim ayı başında 2026",
+      "policy_key": "early_oct_before_gameweek"
+    },
+    {
+      "player_id": 118,
+      "availability_type": "injuries",
+      "model_probability": 0,
+      "reason": "Kas sakatlığı",
+      "expected_return": "Kasım ayı sonunda 2026",
+      "policy_key": "long_out_after_gameweek"
+    },
+    {
+      "player_id": 127,
+      "availability_type": "injuries",
+      "model_probability": 0,
+      "reason": "Uyluk sakatlığı",
+      "expected_return": "Ekim ayı ortasında 2026",
+      "policy_key": "long_out_after_gameweek"
+    },
+    {
+      "player_id": 1373,
+      "availability_type": "injuries",
+      "model_probability": 0.75,
+      "reason": "Uyluk sakatlığı",
+      "expected_return": "Ekim ayı başında 2026",
+      "policy_key": "early_oct_before_gameweek"
+    },
+    {
+      "player_id": 132,
+      "availability_type": "injuries",
+      "model_probability": 0.5,
+      "reason": "Kas sakatlığı",
+      "expected_return": "Şüpheli",
+      "policy_key": "doubtful"
+    },
+    {
+      "player_id": 629,
+      "availability_type": "injuries",
+      "model_probability": 0.75,
+      "reason": "Kas sakatlığı",
+      "expected_return": "Ekim ayı başında 2026",
+      "policy_key": "early_oct_before_gameweek"
+    },
+    {
+      "player_id": 363,
+      "availability_type": "injuries",
+      "model_probability": 0.75,
+      "reason": "Çapraz bağ yırtılması",
+      "expected_return": "Ekim ayı başında 2026",
+      "policy_key": "early_oct_before_gameweek"
+    },
+    {
+      "player_id": 352,
+      "availability_type": "injuries",
+      "model_probability": 0.5,
+      "reason": "Kas sakatlığı",
+      "expected_return": "Şüpheli",
+      "policy_key": "doubtful"
+    },
+    {
+      "player_id": 448,
+      "availability_type": "injuries",
+      "model_probability": 0.5,
+      "reason": "Kas sakatlığı",
+      "expected_return": "Şüpheli",
+      "policy_key": "doubtful"
+    },
+    {
+      "player_id": 471,
+      "availability_type": "injuries",
+      "model_probability": 0.5,
+      "reason": "Kas sakatlığı",
+      "expected_return": "Şüpheli",
+      "policy_key": "doubtful"
+    },
+    {
+      "player_id": 446,
+      "availability_type": "injuries",
+      "model_probability": 0.75,
+      "reason": "Kas sakatlığı",
+      "expected_return": "Ekim ayı başında 2026",
+      "policy_key": "early_oct_before_gameweek"
+    },
+    {
+      "player_id": 456,
+      "availability_type": "injuries",
+      "model_probability": 0.75,
+      "reason": "Kas sakatlığı",
+      "expected_return": "Ekim ayı başında 2026",
+      "policy_key": "early_oct_before_gameweek"
+    },
+    {
+      "player_id": 17,
+      "availability_type": "return",
+      "model_probability": 0.75,
+      "reason": "Menisküs sakatlığı",
+      "expected_return": "İdmana döndü",
+      "policy_key": "returned_to_training"
+    },
+    {
+      "player_id": 3,
+      "availability_type": "injuries",
+      "model_probability": 0,
+      "reason": "Menisküs sakatlığı",
+      "expected_return": "Kasım ayı başında 2026",
+      "policy_key": "long_out_after_gameweek"
+    },
+    {
+      "player_id": 34,
+      "availability_type": "injuries",
+      "model_probability": 0.5,
+      "reason": "Kas sakatlığı",
+      "expected_return": "Şüpheli",
+      "policy_key": "doubtful"
+    },
+    {
+      "player_id": 9,
+      "availability_type": "injuries",
+      "model_probability": 0.75,
+      "reason": "Diz sakatlığı",
+      "expected_return": "Ekim ayı başında 2026",
+      "policy_key": "early_oct_before_gameweek"
+    }
+  ]
+}
