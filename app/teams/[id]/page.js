@@ -47,6 +47,8 @@ export default async function TeamPage({params}){
   const xgDiffPerMatch=Number(s?.xg_diff||0)/safeMatches
   const tacticalCoverage=tactical?.coverage||'aggregate_only'
   const hasEventProfile=Number(tactical?.event_shot_sample||0)>0
+  const hasAdvancedProfile=Number(tactical?.advanced_profile_matches||0)>0
+  const hasInferredChannels=tactical?.inferred_attack_left_share!==null&&tactical?.inferred_attack_left_share!==undefined
   const idx=v=>v===null||v===undefined?'—':Number(v).toFixed(2)+'×'
   const pctShare=v=>v===null||v===undefined?'—':(Number(v)*100).toFixed(0)+'%'
 
@@ -139,7 +141,7 @@ export default async function TeamPage({params}){
     <section className="card profile-card team-tactical-profile">
       <div className="panel-head">
         <div><span className="eyebrow">GÜÇLÜ / ZAYIF YANLAR</span><h2>Atak ve savunma profili</h2></div>
-        <small>{tacticalCoverage==='event_complete'?'Detay olay verisi tam':tacticalCoverage==='partial_events'?'Detay olay verisi kısmi':'Genel hücum/savunma + duran top verisi hazır • yön/şut bölgesi olayı bekleniyor'}</small>
+        <small>{hasAdvancedProfile?`Detay profil MH${tactical.advanced_profile_through_gameweek} • ${tactical.advanced_profile_matches} maç`:tacticalCoverage==='event_complete'?'Detay olay verisi tam':'Genel hücum/savunma profili'}</small>
       </div>
       <div className="team-detail-stat-grid team-core-stat-grid">
         <div className="card"><span>Hücum gücü</span><b>{idx(tactical?.attack_strength_index)}</b><small>lig ortalaması = 1.00</small></div>
@@ -151,6 +153,39 @@ export default async function TeamPage({params}){
         <div className="card"><span>Rakip ceza sahası dokunuşu</span><b>{tactical?.touches_in_opposition_box??'—'}</b><small>sezon toplamı</small></div>
         <div className="card"><span>Şut dönüşümü</span><b>{tactical?.shot_conversion_rate===null||tactical?.shot_conversion_rate===undefined?'—':Number(tactical.shot_conversion_rate).toFixed(1)+'%'}</b><small>gol / şut</small></div>
       </div>
+      {hasAdvancedProfile?<div className="team-detail-stat-grid team-core-stat-grid">
+        <div className="card"><span>Ceza sahası dokunuşu / maç</span><b>{num(tactical?.touches_in_box_per_match,1)}</b><small>rakip sahadaki box baskısı</small></div>
+        <div className="card"><span>Şut isabeti</span><b>{pctShare(tactical?.shot_accuracy)}</b><small>isabetli şut / toplam şut</small></div>
+        <div className="card"><span>Duran top xG payı</span><b>{pctShare(tactical?.set_piece_xg_share)}</b><small>{num(tactical?.set_piece_xg_per_match,2)} xG/maç</small></div>
+        <div className="card"><span>Rakip duran top xG payı</span><b>{pctShare(tactical?.opponent_set_piece_xg_share)}</b><small>{num(tactical?.opponent_set_piece_xg_per_match,2)} xGA/maç</small></div>
+        <div className="card"><span>Cross / maç</span><b>{num(tactical?.crosses_per_match,1)}</b><small>başarı {pctShare(tactical?.cross_success_rate)}</small></div>
+        <div className="card"><span>Dripling / maç</span><b>{num(tactical?.takeons_per_match,1)}</b><small>başarı {pctShare(tactical?.takeon_success_rate)}</small></div>
+        <div className="card"><span>Üretilen şans / maç</span><b>{num(tactical?.chances_created_per_match,1)}</b><small>oyuncu aksiyon toplamı</small></div>
+        <div className="card"><span>PPDA</span><b>{num(tactical?.ppda_avg,1)}</b><small>düşük değer daha agresif baskı</small></div>
+      </div>:null}
+      {hasInferredChannels?<div className="profile-grid team-detail-history-grid">
+        <div className="card">
+          <h3>Hücum yönü <small>türetilmiş</small></h3>
+          <div className="detail-list">
+            <div><span>Sol kanal</span><b>{pctShare(tactical?.inferred_attack_left_share)}</b></div>
+            <div><span>Merkez</span><b>{pctShare(tactical?.inferred_attack_center_share)}</b></div>
+            <div><span>Sağ kanal</span><b>{pctShare(tactical?.inferred_attack_right_share)}</b></div>
+          </div>
+          <small className="muted">Oyuncuların gerçek saha rolü + şut + yaratılan şans + başarılı cross aksiyonlarından türetildi.</small>
+        </div>
+        <div className="card">
+          <h3>Rakibin bize karşı hücum yönü <small>türetilmiş</small></h3>
+          <div className="detail-list">
+            <div><span>Sol kanal</span><b>{pctShare(tactical?.inferred_conceded_left_share)}</b></div>
+            <div><span>Merkez</span><b>{pctShare(tactical?.inferred_conceded_center_share)}</b></div>
+            <div><span>Sağ kanal</span><b>{pctShare(tactical?.inferred_conceded_right_share)}</b></div>
+            <div><span>Rakip şut / maç</span><b>{num(tactical?.opponent_shots_per_match,1)}</b></div>
+            <div><span>Rakip box dokunuşu / maç</span><b>{num(tactical?.opponent_touches_in_box_per_match,1)}</b></div>
+          </div>
+          <small className="muted">Bu bölüm golün gerçek başlangıç koordinatı değil; rakip aksiyonlarının rol-kanal dağılımıdır.</small>
+        </div>
+      </div>:null}
+
       <div className="profile-grid team-detail-history-grid">
         <div className="card">
           <h3>Duran top üretimi</h3>
@@ -197,7 +232,7 @@ export default async function TeamPage({params}){
             <div><span>Kontradan yenilen</span><b>{pctShare(tactical?.conceded_counter_share)}</b></div>
           </div>
         </div>
-      </div>:<p className="muted">Sol/merkez/sağ, ceza sahası/uzak mesafe ve duran top/kontra kırılımları için olay-seviyesi veri tabanı hazır. Onaylı veri kaynağı geldikçe bu bölüm otomatik dolacak; eksik alanlarda veri uydurulmuyor.</p>}
+      </div>:<p className="muted">Gerçek gol/şut koordinatı, ceza sahası–uzak mesafe ve kontra kırılımları için olay-seviyesi kaynak henüz yok. Yukarıdaki yön profili gerçek saha rolleri ve aksiyonlardan türetilmiştir; gözlenen olay konumu gibi sunulmaz.</p>}
     </section>
 
     <section className="card team-roster-section team-roster-v2">
