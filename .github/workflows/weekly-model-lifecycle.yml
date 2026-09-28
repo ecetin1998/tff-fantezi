@@ -42,8 +42,7 @@ jobs:
         run: |
           set -euo pipefail
           response="$(curl --fail --show-error --silent --max-time 240             -H "Authorization: Bearer $OIDC_TOKEN"             -H "Content-Type: application/json"             --data '{"stage":"ingest","strict":false}'             "$FUNCTIONS_URL/model-refresh-control")"
-          printf '%s
-' "$response" | jq .
+          echo "$response" | jq .
           echo "configured=$(printf '%s' "$response" | jq -r '.upstream_configured // false')" >> "$GITHUB_OUTPUT"
 
       - name: Check whether current MH is fully closed
@@ -54,8 +53,7 @@ jobs:
         run: |
           set -euo pipefail
           response="$(curl --fail --show-error --silent             -H "Authorization: Bearer $OIDC_TOKEN"             -H "Content-Type: application/json"             --data '{"action":"status"}'             "$FUNCTIONS_URL/weekly-model-lifecycle")"
-          printf '%s
-' "$response" | jq .
+          echo "$response" | jq .
           echo "ready=$(printf '%s' "$response" | jq -r '.ready_to_advance // false')" >> "$GITHUB_OUTPUT"
           echo "current_gw=$(printf '%s' "$response" | jq -r '.current_gameweek')" >> "$GITHUB_OUTPUT"
           echo "target_gw=$(printf '%s' "$response" | jq -r '.target_gameweek')" >> "$GITHUB_OUTPUT"
@@ -84,8 +82,7 @@ jobs:
         run: |
           set -euo pipefail
           response="$(curl --fail --show-error --silent             -H "Authorization: Bearer $OIDC_TOKEN"             -H "Content-Type: application/json"             --data '{"action":"close_backtest"}'             "$FUNCTIONS_URL/weekly-model-lifecycle")"
-          printf '%s
-' "$response" | jq .
+          echo "$response" | jq .
           printf '%s' "$response" > "$RUNNER_TEMP/closed-week.json"
 
       - name: Build next-MH candidate inputs
@@ -97,8 +94,7 @@ jobs:
         run: |
           set -euo pipefail
           response="$(curl --fail --show-error --silent --max-time 240             -H "Authorization: Bearer $OIDC_TOKEN"             -H "Content-Type: application/json"             --data '{"action":"prepare"}'             "$FUNCTIONS_URL/weekly-model-lifecycle")"
-          printf '%s
-' "$response" | jq .
+          echo "$response" | jq .
           echo "run_id=$(printf '%s' "$response" | jq -r '.run_id')" >> "$GITHUB_OUTPUT"
           echo "gameweek=$(printf '%s' "$response" | jq -r '.gameweek')" >> "$GITHUB_OUTPUT"
           echo "benchmark=$(printf '%s' "$response" | jq -r '.benchmark')" >> "$GITHUB_OUTPUT"
