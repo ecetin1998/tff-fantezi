@@ -71,6 +71,17 @@ assert.match(finalPlayerGap,/set primary_role='W'/)
 assert.match(finalPlayerGap,/effective_xa_per90/,'attack contribution refresh must preserve effective xA fallback')
 assert.doesNotMatch(finalPlayerGap,/set xa_model_per90=/,'observed xA must remain separate from model prior')
 
+const reviewedActionsV2=fs.readFileSync('supabase/migrations/20260928163000_fill_reviewed_player_actions_v2.sql','utf8')
+assert.match(reviewedActionsV2,/player_id=391/,'Saba reviewed action row must be targeted')
+assert.match(reviewedActionsV2,/key_passes=coalesce\(s\.key_passes,1\)/)
+assert.match(reviewedActionsV2,/crosses=coalesce\(s\.crosses,2\)/)
+assert.match(reviewedActionsV2,/successful_crosses=coalesce\(s\.successful_crosses,1\)/)
+assert.match(reviewedActionsV2,/player_id=396/,'Ousseynou Ba reviewed zero-shot row must be targeted')
+assert.match(reviewedActionsV2,/player_id=85/,'Emirhan Boz reviewed zero-shot row must be targeted')
+assert.match(reviewedActionsV2,/shots=coalesce\(s\.shots,0\)/,'reviewed zero-shot rows must fill only missing values')
+assert.doesNotMatch(reviewedActionsV2,/set[\s\S]*takeons=0/i,'missing dribble data must remain unknown')
+assert.doesNotMatch(reviewedActionsV2,/shot_share=/,'partial GW6 action fill must not recompute team shares')
+
 const teamAdvancedSchema=fs.readFileSync('supabase/migrations/20260928111500_team_advanced_profiles_from_fresh_data.sql','utf8')
 for(const field of [
   'advanced_profile_through_gameweek','set_piece_xg_share','opponent_set_piece_xg_share',
