@@ -12,6 +12,7 @@ const section=(start,end)=>{
   return data.slice(s,e)
 }
 
+const playerLoader=section('async function _loadPlayersForRun','async function _getPlayersWithProjection')
 const players=section('async function _getPlayersWithProjection','const HOME_PLAYER_COLUMNS')
 const availability=section('async function _getAvailability','async function _getRoleSignals')
 const roles=section('async function _getRoleSignals','export async function getAuthState')
