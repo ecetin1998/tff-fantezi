@@ -45,7 +45,13 @@ function scoreSnapshot(snapshot,pointMap,posMap){
 }
 
 export default async function Squad({searchParams}){
-  const [auth,sp]=await Promise.all([getAuthState(),searchParams])
+  const [auth,sp,pool,recommendation,supabase]=await Promise.all([
+    getAuthState(),
+    searchParams,
+    getSquadPlayerPool(),
+    getRecommendation('recommended'),
+    createClient()
+  ])
 
   if(!auth.userId)return <div className="auth-wrap"><div className="card auth-card squad-login-card">
     <span className="eyebrow">BENİM KADROM</span><h1>Kendi fantezi takımını kur</h1>
@@ -53,11 +59,11 @@ export default async function Squad({searchParams}){
     <Link className="cta" href="/login">Giriş / kayıt</Link>
   </div></div>
 
-  const [{players,run},supabase]=await Promise.all([getSquadPlayerPool(),createClient()])
-  const [{members:recommended},{data:pageData,error:pageError}]=await Promise.all([
-    getRecommendation('recommended'),
-    run?.gameweek?supabase.rpc('scout_my_squad_page',{p_gameweek:run.gameweek}):Promise.resolve({data:null,error:null})
-  ])
+  const {players,run}=pool
+  const {members:recommended}=recommendation
+  const {data:pageData,error:pageError}=run?.gameweek
+    ?await supabase.rpc('scout_my_squad_page',{p_gameweek:run.gameweek})
+    :{data:null,error:null}
   if(pageError)reportServerError('squad:pageData',pageError,{gameweek:run?.gameweek})
 
   const gameweekRow=pageData?.gameweek||null
