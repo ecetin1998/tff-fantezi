@@ -1,17 +1,13 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { getPlayerDetail, getPlayersWithProjection } from '@/lib/data'
+import { getPlayerDetail } from '@/lib/data'
 import { teamCssVars } from '@/lib/teamThemes'
 import { availabilityCompactNote, availabilityIsIssue } from '@/lib/availability'
 import {playerLabel,predictionConfidenceLabel} from '@/lib/playerPresentation'
 import {playerRoleLabel} from '@/lib/playerRole'
 
 export const revalidate=300
-export const dynamicParams=false
-export async function generateStaticParams(){
-  const {players}=await getPlayersWithProjection()
-  return (players||[]).map(p=>({id:String(p.id)}))
-}
+export const dynamic='force-dynamic'
 export async function generateMetadata({params}){
   const {id}=await params
   const data=await getPlayerDetail(id)
