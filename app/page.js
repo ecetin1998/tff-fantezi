@@ -1,25 +1,12 @@
 import Link from 'next/link'
-import { getMatches, getPlayersWithProjection } from '@/lib/data'
+import { getHomeOverview } from '@/lib/data'
 import { teamCssVars } from '@/lib/teamThemes'
 import {playerLabel} from '@/lib/playerPresentation'
 
 export const revalidate=300
 
 export default async function Home(){
-  const [{players,run},{matches}]=await Promise.all([getPlayersWithProjection(),getMatches()])
-  const best=[...players].sort((a,b)=>Number(b.projection?.xfp||0)-Number(a.projection?.xfp||0))[0]
-  const value=[...players].sort((a,b)=>Number(b.projection?.value_score||0)-Number(a.projection?.value_score||0))[0]
-  const mins=[...players].sort((a,b)=>{
-    const am=Number(a.projection?.x_minutes||0),bm=Number(b.projection?.x_minutes||0)
-    if(bm!==am)return bm-am
-    const ar=Number(a.projection?.xi_probability||0)*Number(a.projection?.availability_probability??1)
-    const br=Number(b.projection?.xi_probability||0)*Number(b.projection?.availability_probability??1)
-    if(br!==ar)return br-ar
-    const recent=Number(b.projection?.recent4_minutes||0)-Number(a.projection?.recent4_minutes||0)
-    if(recent!==0)return recent
-    return Number(b.projection?.over60_probability||0)-Number(a.projection?.over60_probability||0)
-  })[0]
-  const top25=[...players].sort((a,b)=>Number(a.projection?.top25_rank||9999)-Number(b.projection?.top25_rank||9999) || Number(b.projection?.top25_score||0)-Number(a.projection?.top25_score||0))[0]
+  const {run,best,value,mins,top25,playerCount,matchCount}=await getHomeOverview()
   const sourceUpdated=run?.source_updated_at?new Intl.DateTimeFormat('tr-TR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit',timeZone:'Europe/Istanbul'}).format(new Date(run.source_updated_at)):'—'
   const modelUpdated=run?.generated_at?new Intl.DateTimeFormat('tr-TR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit',timeZone:'Europe/Istanbul'}).format(new Date(run.generated_at)):'—'
   const highlights=[
@@ -47,7 +34,7 @@ export default async function Home(){
         <div className="card spotlight-card home-status-card home-status-week">
           <span>Güncel hafta</span>
           <b>MH{run?.gameweek||'—'}</b>
-          <small>{matches.length} maç • {players.length} oyuncu</small>
+          <small>{matchCount} maç • {playerCount} oyuncu</small>
           <strong>Aktif <em>hafta</em></strong>
         </div>
         <div className="card spotlight-card home-status-card home-status-ready">
