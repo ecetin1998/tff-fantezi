@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import SquadBuilder from '@/components/SquadBuilder'
 import {createClient} from '@/lib/supabase/server'
-import {getAuthState,getPlayersWithProjection,getRecommendation} from '@/lib/data'
+import {getAuthState,getSquadPlayerPool,getRecommendation} from '@/lib/data'
 import {BUDGET,FORMATION_SET,SQUAD_SIZE} from '@/lib/rules'
 import {playerLabel} from '@/lib/playerPresentation'
 import {reportServerError} from '@/lib/observability'
@@ -45,8 +45,8 @@ function scoreSnapshot(snapshot,pointMap,posMap){
 }
 
 export default async function Squad({searchParams}){
-  const auth=await getAuthState()
-  const sp=await searchParams
+  const [auth,sp]=await Promise.all([getAuthState(),searchParams])
+  const publicDataPromise=Promise.all([getSquadPlayerPool(),getRecommendation('recommended')])
 
   if(!auth.userId)return <div className="auth-wrap"><div className="card auth-card squad-login-card">
     <span className="eyebrow">BENİM KADROM</span><h1>Kendi fantezi takımını kur</h1>
@@ -54,13 +54,13 @@ export default async function Squad({searchParams}){
     <Link className="cta" href="/login">Giriş / kayıt</Link>
   </div></div>
 
-  const [{players,run},{members:recommended}]=await Promise.all([getPlayersWithProjection(),getRecommendation('recommended')])
+  const [{players,run},{members:recommended}]=await publicDataPromise
   const supabase=await createClient()
 
   const [{data:sq,error:sqError},{data:gameweekRow,error:gwError},{data:snapshots,error:snapshotError}]=await Promise.all([
     supabase.from('scout_user_squads').select('id').eq('user_id',auth.userId).eq('is_active',true).maybeSingle(),
     run?.gameweek?supabase.from('scout_gameweeks').select('gameweek,deadline_at,locked_at').eq('gameweek',run.gameweek).maybeSingle():Promise.resolve({data:null,error:null}),
-    supabase.from('scout_user_squad_snapshots').select('gameweek,members,captain_id,locked_at,updated_at').eq('user_id',auth.userId).order('gameweek',{ascending:false})
+    supabase.from('scout_user_squad_snapshots').select('gameweek,members,captain_id,locked_at,updated_at').eq('user_id',auth.userId).order('gameweek',{ascending:false}).limit(34)
   ])
   for(const [scope,error] of [['squad:active',sqError],['squad:gameweek',gwError],['squad:snapshots',snapshotError]])if(error)reportServerError(scope,error)
 
