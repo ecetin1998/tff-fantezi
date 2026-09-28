@@ -95,7 +95,7 @@ summary_size="$(wc -c < "$TMP_DIR/summary.json" | tr -d ' ')"
 (( summary_size < 51200 )) || fail "summary payload is $summary_size bytes (must be < 51200)"
 echo "PASS summary size $summary_size bytes"
 
-curl_retry -fsSL "$BASE_URL/api/scout-data?section=players" > "$TMP_DIR/players-live.json"
+cp "$TMP_DIR/players.json" "$TMP_DIR/players-live.json"
 curl_retry -fsSL "$BASE_URL/players/419" > "$TMP_DIR/player-419.html"
 curl_retry -fsSL "$BASE_URL/matches" > "$TMP_DIR/matches.html"
 curl_retry -fsSL "$BASE_URL/" > "$TMP_DIR/home.html"

@@ -15,5 +15,8 @@ assert.match(smoke,/workflow_run\.head_sha/)
 assert.match(health,/NEXT_PUBLIC_BUILD_SHA/)
 assert.match(health,/Cache-Control':'no-store/)
 assert.match(wrangler,/"name": "tff-fantezi"/)
+const smokeScript=fs.readFileSync('scripts/smoke.sh','utf8')
+assert.match(smokeScript,/cp "\$TMP_DIR\/players\.json" "\$TMP_DIR\/players-live\.json"/)
+assert.equal((smokeScript.match(/api\/scout-data\?section=players/g)||[]).length,0,'production smoke must not refetch the players section after the section loop')
 
 console.log('cloudflare deploy contract passed')
