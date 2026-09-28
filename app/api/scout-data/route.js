@@ -7,7 +7,7 @@ import runtimeFixture from '@/test/fixtures/scout-runtime.json'
 import {buildScoutSummary,SCOUT_FEED_SCHEMA_VERSION,SCOUT_FEED_SECTIONS,scoutFeedMatchRow} from '@/lib/scoutFeed'
 import {
   getAvailability,getBacktestOverview,getMatches,getPlayersWithProjection,
-  getRecommendation,getRoleSignals,getWeeklyPoints
+  getPublicPerformanceOverview,getRecommendation,getRoleSignals,getWeeklyPoints
 } from '@/lib/data'
 
 export const dynamic='force-dynamic'
@@ -124,7 +124,7 @@ async function buildPayload(section,full){
     return {meta,section,...summary}
   }
   if(section==='performance'){
-    const d=await getBacktestOverview()
+    const d=full?await getBacktestOverview():await getPublicPerformanceOverview()
     const summary={
       current_run:safeRun(d.currentRun),
       qa_pass:Boolean(d.currentRunQa?.pass),
