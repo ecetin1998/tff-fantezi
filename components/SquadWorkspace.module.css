@@ -21,6 +21,42 @@
 .scope :global(.save-squad-btn):disabled{cursor:default}
 .scope :global(.auto-xi-btn){min-width:150px}
 
+.scope :global(.squad-deadline-status){
+  min-width:0;
+  min-height:58px;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  padding:9px 11px;
+  border:1px solid #cfe8e3;
+  border-radius:11px;
+  background:linear-gradient(135deg,#edf8f6,#f8fbff);
+}
+.scope :global(.squad-deadline-status)>span{
+  color:#087e72;
+  font-size:7px;
+  font-weight:950;
+  letter-spacing:.08em;
+}
+.scope :global(.squad-deadline-status)>b{
+  margin-top:3px;
+  color:#25304d;
+  font-size:15px;
+  line-height:1.12;
+  font-variant-numeric:tabular-nums;
+}
+.scope :global(.squad-deadline-status)>small{
+  margin-top:4px;
+  color:#73809a;
+  font-size:6.5px;
+  line-height:1.25;
+}
+.scope :global(.squad-deadline-status):global(.locked){
+  border-color:#ead4d9;
+  background:#fff5f6;
+}
+.scope :global(.squad-deadline-status):global(.locked)>span{color:#a24758}
+
 @media(min-width:1000px){
   .scope :global(.my-squad-layout){
     grid-template-columns:minmax(0,1.42fr) minmax(390px,.88fr);
@@ -625,7 +661,7 @@
 /* compact top summary after removing distribution */
 @media(min-width:1000px){
   .scope :global(.squad-control-strip){
-    grid-template-columns:minmax(120px,.7fr) minmax(145px,.85fr) minmax(145px,.85fr) minmax(320px,1.35fr);
+    grid-template-columns:minmax(190px,1.05fr) repeat(3,minmax(112px,.7fr)) minmax(300px,1.25fr);
   }
   .scope :global(.picker-table-head){
     grid-template-columns:minmax(0,1fr) 50px 52px 44px 25px;
@@ -704,6 +740,14 @@
     gap:7px;
     padding:8px;
   }
+  .scope :global(.squad-deadline-status){
+    grid-column:1/-1;
+    min-height:72px;
+    padding:10px 12px;
+  }
+  .scope :global(.squad-deadline-status)>span{font-size:7px}
+  .scope :global(.squad-deadline-status)>b{font-size:17px}
+  .scope :global(.squad-deadline-status)>small{font-size:7px}
   .scope :global(.squad-control-stat){
     min-width:0;
     min-height:58px;
