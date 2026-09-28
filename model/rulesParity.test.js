@@ -35,6 +35,11 @@ assert.match(autosubTs,/export function expectedAutosubValue\(/)
 assert.match(autosubTs,/export function optimizeBenchForAutosubs\(/)
 assert.match(optimizerTs,/import \{ optimizeBenchForAutosubs \} from "\.\.\/_shared\/autosub\.ts"/)
 
+assert.match(optimizerPy,/def _shortlist_bench_candidates\(/)
+assert.match(autosubTs,/function shortlistBenchCandidates\(/)
+assert.match(optimizerPy,/for _ in range\(4\):/)
+assert.match(autosubTs,/iteration<4/)
+
 const scoring=canonical.scoring
 const sim=fs.readFileSync(path.join(root,'model/simulateScout.js'),'utf8')
 assert.match(sim,/const \{SCORING\}=require\('\.\.\/lib\/rules\.js'\)/,'live simulator must read canonical scoring rules')

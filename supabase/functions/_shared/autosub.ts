@@ -62,12 +62,23 @@ function starterAbsenceDistribution(xi:PlayerRow[]){
   return distribution;
 }
 
-export function expectedAutosubValue(xi:PlayerRow[],orderedBench:PlayerRow[],formations:string[]){
-  if(xi.length!==11||orderedBench.length!==4)return 0;
+type AutosubContext={
+  counts:Record<string,number>;
+  formations:string[];
+  absence:Map<string,number>;
+};
+
+function makeAutosubContext(xi:PlayerRow[],formations:string[]):AutosubContext|null{
+  if(xi.length!==11)return null;
   const counts:Record<string,number>={GK:0,DEF:0,MID:0,FWD:0};
   for(const player of xi)counts[player.position]=(counts[player.position]||0)+1;
-  if(!formationKey(counts,formations))return 0;
+  if(!formationKey(counts,formations))return null;
+  return {counts,formations,absence:starterAbsenceDistribution(xi)};
+}
 
+function expectedAutosubValueWithContext(context:AutosubContext,orderedBench:PlayerRow[]){
+  if(orderedBench.length!==4)return 0;
+  const {counts,formations,absence}=context;
   const goalkeeper=orderedBench.find(player=>player.position==="GK");
   const outfield=orderedBench.filter(player=>player.position!=="GK");
   if(!goalkeeper||outfield.length!==3)return 0;
@@ -76,7 +87,7 @@ export function expectedAutosubValue(xi:PlayerRow[],orderedBench:PlayerRow[],for
   const conditional=bench.map(conditionalXfp);
   let total=0;
 
-  for(const [stateKey,starterProbability] of starterAbsenceDistribution(xi)){
+  for(const [stateKey,starterProbability] of absence){
     if(starterProbability<=0)continue;
     const state=stateKey.split(",").map(Number);
     const absent:Record<string,number>=Object.fromEntries(POSITIONS.map((pos,index)=>[pos,state[index]||0]));
@@ -121,6 +132,11 @@ export function expectedAutosubValue(xi:PlayerRow[],orderedBench:PlayerRow[],for
   return total;
 }
 
+export function expectedAutosubValue(xi:PlayerRow[],orderedBench:PlayerRow[],formations:string[]){
+  const context=makeAutosubContext(xi,formations);
+  return context?expectedAutosubValueWithContext(context,orderedBench):0;
+}
+
 function permutations3<T>(rows:T[]){
   if(rows.length!==3)return [rows];
   return [
@@ -130,17 +146,22 @@ function permutations3<T>(rows:T[]){
   ];
 }
 
-export function bestBenchOrder(xi:PlayerRow[],bench:PlayerRow[],formations:string[]){
+function bestBenchOrderWithContext(context:AutosubContext,bench:PlayerRow[]){
   const goalkeeper=bench.find(player=>player.position==="GK");
   const outfield=bench.filter(player=>player.position!=="GK");
   if(!goalkeeper||outfield.length!==3)return {bench:[...bench],autosubEv:0};
   let best=[goalkeeper,...outfield],bestValue=-1;
   for(const order of permutations3(outfield)){
     const candidate=[goalkeeper,...order];
-    const value=expectedAutosubValue(xi,candidate,formations);
+    const value=expectedAutosubValueWithContext(context,candidate);
     if(value>bestValue+1e-12){best=candidate;bestValue=value}
   }
   return {bench:best,autosubEv:bestValue};
+}
+
+export function bestBenchOrder(xi:PlayerRow[],bench:PlayerRow[],formations:string[]){
+  const context=makeAutosubContext(xi,formations);
+  return context?bestBenchOrderWithContext(context,bench):{bench:[...bench],autosubEv:0};
 }
 
 function legalSquad(xi:PlayerRow[],bench:PlayerRow[],rules:any){
@@ -162,21 +183,41 @@ function legalSquad(xi:PlayerRow[],bench:PlayerRow[],rules:any){
   return true;
 }
 
+function shortlistBenchCandidates(candidates:PlayerRow[],bench:PlayerRow[]){
+  const out=new Map<number,PlayerRow>();
+  const add=(player:PlayerRow)=>out.set(num(player.player_id),player);
+  for(const player of bench)add(player);
+  for(const pos of POSITIONS){
+    const rows=candidates.filter(player=>player.position===pos);
+    [...rows].sort((a,b)=>num(b.xfp)-num(a.xfp)||num(a.price)-num(b.price)).slice(0,6).forEach(add);
+    [...rows].sort((a,b)=>num(a.price)-num(b.price)||num(b.xfp)-num(a.xfp)).slice(0,6).forEach(add);
+    [...rows].sort((a,b)=>{
+      const av=num(a.price)>0?num(a.xfp)/num(a.price):0;
+      const bv=num(b.price)>0?num(b.xfp)/num(b.price):0;
+      return bv-av||num(b.xfp)-num(a.xfp);
+    }).slice(0,6).forEach(add);
+  }
+  return [...out.values()];
+}
+
 export function optimizeBenchForAutosubs(xi:PlayerRow[],bench:PlayerRow[],candidates:PlayerRow[],rules:any){
   const formations=Array.isArray(rules.formations)?rules.formations.map(String):[];
-  let current=bestBenchOrder(xi,bench,formations);
-  for(let iteration=0;iteration<8;iteration++){
+  const context=makeAutosubContext(xi,formations);
+  if(!context)return {bench:[...bench],autosubEv:0};
+  const shortlist=shortlistBenchCandidates(candidates,bench);
+  let current=bestBenchOrderWithContext(context,bench);
+  for(let iteration=0;iteration<4;iteration++){
     let best=current;
     let bestCost=current.bench.reduce((sum,p)=>sum+num(p.price),0);
     const selected=new Set([...xi,...current.bench].map(p=>num(p.player_id)));
     for(let slot=0;slot<current.bench.length;slot++){
       const old=current.bench[slot];
-      for(const candidate of candidates){
+      for(const candidate of shortlist){
         const candidateId=num(candidate.player_id);
         if(candidate.position!==old.position||selected.has(candidateId))continue;
         const trial=[...current.bench];trial[slot]=candidate;
         if(!legalSquad(xi,trial,rules))continue;
-        const ordered=bestBenchOrder(xi,trial,formations);
+        const ordered=bestBenchOrderWithContext(context,trial);
         const cost=ordered.bench.reduce((sum,p)=>sum+num(p.price),0);
         if(
           ordered.autosubEv>best.autosubEv+1e-9||

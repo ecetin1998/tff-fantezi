@@ -142,15 +142,33 @@ def best_bench_order(xi,bench):
             best_order,best_value=candidate,value
     return best_order,best_value
 
+def _shortlist_bench_candidates(candidates,bench):
+    out={p['id']:p for p in bench}
+    for pos in ('GK','DEF','MID','FWD'):
+        rows=[p for p in candidates if p['position']==pos]
+        groups=[
+            sorted(rows,key=lambda p:(-float(p.get('xfp',0)),float(p.get('price',0))))[:6],
+            sorted(rows,key=lambda p:(float(p.get('price',0)),-float(p.get('xfp',0))))[:6],
+            sorted(rows,key=lambda p:(
+                -(float(p.get('xfp',0))/float(p.get('price',1)) if float(p.get('price',0))>0 else 0),
+                -float(p.get('xfp',0))
+            ))[:6],
+        ]
+        for group in groups:
+            for player in group:
+                out[player['id']]=player
+    return list(out.values())
+
 def optimize_bench_for_autosubs(xi,bench,candidates):
+    shortlist=_shortlist_bench_candidates(candidates,bench)
     current,current_value=best_bench_order(xi,bench)
     selected_ids={p['id'] for p in xi+current}
-    for _ in range(8):
+    for _ in range(4):
         best=current
         best_value=current_value
         best_cost=sum(float(p['price']) for p in current)
         for slot,old in enumerate(current):
-            for candidate in candidates:
+            for candidate in shortlist:
                 if candidate['position']!=old['position'] or candidate['id'] in selected_ids:
                     continue
                 trial=list(current);trial[slot]=candidate
