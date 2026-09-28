@@ -30,7 +30,7 @@ assert.match(data,/currentMatches:fixtures/)
 
 const pitch=read('components/SquadPitchView.js')
 assert.match(pitch,/function displayName\(player\)\{ return pitchPlayerLabel\(player\) \}/)
-assert.match(pitch,/Alternatif \(tavan\) kaptan: <b>\{playerLabel\(ceilingCaptain\.player\)\}<\/b>/)
+assert.doesNotMatch(pitch,/Alternatif \(tavan\) kaptan:/)
 
 const builder=read('components/SquadBuilder.js')
 assert.doesNotMatch(builder,/vice|yardımcı kaptan/i)
