@@ -1,16 +1,13 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { getPlayerDetail, getPlayersWithProjection } from '@/lib/data'
+import { getPlayerDetail } from '@/lib/data'
 import { teamCssVars } from '@/lib/teamThemes'
 import { availabilityCompactNote, availabilityIsIssue } from '@/lib/availability'
 import {playerLabel,predictionConfidenceLabel} from '@/lib/playerPresentation'
 import {playerRoleLabel} from '@/lib/playerRole'
 
 export const revalidate=300
-export async function generateStaticParams(){
-  const {players}=await getPlayersWithProjection()
-  return (players||[]).map(p=>({id:String(p.id)}))
-}
+export const dynamic='force-dynamic'
 export async function generateMetadata({params}){
   const {id}=await params
   const data=await getPlayerDetail(id)
@@ -22,14 +19,6 @@ const pct=v=>`${(Number(v||0)*100).toFixed(0)}%`
 const num=(v,d=2)=>Number(v||0).toFixed(d)
 const venue=v=>v==='HOME'?'Ev':v==='AWAY'?'Dep':'—'
 const posLabel=p=>({GK:'KL',DEF:'DEF',MID:'OS',FWD:'FOR'}[p]||p||'—')
-const formatCheck=value=>{
-  if(!value)return '—'
-  return new Intl.DateTimeFormat('tr-TR',{
-    timeZone:'Europe/Istanbul',
-    day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'
-  }).format(new Date(value)).replace(',', '')
-}
-
 function MetricGrid({items,className=''}){
   return <div className={`player-detail-metric-grid ${className}`}>
     {items.map(item=><div className={item.emphasis?'is-emphasis':''} key={item.label}>
@@ -166,7 +155,6 @@ export default async function PlayerPage({ params }){
           {a?.suspension_fixture?<small>Ceza maçı: {a.suspension_fixture}</small>:null}
         </div>
       </div>
-      {a?.checked_at?<small className="player-availability-check">Son kontrol: {formatCheck(a.checked_at)}</small>:null}
     </div>:null}
 
     <section className="card profile-card player-decision-card">
