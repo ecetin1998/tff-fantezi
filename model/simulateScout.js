@@ -7,6 +7,11 @@ function cardPoints(yellow,red){
   return red ? SCORING.red : yellow ? SCORING.yellow : 0;
 }
 
+function appearancePoints(minutes){
+  const mins=Number(minutes)||0;
+  return (mins>0?SCORING.appearance:0)+(mins>60?SCORING.appearance_60:0);
+}
+
 function makeHistogram(){
   return {offset:-32,bins:new Int32Array(128),total:0,sum:0,sumSq:0};
 }
@@ -194,7 +199,7 @@ function simulateScout(input,count,seed,attackPolicy=true){
           leave[i]=redCardExitMinute(enter[i],leave[i],random());
           mins[i]=Math.max(0,leave[i]-enter[i]);
         }
-        comp.appearance[i]=(mins[i]>0?SCORING.appearance:0)+(mins[i]>60?SCORING.appearance_60:0);
+        comp.appearance[i]=appearancePoints(mins[i]);
       }
 
       const score=[poisson(match.home_lambda),poisson(match.away_lambda)];
@@ -309,6 +314,6 @@ function simulateScout(input,count,seed,attackPolicy=true){
 }
 
 module.exports={
-  simulateScout,cardPoints,histogramQuantile,
+  simulateScout,cardPoints,appearancePoints,histogramQuantile,
   expectedKeeperSaves,goalkeeperSaveRate,bonusByCompetitionRank,redCardExitMinute,isActiveAt
 };

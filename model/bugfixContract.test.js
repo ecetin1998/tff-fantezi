@@ -67,6 +67,9 @@ assert.match(pitch,/Alternatif \(tavan\) kaptan: <b>\{playerLabel\(ceilingCaptai
 assert.match(builder,/p=>p&&p\.position!=='GK'/)
 assert.match(builder,/p\.position!=='GK'\?<button[^\n]+captain-toggle/)
 assert.match(builder,/map\.get\(captainId\)\?\.position!=='GK'/)
+assert.doesNotMatch(builder,/club-counts">\$/)
+assert.doesNotMatch(builder,/bütçe kullanılmıyor/i)
+assert.match(builder,/Kalan: \{bank\.toFixed\(1\)\}m/)
 for(const file of ['app/actions.js','app/squad/page.js','components/SquadBuilder.js','rules/tff-fantasy.json','lib/rules.js']){
   assert.doesNotMatch(read(file),/vice_captain|VICE_CAPTAIN|Yardımcı kaptan|Yrd\. kaptan/i,file+' must not expose vice captain')
 }
@@ -76,7 +79,10 @@ assert.match(edge,/const budget=n\(rules\.budget\)/)
 assert.match(edge,/new Set\(rows\.map\(r=>Number\(r\.team_id\)/)
 assert.match(edge,/if\(pos!=="GK"\)/)
 assert.match(edge,/captainLambda=\.18/)
-assert.match(edge,/budgetPenaltyPerM=\.03/)
+assert.doesNotMatch(edge,/budgetPenaltyPerM|spendReward|benchValue|\.08\*playProbability/)
+assert.match(edge,/const cheapBench=\.0001\*price/)
+assert.match(edge,/score:base,/)
+assert.match(edge,/score:-cheapBench/)
 assert.doesNotMatch(edge,/\[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18\]/)
 
 const replayEdge=read('supabase/functions/run-replay-distribution-test/index.ts')
@@ -116,5 +122,27 @@ assert.match(migration,/p\.position='GK'/)
 assert.match(migration,/'gk_captain'/)
 assert.match(migration,/'xi_over_1'/)
 assert.match(migration,/'unexplained_same_team_def_xfp_diff'/)
+
+const guardrails=read('supabase/migrations/20260928083313_optimizer_audit_guardrails.sql')
+assert.match(guardrails,/scout_squad_members_captain_guard/)
+assert.match(guardrails,/GK_CAPTAIN_NOT_ALLOWED/)
+assert.match(guardrails,/CAPTAIN_MUST_BE_STARTER/)
+assert.match(guardrails,/\)>\.3/)
+assert.match(guardrails,/security invoker/)
+assert.doesNotMatch(guardrails,/security definer/)
+
+const simulator=read('model/simulateScout.js')
+assert.match(simulator,/function appearancePoints\(minutes\)/)
+assert.match(simulator,/mins>60\?SCORING\.appearance_60:0/,'official TFF second appearance point starts above 60 minutes')
+assert.match(simulator,/mins\[i\]>=60&&score\[/,'clean sheet must require at least 60 minutes and a team match clean sheet')
+for(const file of [
+  'supabase/functions/run-enrichment-replay-chunk/index.ts',
+  'supabase/functions/run-mh1-replay-chunk/index.ts',
+  'supabase/functions/run-replay-distribution-test/index.ts'
+]){
+  const replay=read(file)
+  assert.match(replay,/mins\[i\]>60/,'replay appearance threshold must stay strictly above 60: '+file)
+  assert.match(replay,/mins\[i\]>=60/,'replay clean-sheet/60+ probability threshold must stay inclusive: '+file)
+}
 
 console.log('bugfix contract passed')

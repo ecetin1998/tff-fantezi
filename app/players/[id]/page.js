@@ -45,7 +45,7 @@ export default async function PlayerPage({ params }){
   const data=await getPlayerDetail(id)
   if(!data) notFound()
 
-  const {run,player,projection:p,availability:a,role:r,season:s,weekly,matches=[]}=data
+  const {run,player,projection:p,availability:a,role:r,season:s,modelFeatures:mf,weekly,matches=[]}=data
   const closedWeeks=[...(weekly||[])].sort((x,y)=>Number(x.gameweek||0)-Number(y.gameweek||0))
   const playedWeeks=closedWeeks.filter(w=>Number(w.minutes||0)>0)
   const played=Number(s?.matches_played ?? playedWeeks.length)
@@ -258,7 +258,7 @@ export default async function PlayerPage({ params }){
           <div><span>Top25 skor</span><b>{p?.top25_score===null||p?.top25_score===undefined?'—':num(p.top25_score,3)}</b></div>
           <div><span>Veri güveni</span><b>{predictionConfidenceLabel(run,p)}</b></div>
           {!isGK?<div><span>Takım gol payı</span><b>{pct(r?.team_goal_share)}</b></div>:null}
-          {!isGK?<div><span>Takım asist payı</span><b>{pct(r?.team_assist_share)}</b></div>:null}
+          {!isGK?<div><span>Model xA / 90</span><b>{mf?.effective_xa_per90===null||mf?.effective_xa_per90===undefined?'—':num(mf.effective_xa_per90,3)}</b></div>:null}
           {!isGK?<div><span>xA kaynağı</span><b>{s?.xa_source||'—'}</b></div>:null}
           {detailedRole?<div><span>Detay rol</span><b>{detailedRole}</b></div>:null}
         </div>

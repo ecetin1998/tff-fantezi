@@ -362,7 +362,7 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
       <div className="squad-control-stat">
         <span>Bütçe</span>
         <b>{cost.toFixed(1)}<small>m / 100m</small></b>
-        <small>{bank.toFixed(1)}m banka</small>
+        <small>Kalan: {bank.toFixed(1)}m</small>
       </div>
       <div className="squad-control-stat">
         <span>{SQUAD_SIZE} oyuncu xFP</span>
@@ -578,10 +578,9 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
 
       <div className="squad-save-row">
         <div className="squad-validity">
-          <div className="club-counts">${Object.entries(clubCounts).sort((a,b)=>b[1]-a[1]).map(([teamId,count])=>{const p=selected.find(x=>String(x.team_id)===String(teamId));return <span className={count>=MAX_PLAYERS_PER_CLUB?'limit':''} key={teamId}>{p?.team||teamId}: {count}/{MAX_PLAYERS_PER_CLUB}</span>})}</div>
+          <div className="club-counts">{Object.entries(clubCounts).sort((a,b)=>b[1]-a[1]).map(([teamId,count])=>{const p=selected.find(x=>String(x.team_id)===String(teamId));return <span className={count>=MAX_PLAYERS_PER_CLUB?'limit':''} key={teamId}>{p?.team||teamId}: {count}/{MAX_PLAYERS_PER_CLUB}</span>})}</div>
           <span className={validRoster?'ok':''}>{validRoster?'✓':'○'} 2 KL / 5 DEF / 5 OS / 3 FOR</span>
           <span className={cost<=BUDGET?'ok':''}>{cost<=BUDGET?'✓':'○'} Bütçe limiti</span>
-          {bank>=5?<span className="budget-warning">⚠ {bank.toFixed(1)}m bütçe kullanılmıyor</span>:null}
           <span className={clubLimitOk?'ok':''}>{clubLimitOk?'✓':'○'} Kulüp başına en fazla {MAX_PLAYERS_PER_CLUB}</span>
           <span className={validXI?'ok':''}>{validXI?'✓':'○'} {liveFormation===formation?'Seçili diziliş hazır':'XI dizilişi güncellenmeli'}</span>
         </div>

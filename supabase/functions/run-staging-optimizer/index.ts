@@ -63,6 +63,7 @@ async function gateAuthorized(req: Request) {
 }
 
 import solver from "https://esm.sh/javascript-lp-solver@0.4.24";
+import { optimizeBenchForAutosubs } from "../_shared/autosub.ts";
 
 
 function n(v:any){const x=Number(v);return Number.isFinite(x)?x:0}
@@ -107,24 +108,19 @@ function buildModel(rows:any[],variant:string,recommendedXI:Set<number>,rules:an
 
   const variables:any={},ints:any={};
   const captainLambda=.18;
-  const budgetPenaltyPerM=.03;
   for(const r of rows){
     const id=Number(r.player_id),pos=String(r.position),team=Number(r.team_id);
     const price=n(r.price),xfp=n(r.xfp),p90=n(r.p90);
     constraints["one_"+id]={max:1};
     constraints["caplink_"+id]={max:0};
-    const availability=n(r.availability_probability);
     const minutes=n(r.x_minutes);
     const xiProbability=n(r.xi_probability);
-    const playProbability=Math.max(0,Math.min(1,availability*Math.max(xiProbability,Math.min(1,minutes/90))));
-    const benchValue=.08*playProbability*xfp;
     const cheapBench=.0001*price;
-    const spendReward=budgetPenaltyPerM*price;
     const base=variant==="recommended"?xfp:xfp+.18*Math.max(0,p90-xfp);
     const xiEligible=xiProbability>=.5&&minutes>=40;
     if(xiEligible){
       const v:any={
-        score:base-benchValue+cheapBench+spendReward,
+        score:base,
         budget:price,total:1,xiTotal:1,
         ["squad"+pos]:1,["team_"+team]:1,["one_"+id]:1,["caplink_"+id]:-1,
         ["xi"+pos+"Min"]:1,["xi"+pos+"Max"]:1
@@ -139,7 +135,7 @@ function buildModel(rows:any[],variant:string,recommendedXI:Set<number>,rules:an
       }
     }
     variables["b_"+id]={
-      score:benchValue-cheapBench+spendReward,budget:price,total:1,
+      score:-cheapBench,budget:price,total:1,
       ["squad"+pos]:1,["team_"+team]:1,["one_"+id]:1
     };
     ints["b_"+id]=1;
@@ -162,7 +158,12 @@ function solve(rows:any[],variant:string,recommendedXI:Set<number>,rules:any){
   if(xi.length!==11||bench.length!==4||!captain)throw new Error("bad solution shape "+variant+" "+xi.length+"/"+bench.length+"/"+captain);
   const captainRow=rows.find(r=>Number(r.player_id)===captain);
   if(captainRow?.position==="GK")throw new Error("GK captain invariant violated");
-  return {out,xi,bench,captain};
+  const xiRows=xi.map(id=>rows.find(r=>Number(r.player_id)===id)).filter(Boolean);
+  const counts:any={DEF:0,MID:0,FWD:0};
+  for(const r of xiRows)if(r.position!=="GK")counts[r.position]=(counts[r.position]||0)+1;
+  const formation=`${counts.DEF}-${counts.MID}-${counts.FWD}`;
+  if(!Array.isArray(rules.formations)||!rules.formations.includes(formation))throw new Error("invalid starting formation "+formation);
+  return {out,xi,bench,captain,formation};
 }
 Deno.serve(async(req:Request)=>{
   try{
@@ -185,11 +186,11 @@ Deno.serve(async(req:Request)=>{
     const rules=rulesRes.data?.rules;
     if(!rules)throw new Error("GAME_RULES_MISSING");
     const {data,error}=await sb.from("scout_player_projections")
-      .select("player_id,xfp,p90,xi_probability,x_minutes,availability_probability,confidence,scout_players!inner(team_id,position,price,active)")
+      .select("player_id,xfp,p90,xi_probability,appearance_probability,x_minutes,availability_probability,confidence,scout_players!inner(team_id,position,price,active)")
       .eq("run_id",RUN);
     if(error)throw error;
     const rows=(data||[]).map((x:any)=>({
-      player_id:x.player_id,xfp:x.xfp,p90:x.p90,xi_probability:x.xi_probability,x_minutes:x.x_minutes,availability_probability:x.availability_probability,
+      player_id:x.player_id,xfp:x.xfp,p90:x.p90,xi_probability:x.xi_probability,appearance_probability:x.appearance_probability,x_minutes:x.x_minutes,availability_probability:x.availability_probability,
       team_id:x.scout_players.team_id,position:x.scout_players.position,price:x.scout_players.price,active:x.scout_players.active,confidence:x.confidence||"medium"
     })).filter((x:any)=>x.active && n(x.availability_probability)>=.8 && n(x.price)>0);
     const byPos:any={GK:[],DEF:[],MID:[],FWD:[]};
@@ -210,8 +211,16 @@ Deno.serve(async(req:Request)=>{
       if(mm.error)throw mm.error;
       recommendedXI=new Set((mm.data||[]).map((x:any)=>Number(x.player_id)));
     }
-    const sol=solve(pool,mode,recommendedXI,rules);
-    const byId=new Map(pool.map((x:any)=>[Number(x.player_id),x]));
+    const solved=solve(pool,mode,recommendedXI,rules);
+    const poolById=new Map(pool.map((x:any)=>[Number(x.player_id),x]));
+    const refinedBench=optimizeBenchForAutosubs(
+      solved.xi.map((pid:number)=>poolById.get(pid)).filter(Boolean),
+      solved.bench.map((pid:number)=>poolById.get(pid)).filter(Boolean),
+      pool,
+      rules
+    );
+    const sol={...solved,bench:refinedBench.bench.map((row:any)=>Number(row.player_id)),autosubEv:refinedBench.autosubEv};
+    const byId=poolById;
     const old=await sb.from("scout_squad_recommendations").select("id").eq("run_id",RUN).eq("variant",mode);
     if(old.error)throw old.error;
     const oldIds=(old.data||[]).map((x:any)=>x.id);
@@ -227,18 +236,17 @@ Deno.serve(async(req:Request)=>{
       const budget=allRows.reduce((s:number,r:any)=>s+n(r.price),0);
       const xiXfp=xiRows.reduce((s:number,r:any)=>s+n(r.xfp),0);
       const cap=byId.get(sol.captain);
-      const counts:any={DEF:0,MID:0,FWD:0};
-      for(const r of xiRows)if(r.position!=="GK")counts[r.position]=(counts[r.position]||0)+1;
-      const formation=`${counts.DEF}-${counts.MID}-${counts.FWD}`;
-      const objective=variant==="recommended"?"xi_xfp_bench_ev_v3":"ceiling_p90_bench_ev_v4";
+      const formation=sol.formation;
+      const objective=variant==="recommended"?"xi_primary_exact_autosub_secondary_v1":"ceiling_primary_exact_autosub_secondary_v1";
       const sims=Number(runMeta.data.simulation_count||0).toLocaleString("tr-TR");
+      const autosubLabel=Number(sol.autosubEv||0).toFixed(2);
       const status=variant==="recommended"
-        ? `OPTIMAL • availability-integrated • bütçe ≤${Number(rules.budget)}m • ${sims} sim • bench puanı dahil değil`
-        : `OPTIMAL • availability-integrated • Tavan 11 • P90 odaklı • bütçe ≤${Number(rules.budget)}m • ${sims} sim • recommended ile en az 3 farklı`;
+        ? `OPTIMAL • availability-integrated • bütçe ≤${Number(rules.budget)}m • ${sims} sim • autosub EV +${autosubLabel}`
+        : `OPTIMAL • availability-integrated • Tavan 11 • P90 odaklı • bütçe ≤${Number(rules.budget)}m • ${sims} sim • autosub EV +${autosubLabel} • recommended ile en az 3 farklı`;
       recs.push({id,run_id:RUN,variant,budget,xi_xfp:xiXfp,captain_xfp:xiXfp+n(cap.xfp),formation,objective,status});
       const posOrder:any={GK:0,DEF:1,MID:2,FWD:3};
       const xis=[...sol.xi].sort((a:number,b:number)=>posOrder[byId.get(a).position]-posOrder[byId.get(b).position]||n(byId.get(b).xfp)-n(byId.get(a).xfp));
-      const bns=[...sol.bench].sort((a:number,b:number)=>posOrder[byId.get(a).position]-posOrder[byId.get(b).position]||n(byId.get(b).xfp)-n(byId.get(a).xfp));
+      const bns=[...sol.bench];
       const members:any[]=[];
       xis.forEach((pid:number,idx:number)=>{
         const r=byId.get(pid);members.push({recommendation_id:id,player_id:pid,squad_slot:"XI",sort_order:idx+1,is_captain:pid===sol.captain,xfp:n(r.xfp),xi_contribution:n(r.xfp)*(pid===sol.captain?2:1)});
@@ -249,6 +257,6 @@ Deno.serve(async(req:Request)=>{
       const ir=await sb.from("scout_squad_recommendations").insert(recs[recs.length-1]);if(ir.error)throw ir.error;
       const im=await sb.from("scout_squad_members").insert(members);if(im.error)throw im.error;
     }
-    return Response.json({ok:true,run:RUN,mode,players:rows.length,pool:pool.length,xi:sol.xi,bench:sol.bench,captain:sol.captain});
+    return Response.json({ok:true,run:RUN,mode,players:rows.length,pool:pool.length,xi:sol.xi,bench:sol.bench,captain:sol.captain,autosub_ev:sol.autosubEv});
   }catch(e:any){return Response.json({error:String(e?.message||e)},{status:500})}
 });
