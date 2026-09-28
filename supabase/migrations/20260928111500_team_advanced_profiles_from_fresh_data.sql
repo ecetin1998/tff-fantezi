@@ -105,7 +105,8 @@ select jsonb_build_object(
         inferred_conceded_left_share+inferred_conceded_center_share+inferred_conceded_right_share-1
       )>.01
   )
-);
+)
+from p;
 $qa$;
 
 grant execute on function public.scout_team_profile_qa() to anon,authenticated,service_role;
