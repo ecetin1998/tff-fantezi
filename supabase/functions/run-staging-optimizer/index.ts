@@ -63,6 +63,7 @@ async function gateAuthorized(req: Request) {
 }
 
 import solver from "https://esm.sh/javascript-lp-solver@0.4.24";
+import { optimizeBenchForAutosubs } from "../_shared/autosub.ts";
 
 
 function n(v:any){const x=Number(v);return Number.isFinite(x)?x:0}
@@ -185,11 +186,11 @@ Deno.serve(async(req:Request)=>{
     const rules=rulesRes.data?.rules;
     if(!rules)throw new Error("GAME_RULES_MISSING");
     const {data,error}=await sb.from("scout_player_projections")
-      .select("player_id,xfp,p90,xi_probability,x_minutes,availability_probability,confidence,scout_players!inner(team_id,position,price,active)")
+      .select("player_id,xfp,p90,xi_probability,appearance_probability,x_minutes,availability_probability,confidence,scout_players!inner(team_id,position,price,active)")
       .eq("run_id",RUN);
     if(error)throw error;
     const rows=(data||[]).map((x:any)=>({
-      player_id:x.player_id,xfp:x.xfp,p90:x.p90,xi_probability:x.xi_probability,x_minutes:x.x_minutes,availability_probability:x.availability_probability,
+      player_id:x.player_id,xfp:x.xfp,p90:x.p90,xi_probability:x.xi_probability,appearance_probability:x.appearance_probability,x_minutes:x.x_minutes,availability_probability:x.availability_probability,
       team_id:x.scout_players.team_id,position:x.scout_players.position,price:x.scout_players.price,active:x.scout_players.active,confidence:x.confidence||"medium"
     })).filter((x:any)=>x.active && n(x.availability_probability)>=.8 && n(x.price)>0);
     const byPos:any={GK:[],DEF:[],MID:[],FWD:[]};
@@ -210,8 +211,16 @@ Deno.serve(async(req:Request)=>{
       if(mm.error)throw mm.error;
       recommendedXI=new Set((mm.data||[]).map((x:any)=>Number(x.player_id)));
     }
-    const sol=solve(pool,mode,recommendedXI,rules);
-    const byId=new Map(pool.map((x:any)=>[Number(x.player_id),x]));
+    const solved=solve(pool,mode,recommendedXI,rules);
+    const poolById=new Map(pool.map((x:any)=>[Number(x.player_id),x]));
+    const refinedBench=optimizeBenchForAutosubs(
+      solved.xi.map((pid:number)=>poolById.get(pid)).filter(Boolean),
+      solved.bench.map((pid:number)=>poolById.get(pid)).filter(Boolean),
+      pool,
+      rules
+    );
+    const sol={...solved,bench:refinedBench.bench.map((row:any)=>Number(row.player_id)),autosubEv:refinedBench.autosubEv};
+    const byId=poolById;
     const old=await sb.from("scout_squad_recommendations").select("id").eq("run_id",RUN).eq("variant",mode);
     if(old.error)throw old.error;
     const oldIds=(old.data||[]).map((x:any)=>x.id);
@@ -228,15 +237,16 @@ Deno.serve(async(req:Request)=>{
       const xiXfp=xiRows.reduce((s:number,r:any)=>s+n(r.xfp),0);
       const cap=byId.get(sol.captain);
       const formation=sol.formation;
-      const objective=variant==="recommended"?"xi_xfp_budget_neutral_v1":"ceiling_p90_budget_neutral_v1";
+      const objective=variant==="recommended"?"xi_primary_exact_autosub_secondary_v1":"ceiling_primary_exact_autosub_secondary_v1";
       const sims=Number(runMeta.data.simulation_count||0).toLocaleString("tr-TR");
+      const autosubLabel=Number(sol.autosubEv||0).toFixed(2);
       const status=variant==="recommended"
-        ? `OPTIMAL • availability-integrated • bütçe ≤${Number(rules.budget)}m • ${sims} sim • bench puanı dahil değil`
-        : `OPTIMAL • availability-integrated • Tavan 11 • P90 odaklı • bütçe ≤${Number(rules.budget)}m • ${sims} sim • recommended ile en az 3 farklı`;
+        ? `OPTIMAL • availability-integrated • bütçe ≤${Number(rules.budget)}m • ${sims} sim • autosub EV +${autosubLabel}`
+        : `OPTIMAL • availability-integrated • Tavan 11 • P90 odaklı • bütçe ≤${Number(rules.budget)}m • ${sims} sim • autosub EV +${autosubLabel} • recommended ile en az 3 farklı`;
       recs.push({id,run_id:RUN,variant,budget,xi_xfp:xiXfp,captain_xfp:xiXfp+n(cap.xfp),formation,objective,status});
       const posOrder:any={GK:0,DEF:1,MID:2,FWD:3};
       const xis=[...sol.xi].sort((a:number,b:number)=>posOrder[byId.get(a).position]-posOrder[byId.get(b).position]||n(byId.get(b).xfp)-n(byId.get(a).xfp));
-      const bns=[...sol.bench].sort((a:number,b:number)=>posOrder[byId.get(a).position]-posOrder[byId.get(b).position]||n(byId.get(b).xfp)-n(byId.get(a).xfp));
+      const bns=[...sol.bench];
       const members:any[]=[];
       xis.forEach((pid:number,idx:number)=>{
         const r=byId.get(pid);members.push({recommendation_id:id,player_id:pid,squad_slot:"XI",sort_order:idx+1,is_captain:pid===sol.captain,xfp:n(r.xfp),xi_contribution:n(r.xfp)*(pid===sol.captain?2:1)});
@@ -247,6 +257,6 @@ Deno.serve(async(req:Request)=>{
       const ir=await sb.from("scout_squad_recommendations").insert(recs[recs.length-1]);if(ir.error)throw ir.error;
       const im=await sb.from("scout_squad_members").insert(members);if(im.error)throw im.error;
     }
-    return Response.json({ok:true,run:RUN,mode,players:rows.length,pool:pool.length,xi:sol.xi,bench:sol.bench,captain:sol.captain});
+    return Response.json({ok:true,run:RUN,mode,players:rows.length,pool:pool.length,xi:sol.xi,bench:sol.bench,captain:sol.captain,autosub_ev:sol.autosubEv});
   }catch(e:any){return Response.json({error:String(e?.message||e)},{status:500})}
 });
