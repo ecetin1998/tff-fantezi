@@ -114,7 +114,7 @@ export default async function PlayerPage({ params }){
       {label:'Cross',value:s?.crosses===null||s?.crosses===undefined?'—':`${Number(s.successful_crosses||0)}/${Number(s.crosses)}`,note:'başarılı / toplam'},
       {label:'Dripling',value:s?.takeons===null||s?.takeons===undefined?'—':`${Number(s.successful_takeons||0)}/${Number(s.takeons)}`,note:'başarılı / toplam'},
       {label:'Takım hücum katkısı',value:s?.attack_contribution_share===null||s?.attack_contribution_share===undefined?'—':pct(s.attack_contribution_share),note:'xG + etkili xA payı'},
-      {label:'İleri veri kapsamı',value:s?.advanced_through_gameweek?`MH1–MH${s.advanced_through_gameweek}`:'—',note:s?.advanced_source||undefined}
+      {label:'İleri veri kapsamı',value:s?.advanced_through_gameweek?`MH1–MH${s.advanced_through_gameweek}`:'—',note:'kaynaklı maç aksiyonları'}
     )
     if(isDEF)seasonMetrics.push({label:'Gol yemeden',value:Number(s?.clean_sheets||0)})
   }
