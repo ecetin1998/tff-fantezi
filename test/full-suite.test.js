@@ -25,6 +25,7 @@ const jsTests=[
   'model/cloudflareDeployContract.test.js',
   'model/vercelDisabledContract.test.js',
   'model/enrichmentContract.test.js',
+  'model/enrichmentReplayContract.test.js',
 ]
 
 for(const file of jsTests){
