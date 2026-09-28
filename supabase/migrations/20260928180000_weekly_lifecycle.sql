@@ -217,4 +217,32 @@ $fn$;
 revoke all on function public.apply_replay_accum_attack_to_run(uuid,integer,text) from public,anon,authenticated;
 grant execute on function public.apply_replay_accum_attack_to_run(uuid,integer,text) to service_role;
 
+create or replace function public.scout_finalize_candidate_projection_fields(p_run_id uuid)
+returns integer
+language plpgsql
+security definer
+set search_path='public'
+as $fn$
+declare v_count integer;
+begin
+  update public.scout_player_projections p
+  set value_score=case when sp.price>0 then p.xfp/sp.price else null end
+  from public.scout_players sp
+  where p.run_id=p_run_id and sp.id=p.player_id;
+  get diagnostics v_count=row_count;
+
+  update public.scout_role_signals r
+  set predicted_xi_probability=p.xi_probability,
+      x_minutes=p.x_minutes,
+      availability_probability=p.availability_probability
+  from public.scout_player_projections p
+  where p.run_id=p_run_id and r.run_id=p_run_id and r.player_id=p.player_id;
+
+  return v_count;
+end;
+$fn$;
+
+revoke all on function public.scout_finalize_candidate_projection_fields(uuid) from public,anon,authenticated;
+grant execute on function public.scout_finalize_candidate_projection_fields(uuid) to service_role;
+
 commit;
