@@ -23,6 +23,10 @@ for(const file of ['components/SquadPitchView.js','components/SquadBuilder.js'])
   assert.match(source,/function displayName\(player\)\{ return pitchPlayerLabel\(player\) \}/,file+' pitch displayName must stay short.')
 }
 
+const pitchView=read('components/SquadPitchView.js')
+assert.doesNotMatch(pitchView,/Alternatif \(tavan\) kaptan:/,'Recommended squad card must not show the ceiling-captain note.')
+assert.doesNotMatch(pitchView,/ceiling-captain-note/,'Removed ceiling-captain note markup must not return.')
+
 const builder=read('components/SquadBuilder.js')
 assert.match(builder,/picker-copy[\s\S]{0,120}<b>\{playerLabel\(p\)\}<\/b>/,'Picker must use full player names.')
 assert.match(builder,/bench-copy"><b>\{playerLabel\(p\)\}<\/b>/,'Bench must use full player names.')
