@@ -19,4 +19,11 @@ const smokeScript=fs.readFileSync('scripts/smoke.sh','utf8')
 assert.match(smokeScript,/cp "\$TMP_DIR\/players\.json" "\$TMP_DIR\/players-live\.json"/)
 assert.equal((smokeScript.match(/api\/scout-data\?section=players/g)||[]).length,0,'production smoke must not refetch the players section after the section loop')
 
+const scoutApi=fs.readFileSync('app/api/scout-data/route.js','utf8')
+const data=fs.readFileSync('lib/data.js','utf8')
+assert.match(scoutApi,/full\?await getBacktestOverview\(\):await getPublicPerformanceOverview\(\)/,'public performance API must use the lightweight query path')
+assert.match(data,/async function _getPublicPerformanceOverview\(\)/)
+const publicPerf=data.slice(data.indexOf('async function _getPublicPerformanceOverview'),data.indexOf('async function _getBacktestOverview'))
+assert.doesNotMatch(publicPerf,/scout_backtest_players|scout_preseason_player_priors|scout_preseason_team_priors/,'public performance query must not load full backtest/preseason payloads')
+
 console.log('cloudflare deploy contract passed')
