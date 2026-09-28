@@ -15,6 +15,14 @@ function formatCountdown(ms){
   const days=Math.floor(total/86400),hours=Math.floor((total%86400)/3600),minutes=Math.floor((total%3600)/60)
   return days>0?`${days}g ${hours}s ${minutes}dk`:`${hours}s ${minutes}dk`
 }
+function formatDeadline(value){
+  if(!value)return '—'
+  const date=new Date(value)
+  if(Number.isNaN(date.getTime()))return '—'
+  return new Intl.DateTimeFormat('tr-TR',{
+    timeZone:'Europe/Istanbul',day:'numeric',month:'long',hour:'2-digit',minute:'2-digit',hour12:false
+  }).format(date)
+}
 function stateSignature(payload=[]){
   return JSON.stringify([...payload]
     .map(x=>({player_id:Number(x.player_id),is_captain:Boolean(x.is_captain),bench_order:x.bench_order===null?null:Number(x.bench_order)}))
@@ -351,8 +359,8 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
     <section className="squad-control-strip card">
       <div className={`squad-deadline-status ${isLocked?'locked':''}`}>
         <span>{isLocked?'HAFTA KİLİTLİ':'KADRO SON TARİHİ'}</span>
-        <b>{deadlineAt?new Date(deadlineAt).toLocaleString('tr-TR',{timeZone:'Europe/Istanbul'}):'—'}</b>
-        <small>{isLocked?'Kadro salt okunur.':deadlineAt?formatCountdown(Math.max(0,new Date(deadlineAt).getTime()-now)):'Deadline bekleniyor'}</small>
+        <b>{formatDeadline(deadlineAt)}</b>
+        <small>{isLocked?'Kadro salt okunur.':deadlineAt?`İlk maçtan 1 saat önce • ${formatCountdown(Math.max(0,new Date(deadlineAt).getTime()-now))}`:'Takvim bekleniyor'}</small>
       </div>
       <div className="squad-control-stat">
         <span>Kadro</span>
