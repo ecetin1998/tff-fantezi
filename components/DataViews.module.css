@@ -196,6 +196,10 @@
 .scope :global(.match-analysis-card) :global(.match-card-top){
   align-items:center;
 }
+.scope :global(.match-analysis-card) :global(.match-teams){
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:18px;
+}
 .scope :global(.match-profile-pill){
   display:inline-flex;
   align-items:center;
@@ -452,7 +456,8 @@
     padding:15px;
   }
   .scope :global(.match-analysis-card) :global(.match-teams){
-    grid-template-columns:minmax(0,1fr) minmax(82px,100px) minmax(0,1fr);
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:14px;
   }
   .scope :global(.match-profile-pill){
     font-size:6px;
@@ -983,7 +988,8 @@
     font-size:25px;
   }
   .scope :global(.match-analysis-card) :global(.match-teams){
-    grid-template-columns:minmax(0,1fr) minmax(78px,92px) minmax(0,1fr);
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:10px;
   }
   .scope :global(.match-fantasy-note){
     padding:12px;

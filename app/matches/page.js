@@ -134,12 +134,6 @@ export default async function Matches(){
               </div>
             </div>
 
-            <div className="xg-comparison fantasy-xg-comparison">
-              <small>xG TAHMİNİ</small>
-              <strong><b>{homeXg.toFixed(2)}</b><em>—</em><b>{awayXg.toFixed(2)}</b></strong>
-              <span>Toplam {totalXg.toFixed(2)}</span>
-            </div>
-
             <div className="away match-team-block">
               <span>DEP</span>
               <Link className="match-team-link away-link" style={teamCssVars(m.away_team)} href={'/teams/'+m.away_team_id}><i className="club-dot"/><b>{m.away_team}</b></Link>
