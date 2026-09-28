@@ -26,6 +26,7 @@ const jsTests=[
   'model/vercelDisabledContract.test.js',
   'model/enrichmentContract.test.js',
   'model/enrichmentReplayContract.test.js',
+  'model/currentRunAlignmentContract.test.js',
 ]
 
 for(const file of jsTests){
