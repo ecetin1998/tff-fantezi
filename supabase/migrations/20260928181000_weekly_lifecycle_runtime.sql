@@ -272,7 +272,7 @@ select jsonb_build_object(
   'xi_overlap',(select xi_overlap from overlap)
 )
 from checks;
-$function$
+$function$;
 
 
 
