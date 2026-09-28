@@ -1,5 +1,5 @@
 const assert=require('node:assert/strict')
-const {simulateScout,cardPoints,expectedKeeperSaves,bonusByCompetitionRank,redCardExitMinute,isActiveAt}=require('./simulateScout')
+const {simulateScout,cardPoints,appearancePoints,expectedKeeperSaves,bonusByCompetitionRank,redCardExitMinute,isActiveAt}=require('./simulateScout')
 
 function player(id,club,pos='MID'){
   return {
@@ -58,6 +58,10 @@ function baseInput(){
 assert.equal(cardPoints(true,false),-1,'yellow card is -1')
 assert.equal(cardPoints(false,true),-3,'red card is -3')
 assert.equal(cardPoints(true,true),-3,'second-yellow dismissal is -3 total, not -4')
+assert.equal(appearancePoints(0),0,'no appearance points without minutes')
+assert.equal(appearancePoints(59),1,'under 60 minutes is one point')
+assert.equal(appearancePoints(60),1,'exactly 60 minutes is still one point under the official rule')
+assert.equal(appearancePoints(61),2,'the second appearance point starts only above 60 minutes')
 
 console.log('simulateScout checks passed')
 
