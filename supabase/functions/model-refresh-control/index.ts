@@ -45,6 +45,9 @@ function ageHours(value:string|null|undefined){
   const ts=new Date(value).getTime()
   return Number.isFinite(ts)?Math.max(0,(Date.now()-ts)/36e5):Infinity
 }
+function engineSignature(value:string){
+  return String(value||"").replace(/\b(?:GW|MH)\s*\d+\b/gi,"GW#").replace(/\s+/g," ").trim()
+}
 async function latestTimestamp(sb:any,table:string,column:string){
   const q=await sb.from(table).select(column).not(column,"is",null).order(column,{ascending:false}).limit(1).maybeSingle()
   if(q.error)throw q.error
@@ -153,6 +156,30 @@ Deno.serve(async(req:Request)=>{
       if(body.pass!==true)return Response.json({error:"replay must explicitly pass"},{status:409})
       await upsertGate(sb,runId,{backtest_pass:true,details:{replay:body.details||{pass:true}}})
       return Response.json({ok:true,pass:true})
+    }
+
+    if(stage==="model_gate"){
+      const cycle=await sb.from("scout_weekly_lifecycle")
+        .select("source_run_id,candidate_run_id,target_gameweek")
+        .eq("candidate_run_id",runId).maybeSingle()
+      if(cycle.error)throw cycle.error
+      if(!cycle.data?.source_run_id)return Response.json({error:"weekly lifecycle parent missing"},{status:409})
+      const [parent,candidate,parentGate]=await Promise.all([
+        sb.from("scout_model_runs").select("id,model_version").eq("id",cycle.data.source_run_id).single(),
+        sb.from("scout_model_runs").select("id,model_version").eq("id",runId).single(),
+        sb.from("scout_run_release_gates").select("backtest_pass").eq("run_id",cycle.data.source_run_id).single(),
+      ])
+      for(const q of [parent,candidate,parentGate])if(q.error)throw q.error
+      const sameEngine=engineSignature(parent.data.model_version)===engineSignature(candidate.data.model_version)
+      const pass=sameEngine&&Boolean(parentGate.data.backtest_pass)
+      await upsertGate(sb,runId,{
+        backtest_pass:pass,
+        details:{model_validation:{
+          pass,same_engine:sameEngine,inherited_from:parent.data.id,
+          reason:"unchanged engine; inherit prior leakage-safe replay gate and record the newly closed live week separately"
+        }}
+      })
+      return Response.json({ok:pass,pass,same_engine:sameEngine,inherited_from:parent.data.id},{status:pass?200:409})
     }
 
     if(stage==="promote"){
