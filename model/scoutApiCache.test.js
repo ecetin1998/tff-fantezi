@@ -27,6 +27,11 @@ const assert=require('node:assert/strict')
   assert.match(route,/buildPayload\(requested,true\)/)
   assert.doesNotMatch(route,/buildCached\(requested,full\)/)
   assert.doesNotMatch(route,/export const revalidate=/)
+  assert.match(route,/const d=full\?await getBacktestOverview\(\):await getBacktestSummary\(\)/)
+  const data=fs.readFileSync('lib/data.js','utf8')
+  assert.match(data,/async function _getBacktestSummary\(\)/)
+  assert.doesNotMatch(data.match(/async function _getBacktestSummary\(\)[\s\S]*?\n}\n/)[0],/scout_replay_players|scout_backtest_players|scout_preseason_player_priors/)
+
 
   console.log('scoutApiCache: keyed full payload bypasses public caches')
 })().catch(error=>{console.error(error);process.exit(1)})
