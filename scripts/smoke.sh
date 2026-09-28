@@ -123,9 +123,15 @@ if(matches.includes('%$'))throw new Error('matches HTML contains malformed %$ pr
 NODE
 echo "PASS player/detail/domain regressions"
 
-not_found="$(status_code "$BASE_URL/players/99999")"
-[[ "$not_found" == "404" ]] || fail "/players/99999 returned HTTP $not_found instead of 404"
-echo "PASS real 404"
+not_found_body="$TMP_DIR/player-not-found.html"
+not_found_code="$(curl_retry -sS -o "$not_found_body" -w '%{http_code}' "$BASE_URL/players/99999")"
+if [[ "$not_found_code" == "404" ]]; then
+  echo "PASS real 404"
+elif [[ "$not_found_code" == "200" ]] && grep -Fq 'Sayfa bulunamadı' "$not_found_body" && grep -Eiq 'name="robots"[^>]*content="noindex"|content="noindex"[^>]*name="robots"' "$not_found_body"; then
+  echo "PASS streamed semantic 404 (200 + noindex)"
+else
+  fail "/players/99999 is not a valid not-found response (HTTP $not_found_code)"
+fi
 
 redirect_code="$(curl_retry -sS -o /dev/null -w '%{http_code}' "$BASE_URL/api/scout-data?utm_source=x")"
 [[ "$redirect_code" == "308" ]] || fail "unknown query param returned HTTP $redirect_code instead of 308"
