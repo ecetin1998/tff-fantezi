@@ -61,6 +61,22 @@ assert.match(xaFillV4,/s\.player_id=500/,'Taşkın player id should be targeted'
 assert.match(xaFillV4,/effective_xa_per90/,'attack contribution refresh must retain fallback for uncovered players')
 assert.doesNotMatch(xaFillV4,/set xa_model_per90=/,'observed xA must not overwrite the model prior')
 
+const teamAdvancedSchema=fs.readFileSync('supabase/migrations/20260928111500_team_advanced_profiles_from_fresh_data.sql','utf8')
+for(const field of [
+  'advanced_profile_through_gameweek','set_piece_xg_share','opponent_set_piece_xg_share',
+  'inferred_attack_left_share','inferred_attack_center_share','inferred_attack_right_share',
+  'inferred_conceded_left_share','inferred_conceded_center_share','inferred_conceded_right_share',
+  'scout_team_profile_qa'
+])assert.match(teamAdvancedSchema,new RegExp(field))
+assert.match(teamAdvancedSchema,/invalid_attack_share/)
+assert.match(teamAdvancedSchema,/invalid_conceded_share/)
+
+const teamAdvancedFill=fs.readFileSync('supabase/migrations/20260928112000_fill_fresh_team_advanced_profiles.sql','utf8')
+assert.match(teamAdvancedFill,/fresh_sheet_sahadan_gw1_5_2026-09-25/)
+assert.match(teamAdvancedFill,/role_side_weighted_shots_chances_half_successful_crosses/)
+assert.match(teamAdvancedFill,/advanced_profile_matches/)
+assert.match(teamAdvancedFill,/inferred_conceded_right_share/)
+
 const data=fs.readFileSync('lib/data.js','utf8')
 assert.match(data,/TEAM_TACTICAL_PUBLIC_COLUMNS/)
 assert.match(data,/xa_model_per90/)
@@ -68,6 +84,8 @@ assert.match(data,/primary_role/)
 assert.match(data,/scout_team_tactical_profiles/)
 assert.match(data,/big_chances,big_chances_missed,shots_on_target_per_match/)
 assert.match(data,/set_piece_goals,set_piece_xg,set_piece_goals_conceded,set_piece_xga/)
+assert.match(data,/advanced_profile_through_gameweek,advanced_profile_matches/)
+assert.match(data,/inferred_attack_left_share,inferred_attack_center_share,inferred_attack_right_share/)
 
 const playerPage=fs.readFileSync('app/players/[id]/page.js','utf8')
 assert.match(playerPage,/playerRoleLabel/)
@@ -81,6 +99,10 @@ assert.match(teamPage,/Hücuma en çok katkı/)
 assert.match(teamPage,/Duran top üretimi/)
 assert.match(teamPage,/Büyük şans/)
 assert.match(teamPage,/Şut dönüşümü/)
+assert.match(teamPage,/Hücum yönü/)
+assert.match(teamPage,/Rakibin bize karşı hücum yönü/)
+assert.match(teamPage,/Duran top xG payı/)
+assert.match(teamPage,/gözlenen olay konumu gibi sunulmaz/)
 
 assert.equal(playerRoleLabel({primary_role:'CB',role_side:'C'}),'Stoper')
 assert.equal(playerRoleLabel({primary_role:'WB',role_side:'L'}),'sol kanat bek')
