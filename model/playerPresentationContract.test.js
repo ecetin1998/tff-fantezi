@@ -23,6 +23,12 @@ for(const file of ['components/SquadPitchView.js','components/SquadBuilder.js'])
   assert.match(source,/function displayName\(player\)\{ return pitchPlayerLabel\(player\) \}/,file+' pitch displayName must stay short.')
 }
 
+const builder=read('components/SquadBuilder.js')
+assert.match(builder,/picker-copy[\s\S]{0,120}<b>\{playerLabel\(p\)\}<\/b>/,'Picker must use full player names.')
+assert.match(builder,/bench-copy"><b>\{playerLabel\(p\)\}<\/b>/,'Bench must use full player names.')
+assert.match(builder,/captain-candidates[\s\S]{0,500}<b>\{playerLabel\(p\)\}<\/b>/,'Captain candidates must use full player names.')
+assert.match(builder,/captain-impact[\s\S]{0,220}<b>\{playerLabel\(xi\.find/,'Selected captain must use the full player name.')
+
 for(const file of ['app/page.js','app/players/page.js','app/matches/page.js']){
   assert.doesNotMatch(read(file),/DataFreshnessBanner/,file+' must not restore the repetitive stale-data banner.')
 }
