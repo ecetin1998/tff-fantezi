@@ -131,4 +131,18 @@ assert.match(guardrails,/\)>\.3/)
 assert.match(guardrails,/security invoker/)
 assert.doesNotMatch(guardrails,/security definer/)
 
+const simulator=read('model/simulateScout.js')
+assert.match(simulator,/function appearancePoints\(minutes\)/)
+assert.match(simulator,/mins>60\?SCORING\.appearance_60:0/,'official TFF second appearance point starts above 60 minutes')
+assert.match(simulator,/mins\[i\]>=60&&score\[/,'clean sheet must require at least 60 minutes and a team match clean sheet')
+for(const file of [
+  'supabase/functions/run-enrichment-replay-chunk/index.ts',
+  'supabase/functions/run-mh1-replay-chunk/index.ts',
+  'supabase/functions/run-replay-distribution-test/index.ts'
+]){
+  const replay=read(file)
+  assert.match(replay,/mins\[i\]>60/,'replay appearance threshold must stay strictly above 60: '+file)
+  assert.match(replay,/mins\[i\]>=60/,'replay clean-sheet/60+ probability threshold must stay inclusive: '+file)
+}
+
 console.log('bugfix contract passed')
