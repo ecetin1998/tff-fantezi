@@ -35,4 +35,29 @@ assert.match(autosubTs,/export function expectedAutosubValue\(/)
 assert.match(autosubTs,/export function optimizeBenchForAutosubs\(/)
 assert.match(optimizerTs,/import \{ optimizeBenchForAutosubs \} from "\.\.\/_shared\/autosub\.ts"/)
 
-console.log('rulesParity: canonical rules and optimizer objective constants are aligned')
+const scoring=canonical.scoring
+const sim=fs.readFileSync(path.join(root,'model/simulateScout.js'),'utf8')
+assert.match(sim,/const \{SCORING\}=require\('\.\.\/lib\/rules\.js'\)/,'live simulator must read canonical scoring rules')
+
+const enrichment=fs.readFileSync(path.join(root,'supabase/functions/run-enrichment-replay-chunk/index.ts'),'utf8')
+const scoringMatch=enrichment.match(/const SCORING=({[\s\S]*?\n});/)
+assert.ok(scoringMatch,'enrichment replay SCORING literal missing')
+const replayScoring=Function('"use strict";return ('+scoringMatch[1]+')')()
+assert.deepEqual(replayScoring,scoring,'enrichment replay scoring must match canonical rules exactly')
+
+for(const file of [
+  'supabase/functions/run-mh1-replay-chunk/index.ts',
+  'supabase/functions/run-replay-distribution-test/index.ts'
+]){
+  const replay=fs.readFileSync(path.join(root,file),'utf8')
+  assert.match(replay,/goalPts\s*=\s*\[10,6,5,4\]/,file+' goal scoring drifted')
+  assert.match(replay,/csPts\s*=\s*\[4,4,1,0\]/,file+' clean-sheet scoring drifted')
+  assert.match(replay,/\(mins\[i\]>0\?1:0\)\+\(mins\[i\]>60\?1:0\)/,file+' appearance scoring drifted')
+  assert.match(replay,/cards\[i\]=rc\?-3:\(yc\?-1:0\)/,file+' card scoring drifted')
+  assert.match(replay,/assists\[[^\n]+\]\+=3/,file+' assist scoring drifted')
+  assert.match(replay,/ownc\[[^\n]+\]-=2/,file+' own-goal scoring drifted')
+  assert.match(replay,/pen\[i\]=-2\*poisson[\s\S]{0,180}\?5\*poisson/,file+' penalty scoring drifted')
+  assert.match(replay,/bon=3[\s\S]{0,180}\[3,2,1\]/,file+' bonus scoring drifted')
+}
+
+console.log('rulesParity: canonical rules, replay scoring and optimizer constants are aligned')
