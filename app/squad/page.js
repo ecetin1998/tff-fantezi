@@ -46,7 +46,6 @@ function scoreSnapshot(snapshot,pointMap,posMap){
 
 export default async function Squad({searchParams}){
   const [auth,sp]=await Promise.all([getAuthState(),searchParams])
-  const publicDataPromise=Promise.all([getSquadPlayerPool(),getRecommendation('recommended')])
 
   if(!auth.userId)return <div className="auth-wrap"><div className="card auth-card squad-login-card">
     <span className="eyebrow">BENİM KADROM</span><h1>Kendi fantezi takımını kur</h1>
@@ -54,22 +53,19 @@ export default async function Squad({searchParams}){
     <Link className="cta" href="/login">Giriş / kayıt</Link>
   </div></div>
 
-  const [{players,run},{members:recommended}]=await publicDataPromise
-  const supabase=await createClient()
-
-  const [{data:sq,error:sqError},{data:gameweekRow,error:gwError},{data:snapshots,error:snapshotError}]=await Promise.all([
-    supabase.from('scout_user_squads').select('id').eq('user_id',auth.userId).eq('is_active',true).maybeSingle(),
-    run?.gameweek?supabase.from('scout_gameweeks').select('gameweek,deadline_at,locked_at').eq('gameweek',run.gameweek).maybeSingle():Promise.resolve({data:null,error:null}),
-    supabase.from('scout_user_squad_snapshots').select('gameweek,members,captain_id,locked_at,updated_at').eq('user_id',auth.userId).order('gameweek',{ascending:false}).limit(34)
+  const [{players,run},supabase]=await Promise.all([getSquadPlayerPool(),createClient()])
+  const [{members:recommended},{data:pageData,error:pageError}]=await Promise.all([
+    getRecommendation('recommended'),
+    run?.gameweek?supabase.rpc('scout_my_squad_page',{p_gameweek:run.gameweek}):Promise.resolve({data:null,error:null})
   ])
-  for(const [scope,error] of [['squad:active',sqError],['squad:gameweek',gwError],['squad:snapshots',snapshotError]])if(error)reportServerError(scope,error)
+  if(pageError)reportServerError('squad:pageData',pageError,{gameweek:run?.gameweek})
 
-  let initialState=[]
-  if(sq?.id){
-    const {data:m,error}=await supabase.from('scout_user_squad_members').select('player_id,is_captain,bench_order').eq('squad_id',sq.id)
-    if(error)reportServerError('squad:members',error)
-    initialState=(m||[]).map(x=>({player_id:Number(x.player_id),is_captain:Boolean(x.is_captain),bench_order:x.bench_order===null?null:Number(x.bench_order)}))
-  }
+  const gameweekRow=pageData?.gameweek||null
+  const snapshots=Array.isArray(pageData?.snapshots)?pageData.snapshots:[]
+  let initialState=(Array.isArray(pageData?.members)?pageData.members:[]).map(x=>({
+    player_id:Number(x.player_id),is_captain:Boolean(x.is_captain),
+    bench_order:x.bench_order===null||x.bench_order===undefined?null:Number(x.bench_order)
+  }))
 
   const currentSnapshot=(snapshots||[]).find(s=>Number(s.gameweek)===Number(run?.gameweek))
   if(currentSnapshot?.members?.length)initialState=currentSnapshot.members.map(x=>({player_id:Number(x.player_id),is_captain:Boolean(x.is_captain),bench_order:x.bench_order===null?null:Number(x.bench_order)}))
@@ -77,17 +73,8 @@ export default async function Squad({searchParams}){
   let recommendedBenchOrder=0
   const recommendedState=(recommended||[]).map(x=>({player_id:Number(x.player_id),is_captain:Boolean(x.is_captain),bench_order:x.squad_slot==='XI'?null:(++recommendedBenchOrder)}))
 
-  const snapshotIds=[...new Set((snapshots||[]).flatMap(s=>(Array.isArray(s.members)?s.members:[]).map(x=>Number(x.player_id))).filter(Boolean))]
-  let pointRows=[],positionRows=[]
-  if(snapshotIds.length){
-    const [pointsRes,positionsRes]=await Promise.all([
-      supabase.from('scout_player_weekly_points').select('player_id,gameweek,points,minutes,is_final').in('player_id',snapshotIds).eq('is_final',true),
-      supabase.from('scout_players').select('id,position,short_label,display_name,full_name').in('id',snapshotIds)
-    ])
-    if(pointsRes.error)reportServerError('squad:snapshotPoints',pointsRes.error)
-    if(positionsRes.error)reportServerError('squad:snapshotPlayers',positionsRes.error)
-    pointRows=pointsRes.data||[];positionRows=positionsRes.data||[]
-  }
+  const pointRows=Array.isArray(pageData?.points)?pageData.points:[]
+  const positionRows=Array.isArray(pageData?.players)?pageData.players:[]
   const pointMap=new Map(pointRows.map(x=>[key(x.gameweek,x.player_id),x]))
   const posMap=new Map(positionRows.map(x=>[Number(x.id),x.position]))
   const playerMap=new Map(positionRows.map(x=>[Number(x.id),x]))
