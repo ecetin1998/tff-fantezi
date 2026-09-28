@@ -43,6 +43,14 @@ assert.equal(
   'The removed stale-data banner component must not be reintroduced accidentally.'
 )
 
+const roleLabels=read('lib/playerRole.js')
+for(const label of ['Kanat Bek','Ön Libero','Merkez Orta Saha','Ofansif Orta Saha','Kenar Orta Saha','İkinci Forvet']){
+  assert.match(roleLabels,new RegExp(label),'Detailed roles must use canonical title-case Turkish labels.')
+}
+assert.match(roleLabels,/L:'Sol'/)
+assert.match(roleLabels,/R:'Sağ'/)
+assert.doesNotMatch(roleLabels,/toLocaleLowerCase/,'Role labels must not be lower-cased ad hoc.')
+
 const playersTable=read('components/PlayersTable.js')
 assert.doesNotMatch(playersTable,/confidenceLabel/,'Player list must not show low/medium/high confidence labels.')
 assert.doesNotMatch(playersTable,/>\{confidenceLabel\(p\.projection\)\} güven</,'Player cards must stay free of confidence text.')
