@@ -39,4 +39,8 @@ assert.equal(
   'The removed stale-data banner component must not be reintroduced accidentally.'
 )
 
+const playersTable=read('components/PlayersTable.js')
+assert.doesNotMatch(playersTable,/confidenceLabel/,'Player list must not show low/medium/high confidence labels.')
+assert.doesNotMatch(playersTable,/>\{confidenceLabel\(p\.projection\)\} güven</,'Player cards must stay free of confidence text.')
+
 console.log('player presentation contract passed')
