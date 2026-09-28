@@ -1,0 +1,48 @@
+const fs=require('node:fs')
+const assert=require('node:assert/strict')
+
+const read=file=>fs.readFileSync(file,'utf8')
+const data=read('lib/data.js')
+const availability=read('lib/availability.js')
+const loginPage=read('app/login/page.js')
+const loginForm=read('components/LoginForm.js')
+const squadPage=read('app/squad/page.js')
+const builder=read('components/SquadBuilder.js')
+const migration=read('supabase/migrations/20260928193000_deadline_and_squad_page_perf.sql')
+const navAccount=read('components/NavAccountControls.js')
+const appNav=read('components/AppNavLinks.js')
+
+assert.match(data,/const PLAYER_LIST_COLUMNS=/)
+assert.match(data,/select\(PLAYER_LIST_COLUMNS\)/,'Player analysis must avoid selecting the entire public player card view.')
+assert.doesNotMatch(data,/v_current_player_cards'\)\.select\('\*'\)[\s\S]{0,300}_loadPlayersForRun/)
+assert.match(data,/players-for-current-run-v2/)
+assert.match(data,/revalidate:300/)
+assert.match(data,/current-run-v2/)
+assert.match(data,/revalidate:20/)
+
+assert.match(loginPage,/dynamic='force-static'/)
+assert.match(loginPage,/Suspense/)
+assert.match(loginForm,/useSearchParams/)
+assert.doesNotMatch(loginPage,/await searchParams/)
+
+assert.match(navAccount,/auth\.getSession\(\)/)
+assert.match(appNav,/auth\.getSession\(\)/)
+assert.doesNotMatch(navAccount,/auth\.getUser\(\)/)
+assert.doesNotMatch(appNav,/auth\.getUser\(\)/)
+
+assert.match(squadPage,/scout_my_squad_page/)
+assert.doesNotMatch(squadPage,/scout_user_squad_members'\)\.select/)
+assert.match(migration,/create or replace function public\.scout_my_squad_page/)
+assert.match(migration,/min\(kickoff_at\)-interval '1 hour'/)
+assert.match(migration,/scout_match_history_deadline_sync/)
+assert.match(migration,/where public\.scout_gameweeks\.locked_at is null/)
+
+assert.match(builder,/İlk maçtan 1 saat önce/)
+assert.match(builder,/formatDeadline/)
+assert.match(availability,/split\(\/\\s\*\(\?:\\\||•\)\\s\*Rechecked\\b\/i\)/)
+assert.doesNotMatch(availability,/return \[reason,'Rechecked/)
+
+assert.equal(fs.existsSync('app/players/loading.js'),true)
+assert.equal(fs.existsSync('app/squad/loading.js'),true)
+
+console.log('performance/deadline/readability contract passed')
