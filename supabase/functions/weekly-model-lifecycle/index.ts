@@ -96,6 +96,24 @@ function normalizedWeights(length:number){
   const total=raw.reduce((a,b)=>a+b,0)||1
   return raw.map(x=>x/total)
 }
+async function linkLifecycle(sb:any,current:any,target:number,runId:string,benchmark:string,key:string,status:any){
+  const now=new Date().toISOString()
+  const q=await sb.from("scout_weekly_lifecycle").upsert({
+    target_gameweek:target,
+    source_gameweek:Number(current.gameweek),
+    source_run_id:current.id,
+    candidate_run_id:runId,
+    benchmark_version:benchmark,
+    execution_key:key,
+    stage:"prepared",
+    status:"running",
+    details:{source_revision:sourceRevision(status.latest_source_at),latest_source_at:status.latest_source_at},
+    started_at:now,
+    updated_at:now,
+    last_error:null,
+  },{onConflict:"target_gameweek"})
+  if(q.error)throw q.error
+}
 
 async function sourceStatus(sb:any,current:any){
   const gw=Number(current.gameweek),target=gw+1
@@ -154,7 +172,10 @@ async function prepare(sb:any,current:any,status:any){
     const meta=await sb.from("scout_replay_input_meta").select("benchmark_version").eq("gameweek",target)
       .ilike("source_note","%"+key+"%").order("created_at",{ascending:false}).limit(1).maybeSingle()
     if(meta.error)throw meta.error
-    if(meta.data)return {reused:true,run_id:existing.data.id,gameweek:target,benchmark:meta.data.benchmark_version}
+    if(meta.data){
+      await linkLifecycle(sb,current,target,existing.data.id,String(meta.data.benchmark_version),key,status)
+      return {reused:true,run_id:existing.data.id,gameweek:target,benchmark:meta.data.benchmark_version}
+    }
   }
 
   let runId=existing.data?.id
@@ -323,6 +344,7 @@ async function prepare(sb:any,current:any,status:any){
     const ins=await sb.from(table).insert(rows)
     if(ins.error)throw new Error(table+": "+ins.error.message)
   }
+  await linkLifecycle(sb,current,target,runId,benchmark,key,status)
   return {reused:false,run_id:runId,gameweek:target,benchmark,players:inputRows.length,matches:matchInputs.length,key}
 }
 
