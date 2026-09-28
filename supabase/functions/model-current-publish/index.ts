@@ -39,6 +39,35 @@ Deno.serve(async(req:Request)=>{
   try{
     if(!(await authorized(req)))return Response.json({error:"unauthorized"},{status:401})
     const body=await req.json()
+    const sb=createClient(Deno.env.get("SUPABASE_URL")!,Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!)
+
+    if(body.action==="record_gates"){
+      const target=String(body.run_id||"")
+      if(!target)throw new Error("run_id required")
+      const [qa,dataQa,av]=await Promise.all([
+        sb.rpc("scout_run_qa",{p_run_id:target}),
+        sb.rpc("scout_data_integrity_qa",{p_run_id:target}),
+        sb.from("scout_availability").select("checked_at").eq("run_id",target).order("checked_at",{ascending:false}).limit(1).maybeSingle()
+      ])
+      if(qa.error)throw qa.error
+      if(dataQa.error)throw dataQa.error
+      if(av.error)throw av.error
+      const checked=av.data?.checked_at?new Date(av.data.checked_at).getTime():0
+      const availabilityFresh=checked>0&&(Date.now()-checked)<=24*3600*1000
+      const replayPass=body.replay?.pass===true
+      const row={
+        run_id:target,qa_pass:Boolean(qa.data?.pass),data_integrity_pass:Boolean(dataQa.data?.pass),
+        backtest_pass:replayPass,availability_freshness:availabilityFresh,
+        checked_by:"github-actions/live-candidate",
+        details:{model_qa:qa.data,data_integrity:dataQa.data,replay:body.replay||null},
+        checked_at:new Date().toISOString()
+      }
+      const gate=await sb.from("scout_run_release_gates").upsert(row,{onConflict:"run_id"})
+      if(gate.error)throw gate.error
+      const pass=row.qa_pass&&row.data_integrity_pass&&row.backtest_pass&&row.availability_freshness
+      return Response.json({ok:pass,pass,run_id:target,gate:row},{status:pass?200:409})
+    }
+
     const meta=body.meta||{},inputs=body.inputs||{}
     const projections=Array.isArray(body.projections)?body.projections:[]
     const roleSignals=Array.isArray(body.role_signals)?body.role_signals:[]
@@ -49,7 +78,6 @@ Deno.serve(async(req:Request)=>{
     if(!Array.isArray(inputs.players)||inputs.players.length!==449)throw new Error("449-player input snapshot required")
     if(!Array.isArray(inputs.matches)||inputs.matches.length!==9)throw new Error("9-match input snapshot required")
 
-    const sb=createClient(Deno.env.get("SUPABASE_URL")!,Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!)
     const sourceRunId=String(meta.source_run_id||"")
     const source=await sb.from("scout_model_runs").select("*").eq("id",sourceRunId).single()
     if(source.error)throw source.error
