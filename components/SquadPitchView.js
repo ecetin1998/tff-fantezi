@@ -25,7 +25,6 @@ export default function SquadPitchView({
   const bench=members.filter(m=>m.squad_slot!=='XI').sort((a,b)=>Number(a.sort_order||0)-Number(b.sort_order||0))
   const groups=['GK','DEF','MID','FWD']
   const formation=`${xi.filter(m=>m.player?.position==='DEF').length}-${xi.filter(m=>m.player?.position==='MID').length}-${xi.filter(m=>m.player?.position==='FWD').length}`
-  const ceilingCaptain=xi.reduce((best,m)=>Number(m.p90||0)>Number(best?.p90||-Infinity)?m:best,null)
 
   return <section className={`readonly-squad-view ${compact?'compact':''} ${variant}`}>
     <div className="readonly-squad-head">
@@ -40,7 +39,7 @@ export default function SquadPitchView({
       </div>
       <span className="formation-summary-pill"><small>Taktik</small><b>{formation}</b></span>
     </div>
-    {variant==='recommended'&&ceilingCaptain?<div className="ceiling-captain-note">Alternatif (tavan) kaptan: <b>{playerLabel(ceilingCaptain.player)}</b> • P90 {Number(ceilingCaptain.p90||0).toFixed(1)}</div>:null}
+
 
     <div className={`my-squad-pitch readonly-squad-pitch ${compact?'compact':''}`}>
       <div className="pitch-mark center-line"/>
