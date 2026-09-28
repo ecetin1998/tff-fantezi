@@ -52,6 +52,8 @@ assert.match(sim,/searchParams\.get\("benchmark"\)/)
 assert.match(sim,/mins\[i\]>60\?SCORING\.appearance_60:0/,'Official appearance rule is strictly >60 minutes.')
 assert.match(sim,/mins\[i\]>=60&&score/,'Official clean-sheet minimum remains >=60 minutes.')
 assert.match(sim,/scout_finalize_simulation_run/)
+assert.match(sim,/scout_game_rules/)
+assert.doesNotMatch(sim,/const SCORING=\{/,'Weekly simulator must read scoring from canonical rules.')
 assert.match(sim,/minDraws<50000/)
 assert.doesNotMatch(sim,/live-mh7|GAMEWEEK=7|expected 449/)
 
