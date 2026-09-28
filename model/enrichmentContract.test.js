@@ -70,6 +70,7 @@ for(const field of [
 ])assert.match(teamAdvancedSchema,new RegExp(field))
 assert.match(teamAdvancedSchema,/invalid_attack_share/)
 assert.match(teamAdvancedSchema,/invalid_conceded_share/)
+assert.match(teamAdvancedSchema,/\nfrom p;\n\$qa\$;/,'team profile QA must aggregate from its CTE')
 
 const teamAdvancedFill=fs.readFileSync('supabase/migrations/20260928112000_fill_fresh_team_advanced_profiles.sql','utf8')
 assert.match(teamAdvancedFill,/fresh_sheet_sahadan_gw1_5_2026-09-25/)
