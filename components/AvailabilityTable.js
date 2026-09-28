@@ -6,13 +6,6 @@ import {playerLabel} from '@/lib/playerPresentation'
 
 const posLabel=p=>({GK:'KL',DEF:'DEF',MID:'OS',FWD:'FOR'}[p]||p||'—')
 
-const formatCheck=(value)=>{
-  if(!value)return '—'
-  const parts=new Intl.DateTimeFormat('en-GB',{timeZone:'Europe/Istanbul',day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit',hour12:false}).formatToParts(new Date(value))
-  const get=t=>parts.find(x=>x.type===t)?.value||''
-  return `${get('day')}/${get('month')}/${get('year')} ${get('hour')}:${get('minute')}`
-}
-
 const formatDateOnly=value=>{
   if(!value)return '—'
   const d=new Date(value+'T12:00:00Z')
@@ -66,7 +59,7 @@ export default function AvailabilityTable({ rows }){
     <div className="card table-wrap availability-table-wrap"><table className="availability-table-v2">
       <thead><tr>
         <th>#</th><th>Oyuncu</th><th>Takım</th><th>Mevki</th><th>Durum</th><th>Oynama %</th>
-        <th>Not</th><th>Başlangıç</th><th>Dönüş / ceza maçı</th><th>Kontrol</th>
+        <th>Not</th><th>Başlangıç</th><th>Dönüş / ceza maçı</th>
       </tr></thead>
       <tbody>{filtered.map((r,i)=>{
         const note=availabilityCompactNote(r)
@@ -77,10 +70,9 @@ export default function AvailabilityTable({ rows }){
           <td><span className={`pos ${r.player?.position}`}>{posLabel(r.player?.position)}</span></td>
           <td><span className={`status-chip ${r.availability_type||''}`}>{availabilityStatusLabel(r)}</span></td>
           <td>{(Number(r.availability_probability??1)*100).toFixed(0)}%</td>
-          <td className="availability-note-cell"><b>{availabilityReason(r)||'—'}</b></td>
+          <td className="availability-note-cell"><b>{note||availabilityReason(r)||'—'}</b></td>
           <td>{formatDateOnly(r.injury_date)}</td>
           <td className="availability-return-cell">{r.suspension_fixture||availabilityExpectedReturn(r.expected_return_date)||'—'}</td>
-          <td>{formatCheck(r.checked_at)}</td>
         </tr>
       })}</tbody>
     </table></div>
@@ -98,7 +90,7 @@ export default function AvailabilityTable({ rows }){
           <div className="availability-mobile-meta">
             <span><small>Oynama</small><b>{(Number(r.availability_probability??1)*100).toFixed(0)}%</b></span>
             <span><small>Başlangıç</small><b>{formatDateOnly(r.injury_date)}</b></span>
-            <span><small>Kontrol</small><b>{formatCheck(r.checked_at)}</b></span>
+            <span><small>Dönüş / ceza</small><b>{r.suspension_fixture||availabilityExpectedReturn(r.expected_return_date)||'—'}</b></span>
           </div>
         </Link>
       })}
