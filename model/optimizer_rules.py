@@ -11,6 +11,9 @@ BUDGET=float(RULES['budget'])
 SQUAD_LIMITS={k:int(v) for k,v in RULES['squad'].items()}
 MAX_PER_CLUB=int(RULES['max_per_club'])
 CAPTAIN_LAMBDA=0.18
+AGGRESSIVE_XFP_FLOOR=0.965
+AGGRESSIVE_MIN_OVERLAP=7
+AGGRESSIVE_MAX_OVERLAP=9
 
 def formation_counts(value):
     d,m,f=(int(x) for x in value.split('-'))
@@ -22,21 +25,42 @@ XI_BOUNDS={
     for pos in ('GK','DEF','MID','FWD')
 }
 
-def lineup_metric(player, alternative=False):
+def metric_scale(players):
+    top25=[float(p.get('top25_score',0) or 0) for p in players]
+    return {
+        'max_xfp':max([float(p.get('xfp',0) or 0) for p in players] or [1.0]) or 1.0,
+        'max_p90':max([float(p.get('p90',0) or 0) for p in players] or [1.0]) or 1.0,
+        'min_top25':min(top25 or [0.0]),
+        'max_top25':max(top25 or [1.0]),
+    }
+
+def _top25_norm(player,scale):
+    span=max(1e-9,float(scale['max_top25'])-float(scale['min_top25']))
+    value=(float(player.get('top25_score',0) or 0)-float(scale['min_top25']))/span
+    return max(0.0,min(1.0,value))
+
+def aggressive_metric(player,scale,captain=False):
+    xfp=max(0.0,float(player.get('xfp',0) or 0))/float(scale['max_xfp'])
+    p90=max(0.0,float(player.get('p90',0) or 0))/float(scale['max_p90'])
+    six=max(0.0,min(1.0,float(player.get('six_plus_probability',0) or 0)))
+    top25=_top25_norm(player,scale)
+    if captain:
+        return .30*xfp+.45*p90+.15*six+.10*top25
+    return .60*xfp+.20*p90+.10*six+.10*top25
+
+def lineup_metric(player, alternative=False, scale=None):
     xfp=float(player['xfp'])
     if not alternative:
         return xfp
-    p90=float(player.get('p90',xfp))
-    return xfp+CAPTAIN_LAMBDA*max(0.0,p90-xfp)
+    return aggressive_metric(player,scale or metric_scale([player]),False)
 
-def captain_metric(player, alternative=False):
+def captain_metric(player, alternative=False, scale=None):
     if player.get('position')=='GK':
         return -1e9
     xfp=float(player['xfp'])
     if not alternative:
         return xfp
-    p90=float(player.get('p90',xfp))
-    return xfp+CAPTAIN_LAMBDA*max(0.0,p90-xfp)
+    return aggressive_metric(player,scale or metric_scale([player]),True)
 
 def cheap_bench_tiebreak(player):
     return float(player['price']) * 1e-4
