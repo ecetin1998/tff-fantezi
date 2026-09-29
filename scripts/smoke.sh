@@ -141,7 +141,7 @@ if [[ "${SKIP_CDN_CHECK:-0}" == "1" ]]; then
   echo "SKIP CDN cache header check"
 else
   curl_retry -sS -D "$TMP_DIR/cache.headers" -o /dev/null "$BASE_URL/api/scout-data?section=summary"
-  grep -Eiq '^cache-control:.*s-maxage=300' "$TMP_DIR/cache.headers" || {
+  grep -Eiq '^cache-control:.*s-maxage=60' "$TMP_DIR/cache.headers" || {
     cat "$TMP_DIR/cache.headers" >&2
     fail "summary response is missing shared-cache policy"
   }
