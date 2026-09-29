@@ -403,6 +403,8 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
   const hoursUntilDeadline=Math.max(0,(deadline-now)/36e5)
   const minInterval=hoursUntilDeadline<=12?2:hoursUntilDeadline<=48?6:24
   const generatedAge=ageHours(current.generated_at)
+  const codeSha=String(body.code_sha||"").trim()||null
+  const configVersion=goalConfigQ.data?.version||null
   const sourceAdvanced=!current.source_updated_at||new Date(latestSourceAt).getTime()>new Date(current.source_updated_at).getTime()+60_000
   const configChanged=Boolean(configVersion)&&String(current.config_version||"")!==String(configVersion)
   const codeChanged=Boolean(codeSha)&&String(current.code_sha||"")!==String(codeSha)
@@ -427,8 +429,19 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
 
   const revision=sourceRevision(latestSourceAt)
   const benchmark=`intraday-mh${gw}-${revision}-${String(current.id).slice(0,8)}`
-  const codeSha=String(body.code_sha||"").trim()||null
-  const configVersion=goalConfigQ.data?.version||null
+  const existing=await sb.from("scout_model_runs")
+    .select("id,status,input_snapshot_hash")
+    .eq("gameweek",gw).eq("is_current",false)
+    .ilike("notes","%"+benchmark+"%")
+    .order("generated_at",{ascending:false}).limit(1).maybeSingle()
+  if(existing.error)throw existing.error
+  if(existing.data){
+    return {
+      refresh_required:true,reused:true,run_id:existing.data.id,parent_run_id:current.id,gameweek:gw,benchmark,
+      latest_source_at:latestSourceAt,deadline_at:new Date(deadline).toISOString(),
+      min_interval_hours:minInterval,input_snapshot_hash:existing.data.input_snapshot_hash||null
+    }
+  }
   const avMap=new Map((availabilityQ.data||[]).map((x:any)=>[Number(x.player_id),x]))
   const roleMap=new Map((rolesQ.data||[]).map((x:any)=>[Number(x.player_id),x]))
   const projectionMap=new Map((currentProjectionQ.data||[]).map((x:any)=>[Number(x.player_id),x]))
@@ -456,7 +469,7 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
   const runInsert=await sb.from("scout_model_runs").insert({
     id:runId,gameweek:gw,model_version:current.model_version,generated_at:new Date().toISOString(),
     source_updated_at:latestSourceAt,source_cutoff:latestSourceAt,simulation_count:0,status:"building",is_current:false,
-    notes:`intraday pre-kickoff refresh • parent ${current.id} • source ${latestSourceAt}`,
+    notes:`intraday pre-kickoff refresh • ${benchmark} • parent ${current.id} • source ${latestSourceAt}`,
     code_sha:codeSha,config_version:configVersion
   })
   if(runInsert.error)throw runInsert.error
