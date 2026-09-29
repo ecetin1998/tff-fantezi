@@ -88,6 +88,6 @@ assert.doesNotMatch(optimizer,/overlap:\{max:8\}|recommendedXI\.has/,'Ceiling XI
 assert.doesNotMatch(optimizer,/budgetPenaltyPerM|spendReward|benchValue|\.08\*playProbability/)
 assert.match(optimizer,/score:base,/)
 assert.match(optimizer,/score:-cheapBench/)
-assert.match(optimizer,/\["workflow_dispatch","schedule"\]/,'Scheduled lifecycle must be allowed to call optimizer.')
+assert.match(optimizer,/\["workflow_dispatch","schedule","push"\]/,'Scheduled and protected main-push lifecycle must be allowed to call optimizer.')
 
 console.log('full audit contract passed')
