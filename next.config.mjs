@@ -18,11 +18,53 @@ const securityHeaders=[
   ].join('; ')}
 ]
 
+const publicEdgeCacheHeaders=[
+  {key:'Cloudflare-CDN-Cache-Control',value:'public, max-age=300, stale-while-revalidate=600'}
+]
+const privateEdgeCacheHeaders=[
+  {key:'Cloudflare-CDN-Cache-Control',value:'private, no-store'}
+]
+
+const publicEdgeRoutes=[
+  '/',
+  '/players',
+  '/players/:path*',
+  '/matches',
+  '/squads',
+  '/teams',
+  '/teams/:path*',
+  '/points',
+  '/roles',
+  '/roles/:path*',
+  '/availability',
+  '/backtest',
+  '/sss',
+]
+const privateEdgeRoutes=[
+  '/squad',
+  '/squad/:path*',
+  '/pricing',
+  '/pricing/:path*',
+  '/login',
+  '/login/:path*',
+  '/reset-password',
+  '/reset-password/:path*',
+  '/confirm-email',
+  '/confirm-email/:path*',
+  '/auth/:path*',
+  '/api/health',
+  '/api/scout-data/summary',
+]
+
 const nextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
   async headers(){
-    return [{source:'/:path*',headers:securityHeaders}]
+    return [
+      {source:'/:path*',headers:securityHeaders},
+      ...publicEdgeRoutes.map(source=>({source,headers:publicEdgeCacheHeaders})),
+      ...privateEdgeRoutes.map(source=>({source,headers:privateEdgeCacheHeaders})),
+    ]
   }
 }
 export default nextConfig

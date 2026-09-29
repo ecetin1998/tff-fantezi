@@ -11,6 +11,9 @@
     "directory": ".open-next/assets",
     "binding": "ASSETS"
   },
+  "cache": {
+    "enabled": true
+  },
   "services": [
     {
       "binding": "WORKER_SELF_REFERENCE",

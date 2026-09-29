@@ -113,9 +113,9 @@ assert.doesNotMatch(playersTable,/initialSearchParams/,'Player list must receive
 assert.doesNotMatch(playersTable,/urlReady/)
 assert.match(playersTable,/router\.replace/)
 const playerDetailRoute=read('app/players/[id]/page.js')
-assert.match(playerDetailRoute,/dynamic='force-dynamic'/,'Player detail must bypass the broken Cloudflare static-param fallback.')
+assert.match(playerDetailRoute,/dynamic='force-static'/,'Player detail should use on-demand ISR to avoid per-request Worker SSR.')
 assert.match(playerDetailRoute,/if\(!data\) notFound\(\)/,'Unknown player ids must still resolve through notFound().')
-assert.doesNotMatch(playerDetailRoute,/generateStaticParams/,'Cloudflare should render player detail ids on demand.')
+assert.match(playerDetailRoute,/generateStaticParams\(\)\{ return \[\] \}/,'Player detail ids should be generated on demand and cached.')
 
 assert.match(data,/unstable_cache\(_getTeamDetail/)
 assert.match(data,/currentMatches:fixtures/)
