@@ -2281,3 +2281,337 @@
     font-size:7.8px !important;
   }
 }
+
+/* ===== Team analysis explorer 2026-09-29 ===== */
+.scope :global(.team-analysis-title){
+  align-items:center;
+}
+.scope :global(.team-analysis-title) h1{
+  margin-bottom:6px;
+}
+.scope :global(.team-analysis-title) p{
+  margin:0;
+  font-size:12px;
+  line-height:1.45;
+}
+.scope :global(.team-analysis-count){
+  flex:0 0 auto;
+  padding:9px 12px;
+  border:1px solid #dbe2ec;
+  border-radius:999px;
+  background:#f7f9fc;
+  color:#53617a;
+  font-size:11px;
+  font-weight:900;
+}
+.scope :global(.team-analysis-legend){
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:8px;
+  margin:-7px 0 14px;
+}
+.scope :global(.team-analysis-legend)>span{
+  min-height:52px;
+  padding:10px 12px;
+  border:1px solid #e0e6ef;
+  border-radius:12px;
+  background:#fafbfd;
+  color:#748097;
+  font-size:9px;
+  line-height:1.4;
+}
+.scope :global(.team-analysis-legend)>span b{
+  display:block;
+  margin-bottom:2px;
+  color:#2c3854;
+  font-size:10px;
+}
+.scope :global(.team-analysis-filters){
+  display:grid;
+  grid-template-columns:minmax(250px,1.6fr) repeat(3,minmax(150px,.7fr));
+  gap:8px;
+  margin-bottom:10px;
+}
+.scope :global(.team-analysis-filters) input,
+.scope :global(.team-analysis-filters) select{
+  width:100%;
+  min-width:0;
+  min-height:42px;
+}
+.scope :global(.team-analysis-card-list){
+  display:none;
+}
+.scope :global(.desktop-team-analysis-table){
+  overflow:auto;
+}
+.scope :global(.desktop-team-analysis-table) table{
+  min-width:1260px;
+}
+.scope :global(.desktop-team-analysis-table) th{
+  white-space:nowrap;
+}
+.scope :global(.team-analysis-row) td{
+  vertical-align:middle;
+}
+.scope :global(.team-analysis-name){
+  min-width:170px;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  color:#25314e;
+  text-decoration:none;
+}
+.scope :global(.team-analysis-name) b{
+  font-size:12px;
+  line-height:1.2;
+}
+.scope :global(.team-mini-shirt){
+  width:34px;
+  height:38px;
+  flex:0 0 34px;
+  position:relative;
+  display:grid;
+  place-items:center;
+  border:1.5px solid rgba(255,255,255,.95);
+  border-radius:8px 8px 10px 10px;
+  background:repeating-linear-gradient(
+    90deg,
+    var(--club1,#6674A8) 0 9px,
+    var(--club2,#DDE3F4) 9px 18px
+  );
+  box-shadow:
+    inset 0 -7px rgba(0,0,0,.07),
+    0 4px 10px color-mix(in srgb,var(--club1,#6674A8) 14%,transparent),
+    0 0 0 1px color-mix(in srgb,var(--club1,#6674A8) 16%,#e3e8f0);
+}
+.scope :global(.team-mini-shirt):before,
+.scope :global(.team-mini-shirt):after{
+  content:"";
+  position:absolute;
+  top:5px;
+  width:9px;
+  height:15px;
+  border:1.5px solid rgba(255,255,255,.86);
+  border-radius:5px;
+  background:inherit;
+  z-index:-1;
+}
+.scope :global(.team-mini-shirt):before{left:-6px;transform:rotate(22deg)}
+.scope :global(.team-mini-shirt):after{right:-6px;transform:rotate(-22deg)}
+.scope :global(.team-mini-shirt) i{
+  position:absolute;
+  top:3px;
+  left:50%;
+  width:10px;
+  height:5px;
+  transform:translateX(-50%);
+  border-radius:0 0 8px 8px;
+  background:rgba(255,255,255,.9);
+}
+.scope :global(.team-analysis-opponents){
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+}
+.scope :global(.team-analysis-opponents) a{
+  color:#34415d;
+  font-size:11px;
+  font-weight:800;
+  text-decoration:none;
+}
+.scope :global(.venue-mini){
+  display:block;
+  width:max-content;
+  margin:2px 0;
+  padding:4px 6px;
+  border-radius:999px;
+  background:#eef2f7;
+  color:#66738b;
+  font-size:8px;
+  font-weight:900;
+}
+.scope :global(.matchup-inline){
+  display:block;
+  margin-top:4px;
+  width:max-content;
+  font-size:7.5px;
+  font-weight:900;
+}
+.scope :global(.matchup-inline):global(.good){color:#1c7b5d}
+.scope :global(.matchup-inline):global(.neutral){color:#667085}
+.scope :global(.matchup-inline):global(.tough){color:#a23d4d}
+
+@media(max-width:900px){
+  .scope :global(.team-analysis-legend){
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+  .scope :global(.team-analysis-filters){
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+  .scope :global(.team-analysis-filters) input{
+    grid-column:1/-1;
+  }
+}
+@media(max-width:760px){
+  .scope :global(.team-analysis-title){
+    align-items:flex-start;
+  }
+  .scope :global(.team-analysis-title) h1{
+    font-size:30px;
+  }
+  .scope :global(.team-analysis-title) p{
+    font-size:11px;
+  }
+  .scope :global(.team-analysis-legend){
+    margin-top:-5px;
+    grid-template-columns:1fr 1fr;
+    gap:7px;
+  }
+  .scope :global(.team-analysis-legend)>span{
+    min-height:58px;
+    padding:9px 10px;
+  }
+  .scope :global(.team-analysis-filters){
+    grid-template-columns:1fr 1fr !important;
+    gap:7px;
+  }
+  .scope :global(.team-analysis-filters) input{
+    grid-column:1/-1;
+  }
+  .scope :global(.team-analysis-filters) select{
+    font-size:13px;
+  }
+  .scope :global(.desktop-team-analysis-table){
+    display:none;
+  }
+  .scope :global(.team-analysis-card-list){
+    display:grid;
+    grid-template-columns:1fr;
+    gap:10px;
+  }
+  .scope :global(.team-analysis-mobile-card){
+    display:block;
+    padding:15px;
+    color:inherit;
+    text-decoration:none;
+    border-top:3px solid var(--club1);
+  }
+  .scope :global(.team-analysis-mobile-head){
+    display:grid;
+    grid-template-columns:42px minmax(0,1fr) auto;
+    gap:11px;
+    align-items:center;
+  }
+  .scope :global(.team-analysis-mobile-head) :global(.team-mini-shirt){
+    width:38px;
+    height:42px;
+    flex-basis:38px;
+  }
+  .scope :global(.team-analysis-mobile-head)>div{
+    min-width:0;
+  }
+  .scope :global(.team-analysis-mobile-head)>div b{
+    display:block;
+    color:#24314e;
+    font-size:16px;
+    line-height:1.15;
+  }
+  .scope :global(.team-analysis-mobile-head)>div small{
+    display:block;
+    margin-top:3px;
+    color:#7d899e;
+    font-size:9px;
+    font-weight:800;
+  }
+  .scope :global(.team-analysis-mobile-head)>strong{
+    color:var(--clubText);
+    font-size:18px;
+    line-height:1;
+    text-align:right;
+  }
+  .scope :global(.team-analysis-mobile-head)>strong small{
+    display:block;
+    margin-top:3px;
+    color:#7d899e;
+    font-size:7px;
+    letter-spacing:.06em;
+  }
+  .scope :global(.team-analysis-fixtures){
+    display:grid;
+    gap:6px;
+    margin:12px 0;
+  }
+  .scope :global(.team-analysis-fixtures)>span{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    min-height:34px;
+    padding:7px 9px;
+    border:1px solid color-mix(in srgb,var(--club1) 12%,#e2e7ef);
+    border-radius:10px;
+    background:color-mix(in srgb,var(--club1) 4%,#fafbfd);
+  }
+  .scope :global(.team-analysis-fixtures) em{
+    padding:4px 6px;
+    border-radius:999px;
+    background:#edf1f6;
+    color:#6b7890;
+    font-size:8px;
+    font-style:normal;
+    font-weight:900;
+  }
+  .scope :global(.team-analysis-fixtures) b{
+    min-width:0;
+    color:#2c3854;
+    font-size:11px;
+  }
+  .scope :global(.team-analysis-mobile-metrics){
+    display:grid;
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:7px;
+  }
+  .scope :global(.team-analysis-mobile-metrics)>div{
+    min-height:68px;
+    padding:9px;
+    border:1px solid #e0e6ef;
+    border-radius:11px;
+    background:#f8fafc;
+  }
+  .scope :global(.team-analysis-mobile-metrics) span{
+    display:block;
+    color:#77839a;
+    font-size:8px;
+    line-height:1.2;
+    font-weight:800;
+  }
+  .scope :global(.team-analysis-mobile-metrics) b{
+    display:block;
+    margin-top:7px;
+    color:#24314d;
+    font-size:15px;
+    line-height:1;
+  }
+  .scope :global(.team-analysis-matchup-line){
+    display:flex;
+    flex-wrap:wrap;
+    gap:6px;
+    margin-top:10px;
+  }
+  .scope :global(.team-analysis-matchup-line) :global(.matchup-pill){
+    font-size:8.5px;
+  }
+}
+@media(max-width:430px){
+  .scope :global(.team-analysis-legend){
+    grid-template-columns:1fr;
+  }
+  .scope :global(.team-analysis-filters){
+    grid-template-columns:1fr !important;
+  }
+  .scope :global(.team-analysis-filters) input{
+    grid-column:auto;
+  }
+  .scope :global(.team-analysis-mobile-metrics){
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+}
