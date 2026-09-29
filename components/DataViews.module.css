@@ -2250,3 +2250,34 @@
     font-size:11.5px !important;
   }
 }
+
+/* ===== Match cards • semantic matchup colors 2026-09-29 ===== */
+.scope :global(.match-analysis-card) :global(.matchup-pill):global(.good){
+  color:#176b52 !important;
+  border-color:#a8dec5 !important;
+  background:#e7f7ef !important;
+}
+.scope :global(.match-analysis-card) :global(.matchup-pill):global(.tough){
+  color:#983244 !important;
+  border-color:#dca8b2 !important;
+  background:#f7e8ec !important;
+}
+.scope :global(.match-analysis-card) :global(.matchup-pill):global(.neutral){
+  color:#4f5b6d !important;
+  border-color:#cfd6e0 !important;
+  background:#eef1f5 !important;
+}
+.scope :global(.match-analysis-card) :global(.outcome-bar-labeled)>i:global(.draw)>span>strong{
+  font-size:10px !important;
+  letter-spacing:-.025em;
+}
+@media(max-width:760px){
+  .scope :global(.match-analysis-card) :global(.outcome-bar-labeled)>i:global(.draw)>span>strong{
+    font-size:8.5px !important;
+  }
+}
+@media(max-width:430px){
+  .scope :global(.match-analysis-card) :global(.outcome-bar-labeled)>i:global(.draw)>span>strong{
+    font-size:7.8px !important;
+  }
+}

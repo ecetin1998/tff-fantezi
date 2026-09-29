@@ -155,7 +155,7 @@ export default async function Matches(){
               <span><strong>Ev</strong><b>%{(home*100).toFixed(0)}</b></span>
             </i>
             <i className="draw" style={{width:(draw*100)+'%'}} title={`Beraberlik ${(draw*100).toFixed(0)}%`}>
-              <span><strong>Ber.</strong><b>%{(draw*100).toFixed(0)}</b></span>
+              <span><strong>Beraberlik</strong><b>%{(draw*100).toFixed(0)}</b></span>
             </i>
             <i className="away" style={{width:(away*100)+'%'}} title={`Dep ${(away*100).toFixed(0)}%`}>
               <span><strong>Dep</strong><b>%{(away*100).toFixed(0)}</b></span>
