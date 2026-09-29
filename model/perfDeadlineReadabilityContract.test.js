@@ -99,6 +99,9 @@ assert.match(weeklyPointsTable,/posLabel\(p\.position\)/,'Weekly points position
 assert.match(teamDetailPage,/rakibi/,'Single current opponent label must use correct Turkish wording.')
 assert.doesNotMatch(teamDetailPage,/rakip\{currentMatches/)
 assert.match(analysisCss,/Team detail • final polish authority 2026-09-29/)
+assert.match(analysisCss,/Mobile player hero \+ full probability labels 2026-09-29/)
+assert.match(analysisCss,/player-detail-hero\)\{[\s\S]*?min-height:0 !important/,'Mobile player hero must not retain dead vertical space.')
+assert.match(analysisCss,/player-hero-score\)\{[\s\S]*?min-height:88px/,'Mobile xFP score must render as a compact highlighted card.')
 assert.match(analysisCss,/team-roster-player-v3[\s\S]*grid-template-columns:minmax\(260px,1fr\) 236px !important/,'Team roster identity must not collapse under legacy grid styles.')
 
 console.log('performance/deadline/readability contract passed')

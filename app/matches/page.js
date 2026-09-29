@@ -151,14 +151,14 @@ export default async function Matches(){
           </div>
 
           <div className="outcome-bar outcome-bar-labeled" aria-label="Maç sonucu olasılıkları">
-            <i className="home" style={{width:(home*100)+'%'}} title={`Ev ${(home*100).toFixed(0)}%`}>
-              <span><strong>Ev</strong><b>%{(home*100).toFixed(0)}</b></span>
+            <i className="home" style={{width:(home*100)+'%'}} title={`Ev sahibi ${(home*100).toFixed(0)}%`}>
+              <span><strong>Ev sahibi</strong><b>%{(home*100).toFixed(0)}</b></span>
             </i>
             <i className="draw" style={{width:(draw*100)+'%'}} title={`Beraberlik ${(draw*100).toFixed(0)}%`}>
               <span><strong>Beraberlik</strong><b>%{(draw*100).toFixed(0)}</b></span>
             </i>
-            <i className="away" style={{width:(away*100)+'%'}} title={`Dep ${(away*100).toFixed(0)}%`}>
-              <span><strong>Dep</strong><b>%{(away*100).toFixed(0)}</b></span>
+            <i className="away" style={{width:(away*100)+'%'}} title={`Deplasman ${(away*100).toFixed(0)}%`}>
+              <span><strong>Deplasman</strong><b>%{(away*100).toFixed(0)}</b></span>
             </i>
           </div>
 
