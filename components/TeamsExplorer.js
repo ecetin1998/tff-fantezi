@@ -17,8 +17,7 @@ const sortOptions=[
   ['total_xfp','Takım toplam xFP'],
   ['season_xg_per_match','Sezon xG / maç'],
   ['season_xga_per_match','Sezon xGA / maç'],
-  ['xg_diff','Sezon xG farkı'],
-  ['possession','Topa sahip olma'],
+  ['oppXg','Bu hafta rakip xG'],
 ]
 const sortLabels=Object.fromEntries(sortOptions)
 
@@ -96,7 +95,7 @@ export default function TeamsExplorer({teams=[],gameweek}){
           </div>
           <div className="team-analysis-mobile-metrics">
             <div className={metricClass('xg')}><span>Bu hafta xG</span><b>{num(team.xg)}</b></div>
-            <div><span>Rakip xG</span><b>{num(team.oppXg)}</b></div>
+            <div className={metricClass('oppXg')}><span>Bu hafta rakip xG</span><b>{num(team.oppXg)}</b></div>
             <div className={metricClass('win')}><span>Galibiyet</span><b>{pct(team.win)}</b></div>
             <div className={metricClass('cs')}><span>CS</span><b>{pct(team.cs)}</b></div>
             <div className={metricClass('season_xg_per_match')}><span>Sezon xG/maç</span><b>{num(team.season_xg_per_match)}</b></div>
@@ -115,7 +114,7 @@ export default function TeamsExplorer({teams=[],gameweek}){
         <table>
           <thead><tr>
             <th>Takım</th><th>MH{gameweek||'—'} rakibi</th><th className={venue?'is-filtered-head':''}>E/D</th>
-            {head('xg','Bu hafta xG')}<th>Rakip xG</th>{head('win','Galibiyet')}{head('cs','CS')}
+            {head('xg','Bu hafta xG')}{head('oppXg','Bu hafta rakip xG')}{head('win','Galibiyet')}{head('cs','CS')}
             {head('total_xfp','Toplam xFP')}{head('season_xg_per_match','Sezon xG/maç')}{head('season_xga_per_match','xGA/maç')}
             {head('xg_diff','xG farkı')}{head('possession','Topa sahip olma')}
           </tr></thead>
@@ -124,7 +123,7 @@ export default function TeamsExplorer({teams=[],gameweek}){
             <td><div className="team-analysis-opponents">{(team.fixtures||[]).map((f,i)=><Link href={'/teams/'+f.opponent_id} key={i}>{f.opponent}</Link>)}</div></td>
             <td className={venue?'is-filtered-cell':''}>{(team.fixtures||[]).map((f,i)=><span className={'venue-mini'+(venue&&f.venue===venue?' is-selected-filter':'')} key={i}>{venueLabel(f.venue)}</span>)}</td>
             <td className={(cellClass('xg')+' '+(attack?'is-filtered-cell':'')).trim()}><b>{num(team.xg)}</b><small className={'matchup-inline '+team.attack_level+(attackSelected(team)?' is-selected-filter':'')}>{matchupLabel[team.attack_level]}</small></td>
-            <td>{num(team.oppXg)}</td><td className={cellClass('win')}>{pct(team.win)}</td><td className={cellClass('cs')}>{pct(team.cs)}</td>
+            <td className={cellClass('oppXg')}>{num(team.oppXg)}</td><td className={cellClass('win')}>{pct(team.win)}</td><td className={cellClass('cs')}>{pct(team.cs)}</td>
             <td className={cellClass('total_xfp')}><b>{num(team.total_xfp,1)}</b></td><td className={cellClass('season_xg_per_match')}>{num(team.season_xg_per_match)}</td><td className={cellClass('season_xga_per_match')}>{num(team.season_xga_per_match)}</td>
             <td className={cellClass('xg_diff')}>{num(team.xg_diff)}</td><td className={cellClass('possession')}>{num(team.possession,1)}%</td>
           </tr>)}</tbody>
