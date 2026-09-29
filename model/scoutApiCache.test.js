@@ -24,6 +24,8 @@ const assert=require('node:assert/strict')
 
   const route=fs.readFileSync('app/api/scout-data/route.js','utf8')
   assert.match(route,/shouldUsePublicPayloadCache\(full\)/)
+  assert.match(route,/s-maxage=60, stale-while-revalidate=60/,'Public feed must not lag a promoted model for many minutes.')
+  assert.match(route,/\{revalidate:60\}/,'Server payload cache should refresh within one minute.')
   assert.match(route,/buildPayload\(requested,true\)/)
   assert.doesNotMatch(route,/buildCached\(requested,full\)/)
   assert.doesNotMatch(route,/export const revalidate=/)
