@@ -253,6 +253,7 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
     const p=map.get(id)
     if(!p||ids.includes(id)||ids.length>=SQUAD_SIZE)return
     if((counts[p.position]||0)>=SQUAD_LIMITS[p.position])return
+    if(MAX_PLAYERS_PER_CLUB&&(clubCounts[p.team_id]||0)>=MAX_PLAYERS_PER_CLUB)return
     if(cost+Number(p.price)>BUDGET+.0001)return
     const next=[...ids,id]
     setIds(next);rebuild(next)
@@ -446,10 +447,6 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
             })}
           </div>)}
         </div>
-        <div className="roster-stage-foot">
-          <span>Boş slota dokun → oyuncu havuzu o mevkiye filtrelenir.</span>
-          <b>{validRoster?'Kadro tamamlandı ✓':'Önce {SQUAD_SIZE} kişilik kadroyu tamamla'}</b>
-        </div>
       </section>
 
       <aside className="player-picker card" ref={pickerRef}>
@@ -483,8 +480,9 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
           {visibleCandidates.map(p=>{
             const chosen=ids.includes(p.id)
             const posFull=(counts[p.position]||0)>=SQUAD_LIMITS[p.position]
-            const overBudget=!chosen&&cost+Number(p.price)>100.0001
-            const disabled=!chosen&&(ids.length>=SQUAD_SIZE||posFull||overBudget)
+            const teamFull=MAX_PLAYERS_PER_CLUB&&(clubCounts[p.team_id]||0)>=MAX_PLAYERS_PER_CLUB
+            const overBudget=!chosen&&cost+Number(p.price)>BUDGET+.0001
+            const disabled=!chosen&&(ids.length>=SQUAD_SIZE||posFull||teamFull||overBudget)
             const availabilityNote=(availabilityIsIssue(p.availability)||p.availability?.availability_type==='return')
               ? availabilityCompactNote(p.availability)
               : ''
