@@ -2,10 +2,10 @@ const fs=require('node:fs')
 const assert=require('node:assert/strict')
 
 const config=JSON.parse(fs.readFileSync('vercel.json','utf8'))
-assert.deepEqual(
+assert.equal(
   config?.git?.deploymentEnabled,
-  {'*':false,main:true},
-  'Vercel Git deployments must be restricted to main only'
+  undefined,
+  'deploymentEnabled wildcard rules must not block main production deploys'
 )
 assert.match(
   String(config?.ignoreCommand||''),
@@ -19,4 +19,4 @@ for(const file of workflows){
   assert.doesNotMatch(content,/vercel\s+(deploy|build)|npx\s+vercel|VERCEL_TOKEN/i,file+' must not deploy to Vercel directly')
 }
 
-console.log('Vercel Git deployments enabled for main only')
+console.log('Vercel previews skipped while main production deploys remain enabled')
