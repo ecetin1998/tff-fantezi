@@ -164,10 +164,12 @@ async function prepare(sb:any,current:any,status:any,body:any={}){
   if(!status.ready_to_advance)throw new Error("SOURCE_NOT_READY")
   const target=Number(status.target_gameweek)
   const goalConfigQ=await sb.from("scout_goal_distribution_config")
-    .select("version").eq("active",true).order("created_at",{ascending:false}).limit(1).maybeSingle()
+    .select("version,alpha_used,gate_benchmark").eq("active",true).order("created_at",{ascending:false}).limit(1).maybeSingle()
   if(goalConfigQ.error)throw goalConfigQ.error
   const codeSha=String(body.code_sha||"").trim()||null
-  const configVersion=goalConfigQ.data?.version||null
+  const configVersion=goalConfigQ.data?.version
+    ?[goalConfigQ.data.version,goalConfigQ.data.alpha_used!=null?`alpha=${goalConfigQ.data.alpha_used}`:null,goalConfigQ.data.gate_benchmark||null].filter(Boolean).join('|')
+    :null
   const priorMetaQ=await sb.from("scout_replay_input_meta").select("*")
     .eq("gameweek",Number(current.gameweek)).order("created_at",{ascending:false}).limit(1).maybeSingle()
   if(priorMetaQ.error)throw priorMetaQ.error
@@ -388,7 +390,7 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
     sb.from("scout_replay_input_meta").select("*").eq("gameweek",gw).order("created_at",{ascending:false}).limit(1).maybeSingle(),
     sb.from("scout_availability").select("*").eq("run_id",current.id),
     sb.from("scout_role_signals").select("*").eq("run_id",current.id),
-    sb.from("scout_goal_distribution_config").select("version").eq("active",true).order("created_at",{ascending:false}).limit(1).maybeSingle(),
+    sb.from("scout_goal_distribution_config").select("version,alpha_used,gate_benchmark").eq("active",true).order("created_at",{ascending:false}).limit(1).maybeSingle(),
     sb.from("scout_players").select("updated_at").eq("active",true).order("updated_at",{ascending:false}).limit(1).maybeSingle(),
     sb.from("scout_player_projections").select("player_id,opponent_name,venue,confidence,data_confidence").eq("run_id",current.id)
   ])
