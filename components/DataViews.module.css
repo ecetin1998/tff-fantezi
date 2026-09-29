@@ -2913,3 +2913,152 @@
     min-width:60px !important;
   }
 }
+
+/* ===== Weekly mobile cards final polish 2026-09-30 ===== */
+@media(max-width:760px){
+  .scope :global(.weekly-card-list){
+    gap:14px !important;
+  }
+  .scope :global(.weekly-mobile-card){
+    padding:15px !important;
+    border-radius:18px !important;
+    border-color:#d8e1ec !important;
+    background:
+      linear-gradient(180deg,color-mix(in srgb,var(--club1) 3%,#fff) 0,#fff 88px) !important;
+    box-shadow:0 10px 28px rgba(34,48,77,.08) !important;
+  }
+  .scope :global(.weekly-mobile-head){
+    min-height:68px !important;
+    align-items:center !important;
+    padding-right:76px !important;
+  }
+  .scope :global(.mobile-card-badges){
+    align-self:start;
+    padding-top:2px;
+  }
+  .scope :global(.weekly-mobile-player-name) b{
+    color:#22304d !important;
+    font-size:15.5px !important;
+    line-height:1.16 !important;
+    font-weight:950 !important;
+    letter-spacing:-.015em;
+  }
+  .scope :global(.weekly-mobile-player-name) small{
+    margin-top:4px !important;
+    color:#7b879d !important;
+    font-size:10px !important;
+    font-weight:750;
+  }
+  .scope :global(.weekly-total-score){
+    top:13px !important;
+    right:13px !important;
+    min-width:66px !important;
+    padding:8px 8px 7px !important;
+    border-color:color-mix(in srgb,var(--club1) 24%,#dce3ec) !important;
+    border-radius:13px !important;
+    background:rgba(255,255,255,.94) !important;
+    box-shadow:0 8px 18px rgba(39,51,78,.08) !important;
+  }
+  .scope :global(.weekly-total-score) strong{
+    color:var(--clubText,#24314e) !important;
+    font-size:22px !important;
+    font-weight:950 !important;
+  }
+  .scope :global(.weekly-total-score) small{
+    color:#6f7c93 !important;
+    font-size:8.5px !important;
+    font-weight:900 !important;
+  }
+
+  .scope :global(.weekly-form-meta){
+    grid-template-columns:repeat(4,minmax(0,1fr)) !important;
+    gap:6px !important;
+    margin:12px 0 10px !important;
+  }
+  .scope :global(.weekly-form-meta)>span{
+    min-height:58px !important;
+    padding:8px 7px !important;
+    align-items:center !important;
+    text-align:center !important;
+    border-color:#e0e6ef !important;
+    background:#f7f9fc !important;
+  }
+  .scope :global(.weekly-form-meta)>span small{
+    color:#7b879d !important;
+    font-size:7.8px !important;
+    font-weight:850 !important;
+  }
+  .scope :global(.weekly-form-meta)>span b{
+    margin-top:6px !important;
+    color:#26324f !important;
+    font-size:13.5px !important;
+    font-weight:950 !important;
+  }
+  .scope :global(.weekly-form-meta) :global(.mobile-form-trend){
+    grid-column:1/-1 !important;
+    min-height:38px !important;
+    padding:7px 10px !important;
+    border-color:#cfe9e3 !important;
+    background:#edf8f5 !important;
+    border-radius:10px !important;
+  }
+  .scope :global(.weekly-form-meta) :global(.mobile-form-trend) small{
+    color:#5c746f !important;
+    font-size:8.5px !important;
+  }
+  .scope :global(.weekly-form-meta) :global(.mobile-form-trend) b{
+    color:#0b8e82 !important;
+    font-size:18px !important;
+  }
+
+  .scope :global(.week-scroll-head){
+    margin:10px 0 8px !important;
+    padding-top:10px !important;
+  }
+  .scope :global(.week-scroll-head) b{
+    color:#5a6680 !important;
+    font-size:9.5px !important;
+    font-weight:950 !important;
+    letter-spacing:.08em;
+  }
+  .scope :global(.week-scroll-head) span{
+    font-size:9px !important;
+  }
+  .scope :global(.week-chip-row):global(.scroll-snap-weeks){
+    gap:7px !important;
+    padding-bottom:1px;
+  }
+  .scope :global(.week-chip-row):global(.scroll-snap-weeks)>span{
+    min-width:57px !important;
+    min-height:64px !important;
+    border-radius:12px !important;
+    background:#fafbfd !important;
+  }
+  .scope :global(.week-chip-row):global(.scroll-snap-weeks)>span:global(.hot){
+    background:#e9f8f4 !important;
+    border-color:#9fd9ce !important;
+  }
+  .scope :global(.week-chip-row):global(.scroll-snap-weeks)>span small{
+    font-size:8.5px !important;
+    font-weight:850 !important;
+  }
+  .scope :global(.week-chip-row):global(.scroll-snap-weeks)>span b{
+    margin-top:6px !important;
+    font-size:16px !important;
+    font-weight:950 !important;
+  }
+}
+@media(max-width:430px){
+  .scope :global(.weekly-mobile-card){
+    padding:14px !important;
+  }
+  .scope :global(.weekly-mobile-head){
+    padding-right:70px !important;
+  }
+  .scope :global(.weekly-form-meta){
+    grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+  }
+  .scope :global(.weekly-form-meta) :global(.mobile-form-trend){
+    grid-column:1/-1 !important;
+  }
+}
