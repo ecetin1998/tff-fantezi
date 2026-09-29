@@ -32,7 +32,7 @@ async function verifyGithubOidc(token: string) {
     payload.repository_id !== GITHUB_REPOSITORY_ID ||
     payload.repository !== "ecetin1998/tff-fantezi" ||
     payload.ref !== "refs/heads/main" ||
-    payload.event_name !== "workflow_dispatch"
+    !["workflow_dispatch","schedule","push"].includes(String(payload.event_name||""))
   ) return false;
   const jwks = await fetch(GITHUB_JWKS_URL).then((r) => r.json());
   const jwk = (jwks.keys || []).find((k: any) => k.kid === header.kid);
@@ -83,7 +83,7 @@ function xiBounds(formations:string[]){
   return bounds;
 }
 
-function buildModel(rows:any[],variant:string,recommendedXI:Set<number>,rules:any){
+function buildModel(rows:any[],variant:string,rules:any){
   const budget=n(rules.budget);
   const squad=rules.squad||{};
   const formations=Array.isArray(rules.formations)?rules.formations:[];
@@ -93,8 +93,7 @@ function buildModel(rows:any[],variant:string,recommendedXI:Set<number>,rules:an
     budget:{max:budget},
     total:{equal:Object.values(squad).reduce((s:any,v:any)=>s+Number(v||0),0)},
     xiTotal:{equal:11},
-    capTotal:{equal:1},
-    ...(variant==="alternative"?{overlap:{max:8}}:{})
+    capTotal:{equal:1}
   };
   for(const pos of ["GK","DEF","MID","FWD"]){
     constraints["squad"+pos]={equal:Number(squad[pos]||0)};
@@ -126,10 +125,9 @@ function buildModel(rows:any[],variant:string,recommendedXI:Set<number>,rules:an
         ["xi"+pos+"Min"]:1,["xi"+pos+"Max"]:1
       };
       if(pos==="GK"||pos==="DEF")v["defstack_"+team]=1;
-      if(variant==="alternative"&&recommendedXI.has(id))v.overlap=1;
       variables["x_"+id]=v;ints["x_"+id]=1;
       if(pos!=="GK"){
-        const captainScore=xfp+captainLambda*Math.max(0,p90-xfp);
+        const captainScore=variant==="recommended"?xfp:xfp+captainLambda*Math.max(0,p90-xfp);
         variables["c_"+id]={score:captainScore,capTotal:1,["caplink_"+id]:1};
         ints["c_"+id]=1;
       }
@@ -143,8 +141,8 @@ function buildModel(rows:any[],variant:string,recommendedXI:Set<number>,rules:an
   return {optimize:"score",opType:"max",constraints,variables,ints};
 }
 
-function solve(rows:any[],variant:string,recommendedXI:Set<number>,rules:any){
-  const model=buildModel(rows,variant,recommendedXI,rules);
+function solve(rows:any[],variant:string,rules:any){
+  const model=buildModel(rows,variant,rules);
   const out:any=(solver as any).Solve(model);
   if(!out?.feasible)throw new Error("optimizer infeasible "+variant);
   const xi:number[]=[],bench:number[]=[];let captain=0;
@@ -203,15 +201,7 @@ Deno.serve(async(req:Request)=>{
       [...arr].sort((a,b)=>n(a.price)-n(b.price)||n(b.xfp)-n(a.xfp)).slice(0,30).forEach(x=>keep.add(Number(x.player_id)));
     }
     const pool=rows.filter((x:any)=>keep.has(Number(x.player_id)));
-    let recommendedXI=new Set<number>();
-    if(mode==="alternative"){
-      const rr=await sb.from("scout_squad_recommendations").select("id").eq("run_id",RUN).eq("variant","recommended").single();
-      if(rr.error)throw rr.error;
-      const mm=await sb.from("scout_squad_members").select("player_id,squad_slot").eq("recommendation_id",rr.data.id).eq("squad_slot","XI");
-      if(mm.error)throw mm.error;
-      recommendedXI=new Set((mm.data||[]).map((x:any)=>Number(x.player_id)));
-    }
-    const solved=solve(pool,mode,recommendedXI,rules);
+    const solved=solve(pool,mode,rules);
     const poolById=new Map(pool.map((x:any)=>[Number(x.player_id),x]));
     const refinedBench=optimizeBenchForAutosubs(
       solved.xi.map((pid:number)=>poolById.get(pid)).filter(Boolean),
@@ -242,7 +232,7 @@ Deno.serve(async(req:Request)=>{
       const autosubLabel=Number(sol.autosubEv||0).toFixed(2);
       const status=variant==="recommended"
         ? `OPTIMAL • availability-integrated • bütçe ≤${Number(rules.budget)}m • ${sims} sim • autosub EV +${autosubLabel}`
-        : `OPTIMAL • availability-integrated • Tavan 11 • P90 odaklı • bütçe ≤${Number(rules.budget)}m • ${sims} sim • autosub EV +${autosubLabel} • recommended ile en az 3 farklı`;
+        : `OPTIMAL • availability-integrated • Tavan 11 • P90 odaklı • bütçe ≤${Number(rules.budget)}m • ${sims} sim • autosub EV +${autosubLabel}`;
       recs.push({id,run_id:RUN,variant,budget,xi_xfp:xiXfp,captain_xfp:xiXfp+n(cap.xfp),formation,objective,status});
       const posOrder:any={GK:0,DEF:1,MID:2,FWD:3};
       const xis=[...sol.xi].sort((a:number,b:number)=>posOrder[byId.get(a).position]-posOrder[byId.get(b).position]||n(byId.get(b).xfp)-n(byId.get(a).xfp));

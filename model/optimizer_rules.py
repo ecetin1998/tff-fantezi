@@ -29,10 +29,12 @@ def lineup_metric(player, alternative=False):
     p90=float(player.get('p90',xfp))
     return xfp+CAPTAIN_LAMBDA*max(0.0,p90-xfp)
 
-def captain_metric(player):
+def captain_metric(player, alternative=False):
     if player.get('position')=='GK':
         return -1e9
     xfp=float(player['xfp'])
+    if not alternative:
+        return xfp
     p90=float(player.get('p90',xfp))
     return xfp+CAPTAIN_LAMBDA*max(0.0,p90-xfp)
 

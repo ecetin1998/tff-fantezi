@@ -1,6 +1,17 @@
 name: Weekly model lifecycle
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - "supabase/functions/run-live-sim-chunk/**"
+      - "supabase/functions/run-staging-optimizer/**"
+      - "supabase/functions/model-refresh-control/**"
+      - "supabase/functions/weekly-model-lifecycle/**"
+      - "model/optimizer_rules.py"
+      - "model/optimize_candidate.py"
+      - ".github/workflows/weekly-model-lifecycle.yml"
+      - "supabase/migrations/20260929*.sql"
   schedule:
     - cron: '17 * * * *'
   workflow_dispatch:
@@ -58,11 +69,97 @@ jobs:
           echo "current_gw=$(printf '%s' "$response" | jq -r '.current_gameweek')" >> "$GITHUB_OUTPUT"
           echo "target_gw=$(printf '%s' "$response" | jq -r '.target_gameweek')" >> "$GITHUB_OUTPUT"
 
-      - name: Wait for complete closure
+      - name: Prepare current-MH refresh when inputs changed
         if: steps.status.outputs.ready != 'true'
+        id: current_refresh
+        shell: bash
+        env:
+          OIDC_TOKEN: ${{ steps.oidc.outputs.token }}
         run: |
-          echo "Current MH is not fully closed or next-MH fixtures are not ready. No model state changed."
-          echo "Next hourly check will retry."
+          set -euo pipefail
+          response="$(jq -n --arg sha "$GITHUB_SHA" '{action:"prepare_current",code_sha:$sha}' |             curl --fail --show-error --silent --max-time 240               -H "Authorization: Bearer $OIDC_TOKEN"               -H "Content-Type: application/json"               --data-binary @- "$FUNCTIONS_URL/weekly-model-lifecycle")"
+          echo "$response" | jq .
+          echo "refresh=$(printf '%s' "$response" | jq -r '.refresh_required // false')" >> "$GITHUB_OUTPUT"
+          echo "run_id=$(printf '%s' "$response" | jq -r '.run_id // empty')" >> "$GITHUB_OUTPUT"
+          echo "parent_run_id=$(printf '%s' "$response" | jq -r '.parent_run_id // empty')" >> "$GITHUB_OUTPUT"
+          echo "gameweek=$(printf '%s' "$response" | jq -r '.gameweek // empty')" >> "$GITHUB_OUTPUT"
+          echo "benchmark=$(printf '%s' "$response" | jq -r '.benchmark // empty')" >> "$GITHUB_OUTPUT"
+
+      - name: Run 50K current-MH refresh
+        if: steps.status.outputs.ready != 'true' && steps.current_refresh.outputs.refresh == 'true'
+        shell: bash
+        env:
+          OIDC_TOKEN: ${{ steps.oidc.outputs.token }}
+          RUN_ID: ${{ steps.current_refresh.outputs.run_id }}
+          GAMEWEEK: ${{ steps.current_refresh.outputs.gameweek }}
+          BENCHMARK: ${{ steps.current_refresh.outputs.benchmark }}
+        run: |
+          set -euo pipefail
+          common=(-H "Authorization: Bearer $OIDC_TOKEN")
+          curl --fail --show-error --silent --max-time 240 "${common[@]}"             "$FUNCTIONS_URL/run-live-sim-chunk?mode=reset&gw=$GAMEWEEK&run=$RUN_ID&benchmark=$BENCHMARK" | jq .
+          for part in $(seq 0 24); do
+            seed=$((2026000000 + GAMEWEEK * 100000 + part * 2000 + 1))
+            curl --fail --show-error --silent --max-time 240 "${common[@]}"               "$FUNCTIONS_URL/run-live-sim-chunk?gw=$GAMEWEEK&run=$RUN_ID&benchmark=$BENCHMARK&draws=2000&seed=$seed" | jq -c .
+          done
+          curl --fail --show-error --silent --max-time 240 "${common[@]}"             "$FUNCTIONS_URL/run-live-sim-chunk?mode=finalize&gw=$GAMEWEEK&run=$RUN_ID&benchmark=$BENCHMARK" | jq .
+
+      - name: Optimize current-MH recommended squad
+        if: steps.status.outputs.ready != 'true' && steps.current_refresh.outputs.refresh == 'true'
+        env:
+          OIDC_TOKEN: ${{ steps.oidc.outputs.token }}
+          RUN_ID: ${{ steps.current_refresh.outputs.run_id }}
+        run: |
+          set -euo pipefail
+          curl --fail --show-error --silent --max-time 300             -H "Authorization: Bearer $OIDC_TOKEN"             "$FUNCTIONS_URL/run-staging-optimizer?mode=recommended&run=$RUN_ID" | jq .
+
+      - name: Optimize current-MH ceiling squad
+        if: steps.status.outputs.ready != 'true' && steps.current_refresh.outputs.refresh == 'true'
+        env:
+          OIDC_TOKEN: ${{ steps.oidc.outputs.token }}
+          RUN_ID: ${{ steps.current_refresh.outputs.run_id }}
+        run: |
+          set -euo pipefail
+          curl --fail --show-error --silent --max-time 300             -H "Authorization: Bearer $OIDC_TOKEN"             "$FUNCTIONS_URL/run-staging-optimizer?mode=alternative&run=$RUN_ID" | jq .
+
+      - name: QA current-MH refresh
+        if: steps.status.outputs.ready != 'true' && steps.current_refresh.outputs.refresh == 'true'
+        env:
+          OIDC_TOKEN: ${{ steps.oidc.outputs.token }}
+          RUN_ID: ${{ steps.current_refresh.outputs.run_id }}
+          PARENT_RUN_ID: ${{ steps.current_refresh.outputs.parent_run_id }}
+        run: |
+          set -euo pipefail
+          for stage in qa integrity bugfix; do
+            jq -n --arg run "$RUN_ID" --arg stage "$stage" '{stage:$stage,run_id:$run}' |               curl --fail --show-error --silent -H "Authorization: Bearer $OIDC_TOKEN" -H "Content-Type: application/json"                 --data-binary @- "$FUNCTIONS_URL/model-refresh-control" | jq .
+          done
+          jq -n --arg run "$RUN_ID" --arg parent "$PARENT_RUN_ID" '{stage:"model_gate",run_id:$run,parent_run_id:$parent}' |             curl --fail --show-error --silent -H "Authorization: Bearer $OIDC_TOKEN" -H "Content-Type: application/json"               --data-binary @- "$FUNCTIONS_URL/model-refresh-control" | jq .
+
+      - name: Freeze refreshed current-MH snapshot
+        if: steps.status.outputs.ready != 'true' && steps.current_refresh.outputs.refresh == 'true'
+        env:
+          OIDC_TOKEN: ${{ steps.oidc.outputs.token }}
+          RUN_ID: ${{ steps.current_refresh.outputs.run_id }}
+        run: |
+          set -euo pipefail
+          jq -n --arg run "$RUN_ID" '{action:"snapshot",run_id:$run}' |             curl --fail --show-error --silent -H "Authorization: Bearer $OIDC_TOKEN" -H "Content-Type: application/json"               --data-binary @- "$FUNCTIONS_URL/weekly-model-lifecycle" | jq .
+
+      - name: Promote refreshed current MH
+        if: steps.status.outputs.ready != 'true' && steps.current_refresh.outputs.refresh == 'true'
+        env:
+          OIDC_TOKEN: ${{ steps.oidc.outputs.token }}
+          RUN_ID: ${{ steps.current_refresh.outputs.run_id }}
+        run: |
+          set -euo pipefail
+          jq -n --arg run "$RUN_ID" '{stage:"promote",run_id:$run}' |             curl --fail --show-error --silent -H "Authorization: Bearer $OIDC_TOKEN" -H "Content-Type: application/json"               --data-binary @- "$FUNCTIONS_URL/model-refresh-control" | jq .
+
+      - name: Verify refreshed current MH
+        if: steps.status.outputs.ready != 'true' && steps.current_refresh.outputs.refresh == 'true'
+        env:
+          OIDC_TOKEN: ${{ steps.oidc.outputs.token }}
+          GAMEWEEK: ${{ steps.current_refresh.outputs.gameweek }}
+        run: |
+          set -euo pipefail
+          jq -n --argjson gw "$GAMEWEEK" '{action:"verify",gameweek:$gw}' |             curl --fail --show-error --silent -H "Authorization: Bearer $OIDC_TOKEN" -H "Content-Type: application/json"               --data-binary @- "$FUNCTIONS_URL/weekly-model-lifecycle" | jq .
 
       - name: Require fresh source data before advancing
         if: steps.status.outputs.ready == 'true'
@@ -93,7 +190,7 @@ jobs:
           OIDC_TOKEN: ${{ steps.oidc.outputs.token }}
         run: |
           set -euo pipefail
-          response="$(curl --fail --show-error --silent --max-time 240             -H "Authorization: Bearer $OIDC_TOKEN"             -H "Content-Type: application/json"             --data '{"action":"prepare"}'             "$FUNCTIONS_URL/weekly-model-lifecycle")"
+          response="$(jq -n --arg sha "$GITHUB_SHA" '{action:"prepare",code_sha:$sha}' |             curl --fail --show-error --silent --max-time 240               -H "Authorization: Bearer $OIDC_TOKEN"               -H "Content-Type: application/json"               --data-binary @- "$FUNCTIONS_URL/weekly-model-lifecycle")"
           echo "$response" | jq .
           echo "run_id=$(printf '%s' "$response" | jq -r '.run_id')" >> "$GITHUB_OUTPUT"
           echo "gameweek=$(printf '%s' "$response" | jq -r '.gameweek')" >> "$GITHUB_OUTPUT"

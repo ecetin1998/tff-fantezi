@@ -2,7 +2,7 @@ import Link from 'next/link'
 
 export const metadata={
   title:'Süper Lig Fantasy SSS ve Rehber',
-  description:'Fantezi Scout nasıl kullanılır? xFP, xDakika, P25/P90, 6+ ihtimali, xG, xA, ELO, fantezi puanları, kadro önerileri ve Süper Lig fantasy terimleri için açıklamalı rehber.',
+  description:'Fantezi Scout nasıl kullanılır? xFP, xDakika, P25/P90, 6+ ihtimali, xG, xA, fantezi puanları, kadro önerileri ve Süper Lig fantasy terimleri için açıklamalı rehber.',
   keywords:[
     'Süper Lig fantasy','Süper Lig fantezi futbol','fantasy futbol Türkiye','xFP nedir',
     'fantasy puanları','kadro önerisi','xDakika','ilk 11 ihtimali','xG xA','fantasy futbol rehberi'
@@ -22,7 +22,7 @@ const menuItems=[
   ['/matches', 'Maç Tahminleri', 'Takımların beklenen gol üretimini, 1/X/2 olasılıklarını ve fantasy açısından hücum-savunma eşleşmesini görürsün.'],
   ['/squads', 'Kadro Önerileri', 'Modelin dengeli Önerilen Kadro’sunu ve daha yüksek tavanı hedefleyen Tavan 11’i; ilk 11, yedek, kaptan ve xFP ile birlikte görürsün.'],
   ['/squad', 'Benim Kadrom', 'Hesabınla 15 oyunculuk, 100m bütçeli kendi takımını kurar; ilk 11, yedek sırası ve kaptanı yönetirsin.'],
-  ['/teams', 'Takım & Fikstür Analizi', 'Takım profili, rakip, ev/deplasman, xG, gol yememe ihtimali, ELO ve takım oyuncularının fantasy görünümünü birlikte okursun.'],
+  ['/teams', 'Takım & Fikstür Analizi', 'Takım profili, rakip, ev/deplasman, xG, gol yememe ihtimali ve takım oyuncularının fantasy görünümünü birlikte okursun.'],
   ['/availability', 'Sakatlık / Ceza Durumu', 'Sakat, cezalı, dönüş yapan veya oynama ihtimali düşen oyuncuların güncel uygunluk durumunu takip edersin.'],
   ['/roles', 'Rol & Dakika Takibi', 'İlk 11 ve dakika rolü yükselen/düşen oyuncuları, son maçlardaki kullanım değişimiyle birlikte görürsün.'],
   ['/backtest', 'Model Performansı', 'Modelin geçmiş haftalardaki geriye dönük testini, canlı dondurulmuş tahminlerini, QA kontrollerini ve öğrenme sinyallerini şeffaf biçimde incelersin.'],
@@ -42,7 +42,6 @@ const glossary=[
   ['xG', 'Expected Goals; gol pozisyonlarının kalitesini ve beklenen gol üretimini ölçen istatistiktir. Tek başına maç skoru tahmini değildir.'],
   ['xA', 'Expected Assists; bir oyuncunun ürettiği pasların asist olma beklentisini ölçen istatistiktir.'],
   ['F/P', 'Fiyat/performans göstergesi. Oyuncunun fiyatına göre model beklentisinin ne kadar verimli olduğunu karşılaştırmaya yardım eder.'],
-  ['ELO', 'Takımların geçmiş sonuçlarından türetilen göreli güç derecesidir. Rakibin gücünü ve fikstür bağlamını yorumlamak için yardımcı sinyal olarak kullanılır.'],
   ['Puan bandı', 'P25–P90 gibi aralıklar tek bir xFP sayısından daha geniş olası sonuç alanını gösterir. Fantasy puanı doğal olarak değişken olduğu için bandın dışına çıkan sonuçlar da mümkündür.'],
   ['Top‑25', 'Yüksek skor adaylarını xFP’den ayrı bir üst-tavan sıralama katmanıyla tarar. Ana xFP hesabının veya optimizerın yerine geçmez.'],
   ['QA / PASS', 'Yeni model çıktısının veri bütünlüğü, aktif oyuncu kapsamı, dakika/rol ve diğer yayın kontrollerini geçtiğini belirtir. Kontrolü geçmeyen aday sürüm yayınlanmaz.'],
@@ -106,7 +105,7 @@ export default function FAQPage(){
     <section id="terimler" className="card faq-section faq-glossary-section">
       <div className="panel-head">
         <div><span className="eyebrow">FANTASY SÖZLÜĞÜ</span><h2>Kısaltmalar ve model terimleri</h2></div>
-        <small>xFP • xDk • P90 • xG • xA • ELO</small>
+        <small>xFP • xDk • P90 • xG • xA</small>
       </div>
       <div className="faq-glossary-grid">
         {glossary.map(([term,description])=><article key={term}>

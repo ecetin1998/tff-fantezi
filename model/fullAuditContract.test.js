@@ -5,6 +5,18 @@ const read=file=>fs.readFileSync(file,'utf8')
 
 const matches=read('app/matches/page.js')
 assert.doesNotMatch(matches,/%\$/,'match probabilities must never render %$')
+assert.doesNotMatch(matches,/runtime Elo/,'Runtime Elo disclaimer must not repeat on every match card.')
+
+const nextConfig=read('next.config.mjs')
+for(const header of ['X-Content-Type-Options','Referrer-Policy','X-Frame-Options','Permissions-Policy','Content-Security-Policy']){
+  assert.match(nextConfig,new RegExp(header),header+' must be configured globally.')
+}
+assert.match(nextConfig,/frame-ancestors 'none'/)
+assert.match(nextConfig,/object-src 'none'/)
+
+const health=read('app/api/health/route.js')
+assert.match(health,/VERCEL_GIT_COMMIT_SHA/)
+assert.doesNotMatch(health,/\|\|'dev'/)
 
 for(const file of ['app/layout.js','app/sitemap.js','app/robots.js','app/actions.js','README.md','scripts/smoke.sh']){
   assert.doesNotMatch(read(file),/tff-fantezi\.vercel\.app/,file+' must use the Cloudflare production origin')
@@ -13,12 +25,16 @@ for(const file of ['app/layout.js','app/sitemap.js','app/robots.js','app/actions
 const api=read('app/api/scout-data/route.js')
 const feed=read('lib/scoutFeed.js')
 assert.match(api,/name:p\.full_name\|\|p\.display_name\|\|p\.short_label/)
+assert.match(api,/xa_per90:p\.attack_profile\?\.xa_per90/)
 assert.match(feed,/name:p\.full_name\|\|p\.display_name\|\|p\.short_label/)
 assert.match(feed,/name:m\.player\?\.full_name\|\|m\.player\?\.display_name\|\|m\.player\?\.short_label/)
 assert.match(feed,/name:a\.player\?\.full_name\|\|a\.player\?\.display_name\|\|a\.player\?\.short_label/)
 
 const data=read('lib/data.js')
 assert.match(data,/const displayName=p=>p\?\.full_name\|\|p\?\.display_name\|\|p\?\.short_label/)
+assert.match(data,/attack_profile:/)
+assert.match(data,/xa_per90:row\.xa_per90/)
+assert.match(data,/async function _getPlayersPage/)
 for(const table of ['scout_player_projections','scout_player_season_stats','scout_match_predictions','scout_role_signals','scout_player_weekly_points']){
   assert.doesNotMatch(data,new RegExp("from\\('"+table+"'\\)\\s*\\.select\\('\\*'\\)"),table+' must use explicit public columns')
 }
@@ -27,6 +43,9 @@ assert.match(data,/data:getTeamDetail:weekly/)
 assert.match(data,/data:getTeamFixturesOverview:matches/)
 assert.match(data,/matches:fixtures/)
 assert.match(data,/currentMatches:fixtures/)
+
+const passwordSecurity=read('lib/passwordSecurity.js')
+assert.match(passwordSecurity,/return 'password_check_failed'/,'Password breach-check outages must fail closed.')
 
 const pitch=read('components/SquadPitchView.js')
 assert.match(pitch,/function displayName\(player\)\{ return pitchPlayerLabel\(player\) \}/)
@@ -44,8 +63,11 @@ for(const file of ['rules/tff-fantasy.json','lib/rules.js','app/actions.js','app
 const playersPage=read('app/players/page.js')
 const playersTable=read('components/PlayersTable.js')
 assert.doesNotMatch(playersPage,/Suspense/)
+assert.match(playersPage,/searchParams/)
+assert.match(playersPage,/getPlayersPage/)
 assert.doesNotMatch(playersTable,/useSearchParams/)
 assert.match(playersTable,/const PAGE_SIZE=50/)
+assert.match(playersTable,/router\.replace/)
 
 const cf=read('.github/workflows/cloudflare-deploy.yml')
 assert.match(cf,/branches: \[main\]/)
@@ -61,9 +83,11 @@ const optimizer=read('supabase/functions/run-staging-optimizer/index.ts')
 assert.match(optimizer,/scout_game_rules/)
 assert.doesNotMatch(optimizer,/for\(let t=1;t<=18;t\+\+\)/)
 assert.match(optimizer,/pos!==["']GK["']/)
-assert.match(optimizer,/captainScore=xfp\+captainLambda/)
+assert.match(optimizer,/captainScore=variant==="recommended"\?xfp:xfp\+captainLambda/)
+assert.doesNotMatch(optimizer,/overlap:\{max:8\}|recommendedXI\.has/,'Ceiling XI must not be forced to differ from the recommended XI.')
 assert.doesNotMatch(optimizer,/budgetPenaltyPerM|spendReward|benchValue|\.08\*playProbability/)
 assert.match(optimizer,/score:base,/)
 assert.match(optimizer,/score:-cheapBench/)
+assert.match(optimizer,/\["workflow_dispatch","schedule","push"\]/,'Scheduled and protected main-push lifecycle must be allowed to call optimizer.')
 
 console.log('full audit contract passed')

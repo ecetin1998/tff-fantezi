@@ -24,7 +24,7 @@ async function verifyGithubOidc(token:string){
     header.alg!=="RS256"||!header.kid||payload.iss!==ISSUER||!audOk||
     Number(payload.exp||0)<now-30||Number(payload.nbf||0)>now+30||
     payload.repository_id!==REPOSITORY_ID||payload.repository!==REPOSITORY||
-    payload.ref!=="refs/heads/main"||!["workflow_dispatch","schedule"].includes(String(payload.event_name||""))
+    payload.ref!=="refs/heads/main"||!["workflow_dispatch","schedule","push"].includes(String(payload.event_name||""))
   )return false
   const jwks=await fetch(JWKS_URL).then(r=>r.json())
   const jwk=(jwks.keys||[]).find((k:any)=>k.kid===header.kid)
@@ -47,6 +47,14 @@ function ageHours(value:string|null|undefined){
 }
 function engineSignature(value:string){
   return String(value||"").replace(/\b(?:GW|MH)\s*\d+\b/gi,"GW#").replace(/\s+/g," ").trim()
+}
+function goalConfigFingerprint(row:any){
+  if(!row?.version)return ""
+  return [
+    row.version,
+    row.alpha_used!=null?`alpha=${row.alpha_used}`:null,
+    row.gate_benchmark||null
+  ].filter(Boolean).join("|")
 }
 async function latestTimestamp(sb:any,table:string,column:string){
   const q=await sb.from(table).select(column).not(column,"is",null).order(column,{ascending:false}).limit(1).maybeSingle()
@@ -163,23 +171,44 @@ Deno.serve(async(req:Request)=>{
         .select("source_run_id,candidate_run_id,target_gameweek")
         .eq("candidate_run_id",runId).maybeSingle()
       if(cycle.error)throw cycle.error
-      if(!cycle.data?.source_run_id)return Response.json({error:"weekly lifecycle parent missing"},{status:409})
-      const [parent,candidate,parentGate]=await Promise.all([
-        sb.from("scout_model_runs").select("id,model_version").eq("id",cycle.data.source_run_id).single(),
-        sb.from("scout_model_runs").select("id,model_version").eq("id",runId).single(),
-        sb.from("scout_run_release_gates").select("backtest_pass").eq("run_id",cycle.data.source_run_id).single(),
+      const parentRunId=cycle.data?.source_run_id||String(body.parent_run_id||"").trim()||null
+      if(!parentRunId)return Response.json({error:"model validation parent missing"},{status:409})
+      const [parent,candidate,parentGate,goalDist]=await Promise.all([
+        sb.from("scout_model_runs").select("id,model_version,config_version").eq("id",parentRunId).single(),
+        sb.from("scout_model_runs").select("id,model_version,config_version").eq("id",runId).single(),
+        sb.from("scout_run_release_gates").select("backtest_pass").eq("run_id",parentRunId).single(),
+        sb.from("scout_goal_distribution_config")
+          .select("version,distribution,alpha_used,active,gate_passed,gate_benchmark")
+          .eq("active",true).order("created_at",{ascending:false}).limit(1).maybeSingle(),
       ])
-      for(const q of [parent,candidate,parentGate])if(q.error)throw q.error
+      for(const q of [parent,candidate,parentGate,goalDist])if(q.error)throw q.error
       const sameEngine=engineSignature(parent.data.model_version)===engineSignature(candidate.data.model_version)
-      const pass=sameEngine&&Boolean(parentGate.data.backtest_pass)
+      const sameConfig=String(parent.data.config_version||"")===String(candidate.data.config_version||"")
+      const activeGoalConfig=goalConfigFingerprint(goalDist.data)
+      const gatedGoalDistChange=Boolean(
+        !sameConfig&&goalDist.data?.active===true&&goalDist.data?.gate_passed===true&&
+        String(goalDist.data?.distribution||"").toUpperCase()==="NB2"&&Number(goalDist.data?.alpha_used||0)>0&&
+        String(candidate.data.config_version||"")===activeGoalConfig
+      )
+      const pass=sameEngine&&Boolean(parentGate.data.backtest_pass)&&(sameConfig||gatedGoalDistChange)
       await upsertGate(sb,runId,{
         backtest_pass:pass,
         details:{model_validation:{
-          pass,same_engine:sameEngine,inherited_from:parent.data.id,
-          reason:"unchanged engine; inherit prior leakage-safe replay gate and record the newly closed live week separately"
+          pass,same_engine:sameEngine,same_config:sameConfig,gated_goal_distribution_change:gatedGoalDistChange,
+          goal_distribution_gate:goalDist.data?.gate_benchmark||null,inherited_from:parent.data.id,
+          reason:!sameEngine
+            ?"engine changed; full leakage-safe validation is required"
+            :sameConfig
+              ?"engine and config unchanged; inherit prior leakage-safe replay gate"
+              :gatedGoalDistChange
+                ?"goal distribution config changed through its recorded 50K component gate"
+                :"config changed without an approved component gate"
         }}
       })
-      return Response.json({ok:pass,pass,same_engine:sameEngine,inherited_from:parent.data.id},{status:pass?200:409})
+      return Response.json({
+        ok:pass,pass,same_engine:sameEngine,same_config:sameConfig,
+        gated_goal_distribution_change:gatedGoalDistChange,inherited_from:parent.data.id
+      },{status:pass?200:409})
     }
 
     if(stage==="promote"){

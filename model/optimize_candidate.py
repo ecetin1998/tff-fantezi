@@ -11,7 +11,7 @@ from scipy.sparse import coo_matrix
 from optimizer_rules import BUDGET, MAX_PER_CLUB, SQUAD_LIMITS, XI_BOUNDS, captain_metric, cheap_bench_tiebreak, formation_of, lineup_metric, optimize_bench_for_autosubs
 
 
-def solve(players, alternative=False, avoid=(), max_defensive_stack_per_team=2):
+def solve(players, alternative=False, max_defensive_stack_per_team=2):
     eligible = [p for p in players if p['availability'] >= .8 and p['price'] > 0]
     n = len(eligible)
     ids = [p['id'] for p in eligible]
@@ -28,7 +28,7 @@ def solve(players, alternative=False, avoid=(), max_defensive_stack_per_team=2):
         # cancels for starters and applies only to true bench players.
         c[i] = -base - bench_cost
         c[n+i] = bench_cost
-        c[2*n+i] = -captain_metric(p)
+        c[2*n+i] = -captain_metric(p, alternative)
         if p['position']=='GK':
             ub[2*n+i] = 0
     rr, cc, dd, lo, hi = [], [], [], [], []
@@ -53,8 +53,6 @@ def solve(players, alternative=False, avoid=(), max_defensive_stack_per_team=2):
     for i in range(n):
         add([(i,1),(n+i,-1)],-np.inf,0)
         add([(2*n+i,1),(i,-1)],-np.inf,0)
-    if avoid:
-        add([(i,1) for i,p in enumerate(eligible) if p['id'] in avoid],0,8)
     A=coo_matrix((dd,(rr,cc)),shape=(len(lo),3*n)).tocsr()
     result=milp(c,integrality=np.ones(3*n),bounds=Bounds(0,ub),constraints=LinearConstraint(A,lo,hi),options={'time_limit':60,'mip_rel_gap':.003})
     if not result.success or result.x is None:
@@ -81,5 +79,5 @@ def solve(players, alternative=False, avoid=(), max_defensive_stack_per_team=2):
 if __name__=='__main__':
     with open(sys.argv[1],encoding='utf8') as f: players=json.load(f)
     main=solve(players)
-    alt=solve(players,True,main['xi'])
+    alt=solve(players,True)
     print(json.dumps([main,alt],ensure_ascii=False))

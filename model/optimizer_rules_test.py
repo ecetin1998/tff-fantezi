@@ -14,7 +14,8 @@ def test_captain_metric_modes():
     a={'position':'FWD','xfp':6.0,'p90':9.0,'price':8.0,'xi':.95,'minutes':82,'availability':1}
     b={'position':'MID','xfp':6.8,'p90':8.0,'price':8.0,'xi':.95,'minutes':82,'availability':1}
     assert captain_metric(b)>captain_metric(a)
-    assert captain_metric(a)==6.0+.18*3.0
+    assert captain_metric(a)==6.0
+    assert captain_metric(a,True)==6.0+.18*3.0
     assert captain_metric({**a,'position':'GK'})<0
 
 def test_canonical_roster_and_formation():
