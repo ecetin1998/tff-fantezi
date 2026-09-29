@@ -1,6 +1,17 @@
 name: Weekly model lifecycle
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - "supabase/functions/run-live-sim-chunk/**"
+      - "supabase/functions/run-staging-optimizer/**"
+      - "supabase/functions/model-refresh-control/**"
+      - "supabase/functions/weekly-model-lifecycle/**"
+      - "model/optimizer_rules.py"
+      - "model/optimize_candidate.py"
+      - ".github/workflows/weekly-model-lifecycle.yml"
+      - "supabase/migrations/20260929*.sql"
   schedule:
     - cron: '17 * * * *'
   workflow_dispatch:
