@@ -7,9 +7,10 @@ export const revalidate=300
 
 export default async function Home(){
   const {run,best,value,teamXfpLeader,top25,playerCount,matchCount}=await getHomeOverview()
-  const sourceUpdated=run?.source_updated_at?new Intl.DateTimeFormat('tr-TR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit',timeZone:'Europe/Istanbul'}).format(new Date(run.source_updated_at)):'—'
+  const latestDataAt=run?.latest_data_at||run?.source_updated_at||null
+  const sourceUpdated=latestDataAt?new Intl.DateTimeFormat('tr-TR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit',timeZone:'Europe/Istanbul'}).format(new Date(latestDataAt)):'—'
   const modelUpdated=run?.generated_at?new Intl.DateTimeFormat('tr-TR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit',timeZone:'Europe/Istanbul'}).format(new Date(run.generated_at)):'—'
-  const sourceAgeHours=run?.source_updated_at?Math.max(0,(Date.now()-new Date(run.source_updated_at).getTime())/36e5):Infinity
+  const sourceAgeHours=latestDataAt?Math.max(0,(Date.now()-new Date(latestDataAt).getTime())/36e5):Infinity
   const sourceFresh=sourceAgeHours<=24
   const freshnessLabel=!Number.isFinite(sourceAgeHours)?'Bilinmiyor':sourceAgeHours<1?'1 saatten yeni':sourceAgeHours<24?`${Math.round(sourceAgeHours)} saat önce`:`${Math.round(sourceAgeHours/24)} gün önce`
   const highlights=[
