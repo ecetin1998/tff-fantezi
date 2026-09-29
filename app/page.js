@@ -9,6 +9,9 @@ export default async function Home(){
   const {run,best,value,teamXfpLeader,top25,playerCount,matchCount}=await getHomeOverview()
   const sourceUpdated=run?.source_updated_at?new Intl.DateTimeFormat('tr-TR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit',timeZone:'Europe/Istanbul'}).format(new Date(run.source_updated_at)):'—'
   const modelUpdated=run?.generated_at?new Intl.DateTimeFormat('tr-TR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit',timeZone:'Europe/Istanbul'}).format(new Date(run.generated_at)):'—'
+  const sourceAgeHours=run?.source_updated_at?Math.max(0,(Date.now()-new Date(run.source_updated_at).getTime())/36e5):Infinity
+  const sourceFresh=sourceAgeHours<=24
+  const freshnessLabel=!Number.isFinite(sourceAgeHours)?'Bilinmiyor':sourceAgeHours<1?'1 saatten yeni':sourceAgeHours<24?`${Math.round(sourceAgeHours)} saat önce`:`${Math.round(sourceAgeHours/24)} gün önce`
   const highlights=[
     {
       label:`MH${run?.gameweek||'—'} en yüksek beklenen puan`,
@@ -60,9 +63,9 @@ export default async function Home(){
         </div>
         <div className="card spotlight-card home-status-card home-status-ready">
           <span>Model durumu</span>
-          <b>Model hazır</b>
-          <small>Kaynak veriler {sourceUpdated}<br/>Model hesaplandı {modelUpdated}</small>
-          <strong>Güncel <em>model</em></strong>
+          <b>{run?.status==='ready'?'READY':'Hazırlanıyor'}</b>
+          <small>Kaynak verisi: {freshnessLabel} ({sourceUpdated})<br/>Model hesaplandı {modelUpdated}</small>
+          <strong>{sourceFresh?'Veri taze':'Tazelik kontrolü gerekli'} <em>kaynak</em></strong>
         </div>
       </aside>
     </section>
