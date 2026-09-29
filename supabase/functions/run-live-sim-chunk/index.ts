@@ -28,7 +28,7 @@ async function verifyGithubOidc(token){
   if(header.alg!=="RS256"||!header.kid||payload.iss!==GITHUB_OIDC_ISSUER||!audOk||
      Number(payload.exp||0)<now-30||Number(payload.nbf||0)>now+30||
      payload.repository_id!==GITHUB_REPOSITORY_ID||payload.repository!=="ecetin1998/tff-fantezi"||
-     payload.ref!==OPS_REF||!["workflow_dispatch","schedule"].includes(String(payload.event_name||"")))return false;
+     payload.ref!==OPS_REF||!["workflow_dispatch","schedule","push"].includes(String(payload.event_name||"")))return false;
   const jwks=await fetch(GITHUB_JWKS_URL).then(r=>r.json());
   const jwk=(jwks.keys||[]).find(k=>k.kid===header.kid);
   if(!jwk)return false;
