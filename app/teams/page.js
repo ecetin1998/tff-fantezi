@@ -1,32 +1,27 @@
-import Link from 'next/link'
-import { getTeamFixturesOverview } from '@/lib/data'
-import { teamCssVars } from '@/lib/teamThemes'
+import {getTeamFixturesOverview} from '@/lib/data'
+import TeamsExplorer from '@/components/TeamsExplorer'
 
 export const metadata={title:'Takım Analizi'}
-
 export const revalidate=300
 
 export default async function Teams(){
-  const {run,teams:rawTeams}=await getTeamFixturesOverview()
-  const teams=[...rawTeams].sort((a,b)=>a.name.localeCompare(b.name,'tr'))
+  const {run,teams}=await getTeamFixturesOverview()
 
   return <>
-    <div className="section-title">
-      <div><span className="eyebrow">TAKIM ANALİZİ</span><h1>MH{run?.gameweek||'—'} Takım & Fikstür Görünümü</h1></div>
-      <span className="muted">{teams.length} takım • detay için takıma dokun</span>
+    <div className="section-title team-analysis-title">
+      <div>
+        <span className="eyebrow">TAKIM ANALİZİ</span>
+        <h1>MH{run?.gameweek||'—'} Takım Analizi</h1>
+        <p className="muted">Haftanın rakibi, maç modeli ve sezon takım profili tek ekranda.</p>
+      </div>
+      <span className="team-analysis-count">{teams.length} takım</span>
     </div>
-    <div className="team-grid">
-      {teams.map(t=><Link href={'/teams/'+t.id} className="card team-card team-accent-card team-overview-card" style={teamCssVars(t.name)} key={t.id}>
-        <div className="team-card-head"><h2>{t.name}</h2><span className="pill">{t.venue}</span></div>
-        <p className="muted">Rakip: {t.opponent}</p>
-        <div className="team-metrics">
-          <div><span>xG</span><b>{Number(t.xg||0).toFixed(2)}</b></div>
-          <div><span>Rakip xG</span><b>{Number(t.oppXg||0).toFixed(2)}</b></div>
-          <div><span>Galibiyet</span><b>{(Number(t.win||0)*100).toFixed(1)}%</b></div>
-          <div><span>CS</span><b>{(Number(t.cs||0)*100).toFixed(1)}%</b></div>
-        </div>
-        <span className="team-card-open">Takım profili →</span>
-      </Link>)}
+    <div className="team-analysis-legend">
+      <span><b>Bu hafta xG</b> maç özelindeki gol üretim beklentisi</span>
+      <span><b>CS</b> gol yememe olasılığı</span>
+      <span><b>Toplam xFP</b> takım oyuncularının haftalık toplam beklentisi</span>
+      <span><b>xG farkı</b> sezonluk hücum-savunma dengesi</span>
     </div>
+    <TeamsExplorer teams={teams} gameweek={run?.gameweek}/>
   </>
 }
