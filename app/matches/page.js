@@ -126,7 +126,7 @@ export default async function Matches(){
 
           <div className="match-teams">
             <div className="match-team-block">
-              <span>EV</span>
+              <span>Ev sahibi</span>
               <Link className="match-team-link match-team-identity home-identity" style={teamCssVars(m.home_team)} href={'/teams/'+m.home_team_id}>
                 <b>{m.home_team}</b>
                 <span className="match-team-shirt" aria-hidden="true"><i/></span>
@@ -138,7 +138,7 @@ export default async function Matches(){
             </div>
 
             <div className="away match-team-block">
-              <span>DEP</span>
+              <span>Deplasman</span>
               <Link className="match-team-link away-link match-team-identity away-identity" style={teamCssVars(m.away_team)} href={'/teams/'+m.away_team_id}>
                 <span className="match-team-shirt" aria-hidden="true"><i/></span>
                 <b>{m.away_team}</b>
