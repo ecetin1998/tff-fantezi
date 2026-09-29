@@ -103,5 +103,8 @@ assert.match(analysisCss,/Mobile player hero \+ full probability labels 2026-09-
 assert.match(analysisCss,/player-detail-hero\)\{[\s\S]*?min-height:0 !important/,'Mobile player hero must not retain dead vertical space.')
 assert.match(analysisCss,/player-hero-score\)\{[\s\S]*?min-height:88px/,'Mobile xFP score must render as a compact highlighted card.')
 assert.match(analysisCss,/team-roster-player-v3[\s\S]*grid-template-columns:minmax\(260px,1fr\) 236px !important/,'Team roster identity must not collapse under legacy grid styles.')
+assert.match(analysisCss,/Team tactical mobile cards polish 2026-09-30/)
+assert.match(dataViewsCss,/Weekly mobile card polish 2026-09-30/)
+assert.match(dataViewsCss,/weekly-form-meta[\s\S]*grid-template-columns:repeat\(2,minmax\(0,1fr\)\) !important/,'Mobile Fantasy Points stats should stay in a clean 2x2 grid.')
 
 console.log('performance/deadline/readability contract passed')
