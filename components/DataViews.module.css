@@ -1676,3 +1676,139 @@
 .scope :global(.match-analysis-card) :global(.match-team-meta):global(.away-meta):global(.matchup-badges) :global(.matchup-pill){
   align-self:flex-end;
 }
+
+/* ===== Site-wide premium readability authority 2026-09-29 ===== */
+.scope{
+  --muted:#66738a;
+  --premium-muted:#66738a;
+}
+.scope main{
+  color:#24314d;
+  font-size:15px;
+  line-height:1.5;
+}
+.scope :global(.card){
+  border-color:#d9e1ec;
+  background:#fff;
+  box-shadow:0 10px 30px rgba(35,48,83,.065);
+}
+.scope :global(.muted){
+  color:#65728a;
+}
+.scope :global(.eyebrow){
+  color:#087f75;
+  font-size:11px;
+  line-height:1.25;
+  letter-spacing:.10em;
+}
+.scope :global(.section-title)>:global(.muted),
+.scope :global(.footnote){
+  color:#68758d;
+  font-size:12px;
+}
+.scope :global(.table-wrap) th,
+.scope :global(.table-wrap) td{
+  font-size:12px;
+}
+.scope :global(.pill),
+.scope :global(.status-chip),
+.scope :global(.signal),
+.scope :global(.fixture-difficulty){
+  font-size:10px;
+}
+
+@media(min-width:901px){
+  .scope :global(.desktop-nav){
+    overflow:visible;
+    scrollbar-width:auto;
+  }
+  .scope :global(.desktop-nav)>a,
+  .scope :global(.desktop-more)>button{
+    color:#43506b;
+    font-size:12px;
+    font-weight:800;
+  }
+  .scope :global(.desktop-nav) :global(.nav-active),
+  .scope :global(.desktop-more)>button:global(.nav-active){
+    background:#e2f4f0;
+    color:#076e66;
+    border-color:#bfe3dc;
+  }
+  .scope :global(.desktop-more){
+    position:relative;
+    z-index:140;
+  }
+  .scope :global(.desktop-more-panel){
+    top:calc(100% + 8px);
+    right:0;
+    z-index:160;
+    width:240px;
+    margin-top:0;
+    overflow:visible;
+  }
+  .scope :global(.desktop-more-panel) a{
+    color:#3d4b67;
+    font-size:12px;
+    font-weight:750;
+  }
+}
+
+/* Match cards: stronger contrast and a taller, easier-to-scan 1/X/2 bar. */
+.scope :global(.match-analysis-card) :global(.match-team-link) b{
+  color:#1f2c49;
+  font-size:13px;
+}
+.scope :global(.match-analysis-card) :global(.match-team-meta) small{
+  color:#5f6d85;
+  font-size:10px;
+}
+.scope :global(.match-analysis-card) :global(.matchup-pill){
+  opacity:1;
+  font-weight:900;
+}
+.scope :global(.outcome-bar-labeled){
+  height:48px;
+  margin:15px 0 12px;
+  border-radius:12px;
+  box-shadow:0 7px 18px rgba(35,48,83,.11);
+}
+.scope :global(.outcome-bar-labeled) i:first-child{border-radius:12px 0 0 12px}
+.scope :global(.outcome-bar-labeled) i:last-child{border-radius:0 12px 12px 0}
+.scope :global(.outcome-bar-labeled) :global(.home){
+  background:linear-gradient(90deg,#12b486,#087b61);
+}
+.scope :global(.outcome-bar-labeled) :global(.draw){
+  background:linear-gradient(90deg,#f0bc43,#c88910);
+}
+.scope :global(.outcome-bar-labeled) :global(.away){
+  background:linear-gradient(90deg,#7569ea,#4f43ba);
+}
+.scope :global(.outcome-bar-labeled) i span{
+  gap:4px;
+  color:#fff;
+  font-size:10.5px;
+  font-weight:850;
+  text-shadow:0 1px 2px rgba(0,0,0,.28);
+}
+.scope :global(.outcome-bar-labeled) i span b{
+  color:#fff;
+  font-size:12px;
+}
+.scope :global(.match-fantasy-meta) small{
+  color:#627087;
+  font-size:10px;
+}
+.scope :global(.match-fantasy-meta) b{
+  color:#22304d;
+  font-size:13px;
+}
+@media(max-width:760px){
+  .scope main{
+    font-size:14px;
+  }
+  .scope :global(.outcome-bar-labeled){
+    height:42px;
+  }
+  .scope :global(.outcome-bar-labeled) i span{font-size:9px}
+  .scope :global(.outcome-bar-labeled) i span b{font-size:10.5px}
+}
