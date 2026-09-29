@@ -23,7 +23,7 @@ async function verifyGithubOidc(token:string){
     header.alg!=="RS256"||!header.kid||payload.iss!==ISSUER||!audOk||
     Number(payload.exp||0)<now-30||Number(payload.nbf||0)>now+30||
     payload.repository_id!==REPOSITORY_ID||payload.repository!==REPOSITORY||
-    payload.ref!=="refs/heads/main"||!["workflow_dispatch","schedule"].includes(String(payload.event_name||""))
+    payload.ref!=="refs/heads/main"||!["workflow_dispatch","schedule","push"].includes(String(payload.event_name||""))
   )return false
   const jwks=await fetch(JWKS_URL).then(r=>r.json())
   const jwk=(jwks.keys||[]).find((k:any)=>k.kid===header.kid)
