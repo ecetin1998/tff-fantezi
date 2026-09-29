@@ -228,24 +228,41 @@ Deno.serve(async(req:Request)=>{
       if(cycle.error)throw cycle.error
       const parentRunId=cycle.data?.source_run_id||String(body.parent_run_id||"").trim()||null
       if(!parentRunId)return Response.json({error:"model validation parent missing"},{status:409})
-      const [parent,candidate,parentGate]=await Promise.all([
-        sb.from("scout_model_runs").select("id,model_version").eq("id",parentRunId).single(),
-        sb.from("scout_model_runs").select("id,model_version").eq("id",runId).single(),
+      const [parent,candidate,parentGate,goalDist]=await Promise.all([
+        sb.from("scout_model_runs").select("id,model_version,config_version").eq("id",parentRunId).single(),
+        sb.from("scout_model_runs").select("id,model_version,config_version").eq("id",runId).single(),
         sb.from("scout_run_release_gates").select("backtest_pass").eq("run_id",parentRunId).single(),
+        sb.from("scout_goal_distribution_config")
+          .select("version,distribution,alpha_used,active,gate_passed,gate_benchmark")
+          .eq("active",true).order("created_at",{ascending:false}).limit(1).maybeSingle(),
       ])
-      for(const q of [parent,candidate,parentGate])if(q.error)throw q.error
+      for(const q of [parent,candidate,parentGate,goalDist])if(q.error)throw q.error
       const sameEngine=engineSignature(parent.data.model_version)===engineSignature(candidate.data.model_version)
-      const pass=sameEngine&&Boolean(parentGate.data.backtest_pass)
+      const sameConfig=String(parent.data.config_version||"")===String(candidate.data.config_version||"")
+      const gatedGoalDistChange=Boolean(
+        !sameConfig&&goalDist.data?.active===true&&goalDist.data?.gate_passed===true&&
+        String(goalDist.data?.distribution||"").toUpperCase()==="NB2"&&Number(goalDist.data?.alpha_used||0)>0&&
+        String(candidate.data.config_version||"")===String(goalDist.data?.version||"")
+      )
+      const pass=sameEngine&&Boolean(parentGate.data.backtest_pass)&&(sameConfig||gatedGoalDistChange)
       await upsertGate(sb,runId,{
         backtest_pass:pass,
         details:{model_validation:{
-          pass,same_engine:sameEngine,inherited_from:parent.data.id,
-          reason:cycle.data?.source_run_id
-            ?"unchanged engine; inherit prior leakage-safe replay gate and record the newly closed live week separately"
-            :"same-gameweek pre-kickoff refresh; engine unchanged so inherit the validated replay gate"
+          pass,same_engine:sameEngine,same_config:sameConfig,gated_goal_distribution_change:gatedGoalDistChange,
+          goal_distribution_gate:goalDist.data?.gate_benchmark||null,inherited_from:parent.data.id,
+          reason:!sameEngine
+            ?"engine changed; full leakage-safe validation is required"
+            :sameConfig
+              ?"engine and config unchanged; inherit prior leakage-safe replay gate"
+              :gatedGoalDistChange
+                ?"goal distribution config changed through its recorded 50K component gate"
+                :"config changed without an approved component gate"
         }}
       })
-      return Response.json({ok:pass,pass,same_engine:sameEngine,inherited_from:parent.data.id},{status:pass?200:409})
+      return Response.json({
+        ok:pass,pass,same_engine:sameEngine,same_config:sameConfig,
+        gated_goal_distribution_change:gatedGoalDistChange,inherited_from:parent.data.id
+      },{status:pass?200:409})
     }
 
     if(stage==="promote"){
