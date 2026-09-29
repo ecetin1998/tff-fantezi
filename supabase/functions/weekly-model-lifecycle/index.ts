@@ -406,7 +406,9 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
   const minInterval=hoursUntilDeadline<=12?2:hoursUntilDeadline<=48?6:24
   const generatedAge=ageHours(current.generated_at)
   const codeSha=String(body.code_sha||"").trim()||null
-  const configVersion=goalConfigQ.data?.version||null
+  const configVersion=goalConfigQ.data?.version
+    ?[goalConfigQ.data.version,goalConfigQ.data.alpha_used!=null?`alpha=${goalConfigQ.data.alpha_used}`:null,goalConfigQ.data.gate_benchmark||null].filter(Boolean).join('|')
+    :null
   const sourceAdvanced=!current.source_updated_at||new Date(latestSourceAt).getTime()>new Date(current.source_updated_at).getTime()+60_000
   const configChanged=Boolean(configVersion)&&String(current.config_version||"")!==String(configVersion)
   const codeChanged=Boolean(codeSha)&&String(current.code_sha||"")!==String(codeSha)
