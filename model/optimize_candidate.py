@@ -8,13 +8,15 @@ import sys
 import numpy as np
 from scipy.optimize import milp, Bounds, LinearConstraint
 from scipy.sparse import coo_matrix
-from optimizer_rules import BUDGET, MAX_PER_CLUB, SQUAD_LIMITS, XI_BOUNDS, captain_metric, cheap_bench_tiebreak, formation_of, lineup_metric, optimize_bench_for_autosubs
+from optimizer_rules import AGGRESSIVE_MAX_OVERLAP, AGGRESSIVE_MIN_OVERLAP, AGGRESSIVE_XFP_FLOOR, BUDGET, MAX_PER_CLUB, SQUAD_LIMITS, XI_BOUNDS, captain_metric, cheap_bench_tiebreak, formation_of, lineup_metric, metric_scale, optimize_bench_for_autosubs
 
 
-def solve(players, alternative=False, max_defensive_stack_per_team=2):
+def solve(players, alternative=False, reference_xi=None, reference_xfp=None, max_defensive_stack_per_team=2):
     eligible = [p for p in players if p['availability'] >= .8 and p['price'] > 0]
     n = len(eligible)
     ids = [p['id'] for p in eligible]
+    scale = metric_scale(eligible)
+    reference_ids=set(reference_xi or [])
     pos = ['GK', 'DEF', 'MID', 'FWD']
     ub = np.ones(3*n)
     for i, p in enumerate(eligible):
@@ -22,13 +24,13 @@ def solve(players, alternative=False, max_defensive_stack_per_team=2):
             ub[i] = 0
     c = np.zeros(3*n)
     for i, p in enumerate(eligible):
-        base = lineup_metric(p, alternative)
+        base = lineup_metric(p, alternative, scale)
         bench_cost = cheap_bench_tiebreak(p)
         # xi and squad are both 1 for starters, so the tiny price tie-break
         # cancels for starters and applies only to true bench players.
         c[i] = -base - bench_cost
         c[n+i] = bench_cost
-        c[2*n+i] = -captain_metric(p, alternative)
+        c[2*n+i] = -captain_metric(p, alternative, scale)
         if p['position']=='GK':
             ub[2*n+i] = 0
     rr, cc, dd, lo, hi = [], [], [], [], []
@@ -50,6 +52,9 @@ def solve(players, alternative=False, max_defensive_stack_per_team=2):
         ix=[i for i,p in enumerate(eligible) if p['team']==team]
         add([(n+i,1) for i in ix],0,MAX_PER_CLUB)
         add([(i,1) for i in ix if eligible[i]['position'] in ('GK','DEF')],0,max_defensive_stack_per_team)
+    if alternative and reference_ids:
+        add([(i,1) for i,p in enumerate(eligible) if p['id'] in reference_ids],AGGRESSIVE_MIN_OVERLAP,AGGRESSIVE_MAX_OVERLAP)
+        add([(i,float(p['xfp'])) for i,p in enumerate(eligible)],float(reference_xfp or 0)*AGGRESSIVE_XFP_FLOOR,np.inf)
     for i in range(n):
         add([(i,1),(n+i,-1)],-np.inf,0)
         add([(2*n+i,1),(i,-1)],-np.inf,0)
@@ -79,5 +84,5 @@ def solve(players, alternative=False, max_defensive_stack_per_team=2):
 if __name__=='__main__':
     with open(sys.argv[1],encoding='utf8') as f: players=json.load(f)
     main=solve(players)
-    alt=solve(players,True)
+    alt=solve(players,True,main['xi'],main['xi_xfp'])
     print(json.dumps([main,alt],ensure_ascii=False))

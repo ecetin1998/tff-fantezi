@@ -67,6 +67,30 @@ import { optimizeBenchForAutosubs } from "../_shared/autosub.ts";
 
 
 function n(v:any){const x=Number(v);return Number.isFinite(x)?x:0}
+const AGGRESSIVE_XFP_FLOOR=.965;
+const AGGRESSIVE_MIN_OVERLAP=7;
+const AGGRESSIVE_MAX_OVERLAP=9;
+
+function metricScale(rows:any[]){
+  const maxXfp=Math.max(1e-9,...rows.map(r=>n(r.xfp)));
+  const maxP90=Math.max(1e-9,...rows.map(r=>n(r.p90)));
+  const top25=rows.map(r=>n(r.top25_score));
+  const minTop25=Math.min(...top25),maxTop25=Math.max(...top25);
+  return {maxXfp,maxP90,minTop25,maxTop25};
+}
+function normalizedTop25(row:any,scale:any){
+  const span=Math.max(1e-9,scale.maxTop25-scale.minTop25);
+  return Math.max(0,Math.min(1,(n(row.top25_score)-scale.minTop25)/span));
+}
+function aggressiveScore(row:any,scale:any,captain=false){
+  const xfp=Math.max(0,n(row.xfp))/scale.maxXfp;
+  const p90=Math.max(0,n(row.p90))/scale.maxP90;
+  const six=Math.max(0,Math.min(1,n(row.six_plus_probability)));
+  const top25=normalizedTop25(row,scale);
+  return captain
+    ? .30*xfp+.45*p90+.15*six+.10*top25
+    : .60*xfp+.20*p90+.10*six+.10*top25;
+}
 
 function xiBounds(formations:string[]){
   const rows=formations.map(f=>{
@@ -83,7 +107,7 @@ function xiBounds(formations:string[]){
   return bounds;
 }
 
-function buildModel(rows:any[],variant:string,rules:any){
+function buildModel(rows:any[],variant:string,rules:any,reference:any=null){
   const budget=n(rules.budget);
   const squad=rules.squad||{};
   const formations=Array.isArray(rules.formations)?rules.formations:[];
@@ -95,6 +119,10 @@ function buildModel(rows:any[],variant:string,rules:any){
     xiTotal:{equal:11},
     capTotal:{equal:1}
   };
+  if(variant==="alternative"&&reference){
+    constraints.aggressiveOverlap={min:AGGRESSIVE_MIN_OVERLAP,max:AGGRESSIVE_MAX_OVERLAP};
+    constraints.aggressiveXfpFloor={min:n(reference.xfp)*AGGRESSIVE_XFP_FLOOR};
+  }
   for(const pos of ["GK","DEF","MID","FWD"]){
     constraints["squad"+pos]={equal:Number(squad[pos]||0)};
     constraints["xi"+pos+"Min"]={min:bounds[pos].min};
@@ -106,16 +134,17 @@ function buildModel(rows:any[],variant:string,rules:any){
   }
 
   const variables:any={},ints:any={};
-  const captainLambda=.18;
+  const scale=metricScale(rows);
+  const referenceIds=new Set<number>(reference?.xi||[]);
   for(const r of rows){
     const id=Number(r.player_id),pos=String(r.position),team=Number(r.team_id);
-    const price=n(r.price),xfp=n(r.xfp),p90=n(r.p90);
+    const price=n(r.price),xfp=n(r.xfp);
     constraints["one_"+id]={max:1};
     constraints["caplink_"+id]={max:0};
     const minutes=n(r.x_minutes);
     const xiProbability=n(r.xi_probability);
     const cheapBench=.0001*price;
-    const base=variant==="recommended"?xfp:xfp+.18*Math.max(0,p90-xfp);
+    const base=variant==="recommended"?xfp:aggressiveScore(r,scale,false);
     const xiEligible=xiProbability>=.5&&minutes>=40;
     if(xiEligible){
       const v:any={
@@ -125,9 +154,13 @@ function buildModel(rows:any[],variant:string,rules:any){
         ["xi"+pos+"Min"]:1,["xi"+pos+"Max"]:1
       };
       if(pos==="GK"||pos==="DEF")v["defstack_"+team]=1;
+      if(variant==="alternative"&&reference){
+        if(referenceIds.has(id))v.aggressiveOverlap=1;
+        v.aggressiveXfpFloor=xfp;
+      }
       variables["x_"+id]=v;ints["x_"+id]=1;
       if(pos!=="GK"){
-        const captainScore=variant==="recommended"?xfp:xfp+captainLambda*Math.max(0,p90-xfp);
+        const captainScore=variant==="recommended"?xfp:aggressiveScore(r,scale,true);
         variables["c_"+id]={score:captainScore,capTotal:1,["caplink_"+id]:1};
         ints["c_"+id]=1;
       }
@@ -141,8 +174,8 @@ function buildModel(rows:any[],variant:string,rules:any){
   return {optimize:"score",opType:"max",constraints,variables,ints};
 }
 
-function solve(rows:any[],variant:string,rules:any){
-  const model=buildModel(rows,variant,rules);
+function solve(rows:any[],variant:string,rules:any,reference:any=null){
+  const model=buildModel(rows,variant,rules,reference);
   const out:any=(solver as any).Solve(model);
   if(!out?.feasible)throw new Error("optimizer infeasible "+variant);
   const xi:number[]=[],bench:number[]=[];let captain=0;
@@ -184,11 +217,11 @@ Deno.serve(async(req:Request)=>{
     const rules=rulesRes.data?.rules;
     if(!rules)throw new Error("GAME_RULES_MISSING");
     const {data,error}=await sb.from("scout_player_projections")
-      .select("player_id,xfp,p90,xi_probability,appearance_probability,x_minutes,availability_probability,confidence,scout_players!inner(team_id,position,price,active)")
+      .select("player_id,xfp,p90,six_plus_probability,top25_score,xi_probability,appearance_probability,x_minutes,availability_probability,confidence,scout_players!inner(team_id,position,price,active)")
       .eq("run_id",RUN);
     if(error)throw error;
     const rows=(data||[]).map((x:any)=>({
-      player_id:x.player_id,xfp:x.xfp,p90:x.p90,xi_probability:x.xi_probability,appearance_probability:x.appearance_probability,x_minutes:x.x_minutes,availability_probability:x.availability_probability,
+      player_id:x.player_id,xfp:x.xfp,p90:x.p90,six_plus_probability:x.six_plus_probability,top25_score:x.top25_score,xi_probability:x.xi_probability,appearance_probability:x.appearance_probability,x_minutes:x.x_minutes,availability_probability:x.availability_probability,
       team_id:x.scout_players.team_id,position:x.scout_players.position,price:x.scout_players.price,active:x.scout_players.active,confidence:x.confidence||"medium"
     })).filter((x:any)=>x.active && n(x.availability_probability)>=.8 && n(x.price)>0);
     const byPos:any={GK:[],DEF:[],MID:[],FWD:[]};
@@ -198,10 +231,17 @@ Deno.serve(async(req:Request)=>{
       const arr=byPos[pos];
       [...arr].sort((a,b)=>n(b.xfp)-n(a.xfp)).slice(0,35).forEach(x=>keep.add(Number(x.player_id)));
       [...arr].sort((a,b)=>n(b.p90)-n(a.p90)||n(b.xfp)-n(a.xfp)).slice(0,35).forEach(x=>keep.add(Number(x.player_id)));
+      [...arr].sort((a,b)=>n(b.top25_score)-n(a.top25_score)||n(b.six_plus_probability)-n(a.six_plus_probability)).slice(0,30).forEach(x=>keep.add(Number(x.player_id)));
       [...arr].sort((a,b)=>n(a.price)-n(b.price)||n(b.xfp)-n(a.xfp)).slice(0,30).forEach(x=>keep.add(Number(x.player_id)));
     }
     const pool=rows.filter((x:any)=>keep.has(Number(x.player_id)));
-    const solved=solve(pool,mode,rules);
+    let reference=null;
+    if(mode==="alternative"){
+      const baseline=solve(pool,"recommended",rules);
+      const baselineXfp=baseline.xi.reduce((sum:number,pid:number)=>sum+n(pool.find((r:any)=>Number(r.player_id)===pid)?.xfp),0);
+      reference={xi:baseline.xi,xfp:baselineXfp};
+    }
+    const solved=solve(pool,mode,rules,reference);
     const poolById=new Map(pool.map((x:any)=>[Number(x.player_id),x]));
     const refinedBench=optimizeBenchForAutosubs(
       solved.xi.map((pid:number)=>poolById.get(pid)).filter(Boolean),
@@ -227,12 +267,12 @@ Deno.serve(async(req:Request)=>{
       const xiXfp=xiRows.reduce((s:number,r:any)=>s+n(r.xfp),0);
       const cap=byId.get(sol.captain);
       const formation=sol.formation;
-      const objective=variant==="recommended"?"xi_primary_exact_autosub_secondary_v1":"ceiling_primary_exact_autosub_secondary_v1";
+      const objective=variant==="recommended"?"xi_primary_exact_autosub_secondary_v1":"aggressive_balanced_ceiling_v1";
       const sims=Number(runMeta.data.simulation_count||0).toLocaleString("tr-TR");
       const autosubLabel=Number(sol.autosubEv||0).toFixed(2);
       const status=variant==="recommended"
         ? `OPTIMAL • availability-integrated • bütçe ≤${Number(rules.budget)}m • ${sims} sim • autosub EV +${autosubLabel}`
-        : `OPTIMAL • availability-integrated • Tavan 11 • P90 odaklı • bütçe ≤${Number(rules.budget)}m • ${sims} sim • autosub EV +${autosubLabel}`;
+        : `OPTIMAL • Agresif 11 • %60 xFP + %20 P90 + %10 6+ + %10 Top25 • xFP tabanı %96,5 • Önerilen XI ile 7-9 ortak • bütçe ≤${Number(rules.budget)}m • ${sims} sim • autosub EV +${autosubLabel}`;
       recs.push({id,run_id:RUN,variant,budget,xi_xfp:xiXfp,captain_xfp:xiXfp+n(cap.xfp),formation,objective,status});
       const posOrder:any={GK:0,DEF:1,MID:2,FWD:3};
       const xis=[...sol.xi].sort((a:number,b:number)=>posOrder[byId.get(a).position]-posOrder[byId.get(b).position]||n(byId.get(b).xfp)-n(byId.get(a).xfp));

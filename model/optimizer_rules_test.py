@@ -5,17 +5,20 @@ ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT/'model'))
 
 from optimizer_rules import (  # noqa: E402
+    AGGRESSIVE_MAX_OVERLAP,AGGRESSIVE_MIN_OVERLAP,AGGRESSIVE_XFP_FLOOR,
     BUDGET,FORMATIONS,MAX_PER_CLUB,SQUAD_LIMITS,
-    best_bench_order,captain_metric,cheap_bench_tiebreak,expected_autosub_value,
-    formation_of,legal_squad,lineup_metric,play_probability,
+    aggressive_metric,best_bench_order,captain_metric,cheap_bench_tiebreak,expected_autosub_value,
+    formation_of,legal_squad,lineup_metric,metric_scale,play_probability,
 )
 
 def test_captain_metric_modes():
-    a={'position':'FWD','xfp':6.0,'p90':9.0,'price':8.0,'xi':.95,'minutes':82,'availability':1}
-    b={'position':'MID','xfp':6.8,'p90':8.0,'price':8.0,'xi':.95,'minutes':82,'availability':1}
+    a={'position':'FWD','xfp':6.0,'p90':9.0,'six_plus_probability':.48,'top25_score':2.0,'price':8.0,'xi':.95,'minutes':82,'availability':1}
+    b={'position':'MID','xfp':6.8,'p90':8.0,'six_plus_probability':.42,'top25_score':1.5,'price':8.0,'xi':.95,'minutes':82,'availability':1}
+    scale=metric_scale([a,b])
     assert captain_metric(b)>captain_metric(a)
     assert captain_metric(a)==6.0
-    assert captain_metric(a,True)==6.0+.18*3.0
+    assert 0<captain_metric(a,True,scale)<1
+    assert 0<aggressive_metric(a,scale)<1
     assert captain_metric({**a,'position':'GK'})<0
 
 def test_canonical_roster_and_formation():
@@ -41,6 +44,9 @@ def test_json_rule_parity_constants():
     assert BUDGET==100
     assert MAX_PER_CLUB==3
     assert SQUAD_LIMITS=={'GK':2,'DEF':5,'MID':5,'FWD':3}
+    assert AGGRESSIVE_XFP_FLOOR==0.965
+    assert AGGRESSIVE_MIN_OVERLAP==7
+    assert AGGRESSIVE_MAX_OVERLAP==9
     assert '4-4-2' in FORMATIONS
 
 
