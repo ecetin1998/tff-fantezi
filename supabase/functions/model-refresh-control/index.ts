@@ -48,6 +48,14 @@ function ageHours(value:string|null|undefined){
 function engineSignature(value:string){
   return String(value||"").replace(/\b(?:GW|MH)\s*\d+\b/gi,"GW#").replace(/\s+/g," ").trim()
 }
+function goalConfigFingerprint(row:any){
+  if(!row?.version)return ""
+  return [
+    row.version,
+    row.alpha_used!=null?`alpha=${row.alpha_used}`:null,
+    row.gate_benchmark||null
+  ].filter(Boolean).join("|")
+}
 async function latestTimestamp(sb:any,table:string,column:string){
   const q=await sb.from(table).select(column).not(column,"is",null).order(column,{ascending:false}).limit(1).maybeSingle()
   if(q.error)throw q.error
@@ -106,69 +114,6 @@ Deno.serve(async(req:Request)=>{
       const ok=!upstreamError&&!stale.length
       if(!ok&&strict)return Response.json({ok:false,error:upstreamError||"source data is stale",sources,stale,upstream_configured:Boolean(endpoint),upstream_status:upstreamStatus},{status:409})
       return Response.json({ok,sources,stale,upstream_configured:Boolean(endpoint),upstream_called:Boolean(endpoint),upstream_status:upstreamStatus,upstream_error:upstreamError})
-    }
-
-    if(stage==="current_context"){
-      const current=await sb.from("scout_model_runs")
-        .select("id,gameweek,model_version,generated_at,source_updated_at,status,is_current")
-        .eq("is_current",true).eq("status","ready")
-        .order("generated_at",{ascending:false}).limit(1).maybeSingle()
-      if(current.error)throw current.error
-      if(!current.data)return Response.json({error:"current run missing"},{status:409})
-
-      const [meta,kickoff,inputs,roles,availability]=await Promise.all([
-        sb.from("scout_replay_input_meta").select("benchmark_version,created_at")
-          .eq("gameweek",current.data.gameweek).order("created_at",{ascending:false}).limit(1).maybeSingle(),
-        sb.from("scout_match_predictions").select("kickoff_at")
-          .eq("run_id",current.data.id).order("kickoff_at",{ascending:true}).limit(1).maybeSingle(),
-        sb.from("scout_replay_player_inputs").select("*")
-          .eq("gameweek",current.data.gameweek).order("benchmark_version",{ascending:false}),
-        sb.from("scout_role_signals").select("player_id,predicted_xi_probability,availability_probability")
-          .eq("run_id",current.data.id),
-        sb.from("scout_availability").select("player_id,availability_probability,checked_at")
-          .eq("run_id",current.data.id),
-      ])
-      for(const q of [meta,kickoff,inputs,roles,availability])if(q.error)throw q.error
-      if(!meta.data?.benchmark_version)return Response.json({error:"current simulation benchmark missing"},{status:409})
-      const benchmark=String(meta.data.benchmark_version)
-      const kickoffAt=kickoff.data?.kickoff_at||null
-      const refreshAllowed=Boolean(kickoffAt&&Date.now()<new Date(kickoffAt).getTime())
-      if(!refreshAllowed){
-        return Response.json({
-          ok:true,refresh_allowed:false,run_id:current.data.id,gameweek:current.data.gameweek,
-          benchmark,kickoff_at:kickoffAt,reason:"current model is locked at first kickoff"
-        })
-      }
-
-      const roleMap=new Map((roles.data||[]).map((x:any)=>[Number(x.player_id),x]))
-      const availabilityMap=new Map((availability.data||[]).map((x:any)=>[Number(x.player_id),x]))
-      const currentInputs=(inputs.data||[]).filter((x:any)=>String(x.benchmark_version)===benchmark)
-      if(!currentInputs.length)return Response.json({error:"current benchmark player inputs missing",benchmark},{status:409})
-
-      let changed=0
-      const synced=currentInputs.map((row:any)=>{
-        const role=roleMap.get(Number(row.player_id))
-        const av=availabilityMap.get(Number(row.player_id))
-        const nextAvailability=Math.max(0,Math.min(1,Number(av?.availability_probability??role?.availability_probability??row.availability??1)))
-        const nextRole=Math.max(.0000001,Math.min(.9999999,Number(role?.predicted_xi_probability??row.role_probability??0)*nextAvailability))
-        if(Math.abs(Number(row.availability??0)-nextAvailability)>1e-9||Math.abs(Number(row.role_probability??0)-nextRole)>1e-9)changed++
-        return {
-          ...row,
-          availability:nextAvailability,
-          role_probability:nextRole,
-          source_note:String(row.source_note||"")+" • pre-kickoff current sync "+new Date().toISOString()
-        }
-      })
-      const write=await sb.from("scout_replay_player_inputs").upsert(synced,{onConflict:"gameweek,benchmark_version,player_id"})
-      if(write.error)throw write.error
-      const latestAvailability=(availability.data||[]).map((x:any)=>x.checked_at).filter(Boolean).sort().at(-1)||null
-      const sourceFresh=ageHours(latestAvailability)<=24
-      return Response.json({
-        ok:true,refresh_allowed:true,source_fresh:sourceFresh,
-        run_id:current.data.id,gameweek:current.data.gameweek,
-        benchmark,kickoff_at:kickoffAt,synced_rows:synced.length,changed_rows:changed,
-        latest_availability_at:latestAvailability
-      })
     }
 
     if(stage==="candidate"){
@@ -239,10 +184,11 @@ Deno.serve(async(req:Request)=>{
       for(const q of [parent,candidate,parentGate,goalDist])if(q.error)throw q.error
       const sameEngine=engineSignature(parent.data.model_version)===engineSignature(candidate.data.model_version)
       const sameConfig=String(parent.data.config_version||"")===String(candidate.data.config_version||"")
+      const activeGoalConfig=goalConfigFingerprint(goalDist.data)
       const gatedGoalDistChange=Boolean(
         !sameConfig&&goalDist.data?.active===true&&goalDist.data?.gate_passed===true&&
         String(goalDist.data?.distribution||"").toUpperCase()==="NB2"&&Number(goalDist.data?.alpha_used||0)>0&&
-        String(candidate.data.config_version||"")===String(goalDist.data?.version||"")
+        String(candidate.data.config_version||"")===activeGoalConfig
       )
       const pass=sameEngine&&Boolean(parentGate.data.backtest_pass)&&(sameConfig||gatedGoalDistChange)
       await upsertGate(sb,runId,{
