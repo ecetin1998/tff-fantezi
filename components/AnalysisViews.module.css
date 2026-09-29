@@ -2040,3 +2040,202 @@
   .scope :global(.player-detail-v2) :global(.player-detail-metric-grid)>div{padding:11px}
   .scope :global(.player-detail-v2) :global(.player-detail-metric-grid) b{font-size:18px}
 }
+
+/* ===== Team detail • final polish authority 2026-09-29 ===== */
+.scope :global(.team-detail-v2){
+  --team-copy:#263150;
+}
+.scope :global(.team-detail-v2) :global(.team-detail-hero-v2){
+  grid-template-columns:76px minmax(0,1fr) minmax(210px,260px);
+  gap:22px;
+  padding:24px 26px;
+}
+.scope :global(.team-detail-v2) :global(.team-detail-mark){
+  width:76px;
+  height:76px;
+  border-radius:20px;
+}
+.scope :global(.team-detail-v2) :global(.team-detail-copy) h1{
+  margin:5px 0 5px;
+  font-size:34px;
+  line-height:1.05;
+}
+.scope :global(.team-detail-v2) :global(.team-detail-copy) p{
+  font-size:11px;
+  line-height:1.35;
+}
+.scope :global(.team-detail-v2) :global(.team-hero-pills) span{
+  min-height:28px;
+  padding:6px 9px;
+  font-size:9px;
+}
+.scope :global(.team-detail-v2) :global(.team-detail-current){
+  width:100%;
+  min-width:0;
+  padding:15px 16px;
+  border:1px solid color-mix(in srgb,var(--club1) 18%,#dde4ee);
+  border-radius:15px;
+  background:color-mix(in srgb,var(--club1) 5%,#fbfcfe);
+  text-align:left;
+  box-shadow:0 8px 22px color-mix(in srgb,var(--club1) 7%,transparent);
+}
+.scope :global(.team-detail-v2) :global(.team-detail-current)>span{
+  display:block;
+  margin-bottom:9px;
+  color:#73809a;
+  font-size:10px;
+  font-weight:900;
+  letter-spacing:.035em;
+}
+.scope :global(.team-detail-v2) :global(.team-detail-current)>div{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:9px;
+  padding:8px 0;
+  border-top:1px solid color-mix(in srgb,var(--club1) 10%,#e9edf3);
+}
+.scope :global(.team-detail-v2) :global(.team-detail-current)>div:first-of-type{
+  border-top:0;
+  padding-top:0;
+}
+.scope :global(.team-detail-v2) :global(.team-detail-current) a,
+.scope :global(.team-detail-v2) :global(.team-detail-current) b{
+  min-width:0;
+  color:var(--clubText);
+  font-size:16px;
+  line-height:1.15;
+  font-weight:950;
+  text-decoration:none;
+}
+.scope :global(.team-detail-v2) :global(.team-detail-current) small{
+  flex:0 0 auto;
+  padding:5px 7px;
+  border-radius:999px;
+  background:#eef2f7;
+  color:#66738b;
+  font-size:8.5px;
+  font-weight:900;
+}
+.scope :global(.team-detail-v2) :global(.team-fixture-badge)>span{
+  font-size:8px;
+  padding:4px 7px;
+}
+.scope :global(.team-detail-v2) :global(.team-fixture-badge) a,
+.scope :global(.team-detail-v2) :global(.team-fixture-badge) b{
+  font-size:10.5px;
+}
+.scope :global(.team-detail-v2) :global(.team-week-metrics) span{
+  font-size:9px;
+}
+.scope :global(.team-detail-v2) :global(.team-week-metrics) small{
+  font-size:8px;
+}
+.scope :global(.team-detail-v2) :global(.team-top-picks-head) span{
+  font-size:9px;
+}
+.scope :global(.team-detail-v2) :global(.team-top-picks-head) small{
+  font-size:8px;
+}
+.scope :global(.team-detail-v2) :global(.team-top-pick)>div b{
+  font-size:10.5px;
+}
+.scope :global(.team-detail-v2) :global(.team-top-pick)>div em{
+  font-size:8px;
+}
+.scope :global(.team-detail-v2) :global(.team-tactical-profile) h3{
+  font-size:15px;
+  line-height:1.2;
+}
+.scope :global(.team-detail-v2) :global(.team-tactical-profile) :global(.detail-list) span,
+.scope :global(.team-detail-v2) :global(.team-tactical-profile) :global(.detail-list) b{
+  font-size:10px;
+  line-height:1.35;
+}
+.scope :global(.team-detail-v2) :global(.team-tactical-profile) :global(.muted){
+  font-size:9.5px;
+  line-height:1.45;
+}
+
+/* The legacy team-detail stylesheet owns the base grid, but must never collapse v3 roster identity. */
+.scope :global(.team-detail-v2) :global(.team-roster-player-v3){
+  grid-template-columns:minmax(260px,1fr) 236px !important;
+  gap:12px !important;
+  min-height:62px;
+  padding:10px 12px !important;
+}
+.scope :global(.team-detail-v2) :global(.team-roster-identity){
+  grid-template-columns:48px minmax(0,1fr) !important;
+  gap:11px;
+  width:auto !important;
+  min-width:0 !important;
+}
+.scope :global(.team-detail-v2) :global(.team-roster-copy){
+  min-width:0 !important;
+}
+.scope :global(.team-detail-v2) :global(.team-roster-copy)>b{
+  display:block !important;
+  color:#263150 !important;
+  font-size:11px !important;
+  line-height:1.25 !important;
+  white-space:normal !important;
+  overflow:visible !important;
+  text-overflow:clip !important;
+}
+.scope :global(.team-detail-v2) :global(.team-roster-copy)>small{
+  display:block !important;
+  color:#7f8aa1 !important;
+  font-size:8.5px !important;
+  line-height:1.3 !important;
+  white-space:normal !important;
+  overflow:visible !important;
+  text-overflow:clip !important;
+}
+.scope :global(.team-detail-v2) :global(.team-roster-metrics-v3){
+  width:236px;
+  grid-template-columns:58px 62px 52px 64px !important;
+}
+
+/* Weekly points desktop: position is a first-class column again. */
+.scope :global(.simplified-weekly-table) :global(.weekly-position-col){
+  width:74px;
+  min-width:74px;
+  text-align:center;
+}
+.scope :global(.simplified-weekly-table) td:global(.weekly-position-col) :global(.pos){
+  min-width:44px;
+  justify-content:center;
+}
+
+@media(max-width:1000px){
+  .scope :global(.team-detail-v2) :global(.team-detail-hero-v2){
+    grid-template-columns:70px minmax(0,1fr);
+  }
+  .scope :global(.team-detail-v2) :global(.team-detail-current){
+    grid-column:1/-1;
+  }
+}
+@media(max-width:760px){
+  .scope :global(.team-detail-v2) :global(.team-detail-copy) h1{
+    font-size:28px;
+  }
+  .scope :global(.team-detail-v2) :global(.team-detail-current){
+    padding:13px 14px;
+  }
+  .scope :global(.team-detail-v2) :global(.team-detail-current) a,
+  .scope :global(.team-detail-v2) :global(.team-detail-current) b{
+    font-size:14px;
+  }
+  .scope :global(.team-detail-v2) :global(.team-roster-player-v3){
+    display:block !important;
+    min-height:0;
+    padding:12px 4px !important;
+  }
+  .scope :global(.team-detail-v2) :global(.team-roster-identity){
+    grid-template-columns:48px minmax(0,1fr) !important;
+  }
+  .scope :global(.team-detail-v2) :global(.team-roster-metrics-v3){
+    width:auto;
+    grid-template-columns:repeat(4,minmax(0,1fr)) !important;
+  }
+}
