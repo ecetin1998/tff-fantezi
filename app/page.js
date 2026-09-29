@@ -13,78 +13,115 @@ export default async function Home(){
   const sourceAgeHours=Number.isFinite(Number(run?.decision_data_age_hours))?Number(run.decision_data_age_hours):Infinity
   const sourceFresh=sourceAgeHours<=24
   const freshnessLabel=!Number.isFinite(sourceAgeHours)?'Bilinmiyor':sourceAgeHours<1?'1 saatten yeni':sourceAgeHours<24?`${Math.round(sourceAgeHours)} saat önce`:`${Math.round(sourceAgeHours/24)} gün önce`
+  const simulationLabel=Number(run?.simulation_count||0)>=1000?`${Math.round(Number(run.simulation_count)/1000)}K`:String(run?.simulation_count||'—')
   const highlights=[
     {
-      label:`MH${run?.gameweek||'—'} en yüksek beklenen puan`,
-      title:playerLabel(best),meta:`${best?.team||'—'} • xFP • tüm senaryoların ortalamasında en yüksek beklenen puan`,
+      label:`MH${run?.gameweek||'—'} xFP lideri`,
+      title:playerLabel(best),meta:`${best?.team||'—'} • en yüksek ortalama beklenti`,
       val:Number(best?.projection?.xfp||0).toFixed(2),unit:'xFP',
       href:best?'/players/'+best.id:'/players',team:best?.team,
     },
     {
-      label:`MH${run?.gameweek||'—'} en iyi F/P`,
-      title:playerLabel(value),meta:`${value?.team||'—'} • Bütçe başına beklenen puan verimi`,
+      label:`MH${run?.gameweek||'—'} fiyat / performans`,
+      title:playerLabel(value),meta:`${value?.team||'—'} • bütçe başına en güçlü verim`,
       val:Number(value?.projection?.value_score||0).toFixed(2),unit:'xFP/m',
       href:value?'/players/'+value.id:'/players',team:value?.team,
     },
     {
       label:`MH${run?.gameweek||'—'} takım xFP lideri`,
       title:teamXfpLeader?.name||'—',
-      meta:`${teamXfpLeader?.player_count||0} aktif oyuncu • takımın bu haftaki toplam beklenen fantasy puanı`,
+      meta:`${teamXfpLeader?.player_count||0} aktif oyuncu • toplam havuz beklentisi`,
       val:Number(teamXfpLeader?.total_xfp||0).toFixed(2),unit:'xFP',
       href:teamHref(teamXfpLeader?.name,teamXfpLeader?.id),team:teamXfpLeader?.name,
     },
     {
-      label:`MH${run?.gameweek||'—'} Top-25’e girme adayı #1`,
-      title:playerLabel(top25),meta:`${top25?.team||'—'} • Yüksek puan patlaması ihtimali en güçlü aday`,
-      val:`#${Number(top25?.projection?.top25_rank||1)}`,unit:'Top25 sıra',
+      label:`MH${run?.gameweek||'—'} Top-25 adayı #1`,
+      title:playerLabel(top25),meta:`${top25?.team||'—'} • üst dilime çıkma profili`,
+      val:`#${Number(top25?.projection?.top25_rank||1)}`,unit:'Top25',
       href:top25?'/players/'+top25.id:'/players',team:top25?.team,
     },
   ]
-  return <>
-<section className="home-intro-layout">
+
+  return <div className="home-shell">
+    <section className="home-intro-layout">
       <div className="card home-intro-hero">
-        <span className="eyebrow">SÜPER LİG FANTASY ANALİZ PLATFORMU</span>
+        <div className="home-hero-kicker">
+          <span className="eyebrow">SÜPER LİG FANTASY ANALİZ PLATFORMU</span>
+          <span className="home-live-pill">MH{run?.gameweek||'—'} • {simulationLabel} sim</span>
+        </div>
         <h1>Veriyi oku.<br/><span>Kararı sen ver.</span></h1>
-        <p>Fantezi Scout; oyuncu rolü, dakika ihtimali, maç modeli ve fantezi puan dağılımını tek yerde birleştirir. Amaç tek bir “doğru kadro” söylemek değil; karar verirken ihtiyacın olan resmi görünür yapmak.</p>
+        <p>Oyuncu rolü, dakika ihtimali, maç modeli ve puan dağılımını tek bir karar ekranında birleştiriyoruz. Tek bir “doğru kadro” yerine, nedenini görebildiğin daha güçlü seçimler yap.</p>
         <div className="home-intro-actions">
-          <Link href="/players" className="cta">Oyuncu Analizleri</Link>
-          <Link href="/squad" className="secondary">Benim Kadrom</Link>
-          <Link href="/matches" className="text-action">Maç Tahminleri →</Link>
+          <Link href="/players" className="cta">Oyuncuları incele</Link>
+          <Link href="/squad" className="secondary">Kadromu kur</Link>
+          <Link href="/matches" className="text-action">Maç modeline git <span>→</span></Link>
+        </div>
+        <div className="home-hero-mini">
+          <div><b>{playerCount}</b><span>aktif oyuncu</span></div>
+          <div><b>{matchCount}</b><span>haftalık maç</span></div>
+          <div><b>{simulationLabel}</b><span>simülasyon</span></div>
         </div>
       </div>
+
       <aside className="home-highlight-grid">
-        {highlights.map(h=><Link key={h.label} className="card spotlight-card team-accent-card" style={teamCssVars(h.team)} href={h.href}>
-          <span>{h.label}</span><b>{h.title}</b><small>{h.meta}</small><strong>{h.val} <em>{h.unit}</em></strong>
+        {highlights.map(h=><Link key={h.label} className="card spotlight-card home-highlight-card team-accent-card" style={teamCssVars(h.team)} href={h.href}>
+          <span>{h.label}</span>
+          <b>{h.title}</b>
+          <small>{h.meta}</small>
+          <strong>{h.val} <em>{h.unit}</em></strong>
         </Link>)}
         <div className="card spotlight-card home-status-card home-status-week">
-          <span>Güncel hafta</span>
+          <span>Yayınlanan hafta</span>
           <b>MH{run?.gameweek||'—'}</b>
-          <small>{matchCount} maç • {playerCount} oyuncu</small>
-          <strong>Aktif <em>hafta</em></strong>
+          <small>{matchCount} maç • {playerCount} oyuncu • {simulationLabel} sim</small>
+          <strong>Canlı <em>model</em></strong>
         </div>
-        <div className="card spotlight-card home-status-card home-status-ready">
-          <span>Model durumu</span>
+        <div className={`card spotlight-card home-status-card home-status-ready ${sourceFresh?'fresh':'stale'}`}>
+          <span>Model & veri durumu</span>
           <b>{run?.status==='ready'?'READY':'Hazırlanıyor'}</b>
-          <small>Sakatlık/ceza kontrolü: {freshnessLabel} ({sourceUpdated})<br/>Model hesaplandı {modelUpdated}</small>
-          <strong>{sourceFresh?'Durum verisi taze':'Durum verisi bayat'} <em>availability</em></strong>
+          <small>Sakatlık/ceza: {freshnessLabel}<br/>Kaynak {sourceUpdated} • model {modelUpdated}</small>
+          <strong>{sourceFresh?'Veri taze':'Tazelik kontrolü'} <em>availability</em></strong>
         </div>
       </aside>
     </section>
 
     <section className="card home-model-guide">
-      <div className="home-guide-copy"><span className="eyebrow">MODELİ NASIL OKUYACAKSIN?</span><h2>Tek sayıya değil, dağılıma bak.</h2><p><strong>xFP lideri</strong>, tüm senaryoların ortalamasında en yüksek puanı beklenen oyuncudur. <strong>Top‑25’e girme adayı #1</strong> ise yüksek puan patlaması ihtimali en güçlü oyuncudur. Bu yüzden aynı kişi olmak zorunda değildir.</p></div>
+      <div className="home-guide-copy">
+        <span className="eyebrow">MODELİ NASIL OKUYACAKSIN?</span>
+        <h2>Tek sayıya değil,<br/><span>dağılıma bak.</span></h2>
+        <p><strong>xFP</strong> ortalama beklentiyi, <strong>P90</strong> yüksek tavanı, <strong>Top‑25</strong> ise haftanın üst puan dilimine girme profilini anlatır. Aynı oyuncu her metriğin lideri olmak zorunda değildir.</p>
+        <Link href="/sss" className="home-guide-link">Metodolojiyi aç <span>→</span></Link>
+      </div>
       <div className="home-guide-metrics">
-        <div><b>xFP</b><span>Beklenen fantezi puanı</span></div>
-        <div><b>xDakika</b><span>Beklenen oynama süresi</span></div>
-        <div><b>P90</b><span>Üst %10 puan eşiği</span></div>
-        <div><b>Top25</b><span>Haftanın üst puan dilimine girme aday sırası</span></div>
+        <div><b>xFP</b><span>Beklenen fantasy puanı</span><small>Ortalama senaryo</small></div>
+        <div><b>xDakika</b><span>Beklenen oynama süresi</span><small>Rol + ilk 11 ihtimali</small></div>
+        <div><b>P90</b><span>Üst %10 puan eşiği</span><small>Tavan senaryosu</small></div>
+        <div><b>Top‑25</b><span>Üst dilime girme profili</span><small>Patlama ihtimali</small></div>
       </div>
     </section>
 
-    <section className="home-feature-grid">
-      <Link href="/players" className="card home-feature-card"><b>Oyuncu Analizleri</b><p>Tam ad, takım, rakip, rol, dakika, xFP ve gerçek haftalık performansı birlikte gör.</p><span>Oyuncu havuzu →</span></Link>
-      <Link href="/teams" className="card home-feature-card"><b>Takım Profilleri</b><p>Takım renkleri, kadro, geçmiş sonuçlar, xG/xGA profili ve bu haftaki eşleşme.</p><span>Takım analizleri →</span></Link>
-      <Link href="/squad" className="card home-feature-card"><b>Benim Kadrom</b><p>15 oyuncunu sahaya diz, kaptanı seç, yedeklerle dinamik swap yap ve taktiği canlı gör.</p><span>Benim Kadrom →</span></Link>
+    <section className="home-feature-section">
+      <div className="home-section-head">
+        <div><span className="eyebrow">SCOUT MERKEZİ</span><h2>Karar akışın tek yerde.</h2></div>
+        <p>Oyuncudan maça, maçtan kadroya aynı veri zincirini takip et.</p>
+      </div>
+      <div className="home-feature-grid">
+        <Link href="/players" className="card home-feature-card">
+          <span className="home-feature-no">01</span>
+          <div><b>Oyuncu Analizleri</b><p>Tam ad, takım, rakip, rol, dakika, xFP, P90 ve gerçek haftalık performansı birlikte gör.</p></div>
+          <strong>Oyuncu havuzu <i>→</i></strong>
+        </Link>
+        <Link href="/teams" className="card home-feature-card">
+          <span className="home-feature-no">02</span>
+          <div><b>Takım Profilleri</b><p>Takım formu, xG/xGA, hücum kanalları, fikstür ve matchup etkisini aynı profilde incele.</p></div>
+          <strong>Takım analizleri <i>→</i></strong>
+        </Link>
+        <Link href="/squad" className="card home-feature-card">
+          <span className="home-feature-no">03</span>
+          <div><b>Benim Kadrom</b><p>15 oyuncunu kur, sahayı otomatik diz, kaptanı seç ve model kadronla farkları anında gör.</p></div>
+          <strong>Kadromu aç <i>→</i></strong>
+        </Link>
+      </div>
     </section>
-  </>
+  </div>
 }
