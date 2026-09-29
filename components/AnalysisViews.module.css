@@ -1885,3 +1885,158 @@
   }
 }
 
+/* ===== Player detail • final visual authority 2026-09-29 ===== */
+.scope :global(.player-detail-v2){
+  color:#24314d;
+}
+.scope :global(.player-detail-v2) :global(.profile-card){
+  padding:22px;
+  border-color:#d9e1ec;
+  background:#fff;
+  box-shadow:0 12px 32px rgba(35,48,83,.07);
+}
+.scope :global(.player-detail-v2) :global(.player-detail-section-head){
+  margin-bottom:16px;
+}
+.scope :global(.player-detail-v2) :global(.player-detail-section-head) h2{
+  margin-top:5px;
+  color:#1f2b49;
+  font-size:24px;
+  line-height:1.18;
+}
+.scope :global(.player-detail-v2) :global(.player-detail-metric-grid){
+  gap:10px;
+}
+.scope :global(.player-detail-v2) :global(.player-detail-metric-grid)>div{
+  min-height:104px;
+  padding:14px;
+  border-color:#dce4ee;
+  border-radius:14px;
+  background:#f8fafc;
+}
+.scope :global(.player-detail-v2) :global(.player-detail-metric-grid) span{
+  color:#66738b;
+  font-size:11px;
+  line-height:1.3;
+  font-weight:850;
+}
+.scope :global(.player-detail-v2) :global(.player-detail-metric-grid) b{
+  margin-top:7px;
+  color:#22304d;
+  font-size:22px;
+  line-height:1.05;
+}
+.scope :global(.player-detail-v2) :global(.player-detail-metric-grid) small{
+  margin-top:7px;
+  color:#7b879d;
+  font-size:10px;
+  line-height:1.35;
+}
+.scope :global(.player-detail-v2) :global(.player-identity-pills) span{
+  min-height:30px;
+  padding:6px 10px;
+  color:#53627d;
+  font-size:10px;
+}
+.scope :global(.player-detail-v2) :global(.player-detail-identity)>p b{
+  font-size:12px;
+}
+.scope :global(.player-detail-v2) :global(.player-fixture-chip){
+  min-height:38px;
+  padding:8px 11px;
+}
+.scope :global(.player-detail-v2) :global(.player-fixture-chip)>span{
+  font-size:9px;
+}
+.scope :global(.player-detail-v2) :global(.player-fixture-chip) a,
+.scope :global(.player-detail-v2) :global(.player-fixture-chip) b{
+  font-size:11px;
+}
+.scope :global(.player-detail-v2) :global(.projection-explainer),
+.scope :global(.player-detail-v2) :global(.player-role-caption){
+  color:#68758d;
+  font-size:11px;
+  line-height:1.55;
+}
+.scope :global(.player-detail-v2) :global(.player-attacking-expectation) span{
+  color:#65728b;
+  font-size:10px;
+}
+.scope :global(.player-detail-v2) :global(.player-attacking-expectation) b{
+  font-size:16px;
+}
+.scope :global(.player-detail-v2) :global(.player-form-strip) span{
+  color:#6b7890;
+  font-size:10px;
+}
+.scope :global(.player-detail-v2) :global(.player-form-strip) b{
+  font-size:15px;
+}
+.scope :global(.player-detail-v2) :global(.player-advanced-details){
+  position:relative;
+  isolation:isolate;
+  overflow:hidden;
+  border-color:#d9e1ec;
+  background:#fff;
+}
+.scope :global(.player-detail-v2) :global(.player-advanced-details) summary{
+  position:relative;
+  z-index:2;
+  min-height:64px;
+  padding:17px 20px;
+  pointer-events:auto;
+  touch-action:manipulation;
+}
+.scope :global(.player-detail-v2) :global(.player-advanced-details) summary span small{
+  color:#68758d;
+  font-size:9.5px;
+}
+.scope :global(.player-detail-v2) :global(.player-advanced-details) summary span b{
+  color:#26334f;
+  font-size:13px;
+}
+.scope :global(.player-detail-v2) :global(.player-advanced-body) :global(.detail-list) span{
+  font-size:10.5px;
+}
+.scope :global(.player-detail-v2) :global(.player-advanced-body) :global(.detail-list) b{
+  font-size:11.5px;
+}
+.scope :global(.player-detail-v2) :global(.player-model-note) span{
+  font-size:9.5px;
+}
+.scope :global(.player-detail-v2) :global(.player-model-note) p{
+  color:#5d6b84;
+  font-size:11px;
+  line-height:1.55;
+}
+@media(max-width:760px){
+  .scope :global(.player-detail-v2) :global(.profile-card){
+    padding:16px;
+    border-radius:16px;
+  }
+  .scope :global(.player-detail-v2) :global(.player-detail-section-head) h2{
+    font-size:21px;
+  }
+  .scope :global(.player-detail-v2) :global(.player-detail-metric-grid),
+  .scope :global(.player-detail-v2) :global(.scenario-metrics),
+  .scope :global(.player-detail-v2) :global(.role-metrics),
+  .scope :global(.player-detail-v2) :global(.season-position-metrics),
+  .scope :global(.player-detail-v2) :global(.season-position-metrics):global(.position-gk){
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:9px;
+  }
+  .scope :global(.player-detail-v2) :global(.player-detail-metric-grid)>div{
+    min-height:96px;
+    padding:12px;
+  }
+  .scope :global(.player-detail-v2) :global(.player-detail-metric-grid) span{font-size:10.5px}
+  .scope :global(.player-detail-v2) :global(.player-detail-metric-grid) b{font-size:20px}
+  .scope :global(.player-detail-v2) :global(.player-detail-metric-grid) small{font-size:9.5px}
+  .scope :global(.player-detail-v2) :global(.player-identity-pills) span{font-size:9.5px}
+  .scope :global(.player-detail-v2) :global(.projection-explainer),
+  .scope :global(.player-detail-v2) :global(.player-role-caption){font-size:10.5px}
+}
+@media(max-width:390px){
+  .scope :global(.player-detail-v2) :global(.player-detail-metric-grid)>div{padding:11px}
+  .scope :global(.player-detail-v2) :global(.player-detail-metric-grid) b{font-size:18px}
+}
