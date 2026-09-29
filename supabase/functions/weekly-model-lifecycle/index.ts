@@ -45,6 +45,11 @@ const avg=(xs:number[])=>xs.length?xs.reduce((a,b)=>a+b,0)/xs.length:0
 const per90=(v:any,minutes:any,fallback=0)=>n(minutes)>0?n(v)*90/n(minutes):fallback
 const newer=(...xs:any[])=>xs.filter(Boolean).map(x=>new Date(x).getTime()).filter(Number.isFinite).sort((a,b)=>b-a)[0]||Date.now()
 const sourceRevision=(value:any)=>new Date(value).toISOString().replace(/[-:TZ.]/g,"").slice(0,14)
+const ageHours=(value:any)=>{
+  if(!value)return Infinity
+  const ts=new Date(value).getTime()
+  return Number.isFinite(ts)?Math.max(0,(Date.now()-ts)/36e5):Infinity
+}
 async function snapshotHash(value:any){
   const payload=new TextEncoder().encode(JSON.stringify(value))
   const digest=await crypto.subtle.digest("SHA-256",payload)
