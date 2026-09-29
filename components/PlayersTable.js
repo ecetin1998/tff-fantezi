@@ -1,5 +1,5 @@
 'use client'
-import {useEffect,useState} from 'react'
+import {useCallback,useEffect,useState} from 'react'
 import Link from 'next/link'
 import {useRouter} from 'next/navigation'
 import {teamCssVars} from '@/lib/teamThemes'
@@ -16,7 +16,7 @@ export default function PlayersTable({players,total,page,pageCount,teams,filters
 
   useEffect(()=>{setQ(filters?.q||'')},[filters?.q])
 
-  const navigate=patch=>{
+  const navigate=useCallback(patch=>{
     const next={...(filters||{}),...patch}
     const params=new URLSearchParams()
     if(next.q)params.set('q',next.q)
@@ -27,13 +27,13 @@ export default function PlayersTable({players,total,page,pageCount,teams,filters
     if(Number(next.page||1)>1)params.set('page',String(next.page))
     const query=params.toString()
     router.replace('/players'+(query?'?'+query:''),{scroll:false})
-  }
+  },[filters,router])
 
   useEffect(()=>{
     if(q===(filters?.q||''))return
     const timer=setTimeout(()=>navigate({q,page:1}),250)
     return ()=>clearTimeout(timer)
-  },[q,filters?.q])
+  },[q,filters?.q,navigate])
 
   const changeSort=key=>{
     const same=filters?.sort===key
