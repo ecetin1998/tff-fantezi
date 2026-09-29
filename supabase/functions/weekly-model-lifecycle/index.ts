@@ -384,14 +384,15 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
   const deadline=kickoff-36e5
   if(now>=deadline)return {refresh_required:false,reason:"CURRENT_WEEK_LOCKED",deadline_at:new Date(deadline).toISOString()}
 
-  const [latestMetaQ,availabilityQ,rolesQ,goalConfigQ,playersUpdatedQ]=await Promise.all([
+  const [latestMetaQ,availabilityQ,rolesQ,goalConfigQ,playersUpdatedQ,currentProjectionQ]=await Promise.all([
     sb.from("scout_replay_input_meta").select("*").eq("gameweek",gw).order("created_at",{ascending:false}).limit(1).maybeSingle(),
     sb.from("scout_availability").select("*").eq("run_id",current.id),
     sb.from("scout_role_signals").select("*").eq("run_id",current.id),
     sb.from("scout_goal_distribution_config").select("version").eq("active",true).order("created_at",{ascending:false}).limit(1).maybeSingle(),
-    sb.from("scout_players").select("updated_at").eq("active",true).order("updated_at",{ascending:false}).limit(1).maybeSingle()
+    sb.from("scout_players").select("updated_at").eq("active",true).order("updated_at",{ascending:false}).limit(1).maybeSingle(),
+    sb.from("scout_player_projections").select("player_id,opponent_name,venue,confidence,data_confidence").eq("run_id",current.id)
   ])
-  for(const q of [latestMetaQ,availabilityQ,rolesQ,goalConfigQ,playersUpdatedQ])if(q.error)throw q.error
+  for(const q of [latestMetaQ,availabilityQ,rolesQ,goalConfigQ,playersUpdatedQ,currentProjectionQ])if(q.error)throw q.error
   if(!latestMetaQ.data)return {refresh_required:false,reason:"CURRENT_SIM_INPUT_META_MISSING"}
 
   const latestSourceAt=new Date(newer(
@@ -425,6 +426,7 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
   const configVersion=goalConfigQ.data?.version||null
   const avMap=new Map((availabilityQ.data||[]).map((x:any)=>[Number(x.player_id),x]))
   const roleMap=new Map((rolesQ.data||[]).map((x:any)=>[Number(x.player_id),x]))
+  const projectionMap=new Map((currentProjectionQ.data||[]).map((x:any)=>[Number(x.player_id),x]))
 
   const inputRows=(inputsQ.data||[]).map((x:any)=>{
     const av=avMap.get(Number(x.player_id))
@@ -449,14 +451,17 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
   })
   if(runInsert.error)throw runInsert.error
 
-  const projectionRows=inputRows.map((x:any)=>({
-    run_id:runId,player_id:Number(x.player_id),opponent_name:"—",venue:"HOME",
-    xi_probability:0,appearance_probability:0,over60_probability:0,x_minutes:0,
-    core_xfp:0,x_bonus:0,xfp:0,p25:0,p75:0,p90:0,six_plus_probability:0,value_score:0,
-    data_confidence:x.data_confidence||"medium",role_note:null,expected_goals:0,expected_assists:0,
-    mc_standard_error:0,availability_source:"intraday-refresh",availability_probability:n(x.availability,1),
-    top25_score:null,top25_rank:null,top25_model_version:null,confidence:x.data_confidence||"medium"
-  }))
+  const projectionRows=inputRows.map((x:any)=>{
+    const previous=projectionMap.get(Number(x.player_id))||{}
+    return {
+      run_id:runId,player_id:Number(x.player_id),opponent_name:previous.opponent_name||"—",venue:previous.venue||"HOME",
+      xi_probability:0,appearance_probability:0,over60_probability:0,x_minutes:0,
+      core_xfp:0,x_bonus:0,xfp:0,p25:0,p75:0,p90:0,six_plus_probability:0,value_score:0,
+      data_confidence:previous.data_confidence||x.data_confidence||"medium",role_note:null,expected_goals:0,expected_assists:0,
+      mc_standard_error:0,availability_source:"intraday-refresh",availability_probability:n(x.availability,1),
+      top25_score:null,top25_rank:null,top25_model_version:null,confidence:previous.confidence||x.data_confidence||"medium"
+    }
+  })
   const availabilityRows=(availabilityQ.data||[]).map((x:any)=>{const {run_id:_,...rest}=x;return {...rest,run_id:runId}})
   const roleRows=(rolesQ.data||[]).map((x:any)=>{
     const {run_id:_,...rest}=x
