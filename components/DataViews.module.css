@@ -2095,3 +2095,158 @@
     font-size:10.5px;
   }
 }
+
+/* ===== Match cards • final readability authority 2026-09-29 ===== */
+.scope :global(.match-analysis-card) :global(.match-team-identity) b{
+  font-size:16px;
+  line-height:1.15;
+}
+.scope :global(.match-analysis-card) :global(.matchup-pill):global(.good){
+  color:#176b52;
+  font-size:10.5px;
+  font-weight:950;
+}
+.scope :global(.match-analysis-card) :global(.matchup-pill):global(.tough){
+  color:#a93e4c;
+  font-size:10.5px;
+  font-weight:950;
+}
+.scope :global(.match-analysis-card) :global(.matchup-pill):global(.neutral){
+  color:#4f5c75;
+  font-size:10.5px;
+  font-weight:950;
+}
+
+/* Use !important here deliberately: PremiumViews also owns an older outcome-bar size.
+   This is the canonical final size for the match page. */
+.scope :global(.match-analysis-card) :global(.outcome-bar-labeled){
+  width:100% !important;
+  max-width:none !important;
+  height:72px !important;
+  min-height:72px !important;
+  flex:0 0 72px !important;
+  display:flex !important;
+  margin:22px 0 24px !important;
+  overflow:hidden !important;
+  border-radius:14px !important;
+}
+.scope :global(.match-analysis-card) :global(.outcome-bar-labeled)>i{
+  height:72px !important;
+  min-height:72px !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  overflow:hidden !important;
+}
+.scope :global(.match-analysis-card) :global(.outcome-bar-labeled)>i>span{
+  width:100%;
+  min-width:0;
+  display:flex !important;
+  flex-direction:column;
+  align-items:center !important;
+  justify-content:center !important;
+  gap:4px !important;
+  padding:5px 4px !important;
+  white-space:nowrap !important;
+  overflow:hidden !important;
+  text-overflow:clip !important;
+  line-height:1 !important;
+}
+.scope :global(.match-analysis-card) :global(.outcome-bar-labeled)>i>span>strong{
+  font-size:11.5px !important;
+  line-height:1 !important;
+  font-weight:950 !important;
+}
+.scope :global(.match-analysis-card) :global(.outcome-bar-labeled)>i>span>b{
+  font-size:17px !important;
+  line-height:1 !important;
+  font-weight:950 !important;
+}
+.scope :global(.match-analysis-card) :global(.fantasy-first-meta)>span{
+  min-height:98px;
+  padding:13px 10px;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+}
+.scope :global(.match-analysis-card) :global(.fantasy-first-meta) small{
+  min-height:28px;
+  display:flex;
+  align-items:flex-end;
+  justify-content:center;
+  overflow:visible;
+  text-overflow:clip;
+  white-space:normal;
+  overflow-wrap:anywhere;
+  color:#53617a;
+  font-size:9.5px;
+  line-height:1.2;
+  font-weight:850;
+  text-align:center;
+}
+.scope :global(.match-analysis-card) :global(.fantasy-first-meta) b{
+  margin-top:8px;
+  font-size:16px;
+  text-align:center;
+}
+@media(max-width:760px){
+  .scope :global(.match-analysis-card) :global(.match-team-identity) b{
+    font-size:12.5px;
+  }
+  .scope :global(.match-analysis-card) :global(.matchup-pill):global(.good),
+  .scope :global(.match-analysis-card) :global(.matchup-pill):global(.tough),
+  .scope :global(.match-analysis-card) :global(.matchup-pill):global(.neutral){
+    font-size:9.5px;
+  }
+  .scope :global(.match-analysis-card) :global(.outcome-bar-labeled){
+    height:58px !important;
+    min-height:58px !important;
+    flex-basis:58px !important;
+    margin:18px 0 20px !important;
+  }
+  .scope :global(.match-analysis-card) :global(.outcome-bar-labeled)>i{
+    height:58px !important;
+    min-height:58px !important;
+  }
+  .scope :global(.match-analysis-card) :global(.outcome-bar-labeled)>i>span{
+    gap:3px !important;
+    padding:4px 2px !important;
+  }
+  .scope :global(.match-analysis-card) :global(.outcome-bar-labeled)>i>span>strong{
+    font-size:9.5px !important;
+  }
+  .scope :global(.match-analysis-card) :global(.outcome-bar-labeled)>i>span>b{
+    font-size:13px !important;
+  }
+  .scope :global(.match-analysis-card) :global(.fantasy-first-meta)>span{
+    min-height:88px;
+    padding:11px 8px;
+  }
+  .scope :global(.match-analysis-card) :global(.fantasy-first-meta) small{
+    min-height:25px;
+    font-size:8.5px;
+  }
+  .scope :global(.match-analysis-card) :global(.fantasy-first-meta) b{
+    font-size:14px;
+  }
+}
+@media(max-width:430px){
+  .scope :global(.match-analysis-card) :global(.match-team-identity) b{
+    font-size:11px;
+  }
+  .scope :global(.match-analysis-card) :global(.outcome-bar-labeled){
+    height:54px !important;
+    min-height:54px !important;
+    flex-basis:54px !important;
+  }
+  .scope :global(.match-analysis-card) :global(.outcome-bar-labeled)>i{
+    height:54px !important;
+    min-height:54px !important;
+  }
+  .scope :global(.match-analysis-card) :global(.outcome-bar-labeled)>i>span>strong{
+    font-size:8.5px !important;
+  }
+  .scope :global(.match-analysis-card) :global(.outcome-bar-labeled)>i>span>b{
+    font-size:11.5px !important;
+  }
+}
