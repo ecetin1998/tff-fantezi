@@ -62,6 +62,8 @@ assert.match(worker,/source_cutoff/)
 assert.match(worker,/input_snapshot_hash/)
 assert.match(worker,/code_sha/)
 assert.match(worker,/config_version/)
+assert.match(worker,/codeRevision/,'Intraday candidates must be keyed by code revision to avoid stale candidate reuse.')
+assert.match(worker,/shareTotals/,'Intraday availability changes must renormalize team goal and assist shares.')
 assert.doesNotMatch(worker,/gameweek\s*=\s*7|GAMEWEEK\s*=\s*7/)
 
 const sim=read('supabase/functions/run-live-sim-chunk/index.ts')
