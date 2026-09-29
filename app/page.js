@@ -7,10 +7,10 @@ export const revalidate=300
 
 export default async function Home(){
   const {run,best,value,teamXfpLeader,top25,playerCount,matchCount}=await getHomeOverview()
-  const latestDataAt=run?.latest_data_at||run?.source_updated_at||null
+  const latestDataAt=run?.decision_data_at||run?.source_updated_at||null
   const sourceUpdated=latestDataAt?new Intl.DateTimeFormat('tr-TR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit',timeZone:'Europe/Istanbul'}).format(new Date(latestDataAt)):'—'
   const modelUpdated=run?.generated_at?new Intl.DateTimeFormat('tr-TR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit',timeZone:'Europe/Istanbul'}).format(new Date(run.generated_at)):'—'
-  const sourceAgeHours=Number.isFinite(Number(run?.latest_data_age_hours))?Number(run.latest_data_age_hours):Infinity
+  const sourceAgeHours=Number.isFinite(Number(run?.decision_data_age_hours))?Number(run.decision_data_age_hours):Infinity
   const sourceFresh=sourceAgeHours<=24
   const freshnessLabel=!Number.isFinite(sourceAgeHours)?'Bilinmiyor':sourceAgeHours<1?'1 saatten yeni':sourceAgeHours<24?`${Math.round(sourceAgeHours)} saat önce`:`${Math.round(sourceAgeHours/24)} gün önce`
   const highlights=[
@@ -65,8 +65,8 @@ export default async function Home(){
         <div className="card spotlight-card home-status-card home-status-ready">
           <span>Model durumu</span>
           <b>{run?.status==='ready'?'READY':'Hazırlanıyor'}</b>
-          <small>Kaynak verisi: {freshnessLabel} ({sourceUpdated})<br/>Model hesaplandı {modelUpdated}</small>
-          <strong>{sourceFresh?'Veri taze':'Tazelik kontrolü gerekli'} <em>kaynak</em></strong>
+          <small>Sakatlık/ceza kontrolü: {freshnessLabel} ({sourceUpdated})<br/>Model hesaplandı {modelUpdated}</small>
+          <strong>{sourceFresh?'Durum verisi taze':'Durum verisi bayat'} <em>availability</em></strong>
         </div>
       </aside>
     </section>

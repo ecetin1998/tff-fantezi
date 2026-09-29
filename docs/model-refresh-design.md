@@ -1,10 +1,10 @@
 # Model Refresh Automation Design
 
-**Status:** implemented. The generic weekly lifecycle is scheduled hourly; it advances only after the current MH is fully closed and all release gates pass.
+**Status:** implemented. The lifecycle checks sources and closure state hourly. It can rebuild the open MH before the lineup deadline, and it rolls to the next MH only after the current week is fully closed and all release gates pass.
 
 ## Goal
 
-Automate the weekly Scout lifecycle without ever promoting a run that has not passed the same release gates used manually.
+Keep the published Scout model fresh without ever replacing it with an unvalidated run.
 
 ## Active pipeline
 
@@ -13,77 +13,84 @@ Automate the weekly Scout lifecycle without ever promoting a run that has not pa
    - completed-match actuals
    - availability/suspension data
    - active roster and prices
-2. **Build candidate**
-   - create a new non-current `scout_model_runs` row
-   - generate projections, roles, recommendations and dependent outputs
-   - never mutate the current run in place
-3. **Gate 1 — model QA**
-   - execute `scout_run_qa(candidate_run_id)`
-   - fail closed
-4. **Gate 2 — data integrity**
-   - execute `scout_data_integrity_qa(candidate_run_id)`
-   - fail closed
-5. **Replay / backtest**
-   - run the exact model code/version that produced the candidate
-   - record benchmark version, code revision, seed, draws and result
-   - reject stale replay workers whose simulator does not match the candidate motor
-6. **Release record**
-   - write `scout_run_release_gates` only after all three gates pass
-7. **Promote**
+2. **Build a non-current candidate**
+   - open MH: rebuild only when critical source/config/code inputs changed and the first-match deadline has not passed
+   - closed MH: build the next MH only when closure and next-fixture coverage are complete
+   - never mutate the published current run in place
+3. **50K simulation**
+   - use the active, approved goal-distribution configuration
+   - the current active configuration is gated NB2; Poisson remains the fail-closed fallback when no approved NB2 config exists
+4. **Optimizer**
+   - recommended XI maximizes expected value
+   - ceiling XI uses the tail objective without being forced to differ from the recommended XI
+   - squad legality, budget, club limit and defensive-stack constraints remain canonical
+5. **Release gates**
+   - `scout_run_qa(candidate_run_id)`
+   - `scout_data_integrity_qa(candidate_run_id)`
+   - bugfix invariants
+   - leakage-safe model validation / approved component gate
+6. **Freeze and promote**
+   - snapshot the validated candidate
    - service-role-only `scout_promote_run(candidate_run_id)`
-8. **Post-promotion verification**
+7. **Post-promotion verification**
    - verify exactly one current run
-   - smoke-check public API and main pages
-9. **Failure notification**
-   - send a notification containing stage, run id, model revision and sanitized error
-   - leave the previous current run untouched
+   - smoke-check public API and application routes
 
-## Scheduler
-
-GitHub Actions is the active orchestrator and Supabase Edge Functions are protected workers.
-
-Reasons:
-- repository revision is explicit in every run;
-- CI/model tests can run before remote compute;
-- failed workflow is visible in the same place as code changes;
-- secrets remain in GitHub/Supabase secret stores;
-- promotion can be a final explicit job with dependencies on all gates.
+If any stage fails, the previous current run remains published.
 
 ## Cadence
 
-A single blind midnight refresh is not enough for fantasy decisions. The workflow runs an hourly lightweight source/closure check. It performs no model mutation while the current MH is open. Once every current-MH fixture is `Bitti` + `KAPANDI`, official weekly rows are final, and the next MH fixtures exist, it performs the full rollover exactly once. The new run is snapshotted before the next first kickoff.
+The workflow runs an hourly lightweight check.
+
+For an **open MH**, availability must be no older than 24 hours. A candidate refresh is considered when source data advances or when the code/config fingerprint changes. Refresh cadence tightens toward the lineup deadline:
+
+- more than 48 hours remaining: at most daily
+- 12–48 hours remaining: at most every 6 hours
+- less than 12 hours remaining: at most every 2 hours
+- from one hour before the first kickoff: locked
+
+For a **closed MH**, rollover starts only when every current fixture is `Bitti` + `KAPANDI`, weekly actuals are final and the next MH fixtures are complete.
+
+The scheduler does not fake freshness. If the approved upstream availability source is not configured or is stale, the current run remains published and the refresh is skipped with an explicit reason.
 
 ## Worker authentication
 
-GitHub Actions protected workers use GitHub OIDC rather than a long-lived shared secret:
-- workflow permission: `id-token: write`
-- audience: `tff-fantezi-scout`
-- accepted repository: `ecetin1998/tff-fantezi`
-- accepted repository id: `1353738004`
-- accepted ref: `refs/heads/main`
-- accepted event: `workflow_dispatch`
+GitHub Actions workers use GitHub OIDC. The protected lifecycle workers accept only tokens matching:
 
-The Supabase project URL is not secret and is embedded in the workflow. `SCOUT_GATE_SECRET` remains only as an optional backwards-compatible fallback. No service-role value is stored in repository files or exposed to frontend code.
+- audience: `tff-fantezi-scout`
+- repository: `ecetin1998/tff-fantezi`
+- repository id: `1353738004`
+- ref: `refs/heads/main`
+- supported events: `schedule`, `workflow_dispatch`, and the path-filtered `push` lifecycle
+
+The production lifecycle does not require a long-lived service-role value or model-operation secret in GitHub. Supabase service-role credentials stay inside Supabase workers.
+
+## Reproducibility
+
+Generated runs record:
+
+- `source_cutoff`
+- `input_snapshot_hash`
+- `code_sha`
+- `config_version`
+- simulation count and benchmark version
+
+The goal-distribution fingerprint includes the version, active alpha value and recorded component-gate benchmark. A configuration change is not inherited silently unless its component gate is recorded as passed.
 
 ## Idempotency
 
-Every workflow run should carry a deterministic execution key such as season + target MH + source snapshot timestamp + git SHA. Re-running the same execution must reuse or safely replace the same candidate, never create multiple current runs.
+Current-MH refreshes and weekly rollovers use deterministic source-revision keys. Retrying the same source snapshot reuses the existing candidate instead of creating duplicate publishable runs.
 
-## Notification design
+## Source policy
 
-On failure, notify only after a stage genuinely fails. Recommended options:
-- GitHub Actions failure notification;
-- Vercel/observability alert for post-deploy failures;
-- later: a dedicated mail/Slack webhook stored as a secret.
-
-No notification connector is hard-coded in this branch.
+The lifecycle can only refresh from approved inputs. The repository intentionally does not contain an unlicensed scraper for injury/suspension sources. Until an approved or licensed upstream endpoint is connected, the availability freshness guard remains fail-closed rather than updating timestamps without new evidence.
 
 ## Runtime guarantees
 
-- protected Edge Functions reject requests without a valid GitHub OIDC token or an explicitly configured legacy gate secret
-- both QA RPCs are read-only
-- replay runs the same simulator revision as candidate generation
-- release gate is populated only after PASS
-- promote is browser-inaccessible
-- failure leaves current run unchanged
-- one dry-run and one forced-failure test are documented
+- current published data is never rewritten by an unfinished simulation
+- 50K simulation completeness is checked before finalize
+- browser roles cannot execute internal model/replay RPCs
+- internal replay/model state is not browser-readable
+- promotion is service-role only
+- the previous current run survives any failed candidate
+- first kickoff locks the current MH
