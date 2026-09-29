@@ -16,6 +16,7 @@ const migration=read('supabase/migrations/20260928193000_deadline_and_squad_page
 const navAccount=read('components/NavAccountControls.js')
 const appNav=read('components/AppNavLinks.js')
 const playerDetailLayout=read('app/players/[id]/layout.js')
+const teamDetailLayout=read('app/teams/[id]/layout.js')
 const analysisCss=read('components/AnalysisViews.module.css')
 const dataViewsCss=read('components/DataViews.module.css')
 const squadWorkspaceCss=read('components/SquadWorkspace.module.css')
@@ -79,6 +80,7 @@ assert.equal(fs.existsSync('app/squad/loading.js'),true)
 
 /* visual-system regression guards */
 assert.match(playerDetailLayout,/AnalysisViews\.module\.css/,'Player detail must load its route-scoped analysis styles.')
+assert.match(teamDetailLayout,/AnalysisViews\.module\.css/,'Team detail must load its route-scoped analysis styles.')
 assert.match(analysisCss,/Player detail • final visual authority 2026-09-29/)
 assert.match(analysisCss,/player-advanced-details[\s\S]*pointer-events:auto/,'Advanced player details summary must remain clickable.')
 assert.match(dataViewsCss,/Site-wide premium readability authority 2026-09-29/)
