@@ -1793,16 +1793,16 @@
 
 
 /* ===== My Squad • model advice consistency + weekly snapshot ===== */
-.scope :global(.squad-model-advice){
+.scope :global(.squad-model-guidance){
   min-width:0;
 }
-.scope :global(.squad-model-advice) h2{
+.scope :global(.squad-model-guidance) h2{
   max-width:760px;
   font-size:clamp(20px,2.2vw,30px);
   line-height:1.12;
   overflow-wrap:anywhere;
 }
-.scope :global(.squad-model-advice) p{
+.scope :global(.squad-model-guidance) p{
   max-width:720px;
   line-height:1.55;
 }
@@ -1941,7 +1941,7 @@
   }
 }
 @media(max-width:760px){
-  .scope :global(.squad-model-advice) h2{
+  .scope :global(.squad-model-guidance) h2{
     font-size:22px;
     line-height:1.16;
   }
@@ -1977,10 +1977,10 @@
   }
 }
 @media(max-width:430px){
-  .scope :global(.squad-model-advice) h2{
+  .scope :global(.squad-model-guidance) h2{
     font-size:20px;
   }
-  .scope :global(.squad-model-advice) p{
+  .scope :global(.squad-model-guidance) p{
     font-size:10.5px;
   }
   .scope :global(.squad-history-item){
