@@ -137,11 +137,12 @@ export default function WeeklyPointsTable({players,throughGameweek,finalThroughG
       </div>
       :
       <div className="card table-wrap weekly-points-wrap simplified-weekly-table"><table>
-        <thead><tr><th className="rank-col">#</th>{head('name','Oyuncu')}{head('total','Toplam')}{head('played','Maç')}{head('avg','Ort.')}{head('last3','Son 3')}{head('six','6+ %')}<th>Form</th>{gameweeks.map(g=>head('gw'+g,'MH'+g,weekMode&&g===weekSort?'selected-week-col':''))}</tr></thead>
+        <thead><tr><th className="rank-col">#</th>{head('name','Oyuncu')}<th className="weekly-position-col">Mevki</th>{head('total','Toplam')}{head('played','Maç')}{head('avg','Ort.')}{head('last3','Son 3')}{head('six','6+ %')}<th>Form</th>{gameweeks.map(g=>head('gw'+g,'MH'+g,weekMode&&g===weekSort?'selected-week-col':''))}</tr></thead>
         <tbody>{pageRows.map((p,i)=><tr className="team-player-row clickable-row" style={teamCssVars(p.team)} key={p.id} tabIndex={0}
           onClick={e=>openRow(e,p.id)} onKeyDown={e=>{if(e.key==='Enter')router.push('/players/'+p.id)}}>
           <td className="rank-col">#{(safePage-1)*PAGE_SIZE+i+1}</td>
           <td className="weekly-player-cell"><Link className="player-link" href={'/players/'+p.id}><b>{playerLabel(p)}</b></Link><small><Link className="team-table-link" href={'/teams/'+p.team_id}>{p.team}</Link></small></td>
+          <td className="weekly-position-col"><span className={'pos '+p.position}>{posLabel(p.position)}</span></td>
           <td className="summary-score"><b>{p.total}</b></td><td>{p.played}</td><td>{num(p.avg)}</td><td><b>{num(p.last3)}</b></td><td>{(p.sixPlus*100).toFixed(0)}%</td>
           <td><span className={'form-trend '+(p.trend>.5?'up':p.trend<-.5?'down':'flat')}>{p.trend>.5?'↑':p.trend<-.5?'↓':'→'}</span></td>
           {gameweeks.map(g=>{const row=p.pointMap.get(g),pending=g>finalThroughGameweek,selected=weekMode&&g===weekSort,stateClass=pending?'pending-score':row?'':'empty-score';return <td key={g} className={'weekly-score '+stateClass+' '+(selected?'selected-week-cell':'')}>{row?row.points:'—'}</td>})}
