@@ -436,10 +436,15 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
   const inputRows=(inputsQ.data||[]).map((x:any)=>{
     const av=avMap.get(Number(x.player_id))
     const role=roleMap.get(Number(x.player_id))
+    const availability=clamp(0,1,n(av?.availability_probability,x.availability))
+    const integratedXi=n(role?.predicted_xi_probability,NaN)
+    const conditionalRole=Number.isFinite(integratedXi)&&availability>1e-6
+      ?integratedXi/availability
+      :n(x.role_probability)
     return {
       ...x,benchmark_version:benchmark,
-      availability:clamp(0,1,n(av?.availability_probability,x.availability)),
-      role_probability:clamp(.000001,.999999,n(role?.predicted_xi_probability,x.role_probability)),
+      availability,
+      role_probability:clamp(.000001,.999999,conditionalRole),
       source_note:`intraday refresh from ${sourceBenchmark}; source ${latestSourceAt}`
     }
   })
