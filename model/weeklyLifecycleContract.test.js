@@ -62,6 +62,8 @@ assert.match(worker,/source_cutoff/)
 assert.match(worker,/input_snapshot_hash/)
 assert.match(worker,/code_sha/)
 assert.match(worker,/config_version/)
+assert.match(worker,/codeRevision/,'Intraday candidates must be keyed by code revision to avoid stale candidate reuse.')
+assert.match(worker,/shareTotals/,'Intraday availability changes must renormalize team goal and assist shares.')
 assert.doesNotMatch(worker,/gameweek\s*=\s*7|GAMEWEEK\s*=\s*7/)
 
 const sim=read('supabase/functions/run-live-sim-chunk/index.ts')
@@ -102,5 +104,8 @@ assert.match(migration,/minute_sum-990\*fixture_count/,'Team-minute invariant mu
 assert.match(migration,/match_count>=18 and mod\(match_count,2\)=0/,'Run QA must accept valid DGW fixture counts.')
 assert.match(migration,/refresh_top25_gb_v1/)
 assert.match(migration,/refresh_top25_v23/)
+const overlapGateFix=read('supabase/migrations/20260929164056_remove_optimizer_overlap_qa_gate.sql')
+assert.doesNotMatch(overlapGateFix,/xi_overlap<=8|optimizer_ok and overlap_ok/,'XI overlap is diagnostic only; ceiling XI must not be forced to differ.')
+assert.match(overlapGateFix,/'xi_overlap',\(select xi_overlap from overlap\)/)
 
 console.log('weekly lifecycle contract passed')

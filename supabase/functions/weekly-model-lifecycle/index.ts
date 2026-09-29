@@ -453,7 +453,9 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
   if(!(inputsQ.data||[]).length||!(matchesQ.data||[]).length)throw new Error("CURRENT_SIM_INPUT_COVERAGE_MISSING")
 
   const revision=sourceRevision(latestSourceAt)
-  const benchmark=`intraday-mh${gw}-${revision}-${String(current.id).slice(0,8)}`
+  const codeRevision=String(codeSha||"nocode").slice(0,8)
+  const configRevision=String(goalConfigQ.data?.version||"noconfig").replace(/[^a-z0-9]+/gi,"-").slice(0,24)
+  const benchmark=`intraday-mh${gw}-${revision}-${codeRevision}-${configRevision}-${String(current.id).slice(0,8)}`
   const existing=await sb.from("scout_model_runs")
     .select("id,status,input_snapshot_hash")
     .eq("gameweek",gw).eq("is_current",false)
@@ -511,10 +513,33 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
     }
   })
   const availabilityRows=(availabilityQ.data||[]).map((x:any)=>{const {run_id:_,...rest}=x;return {...rest,run_id:runId}})
-  const roleRows=(rolesQ.data||[]).map((x:any)=>{
+  const teamByPlayer=new Map((inputRows||[]).map((x:any)=>[Number(x.player_id),Number(x.club_id)]))
+  const roleBase=(rolesQ.data||[]).map((x:any)=>{
     const {run_id:_,...rest}=x
     const av=avMap.get(Number(x.player_id))
-    return {...rest,run_id:runId,availability_probability:clamp(0,1,n(av?.availability_probability,x.availability_probability))}
+    return {
+      ...rest,run_id:runId,
+      availability_probability:clamp(0,1,n(av?.availability_probability,x.availability_probability)),
+      team_id:teamByPlayer.get(Number(x.player_id))
+    }
+  })
+  const shareTotals=new Map<number,{goal:number,assist:number}>()
+  for(const row of roleBase){
+    if(!(row.availability_probability>0)||!Number.isFinite(row.team_id))continue
+    const total=shareTotals.get(row.team_id)||{goal:0,assist:0}
+    total.goal+=Math.max(0,n(row.team_goal_share))
+    total.assist+=Math.max(0,n(row.team_assist_share))
+    shareTotals.set(row.team_id,total)
+  }
+  const roleRows=roleBase.map((x:any)=>{
+    const {team_id,...row}=x
+    if(!(x.availability_probability>0))return {...row,team_goal_share:0,team_assist_share:0}
+    const total=shareTotals.get(team_id)||{goal:0,assist:0}
+    return {
+      ...row,
+      team_goal_share:total.goal>0?Math.max(0,n(x.team_goal_share))/total.goal:0,
+      team_assist_share:total.assist>0?Math.max(0,n(x.team_assist_share))/total.assist:0
+    }
   })
 
   for(const [table,rows] of [
