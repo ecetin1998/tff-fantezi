@@ -85,10 +85,10 @@ export default async function TeamPage({params}){
         </div>
       </div>
       <div className="team-detail-current">
-        <span>MH{run?.gameweek||'—'} rakip{currentMatches.length>1?'leri':'i'}</span>
+        <span>MH{run?.gameweek||'—'} {currentMatches.length>1?'rakipleri':'rakibi'}</span>
         {currentMatches.length?currentMatches.map(m=><div key={m.match_id}>
           {m.opponent?<Link href={'/teams/'+m.opponent.id}>{m.opponent.name}</Link>:<b>—</b>}
-          <small>{m.venue==='HOME'?'Ev':'Dep'}</small>
+          <small>{m.venue==='HOME'?'Ev sahibi':'Deplasman'}</small>
         </div>):<b>—</b>}
       </div>
     </section>
@@ -101,7 +101,7 @@ export default async function TeamPage({params}){
         </div>
         <div className="team-fixture-list">
           {currentMatches.length?currentMatches.map(m=><div className="team-fixture-badge" key={m.match_id}>
-            <span>{m.venue==='HOME'?'EV':'DEP'}</span>
+            <span>{m.venue==='HOME'?'Ev sahibi':'Deplasman'}</span>
             {m.opponent?<Link href={'/teams/'+m.opponent.id}>{m.opponent.name}</Link>:<b>Rakip yok</b>}
           </div>):<div className="team-fixture-badge"><span>—</span><b>Rakip yok</b></div>}
         </div>
