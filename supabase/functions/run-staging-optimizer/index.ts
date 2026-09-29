@@ -32,7 +32,7 @@ async function verifyGithubOidc(token: string) {
     payload.repository_id !== GITHUB_REPOSITORY_ID ||
     payload.repository !== "ecetin1998/tff-fantezi" ||
     payload.ref !== "refs/heads/main" ||
-    !["workflow_dispatch","schedule"].includes(String(payload.event_name||""))
+    !["workflow_dispatch","schedule","push"].includes(String(payload.event_name||""))
   ) return false;
   const jwks = await fetch(GITHUB_JWKS_URL).then((r) => r.json());
   const jwk = (jwks.keys || []).find((k: any) => k.kid === header.kid);
