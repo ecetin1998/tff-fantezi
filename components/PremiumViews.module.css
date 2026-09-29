@@ -2217,3 +2217,27 @@
   .scope :global(.home-highlight-grid) :global(.spotlight-card)>strong{font-size:21px}
   .scope :global(.home-guide-metrics){grid-template-columns:1fr 1fr}
 }
+
+
+/* Home hero layout guard: keep CTA and summary metrics in normal flow.
+   This prevents the absolute metrics row from covering CTA buttons when
+   the hero copy wraps at tablet / narrow desktop widths. */
+.scope :global(.home-intro-hero){
+  display:flex;
+  flex-direction:column;
+}
+.scope :global(.home-hero-mini){
+  position:relative;
+  left:auto;
+  right:auto;
+  bottom:auto;
+  width:100%;
+  margin-top:auto;
+  padding-top:28px;
+}
+@media(max-width:900px){
+  .scope :global(.home-hero-mini){padding-top:24px}
+}
+@media(max-width:680px){
+  .scope :global(.home-hero-mini){padding-top:18px}
+}
