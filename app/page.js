@@ -10,7 +10,7 @@ export default async function Home(){
   const latestDataAt=run?.latest_data_at||run?.source_updated_at||null
   const sourceUpdated=latestDataAt?new Intl.DateTimeFormat('tr-TR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit',timeZone:'Europe/Istanbul'}).format(new Date(latestDataAt)):'—'
   const modelUpdated=run?.generated_at?new Intl.DateTimeFormat('tr-TR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit',timeZone:'Europe/Istanbul'}).format(new Date(run.generated_at)):'—'
-  const sourceAgeHours=latestDataAt?Math.max(0,(Date.now()-new Date(latestDataAt).getTime())/36e5):Infinity
+  const sourceAgeHours=Number.isFinite(Number(run?.latest_data_age_hours))?Number(run.latest_data_age_hours):Infinity
   const sourceFresh=sourceAgeHours<=24
   const freshnessLabel=!Number.isFinite(sourceAgeHours)?'Bilinmiyor':sourceAgeHours<1?'1 saatten yeni':sourceAgeHours<24?`${Math.round(sourceAgeHours)} saat önce`:`${Math.round(sourceAgeHours/24)} gün önce`
   const highlights=[
