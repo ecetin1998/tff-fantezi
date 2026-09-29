@@ -127,7 +127,10 @@ export default async function Matches(){
           <div className="match-teams">
             <div className="match-team-block">
               <span>EV</span>
-              <Link className="match-team-link" style={teamCssVars(m.home_team)} href={'/teams/'+m.home_team_id}><i className="club-dot"/><b>{m.home_team}</b></Link>
+              <Link className="match-team-link match-team-identity home-identity" style={teamCssVars(m.home_team)} href={'/teams/'+m.home_team_id}>
+                <b>{m.home_team}</b>
+                <span className="match-team-shirt" aria-hidden="true"><i/></span>
+              </Link>
               <div className="match-team-meta matchup-badges">
                 <em className={'matchup-pill '+(m.home_attack_level||'neutral')}>Hücum: {matchupLabel[m.home_attack_level]||'Dengeli'}</em>
                 <em className={'matchup-pill '+(m.home_defense_level||'neutral')}>Savunma: {matchupLabel[m.home_defense_level]||'Dengeli'}</em>
@@ -136,7 +139,10 @@ export default async function Matches(){
 
             <div className="away match-team-block">
               <span>DEP</span>
-              <Link className="match-team-link away-link" style={teamCssVars(m.away_team)} href={'/teams/'+m.away_team_id}><i className="club-dot"/><b>{m.away_team}</b></Link>
+              <Link className="match-team-link away-link match-team-identity away-identity" style={teamCssVars(m.away_team)} href={'/teams/'+m.away_team_id}>
+                <span className="match-team-shirt" aria-hidden="true"><i/></span>
+                <b>{m.away_team}</b>
+              </Link>
               <div className="match-team-meta away-meta matchup-badges">
                 <em className={'matchup-pill '+(m.away_attack_level||'neutral')}>Hücum: {matchupLabel[m.away_attack_level]||'Dengeli'}</em>
                 <em className={'matchup-pill '+(m.away_defense_level||'neutral')}>Savunma: {matchupLabel[m.away_defense_level]||'Dengeli'}</em>
@@ -145,9 +151,15 @@ export default async function Matches(){
           </div>
 
           <div className="outcome-bar outcome-bar-labeled" aria-label="Maç sonucu olasılıkları">
-            <i className="home" style={{width:(home*100)+'%'}} title={`Ev ${(home*100).toFixed(0)}%`}><span><b>{(home*100).toFixed(0)}%</b> Ev</span></i>
-            <i className="draw" style={{width:(draw*100)+'%'}} title={`Beraberlik ${(draw*100).toFixed(0)}%`}><span><b>{(draw*100).toFixed(0)}%</b> Ber.</span></i>
-            <i className="away" style={{width:(away*100)+'%'}} title={`Dep ${(away*100).toFixed(0)}%`}><span><b>{(away*100).toFixed(0)}%</b> Dep</span></i>
+            <i className="home" style={{width:(home*100)+'%'}} title={`Ev ${(home*100).toFixed(0)}%`}>
+              <span><strong>Ev</strong><b>%{(home*100).toFixed(0)}</b></span>
+            </i>
+            <i className="draw" style={{width:(draw*100)+'%'}} title={`Beraberlik ${(draw*100).toFixed(0)}%`}>
+              <span><strong>Ber.</strong><b>%{(draw*100).toFixed(0)}</b></span>
+            </i>
+            <i className="away" style={{width:(away*100)+'%'}} title={`Dep ${(away*100).toFixed(0)}%`}>
+              <span><strong>Dep</strong><b>%{(away*100).toFixed(0)}</b></span>
+            </i>
           </div>
 
           <div className="match-fantasy-meta fantasy-first-meta">

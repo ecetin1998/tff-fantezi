@@ -1812,3 +1812,286 @@
   .scope :global(.outcome-bar-labeled) i span{font-size:9px}
   .scope :global(.outcome-bar-labeled) i span b{font-size:10.5px}
 }
+
+/* ===== Match cards • club shirts + prominent probability bar 2026-09-29 ===== */
+.scope :global(.match-analysis-card){
+  height:auto;
+  min-height:730px;
+}
+.scope :global(.match-analysis-card):has(:global(.match-technical-details)[open]){
+  height:auto;
+  min-height:730px;
+}
+.scope :global(.match-analysis-card) :global(.match-teams){
+  gap:24px;
+  align-items:start;
+}
+.scope :global(.match-analysis-card) :global(.match-team-block)>span:first-child{
+  color:#65728a;
+  font-size:10px;
+  line-height:1;
+  font-weight:950;
+  letter-spacing:.08em;
+}
+.scope :global(.match-analysis-card) :global(.match-team-link):global(.match-team-identity){
+  width:100%;
+  max-width:none;
+  min-height:88px;
+  display:flex;
+  align-items:center;
+  gap:16px;
+  overflow:visible;
+  text-decoration:none;
+}
+.scope :global(.match-analysis-card) :global(.home-identity){
+  justify-content:flex-start;
+}
+.scope :global(.match-analysis-card) :global(.away-identity){
+  justify-content:flex-end;
+}
+.scope :global(.match-analysis-card) :global(.match-team-identity) b{
+  max-width:min(210px,calc(100% - 82px));
+  overflow:visible;
+  color:#1e2b48;
+  font-size:18px;
+  line-height:1.12;
+  font-weight:950;
+  letter-spacing:-.025em;
+  text-overflow:clip;
+  white-space:normal;
+}
+.scope :global(.match-analysis-card) :global(.away-identity) b{
+  text-align:right;
+}
+.scope :global(.match-team-shirt){
+  width:62px;
+  height:68px;
+  flex:0 0 62px;
+  position:relative;
+  display:grid;
+  place-items:center;
+  border:2px solid rgba(255,255,255,.92);
+  border-radius:11px 11px 16px 16px;
+  background:repeating-linear-gradient(
+    90deg,
+    var(--club1,#6674A8) 0 16px,
+    var(--club2,#DDE3F4) 16px 32px
+  );
+  box-shadow:
+    inset 0 -13px rgba(0,0,0,.08),
+    0 9px 18px color-mix(in srgb,var(--club1,#6674A8) 22%,transparent),
+    0 0 0 1px color-mix(in srgb,var(--club1,#6674A8) 18%,#dfe5ee);
+}
+.scope :global(.match-team-shirt):before,
+.scope :global(.match-team-shirt):after{
+  content:"";
+  position:absolute;
+  top:8px;
+  width:18px;
+  height:27px;
+  border:2px solid rgba(255,255,255,.82);
+  background:inherit;
+  border-radius:7px;
+  z-index:-1;
+}
+.scope :global(.match-team-shirt):before{
+  left:-12px;
+  transform:rotate(24deg);
+}
+.scope :global(.match-team-shirt):after{
+  right:-12px;
+  transform:rotate(-24deg);
+}
+.scope :global(.match-team-shirt) i{
+  position:absolute;
+  top:5px;
+  left:50%;
+  width:18px;
+  height:8px;
+  transform:translateX(-50%);
+  border-radius:0 0 10px 10px;
+  background:rgba(255,255,255,.88);
+  box-shadow:0 1px 0 rgba(0,0,0,.08);
+}
+.scope :global(.match-analysis-card) :global(.matchup-badges){
+  margin-top:6px;
+}
+.scope :global(.outcome-bar-labeled){
+  height:60px;
+  margin:19px 0 14px;
+  overflow:hidden;
+  border:1px solid #d4dce8;
+  border-radius:13px;
+  background:#e9edf3;
+  box-shadow:0 10px 24px rgba(35,48,83,.13);
+}
+.scope :global(.outcome-bar-labeled) i{
+  min-width:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.scope :global(.outcome-bar-labeled) i+ i{
+  box-shadow:inset 1px 0 rgba(255,255,255,.56);
+}
+.scope :global(.outcome-bar-labeled) i span{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  padding:0 7px;
+  color:#fff;
+  font-size:13px;
+  line-height:1;
+  font-weight:900;
+  letter-spacing:-.015em;
+  text-shadow:0 1px 2px rgba(0,0,0,.30);
+}
+.scope :global(.outcome-bar-labeled) i span strong{
+  color:#fff;
+  font-size:13px;
+  line-height:1;
+  font-weight:900;
+}
+.scope :global(.outcome-bar-labeled) i span b{
+  color:#fff;
+  font-size:17px;
+  line-height:1;
+  font-weight:950;
+  font-variant-numeric:tabular-nums;
+}
+.scope :global(.outcome-bar-labeled) :global(.home){
+  background:linear-gradient(90deg,#12b888,#087a61);
+}
+.scope :global(.outcome-bar-labeled) :global(.draw){
+  background:linear-gradient(90deg,#f0ba37,#c9850e);
+}
+.scope :global(.outcome-bar-labeled) :global(.away){
+  background:linear-gradient(90deg,#7568ea,#4e42b7);
+}
+.scope :global(.match-fantasy-meta){
+  gap:8px;
+}
+.scope :global(.match-fantasy-meta)>span{
+  min-height:88px;
+  padding:13px 12px;
+}
+.scope :global(.match-fantasy-meta) small{
+  color:#596780;
+  font-size:11px;
+  line-height:1.25;
+  font-weight:800;
+}
+.scope :global(.match-fantasy-meta) b{
+  margin-top:7px;
+  color:#1e2b48;
+  font-size:17px;
+  line-height:1;
+}
+@media(max-width:760px){
+  .scope :global(.match-analysis-card){
+    min-height:770px;
+  }
+  .scope :global(.match-analysis-card):has(:global(.match-technical-details)[open]){
+    min-height:770px;
+  }
+  .scope :global(.match-analysis-card) :global(.match-teams){
+    gap:14px;
+  }
+  .scope :global(.match-analysis-card) :global(.match-team-link):global(.match-team-identity){
+    min-height:74px;
+    gap:11px;
+  }
+  .scope :global(.match-analysis-card) :global(.match-team-identity) b{
+    max-width:calc(100% - 57px);
+    font-size:13px;
+  }
+  .scope :global(.match-team-shirt){
+    width:46px;
+    height:51px;
+    flex-basis:46px;
+    border-radius:9px 9px 12px 12px;
+    background:repeating-linear-gradient(
+      90deg,
+      var(--club1,#6674A8) 0 12px,
+      var(--club2,#DDE3F4) 12px 24px
+    );
+  }
+  .scope :global(.match-team-shirt):before,
+  .scope :global(.match-team-shirt):after{
+    top:6px;
+    width:13px;
+    height:20px;
+    border-radius:6px;
+  }
+  .scope :global(.match-team-shirt):before{left:-9px}
+  .scope :global(.match-team-shirt):after{right:-9px}
+  .scope :global(.match-team-shirt) i{
+    top:4px;
+    width:14px;
+    height:6px;
+  }
+  .scope :global(.outcome-bar-labeled){
+    height:50px;
+    margin:16px 0 12px;
+  }
+  .scope :global(.outcome-bar-labeled) i span{
+    gap:4px;
+    padding:0 4px;
+    font-size:10px;
+  }
+  .scope :global(.outcome-bar-labeled) i span strong{
+    font-size:10px;
+  }
+  .scope :global(.outcome-bar-labeled) i span b{
+    font-size:12px;
+  }
+  .scope :global(.match-fantasy-meta)>span{
+    min-height:78px;
+    padding:11px 9px;
+  }
+  .scope :global(.match-fantasy-meta) small{font-size:9.5px}
+  .scope :global(.match-fantasy-meta) b{font-size:14px}
+}
+@media(max-width:430px){
+  .scope :global(.match-analysis-card){
+    min-height:800px;
+  }
+  .scope :global(.match-analysis-card):has(:global(.match-technical-details)[open]){
+    min-height:800px;
+  }
+  .scope :global(.match-analysis-card) :global(.match-team-link):global(.match-team-identity){
+    min-height:66px;
+    gap:8px;
+  }
+  .scope :global(.match-analysis-card) :global(.match-team-identity) b{
+    max-width:calc(100% - 48px);
+    font-size:11.5px;
+  }
+  .scope :global(.match-team-shirt){
+    width:39px;
+    height:44px;
+    flex-basis:39px;
+  }
+  .scope :global(.match-team-shirt):before,
+  .scope :global(.match-team-shirt):after{
+    top:5px;
+    width:11px;
+    height:17px;
+  }
+  .scope :global(.match-team-shirt):before{left:-7px}
+  .scope :global(.match-team-shirt):after{right:-7px}
+  .scope :global(.outcome-bar-labeled){
+    height:48px;
+  }
+  .scope :global(.outcome-bar-labeled) i span{
+    gap:3px;
+    padding:0 2px;
+  }
+  .scope :global(.outcome-bar-labeled) i span strong{
+    font-size:8.5px;
+  }
+  .scope :global(.outcome-bar-labeled) i span b{
+    font-size:10.5px;
+  }
+}
