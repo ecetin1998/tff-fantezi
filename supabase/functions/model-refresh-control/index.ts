@@ -162,8 +162,10 @@ Deno.serve(async(req:Request)=>{
       const write=await sb.from("scout_replay_player_inputs").upsert(synced,{onConflict:"gameweek,benchmark_version,player_id"})
       if(write.error)throw write.error
       const latestAvailability=(availability.data||[]).map((x:any)=>x.checked_at).filter(Boolean).sort().at(-1)||null
+      const sourceFresh=ageHours(latestAvailability)<=24
       return Response.json({
-        ok:true,refresh_allowed:true,run_id:current.data.id,gameweek:current.data.gameweek,
+        ok:true,refresh_allowed:true,source_fresh:sourceFresh,
+        run_id:current.data.id,gameweek:current.data.gameweek,
         benchmark,kickoff_at:kickoffAt,synced_rows:synced.length,changed_rows:changed,
         latest_availability_at:latestAvailability
       })
