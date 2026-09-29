@@ -797,4 +797,31 @@
   .scope :global(.team-roster-player){grid-template-columns:42px minmax(0,1fr) 62px}
 }
 
-
+/* ===== Kadro Önerileri • restore desktop comparison 2026-09-29 ===== */
+@media(min-width:1024px){
+  .scope :global(.unified-squad-list){
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:16px;
+    align-items:start;
+  }
+  .scope :global(.unified-squad-card){
+    min-width:0;
+  }
+  .scope :global(.unified-squad-list) :global(.readonly-pitch-player)>b{
+    font-size:8px;
+    line-height:1.15;
+  }
+  .scope :global(.unified-squad-list) :global(.readonly-pitch-player)>small{
+    font-size:6.5px;
+  }
+  .scope :global(.unified-squad-list) :global(.pitch-player-tags) span,
+  .scope :global(.unified-squad-list) :global(.pitch-player-tags) strong{
+    font-size:6.5px;
+  }
+  .scope :global(.unified-squad-list) :global(.bench-copy) b{font-size:8.5px}
+  .scope :global(.unified-squad-list) :global(.bench-copy) small{font-size:7px}
+}
+@media(max-width:1023px){
+  .scope :global(.unified-squad-list){grid-template-columns:1fr}
+}
