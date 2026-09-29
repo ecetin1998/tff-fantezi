@@ -96,12 +96,13 @@ jobs:
         run: |
           set -euo pipefail
           common=(-H "Authorization: Bearer $OIDC_TOKEN")
-          curl --fail --show-error --silent --max-time 240 "${common[@]}"             "$FUNCTIONS_URL/run-live-sim-chunk?mode=reset&gw=$GAMEWEEK&run=$RUN_ID&benchmark=$BENCHMARK" | jq .
+          curl --fail --show-error --silent --max-time 240 --retry 5 --retry-delay 2 --retry-all-errors --retry-max-time 120 "${common[@]}"             "$FUNCTIONS_URL/run-live-sim-chunk?mode=reset&gw=$GAMEWEEK&run=$RUN_ID&benchmark=$BENCHMARK" | jq .
           for part in $(seq 0 24); do
             seed=$((2026000000 + GAMEWEEK * 100000 + part * 2000 + 1))
-            curl --fail --show-error --silent --max-time 240 "${common[@]}"               "$FUNCTIONS_URL/run-live-sim-chunk?gw=$GAMEWEEK&run=$RUN_ID&benchmark=$BENCHMARK&draws=2000&seed=$seed" | jq -c .
+            curl --fail --show-error --silent --max-time 240 --retry 5 --retry-delay 2 --retry-all-errors --retry-max-time 120 "${common[@]}"               "$FUNCTIONS_URL/run-live-sim-chunk?gw=$GAMEWEEK&run=$RUN_ID&benchmark=$BENCHMARK&draws=2000&seed=$seed" | jq -c .
+            sleep 1
           done
-          curl --fail --show-error --silent --max-time 240 "${common[@]}"             "$FUNCTIONS_URL/run-live-sim-chunk?mode=finalize&gw=$GAMEWEEK&run=$RUN_ID&benchmark=$BENCHMARK" | jq .
+          curl --fail --show-error --silent --max-time 240 --retry 5 --retry-delay 2 --retry-all-errors --retry-max-time 120 "${common[@]}"             "$FUNCTIONS_URL/run-live-sim-chunk?mode=finalize&gw=$GAMEWEEK&run=$RUN_ID&benchmark=$BENCHMARK" | jq .
 
       - name: Optimize current-MH recommended squad
         if: steps.status.outputs.ready != 'true' && steps.current_refresh.outputs.refresh == 'true'
@@ -110,7 +111,7 @@ jobs:
           RUN_ID: ${{ steps.current_refresh.outputs.run_id }}
         run: |
           set -euo pipefail
-          curl --fail --show-error --silent --max-time 300             -H "Authorization: Bearer $OIDC_TOKEN"             "$FUNCTIONS_URL/run-staging-optimizer?mode=recommended&run=$RUN_ID" | jq .
+          curl --fail --show-error --silent --max-time 300 --retry 4 --retry-delay 2 --retry-all-errors --retry-max-time 90             -H "Authorization: Bearer $OIDC_TOKEN"             "$FUNCTIONS_URL/run-staging-optimizer?mode=recommended&run=$RUN_ID" | jq .
 
       - name: Optimize current-MH ceiling squad
         if: steps.status.outputs.ready != 'true' && steps.current_refresh.outputs.refresh == 'true'
@@ -119,7 +120,7 @@ jobs:
           RUN_ID: ${{ steps.current_refresh.outputs.run_id }}
         run: |
           set -euo pipefail
-          curl --fail --show-error --silent --max-time 300             -H "Authorization: Bearer $OIDC_TOKEN"             "$FUNCTIONS_URL/run-staging-optimizer?mode=alternative&run=$RUN_ID" | jq .
+          curl --fail --show-error --silent --max-time 300 --retry 4 --retry-delay 2 --retry-all-errors --retry-max-time 90             -H "Authorization: Bearer $OIDC_TOKEN"             "$FUNCTIONS_URL/run-staging-optimizer?mode=alternative&run=$RUN_ID" | jq .
 
       - name: QA current-MH refresh
         if: steps.status.outputs.ready != 'true' && steps.current_refresh.outputs.refresh == 'true'
@@ -207,13 +208,14 @@ jobs:
         run: |
           set -euo pipefail
           common=(-H "Authorization: Bearer $OIDC_TOKEN")
-          curl --fail --show-error --silent --max-time 240 "${common[@]}"             "$FUNCTIONS_URL/run-live-sim-chunk?mode=reset&gw=$GAMEWEEK&run=$RUN_ID&benchmark=$BENCHMARK" | jq .
+          curl --fail --show-error --silent --max-time 240 --retry 5 --retry-delay 2 --retry-all-errors --retry-max-time 120 "${common[@]}"             "$FUNCTIONS_URL/run-live-sim-chunk?mode=reset&gw=$GAMEWEEK&run=$RUN_ID&benchmark=$BENCHMARK" | jq .
           for part in $(seq 0 24); do
             seed=$((2026000000 + GAMEWEEK * 100000 + part * 2000 + 1))
             echo "Simulation chunk $((part+1))/25"
-            curl --fail --show-error --silent --max-time 240 "${common[@]}"               "$FUNCTIONS_URL/run-live-sim-chunk?gw=$GAMEWEEK&run=$RUN_ID&benchmark=$BENCHMARK&draws=2000&seed=$seed" | jq -c .
+            curl --fail --show-error --silent --max-time 240 --retry 5 --retry-delay 2 --retry-all-errors --retry-max-time 120 "${common[@]}"               "$FUNCTIONS_URL/run-live-sim-chunk?gw=$GAMEWEEK&run=$RUN_ID&benchmark=$BENCHMARK&draws=2000&seed=$seed" | jq -c .
+            sleep 1
           done
-          curl --fail --show-error --silent --max-time 240 "${common[@]}"             "$FUNCTIONS_URL/run-live-sim-chunk?mode=finalize&gw=$GAMEWEEK&run=$RUN_ID&benchmark=$BENCHMARK" | jq .
+          curl --fail --show-error --silent --max-time 240 --retry 5 --retry-delay 2 --retry-all-errors --retry-max-time 120 "${common[@]}"             "$FUNCTIONS_URL/run-live-sim-chunk?mode=finalize&gw=$GAMEWEEK&run=$RUN_ID&benchmark=$BENCHMARK" | jq .
 
       - name: Optimize recommended squad
         if: steps.status.outputs.ready == 'true'
@@ -223,7 +225,7 @@ jobs:
           RUN_ID: ${{ steps.prepare.outputs.run_id }}
         run: |
           set -euo pipefail
-          curl --fail --show-error --silent --max-time 300             -H "Authorization: Bearer $OIDC_TOKEN"             "$FUNCTIONS_URL/run-staging-optimizer?mode=recommended&run=$RUN_ID" | jq .
+          curl --fail --show-error --silent --max-time 300 --retry 4 --retry-delay 2 --retry-all-errors --retry-max-time 90             -H "Authorization: Bearer $OIDC_TOKEN"             "$FUNCTIONS_URL/run-staging-optimizer?mode=recommended&run=$RUN_ID" | jq .
 
       - name: Optimize ceiling squad
         if: steps.status.outputs.ready == 'true'
@@ -233,7 +235,7 @@ jobs:
           RUN_ID: ${{ steps.prepare.outputs.run_id }}
         run: |
           set -euo pipefail
-          curl --fail --show-error --silent --max-time 300             -H "Authorization: Bearer $OIDC_TOKEN"             "$FUNCTIONS_URL/run-staging-optimizer?mode=alternative&run=$RUN_ID" | jq .
+          curl --fail --show-error --silent --max-time 300 --retry 4 --retry-delay 2 --retry-all-errors --retry-max-time 90             -H "Authorization: Bearer $OIDC_TOKEN"             "$FUNCTIONS_URL/run-staging-optimizer?mode=alternative&run=$RUN_ID" | jq .
 
       - name: Model QA
         if: steps.status.outputs.ready == 'true'
