@@ -111,6 +111,8 @@ assert.match(playerActionFill,/source_team_id=e\.current_team_id/,'transfered pl
 const data=fs.readFileSync('lib/data.js','utf8')
 assert.match(data,/TEAM_TACTICAL_PUBLIC_COLUMNS/)
 assert.match(data,/xa_model_per90/)
+assert.match(data,/attack_profile:\{/,'Player list mapping must expose xA enrichment to the public feed mapper.')
+assert.match(data,/xa_per90:row\.xa_per90/)
 assert.match(data,/v_scout_player_model_features/)
 assert.match(data,/effective_xa_per90/)
 assert.match(data,/primary_role/)
