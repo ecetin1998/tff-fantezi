@@ -404,10 +404,15 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
   const minInterval=hoursUntilDeadline<=12?2:hoursUntilDeadline<=48?6:24
   const generatedAge=ageHours(current.generated_at)
   const sourceAdvanced=!current.source_updated_at||new Date(latestSourceAt).getTime()>new Date(current.source_updated_at).getTime()+60_000
-  if(!sourceAdvanced||generatedAge<minInterval){
+  const configChanged=Boolean(configVersion)&&String(current.config_version||"")!==String(configVersion)
+  const codeChanged=Boolean(codeSha)&&String(current.code_sha||"")!==String(codeSha)
+  const structuralRefresh=configChanged||codeChanged
+  if(!(sourceAdvanced||structuralRefresh)||(!structuralRefresh&&generatedAge<minInterval)){
     return {
-      refresh_required:false,reason:!sourceAdvanced?"SOURCE_UNCHANGED":"REFRESH_INTERVAL_NOT_REACHED",
+      refresh_required:false,
+      reason:!(sourceAdvanced||structuralRefresh)?"SOURCE_AND_MODEL_UNCHANGED":"REFRESH_INTERVAL_NOT_REACHED",
       latest_source_at:latestSourceAt,model_age_hours:generatedAge,min_interval_hours:minInterval,
+      config_changed:configChanged,code_changed:codeChanged,
       deadline_at:new Date(deadline).toISOString()
     }
   }
