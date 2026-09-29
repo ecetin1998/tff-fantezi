@@ -633,7 +633,7 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
     </section>
 
     <section className="card squad-insight-bar">
-      <div className="squad-model-advice">
+      <div className="squad-model-guidance">
         <span className="eyebrow">MODEL ÖNERİSİ</span>
         {!recommendedIds.length?<>
           <h2>Model kadrosu henüz hazır değil</h2>
