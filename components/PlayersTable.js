@@ -1,90 +1,45 @@
 'use client'
-import { useEffect, useMemo, useState } from 'react'
+import {useEffect,useState} from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
-import { teamCssVars } from '@/lib/teamThemes'
-import { availabilityCompactNote, availabilityIsIssue } from '@/lib/availability'
+import {useRouter} from 'next/navigation'
+import {teamCssVars} from '@/lib/teamThemes'
+import {availabilityCompactNote,availabilityIsIssue} from '@/lib/availability'
 import {fixtureBadge,playerLabel} from '@/lib/playerPresentation'
 import {playerRoleLabel} from '@/lib/playerRole'
 
 const posLabel=p=>({GK:'KL',DEF:'DEF',MID:'OS',FWD:'FOR'}[p]||p||'—')
 const PAGE_SIZE=50
-const normalizeText=value=>String(value||'')
-  .toLocaleLowerCase('tr')
-  .normalize('NFD')
-  .replace(/[\u0300-\u036f]/g,'')
-  .replace(/ı/g,'i')
 
-export default function PlayersTable({players}){
+export default function PlayersTable({players,total,page,pageCount,teams,filters}){
   const router=useRouter()
-  const [q,setQ]=useState('')
-  const [pos,setPos]=useState('')
-  const [team,setTeam]=useState('')
-  const [sort,setSort]=useState('xfp')
-  const [dir,setDir]=useState(-1)
-  const [page,setPage]=useState(1)
-  const [urlReady,setUrlReady]=useState(false)
+  const [q,setQ]=useState(filters?.q||'')
+
+  useEffect(()=>{setQ(filters?.q||'')},[filters?.q])
+
+  const navigate=patch=>{
+    const next={...(filters||{}),...patch}
+    const params=new URLSearchParams()
+    if(next.q)params.set('q',next.q)
+    if(next.team)params.set('team',next.team)
+    if(next.pos)params.set('pos',next.pos)
+    if(next.sort&&next.sort!=='xfp')params.set('sort',next.sort)
+    if(next.dir&&next.dir!=='desc')params.set('dir',next.dir)
+    if(Number(next.page||1)>1)params.set('page',String(next.page))
+    const query=params.toString()
+    router.replace('/players'+(query?'?'+query:''),{scroll:false})
+  }
 
   useEffect(()=>{
-    const params=new URLSearchParams(window.location.search)
-    setQ(params.get('q')||'')
-    setTeam(params.get('team')||'')
-    setPos(params.get('pos')||'')
-    setSort(params.get('sort')||'xfp')
-    setDir(params.get('dir')==='asc'?1:-1)
-    setPage(Math.max(1,Number(params.get('page')||1)))
-    setUrlReady(true)
-  },[])
+    if(q===(filters?.q||''))return
+    const timer=setTimeout(()=>navigate({q,page:1}),250)
+    return ()=>clearTimeout(timer)
+  },[q,filters?.q])
 
-  const teams=useMemo(()=>[...new Set(players.map(p=>p.team).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'tr')),[players])
-
-  const rows=useMemo(()=>{
-    const needle=normalizeText(q.trim())
-    const out=players.filter(p=>
-      (!pos||p.position===pos) &&
-      (!team||p.team===team) &&
-      (!needle||normalizeText((p.full_name||'')+' '+(p.display_name||'')+' '+(p.short_label||'')+' '+p.team+' '+(p.projection?.opponent_name||'')+' '+playerRoleLabel(p)).includes(needle))
-    )
-    const val=(p,k)=>{
-      if(k==='name')return playerLabel(p)
-      if(k==='team')return p.team
-      if(k==='pos')return p.position
-      if(k==='opp')return p.projection?.opponent_name||''
-      if(k==='price')return Number(p.price)
-      if(k==='points')return Number(p.total_points||0)
-      if(k==='xi')return Number(p.projection?.xi_probability||0)
-      if(k==='minutes')return Number(p.projection?.x_minutes||0)
-      if(k==='p25')return Number(p.projection?.p25||0)
-      if(k==='p90')return Number(p.projection?.p90||0)
-      if(k==='six')return Number(p.projection?.six_plus_probability||0)
-      if(k==='xg')return Number(p.projection?.expected_goals||0)
-      if(k==='xa')return Number(p.projection?.expected_assists||0)
-      if(k==='value')return Number(p.projection?.value_score||0)
-      return Number(p.projection?.xfp||0)
-    }
-    return [...out].sort((a,b)=>{
-      const av=val(a,sort),bv=val(b,sort)
-      return typeof av==='string' ? dir*av.localeCompare(bv,'tr') : dir*(av-bv)
-    })
-  },[players,q,pos,team,sort,dir])
-
-  const pageCount=Math.max(1,Math.ceil(rows.length/PAGE_SIZE))
-  const safePage=Math.min(page,pageCount)
-  const pageRows=rows.slice((safePage-1)*PAGE_SIZE,safePage*PAGE_SIZE)
-
-  useEffect(()=>{if(page>pageCount)setPage(pageCount)},[page,pageCount])
-  useEffect(()=>{
-    if(!urlReady)return
-    const params=new URLSearchParams(window.location.search)
-    const put=(key,value,defaultValue='')=>value&&value!==defaultValue?params.set(key,String(value)):params.delete(key)
-    put('q',q);put('team',team);put('pos',pos);put('sort',sort,'xfp')
-    put('dir',dir===1?'asc':'desc','desc');put('page',safePage,1)
-    const next=params.toString()
-    window.history.replaceState(null,'',window.location.pathname+(next?'?'+next:''))
-  },[q,team,pos,sort,dir,safePage,urlReady])
-
-  const change=setter=>e=>{setter(e.target.value);setPage(1)}
-  const head=(k,label)=><th onClick={()=>{setPage(1);if(sort===k)setDir(-dir);else{setSort(k);setDir(-1)}}}>{label}{sort===k?<span className="sortmark">{dir===-1?' ↓':' ↑'}</span>:null}</th>
+  const changeSort=key=>{
+    const same=filters?.sort===key
+    navigate({sort:key,dir:same&&filters?.dir==='desc'?'asc':'desc',page:1})
+  }
+  const head=(key,label)=><th onClick={()=>changeSort(key)}>{label}{filters?.sort===key?<span className="sortmark">{filters?.dir==='asc'?' ↑':' ↓'}</span>:null}</th>
   const pct=v=>String((Number(v||0)*100).toFixed(0))+'%'
   const num=(v,d=2)=>Number(v||0).toFixed(d)
   const playerNote=p=>{
@@ -93,33 +48,30 @@ export default function PlayersTable({players}){
     const visible=availabilityIsIssue(a)||a.availability_type==='return'||a.expected_return_date||a.suspension_fixture
     return visible?availabilityCompactNote(a):''
   }
-  const openRow=(e,id)=>{
-    if(e.target.closest('a,button,input,select'))return
-    router.push('/players/'+id)
-  }
+  const offset=(Math.max(1,Number(page||1))-1)*PAGE_SIZE
 
   return <>
     <div className="filters player-filters">
-      <input value={q} onChange={change(setQ)} placeholder="Oyuncu, takım veya rakip ara..." aria-label="Oyuncu ara"/>
-      <select value={team} onChange={change(setTeam)}>
-        <option value="">Tüm takımlar</option>{teams.map(t=><option key={t}>{t}</option>)}
+      <input value={q} onChange={e=>setQ(e.target.value)} placeholder="Oyuncu, takım veya rakip ara..." aria-label="Oyuncu ara"/>
+      <select value={filters?.team||''} onChange={e=>navigate({team:e.target.value,page:1})}>
+        <option value="">Tüm takımlar</option>{(teams||[]).map(t=><option key={t}>{t}</option>)}
       </select>
-      <select value={pos} onChange={change(setPos)}>
+      <select value={filters?.pos||''} onChange={e=>navigate({pos:e.target.value,page:1})}>
         <option value="">Tüm mevkiler</option><option value="GK">KL</option><option value="DEF">DEF</option><option value="MID">OS</option><option value="FWD">FOR</option>
       </select>
-      <select className="mobile-sort-select" value={sort} onChange={e=>{setSort(e.target.value);setDir(-1);setPage(1)}}>
+      <select className="mobile-sort-select" value={filters?.sort||'xfp'} onChange={e=>navigate({sort:e.target.value,dir:'desc',page:1})}>
         <option value="xfp">xFP'ye göre</option><option value="xi">İlk 11 ihtimaline göre</option><option value="minutes">Dakikaya göre</option><option value="p90">P90'a göre</option><option value="six">6+ ihtimaline göre</option><option value="points">Toplam puana göre</option><option value="value">F/P'ye göre</option><option value="price">Fiyata göre</option>
       </select>
     </div>
 
-    <div className="table-summary"><b>{rows.length}</b> oyuncu • satıra veya karta dokunarak detaya git</div>
-    <div className="projection-legend">Karar metrikleri: <b>İlk 11</b> + <b>xDakika</b> oynama ihtimalini, <b>xFP</b> ortalama beklentiyi, <b>P25/P90</b> dağılım eşiklerini gösterir. <span title="Top-25 skoru, ortalama xFP'den ayrı olarak yüksek puan dilimine girme ihtimalini sıralar.">ⓘ Top‑25 skoru xFP sıralamasından farklı bir tavan metriğidir.</span></div>
+    <div className="table-summary"><b>{total}</b> oyuncu • sunucuda filtrelenmiş sonuçlar</div>
+    <div className="projection-legend">Karar metrikleri: <b>İlk 11</b> + <b>xDakika</b> oynama ihtimalini, <b>xFP</b> ortalama beklentiyi, <b>P25/P90</b> dağılım eşiklerini gösterir. <span title="Top-25 skoru, ortalama xFP'den ayrı olarak yüksek puan dilimine girme ihtimalini sıralar.">ⓘ Top-25 skoru xFP sıralamasından farklı bir tavan metriğidir.</span></div>
 
-    {!rows.length?<div className="card empty-filter-state">Bu filtrelerle eşleşen oyuncu bulunamadı.</div>:<>
+    {!players.length?<div className="card empty-filter-state">Bu filtrelerle eşleşen oyuncu bulunamadı.</div>:<>
       <div className="player-card-list">
-        {pageRows.map((p,i)=><Link href={'/players/'+p.id} className="card mobile-player-card team-accent-card" style={teamCssVars(p.team)} key={p.id}>
+        {players.map((p,i)=><Link href={'/players/'+p.id} className="card mobile-player-card team-accent-card" style={teamCssVars(p.team)} key={p.id}>
           <div className="mobile-player-top">
-            <div className="mobile-card-badges"><span className="weekly-rank">#{(safePage-1)*PAGE_SIZE+i+1}</span><span className={'pos '+p.position}>{posLabel(p.position)}</span></div>
+            <div className="mobile-card-badges"><span className="weekly-rank">#{offset+i+1}</span><span className={'pos '+p.position}>{posLabel(p.position)}</span></div>
             <div className="mobile-player-name"><b>{playerLabel(p)}</b><span>{p.team}{playerRoleLabel(p)?' • '+playerRoleLabel(p):''} • {num(p.price,1)}m</span><small className="player-meta-badges">{fixtureBadge(p.projection)?<em>{fixtureBadge(p.projection)}</em>:null}</small></div>
             <div className="mobile-xfp"><strong>{num(p.projection?.xfp)}</strong><small>xFP</small><em>{num(p.total_points,0)} toplam puan</em></div>
           </div>
@@ -136,21 +88,20 @@ export default function PlayersTable({players}){
         <th className="rank-col">#</th>{head('name','Oyuncu')}{head('team','Takım')}{head('pos','Mevki')}{head('opp','Rakip')}<th>E/D</th>
         {head('price','Fiyat')}{head('points','Toplam Puan')}{head('xi','İlk 11')}{head('minutes','xDk')}{head('xfp','xFP')}
         {head('p25','P25')}{head('p90','P90')}{head('six','6+ %')}{head('xg','xG')}{head('xa','xA')}{head('value','F/P')}
-      </tr></thead><tbody>{pageRows.map((p,i)=><tr className="team-player-row clickable-row" style={teamCssVars(p.team)} key={p.id}
-        tabIndex={0} onClick={e=>openRow(e,p.id)} onKeyDown={e=>{if(e.key==='Enter')router.push('/players/'+p.id)}}>
-        <td className="rank-col">#{(safePage-1)*PAGE_SIZE+i+1}</td>
+      </tr></thead><tbody>{players.map((p,i)=><tr className="team-player-row clickable-row" style={teamCssVars(p.team)} key={p.id}
+        tabIndex={0} onClick={e=>{if(!e.target.closest('a,button,input,select'))router.push('/players/'+p.id)}} onKeyDown={e=>{if(e.key==='Enter')router.push('/players/'+p.id)}}>
+        <td className="rank-col">#{offset+i+1}</td>
         <td><Link className="player-link team-player-link" href={'/players/'+p.id}><i className="club-dot"/><b>{playerLabel(p)}</b></Link>{fixtureBadge(p.projection)?<small className="cell-note">{fixtureBadge(p.projection)}</small>:null}{playerNote(p)?<small className="cell-note">{playerNote(p)}</small>:null}</td>
         <td><Link className="team-table-link" href={'/teams/'+p.team_id}>{p.team}</Link></td><td><span className={'pos '+p.position}>{posLabel(p.position)}</span>{playerRoleLabel(p)?<small className="cell-note">{playerRoleLabel(p)}</small>:null}</td><td>{p.projection?.opponent_name||'—'}</td><td>{p.projection?.venue==='HOME'?'Ev':p.projection?.venue==='AWAY'?'Dep':'—'}</td>
         <td>{num(p.price,1)}m</td><td><b>{num(p.total_points,0)}</b></td><td>{pct(p.projection?.xi_probability)}</td><td>{num(p.projection?.x_minutes,0)}</td><td><b>{num(p.projection?.xfp)}</b></td>
         <td>{num(p.projection?.p25,1)}</td><td>{num(p.projection?.p90,1)}</td><td>{pct(p.projection?.six_plus_probability)}</td><td>{num(p.projection?.expected_goals)}</td><td>{num(p.projection?.expected_assists)}</td><td>{num(p.projection?.value_score)}</td>
       </tr>)}</tbody></table></div>
-      </>
-    }
+    </>}
 
-    {rows.length>PAGE_SIZE?<div className="pagination-bar">
-      <button type="button" disabled={safePage<=1} onClick={()=>setPage(p=>Math.max(1,p-1))}>← Önceki</button>
-      <span>Sayfa <b>{safePage}</b> / {pageCount}</span>
-      <button type="button" disabled={safePage>=pageCount} onClick={()=>setPage(p=>Math.min(pageCount,p+1))}>Sonraki →</button>
+    {pageCount>1?<div className="pagination-bar">
+      <button type="button" disabled={page<=1} onClick={()=>navigate({page:Math.max(1,page-1)})}>← Önceki</button>
+      <span>Sayfa <b>{page}</b> / {pageCount}</span>
+      <button type="button" disabled={page>=pageCount} onClick={()=>navigate({page:Math.min(pageCount,page+1)})}>Sonraki →</button>
     </div>:null}
   </>
 }
