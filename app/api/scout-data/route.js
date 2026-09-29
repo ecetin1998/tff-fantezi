@@ -6,14 +6,15 @@ import {applyScoutFilters,parseScoutQuery,SCOUT_QUERY_KEYS} from '@/lib/scoutApi
 import runtimeFixture from '@/test/fixtures/scout-runtime.json'
 import {buildScoutSummary,SCOUT_FEED_SCHEMA_VERSION,SCOUT_FEED_SECTIONS,scoutFeedMatchRow} from '@/lib/scoutFeed'
 import {
-  getAvailability,getBacktestOverview,getBacktestSummary,getMatches,getPlayersWithProjection,
+  getAvailability,getBacktestOverview,getBacktestSummary,getCurrentRun,getMatches,getPlayersWithProjection,
   getRecommendation,getRoleSignals,getWeeklyPoints
 } from '@/lib/data'
 
 export const dynamic='force-dynamic'
 const responseHeaders={
-  'Cache-Control':'public, max-age=0, s-maxage=300, stale-while-revalidate=600',
-  'CDN-Cache-Control':'public, s-maxage=300, stale-while-revalidate=600',
+  'Cache-Control':'public, max-age=0, s-maxage=20, stale-while-revalidate=20',
+  'CDN-Cache-Control':'public, s-maxage=20, stale-while-revalidate=20',
+  'Vercel-CDN-Cache-Control':'public, s-maxage=20, stale-while-revalidate=20',
   'X-Robots-Tag':'noindex, nofollow, noarchive'
 }
 
@@ -155,9 +156,12 @@ async function buildPayload(section,full){
 }
 
 const buildCached=unstable_cache(
-  async(section,team,position,limit,fieldsKey)=>applyScoutFilters(await buildPayload(section,false),{
-    team:team||null,position:position||null,limit:limit||null,fields:fieldsKey?fieldsKey.split(','):[]
-  }),
+  async(section,team,position,limit,fieldsKey,runId)=>{
+    void runId
+    return applyScoutFilters(await buildPayload(section,false),{
+      team:team||null,position:position||null,limit:limit||null,fields:fieldsKey?fieldsKey.split(','):[]
+    })
+  },
   ['scout-data-v3-public'],
   {revalidate:300}
 )
@@ -179,8 +183,10 @@ export async function GET(request){
     }
     if(!allowed.has(requested))return reply({schema_version:SCOUT_FEED_SCHEMA_VERSION,error:'Bilinmeyen bölüm.'},400)
     const full=requested==='performance'&&fullAuthorized(request)
-    const payload=shouldUsePublicPayloadCache(full)
-      ?await buildCached(requested,parsed.team,parsed.position,parsed.limit,parsed.fieldsKey)
+    const publicCache=shouldUsePublicPayloadCache(full)
+    const currentRunId=publicCache?(await getCurrentRun())?.id||'no-current':null
+    const payload=publicCache
+      ?await buildCached(requested,parsed.team,parsed.position,parsed.limit,parsed.fieldsKey,currentRunId)
       :applyScoutFilters(await buildPayload(requested,true),parsed)
     const versioned=payload?.schema_version?payload:{schema_version:SCOUT_FEED_SCHEMA_VERSION,...payload}
     return reply({...versioned,served_at:new Date().toISOString()},200,{privateResponse:full,varyApiKey:requested==='performance'})
