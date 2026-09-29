@@ -2334,3 +2334,114 @@
     font-size:8.2px !important;
   }
 }
+
+/* ===== Team tactical mobile cards polish 2026-09-30 ===== */
+.scope :global(.team-detail-v2) :global(.team-tactical-profile) :global(.team-detail-history-grid){
+  gap:12px;
+}
+.scope :global(.team-detail-v2) :global(.team-tactical-profile) :global(.team-detail-history-grid)>:global(.card){
+  overflow:hidden;
+  padding:0;
+  border-color:#dce3ed;
+  background:#fff;
+  box-shadow:0 10px 26px rgba(42,55,84,.06);
+}
+.scope :global(.team-detail-v2) :global(.team-tactical-profile) :global(.team-detail-history-grid)>:global(.card)>h3{
+  margin:0;
+  padding:15px 16px 13px;
+  border-bottom:1px solid #e3e8f0;
+  background:linear-gradient(180deg,#fbfcfe,#f7f9fc);
+  color:#26314f !important;
+  font-size:14px !important;
+  line-height:1.25 !important;
+  font-weight:950;
+}
+.scope :global(.team-detail-v2) :global(.team-tactical-profile) :global(.team-detail-history-grid)>:global(.card)>h3 small{
+  color:#8290a7;
+  font-size:8px;
+  font-weight:850;
+}
+.scope :global(.team-detail-v2) :global(.team-tactical-profile) :global(.team-detail-history-grid) :global(.detail-list){
+  display:grid;
+  gap:0;
+  padding:0 14px;
+}
+.scope :global(.team-detail-v2) :global(.team-tactical-profile) :global(.team-detail-history-grid) :global(.detail-list)>div{
+  min-height:50px;
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  align-items:center;
+  gap:14px;
+  padding:10px 0;
+  border-bottom:1px solid #e6ebf2;
+}
+.scope :global(.team-detail-v2) :global(.team-tactical-profile) :global(.team-detail-history-grid) :global(.detail-list)>div:last-child{
+  border-bottom:0;
+}
+.scope :global(.team-detail-v2) :global(.team-tactical-profile) :global(.team-detail-history-grid) :global(.detail-list) span{
+  min-width:0;
+  color:#6f7d96 !important;
+  font-size:10.5px !important;
+  line-height:1.35 !important;
+}
+.scope :global(.team-detail-v2) :global(.team-tactical-profile) :global(.team-detail-history-grid) :global(.detail-list) span a{
+  color:#31405d;
+  font-weight:850;
+  text-decoration:none;
+}
+.scope :global(.team-detail-v2) :global(.team-tactical-profile) :global(.team-detail-history-grid) :global(.detail-list) b{
+  color:#25314f !important;
+  font-size:12px !important;
+  line-height:1 !important;
+  font-weight:950;
+  text-align:right;
+}
+.scope :global(.team-detail-v2) :global(.team-tactical-profile) :global(.team-detail-history-grid)>:global(.card)>:global(.muted){
+  display:block;
+  margin:0;
+  padding:11px 14px 13px;
+  border-top:1px solid #e8ecf2;
+  background:#fafbfd;
+  color:#71809a !important;
+  font-size:9.5px !important;
+  line-height:1.5 !important;
+}
+
+@media(max-width:760px){
+  .scope :global(.team-detail-v2) :global(.team-tactical-profile){
+    padding:14px;
+  }
+  .scope :global(.team-detail-v2) :global(.team-tactical-profile) :global(.panel-head){
+    margin-bottom:12px;
+  }
+  .scope :global(.team-detail-v2) :global(.team-tactical-profile) :global(.panel-head) h2{
+    color:#24314e;
+    font-size:20px;
+    line-height:1.15;
+  }
+  .scope :global(.team-detail-v2) :global(.team-tactical-profile) :global(.team-detail-history-grid){
+    grid-template-columns:1fr !important;
+    gap:11px;
+  }
+  .scope :global(.team-detail-v2) :global(.team-tactical-profile) :global(.team-detail-history-grid)>:global(.card)>h3{
+    padding:14px 14px 12px;
+    font-size:15px !important;
+  }
+  .scope :global(.team-detail-v2) :global(.team-tactical-profile) :global(.team-detail-history-grid) :global(.detail-list){
+    padding:0 13px;
+  }
+  .scope :global(.team-detail-v2) :global(.team-tactical-profile) :global(.team-detail-history-grid) :global(.detail-list)>div{
+    min-height:54px;
+    padding:11px 0;
+  }
+  .scope :global(.team-detail-v2) :global(.team-tactical-profile) :global(.team-detail-history-grid) :global(.detail-list) span{
+    font-size:11.5px !important;
+  }
+  .scope :global(.team-detail-v2) :global(.team-tactical-profile) :global(.team-detail-history-grid) :global(.detail-list) b{
+    font-size:13.5px !important;
+  }
+  .scope :global(.team-detail-v2) :global(.team-tactical-profile) :global(.team-detail-history-grid)>:global(.card)>:global(.muted){
+    padding:12px 13px 14px;
+    font-size:10.5px !important;
+  }
+}
