@@ -17,6 +17,8 @@ assert.match(page,/En yüksek xFP/)
 assert.doesNotMatch(page,/short_label/,'Match cards must not render short player labels.')
 
 assert.match(page,/match-team-shirt/)
+assert.match(page,/>Ev sahibi<\/span>/)
+assert.match(page,/>Deplasman<\/span>/)
 assert.match(page,/<strong>Ev<\/strong>/)
 assert.match(page,/<strong>Beraberlik<\/strong>/)
 assert.match(page,/<strong>Dep<\/strong>/)
