@@ -53,7 +53,7 @@ assert.match(cf,/NEXT_PUBLIC_BUILD_SHA: \$\{\{ github\.sha \}\}/)
 assert.match(cf,/\/api\/health/)
 assert.match(read('.github/workflows/post-deploy-smoke.yml'),/head_sha/)
 assert.equal(fs.existsSync('vercel.json'),true)
-assert.equal(JSON.parse(read('vercel.json')).git.deploymentEnabled,false)
+assert.deepEqual(JSON.parse(read('vercel.json')).git.deploymentEnabled,{'*':false,main:true})
 assert.equal(fs.existsSync('proxy.js'),false)
 assert.equal(fs.existsSync('middleware.js'),true)
 
