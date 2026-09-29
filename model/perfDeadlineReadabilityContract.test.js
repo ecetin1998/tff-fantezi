@@ -81,6 +81,7 @@ assert.equal(fs.existsSync('app/squad/loading.js'),true)
 /* visual-system regression guards */
 assert.match(playerDetailLayout,/AnalysisViews\.module\.css/,'Player detail must load its route-scoped analysis styles.')
 assert.match(teamDetailLayout,/AnalysisViews\.module\.css/,'Team detail must load its route-scoped analysis styles.')
+assert.match(teamDetailLayout,/SquadBuilderLegacy\.module\.css/,'Team detail must load its base layout styles.')
 assert.match(analysisCss,/Player detail • final visual authority 2026-09-29/)
 assert.match(analysisCss,/player-advanced-details[\s\S]*pointer-events:auto/,'Advanced player details summary must remain clickable.')
 assert.match(dataViewsCss,/Site-wide premium readability authority 2026-09-29/)
