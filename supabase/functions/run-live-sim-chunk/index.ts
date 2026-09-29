@@ -135,10 +135,7 @@ Deno.serve(async(req)=>{
       if(!expectedPlayers||rows.length!==expectedPlayers||minDraws<50000||maxDraws<50000){
         return Response.json({error:"accumulator incomplete",rows:rows.length,expected_players:expectedPlayers,min_draws:minDraws,max_draws:maxDraws},{status:409});
       }
-      const runMeta=await sb.from("scout_model_runs").select("is_current,status").eq("id",RUN_ID).single();
-      if(runMeta.error)throw runMeta.error;
-      const finalizeRpc=runMeta.data?.is_current?"scout_finalize_current_simulation_run":"scout_finalize_simulation_run";
-      const finalized=await sb.rpc(finalizeRpc,{
+      const finalized=await sb.rpc("scout_finalize_simulation_run",{
         p_run_id:RUN_ID,p_gameweek:GAMEWEEK,p_benchmark:BENCHMARK
       });
       if(finalized.error)throw finalized.error;
