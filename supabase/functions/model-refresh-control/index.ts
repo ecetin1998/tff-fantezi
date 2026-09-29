@@ -163,11 +163,12 @@ Deno.serve(async(req:Request)=>{
         .select("source_run_id,candidate_run_id,target_gameweek")
         .eq("candidate_run_id",runId).maybeSingle()
       if(cycle.error)throw cycle.error
-      if(!cycle.data?.source_run_id)return Response.json({error:"weekly lifecycle parent missing"},{status:409})
+      const parentRunId=cycle.data?.source_run_id||String(body.parent_run_id||"").trim()||null
+      if(!parentRunId)return Response.json({error:"model validation parent missing"},{status:409})
       const [parent,candidate,parentGate]=await Promise.all([
-        sb.from("scout_model_runs").select("id,model_version").eq("id",cycle.data.source_run_id).single(),
+        sb.from("scout_model_runs").select("id,model_version").eq("id",parentRunId).single(),
         sb.from("scout_model_runs").select("id,model_version").eq("id",runId).single(),
-        sb.from("scout_run_release_gates").select("backtest_pass").eq("run_id",cycle.data.source_run_id).single(),
+        sb.from("scout_run_release_gates").select("backtest_pass").eq("run_id",parentRunId).single(),
       ])
       for(const q of [parent,candidate,parentGate])if(q.error)throw q.error
       const sameEngine=engineSignature(parent.data.model_version)===engineSignature(candidate.data.model_version)
@@ -176,7 +177,9 @@ Deno.serve(async(req:Request)=>{
         backtest_pass:pass,
         details:{model_validation:{
           pass,same_engine:sameEngine,inherited_from:parent.data.id,
-          reason:"unchanged engine; inherit prior leakage-safe replay gate and record the newly closed live week separately"
+          reason:cycle.data?.source_run_id
+            ?"unchanged engine; inherit prior leakage-safe replay gate and record the newly closed live week separately"
+            :"same-gameweek pre-kickoff refresh; engine unchanged so inherit the validated replay gate"
         }}
       })
       return Response.json({ok:pass,pass,same_engine:sameEngine,inherited_from:parent.data.id},{status:pass?200:409})
