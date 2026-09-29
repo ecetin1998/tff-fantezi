@@ -11,5 +11,6 @@ export async function GET(){
     ok:true,
     sha:BUILD_SHA,
     service:'tff-fantezi',
+    environment:process.env.VERCEL_ENV||process.env.NODE_ENV||'unknown',
   },{headers:{'Cache-Control':'no-store'}})
 }
