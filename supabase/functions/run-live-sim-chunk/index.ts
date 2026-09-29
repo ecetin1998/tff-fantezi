@@ -139,17 +139,30 @@ Deno.serve(async(req)=>{
         p_run_id:RUN_ID,p_gameweek:GAMEWEEK,p_benchmark:BENCHMARK
       });
       if(finalized.error)throw finalized.error;
-      return Response.json({ok:true,mode:"finalize",run_id:RUN_ID,gameweek:GAMEWEEK,benchmark:BENCHMARK,draws:minDraws,result:finalized.data});
+      const goalConfig=await sb.from("scout_goal_distribution_config")
+        .select("version,distribution,alpha_used,gate_passed")
+        .eq("active",true).order("created_at",{ascending:false}).limit(1).maybeSingle();
+      if(goalConfig.error)throw goalConfig.error;
+      let matchDistribution="Poisson";
+      if(goalConfig.data?.gate_passed&&String(goalConfig.data?.distribution||"").toUpperCase()==="NB2"&&num(goalConfig.data?.alpha_used)>0){
+        const prediction=await sb.rpc("populate_match_predictions_nb",{
+          p_run_id:RUN_ID,p_gameweek:GAMEWEEK,p_benchmark:BENCHMARK,p_alpha:num(goalConfig.data.alpha_used)
+        });
+        if(prediction.error)throw prediction.error;
+        matchDistribution="NB2";
+      }
+      return Response.json({ok:true,mode:"finalize",run_id:RUN_ID,gameweek:GAMEWEEK,benchmark:BENCHMARK,draws:minDraws,result:finalized.data,match_distribution:matchDistribution});
     }
 
-    const [pq,mq,metaq,aq,rulesq]=await Promise.all([
+    const [pq,mq,metaq,aq,rulesq,goalDistQ]=await Promise.all([
       sb.from("scout_replay_player_inputs").select("*").eq("gameweek",GAMEWEEK).eq("benchmark_version",BENCHMARK).order("player_id"),
       sb.from("scout_replay_match_inputs").select("*").eq("gameweek",GAMEWEEK).eq("benchmark_version",BENCHMARK).order("match_id"),
       sb.from("scout_replay_input_meta").select("*").eq("gameweek",GAMEWEEK).eq("benchmark_version",BENCHMARK).single(),
       sb.from("scout_player_single_shot_adjustments").select("*").eq("through_gameweek",GAMEWEEK-1),
-      sb.from("scout_game_rules").select("rules").order("season",{ascending:false}).limit(1).single()
+      sb.from("scout_game_rules").select("rules").order("season",{ascending:false}).limit(1).single(),
+      sb.from("scout_goal_distribution_config").select("version,distribution,alpha_used,gate_passed").eq("active",true).order("created_at",{ascending:false}).limit(1).maybeSingle()
     ]);
-    for(const q of [pq,mq,metaq,aq,rulesq])if(q.error)throw q.error;
+    for(const q of [pq,mq,metaq,aq,rulesq,goalDistQ])if(q.error)throw q.error;
     const SCORING=rulesq.data?.rules?.scoring;
     if(!SCORING)throw new Error("canonical scoring rules missing");
     if(!(pq.data||[]).length)throw new Error("no player inputs for gameweek "+GAMEWEEK);
@@ -170,6 +183,9 @@ Deno.serve(async(req)=>{
     const temperature=num(meta.temperature,1.7);
     const assistFraction=num(meta.assist_fraction,.67);
     const ownFraction=num(meta.own_goal_fraction,.031);
+    const goalDist=goalDistQ.data||null;
+    const useNb=Boolean(goalDist?.gate_passed)&&String(goalDist?.distribution||"").toUpperCase()==="NB2"&&num(goalDist?.alpha_used)>0;
+    const goalAlpha=useNb?num(goalDist.alpha_used):0;
     const quotas=meta.team_formations||{};
     const adj=new Map((aq.data||[]).map(x=>[Number(x.player_id),x]));
     const allocation=P.map(p=>allocationFor(p,adj.get(p.id)));
@@ -182,12 +198,36 @@ Deno.serve(async(req)=>{
       t^=t+Math.imul(t^(t>>>7),t|61);
       return ((t^(t>>>14))>>>0)/4294967296;
     };
+    const normal=()=>{
+      let u=0,v=0;
+      while(u<=1e-12)u=random();
+      while(v<=1e-12)v=random();
+      return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);
+    };
+    const gamma=shape=>{
+      if(!(shape>0))return 0;
+      if(shape<1)return gamma(shape+1)*Math.pow(random(),1/shape);
+      const d=shape-1/3,c=1/Math.sqrt(9*d);
+      while(true){
+        let x=normal(),v=1+c*x;
+        if(v<=0)continue;
+        v=v*v*v;
+        const u=random();
+        if(u<1-.0331*x*x*x*x)return d*v;
+        if(Math.log(u)<.5*x*x+d*(1-v+Math.log(v)))return d*v;
+      }
+    };
     const poisson=l=>{
       l=Math.max(0,num(l));
       if(l===0)return 0;
       let n=0,t=1,L=Math.exp(-l);
       do{n++;t*=random()}while(t>L);
       return n-1;
+    };
+    const teamGoals=mu=>{
+      if(!useNb)return poisson(mu);
+      const shape=1/goalAlpha;
+      return poisson(gamma(shape)*(goalAlpha*Math.max(0,num(mu))));
     };
     const pick=(ids,weight)=>{
       if(!ids.length)return null;
@@ -270,7 +310,7 @@ Deno.serve(async(req)=>{
           comp.appearance[i]=(mins[i]>0?SCORING.appearance:0)+(mins[i]>60?SCORING.appearance_60:0);
         }
 
-        const score=[poisson(match.home_lambda),poisson(match.away_lambda)];
+        const score=[teamGoals(match.home_lambda),teamGoals(match.away_lambda)];
         const gc=new Int16Array(M);
         for(let side=0;side<2;side++){
           const ids=teams[clubs[side]]||[],opp=teams[clubs[1-side]]||[];
@@ -347,7 +387,7 @@ Deno.serve(async(req)=>{
       p_gameweek:GAMEWEEK,p_benchmark:BENCHMARK,p_draws:draws,p_rows:result
     });
     if(mergeError)throw mergeError;
-    return Response.json({ok:true,run_id:RUN_ID,gameweek:GAMEWEEK,benchmark:BENCHMARK,draws,seed,players:M,matches:matches.length});
+    return Response.json({ok:true,run_id:RUN_ID,gameweek:GAMEWEEK,benchmark:BENCHMARK,draws,seed,players:M,matches:matches.length,goal_distribution:useNb?"NB2":"Poisson",goal_alpha:goalAlpha});
   }catch(e){
     return Response.json({error:String(e?.message||e),stack:String(e?.stack||"").slice(0,1200)},{status:500});
   }
