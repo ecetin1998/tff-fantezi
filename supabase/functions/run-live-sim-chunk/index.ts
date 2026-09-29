@@ -1,10 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-const AUTH_HASH="ab1f975176f9a8e4c357dbcf1b7e9ca7de13473e5c7b03fbb91c5fb0147dec49";
-async function sha256Hex(s){
-  const d=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(s));
-  return [...new Uint8Array(d)].map(x=>x.toString(16).padStart(2,"0")).join("");
-}
 const GITHUB_OIDC_AUDIENCE="tff-fantezi-scout";
 const GITHUB_OIDC_ISSUER="https://token.actions.githubusercontent.com";
 const GITHUB_REPOSITORY_ID="1353738004";
@@ -36,8 +31,6 @@ async function verifyGithubOidc(token){
   return crypto.subtle.verify({name:"RSASSA-PKCS1-v1_5"},key,decodeJwtBytes(parts[2]),new TextEncoder().encode(parts[0]+"."+parts[1]));
 }
 async function authorized(req){
-  const tok=req.headers.get("x-run-token")||"";
-  if(tok && (await sha256Hex(tok))===AUTH_HASH)return true;
   const auth=req.headers.get("authorization")||"";
   if(!auth.startsWith("Bearer "))return false;
   try{return await verifyGithubOidc(auth.slice(7))}catch{return false}
