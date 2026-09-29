@@ -12,8 +12,8 @@ import {
 
 export const dynamic='force-dynamic'
 const responseHeaders={
-  'Cache-Control':'public, max-age=0, s-maxage=300, stale-while-revalidate=600',
-  'CDN-Cache-Control':'public, s-maxage=300, stale-while-revalidate=600',
+  'Cache-Control':'public, max-age=0, s-maxage=60, stale-while-revalidate=60',
+  'CDN-Cache-Control':'public, s-maxage=60, stale-while-revalidate=60',
   'X-Robots-Tag':'noindex, nofollow, noarchive'
 }
 
@@ -159,7 +159,7 @@ const buildCached=unstable_cache(
     team:team||null,position:position||null,limit:limit||null,fields:fieldsKey?fieldsKey.split(','):[]
   }),
   ['scout-data-v3-public'],
-  {revalidate:300}
+  {revalidate:60}
 )
 
 export async function GET(request){
