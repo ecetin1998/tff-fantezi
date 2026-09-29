@@ -45,6 +45,11 @@ const avg=(xs:number[])=>xs.length?xs.reduce((a,b)=>a+b,0)/xs.length:0
 const per90=(v:any,minutes:any,fallback=0)=>n(minutes)>0?n(v)*90/n(minutes):fallback
 const newer=(...xs:any[])=>xs.filter(Boolean).map(x=>new Date(x).getTime()).filter(Number.isFinite).sort((a,b)=>b-a)[0]||Date.now()
 const sourceRevision=(value:any)=>new Date(value).toISOString().replace(/[-:TZ.]/g,"").slice(0,14)
+async function snapshotHash(value:any){
+  const payload=new TextEncoder().encode(JSON.stringify(value))
+  const digest=await crypto.subtle.digest("SHA-256",payload)
+  return Array.from(new Uint8Array(digest)).map(x=>x.toString(16).padStart(2,"0")).join("")
+}
 
 function poisson(lambda:number,max=12){
   const out:number[]=[]
@@ -155,9 +160,14 @@ async function sourceStatus(sb:any,current:any){
   }
 }
 
-async function prepare(sb:any,current:any,status:any){
+async function prepare(sb:any,current:any,status:any,body:any={}){
   if(!status.ready_to_advance)throw new Error("SOURCE_NOT_READY")
   const target=Number(status.target_gameweek)
+  const goalConfigQ=await sb.from("scout_goal_distribution_config")
+    .select("version").eq("active",true).order("created_at",{ascending:false}).limit(1).maybeSingle()
+  if(goalConfigQ.error)throw goalConfigQ.error
+  const codeSha=String(body.code_sha||"").trim()||null
+  const configVersion=goalConfigQ.data?.version||null
   const priorMetaQ=await sb.from("scout_replay_input_meta").select("*")
     .eq("gameweek",Number(current.gameweek)).order("created_at",{ascending:false}).limit(1).maybeSingle()
   if(priorMetaQ.error)throw priorMetaQ.error
@@ -187,15 +197,20 @@ async function prepare(sb:any,current:any,status:any){
     for(const table of ["scout_player_projections","scout_role_signals","scout_availability","scout_match_predictions"]){
       const del=await sb.from(table).delete().eq("run_id",runId);if(del.error)throw del.error
     }
-    const upd=await sb.from("scout_model_runs").update({status:"building",simulation_count:0,generated_at:new Date().toISOString(),source_updated_at:status.latest_source_at}).eq("id",runId)
+    const upd=await sb.from("scout_model_runs").update({
+      status:"building",simulation_count:0,generated_at:new Date().toISOString(),
+      source_updated_at:status.latest_source_at,source_cutoff:status.latest_source_at,
+      code_sha:codeSha,config_version:configVersion,input_snapshot_hash:null
+    }).eq("id",runId)
     if(upd.error)throw upd.error
   }else{
     runId=crypto.randomUUID()
     const ins=await sb.from("scout_model_runs").insert({
       id:runId,gameweek:target,
       model_version:String(current.model_version||"ScoutPlus 3.3").replace(/(GW|MH)\s*\d+/i,"GW"+target),
-      generated_at:new Date().toISOString(),source_updated_at:status.latest_source_at,
-      simulation_count:0,status:"building",is_current:false,notes:key+" • fail-closed weekly lifecycle"
+      generated_at:new Date().toISOString(),source_updated_at:status.latest_source_at,source_cutoff:status.latest_source_at,
+      simulation_count:0,status:"building",is_current:false,notes:key+" • fail-closed weekly lifecycle",
+      code_sha:codeSha,config_version:configVersion
     })
     if(ins.error)throw ins.error
   }
@@ -344,8 +359,130 @@ async function prepare(sb:any,current:any,status:any){
     const ins=await sb.from(table).insert(rows)
     if(ins.error)throw new Error(table+": "+ins.error.message)
   }
+  const inputHash=await snapshotHash({
+    gameweek:target,benchmark,
+    players:inputRows.map((x:any)=>[x.player_id,x.club_id,x.position,x.price,x.availability,x.role_probability,x.durations,x.duration_weights,x.rates,x.sub_role,x.role_side]),
+    matches:matchInputs.map((x:any)=>[x.match_id,x.home_team_id,x.away_team_id,x.home_lambda,x.away_lambda])
+  })
+  const metaUpdate=await sb.from("scout_model_runs").update({
+    input_snapshot_hash:inputHash,source_cutoff:status.latest_source_at,code_sha:codeSha,config_version:configVersion
+  }).eq("id",runId)
+  if(metaUpdate.error)throw metaUpdate.error
   await linkLifecycle(sb,current,target,runId,benchmark,key,status)
   return {reused:false,run_id:runId,gameweek:target,benchmark,players:inputRows.length,matches:matchInputs.length,key}
+}
+
+
+async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
+  const gw=Number(current.gameweek)
+  const now=Date.now()
+  const kickoffQ=await sb.from("scout_match_predictions")
+    .select("kickoff_at").eq("run_id",current.id).order("kickoff_at",{ascending:true}).limit(1).maybeSingle()
+  if(kickoffQ.error)throw kickoffQ.error
+  const kickoff=kickoffQ.data?.kickoff_at?new Date(kickoffQ.data.kickoff_at).getTime():NaN
+  if(!Number.isFinite(kickoff))return {refresh_required:false,reason:"CURRENT_KICKOFF_MISSING"}
+  const deadline=kickoff-36e5
+  if(now>=deadline)return {refresh_required:false,reason:"CURRENT_WEEK_LOCKED",deadline_at:new Date(deadline).toISOString()}
+
+  const [latestMetaQ,availabilityQ,rolesQ,goalConfigQ,playersUpdatedQ]=await Promise.all([
+    sb.from("scout_replay_input_meta").select("*").eq("gameweek",gw).order("created_at",{ascending:false}).limit(1).maybeSingle(),
+    sb.from("scout_availability").select("*").eq("run_id",current.id),
+    sb.from("scout_role_signals").select("*").eq("run_id",current.id),
+    sb.from("scout_goal_distribution_config").select("version").eq("active",true).order("created_at",{ascending:false}).limit(1).maybeSingle(),
+    sb.from("scout_players").select("updated_at").eq("active",true).order("updated_at",{ascending:false}).limit(1).maybeSingle()
+  ])
+  for(const q of [latestMetaQ,availabilityQ,rolesQ,goalConfigQ,playersUpdatedQ])if(q.error)throw q.error
+  if(!latestMetaQ.data)return {refresh_required:false,reason:"CURRENT_SIM_INPUT_META_MISSING"}
+
+  const latestSourceAt=new Date(newer(
+    ...(availabilityQ.data||[]).map((x:any)=>x.checked_at),
+    playersUpdatedQ.data?.updated_at,
+    current.source_updated_at
+  )).toISOString()
+  const hoursUntilDeadline=Math.max(0,(deadline-now)/36e5)
+  const minInterval=hoursUntilDeadline<=12?2:hoursUntilDeadline<=48?6:24
+  const generatedAge=ageHours(current.generated_at)
+  const sourceAdvanced=!current.source_updated_at||new Date(latestSourceAt).getTime()>new Date(current.source_updated_at).getTime()+60_000
+  if(!sourceAdvanced||generatedAge<minInterval){
+    return {
+      refresh_required:false,reason:!sourceAdvanced?"SOURCE_UNCHANGED":"REFRESH_INTERVAL_NOT_REACHED",
+      latest_source_at:latestSourceAt,model_age_hours:generatedAge,min_interval_hours:minInterval,
+      deadline_at:new Date(deadline).toISOString()
+    }
+  }
+
+  const sourceBenchmark=String(latestMetaQ.data.benchmark_version)
+  const [inputsQ,matchesQ]=await Promise.all([
+    sb.from("scout_replay_player_inputs").select("*").eq("gameweek",gw).eq("benchmark_version",sourceBenchmark).order("player_id"),
+    sb.from("scout_replay_match_inputs").select("*").eq("gameweek",gw).eq("benchmark_version",sourceBenchmark).order("match_id")
+  ])
+  for(const q of [inputsQ,matchesQ])if(q.error)throw q.error
+  if(!(inputsQ.data||[]).length||!(matchesQ.data||[]).length)throw new Error("CURRENT_SIM_INPUT_COVERAGE_MISSING")
+
+  const revision=sourceRevision(latestSourceAt)
+  const benchmark=`intraday-mh${gw}-${revision}-${String(current.id).slice(0,8)}`
+  const codeSha=String(body.code_sha||"").trim()||null
+  const configVersion=goalConfigQ.data?.version||null
+  const avMap=new Map((availabilityQ.data||[]).map((x:any)=>[Number(x.player_id),x]))
+  const roleMap=new Map((rolesQ.data||[]).map((x:any)=>[Number(x.player_id),x]))
+
+  const inputRows=(inputsQ.data||[]).map((x:any)=>{
+    const av=avMap.get(Number(x.player_id))
+    const role=roleMap.get(Number(x.player_id))
+    return {
+      ...x,benchmark_version:benchmark,
+      availability:clamp(0,1,n(av?.availability_probability,x.availability)),
+      role_probability:clamp(.000001,.999999,n(role?.predicted_xi_probability,x.role_probability)),
+      source_note:`intraday refresh from ${sourceBenchmark}; source ${latestSourceAt}`
+    }
+  })
+  const matchInputs=(matchesQ.data||[]).map((x:any)=>({...x,benchmark_version:benchmark,source_note:`intraday refresh from ${sourceBenchmark}`}))
+  const meta={...latestMetaQ.data,benchmark_version:benchmark,created_at:new Date().toISOString(),source_note:`intraday refresh from ${sourceBenchmark}; source ${latestSourceAt}`}
+  delete (meta as any).id
+
+  const runId=crypto.randomUUID()
+  const runInsert=await sb.from("scout_model_runs").insert({
+    id:runId,gameweek:gw,model_version:current.model_version,generated_at:new Date().toISOString(),
+    source_updated_at:latestSourceAt,source_cutoff:latestSourceAt,simulation_count:0,status:"building",is_current:false,
+    notes:`intraday pre-kickoff refresh • parent ${current.id} • source ${latestSourceAt}`,
+    code_sha:codeSha,config_version:configVersion
+  })
+  if(runInsert.error)throw runInsert.error
+
+  const projectionRows=inputRows.map((x:any)=>({
+    run_id:runId,player_id:Number(x.player_id),opponent_name:"—",venue:"HOME",
+    xi_probability:0,appearance_probability:0,over60_probability:0,x_minutes:0,
+    core_xfp:0,x_bonus:0,xfp:0,p25:0,p75:0,p90:0,six_plus_probability:0,value_score:0,
+    data_confidence:x.data_confidence||"medium",role_note:null,expected_goals:0,expected_assists:0,
+    mc_standard_error:0,availability_source:"intraday-refresh",availability_probability:n(x.availability,1),
+    top25_score:null,top25_rank:null,top25_model_version:null,confidence:x.data_confidence||"medium"
+  }))
+  const availabilityRows=(availabilityQ.data||[]).map((x:any)=>{const {run_id:_,...rest}=x;return {...rest,run_id:runId}})
+  const roleRows=(rolesQ.data||[]).map((x:any)=>{
+    const {run_id:_,...rest}=x
+    const av=avMap.get(Number(x.player_id))
+    return {...rest,run_id:runId,availability_probability:clamp(0,1,n(av?.availability_probability,x.availability_probability))}
+  })
+
+  for(const [table,rows] of [
+    ["scout_replay_input_meta",[meta]],["scout_replay_match_inputs",matchInputs],["scout_replay_player_inputs",inputRows],
+    ["scout_availability",availabilityRows],["scout_player_projections",projectionRows],["scout_role_signals",roleRows]
+  ] as any[]){
+    const ins=await sb.from(table).insert(rows)
+    if(ins.error)throw new Error(table+": "+ins.error.message)
+  }
+  const inputHash=await snapshotHash({
+    gameweek:gw,benchmark,
+    players:inputRows.map((x:any)=>[x.player_id,x.club_id,x.position,x.price,x.availability,x.role_probability,x.durations,x.duration_weights,x.rates,x.sub_role,x.role_side]),
+    matches:matchInputs.map((x:any)=>[x.match_id,x.home_team_id,x.away_team_id,x.home_lambda,x.away_lambda])
+  })
+  const runUpdate=await sb.from("scout_model_runs").update({input_snapshot_hash:inputHash}).eq("id",runId)
+  if(runUpdate.error)throw runUpdate.error
+  return {
+    refresh_required:true,run_id:runId,parent_run_id:current.id,gameweek:gw,benchmark,
+    latest_source_at:latestSourceAt,deadline_at:new Date(deadline).toISOString(),
+    min_interval_hours:minInterval,input_snapshot_hash:inputHash
+  }
 }
 
 Deno.serve(async(req:Request)=>{
@@ -368,7 +505,11 @@ Deno.serve(async(req:Request)=>{
       return Response.json({ok:true,result:q.data,...status})
     }
     if(action==="prepare"){
-      const result=await prepare(sb,current,status)
+      const result=await prepare(sb,current,status,body)
+      return Response.json({ok:true,...result})
+    }
+    if(action==="prepare_current"){
+      const result=await prepareCurrentRefresh(sb,current,body)
       return Response.json({ok:true,...result})
     }
     if(action==="snapshot"){
