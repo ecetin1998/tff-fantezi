@@ -397,8 +397,24 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
   for(const q of [latestMetaQ,availabilityQ,rolesQ,goalConfigQ,playersUpdatedQ,currentProjectionQ])if(q.error)throw q.error
   if(!latestMetaQ.data)return {refresh_required:false,reason:"CURRENT_SIM_INPUT_META_MISSING"}
 
+  const availabilityTimes=(availabilityQ.data||[])
+    .map((x:any)=>x.checked_at)
+    .filter(Boolean)
+    .map((value:any)=>new Date(value).getTime())
+    .filter(Number.isFinite)
+  const availabilityLatest=availabilityTimes.length
+    ?new Date(Math.max(...availabilityTimes)).toISOString()
+    :null
+  const availabilityAge=ageHours(availabilityLatest)
+  if(!availabilityLatest||availabilityAge>24){
+    return {
+      refresh_required:false,reason:"AVAILABILITY_STALE",
+      availability_checked_at:availabilityLatest,availability_age_hours:availabilityAge,
+      deadline_at:new Date(deadline).toISOString()
+    }
+  }
   const latestSourceAt=new Date(newer(
-    ...(availabilityQ.data||[]).map((x:any)=>x.checked_at),
+    availabilityLatest,
     playersUpdatedQ.data?.updated_at,
     current.source_updated_at
   )).toISOString()
