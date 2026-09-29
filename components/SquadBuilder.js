@@ -1,5 +1,5 @@
 'use client'
-import { useActionState, useDeferredValue, useEffect, useMemo, useRef, useState } from 'react'
+import { useActionState, useEffect, useMemo, useRef, useState } from 'react'
 import { saveSquad } from '@/app/actions'
 import { teamCssVars } from '@/lib/teamThemes'
 import { availabilityCompactNote, availabilityIsIssue } from '@/lib/availability'
@@ -114,7 +114,6 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
   const pickerRef=useRef(null)
 
   const selected=ids.map(id=>map.get(id)).filter(Boolean)
-  const deferredPlayers=useDeferredValue(players)
   const counts=selected.reduce((a,p)=>(a[p.position]=(a[p.position]||0)+1,a),{})
   const cost=selected.reduce((s,p)=>s+Number(p.price||0),0)
   const bank=BUDGET-cost
@@ -177,13 +176,42 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
   useEffect(()=>setPoolLimit(180),[q,pos,team,sortKey,sortDir])
   const visibleCandidates=candidates.slice(0,poolLimit)
 
-  const bestMove=useMemo(()=>{
+  const recommendedIds=useMemo(
+    ()=>recommendedState.map(x=>Number(x.player_id)).filter(id=>map.has(id)).slice(0,SQUAD_SIZE),
+    [recommendedState,map]
+  )
+  const recommendedXiIds=useMemo(
+    ()=>recommendedState.filter(x=>x.bench_order===null).map(x=>Number(x.player_id)).filter(id=>map.has(id)),
+    [recommendedState,map]
+  )
+  const recommendedCaptainId=useMemo(
+    ()=>Number(recommendedState.find(x=>x.is_captain)?.player_id||0)||null,
+    [recommendedState]
+  )
+  const recommendedRosterMatch=useMemo(()=>{
+    if(recommendedIds.length!==SQUAD_SIZE||ids.length!==SQUAD_SIZE)return false
+    const recommendedSet=new Set(recommendedIds)
+    return ids.every(id=>recommendedSet.has(id))
+  },[recommendedIds,ids])
+  const recommendedLineupMatch=useMemo(()=>{
+    if(!recommendedRosterMatch||recommendedXiIds.length!==STARTING_XI_SIZE)return false
+    const currentSet=new Set(xiIds)
+    return recommendedXiIds.every(id=>currentSet.has(id))&&captainId===recommendedCaptainId
+  },[recommendedRosterMatch,recommendedXiIds,xiIds,captainId,recommendedCaptainId])
+
+  const modelMove=useMemo(()=>{
+    if(recommendedIds.length!==SQUAD_SIZE||ids.length!==SQUAD_SIZE||recommendedRosterMatch)return null
     const currentPlan=bestXIPlan(ids,map)
     if(!currentPlan)return null
+    const recommendedSet=new Set(recommendedIds)
+    const currentSet=new Set(ids)
+    const outs=selected.filter(p=>!recommendedSet.has(p.id))
+    const ins=recommendedIds.map(id=>map.get(id)).filter(p=>p&&!currentSet.has(p.id))
     let best=null
-    for(const out of selected){
-      for(const inn of deferredPlayers){
-        if(ids.includes(inn.id)||inn.position!==out.position)continue
+
+    for(const out of outs){
+      for(const inn of ins){
+        if(inn.position!==out.position)continue
         if(Number(inn.price)>Number(out.price)+bank+0.001)continue
         const nextIds=ids.map(id=>id===out.id?inn.id:id)
         if(MAX_PLAYERS_PER_CLUB){
@@ -191,24 +219,24 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
           const nextClubCounts=nextPlayers.reduce((a,p)=>(a[p.team_id]=(a[p.team_id]||0)+1,a),{})
           if(Object.values(nextClubCounts).some(n=>n>MAX_PLAYERS_PER_CLUB))continue
         }
-        const plan=bestXIPlan(nextIds,map)
-        if(!plan)continue
-        const gain=plan.total-currentPlan.total
+        const nextPlan=bestXIPlan(nextIds,map)
+        if(!nextPlan)continue
+        const gain=nextPlan.total-currentPlan.total
         const hitCost=freeTransfersRemaining>0?0:Number(TRANSFER_RULES.hit_cost||4)
         const netGain=gain-hitCost
-        if(!best||netGain>best.netGain)best={out,inn,gain,netGain,hitCost,plan,nextIds}
+        const candidate={out,inn,gain,netGain,hitCost,plan:nextPlan,nextIds}
+        if(!best||candidate.netGain>best.netGain)best=candidate
       }
     }
     return best
-  },[selected,deferredPlayers,ids,bank,map,freeTransfersRemaining])
+  },[recommendedIds,recommendedRosterMatch,ids,selected,bank,map,freeTransfersRemaining])
 
-  function applyBestMove(){
-    if(!bestMove||bestMove.netGain<=0)return
-    setIds(bestMove.nextIds)
-    setFormation(bestMove.plan.key)
-    setXiIds(bestMove.plan.lineup)
-    const nextCaptain=bestMove.plan.captain?.id||null
-    setCaptainId(nextCaptain)
+  function applyModelMove(){
+    if(!modelMove||modelMove.netGain<=0)return
+    setIds(modelMove.nextIds)
+    setFormation(modelMove.plan.key)
+    setXiIds(modelMove.plan.lineup)
+    setCaptainId(modelMove.plan.captain?.id||null)
     setSwapTarget(null)
   }
 
@@ -605,11 +633,30 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
     </section>
 
     <section className="card squad-insight-bar">
-      <div>
+      <div className="squad-model-guidance">
         <span className="eyebrow">MODEL ÖNERİSİ</span>
-        <h2>{bestMove&&bestMove.netGain>0?`${playerLabel(bestMove.out)} → ${playerLabel(bestMove.inn)}`:'Kadron şu an dengeli görünüyor'}</h2>
-        {bestMove&&bestMove.netGain>0?<p>Tek transferde yaklaşık <b>+{bestMove.netGain.toFixed(2)} net xFP</b>{bestMove.hitCost?` (${bestMove.hitCost} puan hit sonrası)`:''}.</p>:<p>Hit maliyeti sonrası pozitif tek transfer bulunamadı.</p>}
-        {bestMove&&bestMove.netGain>0?<button type="button" className="squad-tool-btn model-apply-btn" onClick={applyBestMove} disabled={isLocked}>Öneriyi Uygula</button>:null}
+        {!recommendedIds.length?<>
+          <h2>Model kadrosu henüz hazır değil</h2>
+          <p>Bu haftanın önerilen kadrosu yayınlandığında mevcut kadronla burada karşılaştırılacak.</p>
+        </>:ids.length!==SQUAD_SIZE?<>
+          <h2>Önce 15 kişilik kadronu tamamla</h2>
+          <p>Model karşılaştırması, geçerli bir 15 kişilik kadro oluştuğunda devreye girer.</p>
+        </>:recommendedRosterMatch&&recommendedLineupMatch?<>
+          <h2>Model kadrosuyla birebir eşleşiyorsun</h2>
+          <p>15 oyuncu, ilk 11 ve kaptan modelin önerdiği düzenle aynı. Bu yüzden ayrıca transfer önermiyorum.</p>
+          <span className="model-match-chip">✓ Önerilen kadro aktif</span>
+        </>:recommendedRosterMatch?<>
+          <h2>15'li kadron model önerisiyle aynı</h2>
+          <p>Oyuncu değişikliğine gerek yok. Sadece ilk 11 veya kaptan yerleşimin model düzeninden farklı.</p>
+          <button type="button" className="squad-tool-btn model-apply-btn" onClick={fillRecommended} disabled={isLocked}>Model dizilişini uygula</button>
+        </>:modelMove&&modelMove.netGain>0?<>
+          <h2>{playerLabel(modelMove.out)} → {playerLabel(modelMove.inn)}</h2>
+          <p>Bu değişim modelin yayınlanmış önerilen kadrosuna yaklaştırır ve yaklaşık <b>+{modelMove.netGain.toFixed(2)} net xFP</b>{modelMove.hitCost?` (${modelMove.hitCost} puan hit sonrası)`:''} sağlar.</p>
+          <button type="button" className="squad-tool-btn model-apply-btn" onClick={applyModelMove} disabled={isLocked}>Öneriyi Uygula</button>
+        </>:<>
+          <h2>Kadron model önerisine yakın</h2>
+          <p>Model kadrosuna geçişte şu an tek transferle pozitif net xFP yok. Sırf eşleşmek için hit önermiyorum.</p>
+        </>}
       </div>
       <div className={`pro-lock ${plan==='pro'?'unlocked':''}`}>
         <span>PRO</span><b>4 MH Transfer Planlayıcı</b>

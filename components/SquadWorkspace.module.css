@@ -1790,3 +1790,212 @@
 }
 
 
+
+
+/* ===== My Squad • model advice consistency + weekly snapshot ===== */
+.scope :global(.squad-model-guidance){
+  min-width:0;
+}
+.scope :global(.squad-model-guidance) h2{
+  max-width:760px;
+  font-size:clamp(20px,2.2vw,30px);
+  line-height:1.12;
+  overflow-wrap:anywhere;
+}
+.scope :global(.squad-model-guidance) p{
+  max-width:720px;
+  line-height:1.55;
+}
+.scope :global(.model-match-chip){
+  display:inline-flex;
+  align-items:center;
+  margin-top:12px;
+  padding:7px 10px;
+  border:1px solid #bfe5dd;
+  border-radius:999px;
+  background:#edf9f6;
+  color:#087e72;
+  font-size:9px;
+  font-weight:900;
+}
+
+.scope :global(.squad-history-card){
+  display:grid;
+  gap:16px;
+  padding:22px;
+}
+.scope :global(.squad-history-head){
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-between;
+  gap:24px;
+}
+.scope :global(.squad-history-head) h2{
+  margin:6px 0 0;
+}
+.scope :global(.squad-history-head)>p{
+  max-width:520px;
+  margin:0;
+  color:var(--muted);
+  font-size:10.5px;
+  line-height:1.55;
+  text-align:right;
+}
+.scope :global(.squad-history-list){
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:10px;
+}
+.scope :global(.squad-history-item){
+  min-width:0;
+  display:grid;
+  grid-template-columns:auto minmax(0,1fr) auto;
+  gap:12px;
+  align-items:center;
+  padding:14px;
+  border:1px solid #e1e7f0;
+  border-radius:14px;
+  background:linear-gradient(145deg,#fff,#f7f9fd);
+}
+.scope :global(.squad-history-week){
+  display:grid;
+  gap:6px;
+  align-content:center;
+}
+.scope :global(.squad-history-week)>span{
+  font-size:17px;
+  font-weight:950;
+  color:#25304e;
+}
+.scope :global(.squad-history-week)>em{
+  width:max-content;
+  max-width:100%;
+  padding:4px 7px;
+  border-radius:999px;
+  font-size:7px;
+  font-style:normal;
+  font-weight:900;
+  white-space:nowrap;
+}
+.scope :global(.squad-history-week)>em:global(.complete){
+  color:#087e72;
+  background:#eaf8f5;
+  border:1px solid #c9e9e2;
+}
+.scope :global(.squad-history-week)>em:global(.pending){
+  color:#8b6a22;
+  background:#fff7e8;
+  border:1px solid #f0ddb8;
+}
+.scope :global(.squad-history-captain){
+  min-width:0;
+  display:grid;
+  gap:4px;
+}
+.scope :global(.squad-history-captain) small,
+.scope :global(.squad-history-score) small{
+  color:#8a94aa;
+  font-size:7px;
+  font-weight:850;
+  text-transform:uppercase;
+  letter-spacing:.05em;
+}
+.scope :global(.squad-history-captain) b{
+  min-width:0;
+  font-size:11px;
+  line-height:1.25;
+  overflow-wrap:anywhere;
+}
+.scope :global(.squad-history-score){
+  min-width:72px;
+  display:grid;
+  justify-items:end;
+  gap:3px;
+}
+.scope :global(.squad-history-score) strong{
+  color:#0b8e82;
+  font-size:24px;
+  line-height:1;
+  font-variant-numeric:tabular-nums;
+}
+.scope :global(.squad-history-empty){
+  display:grid;
+  gap:6px;
+  padding:18px;
+  border:1px dashed #d9e0eb;
+  border-radius:14px;
+  background:#f8fafd;
+}
+.scope :global(.squad-history-empty) b{
+  font-size:13px;
+}
+.scope :global(.squad-history-empty) span{
+  color:var(--muted);
+  font-size:10px;
+  line-height:1.5;
+}
+
+@media(max-width:900px){
+  .scope :global(.squad-history-list){
+    grid-template-columns:1fr 1fr;
+  }
+}
+@media(max-width:760px){
+  .scope :global(.squad-model-guidance) h2{
+    font-size:22px;
+    line-height:1.16;
+  }
+  .scope :global(.squad-history-card){
+    gap:13px;
+    padding:16px;
+  }
+  .scope :global(.squad-history-head){
+    display:grid;
+    gap:8px;
+  }
+  .scope :global(.squad-history-head)>p{
+    max-width:none;
+    text-align:left;
+    font-size:9.5px;
+  }
+  .scope :global(.squad-history-list){
+    grid-template-columns:1fr;
+  }
+  .scope :global(.squad-history-item){
+    grid-template-columns:72px minmax(0,1fr) 74px;
+    gap:10px;
+    padding:12px;
+  }
+  .scope :global(.squad-history-week)>span{
+    font-size:16px;
+  }
+  .scope :global(.squad-history-captain) b{
+    font-size:10.5px;
+  }
+  .scope :global(.squad-history-score) strong{
+    font-size:22px;
+  }
+}
+@media(max-width:430px){
+  .scope :global(.squad-model-guidance) h2{
+    font-size:20px;
+  }
+  .scope :global(.squad-model-guidance) p{
+    font-size:10.5px;
+  }
+  .scope :global(.squad-history-item){
+    grid-template-columns:64px minmax(0,1fr) 62px;
+    gap:8px;
+    padding:11px 10px;
+  }
+  .scope :global(.squad-history-week)>em{
+    font-size:6.5px;
+    padding:3px 5px;
+  }
+  .scope :global(.squad-history-score){
+    min-width:0;
+  }
+  .scope :global(.squad-history-score) strong{
+    font-size:20px;
+  }
+}

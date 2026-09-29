@@ -13,6 +13,8 @@ const key=(gw,id)=>`${gw}:${id}`
 function scoreSnapshot(snapshot,pointMap,posMap){
   const members=Array.isArray(snapshot.members)?snapshot.members:[]
   if(!members.length)return null
+  const finalRows=members.map(x=>pointMap.get(key(snapshot.gameweek,Number(x.player_id))))
+  if(finalRows.some(row=>!row))return null
   const played=id=>Number(pointMap.get(key(snapshot.gameweek,id))?.minutes||0)>0
   const points=id=>Number(pointMap.get(key(snapshot.gameweek,id))?.points||0)
   const starters=members.filter(x=>x.bench_order===null).map(x=>Number(x.player_id))
@@ -84,7 +86,10 @@ export default async function Squad({searchParams}){
   const pointMap=new Map(pointRows.map(x=>[key(x.gameweek,x.player_id),x]))
   const posMap=new Map(positionRows.map(x=>[Number(x.id),x.position]))
   const playerMap=new Map(positionRows.map(x=>[Number(x.id),x]))
-  const snapshotHistory=(snapshots||[]).map(s=>({...s,actual_points:scoreSnapshot(s,pointMap,posMap)}))
+  const currentGameweek=Number(run?.gameweek||0)
+  const snapshotHistory=(snapshots||[])
+    .filter(s=>Number(s.gameweek)<currentGameweek||Boolean(s.locked_at))
+    .map(s=>({...s,actual_points:scoreSnapshot(s,pointMap,posMap)}))
 
   const locked=Boolean(gameweekRow?.locked_at)
 
@@ -101,12 +106,30 @@ export default async function Squad({searchParams}){
       transferScenarios={[]}/>
 
     <section className="card squad-history-card">
-      <div className="panel-head"><div><span className="eyebrow">HAFTALIK SNAPSHOT</span><h2>Geçmiş kadro ve puanlar</h2></div></div>
-      <div className="table-scroll"><table><thead><tr><th>MH</th><th>Kaptan</th><th>Durum</th><th>Gerçek puan</th></tr></thead>
-      <tbody>{snapshotHistory.length?snapshotHistory.map(s=><tr key={s.gameweek}><td>MH{s.gameweek}</td>
-        <td>{playerLabel(playerMap.get(Number(s.captain_id)))}</td>
-        <td>{s.locked_at?'Kilitli':'Açık'}</td><td><b>{s.actual_points===null?'—':s.actual_points}</b></td></tr>)
-        :<tr><td colSpan="4">Henüz haftalık snapshot yok.</td></tr>}</tbody></table></div>
+      <div className="squad-history-head">
+        <div><span className="eyebrow">HAFTALIK SNAPSHOT</span><h2>Geçmiş haftalar</h2></div>
+        <p>Hafta kilitlendikten sonra kayıtlı 15'li kadro, otomatik yedekler ve kaptan bonusuyla gerçek puanın burada kesinleşir.</p>
+      </div>
+      {snapshotHistory.length?<div className="squad-history-list">{snapshotHistory.map(s=>{
+        const complete=s.actual_points!==null
+        return <article className="squad-history-item" key={s.gameweek}>
+          <div className="squad-history-week">
+            <span>MH{s.gameweek}</span>
+            <em className={complete?'complete':'pending'}>{complete?'Tamamlandı':'Puanlar bekleniyor'}</em>
+          </div>
+          <div className="squad-history-captain">
+            <small>Kaptan</small>
+            <b>{playerLabel(playerMap.get(Number(s.captain_id)))}</b>
+          </div>
+          <div className="squad-history-score">
+            <small>Gerçek puan</small>
+            <strong>{complete?s.actual_points:'—'}</strong>
+          </div>
+        </article>
+      })}</div>:<div className="squad-history-empty">
+        <b>Henüz tamamlanan maç haftası yok.</b>
+        <span>MH{currentGameweek||'—'} kadron aktif. Hafta kapanıp oyuncu puanları kesinleşince ilk snapshot burada görünecek.</span>
+      </div>}
     </section>
   </>
 }
