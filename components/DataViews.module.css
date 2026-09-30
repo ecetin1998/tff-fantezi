@@ -2328,7 +2328,7 @@
 }
 .scope :global(.team-analysis-filters){
   display:grid;
-  grid-template-columns:minmax(250px,1.6fr) repeat(3,minmax(150px,.7fr));
+  grid-template-columns:minmax(240px,1.45fr) repeat(4,minmax(140px,.7fr));
   gap:8px;
   margin-bottom:10px;
 }
