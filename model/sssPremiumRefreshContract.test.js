@@ -1,0 +1,27 @@
+const fs=require('node:fs')
+const assert=require('node:assert/strict')
+
+const page=fs.readFileSync('app/sss/page.js','utf8')
+const css=fs.readFileSync('components/DataViews.module.css','utf8')
+
+assert.match(page,/Fantezi Scout’u doğru okumak için tek rehber/)
+assert.match(page,/3 ADIMDA KULLANIM/)
+assert.match(page,/Takım Analizi/)
+assert.match(page,/Agresif 11/)
+assert.match(page,/Bu hafta xG/)
+assert.match(page,/Rakip xG/)
+assert.match(page,/Hücum eşleşmesi/)
+assert.match(page,/Savunma eşleşmesi/)
+assert.match(page,/vice-captain/)
+assert.doesNotMatch(page,/Takım & Fikstür Analizi/)
+assert.doesNotMatch(page,/Tavan 11/)
+
+assert.match(css,/SSS premium refresh 2026-10-01/)
+assert.match(css,/faq-quick-grid/)
+assert.match(css,/faq-menu-index/)
+assert.match(css,/faq-hero-meta/)
+assert.match(css,/faq-item\)\[open\]/)
+assert.match(css,/background:\s*#fff/)
+assert.match(css,/@media\(max-width:760px\)/)
+
+console.log('sss premium refresh contract ok')
