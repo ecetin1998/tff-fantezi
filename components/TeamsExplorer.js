@@ -121,7 +121,7 @@ export default function TeamsExplorer({teams=[],gameweek}){
       <div className="card table-wrap desktop-team-analysis-table">
         <table>
           <thead><tr>
-            <th>Takım</th><th>MH{gameweek||'—'} rakibi</th><th className={venue?'is-filtered-head':''}>E/D</th>
+            <th>Takım</th><th>MH{gameweek||'—'} rakibi</th><th className={venue?'is-filtered-head':''}>E/D</th><th className={(attack||defense)?'is-filtered-head':''}>Eşleşme</th>
             {head('xg','Bu hafta xG')}{head('oppXg','Bu hafta rakip xG')}{head('win','Galibiyet')}{head('cs','CS')}
             {head('total_xfp','Toplam xFP')}{head('season_xg_per_match','Sezon xG/maç')}{head('season_xga_per_match','xGA/maç')}
           </tr></thead>
@@ -129,7 +129,8 @@ export default function TeamsExplorer({teams=[],gameweek}){
             <td><Link className="team-analysis-name" href={'/teams/'+team.id}><span className="team-mini-shirt" aria-hidden="true"><i/></span><b>{team.name}</b></Link></td>
             <td><div className="team-analysis-opponents">{(team.fixtures||[]).map((f,i)=><Link href={'/teams/'+f.opponent_id} key={i}>{f.opponent}</Link>)}</div></td>
             <td className={venue?'is-filtered-cell':''}>{(team.fixtures||[]).map((f,i)=><span className={'venue-mini'+(venue&&f.venue===venue?' is-selected-filter':'')} key={i}>{venueLabel(f.venue)}</span>)}</td>
-            <td className={(cellClass('xg')+' '+(attack?'is-filtered-cell':'')).trim()}><b>{num(team.xg)}</b><small className={'matchup-inline '+team.attack_level+(attackSelected(team)?' is-selected-filter':'')}>{matchupLabel[team.attack_level]}</small></td>
+            <td className={(attack||defense)?'is-filtered-cell':''}><div className="team-matchup-cell"><span className={'matchup-pill '+team.attack_level+(attackSelected(team)?' is-selected-filter':'')}>Hücum: {matchupLabel[team.attack_level]}</span><span className={'matchup-pill '+team.defense_level+(defenseSelected(team)?' is-selected-filter':'')}>Savunma: {matchupLabel[team.defense_level]}</span></div></td>
+            <td className={cellClass('xg')}><b>{num(team.xg)}</b></td>
             <td className={cellClass('oppXg')}>{num(team.oppXg)}</td><td className={cellClass('win')}>{pct(team.win)}</td><td className={cellClass('cs')}>{pct(team.cs)}</td>
             <td className={cellClass('total_xfp')}><b>{num(team.total_xfp,1)}</b></td><td className={cellClass('season_xg_per_match')}>{num(team.season_xg_per_match)}</td><td className={cellClass('season_xga_per_match')}>{num(team.season_xga_per_match)}</td>
           </tr>)}</tbody>
