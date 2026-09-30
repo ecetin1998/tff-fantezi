@@ -3086,3 +3086,40 @@
     inset -1px 0 rgba(54,165,143,.16),
     inset 0 -1px rgba(54,165,143,.16) !important;
 }
+
+/* ===== Team analysis matchup column 2026-10-01 ===== */
+.scope :global(.desktop-team-analysis-table) :global(.team-matchup-cell){
+  min-width:172px;
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  gap:6px;
+}
+.scope :global(.desktop-team-analysis-table) :global(.team-matchup-cell) :global(.matchup-pill){
+  min-width:0;
+  width:max-content;
+  max-width:100%;
+  padding:5px 8px;
+  font-size:8px;
+  line-height:1;
+  white-space:nowrap;
+}
+.scope :global(.desktop-team-analysis-table) :global(.team-matchup-cell) :global(.matchup-pill):global(.good){
+  border-color:#a8dec5;
+  background:#e7f7ef;
+  color:#176b52;
+}
+.scope :global(.desktop-team-analysis-table) :global(.team-matchup-cell) :global(.matchup-pill):global(.neutral){
+  border-color:#cfd6e0;
+  background:#eef1f5;
+  color:#4f5b6d;
+}
+.scope :global(.desktop-team-analysis-table) :global(.team-matchup-cell) :global(.matchup-pill):global(.tough){
+  border-color:#dca8b2;
+  background:#f7e8ec;
+  color:#983244;
+}
+.scope :global(.desktop-team-analysis-table) :global(.team-matchup-cell) :global(.matchup-pill):global(.is-selected-filter){
+  box-shadow:0 0 0 2px rgba(28,137,111,.16);
+  transform:translateY(-1px);
+}
