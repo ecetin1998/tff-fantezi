@@ -3062,3 +3062,27 @@
     grid-column:1/-1 !important;
   }
 }
+
+/* ===== Team analysis solid selected column 2026-10-01 ===== */
+.scope :global(.desktop-team-analysis-table) tbody tr td:global(.is-selected-column),
+.scope :global(.desktop-team-analysis-table) tbody tr:nth-child(even) td:global(.is-selected-column),
+.scope :global(.desktop-team-analysis-table) tbody tr:hover td:global(.is-selected-column){
+  background:linear-gradient(180deg,#e3f7f2,#eefaf7) !important;
+  color:#185f54 !important;
+  font-weight:900 !important;
+  box-shadow:
+    inset 1px 0 rgba(54,165,143,.16),
+    inset -1px 0 rgba(54,165,143,.16) !important;
+}
+.scope :global(.desktop-team-analysis-table) tbody tr:first-child td:global(.is-selected-column){
+  box-shadow:
+    inset 1px 0 rgba(54,165,143,.16),
+    inset -1px 0 rgba(54,165,143,.16),
+    inset 0 1px rgba(54,165,143,.16) !important;
+}
+.scope :global(.desktop-team-analysis-table) tbody tr:last-child td:global(.is-selected-column){
+  box-shadow:
+    inset 1px 0 rgba(54,165,143,.16),
+    inset -1px 0 rgba(54,165,143,.16),
+    inset 0 -1px rgba(54,165,143,.16) !important;
+}
