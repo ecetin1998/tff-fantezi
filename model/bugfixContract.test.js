@@ -113,8 +113,8 @@ assert.doesNotMatch(playersTable,/initialSearchParams/,'Player list must receive
 assert.doesNotMatch(playersTable,/urlReady/)
 assert.match(playersTable,/router\.replace/)
 const playerDetailRoute=read('app/players/[id]/page.js')
-assert.doesNotMatch(playerDetailRoute,/dynamic='force-static'/,'Tier-aware player detail must render per session so Pro fields are not serialized to non-Pro users.')
-assert.match(playerDetailRoute,/getAuthState/,'Tier-aware player detail must resolve access on the server.')
+assert.match(playerDetailRoute,/dynamic='force-static'/,'Player detail should use on-demand ISR to avoid per-request Worker SSR.')
+assert.match(playerDetailRoute,/ProPlayerAnalysis/,'Advanced Pro analytics should load through the protected lazy panel.')
 assert.match(playerDetailRoute,/if\(!data\) notFound\(\)/,'Unknown player ids must still resolve through notFound().')
 assert.match(playerDetailRoute,/generateStaticParams\(\)\{ return \[\] \}/,'Player detail ids should be generated on demand and cached.')
 
