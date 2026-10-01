@@ -1,5 +1,6 @@
 import Link from 'next/link'
-import {getRoleSignals} from '@/lib/data'
+import {getAuthState,getRoleSignals} from '@/lib/data'
+import AccessGate from '@/components/AccessGate'
 import {playerLabel} from '@/lib/playerPresentation'
 
 export const metadata={title:'Rol ve Dakika Takibi'}
@@ -12,6 +13,19 @@ const posLabel=p=>({GK:'KL',DEF:'DEF',MID:'OS',FWD:'FOR'}[p]||p||'—')
 const signalClass=s=>s==='ROL YÜKSELİYOR'?'up':s==='ROL DÜŞÜYOR'?'down':s==='DÖNÜŞ'?'return':s==='YOK'?'out':'stable'
 
 export async function renderRolesPage(page=1){
+  const auth=await getAuthState()
+  if(auth.plan!=='pro')return <>
+    <div className="section-title">
+      <div><span className="eyebrow">ROL TAKİBİ</span><h1>Rol & Dakika Takibi</h1></div>
+      <span className="muted">Pro analiz</span>
+    </div>
+    <AccessGate
+      tier="pro"
+      eyebrow="PRO • ROL & DAKİKA"
+      title="Rotasyon değişimini ve dakika sinyallerini aç."
+      description="Son maçlardaki ilk 11 değişimi, dakika farkı, rol yükselişi/düşüşü ve tahmini kullanım görünümü Pro üyelikte açılır."
+    />
+  </>
   const {run,rows}=await getRoleSignals()
   const order={'ROL YÜKSELİYOR':0,'DÖNÜŞ':1,'ROL DÜŞÜYOR':2,'YOK':3,'BELİRGİN DEĞİŞİM YOK':4}
   const sorted=[...rows].sort((a,b)=>(order[a.signal]??9)-(order[b.signal]??9)||Number(b.x_minutes)-Number(a.x_minutes))
