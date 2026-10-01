@@ -41,7 +41,7 @@ export default function LoginForm(){
     <div className="auth-link-stack">
       <Link href="/forgot-password">Şifremi unuttum</Link>
       <span>Hesabın yok mu? <Link href="/signup">Hesap oluştur</Link></span>
-      {String(sp.get('error')||'')==='email_not_confirmed'
+      {String(state?.error||sp.get('error')||'')==='email_not_confirmed'
         ?<span>Doğrulama maili gelmediyse <Link href="/signup#verification">tekrar gönder</Link>.</span>
         :null}
     </div>
