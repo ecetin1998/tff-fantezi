@@ -2,7 +2,6 @@
 import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
 import { usePathname } from 'next/navigation'
-import { logout } from '@/app/actions'
 import { createClient } from '@/lib/supabase/client'
 
 const matches=(path,href)=>href==='/' ? path==='/' : path===href || path.startsWith(href+'/')
@@ -78,6 +77,7 @@ function MenuRow({ href,label,onClick,active=false }){
 
 export function MobileMenu({ primary, analysis }){
   const [auth,setAuth]=useState({loaded:false,signedIn:false})
+  const [signingOut,setSigningOut]=useState(false)
   const path=usePathname()
   const [open,setOpen]=useState(false)
   const wrapRef=useRef(null)
@@ -107,6 +107,20 @@ export function MobileMenu({ primary, analysis }){
   },[open])
 
   const close=()=>setOpen(false)
+  const handleLogout=async()=>{
+    if(signingOut)return
+    setSigningOut(true)
+    const supabase=createClient()
+    const {error}=await supabase.auth.signOut({scope:'local'})
+    if(error){
+      setSigningOut(false)
+      return
+    }
+    setAuth({loaded:true,signedIn:false})
+    setOpen(false)
+    window.location.replace('/')
+  }
+
 
   return <div className="mobile-menu compact-mobile-menu" ref={wrapRef}>
     <button
@@ -129,7 +143,7 @@ export function MobileMenu({ primary, analysis }){
       )}
       <MenuRow onClick={close} href="/pricing" label="Fantezi Pro"/>
       {!auth.loaded?null:auth.signedIn
-        ? <form action={logout}><button className="mobile-menu-row mobile-menu-logout" onClick={close} type="submit"><span className="mobile-menu-row-icon"><MenuIcon href="/login"/></span><span>Çıkış</span></button></form>
+        ? <button className="mobile-menu-row mobile-menu-logout" onClick={handleLogout} type="button" disabled={signingOut}><span className="mobile-menu-row-icon"><MenuIcon href="/login"/></span><span>{signingOut?'Çıkılıyor…':'Çıkış'}</span></button>
         : <MenuRow onClick={close} href="/login" label="Giriş / Kayıt"/>}
     </div>:null}
   </div>
