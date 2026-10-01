@@ -73,7 +73,7 @@ export default function AvailabilityTable({ rows }){
         return <Link href={'/players/'+r.player_id} className="card availability-mobile-card" key={'mobile-'+r.player_id+'-'+i}>
           <div className="availability-mobile-head">
             <span className={`pos ${r.player?.position}`}>{posLabel(r.player?.position)}</span>
-            <div><b>{playerLabel(r.player)}</b><small>{r.team||'—'}</small></div>
+            <div className="availability-mobile-player"><b>{playerLabel(r.player)}</b><small>{r.team||'—'}</small></div>
             <span className={`status-chip ${r.availability_type||''}`}>{availabilityStatusLabel(r)}</span>
           </div>
           <p>{note||'Detay yok'}</p>

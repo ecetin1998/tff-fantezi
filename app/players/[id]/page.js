@@ -261,17 +261,21 @@ export default async function PlayerPage({ params }){
         <div><span className="eyebrow">TAHMİN ARALIĞI vs GERÇEKLEŞEN</span><h2>Model hangi puan aralığını bekledi, oyuncu ne aldı?</h2></div>
         <span className="pill">Aralık içinde {replayHitCount}/{replayRows.length}{replayHitRate!==null?` • ${Math.round(replayHitRate*100)}%`:''}</span>
       </div>
-      <div className="prediction-history-list">{replayRows.map(row=><div className="prediction-history-row range-view" key={row.gameweek}>
-        <span className="prediction-week">MH{row.gameweek}</span>
-        <div className="prediction-range-copy">
-          <span><small>Tahmin aralığı • P25–P90</small><b>{num(row.low,1)} – {num(row.high,1)}</b></span>
-          <span><small>Gerçek puan</small><b>{num(row.actual,0)}</b></span>
-          <small className="prediction-center-note">Merkez xFP {num(row.predicted_xfp,1)}{row.history_mode==='live_frozen'?' • maç öncesi dondurulan tahmin':' • geriye dönük test'}</small>
+      <div className="prediction-history-list compact-range-history">{replayRows.map(row=>{
+        const scale=Math.max(1,row.high,row.actual)
+        const left=Math.max(0,Math.min(100,row.low/scale*100))
+        const right=Math.max(left,Math.min(100,row.high/scale*100))
+        const actual=Math.max(0,Math.min(100,row.actual/scale*100))
+        return <div className="prediction-history-row compact-range-row" key={row.gameweek}>
+          <span className="prediction-week">MH{row.gameweek}</span>
+          <div className="prediction-range-visual">
+            <div className="range-track"><i className="range-band" style={{left:left+'%',width:Math.max(2,right-left)+'%'}}/><i className="range-actual" style={{left:actual+'%'}}/></div>
+            <div className="range-labels"><span>P25 {num(row.low,1)}</span><b>Gerçek {num(row.actual,0)}</b><span>P90 {num(row.high,1)}</span></div>
+            <small>Merkez xFP {num(row.predicted_xfp,1)}{row.history_mode==='live_frozen'?' • maç öncesi':' • geriye dönük test'}</small>
+          </div>
+          <b className={'range-result '+row.status}>{row.inside?'Aralık içinde':row.status==='below'?`P25 altı • -${row.distance.toFixed(1)}`:`P90 üstü • +${row.distance.toFixed(1)}`}</b>
         </div>
-        <b className={'range-result '+row.status}>
-          {row.inside?'Aralık içinde':row.status==='below'?`P25 altı • -${row.distance.toFixed(1)}`:`P90 üstü • +${row.distance.toFixed(1)}`}
-        </b>
-      </div>)}</div>
+      })}</div>
       <p className="muted prediction-history-note">Burada başarıyı tek bir xFP noktasına göre değil, modelin ürettiği P25–P90 dağılım aralığına göre okuyoruz. MH7 ve sonrası gerçek haftalar kapanınca maç öncesi dondurulan tahminler otomatik olarak bu geçmişe eklenir.</p>
     </section>:null}
 
