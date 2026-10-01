@@ -6,7 +6,7 @@ import {reportServerError} from '@/lib/observability'
 import {passwordPolicyCode} from '@/lib/passwordSecurity'
 import {BENCH_SIZE,BUDGET,FORMATION_SET,MAX_PLAYERS_PER_CLUB,SQUAD_LIMITS,SQUAD_SIZE,STARTING_GK,STARTING_XI_SIZE} from '@/lib/rules'
 import {SUPABASE_PUBLISHABLE_KEY,SUPABASE_URL} from '@/lib/config'
-import {ATTACK_FORMATION,MANAGER_CARD_NONE,managerCardInfo,normalizeManagerCard} from '@/lib/managerCards'
+import {ATTACK_FORMATION,ATTACK_SQUAD_LIMITS,MANAGER_CARD_NONE,managerCardInfo,normalizeManagerCard} from '@/lib/managerCards'
 
 const DUMMY_LOGIN_ALIASES=new Set(['adminfree','adminpro'])
 
@@ -174,7 +174,8 @@ export async function saveSquad(_prevState,formData){
   if((players||[]).length!==SQUAD_SIZE||(players||[]).some(p=>!p.active))return {ok:false,error:'Kadroda aktif olmayan veya bulunamayan oyuncu var.',signature:''}
 
   const counts=(players||[]).reduce((a,p)=>(a[p.position]=(a[p.position]||0)+1,a),{})
-  if(!Object.entries(SQUAD_LIMITS).every(([position,required])=>(counts[position]||0)===required))return {ok:false,error:`Kadro dağılımı ${SQUAD_LIMITS.GK} KL / ${SQUAD_LIMITS.DEF} DEF / ${SQUAD_LIMITS.MID} OS / ${SQUAD_LIMITS.FWD} FOR olmalı.`,signature:''}
+  const squadLimits=managerCard==='attack'?ATTACK_SQUAD_LIMITS:SQUAD_LIMITS
+  if(!Object.entries(squadLimits).every(([position,required])=>(counts[position]||0)===required))return {ok:false,error:`Kadro dağılımı ${squadLimits.GK} KL / ${squadLimits.DEF} DEF / ${squadLimits.MID} OS / ${squadLimits.FWD} FOR olmalı.`,signature:''}
   const total=(players||[]).reduce((s,p)=>s+Number(p.price||0),0)
   const effectiveBudget=cardInfo.unlimitedBudget?Number.POSITIVE_INFINITY:Number(cardInfo.budget||BUDGET)
   if(Number.isFinite(effectiveBudget)&&total>effectiveBudget+.0001)return {ok:false,error:`${effectiveBudget}m bütçe aşıldı.`,signature:''}
