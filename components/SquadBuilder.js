@@ -1,6 +1,7 @@
 'use client'
 import { useActionState, useEffect, useMemo, useRef, useState } from 'react'
 import { saveSquad } from '@/app/actions'
+import {createClient} from '@/lib/supabase/client'
 import { teamCssVars } from '@/lib/teamThemes'
 import { availabilityCompactNote, availabilityIsIssue } from '@/lib/availability'
 import {BUDGET,FORMATION_MAP,MAX_PLAYERS_PER_CLUB,SQUAD_LIMITS,SQUAD_SIZE,STARTING_GK,STARTING_XI_SIZE,TRANSFER_RULES} from '@/lib/rules'
@@ -29,6 +30,20 @@ function stateSignature(payload=[]){
   return JSON.stringify([...payload]
     .map(x=>({player_id:Number(x.player_id),is_captain:Boolean(x.is_captain),bench_order:x.bench_order===null?null:Number(x.bench_order)}))
     .sort((a,b)=>a.player_id-b.player_id))
+}
+
+function cardRecommendationState(data){
+  if(!Array.isArray(data?.members))return []
+  return data.members.map(row=>({
+    player_id:Number(row.player_id),
+    is_captain:Boolean(row.is_captain),
+    bench_order:row.squad_slot==='XI'?null:Number(row.sort_order||0),
+  })).filter(row=>Number.isFinite(row.player_id))
+}
+function cardRecommendationXfp(data){
+  const value=data?.recommendation?.xi_xfp_with_card??data?.recommendation?.captain_xfp??data?.recommendation?.xi_xfp
+  const parsed=Number(value)
+  return Number.isFinite(parsed)?parsed:null
 }
 function displayName(player){ return pitchPlayerLabel(player) }
 function shirtMark(player){ return posLabel[player?.position] || player?.position || '—' }
@@ -171,17 +186,56 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
     return {key,lineup,base,total,captain:cap,complete:lineup.length===STARTING_XI_SIZE}
   }).sort((a,b)=>b.total-a.total),[ids,map,effectiveFormationMap,cardInfo.benchBoost,selectedTotal,captainMultiplier])
   const bestFormation=formationOptions.find(x=>x.complete)?.key||formation
-  const managerCardPreviewXfp=useMemo(()=>Object.fromEntries(MANAGER_CARDS.map(card=>{
-    const limits=card.id==='attack'?ATTACK_SQUAD_LIMITS:SQUAD_LIMITS
-    const rosterReady=ids.length===SQUAD_SIZE&&Object.entries(limits).every(([position,required])=>(counts[position]||0)===required)
-    if(!rosterReady)return [card.id,null]
-    const planForCard=bestXIPlan(ids,map,formationMapForCard(card.id),captainMultiplierForCard(card.id))
-    if(!planForCard)return [card.id,null]
-    const info=managerCardInfo(card.id)
-    const base=info.benchBoost?selectedTotal:planForCard.base
-    const bonus=planForCard.captain?xfp(planForCard.captain)*Math.max(0,captainMultiplierForCard(card.id)-1):0
-    return [card.id,base+bonus]
-  })),[ids,map,counts,selectedTotal])
+  const standardRecommendationXfp=useMemo(()=>{
+    const xiRows=recommendedState.filter(row=>row.bench_order===null).map(row=>map.get(Number(row.player_id))).filter(Boolean)
+    if(xiRows.length!==STARTING_XI_SIZE)return null
+    const base=xiRows.reduce((sum,p)=>sum+xfp(p),0)
+    const savedCaptainId=Number(recommendedState.find(row=>row.is_captain)?.player_id||0)
+    const captain=xiRows.find(p=>p.id===savedCaptainId)||[...xiRows].filter(p=>p.position!=='GK').sort((a,b)=>xfp(b)-xfp(a))[0]
+    return base+xfp(captain)
+  },[recommendedState,map])
+
+  const [cardRecommendations,setCardRecommendations]=useState({})
+  const [loadingCards,setLoadingCards]=useState(()=>new Set())
+  const [isAutoFilling,setIsAutoFilling]=useState(false)
+
+  useEffect(()=>{
+    setCardRecommendations(current=>({
+      ...current,
+      [MANAGER_CARD_NONE]:{state:recommendedState,xfp:standardRecommendationXfp}
+    }))
+  },[recommendedState,standardRecommendationXfp])
+
+  useEffect(()=>{
+    if(plan!=='pro')return
+    let cancelled=false
+    const cards=MANAGER_CARDS.filter(card=>card.id!==MANAGER_CARD_NONE)
+    setLoadingCards(new Set(cards.map(card=>card.id)))
+    const supabase=createClient()
+    Promise.all(cards.map(async card=>{
+      try{
+        const {data,error}=await supabase.functions.invoke('manager-card-recommendation',{
+          body:{card:card.id,variant:'recommended'}
+        })
+        if(error||data?.error)throw error||new Error(data.error)
+        if(!cancelled)setCardRecommendations(current=>({
+          ...current,
+          [card.id]:{data,state:cardRecommendationState(data),xfp:cardRecommendationXfp(data)}
+        }))
+      }catch{
+        // Bir kartın önizlemesi başarısız olursa diğer kartları ve kadro ekranını etkileme.
+      }finally{
+        if(!cancelled)setLoadingCards(current=>{
+          const next=new Set(current);next.delete(card.id);return next
+        })
+      }
+    }))
+    return ()=>{cancelled=true}
+  },[plan])
+
+  const managerCardPreviewXfp=useMemo(()=>Object.fromEntries(
+    MANAGER_CARDS.map(card=>[card.id,cardRecommendations[card.id]?.xfp??null])
+  ),[cardRecommendations])
   const captainCandidates=[...xi].filter(p=>p.position!=='GK').sort((a,b)=>xfp(b)-xfp(a)).slice(0,3)
 
   const teams=useMemo(()=>[...new Set(players.map(p=>p.team).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'tr')),[players])
@@ -311,20 +365,46 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
     setSortKey(nextKey)
     setSortDir(nextKey==='name'?'asc':'desc')
   }
-  function fillRecommended(){
-    const next=recommendedState.map(x=>x.player_id).filter(id=>map.has(id)).slice(0,SQUAD_SIZE)
-    const recommendedFormation=formationFromState(recommendedState,map,effectiveFormationMap)
-    const fromRecXI=recommendedState.filter(x=>x.bench_order===null).map(x=>x.player_id).filter(id=>next.includes(id))
+  function applyRecommendationState(state){
+    const next=state.map(x=>Number(x.player_id)).filter(id=>map.has(id)).slice(0,SQUAD_SIZE)
+    const recommendedFormation=formationFromState(state,map,effectiveFormationMap)
+    const fromRecXI=state.filter(x=>x.bench_order===null).map(x=>Number(x.player_id)).filter(id=>next.includes(id))
     setIds(next)
     setFormation(recommendedFormation)
-    const nextXI=fromRecXI.length===11&&formationFromXIIds(fromRecXI,map,effectiveFormationMap)
+    const nextXI=fromRecXI.length===STARTING_XI_SIZE&&formationFromXIIds(fromRecXI,map,effectiveFormationMap)
       ?fromRecXI
       :buildXI(next,recommendedFormation,map,effectiveFormationMap)
     setXiIds(nextXI)
-    const savedCap=recommendedState.find(x=>x.is_captain&&nextXI.includes(x.player_id))?.player_id
+    const savedCap=Number(state.find(x=>x.is_captain&&nextXI.includes(Number(x.player_id)))?.player_id||0)||null
     const nextCaptain=savedCap||nextXI.map(id=>map.get(id)).filter(p=>p&&p.position!=='GK').sort((a,b)=>xfp(b)-xfp(a))[0]?.id||null
     setCaptainId(nextCaptain)
     setSwapTarget(null)
+  }
+
+  async function fillRecommended(){
+    if(isLocked)return
+    if(managerCard===MANAGER_CARD_NONE){
+      applyRecommendationState(recommendedState)
+      return
+    }
+    if(plan!=='pro')return
+
+    setIsAutoFilling(true)
+    try{
+      let entry=cardRecommendations[managerCard]
+      if(!entry?.state?.length){
+        const supabase=createClient()
+        const {data,error}=await supabase.functions.invoke('manager-card-recommendation',{
+          body:{card:managerCard,variant:'recommended'}
+        })
+        if(error||data?.error)throw error||new Error(data.error)
+        entry={data,state:cardRecommendationState(data),xfp:cardRecommendationXfp(data)}
+        setCardRecommendations(current=>({...current,[managerCard]:entry}))
+      }
+      if(entry?.state?.length)applyRecommendationState(entry.state)
+    }finally{
+      setIsAutoFilling(false)
+    }
   }
   function reset(){
     setIds([]);setXiIds([]);setCaptainId(null);setSwapTarget(null);setFormation('4-3-3')
@@ -457,7 +537,7 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
         <small>MH{gameweek||'—'} tahmini</small>
       </div>
       <div className="squad-toolbar">
-        <button type="button" className="squad-tool-btn" onClick={fillRecommended} disabled={isLocked}>{managerCard===MANAGER_CARD_NONE?'Model Kadrosu':'Standart Model Kadrosu'}</button>
+        <button type="button" className="squad-tool-btn auto-fill-btn" onClick={fillRecommended} disabled={isLocked||isAutoFilling||(managerCard!==MANAGER_CARD_NONE&&plan!=='pro')}>{isAutoFilling?'Hazırlanıyor…':'Otomatik Doldur'}</button>
         <button type="button" className="squad-tool-btn danger" onClick={reset} disabled={isLocked}>Sıfırla</button>
         <button type="button" className="squad-tool-btn primary-jump" onClick={goToLineup} disabled={!validRoster}>İlk 11’i Diz ↓</button>
       </div>
@@ -498,6 +578,7 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
             onChange={changeManagerCard}
             disabled={plan!=='pro'||isLocked}
             xfpByCard={plan==='pro'?managerCardPreviewXfp:{}}
+            loadingCards={plan==='pro'?loadingCards:new Set()}
             compact
           />
         </div>
@@ -739,8 +820,8 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
         <span className="eyebrow">MODEL ÖNERİSİ</span>
         {managerCard!==MANAGER_CARD_NONE?<>
           <h2>{cardInfo.label} aktif</h2>
-          <p>Bu hafta standart model kadrosuna göre transfer kıyasını kapattım; seçtiğin kart kadro yapısını veya puan hesabını değiştirebilir. Kart için yeniden optimize edilen Önerilen ve Agresif 11'i Kadro Önerileri ekranından kullan.</p>
-          <a className="squad-tool-btn model-apply-btn" href="/squads">Kartlı kadro önerisini aç</a>
+          <p>Seçili kartın kuralları kadro ve puan hesabına uygulanıyor. Üstteki <b>Otomatik Doldur</b> ile bu karta göre optimize edilmiş kadroyu tek dokunuşla kurabilirsin.</p>
+          <a className="squad-tool-btn model-apply-btn" href="/squads">Kartlı önerileri karşılaştır</a>
         </>:!recommendedIds.length?<>
           <h2>Model kadrosu henüz hazır değil</h2>
           <p>Bu haftanın önerilen kadrosu yayınlandığında mevcut kadronla burada karşılaştırılacak.</p>
