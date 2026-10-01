@@ -537,7 +537,7 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
       <div className="lineup-layout">
         <div className="lineup-field-column">
           <div className="lineup-score-strip">
-            <span><small>XI taban xFP</small><b>{xiTotal.toFixed(1)}</b></span>
+            <span><small>İlk 11 taban xFP</small><b>{xiTotal.toFixed(1)}</b></span>
             <span className="captain-total"><small>Kaptan bonusu</small><b>+{captainBonus.toFixed(1)}</b></span>
             <span className="lineup-total"><small>İlk 11 xFP</small><b>{xiCaptainTotal.toFixed(1)}</b></span>
           </div>
@@ -570,7 +570,7 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
           <div className="bench-zone lineup-bench-zone">
             <div className="bench-zone-head">
               <div><span className="eyebrow">YEDEKLER</span><b>{bench.length}/4</b></div>
-              {swapTarget?<span className="swap-hint">Karşı taraftan uygun oyuncuya dokun → swap</span>:<span>İlk 11 veya yedekten bir oyuncuya dokunarak swap başlat</span>}
+              {swapTarget?<span className="swap-hint">Karşı taraftan uygun oyuncuya dokun → değiştir</span>:<span>İlk 11 veya yedekten bir oyuncuya dokunarak değişim başlat</span>}
             </div>
             <div className="my-bench-row">
               {bench.map((p,i)=>{
@@ -616,7 +616,7 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
           <span className={validRoster?'ok':''}>{validRoster?'✓':'○'} 2 KL / 5 DEF / 5 OS / 3 FOR</span>
           <span className={cost<=BUDGET?'ok':''}>{cost<=BUDGET?'✓':'○'} Bütçe limiti</span>
           <span className={clubLimitOk?'ok':''}>{clubLimitOk?'✓':'○'} Kulüp başına en fazla {MAX_PLAYERS_PER_CLUB}</span>
-          <span className={validXI?'ok':''}>{validXI?'✓':'○'} {liveFormation===formation?'Seçili diziliş hazır':'XI dizilişi güncellenmeli'}</span>
+          <span className={validXI?'ok':''}>{validXI?'✓':'○'} {liveFormation===formation?'Seçili diziliş hazır':'İlk 11 dizilişi güncellenmeli'}</span>
         </div>
         <form action={saveAction} className="squad-save-form">
           <input type="hidden" name="player_ids" value={JSON.stringify(ids)}/>
@@ -649,16 +649,16 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
           <button type="button" className="squad-tool-btn model-apply-btn" onClick={fillRecommended} disabled={isLocked}>Model dizilişini uygula</button>
         </>:modelMove&&modelMove.netGain>0?<>
           <h2>{playerLabel(modelMove.out)} → {playerLabel(modelMove.inn)}</h2>
-          <p>Bu değişim modelin yayınlanmış önerilen kadrosuna yaklaştırır ve yaklaşık <b>+{modelMove.netGain.toFixed(2)} net xFP</b>{modelMove.hitCost?` (${modelMove.hitCost} puan hit sonrası)`:''} sağlar.</p>
+          <p>Bu değişim modelin yayınlanmış önerilen kadrosuna yaklaştırır ve yaklaşık <b>+{modelMove.netGain.toFixed(2)} net xFP</b>{modelMove.hitCost?` (${modelMove.hitCost} puan transfer cezası sonrası)`:''} sağlar.</p>
           <button type="button" className="squad-tool-btn model-apply-btn" onClick={applyModelMove} disabled={isLocked}>Öneriyi Uygula</button>
         </>:<>
           <h2>Kadron model önerisine yakın</h2>
-          <p>Model kadrosuna geçişte şu an tek transferle pozitif net xFP yok. Sırf eşleşmek için hit önermiyorum.</p>
+          <p>Model kadrosuna geçişte şu an tek transferle pozitif net xFP yok. Sırf eşleşmek için ceza puanlı transfer önermiyorum.</p>
         </>}
       </div>
       <div className={`pro-lock ${plan==='pro'?'unlocked':''}`}>
-        <span>PRO</span><b>4 MH Transfer Planlayıcı</b>
-        {transferScenarios.length?<div className="transfer-scenarios">{transferScenarios.map(s=><div key={s.transfers}><b>{s.transfers} transfer</b><span>{Number(s.net_gain||0)>=0?'+':''}{Number(s.net_gain||0).toFixed(2)} net</span>{s.recommended?<em>Önerilen</em>:null}</div>)}</div>:<small>{plan==='pro'?'Model senaryoları yeni refresh ile burada görünecek.':'Çok haftalı transfer zinciri ve hit maliyeti analizi.'}</small>}
+        <span>GELİŞMİŞ</span><b>4 MH Transfer Planlayıcısı</b>
+        {transferScenarios.length?<div className="transfer-scenarios">{transferScenarios.map(s=><div key={s.transfers}><b>{s.transfers} transfer</b><span>{Number(s.net_gain||0)>=0?'+':''}{Number(s.net_gain||0).toFixed(2)} net</span>{s.recommended?<em>Önerilen</em>:null}</div>)}</div>:<small>{plan==='pro'?'Model senaryoları yeni yenilemeyle burada görünecek.':'Çok haftalı transfer zinciri ve transfer cezası analizi.'}</small>}
       </div>
     </section>
   </div>
