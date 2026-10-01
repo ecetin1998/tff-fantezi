@@ -17,7 +17,7 @@ export async function generateMetadata({params}){
   const {id}=await params
   const data=await getTeamDetail(id)
   if(!data)notFound()
-  return {title:data.team.name+' • Takım Analizi',description:data.team.name+' için xG/xGA, fikstür ve fantasy oyuncu analizi.'}
+  return {title:data.team.name+' • Takım Analizi',description:data.team.name+' için xG/xGA, fikstür ve fantezi oyuncu analizi.'}
 }
 
 const pct=v=>v===null||v===undefined?'—':(Number(v)*100).toFixed(0)+'%'
@@ -84,7 +84,7 @@ export default async function TeamPage({params}){
           <span>{matchesPlayed} maç</span>
           <span>{num(s?.xg_per_match)} xG/maç</span>
           <span>{num(s?.xga_per_match)} xGA/maç</span>
-          <span>{fantasyTotal} fantasy puanı</span>
+          <span>{fantasyTotal} fantezi puanı</span>
         </div>
       </div>
       <div className="team-detail-current">
@@ -100,7 +100,7 @@ export default async function TeamPage({params}){
       <div className="team-detail-section-head">
         <div>
           <span className="eyebrow">BU HAFTA</span>
-          <h2>Fantasy karar özeti</h2>
+          <h2>Fantezi karar özeti</h2>
         </div>
         <div className="team-fixture-list">
           {currentMatches.length?currentMatches.map(m=><div className="team-fixture-badge" key={m.match_id}>
@@ -114,7 +114,7 @@ export default async function TeamPage({params}){
         <div><span>Takım xG</span><b>{num(teamXg)}</b><small>gol üretim beklentisi</small></div>
         <div><span>Rakip xG</span><b>{num(oppXg)}</b><small>savunma riski</small></div>
         <div><span>Galibiyet</span><b>{pct(win)}</b><small>maç kazanma ihtimali</small></div>
-        <div><span>Clean sheet</span><b>{pct(cs)}</b><small>savunma getirisi</small></div>
+        <div><span>Gol yememe</span><b>{pct(cs)}</b><small>savunma getirisi</small></div>
       </div>
 
       <div className="team-top-picks">
@@ -157,12 +157,12 @@ export default async function TeamPage({params}){
         <div className="card"><span>Şut dönüşümü</span><b>{tactical?.shot_conversion_rate===null||tactical?.shot_conversion_rate===undefined?'—':Number(tactical.shot_conversion_rate).toFixed(1)+'%'}</b><small>gol / şut</small></div>
       </div>
       {hasAdvancedProfile?<div className="team-detail-stat-grid team-core-stat-grid">
-        <div className="card"><span>Ceza sahası dokunuşu / maç</span><b>{num(tactical?.touches_in_box_per_match,1)}</b><small>rakip sahadaki box baskısı</small></div>
+        <div className="card"><span>Ceza sahası dokunuşu / maç</span><b>{num(tactical?.touches_in_box_per_match,1)}</b><small>rakip ceza sahası baskısı</small></div>
         <div className="card"><span>Şut isabeti</span><b>{pctShare(tactical?.shot_accuracy)}</b><small>isabetli şut / toplam şut</small></div>
         <div className="card"><span>Duran top xG payı</span><b>{pctShare(tactical?.set_piece_xg_share)}</b><small>{num(tactical?.set_piece_xg_per_match,2)} xG/maç</small></div>
         <div className="card"><span>Rakip duran top xG payı</span><b>{pctShare(tactical?.opponent_set_piece_xg_share)}</b><small>{num(tactical?.opponent_set_piece_xg_per_match,2)} xGA/maç</small></div>
-        <div className="card"><span>Cross / maç</span><b>{num(tactical?.crosses_per_match,1)}</b><small>başarı {pctShare(tactical?.cross_success_rate)}</small></div>
-        <div className="card"><span>Dripling / maç</span><b>{num(tactical?.takeons_per_match,1)}</b><small>başarı {pctShare(tactical?.takeon_success_rate)}</small></div>
+        <div className="card"><span>Orta / maç</span><b>{num(tactical?.crosses_per_match,1)}</b><small>başarı {pctShare(tactical?.cross_success_rate)}</small></div>
+        <div className="card"><span>Çalım / maç</span><b>{num(tactical?.takeons_per_match,1)}</b><small>başarı {pctShare(tactical?.takeon_success_rate)}</small></div>
         <div className="card"><span>Üretilen şans / maç</span><b>{num(tactical?.chances_created_per_match,1)}</b><small>oyuncu aksiyon toplamı</small></div>
         <div className="card"><span>PPDA</span><b>{num(tactical?.ppda_avg,1)}</b><small>düşük değer daha agresif baskı</small></div>
       </div>:null}
@@ -174,7 +174,7 @@ export default async function TeamPage({params}){
             <div><span>Merkez</span><b>{pctShare(tactical?.inferred_attack_center_share)}</b></div>
             <div><span>Sağ kanal</span><b>{pctShare(tactical?.inferred_attack_right_share)}</b></div>
           </div>
-          <small className="muted">Oyuncuların gerçek saha rolü + şut + yaratılan şans + başarılı cross aksiyonlarından türetildi.</small>
+          <small className="muted">Oyuncuların gerçek saha rolü + şut + yaratılan şans + başarılı orta aksiyonlarından türetildi.</small>
         </div>
         <div className="card">
           <h3>Rakibin bize karşı hücum yönü <small>türetilmiş</small></h3>
@@ -183,7 +183,7 @@ export default async function TeamPage({params}){
             <div><span>Merkez</span><b>{pctShare(tactical?.inferred_conceded_center_share)}</b></div>
             <div><span>Sağ kanal</span><b>{pctShare(tactical?.inferred_conceded_right_share)}</b></div>
             <div><span>Rakip şut / maç</span><b>{num(tactical?.opponent_shots_per_match,1)}</b></div>
-            <div><span>Rakip box dokunuşu / maç</span><b>{num(tactical?.opponent_touches_in_box_per_match,1)}</b></div>
+            <div><span>Rakip ceza sahası dokunuşu / maç</span><b>{num(tactical?.opponent_touches_in_box_per_match,1)}</b></div>
           </div>
           <small className="muted">Bu bölüm golün gerçek başlangıç koordinatı değil; rakip aksiyonlarının rol-kanal dağılımıdır.</small>
         </div>
@@ -239,16 +239,16 @@ export default async function TeamPage({params}){
     </section>:<AccessGate
       compact
       tier="pro"
-      eyebrow="PRO • TAKIM DERİNLİĞİ"
+      eyebrow="GELİŞMİŞ • TAKIM DERİNLİĞİ"
       title="Gelişmiş hücum-savunma profilini aç."
-      description="Hücum kanalları, rakibin saldırı yönü, duran top üretimi, baskı ve gelişmiş takım eşleşmeleri Pro üyelikte görünür."
+      description="Hücum kanalları, rakibin saldırı yönü, duran top üretimi, baskı ve gelişmiş takım eşleşmeleri Gelişmiş üyelikte görünür."
     />}
 
     <section className="card team-roster-section team-roster-v2">
       <div className="panel-head team-roster-head">
         <div>
           <span className="eyebrow">OYUNCULAR</span>
-          <h2>Fantasy oyuncu havuzu</h2>
+          <h2>Fantezi oyuncu havuzu</h2>
         </div>
         <div className="team-roster-summary">
           <span><small>AKTİF</small><b>{players.length} oyuncu</b></span>
@@ -281,7 +281,7 @@ export default async function TeamPage({params}){
 
       <section className="card team-fantasy-history team-fantasy-history-v2">
         <div className="panel-head">
-          <div><span className="eyebrow">FANTASY FORMU</span><h2>Haftalık takım üretimi</h2></div>
+          <div><span className="eyebrow">FANTEZİ FORMU</span><h2>Haftalık takım üretimi</h2></div>
         </div>
         <div className="team-fantasy-summary">
           <div><span>Son hafta</span><b>{lastFantasyWeek?Number(lastFantasyWeek[1]||0):'—'}</b></div>
