@@ -539,3 +539,21 @@
 .scope :global(.pagination-bar) button:disabled{opacity:.4;cursor:not-allowed}
 .scope :global(.pagination-bar) span{font-size:12px;color:var(--muted)}
 @media(max-width:570px){.scope :global(.pagination-bar){justify-content:space-between}.scope :global(.pagination-bar) button{padding:9px 10px}}
+
+.scope :global(.profile-page){max-width:980px;margin:0 auto}
+.scope :global(.profile-grid){display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.scope :global(.profile-card){padding:24px}
+.scope :global(.profile-card) h2{margin:9px 0 16px;font-size:24px}
+.scope :global(.profile-info-list){display:grid;gap:0;margin-top:16px}
+.scope :global(.profile-info-row){display:flex;align-items:center;justify-content:space-between;gap:18px;padding:14px 0;border-bottom:1px solid var(--line)}
+.scope :global(.profile-info-row):last-child{border-bottom:0}
+.scope :global(.profile-info-row) span{color:var(--muted);font-size:13px}
+.scope :global(.profile-info-row) b{text-align:right;overflow-wrap:anywhere}
+.scope :global(.profile-active){color:var(--green)}
+.scope :global(.profile-plan-badge){border:1px solid #3c6c53;background:#10241b;color:var(--green);padding:8px 12px;border-radius:999px;font-size:12px;font-weight:900;letter-spacing:.08em}
+.scope :global(.profile-plan-badge):global(.pro){background:var(--green);color:#052111}
+.scope :global(.profile-feature-list){display:grid;gap:10px;margin:0;padding:0;list-style:none}
+.scope :global(.profile-feature-list) li{position:relative;padding-left:22px;color:#dce8e1}
+.scope :global(.profile-feature-list) li:before{content:'✓';position:absolute;left:0;color:var(--green);font-weight:900}
+.scope :global(.profile-actions){display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}
+@media(max-width:760px){.scope :global(.profile-grid){grid-template-columns:1fr}.scope :global(.profile-card){padding:20px}.scope :global(.profile-info-row){align-items:flex-start;flex-direction:column;gap:5px}.scope :global(.profile-info-row) b{text-align:left}.scope :global(.profile-actions)>*{flex:1 1 100%}}

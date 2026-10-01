@@ -41,7 +41,10 @@ export default function NavAccountControls(){
     {!state.loaded
       ?<span className="ghost-btn desktop-auth" aria-hidden="true">•••</span>
       :state.signedIn
-        ?<button className="ghost-btn desktop-auth" type="button" onClick={handleLogout} disabled={signingOut}>{signingOut?'Çıkılıyor…':'Çıkış'}</button>
+        ?<>
+          <Link className="ghost-btn desktop-auth" href="/profile">Profilim</Link>
+          <button className="ghost-btn desktop-auth" type="button" onClick={handleLogout} disabled={signingOut}>{signingOut?'Çıkılıyor…':'Çıkış'}</button>
+        </>
         :<Link className="ghost-btn desktop-auth" href="/login">Giriş</Link>}
   </>
 }

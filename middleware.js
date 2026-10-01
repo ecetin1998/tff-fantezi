@@ -12,5 +12,6 @@ export const config={
     '/confirm-email/:path*',
     '/auth/:path*',
     '/pricing/:path*',
+    '/profile/:path*',
   ],
 }
