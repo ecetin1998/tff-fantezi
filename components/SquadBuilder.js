@@ -53,15 +53,6 @@ function buildXI(ids,formation,map,formationMap=FORMATION_MAP){
   }
   return out
 }
-function fitRosterToLimits(ids,map,limits){
-  const out=[]
-  for(const pos of ['GK','DEF','MID','FWD']){
-    const arr=ids.map(id=>map.get(id)).filter(p=>p?.position===pos).sort((a,b)=>xfp(b)-xfp(a))
-    out.push(...arr.slice(0,Number(limits[pos]||0)).map(p=>p.id))
-  }
-  return out
-}
-
 function bestXIPlan(ids,map,formationMap=FORMATION_MAP,captainMultiplier=2){
   let best=null
   for(const key of Object.keys(formationMap)){
@@ -342,19 +333,18 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
     if(plan!=='pro'||isLocked)return
     const next=normalizeManagerCard(value)
     const nextMap=formationMapForCard(next)
-    const nextLimits=squadLimitsForCard(next,SQUAD_LIMITS)
-    const nextIds=fitRosterToLimits(ids,map,nextLimits)
     setManagerCard(next)
-    setIds(nextIds)
-    const planForCard=bestXIPlan(nextIds,map,nextMap,captainMultiplierForCard(next))
-    if(planForCard){
-      setFormation(planForCard.key)
-      setXiIds(planForCard.lineup)
-      setCaptainId(planForCard.captain?.id||null)
-    }else{
-      const fallback=nextMap[formation]?formation:(nextMap['4-3-3']?'4-3-3':Object.keys(nextMap)[0])
+    if(ids.length===SQUAD_SIZE){
+      const planForCard=bestXIPlan(ids,map,nextMap,captainMultiplierForCard(next))
+      if(planForCard){
+        setFormation(planForCard.key)
+        setXiIds(planForCard.lineup)
+        setCaptainId(planForCard.captain?.id||null)
+      }
+    }else if(!nextMap[formation]){
+      const fallback=nextMap['4-3-3']?'4-3-3':Object.keys(nextMap)[0]
       setFormation(fallback)
-      const nextXI=buildXI(nextIds,fallback,map,nextMap)
+      const nextXI=buildXI(ids,fallback,map,nextMap)
       setXiIds(nextXI)
       const cap=nextXI.map(id=>map.get(id)).filter(p=>p&&p.position!=='GK').sort((a,b)=>xfp(b)-xfp(a))[0]
       setCaptainId(cap?.id||null)
@@ -486,6 +476,35 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
           <button type="button" className="squad-tool-btn jump-link" onClick={goToLineup} disabled={!validRoster}>İlk 11’i Diz ↓</button>
         </div>
 
+        <div className={`manager-card-roster-control ${managerCard!==MANAGER_CARD_NONE?'active':''} ${plan==='pro'?'unlocked':'locked'}`}>
+          <div className="manager-card-roster-copy">
+            <div>
+              <span className="eyebrow">GELİŞMİŞ • MENAJER KARTI</span>
+              <h3>{plan==='pro'?cardInfo.label:'Menajer kartı seçimi'}</h3>
+            </div>
+            <div className="manager-card-roster-effect">
+              {plan!=='pro'
+                ?<span>Gelişmiş üyelikte açılır</span>
+                :cardInfo.attack
+                  ?<><span>2 KL</span><span>3 DEF</span><span>5 OS</span><span>5 FOR</span></>
+                  :cardInfo.unlimitedBudget
+                    ?<span>Bütçe sınırı yok</span>
+                    :cardInfo.benchBoost
+                      ?<span>15 oyuncu puana dahil</span>
+                      :cardInfo.captainMultiplier>2
+                        ?<span>Kaptan {captainMultiplier}×</span>
+                        :<span>Standart kadro yapısı • 2 / 5 / 5 / 3</span>}
+            </div>
+          </div>
+          <ManagerCardPicker
+            value={managerCard}
+            onChange={changeManagerCard}
+            disabled={plan!=='pro'||isLocked}
+            xfpByCard={plan==='pro'?managerCardPreviewXfp:{}}
+            compact
+          />
+        </div>
+
         <div className="roster-pitch">
           <div className="pitch-mark center-line"/>
           <div className="pitch-mark center-circle"/>
@@ -493,7 +512,7 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
           <div className="pitch-mark box bottom"/>
 
           {['GK','DEF','MID','FWD'].map(position=><div className={`roster-row roster-${position}`} key={position}>
-            {Array.from({length:effectiveSquadLimits[position]},(_,slot)=>{
+            {Array.from({length:Math.max(effectiveSquadLimits[position],rosterByPos[position]?.length||0)},(_,slot)=>{
               const p=rosterByPos[position]?.[slot]
               if(p)return <div className="roster-player" key={p.id}>
                 <button type="button" className="remove-player roster-remove" onClick={()=>remove(p.id)} aria-label="Oyuncuyu çıkar">×</button>
