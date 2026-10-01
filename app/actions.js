@@ -54,7 +54,7 @@ function squadError(message=''){
   })[key]||'Kadro kaydedilemedi. Lütfen tekrar dene.'
 }
 
-export async function login(formData){
+export async function login(_prevState,formData){
   const supabase=await createClient()
   const identifier=String(formData.get('email')||'').trim()
   const normalized=identifier.toLowerCase()
@@ -62,8 +62,8 @@ export async function login(formData){
   const {error}=DUMMY_LOGIN_ALIASES.has(normalized)
     ?await signInDummyAccount(supabase,normalized,password)
     :await supabase.auth.signInWithPassword({email:identifier,password})
-  if(error)redirect('/login?error='+authErrorCode(error))
-  redirect('/squad')
+  if(error)return {ok:false,error:authErrorCode(error)}
+  return {ok:true,error:null}
 }
 
 async function getSiteUrl(){

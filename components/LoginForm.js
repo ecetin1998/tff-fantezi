@@ -1,5 +1,6 @@
 'use client'
 import Link from 'next/link'
+import {useActionState, useEffect} from 'react'
 import {useSearchParams} from 'next/navigation'
 import {login} from '@/app/actions'
 
@@ -14,25 +15,33 @@ const MESSAGES={
   pro_login_required:'Pro talebini kaydetmek için giriş yap.',
 }
 
+const INITIAL_STATE={ok:false,error:null}
+
 export default function LoginForm(){
   const sp=useSearchParams()
-  const error=ERRORS[String(sp.get('error')||'')]||null
+  const [state,formAction,pending]=useActionState(login,INITIAL_STATE)
+  const error=ERRORS[String(state?.error||sp.get('error')||'')]||null
   const message=MESSAGES[String(sp.get('message')||'')]||null
+
+  useEffect(()=>{
+    if(state?.ok)window.location.replace('/')
+  },[state?.ok])
+
   return <div className="auth-wrap"><div className="card auth-card">
     <span className="eyebrow">HESABIN</span>
     <h1>Giriş yap</h1>
     <p>Hesabına gir ve kaldığın yerden devam et.</p>
     {error?<div className="alert error">{error}</div>:null}
     {message?<div className="alert">{message}</div>:null}
-    <form className="auth-form" action={login}>
+    <form className="auth-form" action={formAction}>
       <label>E-posta / kullanıcı adı<input name="email" type="text" autoComplete="username" placeholder="E-posta veya kullanıcı adı" required/></label>
       <label>Şifre<input name="password" type="password" autoComplete="current-password" minLength="6" required/></label>
-      <button className="cta" type="submit">Giriş yap</button>
+      <button className="cta" type="submit" disabled={pending}>{pending?'Giriş yapılıyor…':'Giriş yap'}</button>
     </form>
     <div className="auth-link-stack">
       <Link href="/forgot-password">Şifremi unuttum</Link>
       <span>Hesabın yok mu? <Link href="/signup">Hesap oluştur</Link></span>
-      {String(sp.get('error')||'')==='email_not_confirmed'
+      {String(state?.error||sp.get('error')||'')==='email_not_confirmed'
         ?<span>Doğrulama maili gelmediyse <Link href="/signup#verification">tekrar gönder</Link>.</span>
         :null}
     </div>
