@@ -24,7 +24,7 @@ export default function ManagerCardPicker({
         aria-pressed={active}
       >
         <span>{card.shortLabel}</span>
-        <b>{loading?'Hesaplanıyor…':Number.isFinite(Number(xfp))?`${Number(xfp).toFixed(1)} xFP`:card.id===MANAGER_CARD_NONE?'Standart':'— xFP'}</b>
+        <b>{loading?'Hesaplanıyor…':xfp!==null&&xfp!==undefined&&Number.isFinite(Number(xfp))?`${Number(xfp).toFixed(1)} xFP`:card.id===MANAGER_CARD_NONE?'Standart':'— xFP'}</b>
         <small>{card.id==='attack'?'2 KL / 3 DEF / 5 OS / 5 FOR':card.captainMultiplier>2?`Kaptan ${card.captainMultiplier}×`:card.benchBoost?'15 oyuncu puanda':card.unlimitedBudget?'Bütçe sınırı yok':'Normal kurallar'}</small>
       </button>
     })}
