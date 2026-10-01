@@ -12,7 +12,8 @@ function cardXfp(data){
   return Number.isFinite(n)?n:null
 }
 
-function SquadCard({data,title,variant,cardActive=false}){
+function SquadCard({data,title,variant,cardActive=false,loading=false}){
+  if(loading)return <section className="card unified-squad-card"><div className="manager-card-loading">Seçilen kart için kadro hazırlanıyor…</div></section>
   if(!data?.members?.length)return <section className="card unified-squad-card"><div className="manager-card-error">Bu kart için kadro üretilemedi.</div></section>
   return <section className="card unified-squad-card">
     <SquadPitchView
@@ -124,7 +125,7 @@ export default function ManagerCardRecommendations({baseRecommended,baseAlternat
     {error?<div className="manager-card-error">{error}</div>:null}
     <div className="unified-squad-list">
       <SquadCard data={active?.recommended} title={managerCard===MANAGER_CARD_NONE?'ÖNERİLEN KADRO':`ÖNERİLEN • ${cardInfo.shortLabel}`} variant="recommended" cardActive={managerCard!==MANAGER_CARD_NONE}/>
-      <SquadCard data={active?.alternative||cache[MANAGER_CARD_NONE]?.alternative} title={managerCard===MANAGER_CARD_NONE?'AGRESİF 11':`AGRESİF • ${cardInfo.shortLabel}`} variant="alternative" cardActive={managerCard!==MANAGER_CARD_NONE}/>
+      <SquadCard data={active?.alternative} title={managerCard===MANAGER_CARD_NONE?'AGRESİF 11':`AGRESİF • ${cardInfo.shortLabel}`} variant="alternative" cardActive={managerCard!==MANAGER_CARD_NONE} loading={managerCard!==MANAGER_CARD_NONE&&loadingSelected&&!active?.alternative}/>
     </div>
   </>
 }
