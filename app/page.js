@@ -37,15 +37,15 @@ export default async function Home(){
       href:teamHref(teamXfpLeader?.name,teamXfpLeader?.id),team:teamXfpLeader?.name,
     },
     isPro?{
-      label:`MH${run?.gameweek||'—'} Top-25 adayı #1`,
+      label:`MH${run?.gameweek||'—'} İlk 25 adayı #1`,
       title:playerLabel(top25),meta:`${top25?.team||'—'} • üst dilime çıkma profili`,
-      val:`#${Number(top25?.projection?.top25_rank||1)}`,unit:'Top25',
+      val:`#${Number(top25?.projection?.top25_rank||1)}`,unit:'İlk 25',
       href:top25?'/players/'+top25.id:'/players',team:top25?.team,
     }:{
-      label:'PRO • Tavan analizi',
-      title:'Top-25 ve P90',
+      label:'GELİŞMİŞ • Tavan analizi',
+      title:'İlk 25 ve P90',
       meta:'yüksek skor adayları • gelişmiş dağılım',
-      val:'PRO',unit:'analiz',
+      val:'GELİŞMİŞ',unit:'analiz',
       href:'/pricing',team:null,
     },
   ]
@@ -54,8 +54,8 @@ export default async function Home(){
     <section className="home-intro-layout">
       <div className="card home-intro-hero">
         <div className="home-hero-kicker">
-          <span className="eyebrow">SÜPER LİG FANTASY ANALİZ PLATFORMU</span>
-          <span className="home-live-pill">MH{run?.gameweek||'—'} • {simulationLabel} sim</span>
+          <span className="eyebrow">SÜPER LİG FANTEZİ ANALİZ PLATFORMU</span>
+          <span className="home-live-pill">MH{run?.gameweek||'—'} • {simulationLabel} simülasyon</span>
         </div>
         <h1>Veriyi oku.<br/><span>Kararı sen ver.</span></h1>
         <p>Oyuncu rolü, dakika ihtimali, maç modeli ve puan dağılımını tek bir karar ekranında birleştiriyoruz. Tek bir “doğru kadro” yerine, nedenini görebildiğin daha güçlü seçimler yap.</p>
@@ -81,14 +81,14 @@ export default async function Home(){
         <div className="card spotlight-card home-status-card home-status-week">
           <span>Yayınlanan hafta</span>
           <b>MH{run?.gameweek||'—'}</b>
-          <small>{matchCount} maç • {playerCount} oyuncu • {simulationLabel} sim</small>
+          <small>{matchCount} maç • {playerCount} oyuncu • {simulationLabel} simülasyon</small>
           <strong>Canlı <em>model</em></strong>
         </div>
         <div className={`card spotlight-card home-status-card home-status-ready ${sourceFresh?'fresh':'stale'}`}>
           <span>Model & veri durumu</span>
-          <b>{run?.status==='ready'?'READY':'Hazırlanıyor'}</b>
+          <b>{run?.status==='ready'?'HAZIR':'Hazırlanıyor'}</b>
           <small>Sakatlık/ceza: {freshnessLabel}<br/>Kaynak {sourceUpdated} • model {modelUpdated}</small>
-          <strong>{sourceFresh?'Veri taze':'Tazelik kontrolü'} <em>availability</em></strong>
+          <strong>{sourceFresh?'Veri taze':'Tazelik kontrolü'} <em>uygunluk</em></strong>
         </div>
       </aside>
     </section>
@@ -97,20 +97,20 @@ export default async function Home(){
       <div className="home-guide-copy">
         <span className="eyebrow">MODELİ NASIL OKUYACAKSIN?</span>
         <h2>Tek sayıya değil,<br/><span>dağılıma bak.</span></h2>
-        <p><strong>xFP</strong> ortalama beklentiyi gösterir. <strong>P90</strong> ve <strong>Top‑25</strong> yüksek tavanı ve haftanın üst puan dilimine girme profilini anlatan Pro katmanlarıdır.</p>
+        <p><strong>xFP</strong> ortalama beklentiyi gösterir. <strong>P90</strong> ve <strong>İlk 25</strong> yüksek tavanı ve haftanın üst puan dilimine girme profilini anlatan gelişmiş üyelik katmanlarıdır.</p>
         <Link href="/sss" className="home-guide-link">Metodolojiyi aç <span>→</span></Link>
       </div>
       <div className="home-guide-metrics">
-        <div><b>xFP</b><span>Beklenen fantasy puanı</span><small>Ortalama senaryo</small></div>
+        <div><b>xFP</b><span>Beklenen fantezi puanı</span><small>Ortalama senaryo</small></div>
         <div><b>xDakika</b><span>Beklenen oynama süresi</span><small>Rol + ilk 11 ihtimali</small></div>
         <div><b>P90</b><span>Üst %10 puan eşiği</span><small>Tavan senaryosu</small></div>
-        <div><b>Top‑25</b><span>Üst dilime girme profili</span><small>Patlama ihtimali</small></div>
+        <div><b>İlk 25</b><span>Üst dilime girme profili</span><small>Patlama ihtimali</small></div>
       </div>
     </section>
 
     <section className="home-feature-section">
       <div className="home-section-head">
-        <div><span className="eyebrow">SCOUT MERKEZİ</span><h2>Karar akışın tek yerde.</h2></div>
+        <div><span className="eyebrow">ANALİZ MERKEZİ</span><h2>Karar akışın tek yerde.</h2></div>
         <p>Oyuncudan maça, maçtan kadroya aynı veri zincirini takip et.</p>
       </div>
       <div className="home-feature-grid">
@@ -121,7 +121,7 @@ export default async function Home(){
         </Link>
         <Link href="/teams" className="card home-feature-card">
           <span className="home-feature-no">02</span>
-          <div><b>Takım Profilleri</b><p>Takım formu, xG/xGA, hücum kanalları, fikstür ve matchup etkisini aynı profilde incele.</p></div>
+          <div><b>Takım Profilleri</b><p>Takım formu, xG/xGA, hücum kanalları, fikstür ve eşleşme etkisini aynı profilde incele.</p></div>
           <strong>Takım analizleri <i>→</i></strong>
         </Link>
         <Link href="/squad" className="card home-feature-card">

@@ -15,13 +15,21 @@ export async function generateMetadata({params}){
   const {id}=await params
   const data=await getPlayerDetail(id)
   if(!data)notFound()
-  return {title:data.player.full_name+' • Oyuncu Analizi',description:data.player.full_name+' için xFP, dakika, rol ve haftalık fantasy performansı.'}
+  return {title:data.player.full_name+' • Oyuncu Analizi',description:data.player.full_name+' için xFP, dakika, rol ve haftalık fantezi performansı.'}
 }
 
 const pct=v=>`${(Number(v||0)*100).toFixed(0)}%`
 const num=(v,d=2)=>Number(v||0).toFixed(d)
 const venue=v=>v==='HOME'?'Ev':v==='AWAY'?'Dep':'—'
 const posLabel=p=>({GK:'KL',DEF:'DEF',MID:'OS',FWD:'FOR'}[p]||p||'—')
+const xaSourceLabel=value=>{
+  const source=String(value||'')
+  if(!source)return '—'
+  if(source==='position_prior')return 'Mevki öncülü'
+  if(source==='preseason_player_prior')return 'Sezon öncesi oyuncu öncülü'
+  if(source.startsWith('fotmob_'))return 'Gözlenen maç verisi'
+  return 'Model verisi'
+}
 function MetricGrid({items,className=''}){
   return <div className={`player-detail-metric-grid ${className}`}>
     {items.map(item=><div className={item.emphasis?'is-emphasis':''} key={item.label}>
@@ -102,14 +110,14 @@ export default async function PlayerPage({ params }){
     )
     if(isPro)seasonMetrics.push(
       {label:'xG toplam',value:num(s?.xg_total)},
-      {label:'xA / 90',value:s?.xa_per90===null||s?.xa_per90===undefined?num(s?.xa_model_per90):num(s?.xa_per90),note:s?.xa_per90===null||s?.xa_per90===undefined?'model/prior':'gözlenen'},
+      {label:'xA / 90',value:s?.xa_per90===null||s?.xa_per90===undefined?num(s?.xa_model_per90):num(s?.xa_per90),note:s?.xa_per90===null||s?.xa_per90===undefined?'model/öncül':'gözlenen'},
       {label:'Şut',value:s?.shots===null||s?.shots===undefined?'—':Number(s.shots)},
       {label:'İsabetli şut',value:s?.shots_on_target===null||s?.shots_on_target===undefined?'—':Number(s.shots_on_target)},
       {label:'Şut payı',value:s?.shot_share===null||s?.shot_share===undefined?'—':pct(s.shot_share),note:'takım şutları içindeki pay'},
       {label:'Yaratılan şans',value:s?.key_passes===null||s?.key_passes===undefined?'—':Number(s.key_passes)},
       {label:'Şans yaratma payı',value:s?.chance_creation_share===null||s?.chance_creation_share===undefined?'—':pct(s.chance_creation_share),note:'takım yaratılan şans payı'},
-      {label:'Cross',value:s?.crosses===null||s?.crosses===undefined?'—':`${Number(s.successful_crosses||0)}/${Number(s.crosses)}`,note:'başarılı / toplam'},
-      {label:'Dripling',value:s?.takeons===null||s?.takeons===undefined?'—':`${Number(s.successful_takeons||0)}/${Number(s.takeons)}`,note:'başarılı / toplam'},
+      {label:'Orta',value:s?.crosses===null||s?.crosses===undefined?'—':`${Number(s.successful_crosses||0)}/${Number(s.crosses)}`,note:'başarılı / toplam'},
+      {label:'Çalım',value:s?.takeons===null||s?.takeons===undefined?'—':`${Number(s.successful_takeons||0)}/${Number(s.takeons)}`,note:'başarılı / toplam'},
       {label:'Takım hücum katkısı',value:s?.attack_contribution_share===null||s?.attack_contribution_share===undefined?'—':pct(s.attack_contribution_share),note:'xG + etkili xA payı'},
       {label:'İleri veri kapsamı',value:s?.advanced_through_gameweek?`MH1–MH${s.advanced_through_gameweek}`:'—',note:'kaynaklı maç aksiyonları'}
     )
@@ -121,8 +129,8 @@ export default async function PlayerPage({ params }){
   )
 
   const roleMetrics=[
-    {label:'Son 2 maç XI',value:pct(r?.last2_xi_probability)},
-    {label:'Önceki 2 maç XI',value:pct(r?.previous2_xi_probability)},
+    {label:'Son 2 maç İlk 11',value:pct(r?.last2_xi_probability)},
+    {label:'Önceki 2 maç İlk 11',value:pct(r?.previous2_xi_probability)},
     {label:'Son 2 dakika',value:num(r?.last2_minutes,1)},
     {label:'Önceki 2 dakika',value:num(r?.previous2_minutes,1)},
   ]
@@ -200,9 +208,9 @@ export default async function PlayerPage({ params }){
     </div>:<AccessGate
       compact
       tier="pro"
-      eyebrow="PRO • OYUNCU DERİNLİĞİ"
+      eyebrow="GELİŞMİŞ • OYUNCU DERİNLİĞİ"
       title="Puan dağılımı, xG/xA ve rol değişimini aç."
-      description="P25/P75/P90, 6+ ihtimali, beklenen gol/asist ve son maç rol-dakika karşılaştırmaları Pro üyelikte görünür."
+      description="P25/P75/P90, 6+ ihtimali, beklenen gol/asist ve son maç rol-dakika karşılaştırmaları Gelişmiş üyelikte görünür."
     />}
 
     <section className="card profile-card season-card player-season-card">
@@ -252,12 +260,12 @@ export default async function PlayerPage({ params }){
           <div><span>60+ dakika</span><b>{pct(p?.over60_probability)}</b></div>
           <div><span>Temel xFP</span><b>{num(p?.core_xfp)}</b></div>
           <div><span>Beklenen bonus</span><b>{num(p?.x_bonus)}</b></div>
-          <div><span>Top25 sıra</span><b>{p?.top25_rank?`#${p.top25_rank}`:'—'}</b></div>
-          <div><span>Top25 skor</span><b>{p?.top25_score===null||p?.top25_score===undefined?'—':num(p.top25_score,3)}</b></div>
+          <div><span>İlk 25 sıra</span><b>{p?.top25_rank?`#${p.top25_rank}`:'—'}</b></div>
+          <div><span>İlk 25 puanı</span><b>{p?.top25_score===null||p?.top25_score===undefined?'—':num(p.top25_score,3)}</b></div>
           <div><span>Veri güveni</span><b>{predictionConfidenceLabel(run,p)}</b></div>
           {!isGK?<div><span>Takım gol payı</span><b>{pct(r?.team_goal_share)}</b></div>:null}
           {!isGK?<div><span>Model xA / 90</span><b>{mf?.effective_xa_per90===null||mf?.effective_xa_per90===undefined?'—':num(mf.effective_xa_per90,3)}</b></div>:null}
-          {!isGK?<div><span>xA kaynağı</span><b>{s?.xa_source||'—'}</b></div>:null}
+          {!isGK?<div><span>xA veri türü</span><b>{xaSourceLabel(s?.xa_source)}</b></div>:null}
           {detailedRole?<div><span>Detay rol</span><b>{detailedRole}</b></div>:null}
         </div>
         <div className="player-model-note"><span>Rol özeti</span><p>{r?.signal||'Belirgin rol değişimi yok.'}</p></div>
