@@ -35,6 +35,63 @@ const bandStatusLabel=value=>({
   'Band üstü':'Tahmin aralığı üstü',
 }[value]||value||'—')
 
+const learningComponentLabel=value=>({
+  'Availability zinciri':'Uygunluk zinciri',
+  'Dağılım / Upper Tail':'Dağılım / Üst uç',
+  'Enrichment Replay Gate':'Zenginleştirme geriye dönük test kontrolü',
+  'Pipeline senkronu':'İşlem zinciri senkronu',
+  'Roster / Active Pool':'Kadro / Aktif havuz',
+  'Takım / Venue':'Takım / Saha durumu',
+  'Takım Kanal / Matchup':'Takım Kanalı / Eşleşme',
+}[value]||localizeModelText(value))
+
+function localizeModelText(value){
+  return String(value??'—')
+    .replace(/Site current snapshotı Fresh Sheetten geride kalmıştı\.?/gi,'Sitedeki güncel kayıt, güncel kaynak sayfasının gerisinde kalmıştı.')
+    .replace(/Dönüş doğrulanmış oyuncunun motor availability değeri stale kalabiliyordu\.?/gi,'Dönüşü doğrulanan oyuncunun model uygunluk değeri eski kalabiliyordu.')
+    .replace(/Top-25 için xFPden ayrı, tail odaklı ranking katmanı production pipelinea alındı\.?/gi,"İlk 25 için xFP'den ayrı, üst uç odaklı sıralama katmanı canlı üretim zincirine alındı.")
+    .replace(/ScoutPlus\s*(\d+(?:\.\d+)*)/gi,'Canlı model v$1')
+    .replace(/Enrichment/gi,'Zenginleştirme')
+    .replace(/Replay/gi,'geriye dönük test')
+    .replace(/Availability/gi,'uygunluk')
+    .replace(/current snapshot/gi,'güncel kayıt')
+    .replace(/snapshot/gi,'kayıt')
+    .replace(/Fresh Sheet/gi,'güncel kaynak sayfası')
+    .replace(/stale/gi,'eski')
+    .replace(/active=false/gi,'etkin olmayan')
+    .replace(/projection/gi,'tahmin')
+    .replace(/Upper Tail/gi,'Üst uç')
+    .replace(/Top-?25/gi,'İlk 25')
+    .replace(/ranking alignment/gi,'sıralama uyumu')
+    .replace(/hit rate/gi,'yakalama oranı')
+    .replace(/production pipeline/gi,'canlı üretim zinciri')
+    .replace(/pipeline/gi,'işlem zinciri')
+    .replace(/aggregate/gi,'toplu')
+    .replace(/matchup/gi,'eşleşme')
+    .replace(/leakage-safe/gi,'veri sızıntısı olmadan')
+    .replace(/pre-target/gi,'hedef öncesi')
+    .replace(/weighted/gi,'ağırlıklı')
+    .replace(/baseline/gi,'başlangıç')
+    .replace(/bias/gi,'sapma eğilimi')
+    .replace(/tail/gi,'üst uç')
+    .replace(/clean[- ]sheet/gi,'gol yememe')
+    .replace(/\bCS\b/g,'gol yememe')
+    .replace(/fantasy/gi,'fantezi')
+    .replace(/\bRoster\b/gi,'Kadro')
+    .replace(/\bActive Pool\b/gi,'Aktif havuz')
+    .replace(/\bVenue\b/gi,'Saha durumu')
+    .replace(/\bGate\b/gi,'kontrol')
+    .replace(/\bstarter\b/gi,'ilk 11 oyuncusu')
+    .replace(/\bstate\b/gi,'durum')
+    .replace(/bimodal/gi,'iki tepeli')
+    .replace(/self-coverage/gi,'öz kapsama')
+    .replace(/\bpriorı\b/gi,'öncülü')
+    .replace(/\bprior\b/gi,'öncül')
+    .replace(/\bRC3\b/g,'Aday sürüm 3')
+    .replace(/\bMAE\b/g,'ortalama mutlak hata')
+    .replace(/\bMC\b/g,'Monte Carlo')
+}
+
 const tendency=v=>{
   if(v===null||v===undefined)return '—'
   const n=Number(v)
@@ -46,8 +103,8 @@ export default async function BacktestPage(){
   const {currentRun,currentRunQa,replayWeeks,liveWeeks,learning,replayPlayers,livePlayers,preseasonCoverage}=await getBacktestOverview()
   const replayClosed=replayWeeks.filter(w=>w.status==='closed')
   const latestLive=liveWeeks.length?liveWeeks[liveWeeks.length-1]:null
-  const replayBenchmark=replayWeeks[0]?.engine_version||'ScoutPlus 3.1'
-  const replayBenchmarkVersion=replayWeeks[0]?.benchmark_version||'—'
+  const replayBenchmark=localizeModelText(replayWeeks[0]?.engine_version||'Canlı model v3.1')
+  const replayBenchmarkVersion=localizeModelText(replayWeeks[0]?.benchmark_version||'—')
   const productionQaPass=Boolean(currentRunQa?.pass)
   const publicModelNumber=(String(currentRun?.model_version||'').match(/ScoutPlus\s+(\d+(?:\.\d+)*)/)||[])[1]
   const publicModelVersion=publicModelNumber?'Canlı model v'+publicModelNumber:'Canlı model'
@@ -138,7 +195,7 @@ export default async function BacktestPage(){
             <td>{pct(w.top25_hit_rate)}</td>
             <td><b>{pct(w.top25_v2_hit_rate)}</b></td>
             <td>{w.average_minute_error===null||w.average_minute_error===undefined?'—':num(w.average_minute_error,1)+' dk'}</td>
-            <td className="learning-cell">{w.main_learning||'—'}</td>
+            <td className="learning-cell">{localizeModelText(w.main_learning)}</td>
             <td><span className={'replay-status '+w.status}>{replayStatus[w.status]||w.status}</span></td>
           </tr>)}</tbody>
         </table>
@@ -189,12 +246,12 @@ export default async function BacktestPage(){
         <div className="panel-head"><div><span className="eyebrow">AÇIK AKSİYONLAR</span><h3>Takip etmeye devam ettiklerimiz</h3></div><small>{activeLearning.length} aktif sinyal</small></div>
         {activeLearning.length?<div className="learning-grid">{activeLearning.map(item=><article key={item.id} className="learning-card">
           <div><span>{learningPriority(item)<99?'Sıra '+learningPriority(item)+' • ':''}{'MH'+item.after_gameweek+' sonrası'}</span><em>{learningStatus[item.status]||item.status}</em></div>
-          <h3>{item.component}</h3><p>{item.summary_tr||item.signal}</p>
+          <h3>{learningComponentLabel(item.component)}</h3><p>{localizeModelText(item.summary_tr||item.signal)}</p>
         </article>)}</div>:<div className="empty-learning-state">Şu an müdahale bekleyen açık model sorunu yok.</div>}
         {resolvedLearning.length?<><div className="panel-head" style={{marginTop:24}}><div><span className="eyebrow">KAPANAN KARARLAR</span><h3>Çözülen veya değişiklik gerektirmeyenler</h3></div><small>{resolvedLearning.length} kayıt</small></div>
         <div className="learning-grid">{resolvedLearning.map(item=><article key={item.id} className="learning-card">
           <div><span>{'MH'+item.after_gameweek+' sonrası'}</span><em>{learningStatus[item.status]||item.status}</em></div>
-          <h3>{item.component}</h3><p>{item.summary_tr||item.signal}</p>
+          <h3>{learningComponentLabel(item.component)}</h3><p>{localizeModelText(item.summary_tr||item.signal)}</p>
         </article>)}</div></>:null}
       </div>:<div className="empty-learning-state">Güncel kurgu geriye dönük testi tamamlanınca öğrenme sinyalleri burada oluşacak.</div>}
     </section>
@@ -204,7 +261,7 @@ export default async function BacktestPage(){
       <div className="table-scroll"><table className="backtest-table">
         <thead><tr><th>Oyuncu</th><th>xFP</th><th>Tahmin aralığı</th><th>Gerçek</th><th>Aralık sonucu</th><th>Aralık dışı</th><th>Merkez farkı</th><th>Ana hata alanı</th></tr></thead>
         <tbody>{[...replayPlayers,...livePlayers].slice(0,20).map((p,i)=>{const lo=p.predicted_p25??p.p25,hi=p.predicted_p90??p.p90;return <tr key={String(p.player_id)+'-'+i}>
-          <td>{p.player_name}</td><td>{num(p.predicted_xfp)}</td><td>{lo===null||lo===undefined||hi===null||hi===undefined?'—':num(lo,0)+'–'+num(hi,0)}</td><td>{num(p.actual_points,0)}</td><td>{bandStatusLabel(p.band_status)}</td><td>{p.outside_band_distance===null||p.outside_band_distance===undefined?'—':num(p.outside_band_distance)}</td><td>{num(p.point_error??p.prediction_error)}</td><td>{p.main_error_area??p.error_component??'—'}</td>
+          <td>{p.player_name}</td><td>{num(p.predicted_xfp)}</td><td>{lo===null||lo===undefined||hi===null||hi===undefined?'—':num(lo,0)+'–'+num(hi,0)}</td><td>{num(p.actual_points,0)}</td><td>{bandStatusLabel(p.band_status)}</td><td>{p.outside_band_distance===null||p.outside_band_distance===undefined?'—':num(p.outside_band_distance)}</td><td>{num(p.point_error??p.prediction_error)}</td><td>{localizeModelText(p.main_error_area??p.error_component)}</td>
         </tr>})}</tbody>
       </table></div>
     </section>:null}
