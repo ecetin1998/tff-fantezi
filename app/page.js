@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { getAuthState, getHomeOverview } from '@/lib/data'
+import { getAuthState, getHomeOverview, getMySquadOverview } from '@/lib/data'
 import { teamCssVars, teamHref } from '@/lib/teamThemes'
 import {playerLabel} from '@/lib/playerPresentation'
 
@@ -7,6 +7,7 @@ export const revalidate=300
 
 export default async function Home(){
   const [overview,auth]=await Promise.all([getHomeOverview(),getAuthState()])
+  const mySquad=auth.signedIn?await getMySquadOverview():null
   const {run,best,value,teamXfpLeader,top25,playerCount,matchCount}=overview
   const isPro=auth.plan==='pro'
   const latestDataAt=run?.decision_data_at||run?.source_updated_at||null
@@ -92,6 +93,17 @@ export default async function Home(){
         </div>
       </aside>
     </section>
+
+    {auth.signedIn?<section className="card home-personal-card">
+      <div className="home-personal-copy"><span className="eyebrow">KADRON İÇİN BU HAFTA</span><h2>{mySquad?.hasSquad?'Kişisel karar özeti':'Kadron henüz hazır değil'}</h2><p>{mySquad?.hasSquad?`MH${run?.gameweek||'—'} ilk 11’in, kaptanın ve deadline öncesi risklerin tek bakışta.`:'15 kişilik kadronu oluşturduğunda burada kişisel xFP ve risk özetin görünecek.'}</p></div>
+      {mySquad?.hasSquad?<div className="home-personal-grid">
+        <div><span>İlk 11 xFP</span><b>{Number(mySquad.xiXfp||0).toFixed(1)}</b><small>kaptan dahil</small></div>
+        <div><span>Kaptan</span><b>{playerLabel(mySquad.captain)}</b><small>{Number(mySquad.captain?.xfp||0).toFixed(1)} xFP</small></div>
+        <div><span>En yüksek xFP</span><b>{playerLabel(mySquad.topPlayer)}</b><small>{Number(mySquad.topPlayer?.xfp||0).toFixed(1)} xFP</small></div>
+        <div className={mySquad.riskCount?'is-risk':''}><span>Deadline kontrolü</span><b>{mySquad.riskCount?mySquad.riskCount+' risk':'Temiz'}</b><small>{mySquad.riskPlayer?playerLabel(mySquad.riskPlayer):'kritik uyarı yok'}</small></div>
+      </div>:null}
+      <div className="home-personal-actions"><Link href="/squad" className="secondary">{mySquad?.hasSquad?'Kadromu kontrol et':'Kadromu oluştur'}</Link>{mySquad?.hasSquad?<Link href="/squads" className="text-action">Model kadrosuyla karşılaştır <span>→</span></Link>:null}</div>
+    </section>:null}
 
     <section className="card home-model-guide">
       <div className="home-guide-copy">
