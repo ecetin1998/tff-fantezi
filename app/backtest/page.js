@@ -48,6 +48,8 @@ const localizeModelText=value=>{
     [/Pipeline senkronu/gi,'Veri akışı eşitlemesi'],
     [/Availability zinciri/gi,'Uygunluk zinciri'],
     [/ScoutPlus\s+(\d+(?:\.\d+)*)\s+replayinde/gi,'canlı model v$1 geriye dönük testinde'],
+    [/ScoutPlus\s+(\d+(?:\.\d+)*)/gi,'Canlı model v$1'],
+    [/Fresh Sheet/gi,'güncel kaynak tablosu'],
     [/Site current snapshotı Fresh Sheetten/gi,'Sitenin güncel haftalık kaydı kaynak veri tablosundan'],
     [/current snapshotta/gi,'güncel haftalık kayıtta'],
     [/availability değeri stale kalabiliyordu/gi,'uygunluk değeri güncel kalmayabiliyordu'],
