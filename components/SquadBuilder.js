@@ -176,6 +176,23 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
   const captainBonus=captainPlayer?xfp(captainPlayer)*Math.max(0,captainMultiplier-1):0
   const scoringBase=cardInfo.benchBoost?selectedTotal:xiTotal
   const xiCaptainTotal=scoringBase+captainBonus
+  const scoringPlayers=cardInfo.benchBoost?selected:xi
+  const bandTotal=key=>{
+    const base=scoringPlayers.reduce((sum,p)=>sum+Number(p?.projection?.[key]??xfp(p)),0)
+    const captainBand=captainPlayer?Number(captainPlayer?.projection?.[key]??xfp(captainPlayer))*Math.max(0,captainMultiplier-1):0
+    return base+captainBand
+  }
+  const riskP25=bandTotal('p25')
+  const riskP90=bandTotal('p90')
+  const deadlineWarnings=[]
+  if(ids.length!==SQUAD_SIZE)deadlineWarnings.push({type:'roster',text:`Kadro ${ids.length}/${SQUAD_SIZE}; eksik slotları tamamla.`})
+  if(ids.length===SQUAD_SIZE&&!budgetOk)deadlineWarnings.push({type:'budget',text:'Bütçe sınırı aşılıyor.'})
+  if(ids.length===SQUAD_SIZE&&!clubLimitOk)deadlineWarnings.push({type:'club',text:'Bir kulüpten oyuncu sınırı aşılmış.'})
+  const availabilityRisks=selected.filter(p=>Number(p?.projection?.availability_probability??1)<.8)
+  if(availabilityRisks.length)deadlineWarnings.push({type:'availability',text:`${availabilityRisks.length} oyuncunun oynama durumu riskli: ${availabilityRisks.slice(0,2).map(playerLabel).join(', ')}${availabilityRisks.length>2?'…':''}`})
+  const rotationRisks=xi.filter(p=>Number(p?.projection?.xi_probability||0)<.55||Number(p?.projection?.x_minutes||0)<45)
+  if(rotationRisks.length)deadlineWarnings.push({type:'rotation',text:`${rotationRisks.length} ilk 11 oyuncusunda dakika/başlama riski var: ${rotationRisks.slice(0,2).map(playerLabel).join(', ')}${rotationRisks.length>2?'…':''}`})
+  if(captainPlayer&&Number(captainPlayer?.projection?.availability_probability??1)<.8)deadlineWarnings.push({type:'captain',text:`Kaptan ${playerLabel(captainPlayer)} oynama riski taşıyor.`})
   const rosterByPos=useMemo(()=>Object.fromEntries(['GK','DEF','MID','FWD'].map(position=>[
     position,
     ids.map(id=>map.get(id)).filter(p=>p?.position===position).sort((a,b)=>xfp(b)-xfp(a))
@@ -205,6 +222,7 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
   const [loadingCards,setLoadingCards]=useState(()=>new Set())
   const [isAutoFilling,setIsAutoFilling]=useState(false)
   const [autoFillError,setAutoFillError]=useState('')
+  const [simulation,setSimulation]=useState(null)
 
   useEffect(()=>{
     setCardRecommendations(current=>({
@@ -419,7 +437,51 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
   }
   function reset(){
     const fallback=effectiveFormationMap['4-3-3']?'4-3-3':Object.keys(effectiveFormationMap)[0]
-    setIds([]);setXiIds([]);setCaptainId(null);setSwapTarget(null);setFormation(fallback)
+    setIds([]);setXiIds([]);setCaptainId(null);setSwapTarget(null);setFormation(fallback);setSimulation(null)
+  }
+
+  function simulatePlayer(target){
+    if(isLocked)return
+    if(ids.length!==SQUAD_SIZE){
+      setSimulation({error:'Önce 15 kişilik kadronu tamamla; sonra oyuncunun kadrona etkisini hesaplayabilirim.'})
+      return
+    }
+    if(ids.includes(target.id)){
+      setSimulation({error:'Bu oyuncu zaten kadroda.'})
+      return
+    }
+    const currentPlan=bestXIPlan(ids,map,effectiveFormationMap,captainMultiplier)
+    if(!currentPlan){
+      setSimulation({error:'Mevcut kadro için geçerli ilk 11 bulunamadı.'})
+      return
+    }
+    let best=null
+    for(const out of selected.filter(p=>p.position===target.position)){
+      const nextCost=cost-Number(out.price||0)+Number(target.price||0)
+      if(Number.isFinite(effectiveBudget)&&nextCost>effectiveBudget+.0001)continue
+      const nextIds=ids.map(id=>id===out.id?target.id:id)
+      if(MAX_PLAYERS_PER_CLUB){
+        const nextPlayers=nextIds.map(id=>map.get(id)).filter(Boolean)
+        const nextClubCounts=nextPlayers.reduce((a,p)=>(a[p.team_id]=(a[p.team_id]||0)+1,a),{})
+        if(Object.values(nextClubCounts).some(n=>n>MAX_PLAYERS_PER_CLUB))continue
+      }
+      const nextPlan=bestXIPlan(nextIds,map,effectiveFormationMap,captainMultiplier)
+      if(!nextPlan)continue
+      const delta=nextPlan.total-currentPlan.total
+      const candidate={out,target,nextIds,currentPlan,nextPlan,delta,nextCost}
+      if(!best||candidate.delta>best.delta)best=candidate
+    }
+    setSimulation(best||{error:'Bu oyuncuyu mevcut bütçe, mevki ve kulüp sınırlarıyla kadroya ekleyemiyorum.'})
+  }
+
+  function applySimulation(){
+    if(!simulation?.nextIds||!simulation?.nextPlan||isLocked)return
+    setIds(simulation.nextIds)
+    setFormation(simulation.nextPlan.key)
+    setXiIds(simulation.nextPlan.lineup)
+    setCaptainId(simulation.nextPlan.captain?.id||null)
+    setSwapTarget(null)
+    setSimulation(null)
   }
 
   function changeManagerCard(value){
@@ -560,6 +622,14 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
       {autoFillError?<small className="save-squad-error auto-fill-error">{autoFillError}</small>:null}
     </section>
 
+    <section className={`card deadline-check-card ${deadlineWarnings.length?'has-risk':'is-clean'}`}>
+      <div className="deadline-check-head">
+        <div><span className="eyebrow">DEADLINE KONTROLÜ</span><h2>{deadlineWarnings.length?`${deadlineWarnings.length} kontrol noktası var`:'Kadro temiz görünüyor'}</h2></div>
+        <span>{deadlineAt?formatDeadline(deadlineAt):'Takvim bekleniyor'}</span>
+      </div>
+      {deadlineWarnings.length?<div className="deadline-warning-list">{deadlineWarnings.slice(0,5).map((warning,i)=><div className={`deadline-warning ${warning.type}`} key={warning.type+'-'+i}><b>!</b><span>{warning.text}</span></div>)}</div>:<p>Mevcut kadroda bütçe, kulüp limiti, uygunluk veya dakika açısından kritik bir uyarı görünmüyor.</p>}
+    </section>
+
     <div className="my-squad-layout roster-builder-layout" ref={rosterRef}>
       <section className="squad-stage card roster-stage">
         <div className="squad-stage-head">
@@ -644,6 +714,20 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
             </select>
           </div>
         </div>
+        {simulation?<div className={`player-simulation-panel ${simulation.error?'error':''}`}>
+          <button type="button" className="simulation-close" onClick={()=>setSimulation(null)} aria-label="Simülasyonu kapat">×</button>
+          {simulation.error?<p>{simulation.error}</p>:<>
+            <span className="eyebrow">KADROMA GÖRE HESAPLA</span>
+            <h3>{playerLabel(simulation.out)} → {playerLabel(simulation.target)}</h3>
+            <div className="simulation-metrics">
+              <span><small>Şimdi</small><b>{simulation.currentPlan.total.toFixed(1)}</b></span>
+              <span><small>Sonra</small><b>{simulation.nextPlan.total.toFixed(1)}</b></span>
+              <span className={simulation.delta>=0?'positive':'negative'}><small>Fark</small><b>{simulation.delta>=0?'+':''}{simulation.delta.toFixed(2)}</b></span>
+            </div>
+            <small>{simulation.nextPlan.key} • kaptan {playerLabel(simulation.nextPlan.captain)} • bütçe {simulation.nextCost.toFixed(1)}m</small>
+            <button type="button" className="squad-tool-btn model-apply-btn" onClick={applySimulation}>Bu değişimi uygula</button>
+          </>}
+        </div>:null}
         <div className="picker-table-head">
           <span className="picker-shirt-head" aria-hidden="true"/>
           <button type="button" className={sortKey==='name'?'active':''} onClick={()=>changePoolSort('name')}>Oyuncu {sortKey==='name'?(sortDir==='desc'?'↓':'↑'):''}</button>
@@ -669,6 +753,7 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
                 <b>{playerLabel(p)}</b>
                 <small><strong>{p.team}</strong><em>Rakip: {p.projection?.opponent_name||'—'}</em></small>
                 {availabilityNote?<small className="picker-availability-note">{availabilityNote}</small>:null}
+                {!chosen?<button type="button" className="picker-simulate-link" onClick={()=>simulatePlayer(p)} disabled={isLocked}>Kadroma göre hesapla</button>:null}
               </div>
               <div className={`picker-value price ${sortKey==='price'?'active':''}`}>{Number(p.price||0).toFixed(1)}m</div>
               <div className={`picker-value xfp ${sortKey==='xfp'?'active':''}`}>{xfp(p).toFixed(2)}</div>
@@ -742,6 +827,11 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
             <span><small>{cardInfo.benchBoost?'Tüm takım taban xFP':'İlk 11 taban xFP'}</small><b>{scoringBase.toFixed(1)}</b></span>
             <span className="captain-total"><small>Kaptan bonusu ({captainMultiplier}×)</small><b>+{captainBonus.toFixed(1)}</b></span>
             <span className="lineup-total"><small>{managerCard===MANAGER_CARD_NONE?'İlk 11 xFP':'Kartlı hafta xFP'}</small><b>{xiCaptainTotal.toFixed(1)}</b></span>
+          </div>
+          <div className="squad-risk-profile">
+            <span><small>Taban • P25</small><b>{riskP25.toFixed(1)}</b></span>
+            <span className="expected"><small>Beklenen</small><b>{xiCaptainTotal.toFixed(1)}</b></span>
+            <span><small>Tavan • P90</small><b>{riskP90.toFixed(1)}</b></span>
           </div>
 
           <div className="my-squad-pitch lineup-pitch">
