@@ -17,7 +17,7 @@ const ERRORS={
 }
 const MESSAGES={
   check_email:'Hesabın oluşturuldu. Doğrulama e-postasını kontrol et; gelen kutusunda yoksa aşağıdan tekrar gönderebilirsin.',
-  resend_sent:'Doğrulama e-postası tekrar gönderildi. Gelen kutusu ve spam klasörünü kontrol et.',
+  resend_sent:'Doğrulama e-postası tekrar gönderildi. Gelen kutusu ve gereksiz klasörünü kontrol et.',
 }
 
 export default async function Signup({searchParams}){
@@ -44,11 +44,11 @@ export default async function Signup({searchParams}){
 
     <section className="auth-utility-section" id="verification">
       <span className="eyebrow">DOĞRULAMA E-POSTASI</span>
-      <h2>Doğrulama maili gelmedi mi?</h2>
+      <h2>Doğrulama e-postası gelmedi mi?</h2>
       <p>Hesabı oluştururken kullandığın e-posta adresini gir; yeni doğrulama bağlantısı gönderelim.</p>
       <form className="auth-form" action={resendConfirmation}>
         <label>E-posta<input name="email" type="email" autoComplete="email" placeholder="E-posta adresin" required/></label>
-        <button className="secondary" type="submit">Doğrulama mailini tekrar gönder</button>
+        <button className="secondary" type="submit">Doğrulama e-postasını tekrar gönder</button>
       </form>
     </section>
   </div></div>
