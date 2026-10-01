@@ -5,6 +5,7 @@ import { availabilityReason, availabilityStatusLabel } from '@/lib/availability'
 import {playerLabel} from '@/lib/playerPresentation'
 
 const posLabel=p=>({GK:'KL',DEF:'DEF',MID:'OS',FWD:'FOR'}[p]||p||'—')
+const fmtUpdate=value=>value?new Intl.DateTimeFormat('tr-TR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit',timeZone:'Europe/Istanbul'}).format(new Date(value)):'—'
 
 export default function AvailabilityTable({ rows }){
   const [team,setTeam]=useState('')
@@ -21,12 +22,14 @@ export default function AvailabilityTable({ rows }){
   const injuryCount=(rows||[]).filter(r=>r.availability_type==='injuries').length
   const suspensionCount=(rows||[]).filter(r=>r.availability_type==='suspensions').length
   const riskCount=(rows||[]).filter(r=>Number(r.availability_probability)>0&&Number(r.availability_probability)<1).length
+  const latestCheckedAt=(rows||[]).map(r=>r.checked_at).filter(Boolean).sort((a,b)=>new Date(b)-new Date(a))[0]||null
 
   return <>
     <section className="availability-overview-grid">
       <div className="card"><span>Sakatlık</span><b>{injuryCount}</b><small>takip edilen oyuncu</small></div>
       <div className="card"><span>Ceza</span><b>{suspensionCount}</b><small>maç cezası kaydı</small></div>
       <div className="card"><span>Riskli</span><b>{riskCount}</b><small>oynama ihtimali düşmüş oyuncu</small></div>
+      <div className="card availability-updated-card"><span>Son güncelleme</span><b>{latestCheckedAt?fmtUpdate(latestCheckedAt).split(' ')[1]:'—'}</b><small>{latestCheckedAt?fmtUpdate(latestCheckedAt).split(' ')[0]:'veri zamanı yok'}</small></div>
     </section>
 
     <div className="filters availability-filters">
