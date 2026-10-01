@@ -6,7 +6,7 @@ import {reportServerError} from '@/lib/observability'
 import {passwordPolicyCode} from '@/lib/passwordSecurity'
 import {BENCH_SIZE,BUDGET,FORMATION_SET,MAX_PLAYERS_PER_CLUB,SQUAD_LIMITS,SQUAD_SIZE,STARTING_GK,STARTING_XI_SIZE} from '@/lib/rules'
 import {SUPABASE_PUBLISHABLE_KEY,SUPABASE_URL} from '@/lib/config'
-import {ATTACK_FORMATION,MANAGER_CARD_NONE,managerCardInfo,normalizeManagerCard} from '@/lib/managerCards'
+import {ATTACK_FORMATION,MANAGER_CARD_NONE,managerCardInfo,normalizeManagerCard,squadLimitsForCard} from '@/lib/managerCards'
 
 const DUMMY_LOGIN_ALIASES=new Set(['adminfree','adminpro'])
 
@@ -46,7 +46,7 @@ function squadError(message=''){
     INVALID_SQUAD:'Kadro verisi geçersiz.',
     SQUAD_MUST_HAVE_15_UNIQUE_PLAYERS:`Kadro ${SQUAD_SIZE} benzersiz oyuncudan oluşmalı.`,
     SQUAD_HAS_INACTIVE_OR_UNKNOWN_PLAYER:'Kadroda aktif olmayan veya bulunamayan oyuncu var.',
-    INVALID_POSITION_COUNTS:`Kadro dağılımı ${SQUAD_LIMITS.GK} KL / ${SQUAD_LIMITS.DEF} DEF / ${SQUAD_LIMITS.MID} OS / ${SQUAD_LIMITS.FWD} FOR olmalı.`,
+    INVALID_POSITION_COUNTS:'Kadro dağılımı seçili menajer kartının kurallarına uymalı.',
     BUDGET_EXCEEDED:'Seçili menajer kartı için bütçe sınırı aşıldı.',
     INVALID_STARTING_XI:'İlk 11 geçersiz.',
     INVALID_BENCH:'Yedek kulübesi tam 4 oyuncu olmalı.',
@@ -174,7 +174,8 @@ export async function saveSquad(_prevState,formData){
   if((players||[]).length!==SQUAD_SIZE||(players||[]).some(p=>!p.active))return {ok:false,error:'Kadroda aktif olmayan veya bulunamayan oyuncu var.',signature:''}
 
   const counts=(players||[]).reduce((a,p)=>(a[p.position]=(a[p.position]||0)+1,a),{})
-  if(!Object.entries(SQUAD_LIMITS).every(([position,required])=>(counts[position]||0)===required))return {ok:false,error:`Kadro dağılımı ${SQUAD_LIMITS.GK} KL / ${SQUAD_LIMITS.DEF} DEF / ${SQUAD_LIMITS.MID} OS / ${SQUAD_LIMITS.FWD} FOR olmalı.`,signature:''}
+  const effectiveSquadLimits=squadLimitsForCard(managerCard,SQUAD_LIMITS)
+  if(!Object.entries(effectiveSquadLimits).every(([position,required])=>(counts[position]||0)===required))return {ok:false,error:`Kadro dağılımı ${effectiveSquadLimits.GK} KL / ${effectiveSquadLimits.DEF} DEF / ${effectiveSquadLimits.MID} OS / ${effectiveSquadLimits.FWD} FOR olmalı.`,signature:''}
   const total=(players||[]).reduce((s,p)=>s+Number(p.price||0),0)
   const effectiveBudget=cardInfo.unlimitedBudget?Number.POSITIVE_INFINITY:Number(cardInfo.budget||BUDGET)
   if(Number.isFinite(effectiveBudget)&&total>effectiveBudget+.0001)return {ok:false,error:`${effectiveBudget}m bütçe aşıldı.`,signature:''}
