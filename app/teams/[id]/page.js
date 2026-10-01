@@ -7,6 +7,7 @@ import TeamRoster from '@/components/TeamRoster'
 import {playerLabel} from '@/lib/playerPresentation'
 
 export const revalidate=300
+export const dynamic='force-dynamic'
 export async function generateStaticParams(){
   const {teams}=await getTeamFixturesOverview()
   const ids=[...new Set((teams||[]).map(t=>Number(t.id)).filter(Boolean))]
