@@ -35,6 +35,69 @@ const bandStatusLabel=value=>({
   'Band üstü':'Tahmin aralığı üstü',
 }[value]||value||'—')
 
+const localizeModelText=value=>{
+  let text=String(value||'').trim()
+  if(!text)return '—'
+
+  const replacements=[
+    [/Enrichment Replay Gate/gi,'İleri Veri Geriye Dönük Test Kontrolü'],
+    [/Takım Kanal\s*\/\s*Matchup/gi,'Takım Kanalı / Eşleşme'],
+    [/Roster\s*\/\s*Active Pool/gi,'Kadro / Aktif Havuz'],
+    [/Takım\s*\/\s*Venue/gi,'Takım / Saha Durumu'],
+    [/Dağılım\s*\/\s*Upper Tail/gi,'Dağılım / Üst Uç'],
+    [/Pipeline senkronu/gi,'Veri akışı eşitlemesi'],
+    [/Availability zinciri/gi,'Uygunluk zinciri'],
+    [/ScoutPlus\s+(\d+(?:\.\d+)*)\s+replayinde/gi,'canlı model v$1 geriye dönük testinde'],
+    [/Site current snapshotı Fresh Sheetten/gi,'Sitenin güncel haftalık kaydı kaynak veri tablosundan'],
+    [/current snapshotta/gi,'güncel haftalık kayıtta'],
+    [/availability değeri stale kalabiliyordu/gi,'uygunluk değeri güncel kalmayabiliyordu'],
+    [/RC3/gi,'3. kontrol turu'],
+    [/ranking alignment/gi,'sıralama uyumu'],
+    [/Top-?25 hit rate/gi,'İlk 25 yakalama oranı'],
+    [/production pipelinea/gi,'canlı model akışına'],
+    [/pre-target snapshot/gi,'hedef öncesi kayıt'],
+    [/leakage-safe/gi,'veri sızıntısı olmadan'],
+    [/MC self-coverage/gi,'simülasyon öz-kapsama'],
+    [/clean[- ]sheet/gi,'gol yememe'],
+    [/stabil starter/gi,'istikrarlı ilk 11 oyuncusu'],
+    [/active=false/gi,'etkin olmayan'],
+    [/projection\/role/gi,'tahmin/rol'],
+    [/\bweighted\b/gi,'ağırlıklı'],
+    [/\bMAE\b/g,'ortalama mutlak hata'],
+    [/\bbias\b/gi,'model eğilimi'],
+    [/baselineı/gi,'başlangıç karşılaştırmasını'],
+    [/\benrichment\b/gi,'ileri veri'],
+    [/\breplay\b/gi,'geriye dönük test'],
+    [/\baggregate\b/gi,'toplu'],
+    [/\bmatchup\b/gi,'eşleşme'],
+    [/\btail\b/gi,'üst uç'],
+    [/\branking\b/gi,'sıralama'],
+    [/\bproduction\b/gi,'canlı'],
+    [/\bpipeline\b/gi,'veri akışı'],
+    [/\bcurrent\b/gi,'güncel'],
+    [/\bsnapshot\b/gi,'haftalık kayıt'],
+    [/\bAvailability\b/gi,'Uygunluk'],
+    [/\bavailability\b/gi,'uygunluk'],
+    [/\bstale\b/gi,'güncel olmayan'],
+    [/\bFantasy\b/gi,'Fantezi'],
+    [/\bfantasy\b/gi,'fantezi'],
+    [/Top-?25/gi,'İlk 25'],
+    [/\bRoster\b/gi,'Kadro'],
+    [/\bActive Pool\b/gi,'Aktif Havuz'],
+    [/\bVenue\b/gi,'Saha Durumu'],
+    [/\bUpper Tail\b/gi,'Üst Uç'],
+    [/\bstarter\b/gi,'ilk 11 oyuncusu'],
+    [/\bpriorı\b/gi,'öncülü'],
+    [/\bprior\b/gi,'öncül'],
+    [/\bbimodal\b/gi,'iki tepeli'],
+    [/\bstate\b/gi,'durum'],
+    [/\bbandı\b/gi,'aralığı'],
+    [/\bband\b/gi,'aralık'],
+  ]
+  for(const [pattern,replacement] of replacements)text=text.replace(pattern,replacement)
+  return text.replace(/\s+/g,' ').trim()
+}
+
 const tendency=v=>{
   if(v===null||v===undefined)return '—'
   const n=Number(v)
@@ -138,7 +201,7 @@ export default async function BacktestPage(){
             <td>{pct(w.top25_hit_rate)}</td>
             <td><b>{pct(w.top25_v2_hit_rate)}</b></td>
             <td>{w.average_minute_error===null||w.average_minute_error===undefined?'—':num(w.average_minute_error,1)+' dk'}</td>
-            <td className="learning-cell">{w.main_learning||'—'}</td>
+            <td className="learning-cell">{localizeModelText(w.main_learning)}</td>
             <td><span className={'replay-status '+w.status}>{replayStatus[w.status]||w.status}</span></td>
           </tr>)}</tbody>
         </table>
@@ -149,7 +212,7 @@ export default async function BacktestPage(){
       <div className="panel-head"><div><span className="eyebrow">NE ANLAMA GELİYOR?</span><h2>Terimleri sade okuyalım</h2></div></div>
       <div className="metric-guide-grid">
         <div><b>Tahmin aralığında kalma</b><p>P25–P90 aralığı modelin ürettiği olası sonuç alanıdır. Fantezi puanları kesikli olduğu için gerçekleşen kapsama sabit <strong>%65 olmak zorunda değildir</strong>. Artık tabloda aynı simülasyon dağılımının beklediği simülasyonun beklediği kapsama ve gerçekleşen farkı ayrı ayrı gösteriyoruz.</p></div>
-        <div><b>Aralık dışı sapma</b><p>Gerçek sonuç aralığın dışına çıktıysa yalnız en yakın sınırdan uzaklığı ölçeriz. Örn. xFP 5, bant 2–13 ve gerçek 18 ise <strong>13 puan hata değil, aralık dışı 5 puan</strong> olarak değerlendirilir.</p></div>
+        <div><b>Aralık dışı sapma</b><p>Gerçek sonuç aralığın dışına çıktıysa yalnız en yakın sınırdan uzaklığı ölçeriz. Örn. xFP 5, aralık 2–13 ve gerçek 18 ise <strong>13 puan hata değil, aralık dışı 5 puan</strong> olarak değerlendirilir.</p></div>
         <div><b>Aralık genişliği</b><p>Belirsizliği ne kadar geniş bıraktığımızı gösterir. Amaç aralığı körlemesine daraltmak değil; kesikli puan dağılımında beklenen simülasyonun beklediği kapsama, gerçekleşen kapsama ve aralık dışı sapmayı birlikte iyileştirmektir.</p></div>
         <div><b>Model eğilimi</b><p>Merkez xFP’nin uzun vadede sistematik olarak fazla mı az mı kaldığını gösterir. Tek oyuncunun uç sonucu değil, tekrar eden yönlü sapma önemlidir.</p></div>
         <div><b>Sıralama ve dakika</b><p>Sıralama uyumu yüksek gördüğümüz oyuncuların gerçekten yukarı çıkıp çıkmadığını; dakika hatası ise rol/ilk 11 tahminimizin doğruluğunu gösterir. <strong>İlk 25 GB</strong>, xFP’yi bozmadan yüksek skor/yüksek skor adaylarını ayrı bir sıralama katmanıyla ölçer.</p></div>        <div><b>İlk 25 modeli</b><p><strong>xFP</strong> beklenen fantezi puanını ölçmeye devam eder; İlk 25 modeli ise yüksek skor/yüksek skor adaylarını geçmiş haftalar üzerinde sonucu görmeden eğitilen ayrı bir sıralama katmanıyla tarar. Bu skor kadro optimizasyonunu veya ana xFP’yi değiştirmez ve kapanan her haftada xFP temel modelına karşı yeniden ölçülür.</p></div>
@@ -189,7 +252,7 @@ export default async function BacktestPage(){
         <div className="panel-head"><div><span className="eyebrow">AÇIK AKSİYONLAR</span><h3>Takip etmeye devam ettiklerimiz</h3></div><small>{activeLearning.length} aktif sinyal</small></div>
         {activeLearning.length?<div className="learning-grid">{activeLearning.map(item=><article key={item.id} className="learning-card">
           <div><span>{learningPriority(item)<99?'Sıra '+learningPriority(item)+' • ':''}{'MH'+item.after_gameweek+' sonrası'}</span><em>{learningStatus[item.status]||item.status}</em></div>
-          <h3>{item.component}</h3><p>{item.summary_tr||item.signal}</p>
+          <h3>{localizeModelText(item.component)}</h3><p>{localizeModelText(item.summary_tr||item.signal)}</p>
         </article>)}</div>:<div className="empty-learning-state">Şu an müdahale bekleyen açık model sorunu yok.</div>}
         {resolvedLearning.length?<><div className="panel-head" style={{marginTop:24}}><div><span className="eyebrow">KAPANAN KARARLAR</span><h3>Çözülen veya değişiklik gerektirmeyenler</h3></div><small>{resolvedLearning.length} kayıt</small></div>
         <div className="learning-grid">{resolvedLearning.map(item=><article key={item.id} className="learning-card">
@@ -204,7 +267,7 @@ export default async function BacktestPage(){
       <div className="table-scroll"><table className="backtest-table">
         <thead><tr><th>Oyuncu</th><th>xFP</th><th>Tahmin aralığı</th><th>Gerçek</th><th>Aralık sonucu</th><th>Aralık dışı</th><th>Merkez farkı</th><th>Ana hata alanı</th></tr></thead>
         <tbody>{[...replayPlayers,...livePlayers].slice(0,20).map((p,i)=>{const lo=p.predicted_p25??p.p25,hi=p.predicted_p90??p.p90;return <tr key={String(p.player_id)+'-'+i}>
-          <td>{p.player_name}</td><td>{num(p.predicted_xfp)}</td><td>{lo===null||lo===undefined||hi===null||hi===undefined?'—':num(lo,0)+'–'+num(hi,0)}</td><td>{num(p.actual_points,0)}</td><td>{bandStatusLabel(p.band_status)}</td><td>{p.outside_band_distance===null||p.outside_band_distance===undefined?'—':num(p.outside_band_distance)}</td><td>{num(p.point_error??p.prediction_error)}</td><td>{p.main_error_area??p.error_component??'—'}</td>
+          <td>{p.player_name}</td><td>{num(p.predicted_xfp)}</td><td>{lo===null||lo===undefined||hi===null||hi===undefined?'—':num(lo,0)+'–'+num(hi,0)}</td><td>{num(p.actual_points,0)}</td><td>{bandStatusLabel(p.band_status)}</td><td>{p.outside_band_distance===null||p.outside_band_distance===undefined?'—':num(p.outside_band_distance)}</td><td>{num(p.point_error??p.prediction_error)}</td><td>{localizeModelText(p.main_error_area??p.error_component)}</td>
         </tr>})}</tbody>
       </table></div>
     </section>:null}
