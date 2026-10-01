@@ -54,7 +54,7 @@ export default function PlayersTable({players,total,page,pageCount,teams,filters
   const offset=(Math.max(1,Number(page||1))-1)*PAGE_SIZE
 
   return <>
-    <div className="filters player-filters">
+    {!isVisitor?<div className="filters player-filters">
       <input value={q} onChange={e=>setQ(e.target.value)} placeholder="Oyuncu, takım veya rakip ara..." aria-label="Oyuncu ara"/>
       <select value={filters?.team||''} onChange={e=>navigate({team:e.target.value,page:1})}>
         <option value="">Tüm takımlar</option>{(teams||[]).map(t=><option key={t}>{t}</option>)}
@@ -67,19 +67,19 @@ export default function PlayersTable({players,total,page,pageCount,teams,filters
         {isPro?<><option value="p90">P90'a göre</option><option value="six">6+ ihtimaline göre</option></>:null}
         <option value="points">Toplam puana göre</option><option value="value">F/P'ye göre</option><option value="price">Fiyata göre</option>
       </select>
-    </div>
+    </div>:null}
 
-    <div className="table-summary"><b>{total}</b> oyuncu • {isVisitor?'ziyaretçi önizlemesi':isPro?'Pro analiz görünümü':'ücretsiz üye görünümü'}</div>
+    <div className="table-summary">{isVisitor?<><b>İlk {players.length}</b> oyuncu • xFP sıralaması • tüm oyuncu havuzu ücretsiz üyelikle açılır</>:<><b>{total}</b> oyuncu • {isPro?'Pro analiz görünümü':'ücretsiz üye görünümü'}</>}</div>
     <div className="projection-legend">
       Karar metrikleri: <b>İlk 11</b> + <b>xDakika</b> oynama ihtimalini, <b>xFP</b> ortalama beklentiyi gösterir.
       {isPro?<span> <b>P25/P90</b>, <b>6+</b>, <b>xG</b> ve <b>xA</b> Pro dağılım/üretim katmanlarıdır.</span>:<span> Puan dağılımı, 6+ ihtimali ve xG/xA detayları Pro üyelikte açılır.</span>}
     </div>
-    {!isPro?<AccessGate
+    {!isVisitor&&!isPro?<AccessGate
       compact
-      tier={isVisitor?'member':'pro'}
-      eyebrow={isVisitor?'ÜCRETSİZ ÜYELİK':'PRO ANALİZ'}
-      title={isVisitor?'Kadronu kaydetmek için ücretsiz hesap aç.':'Tavan ve üretim metriklerini aç.'}
-      description={isVisitor?'Üyelikle Benim Kadrom ve tam temel oyuncu görünümü açılır. Pro ile P25/P90, 6+, xG ve xA detaylarına geçersin.':'P25/P90 dağılımı, 6+ ihtimali, xG/xA ve gelişmiş rol analizi Pro üyelikte görünür.'}
+      tier="pro"
+      eyebrow="PRO ANALİZ"
+      title="Tavan ve üretim metriklerini aç."
+      description="P25/P90 dağılımı, 6+ ihtimali, xG/xA ve gelişmiş rol analizi Pro üyelikte görünür."
     />:null}
 
     {!players.length?<div className="card empty-filter-state">Bu filtrelerle eşleşen oyuncu bulunamadı.</div>:<>
@@ -115,7 +115,15 @@ export default function PlayersTable({players,total,page,pageCount,teams,filters
       </tr>)}</tbody></table></div>
     </>}
 
-    {pageCount>1?<div className="pagination-bar">
+    {isVisitor?<AccessGate
+      compact
+      tier="member"
+      eyebrow="ÜCRETSİZ ÜYELİK"
+      title="İlk 15'i gördün. Tüm oyuncu havuzunu aç."
+      description="Ücretsiz hesapla arama, takım/mevki filtreleri, tüm temel oyuncu verileri ve Benim Kadrom açılır."
+    />:null}
+
+    {!isVisitor&&pageCount>1?<div className="pagination-bar">
       <button type="button" disabled={page<=1} onClick={()=>navigate({page:Math.max(1,page-1)})}>← Önceki</button>
       <span>Sayfa <b>{page}</b> / {pageCount}</span>
       <button type="button" disabled={page>=pageCount} onClick={()=>navigate({page:Math.min(pageCount,page+1)})}>Sonraki →</button>
