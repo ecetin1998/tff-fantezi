@@ -39,7 +39,7 @@ assert.match(data,/squad-player-pool-v1/)
 assert.match(squadPool,/select\(SQUAD_POOL_COLUMNS\)/)
 assert.doesNotMatch(squadPool,/select\('\*'\)/)
 
-assert.match(home,/import \\{[^}]*getAuthState[^}]*getHomeOverview[^}]*\\} from '@\\/lib\\/data'/)
+assert.match(home,/import \{[^}]*getAuthState[^}]*getHomeOverview[^}]*\} from '@\/lib\/data'/)
 assert.match(home,/getHomeOverview\(\)/)
 assert.match(home,/getAuthState\(\)/)
 assert.doesNotMatch(home,/getPlayersWithProjection|getMatches\(/)
