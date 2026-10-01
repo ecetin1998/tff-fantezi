@@ -83,12 +83,20 @@ function formationFromXIIds(ids,map,formationMap=FORMATION_MAP){
 
 export default function SquadBuilder({ players, initialState=[], recommendedState=[], initialManagerCard=MANAGER_CARD_NONE, plan='free', gameweek, deadlineAt=null, locked=false, transferScenarios=[] }){
   const map=useMemo(()=>new Map(players.map(p=>[p.id,p])),[players])
+  const normalizedInitialManagerCard=plan==='pro'?normalizeManagerCard(initialManagerCard):MANAGER_CARD_NONE
+  const initialFormationMap=useMemo(()=>formationMapForCard(normalizedInitialManagerCard),[normalizedInitialManagerCard])
   const initialIds=useMemo(()=>initialState.map(x=>x.player_id).filter(id=>map.has(id)),[initialState,map])
-  const initialFormation=useMemo(()=>formationFromState(initialState,map),[initialState,map])
+  const initialFormation=useMemo(()=>formationFromState(initialState,map,initialFormationMap),[initialState,map,initialFormationMap])
   const initialXI=useMemo(()=>{
     const fromSaved=initialState.filter(x=>x.bench_order===null).map(x=>x.player_id).filter(id=>map.has(id))
-    return fromSaved.length===11?fromSaved:buildXI(initialIds,initialFormation,map)
-  },[initialState,initialIds,initialFormation,map])
+    return fromSaved.length===11?fromSaved:buildXI(initialIds,initialFormation,map,initialFormationMap)
+  },[initialState,initialIds,initialFormation,map,initialFormationMap])
+
+  const [managerCard,setManagerCard]=useState(normalizedInitialManagerCard)
+  const cardInfo=managerCardInfo(managerCard)
+  const effectiveFormationMap=useMemo(()=>formationMapForCard(managerCard),[managerCard])
+  const captainMultiplier=captainMultiplierForCard(managerCard)
+  const effectiveBudget=cardInfo.unlimitedBudget?Number.POSITIVE_INFINITY:Number(cardInfo.budget||BUDGET)
 
   const [ids,setIds]=useState(initialIds)
   const [formation,setFormation]=useState(initialFormation)
@@ -122,13 +130,14 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
   const selected=ids.map(id=>map.get(id)).filter(Boolean)
   const counts=selected.reduce((a,p)=>(a[p.position]=(a[p.position]||0)+1,a),{})
   const cost=selected.reduce((s,p)=>s+Number(p.price||0),0)
-  const bank=BUDGET-cost
+  const bank=Number.isFinite(effectiveBudget)?effectiveBudget-cost:Number.POSITIVE_INFINITY
   const transfersUsed=initialIds.filter(id=>!ids.includes(id)).length
   const freeTransfersRemaining=Math.max(0,Number(TRANSFER_RULES.free_per_week||0)-transfersUsed)
   const clubCounts=selected.reduce((a,p)=>(a[p.team_id]=(a[p.team_id]||0)+1,a),{})
   const clubLimitOk=!MAX_PLAYERS_PER_CLUB||Object.values(clubCounts).every(n=>n<=MAX_PLAYERS_PER_CLUB)
-  const validRoster=ids.length===SQUAD_SIZE&&Object.entries(SQUAD_LIMITS).every(([k,v])=>(counts[k]||0)===v)&&cost<=BUDGET+.0001&&clubLimitOk
-  const liveFormation=formationFromXIIds(xiIds,map)
+  const budgetOk=!Number.isFinite(effectiveBudget)||cost<=effectiveBudget+.0001
+  const validRoster=ids.length===SQUAD_SIZE&&Object.entries(SQUAD_LIMITS).every(([k,v])=>(counts[k]||0)===v)&&budgetOk&&clubLimitOk
+  const liveFormation=formationFromXIIds(xiIds,map,effectiveFormationMap)
   const validXI=xiIds.length===STARTING_XI_SIZE&&xiIds.every(id=>ids.includes(id))&&Boolean(liveFormation)&&liveFormation===formation
   const valid=validRoster&&validXI&&Boolean(captainId)&&xiIds.includes(captainId)&&map.get(captainId)?.position!=='GK'
 
@@ -144,20 +153,23 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
     return benchValue(b)-benchValue(a)
   })
   const xiTotal=xi.reduce((s,p)=>s+xfp(p),0)
-  const captainBonus=xi.find(p=>p.id===captainId)?xfp(xi.find(p=>p.id===captainId)):0
-  const xiCaptainTotal=xiTotal+captainBonus
   const selectedTotal=selected.reduce((s,p)=>s+xfp(p),0)
+  const captainPlayer=xi.find(p=>p.id===captainId)
+  const captainBonus=captainPlayer?xfp(captainPlayer)*Math.max(0,captainMultiplier-1):0
+  const scoringBase=cardInfo.benchBoost?selectedTotal:xiTotal
+  const xiCaptainTotal=scoringBase+captainBonus
   const rosterByPos=useMemo(()=>Object.fromEntries(['GK','DEF','MID','FWD'].map(position=>[
     position,
     ids.map(id=>map.get(id)).filter(p=>p?.position===position).sort((a,b)=>xfp(b)-xfp(a))
   ])),[ids,map])
-  const formationOptions=useMemo(()=>Object.keys(FORMATION_MAP).map(key=>{
-    const lineup=buildXI(ids,key,map)
+  const formationOptions=useMemo(()=>Object.keys(effectiveFormationMap).map(key=>{
+    const lineup=buildXI(ids,key,map,effectiveFormationMap)
     const base=lineup.reduce((sum,id)=>sum+xfp(map.get(id)),0)
     const cap=lineup.map(id=>map.get(id)).filter(p=>p&&p.position!=='GK').sort((a,b)=>xfp(b)-xfp(a))[0]
-    const total=lineup.length===STARTING_XI_SIZE?base+xfp(cap):0
+    const countedBase=cardInfo.benchBoost?selectedTotal:base
+    const total=lineup.length===STARTING_XI_SIZE?countedBase+xfp(cap)*Math.max(0,captainMultiplier-1):0
     return {key,lineup,base,total,captain:cap,complete:lineup.length===STARTING_XI_SIZE}
-  }).sort((a,b)=>b.total-a.total),[ids,map])
+  }).sort((a,b)=>b.total-a.total),[ids,map,effectiveFormationMap,cardInfo.benchBoost,selectedTotal,captainMultiplier])
   const bestFormation=formationOptions.find(x=>x.complete)?.key||formation
   const captainCandidates=[...xi].filter(p=>p.position!=='GK').sort((a,b)=>xfp(b)-xfp(a)).slice(0,3)
 
@@ -207,7 +219,7 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
 
   const modelMove=useMemo(()=>{
     if(recommendedIds.length!==SQUAD_SIZE||ids.length!==SQUAD_SIZE||recommendedRosterMatch)return null
-    const currentPlan=bestXIPlan(ids,map)
+    const currentPlan=bestXIPlan(ids,map,effectiveFormationMap,captainMultiplier)
     if(!currentPlan)return null
     const recommendedSet=new Set(recommendedIds)
     const currentSet=new Set(ids)
@@ -225,7 +237,7 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
           const nextClubCounts=nextPlayers.reduce((a,p)=>(a[p.team_id]=(a[p.team_id]||0)+1,a),{})
           if(Object.values(nextClubCounts).some(n=>n>MAX_PLAYERS_PER_CLUB))continue
         }
-        const nextPlan=bestXIPlan(nextIds,map)
+        const nextPlan=bestXIPlan(nextIds,map,effectiveFormationMap,captainMultiplier)
         if(!nextPlan)continue
         const gain=nextPlan.total-currentPlan.total
         const hitCost=freeTransfersRemaining>0?0:Number(TRANSFER_RULES.hit_cost||4)
@@ -235,7 +247,7 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
       }
     }
     return best
-  },[recommendedIds,recommendedRosterMatch,ids,selected,bank,map,freeTransfersRemaining])
+  },[recommendedIds,recommendedRosterMatch,ids,selected,bank,map,freeTransfersRemaining,effectiveFormationMap,captainMultiplier])
 
   function applyModelMove(){
     if(!modelMove||modelMove.netGain<=0)return
@@ -247,7 +259,7 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
   }
 
   function rebuild(nextIds,nextFormation=formation){
-    const nextXI=buildXI(nextIds,nextFormation,map)
+    const nextXI=buildXI(nextIds,nextFormation,map,effectiveFormationMap)
     setXiIds(nextXI)
     if(!nextXI.includes(captainId)){
       const cap=nextXI.map(id=>map.get(id)).filter(p=>p&&p.position!=='GK').sort((a,b)=>xfp(b)-xfp(a))[0]
