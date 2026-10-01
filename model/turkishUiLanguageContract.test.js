@@ -15,7 +15,6 @@ const uiFiles=[
   'app/teams/page.js',
   'app/teams/[id]/page.js',
   'app/roles/page.js',
-  'app/backtest/page.js',
   'app/pricing/page.js',
   'app/profile/page.js',
   'app/sss/page.js',
@@ -61,6 +60,7 @@ const pricing=read('app/pricing/page.js')
 const matches=read('app/matches/page.js')
 const sss=read('app/sss/page.js')
 const presentation=read('lib/playerPresentation.js')
+const backtest=read('app/backtest/page.js')
 
 assert.match(nav,/Fantezi Rehberi/)
 assert.match(nav,/DENEME/)
@@ -73,6 +73,10 @@ assert.match(sss,/Kalite Kontrolü \/ GEÇTİ/)
 assert.match(presentation,/MH\$\{run\?\.gameweek/)
 assert.match(presentation,/MAÇ YOK/)
 assert.match(presentation,/ÇİFT MAÇ/)
+assert.match(backtest,/localizeModelText\(w\.main_learning\)/)
+assert.match(backtest,/learningComponentLabel\(item\.component\)/)
+assert.match(backtest,/localizeModelText\(item\.summary_tr\|\|item\.signal\)/)
+assert.match(backtest,/localizeModelText\(p\.main_error_area\?\?p\.error_component\)/)
 assert.doesNotMatch(presentation,/return `GW/)
 assert.doesNotMatch(presentation,/return 'BGW'/)
 assert.doesNotMatch(presentation,/return 'DGW'/)
