@@ -13,7 +13,7 @@ const normalize=value=>String(value||'').toLocaleLowerCase('tr').normalize('NFD'
 const sortOptions=[
   ['xg','Bu hafta xG'],
   ['win','Galibiyet ihtimali'],
-  ['cs','Clean sheet ihtimali'],
+  ['cs','Gol yememe ihtimali'],
   ['total_xfp','Takım toplam xFP'],
   ['season_xg_per_match','Sezon xG / maç'],
   ['season_xga_per_match','Sezon xGA / maç'],
@@ -107,7 +107,7 @@ export default function TeamsExplorer({teams=[],gameweek}){
             <div className={metricClass('xg')}><span>Bu hafta xG</span><b>{num(team.xg)}</b></div>
             <div className={metricClass('oppXg')}><span>Bu hafta rakip xG</span><b>{num(team.oppXg)}</b></div>
             <div className={metricClass('win')}><span>Galibiyet</span><b>{pct(team.win)}</b></div>
-            <div className={metricClass('cs')}><span>CS</span><b>{pct(team.cs)}</b></div>
+            <div className={metricClass('cs')}><span>Gol yememe</span><b>{pct(team.cs)}</b></div>
             <div className={metricClass('season_xg_per_match')}><span>Sezon xG/maç</span><b>{num(team.season_xg_per_match)}</b></div>
             <div className={metricClass('season_xga_per_match')}><span>Sezon xGA/maç</span><b>{num(team.season_xga_per_match)}</b></div>
           </div>
@@ -122,7 +122,7 @@ export default function TeamsExplorer({teams=[],gameweek}){
         <table>
           <thead><tr>
             <th>Takım</th><th>MH{gameweek||'—'} rakibi</th><th className={venue?'is-filtered-head':''}>E/D</th><th className={(attack||defense)?'is-filtered-head':''}>Eşleşme</th>
-            {head('xg','Bu hafta xG')}{head('oppXg','Bu hafta rakip xG')}{head('win','Galibiyet')}{head('cs','CS')}
+            {head('xg','Bu hafta xG')}{head('oppXg','Bu hafta rakip xG')}{head('win','Galibiyet')}{head('cs','Gol yememe')}
             {head('total_xfp','Toplam xFP')}{head('season_xg_per_match','Sezon xG/maç')}{head('season_xga_per_match','xGA/maç')}
           </tr></thead>
           <tbody>{filtered.map(team=><tr className="team-analysis-row" style={teamCssVars(team.name)} key={team.id}>
