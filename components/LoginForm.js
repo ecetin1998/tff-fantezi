@@ -12,7 +12,7 @@ const ERRORS={
 }
 const MESSAGES={
   password_updated:'Şifren güncellendi. Yeni şifrenle giriş yapabilirsin.',
-  pro_login_required:'Pro talebini kaydetmek için giriş yap.',
+  pro_login_required:'Gelişmiş üyelik talebini kaydetmek için giriş yap.',
 }
 
 const INITIAL_STATE={ok:false,error:null}
@@ -42,7 +42,7 @@ export default function LoginForm(){
       <Link href="/forgot-password">Şifremi unuttum</Link>
       <span>Hesabın yok mu? <Link href="/signup">Hesap oluştur</Link></span>
       {String(state?.error||sp.get('error')||'')==='email_not_confirmed'
-        ?<span>Doğrulama maili gelmediyse <Link href="/signup#verification">tekrar gönder</Link>.</span>
+        ?<span>Doğrulama e-postası gelmediyse <Link href="/signup#verification">tekrar gönder</Link>.</span>
         :null}
     </div>
   </div></div>
