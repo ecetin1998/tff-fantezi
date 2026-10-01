@@ -65,10 +65,17 @@ begin
     else v_base_budget_limit
   end;
   v_max_per_club:=(v_rules->>'max_per_club')::int;
-  v_required_gk:=(v_rules->'squad'->>'GK')::int;
-  v_required_def:=(v_rules->'squad'->>'DEF')::int;
-  v_required_mid:=(v_rules->'squad'->>'MID')::int;
-  v_required_fwd:=(v_rules->'squad'->>'FWD')::int;
+  if v_manager_card='attack' then
+    v_required_gk:=2;
+    v_required_def:=3;
+    v_required_mid:=5;
+    v_required_fwd:=5;
+  else
+    v_required_gk:=(v_rules->'squad'->>'GK')::int;
+    v_required_def:=(v_rules->'squad'->>'DEF')::int;
+    v_required_mid:=(v_rules->'squad'->>'MID')::int;
+    v_required_fwd:=(v_rules->'squad'->>'FWD')::int;
+  end if;
   v_squad_size:=v_required_gk+v_required_def+v_required_mid+v_required_fwd;
 
   select array_agg(value order by ord) into v_formations
