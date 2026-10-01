@@ -3704,3 +3704,20 @@
     width:100%;
   }
 }
+
+.scope :global(.availability-updated-card){
+  background:linear-gradient(135deg,#f8fbff,#f1faf8);
+  border-color:#d9e7e4;
+}
+.scope :global(.availability-updated-card) b{
+  font-size:18px;
+  color:#087e72;
+  font-variant-numeric:tabular-nums;
+}
+.scope :global(.availability-updated-card) small{
+  color:#6f7b92;
+  font-weight:800;
+}
+@media(max-width:430px){
+  .scope :global(.availability-updated-card) b{font-size:17px}
+}
