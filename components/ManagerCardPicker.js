@@ -16,6 +16,9 @@ export default function ManagerCardPicker({
       const xfp=xfpByCard?.[card.id]
       const loading=loadingCards?.has?.(card.id)
       const hasXfp=xfp!==null&&xfp!==undefined&&Number.isFinite(Number(xfp))
+      const baseXfp=xfpByCard?.[MANAGER_CARD_NONE]
+      const hasBase=baseXfp!==null&&baseXfp!==undefined&&Number.isFinite(Number(baseXfp))
+      const delta=hasXfp&&hasBase?Number(xfp)-Number(baseXfp):null
       return <button
         type="button"
         key={card.id}
@@ -26,7 +29,7 @@ export default function ManagerCardPicker({
       >
         <span>{card.shortLabel}</span>
         <b>{loading?'Hesaplanıyor…':hasXfp?`${Number(xfp).toFixed(1)} xFP`:card.id===MANAGER_CARD_NONE?'Standart':'— xFP'}</b>
-        <small>{card.id==='attack'?'2 KL / 3 DEF / 5 OS / 5 FOR':card.captainMultiplier>2?`Kaptan ${card.captainMultiplier}×`:card.benchBoost?'15 oyuncu puanda':card.unlimitedBudget?'Bütçe sınırı yok':'Normal kurallar'}</small>
+        <small>{card.id==='attack'?'2 KL / 3 DEF / 5 OS / 5 FOR':card.captainMultiplier>2?`Kaptan ${card.captainMultiplier}×`:card.benchBoost?'15 oyuncu puanda':card.unlimitedBudget?'Bütçe sınırı yok':'Normal kurallar'}{card.id!==MANAGER_CARD_NONE&&delta!==null?<em className={delta>=0?'manager-card-delta positive':'manager-card-delta negative'}>{delta>=0?'+':''}{delta.toFixed(1)} xFP</em>:null}</small>
       </button>
     })}
   </div>

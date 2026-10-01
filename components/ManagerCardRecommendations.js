@@ -101,6 +101,13 @@ export default function ManagerCardRecommendations({baseRecommended,baseAlternat
   ),[cache])
 
   const active=cache[managerCard]||cache[MANAGER_CARD_NONE]
+  const baseXfp=cardXfp(cache[MANAGER_CARD_NONE]?.recommended)
+  const bestWeeklyCard=MANAGER_CARDS
+    .filter(card=>card.id!==MANAGER_CARD_NONE)
+    .map(card=>({card,xfp:cardXfp(cache[card.id]?.recommended)}))
+    .filter(row=>row.xfp!==null&&baseXfp!==null)
+    .map(row=>({...row,delta:Number(row.xfp)-Number(baseXfp)}))
+    .sort((a,b)=>b.delta-a.delta)[0]||null
   return <>
     <div className={`manager-card-panel unlocked ${managerCard!==MANAGER_CARD_NONE?'active':''}`}>
       <div className="manager-card-copy">
@@ -115,6 +122,11 @@ export default function ManagerCardRecommendations({baseRecommended,baseAlternat
         {cardInfo.attack?<span>2 KL / 3 DEF / 5 OS / 5 FOR</span>:null}
         {cardInfo.unlimitedBudget?<span>Bütçe sınırı yok</span>:null}
       </div>
+      {bestWeeklyCard?<div className="manager-card-weekly-read">
+        <span>BU HAFTAKİ MODEL FARKI</span>
+        <b>{bestWeeklyCard.card.shortLabel} <em>{bestWeeklyCard.delta>=0?'+':''}{bestWeeklyCard.delta.toFixed(1)} xFP</em></b>
+        <small>Yalnız MH{active?.run?.gameweek||baseRecommended?.run?.gameweek||'—'} etkisi; kartı sezon içinde hangi hafta kullanmanın daha değerli olacağı ayrıca değerlendirilmelidir.</small>
+      </div>:null}
       <ManagerCardPicker
         value={managerCard}
         onChange={loadCard}
