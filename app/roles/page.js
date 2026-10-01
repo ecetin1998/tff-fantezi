@@ -47,7 +47,7 @@ export async function renderRolesPage(page=1){
       <div className="card"><span>Rol değişimi</span><b>{changed.length}</b><small>dikkat gerektiren oyuncu</small></div>
       <div className="card role-up"><span>Yükselen / dönüş</span><b>{rising.length}</b><small>dakika fırsatı artan</small></div>
       <div className="card role-down"><span>Düşen / yok</span><b>{falling.length}</b><small>dakika riski artan</small></div>
-      <div className="card"><span>Güçlü İlk 11</span><b>{strongXI.length}</b><small>tahmin XI ≥ %75</small></div>
+      <div className="card"><span>Güçlü İlk 11</span><b>{strongXI.length}</b><small>tahmini İlk 11 ≥ %75</small></div>
     </section>
 
     {safePage===1&&changed.length?<section className="card role-changes-card">
