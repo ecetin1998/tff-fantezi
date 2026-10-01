@@ -112,7 +112,7 @@ export default function ManagerCardRecommendations({baseRecommended,baseAlternat
         <span>{cardInfo.label}</span>
         <span>Kaptan {cardInfo.captainMultiplier}×</span>
         {cardInfo.benchBoost?<span>15 oyuncu puana dahil</span>:null}
-        {cardInfo.attack?<span>2 KL / 3 DEF / 5 OS / 5 FOR • 105m</span>:null}
+        {cardInfo.attack?<span>2 KL / 3 DEF / 5 OS / 5 FOR</span>:null}
         {cardInfo.unlimitedBudget?<span>Bütçe sınırı yok</span>:null}
       </div>
       <ManagerCardPicker

@@ -6,7 +6,7 @@ import { availabilityCompactNote, availabilityIsIssue } from '@/lib/availability
 import {BUDGET,FORMATION_MAP,MAX_PLAYERS_PER_CLUB,SQUAD_LIMITS,SQUAD_SIZE,STARTING_GK,STARTING_XI_SIZE,TRANSFER_RULES} from '@/lib/rules'
 import {pitchPlayerLabel,playerLabel} from '@/lib/playerPresentation'
 import ManagerCardPicker from '@/components/ManagerCardPicker'
-import {ATTACK_FORMATION,MANAGER_CARDS,MANAGER_CARD_NONE,captainMultiplierForCard,managerCardInfo,normalizeManagerCard,squadLimitsForCard} from '@/lib/managerCards'
+import {MANAGER_CARDS,MANAGER_CARD_NONE,captainMultiplierForCard,managerCardInfo,normalizeManagerCard,squadLimitsForCard} from '@/lib/managerCards'
 const POS_ORDER={GK:0,DEF:1,MID:2,FWD:3}
 const posLabel={GK:'KL',DEF:'DEF',MID:'OS',FWD:'FOR'}
 
@@ -32,10 +32,8 @@ function stateSignature(payload=[]){
 }
 function displayName(player){ return pitchPlayerLabel(player) }
 function shirtMark(player){ return posLabel[player?.position] || player?.position || '—' }
-function formationMapForCard(card){
-  return card==='attack'
-    ?{...FORMATION_MAP,[ATTACK_FORMATION]:{DEF:2,MID:5,FWD:3}}
-    :FORMATION_MAP
+function formationMapForCard(){
+  return FORMATION_MAP
 }
 function formationFromState(state,map,formationMap=FORMATION_MAP){
   const starters=state.filter(x=>x.bench_order===null).map(x=>map.get(x.player_id)).filter(Boolean)
@@ -595,7 +593,7 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
           {plan!=='pro'?<span>Gelişmiş üyelikte açılır</span>:<>
             <span>Kaptan {captainMultiplier}×</span>
             {cardInfo.benchBoost?<span>15 oyuncu puana dahil</span>:null}
-            {cardInfo.attack?<span>2 KL / 3 DEF / 5 OS / 5 FOR • 105m</span>:null}
+            {cardInfo.attack?<span>2 KL / 3 DEF / 5 OS / 5 FOR</span>:null}
             {cardInfo.unlimitedBudget?<span>Bütçe sınırı yok</span>:null}
             {managerCard===MANAGER_CARD_NONE?<span>Standart kurallar</span>:<span>MH{gameweek||'—'} için seçili</span>}
           </>}
@@ -702,8 +700,8 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
       <div className="squad-save-row">
         <div className="squad-validity">
           <div className="club-counts">{Object.entries(clubCounts).sort((a,b)=>b[1]-a[1]).map(([teamId,count])=>{const p=selected.find(x=>String(x.team_id)===String(teamId));return <span className={count>=MAX_PLAYERS_PER_CLUB?'limit':''} key={teamId}>{p?.team||teamId}: {count}/{MAX_PLAYERS_PER_CLUB}</span>})}</div>
-          <span className={validRoster?'ok':''}>{validRoster?'✓':'○'} 2 KL / 5 DEF / 5 OS / 3 FOR</span>
-          <span className={budgetOk?'ok':''}>{budgetOk?'✓':'○'} {cardInfo.unlimitedBudget?'Bütçe sınırı kaldırıldı':cardInfo.attack?'105m Hücum bütçesi':'Bütçe limiti'}</span>
+          <span className={validRoster?'ok':''}>{validRoster?'✓':'○'} {effectiveSquadLimits.GK} KL / {effectiveSquadLimits.DEF} DEF / {effectiveSquadLimits.MID} OS / {effectiveSquadLimits.FWD} FOR</span>
+          <span className={budgetOk?'ok':''}>{budgetOk?'✓':'○'} {cardInfo.unlimitedBudget?'Bütçe sınırı kaldırıldı':'Bütçe limiti'}</span>
           <span className={clubLimitOk?'ok':''}>{clubLimitOk?'✓':'○'} Kulüp başına en fazla {MAX_PLAYERS_PER_CLUB}</span>
           <span className={validXI?'ok':''}>{validXI?'✓':'○'} {liveFormation===formation?'Seçili diziliş hazır':'İlk 11 dizilişi güncellenmeli'}</span>
         </div>
@@ -725,7 +723,7 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
         <span className="eyebrow">MODEL ÖNERİSİ</span>
         {managerCard!==MANAGER_CARD_NONE?<>
           <h2>{cardInfo.label} aktif</h2>
-          <p>Bu hafta standart model kadrosuna göre transfer kıyasını kapattım; seçtiğin kart bütçe, diziliş ve puan hesabını değiştirebilir. Kart için yeniden optimize edilen Önerilen ve Agresif 11'i Kadro Önerileri ekranından kullan.</p>
+          <p>Bu hafta standart model kadrosuna göre transfer kıyasını kapattım; seçtiğin kart kadro yapısını veya puan hesabını değiştirebilir. Kart için yeniden optimize edilen Önerilen ve Agresif 11'i Kadro Önerileri ekranından kullan.</p>
           <a className="squad-tool-btn model-apply-btn" href="/squads">Kartlı kadro önerisini aç</a>
         </>:!recommendedIds.length?<>
           <h2>Model kadrosu henüz hazır değil</h2>
