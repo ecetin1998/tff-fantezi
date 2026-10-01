@@ -7,9 +7,13 @@ import { availabilityCompactNote, availabilityIsIssue } from '@/lib/availability
 import {BUDGET,FORMATION_MAP,MAX_PLAYERS_PER_CLUB,SQUAD_LIMITS,SQUAD_SIZE,STARTING_GK,STARTING_XI_SIZE,TRANSFER_RULES} from '@/lib/rules'
 import {pitchPlayerLabel,playerLabel} from '@/lib/playerPresentation'
 import ManagerCardPicker from '@/components/ManagerCardPicker'
-import {MANAGER_CARDS,MANAGER_CARD_NONE,captainMultiplierForCard,managerCardInfo,normalizeManagerCard,squadLimitsForCard} from '@/lib/managerCards'
+import {ATTACK_FORMATIONS,MANAGER_CARDS,MANAGER_CARD_NONE,captainMultiplierForCard,managerCardInfo,normalizeManagerCard,squadLimitsForCard} from '@/lib/managerCards'
 const POS_ORDER={GK:0,DEF:1,MID:2,FWD:3}
 const posLabel={GK:'KL',DEF:'DEF',MID:'OS',FWD:'FOR'}
+const ATTACK_FORMATION_MAP=Object.freeze(Object.fromEntries(ATTACK_FORMATIONS.map(value=>{
+  const [DEF,MID,FWD]=value.split('-').map(Number)
+  return [value,Object.freeze({DEF,MID,FWD})]
+})))
 
 function xfp(p){return Number(p?.projection?.xfp||0)}
 function totalPoints(p){return Number(p?.total_points||0)}
@@ -47,8 +51,8 @@ function cardRecommendationXfp(data){
 }
 function displayName(player){ return pitchPlayerLabel(player) }
 function shirtMark(player){ return posLabel[player?.position] || player?.position || '—' }
-function formationMapForCard(){
-  return FORMATION_MAP
+function formationMapForCard(value){
+  return normalizeManagerCard(value)==='attack'?ATTACK_FORMATION_MAP:FORMATION_MAP
 }
 function formationFromState(state,map,formationMap=FORMATION_MAP){
   const starters=state.filter(x=>x.bench_order===null).map(x=>map.get(x.player_id)).filter(Boolean)
@@ -176,14 +180,17 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
     position,
     ids.map(id=>map.get(id)).filter(p=>p?.position===position).sort((a,b)=>xfp(b)-xfp(a))
   ])),[ids,map])
-  const formationOptions=useMemo(()=>Object.keys(effectiveFormationMap).map(key=>{
-    const lineup=buildXI(ids,key,map,effectiveFormationMap)
-    const base=lineup.reduce((sum,id)=>sum+xfp(map.get(id)),0)
-    const cap=lineup.map(id=>map.get(id)).filter(p=>p&&p.position!=='GK').sort((a,b)=>xfp(b)-xfp(a))[0]
-    const countedBase=cardInfo.benchBoost?selectedTotal:base
-    const total=lineup.length===STARTING_XI_SIZE?countedBase+xfp(cap)*Math.max(0,captainMultiplier-1):0
-    return {key,lineup,base,total,captain:cap,complete:lineup.length===STARTING_XI_SIZE}
-  }).sort((a,b)=>b.total-a.total),[ids,map,effectiveFormationMap,cardInfo.benchBoost,selectedTotal,captainMultiplier])
+  const formationOptions=useMemo(()=>{
+    const ranked=Object.keys(effectiveFormationMap).map(key=>{
+      const lineup=buildXI(ids,key,map,effectiveFormationMap)
+      const base=lineup.reduce((sum,id)=>sum+xfp(map.get(id)),0)
+      const cap=lineup.map(id=>map.get(id)).filter(p=>p&&p.position!=='GK').sort((a,b)=>xfp(b)-xfp(a))[0]
+      const countedBase=cardInfo.benchBoost?selectedTotal:base
+      const total=lineup.length===STARTING_XI_SIZE?countedBase+xfp(cap)*Math.max(0,captainMultiplier-1):0
+      return {key,lineup,base,total,captain:cap,complete:lineup.length===STARTING_XI_SIZE}
+    }).sort((a,b)=>b.total-a.total)
+    return managerCard==='attack'?ranked.slice(0,8):ranked
+  },[ids,map,effectiveFormationMap,cardInfo.benchBoost,selectedTotal,captainMultiplier,managerCard])
   const bestFormation=formationOptions.find(x=>x.complete)?.key||formation
   const standardRecommendationXfp=useMemo(()=>{
     const xiRows=recommendedState.filter(row=>row.bench_order===null).map(row=>map.get(Number(row.player_id))).filter(Boolean)
@@ -411,7 +418,8 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
     }
   }
   function reset(){
-    setIds([]);setXiIds([]);setCaptainId(null);setSwapTarget(null);setFormation('4-3-3')
+    const fallback=effectiveFormationMap['4-3-3']?'4-3-3':Object.keys(effectiveFormationMap)[0]
+    setIds([]);setXiIds([]);setCaptainId(null);setSwapTarget(null);setFormation(fallback)
   }
 
   function changeManagerCard(value){

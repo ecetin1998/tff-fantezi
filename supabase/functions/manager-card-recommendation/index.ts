@@ -13,6 +13,7 @@ const CARD_CONFIG:any={
   attack:{captainMultiplier:2,benchBoost:false,attack:true,unlimited:false},
   unlimited_budget:{captainMultiplier:2,benchBoost:false,attack:false,unlimited:true},
 };
+const ATTACK_FORMATIONS=["1-4-5","1-5-4","2-3-5","2-4-4","2-5-3","3-2-5","3-3-4","3-4-3","3-5-2"];
 const AGGRESSIVE_XFP_FLOOR=.965;
 const AGGRESSIVE_MIN_OVERLAP=7;
 const AGGRESSIVE_MAX_OVERLAP=9;
@@ -49,7 +50,9 @@ function xiBounds(formations:string[]){
   return out;
 }
 function effectiveRules(rules:any,card:any){
-  const formations=[...(Array.isArray(rules.formations)?rules.formations.map(String):[])];
+  const formations=card.attack
+    ?[...ATTACK_FORMATIONS]
+    :[...(Array.isArray(rules.formations)?rules.formations.map(String):[])];
   const baseBudget=n(rules.budget);
   const squad=card.attack
     ?{GK:2,DEF:3,MID:5,FWD:5}
