@@ -1,9 +1,16 @@
 'use client'
 
-import {useMemo,useState} from 'react'
+import {useEffect,useMemo,useState} from 'react'
 import {createClient} from '@/lib/supabase/client'
 import SquadPitchView from '@/components/SquadPitchView'
+import ManagerCardPicker from '@/components/ManagerCardPicker'
 import {MANAGER_CARDS,MANAGER_CARD_NONE,managerCardInfo,normalizeManagerCard} from '@/lib/managerCards'
+
+function cardXfp(data){
+  const value=data?.recommendation?.xi_xfp_with_card??data?.recommendation?.captain_xfp??data?.recommendation?.xi_xfp
+  const n=Number(value)
+  return Number.isFinite(n)?n:null
+}
 
 function SquadCard({data,title,variant,cardActive=false}){
   if(!data?.members?.length)return <section className="card unified-squad-card"><div className="manager-card-error">Bu kart için kadro üretilemedi.</div></section>
@@ -13,7 +20,7 @@ function SquadCard({data,title,variant,cardActive=false}){
       title={title}
       gameweek={data.run?.gameweek}
       budget={data.recommendation?.budget}
-      xiXfp={data.recommendation?.xi_xfp_with_card??data.recommendation?.captain_xfp??data.recommendation?.xi_xfp}
+      xiXfp={cardXfp(data)}
       variant={variant}
       scoreLabel={cardActive?'Kartlı hafta xFP':'İlk 11 xFP'}
       budgetLimit={data.recommendation?.budget_limit??100}
@@ -26,63 +33,98 @@ function SquadCard({data,title,variant,cardActive=false}){
 export default function ManagerCardRecommendations({baseRecommended,baseAlternative}){
   const [managerCard,setManagerCard]=useState(MANAGER_CARD_NONE)
   const [cache,setCache]=useState(()=>({[MANAGER_CARD_NONE]:{recommended:baseRecommended,alternative:baseAlternative}}))
-  const [loading,setLoading]=useState(false)
+  const [loadingCards,setLoadingCards]=useState(()=>new Set())
+  const [loadingSelected,setLoadingSelected]=useState(false)
   const [error,setError]=useState('')
-  const selected=cache[managerCard]||cache[MANAGER_CARD_NONE]
   const cardInfo=useMemo(()=>managerCardInfo(managerCard),[managerCard])
+
+  useEffect(()=>{
+    let cancelled=false
+    async function preload(){
+      const supabase=createClient()
+      const cards=MANAGER_CARDS.filter(card=>card.id!==MANAGER_CARD_NONE)
+      setLoadingCards(new Set(cards.map(card=>card.id)))
+      await Promise.all(cards.map(async card=>{
+        try{
+          const {data,error}=await supabase.functions.invoke('manager-card-recommendation',{body:{card:card.id,variant:'recommended'}})
+          if(error||data?.error)throw error||new Error(data.error)
+          if(!cancelled)setCache(current=>({...current,[card.id]:{...(current[card.id]||{}),recommended:data}}))
+        }catch{
+          // Bir kartın önizlemesi hata verirse diğer kartların yüklenmesini engelleme.
+        }finally{
+          if(!cancelled)setLoadingCards(current=>{
+            const next=new Set(current);next.delete(card.id);return next
+          })
+        }
+      }))
+    }
+    preload()
+    return ()=>{cancelled=true}
+  },[])
 
   async function loadCard(value){
     const next=normalizeManagerCard(value)
     setManagerCard(next)
     setError('')
-    if(cache[next]||next===MANAGER_CARD_NONE)return
-    setLoading(true)
+    if(next===MANAGER_CARD_NONE||cache[next]?.alternative)return
+    setLoadingSelected(true)
     try{
       const supabase=createClient()
-      const [recommended,alternative]=await Promise.all([
-        supabase.functions.invoke('manager-card-recommendation',{body:{card:next,variant:'recommended'}}),
-        supabase.functions.invoke('manager-card-recommendation',{body:{card:next,variant:'alternative'}}),
-      ])
-      if(recommended.error)throw recommended.error
-      if(alternative.error)throw alternative.error
-      if(recommended.data?.error)throw new Error(recommended.data.error)
-      if(alternative.data?.error)throw new Error(alternative.data.error)
-      setCache(current=>({...current,[next]:{recommended:recommended.data,alternative:alternative.data}}))
+      const requests=[]
+      if(!cache[next]?.recommended)requests.push(
+        supabase.functions.invoke('manager-card-recommendation',{body:{card:next,variant:'recommended'}})
+          .then(result=>({kind:'recommended',...result}))
+      )
+      requests.push(
+        supabase.functions.invoke('manager-card-recommendation',{body:{card:next,variant:'alternative'}})
+          .then(result=>({kind:'alternative',...result}))
+      )
+      const results=await Promise.all(requests)
+      const patch={}
+      for(const result of results){
+        if(result.error)throw result.error
+        if(result.data?.error)throw new Error(result.data.error)
+        patch[result.kind]=result.data
+      }
+      setCache(current=>({...current,[next]:{...(current[next]||{}),...patch}}))
     }catch(err){
       setError(String(err?.message||'Menajer kartı kadrosu hazırlanamadı.'))
-      setManagerCard(MANAGER_CARD_NONE)
     }finally{
-      setLoading(false)
+      setLoadingSelected(false)
     }
   }
 
-  const active=cache[managerCard]||selected
+  const previewXfp=useMemo(()=>Object.fromEntries(
+    MANAGER_CARDS.map(card=>[card.id,cardXfp(cache[card.id]?.recommended)])
+  ),[cache])
+
+  const active=cache[managerCard]||cache[MANAGER_CARD_NONE]
   return <>
     <div className={`manager-card-panel unlocked ${managerCard!==MANAGER_CARD_NONE?'active':''}`}>
       <div className="manager-card-copy">
         <span className="eyebrow">GELİŞMİŞ • MENAJER KARTI</span>
-        <h3>{cardInfo.label}</h3>
-        <p>{cardInfo.description} Kart değiştiğinde iki kadro da bu haftanın kuralına göre yeniden hesaplanır.</p>
+        <h3>Kart etkisini xFP ile karşılaştır</h3>
+        <p>Kartlar taktik seçimi gibi çalışır. Her butondaki xFP, kart kullanıldığında modelin Önerilen Kadro için hesapladığı haftalık değerdir.</p>
       </div>
-      <label className="manager-card-select">
-        <span>Bu hafta</span>
-        <select value={managerCard} onChange={e=>loadCard(e.target.value)} disabled={loading}>
-          {MANAGER_CARDS.map(card=><option value={card.id} key={card.id}>{card.label}</option>)}
-        </select>
-      </label>
       <div className="manager-card-effects">
+        <span>{cardInfo.label}</span>
         <span>Kaptan {cardInfo.captainMultiplier}×</span>
         {cardInfo.benchBoost?<span>15 oyuncu puana dahil</span>:null}
-        {cardInfo.attack?<span>2-5-3 • 105m bütçe</span>:null}
+        {cardInfo.attack?<span>2 KL / 3 DEF / 5 OS / 5 FOR • 105m</span>:null}
         {cardInfo.unlimitedBudget?<span>Bütçe sınırı yok</span>:null}
-        {managerCard===MANAGER_CARD_NONE?<span>Standart kurallar</span>:<span>Kartlı optimizasyon</span>}
       </div>
+      <ManagerCardPicker
+        value={managerCard}
+        onChange={loadCard}
+        xfpByCard={previewXfp}
+        loadingCards={loadingCards}
+      />
     </div>
-    {loading?<div className="manager-card-loading">Kart etkisine göre Önerilen ve Agresif kadro yeniden hesaplanıyor…</div>:null}
+    {loadingSelected?<div className="manager-card-loading">Seçilen kart için Agresif 11 hazırlanıyor…</div>:null}
     {error?<div className="manager-card-error">{error}</div>:null}
     <div className="unified-squad-list">
       <SquadCard data={active?.recommended} title={managerCard===MANAGER_CARD_NONE?'ÖNERİLEN KADRO':`ÖNERİLEN • ${cardInfo.shortLabel}`} variant="recommended" cardActive={managerCard!==MANAGER_CARD_NONE}/>
-      <SquadCard data={active?.alternative} title={managerCard===MANAGER_CARD_NONE?'AGRESİF 11':`AGRESİF • ${cardInfo.shortLabel}`} variant="alternative" cardActive={managerCard!==MANAGER_CARD_NONE}/>
+      <SquadCard data={active?.alternative||cache[MANAGER_CARD_NONE]?.alternative} title={managerCard===MANAGER_CARD_NONE?'AGRESİF 11':`AGRESİF • ${cardInfo.shortLabel}`} variant="alternative" cardActive={managerCard!==MANAGER_CARD_NONE}/>
     </div>
   </>
 }
