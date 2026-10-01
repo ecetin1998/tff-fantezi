@@ -2,10 +2,10 @@
 import Link from 'next/link'
 import {useEffect,useState} from 'react'
 import {createClient} from '@/lib/supabase/client'
-import {logout} from '@/app/actions'
 
 export default function NavAccountControls(){
   const [state,setState]=useState({loaded:false,signedIn:false,pro:false})
+  const [signingOut,setSigningOut]=useState(false)
   useEffect(()=>{
     const supabase=createClient()
     let alive=true
@@ -23,12 +23,25 @@ export default function NavAccountControls(){
     const {data}=supabase.auth.onAuthStateChange(()=>refresh())
     return()=>{alive=false;data.subscription.unsubscribe()}
   },[])
+  const handleLogout=async()=>{
+    if(signingOut)return
+    setSigningOut(true)
+    const supabase=createClient()
+    const {error}=await supabase.auth.signOut({scope:'local'})
+    if(error){
+      setSigningOut(false)
+      return
+    }
+    setState({loaded:true,signedIn:false,pro:false})
+    window.location.replace('/')
+  }
+
   return <>
     <Link href="/pricing" className="pro-btn">{state.pro?'PRO ✓':'PRO'}</Link>
     {!state.loaded
       ?<span className="ghost-btn desktop-auth" aria-hidden="true">•••</span>
       :state.signedIn
-        ?<form className="desktop-auth" action={logout}><button className="ghost-btn" type="submit">Çıkış</button></form>
+        ?<button className="ghost-btn desktop-auth" type="button" onClick={handleLogout} disabled={signingOut}>{signingOut?'Çıkılıyor…':'Çıkış'}</button>
         :<Link className="ghost-btn desktop-auth" href="/login">Giriş</Link>}
   </>
 }
