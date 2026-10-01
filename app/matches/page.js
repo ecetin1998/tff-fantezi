@@ -36,7 +36,7 @@ function fantasyReading(m){
     const names=[homeTop,awayTop].filter(Boolean).map(p=>`${p.name} (${p.xfp.toFixed(1)} xFP)`).join(' ve ')
     return {
       label:'Açık maç',
-      text:`İki taraf da gol üretmeye yeterince yakın; burada clean sheet kovalamaktan çok gol, asist ve bonus tavanı öne çıkıyor. ${names?names+' iki taraftaki öne çıkan fantasy çıkışları.':'Hücum rolleri savunma tabanından daha cazip.'}`
+      text:`İki taraf da gol üretmeye yeterince yakın; burada gol yememe kovalamaktan çok gol, asist ve bonus tavanı öne çıkıyor. ${names?names+' iki taraftaki öne çıkan fantezi getirileri.':'Hücum rolleri savunma tabanından daha cazip.'}`
     }
   }
 
@@ -45,7 +45,7 @@ function fantasyReading(m){
     const b=favFantasy?.second_attack
     const stack=a&&b&&a.xfp>=3.7&&b.xfp>=3.5
       ? `${a.name} ve ${b.name} aynı taraftan birlikte değerlendirilebilecek kadar güçlü projekte ediliyor.`
-      : a ? `${a.name} ${a.xfp.toFixed(1)} xFP ile bu üstünlüğün en net fantasy karşılığı.` : ''
+      : a ? `${a.name} ${a.xfp.toFixed(1)} xFP ile bu üstünlüğün en net fantezi karşılığı.` : ''
     return {
       label:'Tek taraflı baskı',
       text:`${favName} hem sonuç olasılığında hem xG farkında maçı belirgin biçimde önde oynuyor. ${stack} ${dogName} tarafında seçim yaparken skor bağımlılığı yüksek oyuncuların tabanı daha kırılgan.`.replace(/\s+/g,' ').trim()
@@ -56,15 +56,15 @@ function fantasyReading(m){
     const d=highCsFantasy?.top_defense
     return {
       label:'Savunma maçı',
-      text:`Model düşük gol hacmi bekliyor ve ${highCsName} için clean sheet olasılığı ${pct(highCs)}%. ${d?`${d.name} (${d.xfp.toFixed(1)} xFP) savunma/kaleci hattında bu maçın en doğal fantasy çıkışlarından biri.`:'Savunma ve kaleci seçimi hücum stack’inden daha temiz görünüyor.'}`
+      text:`Model düşük gol hacmi bekliyor ve ${highCsName} için gol yememe olasılığı ${pct(highCs)}%. ${d?`${d.name} (${d.xfp.toFixed(1)} xFP) savunma/kaleci hattında bu maçın en doğal fantezi getirilerindan biri.`:'Savunma ve kaleci seçimi aynı takımdan çoklu hücum seçiminden daha temiz görünüyor.'}`
     }
   }
 
   if(homeCs<.25 && awayCs<.25){
     const best=[homeTop,awayTop].filter(Boolean).sort((a,b)=>b.xfp-a.xfp)[0]
     return {
-      label:'CS tuzağı',
-      text:`İki tarafın clean sheet ihtimali de düşük; savunmacılar hücum katkısı üretmedikçe fiyatlarını çıkarmakta zorlanabilir. ${best?`${best.name} ${best.xfp.toFixed(1)} xFP ile maçın hücum tarafındaki en güçlü bireysel sinyali.`:'Hücum oyuncularının tavanı savunma tabanından daha değerli.'}`
+      label:'Gol yememe tuzağı',
+      text:`İki tarafın gol yememe ihtimali de düşük; savunmacılar hücum katkısı üretmedikçe fiyatlarını çıkarmakta zorlanabilir. ${best?`${best.name} ${best.xfp.toFixed(1)} xFP ile maçın hücum tarafındaki en güçlü bireysel sinyali.`:'Hücum oyuncularının tavanı savunma tabanından daha değerli.'}`
     }
   }
 
@@ -82,7 +82,7 @@ function fantasyReading(m){
     const d=favFantasy?.top_defense
     return {
       label:'Kontrollü favori',
-      text:`${favName} favori ama model maçı yüksek skorlu bir kopuşa taşımıyor. ${a&&d?`Bu profilde ${a.name} gibi tek ana hücum seçimiyle ${d.name} gibi savunma tabanını birleştirmek, ağır hücum stack’inden daha dengeli.`:'Tek premium hücum seçimi ile savunma tarafını birlikte düşünmek daha dengeli.'}`
+      text:`${favName} favori ama model maçı yüksek skorlu bir kopuşa taşımıyor. ${a&&d?`Bu profilde ${a.name} gibi tek ana hücum seçimiyle ${d.name} gibi savunma tabanını birleştirmek, ağır aynı takımdan çoklu hücum seçiminden daha dengeli.`:'Tek yüksek bütçeli hücum seçimi ile savunma tarafını birlikte düşünmek daha dengeli.'}`
     }
   }
 
@@ -113,7 +113,7 @@ export default async function Matches(){
   return <>
 <div className="section-title">
       <div><span className="eyebrow">MAÇ MODELİ</span><h1>MH{run?.gameweek||'—'} Maç Tahminleri</h1></div>
-      <span className="muted">{isVisitor?'Haftanın öne çıkan maçı • ücretsiz üyelikle tüm fikstür':'xG • sonuç olasılığı • clean sheet • fantasy maç profili'}</span>
+      <span className="muted">{isVisitor?'Haftanın öne çıkan maçı • ücretsiz üyelikle tüm fikstür':'xG • sonuç olasılığı • gol yememe • fantezi maç profili'}</span>
     </div>
 
     <div className="grid match-grid modern-match-grid match-analysis-grid">
@@ -177,9 +177,9 @@ export default async function Matches(){
 
           <div className="match-fantasy-meta fantasy-first-meta">
             <span className={attackEdge==='home'?'edge':''}><small>{m.home_team} hücum</small><b>{homeXg.toFixed(2)} xG</b></span>
-            <span className={cleanEdge==='home'?'edge':''}><small>{m.home_team} CS</small><b>{(homeCs*100).toFixed(0)}%</b></span>
+            <span className={cleanEdge==='home'?'edge':''}><small>{m.home_team} gol yememe</small><b>{(homeCs*100).toFixed(0)}%</b></span>
             <span className={attackEdge==='away'?'edge':''}><small>{m.away_team} hücum</small><b>{awayXg.toFixed(2)} xG</b></span>
-            <span className={cleanEdge==='away'?'edge':''}><small>{m.away_team} CS</small><b>{(awayCs*100).toFixed(0)}%</b></span>
+            <span className={cleanEdge==='away'?'edge':''}><small>{m.away_team} gol yememe</small><b>{(awayCs*100).toFixed(0)}%</b></span>
           </div>
 
           <div className="match-team-xfp-strip">
@@ -202,7 +202,7 @@ export default async function Matches(){
           </div>
 
           <div className="match-fantasy-note">
-            <span>FANTASY OKUMASI • {reading.label.toLocaleUpperCase('tr')}</span>
+            <span>FANTEZİ YORUMU • {reading.label.toLocaleUpperCase('tr')}</span>
             <p>{reading.text}</p>
           </div>
 
@@ -224,7 +224,7 @@ export default async function Matches(){
       tier="member"
       eyebrow="ÜCRETSİZ ÜYELİK"
       title="Haftanın öne çıkan maçını gördün."
-      description={`Kalan ${lockedMatchCount} maçın tahminini, xG/sonuç olasılıklarını ve fantasy okumalarını ücretsiz hesapla aç.`}
+      description={`Kalan ${lockedMatchCount} maçın tahminini, xG/sonuç olasılıklarını ve fantezi yorumlarını ücretsiz hesapla aç.`}
     />:null}
   </>
 }
