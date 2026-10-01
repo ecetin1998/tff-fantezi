@@ -3,7 +3,7 @@ import {useSearchParams} from 'next/navigation'
 import {login,signup,resendConfirmation,requestPasswordReset} from '@/app/actions'
 
 const ERRORS={
-  invalid_credentials:'E-posta veya şifre hatalı.',
+  invalid_credentials:'Kullanıcı adı/e-posta veya şifre hatalı.',
   email_not_confirmed:'E-posta adresini doğrulaman gerekiyor.',
   already_registered:'Bu e-posta adresi zaten kayıtlı.',
   weak_password:'Şifre en az 8 karakter olmalı.',
@@ -30,7 +30,7 @@ export default function LoginForm(){
     {error?<div className="alert error">{error}</div>:null}
     {message?<div className="alert">{message}</div>:null}
     <form className="auth-form">
-      <label>E-posta<input name="email" type="email" autoComplete="email" required/></label>
+      <label>E-posta / kullanıcı adı<input name="email" type="text" autoComplete="username" placeholder="E-posta veya kullanıcı adı" required/></label>
       <label>Şifre<input name="password" type="password" autoComplete="current-password" minLength="6" required/></label>
       <div className="auth-actions">
         <button formAction={login} className="cta">Giriş yap</button>
