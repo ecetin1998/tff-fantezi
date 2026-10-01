@@ -9,17 +9,18 @@ export const metadata={
 
 export default async function Players({searchParams}){
   const [sp,auth]=await Promise.all([searchParams,getAuthState()])
+  const isVisitor=auth.tier==='visitor'
   const advancedSorts=new Set(['p25','p90','six','xg','xa'])
   const requestedSort=sp?.sort||'xfp'
   const sort=auth.plan==='pro'||!advancedSorts.has(requestedSort)?requestedSort:'xfp'
   const data=await getPlayersPage({
-    q:sp?.q||'',
-    team:sp?.team||'',
-    pos:sp?.pos||'',
-    sort,
-    dir:sp?.dir||'desc',
-    page:Number(sp?.page||1),
-    pageSize:auth.tier==='visitor'?25:50,
+    q:isVisitor?'':sp?.q||'',
+    team:isVisitor?'':sp?.team||'',
+    pos:isVisitor?'':sp?.pos||'',
+    sort:isVisitor?'xfp':sort,
+    dir:isVisitor?'desc':sp?.dir||'desc',
+    page:isVisitor?1:Number(sp?.page||1),
+    pageSize:isVisitor?15:50,
   })
   const {players,run,total,page,pageCount,teams,filters}=data
   return <>
