@@ -269,8 +269,13 @@ export default async function PlayerPage({ params }){
         return <div className="prediction-history-row compact-range-row" key={row.gameweek}>
           <span className="prediction-week">MH{row.gameweek}</span>
           <div className="prediction-range-visual">
-            <div className="range-track"><i className="range-band" style={{left:left+'%',width:Math.max(2,right-left)+'%'}}/><i className="range-actual" style={{left:actual+'%'}}/></div>
-            <div className="range-labels"><span>P25 {num(row.low,1)}</span><b>Gerçek {num(row.actual,0)}</b><span>P90 {num(row.high,1)}</span></div>
+            <div className="range-track">
+              <i className="range-band" style={{left:left+'%',width:Math.max(2,right-left)+'%'}}/>
+              <i className="range-actual" style={{left:actual+'%'}}/>
+              <span className="range-bound range-p25" style={{left:left+'%'}}>P25 {num(row.low,1)}</span>
+              <span className="range-bound range-p90" style={{left:right+'%'}}>P90 {num(row.high,1)}</span>
+              <b className="range-actual-label" style={{left:actual+'%'}}>Gerçek {num(row.actual,0)}</b>
+            </div>
             <small>Merkez xFP {num(row.predicted_xfp,1)}{row.history_mode==='live_frozen'?' • maç öncesi':' • geriye dönük test'}</small>
           </div>
           <b className={'range-result '+row.status}>{row.inside?'Aralık içinde':row.status==='below'?`P25 altı • -${row.distance.toFixed(1)}`:`P90 üstü • +${row.distance.toFixed(1)}`}</b>
