@@ -20,6 +20,7 @@ export default function SquadPitchView({
   compact=false,
   showBench=true,
   variant='recommended',
+  scoreLabel='İlk 11 xFP',
 }){
   const xi=members.filter(m=>m.squad_slot==='XI')
   const bench=members.filter(m=>m.squad_slot!=='XI').sort((a,b)=>Number(a.sort_order||0)-Number(b.sort_order||0))
@@ -34,7 +35,7 @@ export default function SquadPitchView({
       </div>
       <div className="readonly-squad-head-right">
         {budget!==undefined&&budget!==null?<span><small>Harcanan</small><b>{Number(budget).toFixed(1)}m • Kalan {(100-Number(budget)).toFixed(1)}m</b></span>:null}
-        {xiXfp!==undefined&&xiXfp!==null?<span><small>İlk 11 xFP</small><b>{Number(xiXfp).toFixed(2)}</b></span>:null}
+        {xiXfp!==undefined&&xiXfp!==null?<span><small>{scoreLabel}</small><b>{Number(xiXfp).toFixed(2)}</b></span>:null}
         {actionHref?<Link className="pill" href={actionHref}>{actionLabel}</Link>:null}
       </div>
       <span className="formation-summary-pill"><small>Taktik</small><b>{formation}</b></span>
