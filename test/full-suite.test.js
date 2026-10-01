@@ -34,6 +34,7 @@ const jsTests=[
   'model/sssPremiumRefreshContract.test.js',
   'model/turkishUiLanguageContract.test.js',
   'model/perfDeadlineReadabilityContract.test.js',
+  'model/managerCardsContract.test.js',
 ]
 
 for(const file of jsTests){
