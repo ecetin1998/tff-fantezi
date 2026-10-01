@@ -2,9 +2,10 @@ import './globals.css'
 import siteShell from '@/components/SiteShell.module.css'
 import premiumViews from '@/components/PremiumViews.module.css'
 import dataViews from '@/components/DataViews.module.css'
+import managerCards from '@/components/ManagerCards.module.css'
 import Nav from '@/components/Nav'
 
-const cssScopes=[siteShell.scope,premiumViews.scope,dataViews.scope].join(' ')
+const cssScopes=[siteShell.scope,premiumViews.scope,dataViews.scope,managerCards.scope].join(' ')
 
 const siteUrl=process.env.NEXT_PUBLIC_SITE_URL||'https://tff-fantezi.ecetin1998.workers.dev'
 export const metadata={
