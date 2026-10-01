@@ -17,7 +17,7 @@ const liveStatus={
 }
 const learningStatus={
   applied:'Uygulandı',
-  applied_pending_refresh:'Refresh bekliyor',
+  applied_pending_refresh:'Yenileme bekliyor',
   ready_to_apply:'Uygulamaya hazır',
   no_change:'Değişiklik yok',
   watch:'İzleniyor',
@@ -37,7 +37,8 @@ export default async function BacktestPage(){
   const replayBenchmark=replayWeeks[0]?.engine_version||'ScoutPlus 3.1'
   const replayBenchmarkVersion=replayWeeks[0]?.benchmark_version||'—'
   const productionQaPass=Boolean(currentRunQa?.pass)
-  const publicModelVersion=(String(currentRun?.model_version||'').match(/ScoutPlus\s+\d+(?:\.\d+)*/)||['Canlı model'])[0]
+  const publicModelNumber=(String(currentRun?.model_version||'').match(/ScoutPlus\s+(\d+(?:\.\d+)*)/)||[])[1]
+  const publicModelVersion=publicModelNumber?'Canlı model v'+publicModelNumber:'Canlı model'
   const replayN=replayClosed.reduce((s,w)=>s+Number(w.player_sample||0),0)
   const overallBand=replayN?replayClosed.reduce((s,w)=>s+Number(w.band_hit_rate||0)*Number(w.player_sample||0),0)/replayN:null
   const overallExpectedBand=replayN?replayClosed.reduce((s,w)=>s+Number(w.expected_band_hit_rate||0)*Number(w.player_sample||0),0)/replayN:null
@@ -76,7 +77,7 @@ export default async function BacktestPage(){
         <small>{currentRun?.generated_at?new Date(currentRun.generated_at).toLocaleString('tr-TR',{timeZone:'Europe/Istanbul'}):'—'}</small>
       </div>
       <div className="backtest-explainer">
-        <div><b>{productionQaPass?'PASS':'BEKLİYOR'} • MH{currentRun?.gameweek||'—'}</b><p>{currentRun?.status||'—'} durumunda • {Number(currentRunQa?.simulation_count||currentRun?.simulation_count||0).toLocaleString('tr-TR')} simülasyon. Kontrolleri geçmeyen aday sürüm yayına alınamaz; herhangi bir hata olursa önceki çalışan sürüm korunur.</p></div>
+        <div><b>{productionQaPass?'GEÇTİ':'BEKLİYOR'} • MH{currentRun?.gameweek||'—'}</b><p>{currentRun?.status==='ready'?'Hazır':currentRun?.status==='building'?'Hazırlanıyor':currentRun?.status||'—'} durumunda • {Number(currentRunQa?.simulation_count||currentRun?.simulation_count||0).toLocaleString('tr-TR')} simülasyon. Kontrolleri geçmeyen aday sürüm yayına alınamaz; herhangi bir hata olursa önceki çalışan sürüm korunur.</p></div>
         <div><b>{currentRunQa?.active_projection_count??'—'} / {currentRunQa?.active_player_count??'—'} aktif oyuncu tahmini • {currentRunQa?.active_role_count??'—'} rol</b><p>Eksik aktif oyuncu {currentRunQa?.missing_active_projections??'—'} • eksik rol {currentRunQa?.missing_active_roles??'—'} • eski/pasif oyuncu sızıntısı {currentRunQa?.inactive_positive_projections??'—'} • oynamayacak oyuncu ihlali {currentRunQa?.hard_zero_violations??'—'}.</p></div>
         <div><b>{currentRunQa?.match_count??'—'} maç • {currentRunQa?.recommendation_count??'—'} kadro • ortak 11 {currentRunQa?.xi_overlap??'—'}/11</b><p>Takım dakika max sapma {currentRunQa?.max_team_minute_gap??'—'} dk • pay dağılımı ihlali {currentRunQa?.share_violations??'—'} • fikstür eşleşme hatası {currentRunQa?.data_integrity?.fixture_mismatch??'—'} • puan/dakika tutarsızlığı {currentRunQa?.data_integrity?.nonzero_points_zero_minutes??'—'}.</p></div>
       </div>
@@ -84,9 +85,9 @@ export default async function BacktestPage(){
 
     <section className="backtest-summary-grid">
       <article className="card"><span>Sonucu görmeden tamamlanan test</span><b>{replayClosed.length}<small>/6</small></b><small>MH1–MH6 • Güncel geriye dönük test</small></article>
-      <article className="card"><span>Tahmin bandında kalan</span><b>{pct(overallBand)}</b><small>Simülasyon beklenen {pct(overallExpectedBand)} • fark {pp(overallBandGap)}</small></article>
-      <article className="card"><span>Band dışına çıkınca ortalama sapma</span><b>{num(overallOutside)}</b><small>Yalnız tahmin bandının dışındaki puan mesafesi</small></article>
-      <article className="card"><span>Top‑25 yakalama • xFP</span><b>{pct(overallTop25)}</b><small>{overallTop25V2!==null?'Top-25 modeli '+pct(overallTop25V2)+' • fark '+pp(overallTop25Lift):'Top-25 modelinin ilk gerçek dış örnek ölçümü MH7 kapanınca oluşacak'}</small></article>
+      <article className="card"><span>Tahmin aralığında kalan</span><b>{pct(overallBand)}</b><small>Simülasyon beklenen {pct(overallExpectedBand)} • fark {pp(overallBandGap)}</small></article>
+      <article className="card"><span>Aralık dışına çıkınca ortalama sapma</span><b>{num(overallOutside)}</b><small>Yalnız tahmin aralığının dışındaki puan mesafesi</small></article>
+      <article className="card"><span>İlk 25 yakalama • xFP</span><b>{pct(overallTop25)}</b><small>{overallTop25V2!==null?'İlk 25 modeli '+pct(overallTop25V2)+' • fark '+pp(overallTop25Lift):'İlk 25 modelinin ilk gerçek dış örnek ölçümü MH7 kapanınca oluşacak'}</small></article>
       <article className="card"><span>Şu an takip edilen hafta</span><b>{latestLive?'MH'+latestLive.gameweek:'—'}</b><small>{latestLive?liveStatus[latestLive.status]||latestLive.status:'Canlı kayıt yok'}</small></article>
     </section>
 
@@ -109,7 +110,7 @@ export default async function BacktestPage(){
       <div className="table-scroll">
         <table className="backtest-table replay-table">
           <thead><tr>
-            <th>MH</th><th>Modelin bildiği veri</th><th>Oyuncu</th><th>Band içinde</th><th>Simülasyon beklenen</th><th>Kalibrasyon farkı</th><th>Band genişliği</th><th>Band dışı sapma</th><th>Model eğilimi</th><th>Sıralama uyumu</th><th>İlk 25 xFP</th><th>İlk 25 GB</th><th>Dakika hatası</th><th>Ana öğrenme</th><th>Durum</th>
+            <th>MH</th><th>Modelin bildiği veri</th><th>Oyuncu</th><th>Aralık içinde</th><th>Simülasyon beklenen</th><th>Kalibrasyon farkı</th><th>Aralık genişliği</th><th>Aralık dışı sapma</th><th>Model eğilimi</th><th>Sıralama uyumu</th><th>İlk 25 xFP</th><th>İlk 25 GB</th><th>Dakika hatası</th><th>Ana öğrenme</th><th>Durum</th>
           </tr></thead>
           <tbody>{replayWeeks.map(w=><tr key={w.gameweek} className={w.status==='cold_start_gap'?'replay-gap-row':''}>
             <td><b>{'MH'+w.gameweek}</b></td>
@@ -135,11 +136,11 @@ export default async function BacktestPage(){
     <section className="card metric-guide">
       <div className="panel-head"><div><span className="eyebrow">NE ANLAMA GELİYOR?</span><h2>Terimleri sade okuyalım</h2></div></div>
       <div className="metric-guide-grid">
-        <div><b>Tahmin bandında kalma</b><p>P25–P90 aralığı modelin ürettiği olası sonuç alanıdır. Fantasy puanları kesikli olduğu için gerçekleşen kapsama sabit <strong>%65 olmak zorunda değildir</strong>. Artık tabloda aynı simülasyon dağılımının beklediği simülasyonun beklediği kapsama ve gerçekleşen farkı ayrı ayrı gösteriyoruz.</p></div>
-        <div><b>Band dışı sapma</b><p>Gerçek sonuç bandın dışına çıktıysa yalnız en yakın sınırdan uzaklığı ölçeriz. Örn. xFP 5, bant 2–13 ve gerçek 18 ise <strong>13 puan hata değil, band dışı 5 puan</strong> olarak değerlendirilir.</p></div>
-        <div><b>Band genişliği</b><p>Belirsizliği ne kadar geniş bıraktığımızı gösterir. Amaç bandı körlemesine daraltmak değil; kesikli puan dağılımında beklenen simülasyonun beklediği kapsama, gerçekleşen kapsama ve band dışı sapmayı birlikte iyileştirmektir.</p></div>
+        <div><b>Tahmin aralığında kalma</b><p>P25–P90 aralığı modelin ürettiği olası sonuç alanıdır. Fantezi puanları kesikli olduğu için gerçekleşen kapsama sabit <strong>%65 olmak zorunda değildir</strong>. Artık tabloda aynı simülasyon dağılımının beklediği simülasyonun beklediği kapsama ve gerçekleşen farkı ayrı ayrı gösteriyoruz.</p></div>
+        <div><b>Aralık dışı sapma</b><p>Gerçek sonuç aralığın dışına çıktıysa yalnız en yakın sınırdan uzaklığı ölçeriz. Örn. xFP 5, bant 2–13 ve gerçek 18 ise <strong>13 puan hata değil, aralık dışı 5 puan</strong> olarak değerlendirilir.</p></div>
+        <div><b>Aralık genişliği</b><p>Belirsizliği ne kadar geniş bıraktığımızı gösterir. Amaç aralığı körlemesine daraltmak değil; kesikli puan dağılımında beklenen simülasyonun beklediği kapsama, gerçekleşen kapsama ve aralık dışı sapmayı birlikte iyileştirmektir.</p></div>
         <div><b>Model eğilimi</b><p>Merkez xFP’nin uzun vadede sistematik olarak fazla mı az mı kaldığını gösterir. Tek oyuncunun uç sonucu değil, tekrar eden yönlü sapma önemlidir.</p></div>
-        <div><b>Sıralama ve dakika</b><p>Sıralama uyumu yüksek gördüğümüz oyuncuların gerçekten yukarı çıkıp çıkmadığını; dakika hatası ise rol/ilk 11 tahminimizin doğruluğunu gösterir. <strong>İlk 25 GB</strong>, xFP’yi bozmadan yüksek skor/yüksek skor adaylarını ayrı bir sıralama katmanıyla ölçer.</p></div>        <div><b>Top‑25 modeli</b><p><strong>xFP</strong> beklenen fantasy puanını ölçmeye devam eder; Top‑25 modeli ise yüksek skor/yüksek skor adaylarını geçmiş haftalar üzerinde sonucu görmeden eğitilen ayrı bir sıralama katmanıyla tarar. Bu skor optimizerı veya ana xFP’yi değiştirmez ve kapanan her haftada xFP temel modelına karşı yeniden ölçülür.</p></div>
+        <div><b>Sıralama ve dakika</b><p>Sıralama uyumu yüksek gördüğümüz oyuncuların gerçekten yukarı çıkıp çıkmadığını; dakika hatası ise rol/ilk 11 tahminimizin doğruluğunu gösterir. <strong>İlk 25 GB</strong>, xFP’yi bozmadan yüksek skor/yüksek skor adaylarını ayrı bir sıralama katmanıyla ölçer.</p></div>        <div><b>İlk 25 modeli</b><p><strong>xFP</strong> beklenen fantezi puanını ölçmeye devam eder; İlk 25 modeli ise yüksek skor/yüksek skor adaylarını geçmiş haftalar üzerinde sonucu görmeden eğitilen ayrı bir sıralama katmanıyla tarar. Bu skor kadro optimizasyonunu veya ana xFP’yi değiştirmez ve kapanan her haftada xFP temel modelına karşı yeniden ölçülür.</p></div>
       </div>
     </section>
 
@@ -150,7 +151,7 @@ export default async function BacktestPage(){
       </div>
       <div className="table-scroll">
         <table className="backtest-table">
-          <thead><tr><th>MH</th><th>Oyuncu</th><th>Band içinde</th><th>Band genişliği</th><th>Band dışı sapma</th><th>Model eğilimi</th><th>Sıralama uyumu</th><th>İlk 25</th><th>Dakika hatası</th><th>Durum</th></tr></thead>
+          <thead><tr><th>MH</th><th>Oyuncu</th><th>Aralık içinde</th><th>Aralık genişliği</th><th>Aralık dışı sapma</th><th>Model eğilimi</th><th>Sıralama uyumu</th><th>İlk 25</th><th>Dakika hatası</th><th>Durum</th></tr></thead>
           <tbody>{liveWeeks.length?liveWeeks.map(w=><tr key={w.gameweek} className={w.status==='open'?'current-backtest-row':''}>
             <td><b>{'MH'+w.gameweek}</b></td>
             <td>{w.fp_sample??w.prediction_count??'—'}</td>
@@ -183,13 +184,13 @@ export default async function BacktestPage(){
           <div><span>{'MH'+item.after_gameweek+' sonrası'}</span><em>{learningStatus[item.status]||item.status}</em></div>
           <h3>{item.component}</h3><p>{item.summary_tr||item.signal}</p>
         </article>)}</div></>:null}
-      </div>:<div className="empty-learning-state">Güncel kurgu replay’i tamamlanınca öğrenme sinyalleri burada oluşacak.</div>}
+      </div>:<div className="empty-learning-state">Güncel kurgu geriye dönük testi tamamlanınca öğrenme sinyalleri burada oluşacak.</div>}
     </section>
 
     {(replayPlayers.length||livePlayers.length)?<section className="card backtest-table-card">
       <div className="panel-head"><div><span className="eyebrow">OYUNCU BAZINDA</span><h2>En büyük sapmalar</h2></div></div>
       <div className="table-scroll"><table className="backtest-table">
-        <thead><tr><th>Oyuncu</th><th>xFP</th><th>Tahmin bandı</th><th>Gerçek</th><th>Band sonucu</th><th>Band dışı</th><th>Merkez farkı</th><th>Ana hata alanı</th></tr></thead>
+        <thead><tr><th>Oyuncu</th><th>xFP</th><th>Tahmin aralığı</th><th>Gerçek</th><th>Aralık sonucu</th><th>Aralık dışı</th><th>Merkez farkı</th><th>Ana hata alanı</th></tr></thead>
         <tbody>{[...replayPlayers,...livePlayers].slice(0,20).map((p,i)=>{const lo=p.predicted_p25??p.p25,hi=p.predicted_p90??p.p90;return <tr key={String(p.player_id)+'-'+i}>
           <td>{p.player_name}</td><td>{num(p.predicted_xfp)}</td><td>{lo===null||lo===undefined||hi===null||hi===undefined?'—':num(lo,0)+'–'+num(hi,0)}</td><td>{num(p.actual_points,0)}</td><td>{p.band_status||'—'}</td><td>{p.outside_band_distance===null||p.outside_band_distance===undefined?'—':num(p.outside_band_distance)}</td><td>{num(p.point_error??p.prediction_error)}</td><td>{p.main_error_area??p.error_component??'—'}</td>
         </tr>})}</tbody>
