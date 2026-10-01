@@ -60,7 +60,6 @@ begin
   if v_rules is null then raise exception 'GAME_RULES_MISSING'; end if;
   v_base_budget_limit:=(v_rules->>'budget')::numeric;
   v_budget_limit:=case
-    when v_manager_card='attack' then v_base_budget_limit+5
     when v_manager_card='unlimited_budget' then null
     else v_base_budget_limit
   end;
@@ -157,10 +156,7 @@ begin
   ) then raise exception 'INVALID_CAPTAIN'; end if;
 
   v_formation:=v_xi_def::text||'-'||v_xi_mid::text||'-'||v_xi_fwd::text;
-  if not(
-    v_formation=any(v_formations)
-    or (v_manager_card='attack' and v_formation='2-5-3')
-  ) then raise exception 'INVALID_FORMATION'; end if;
+  if not(v_formation=any(v_formations)) then raise exception 'INVALID_FORMATION'; end if;
 
   v_bank:=case
     when v_manager_card='unlimited_budget' then greatest(0,v_base_budget_limit-v_budget)
