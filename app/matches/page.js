@@ -1,6 +1,7 @@
 import Link from 'next/link'
-import { getMatches } from '@/lib/data'
+import { getAuthState, getMatches } from '@/lib/data'
 import { teamCssVars } from '@/lib/teamThemes'
+import AccessGate from '@/components/AccessGate'
 
 export const revalidate=300
 export const metadata={title:'Maç Tahminleri'}
@@ -96,15 +97,27 @@ function fantasyReading(m){
 }
 
 export default async function Matches(){
-  const {matches,run}=await getMatches()
+  const [{matches,run},auth]=await Promise.all([getMatches(),getAuthState()])
+  const featuredMatch=(matches||[]).reduce((best,m)=>{
+    if(!best)return m
+    const strength=Math.max(Number(m.home_win_probability||0),Number(m.away_win_probability||0))
+    const bestStrength=Math.max(Number(best.home_win_probability||0),Number(best.away_win_probability||0))
+    if(strength!==bestStrength)return strength>bestStrength?m:best
+    const edge=Math.abs(Number(m.home_xg||0)-Number(m.away_xg||0))
+    const bestEdge=Math.abs(Number(best.home_xg||0)-Number(best.away_xg||0))
+    return edge>bestEdge?m:best
+  },null)
+  const isVisitor=auth.tier==='visitor'
+  const visibleMatches=isVisitor?(featuredMatch?[featuredMatch]:[]):matches
+  const lockedMatchCount=Math.max(0,(matches||[]).length-visibleMatches.length)
   return <>
 <div className="section-title">
       <div><span className="eyebrow">MAÇ MODELİ</span><h1>MH{run?.gameweek||'—'} Maç Tahminleri</h1></div>
-      <span className="muted">xG • sonuç olasılığı • clean sheet • fantasy maç profili</span>
+      <span className="muted">{isVisitor?'Haftanın öne çıkan maçı • ücretsiz üyelikle tüm fikstür':'xG • sonuç olasılığı • clean sheet • fantasy maç profili'}</span>
     </div>
 
     <div className="grid match-grid modern-match-grid match-analysis-grid">
-      {matches.map(m=>{
+      {visibleMatches.map(m=>{
         const home=Number(m.home_win_probability||0),draw=Number(m.draw_probability||0),away=Number(m.away_win_probability||0)
         const homeXg=Number(m.home_xg||0),awayXg=Number(m.away_xg||0),totalXg=homeXg+awayXg
         const homeCs=Number(m.home_cs_probability||0),awayCs=Number(m.away_cs_probability||0)
@@ -205,5 +218,13 @@ export default async function Matches(){
         </article>
       })}
     </div>
+
+    {isVisitor&&lockedMatchCount>0?<AccessGate
+      compact
+      tier="member"
+      eyebrow="ÜCRETSİZ ÜYELİK"
+      title="Haftanın öne çıkan maçını gördün."
+      description={`Kalan ${lockedMatchCount} maçın tahminini, xG/sonuç olasılıklarını ve fantasy okumalarını ücretsiz hesapla aç.`}
+    />:null}
   </>
 }
