@@ -121,8 +121,8 @@ export default async function PlayerPage({ params }){
   )
 
   const roleMetrics=[
-    {label:'Son 2 maç XI',value:pct(r?.last2_xi_probability)},
-    {label:'Önceki 2 maç XI',value:pct(r?.previous2_xi_probability)},
+    {label:'Son 2 maç İlk 11',value:pct(r?.last2_xi_probability)},
+    {label:'Önceki 2 maç İlk 11',value:pct(r?.previous2_xi_probability)},
     {label:'Son 2 dakika',value:num(r?.last2_minutes,1)},
     {label:'Önceki 2 dakika',value:num(r?.previous2_minutes,1)},
   ]
