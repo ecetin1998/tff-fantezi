@@ -5,7 +5,7 @@ export const metadata={title:'Model Performansı'}
 
 const num=(v,d=2)=>v===null||v===undefined?'—':Number(v).toFixed(d)
 const pct=v=>v===null||v===undefined?'—':(Number(v)*100).toFixed(0)+'%'
-const pp=v=>v===null||v===undefined?'—':(Number(v)*100>=0?'+':'')+(Number(v)*100).toFixed(1)+' pp'
+const pp=v=>v===null||v===undefined?'—':(Number(v)*100>=0?'+':'')+(Number(v)*100).toFixed(1)+' yüzde puan'
 const replayStatus={
   cold_start_gap:'Başlangıç modeli eksik',
   replay_pending:'Hesaplanacak',
@@ -23,6 +23,18 @@ const learningStatus={
   watch:'İzleniyor',
   baseline:'Başlangıç',
 }
+const runStatusLabel=value=>({
+  ready:'Hazır',
+  building:'Hazırlanıyor',
+  failed:'Başarısız',
+  pending:'Bekliyor',
+}[String(value||'').toLowerCase()]||value||'—')
+const bandStatusLabel=value=>({
+  'Band altı':'Tahmin aralığı altı',
+  'Band içi':'Tahmin aralığı içi',
+  'Band üstü':'Tahmin aralığı üstü',
+}[value]||value||'—')
+
 const tendency=v=>{
   if(v===null||v===undefined)return '—'
   const n=Number(v)
@@ -77,7 +89,7 @@ export default async function BacktestPage(){
         <small>{currentRun?.generated_at?new Date(currentRun.generated_at).toLocaleString('tr-TR',{timeZone:'Europe/Istanbul'}):'—'}</small>
       </div>
       <div className="backtest-explainer">
-        <div><b>{productionQaPass?'GEÇTİ':'BEKLİYOR'} • MH{currentRun?.gameweek||'—'}</b><p>{currentRun?.status==='ready'?'Hazır':currentRun?.status==='building'?'Hazırlanıyor':currentRun?.status||'—'} durumunda • {Number(currentRunQa?.simulation_count||currentRun?.simulation_count||0).toLocaleString('tr-TR')} simülasyon. Kontrolleri geçmeyen aday sürüm yayına alınamaz; herhangi bir hata olursa önceki çalışan sürüm korunur.</p></div>
+        <div><b>{productionQaPass?'GEÇTİ':'BEKLİYOR'} • MH{currentRun?.gameweek||'—'}</b><p>{runStatusLabel(currentRun?.status)} durumunda • {Number(currentRunQa?.simulation_count||currentRun?.simulation_count||0).toLocaleString('tr-TR')} simülasyon. Kontrolleri geçmeyen aday sürüm yayına alınamaz; herhangi bir hata olursa önceki çalışan sürüm korunur.</p></div>
         <div><b>{currentRunQa?.active_projection_count??'—'} / {currentRunQa?.active_player_count??'—'} aktif oyuncu tahmini • {currentRunQa?.active_role_count??'—'} rol</b><p>Eksik aktif oyuncu {currentRunQa?.missing_active_projections??'—'} • eksik rol {currentRunQa?.missing_active_roles??'—'} • eski/pasif oyuncu sızıntısı {currentRunQa?.inactive_positive_projections??'—'} • oynamayacak oyuncu ihlali {currentRunQa?.hard_zero_violations??'—'}.</p></div>
         <div><b>{currentRunQa?.match_count??'—'} maç • {currentRunQa?.recommendation_count??'—'} kadro • ortak 11 {currentRunQa?.xi_overlap??'—'}/11</b><p>Takım dakika max sapma {currentRunQa?.max_team_minute_gap??'—'} dk • pay dağılımı ihlali {currentRunQa?.share_violations??'—'} • fikstür eşleşme hatası {currentRunQa?.data_integrity?.fixture_mismatch??'—'} • puan/dakika tutarsızlığı {currentRunQa?.data_integrity?.nonzero_points_zero_minutes??'—'}.</p></div>
       </div>
@@ -192,7 +204,7 @@ export default async function BacktestPage(){
       <div className="table-scroll"><table className="backtest-table">
         <thead><tr><th>Oyuncu</th><th>xFP</th><th>Tahmin aralığı</th><th>Gerçek</th><th>Aralık sonucu</th><th>Aralık dışı</th><th>Merkez farkı</th><th>Ana hata alanı</th></tr></thead>
         <tbody>{[...replayPlayers,...livePlayers].slice(0,20).map((p,i)=>{const lo=p.predicted_p25??p.p25,hi=p.predicted_p90??p.p90;return <tr key={String(p.player_id)+'-'+i}>
-          <td>{p.player_name}</td><td>{num(p.predicted_xfp)}</td><td>{lo===null||lo===undefined||hi===null||hi===undefined?'—':num(lo,0)+'–'+num(hi,0)}</td><td>{num(p.actual_points,0)}</td><td>{p.band_status||'—'}</td><td>{p.outside_band_distance===null||p.outside_band_distance===undefined?'—':num(p.outside_band_distance)}</td><td>{num(p.point_error??p.prediction_error)}</td><td>{p.main_error_area??p.error_component??'—'}</td>
+          <td>{p.player_name}</td><td>{num(p.predicted_xfp)}</td><td>{lo===null||lo===undefined||hi===null||hi===undefined?'—':num(lo,0)+'–'+num(hi,0)}</td><td>{num(p.actual_points,0)}</td><td>{bandStatusLabel(p.band_status)}</td><td>{p.outside_band_distance===null||p.outside_band_distance===undefined?'—':num(p.outside_band_distance)}</td><td>{num(p.point_error??p.prediction_error)}</td><td>{p.main_error_area??p.error_component??'—'}</td>
         </tr>})}</tbody>
       </table></div>
     </section>:null}
