@@ -60,15 +60,21 @@ begin
   if v_rules is null then raise exception 'GAME_RULES_MISSING'; end if;
   v_base_budget_limit:=(v_rules->>'budget')::numeric;
   v_budget_limit:=case
-    when v_manager_card='attack' then v_base_budget_limit+5
     when v_manager_card='unlimited_budget' then null
     else v_base_budget_limit
   end;
   v_max_per_club:=(v_rules->>'max_per_club')::int;
-  v_required_gk:=(v_rules->'squad'->>'GK')::int;
-  v_required_def:=(v_rules->'squad'->>'DEF')::int;
-  v_required_mid:=(v_rules->'squad'->>'MID')::int;
-  v_required_fwd:=(v_rules->'squad'->>'FWD')::int;
+  if v_manager_card='attack' then
+    v_required_gk:=2;
+    v_required_def:=3;
+    v_required_mid:=5;
+    v_required_fwd:=5;
+  else
+    v_required_gk:=(v_rules->'squad'->>'GK')::int;
+    v_required_def:=(v_rules->'squad'->>'DEF')::int;
+    v_required_mid:=(v_rules->'squad'->>'MID')::int;
+    v_required_fwd:=(v_rules->'squad'->>'FWD')::int;
+  end if;
   v_squad_size:=v_required_gk+v_required_def+v_required_mid+v_required_fwd;
 
   select array_agg(value order by ord) into v_formations
@@ -150,10 +156,7 @@ begin
   ) then raise exception 'INVALID_CAPTAIN'; end if;
 
   v_formation:=v_xi_def::text||'-'||v_xi_mid::text||'-'||v_xi_fwd::text;
-  if not(
-    v_formation=any(v_formations)
-    or (v_manager_card='attack' and v_formation='2-5-3')
-  ) then raise exception 'INVALID_FORMATION'; end if;
+  if not(v_formation=any(v_formations)) then raise exception 'INVALID_FORMATION'; end if;
 
   v_bank:=case
     when v_manager_card='unlimited_budget' then greatest(0,v_base_budget_limit-v_budget)
