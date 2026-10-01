@@ -18,12 +18,12 @@ export default async function Squads(){
         <span className="eyebrow">KADRO OPTİMİZASYONU</span>
         <h1>MH{rec.run?.gameweek||'—'} Kadro Önerileri</h1>
       </div>
-      <span className="muted">{auth.tier==='visitor'?'Ziyaretçi önizlemesi':auth.plan==='pro'?'Pro görünümü':'Ücretsiz üye görünümü'}</span>
+      <span className="muted">{auth.tier==='visitor'?'Ziyaretçi önizlemesi':auth.plan==='pro'?'Gelişmiş görünüm':'Ücretsiz üye görünümü'}</span>
     </div>
 
     <div className="squad-tabs-note">
       <span>● Önerilen: dengeli maksimum beklenen puan • risk dağıtımı için aynı takımın KL+DEF oyuncularından ilk 11’de en fazla 2 kişi</span>
-      <span>◇ Agresif 11: xFP'yi koruyup tavanı artırır • Önerilen XI'den 2-4 oyuncu farklı • kaptan tavan odaklı</span>
+      <span>◇ Agresif 11: xFP'yi koruyup tavanı artırır • Önerilen İlk 11'den 2-4 oyuncu farklı • kaptan tavan odaklı</span>
     </div>
 
     {auth.tier==='visitor'?<>
@@ -64,7 +64,7 @@ export default async function Squads(){
         />
       </section>:<AccessGate
         tier="pro"
-        eyebrow="PRO • AGRESİF 11"
+        eyebrow="GELİŞMİŞ • AGRESİF 11"
         title="Tavan odaklı ikinci kadroyu aç."
         description="Agresif 11, xFP tabanını korurken P90 ve yüksek skor potansiyeline daha fazla ağırlık verir."
       />}
