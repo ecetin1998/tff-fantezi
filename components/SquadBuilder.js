@@ -520,7 +520,7 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
             const chosen=ids.includes(p.id)
             const posFull=(counts[p.position]||0)>=SQUAD_LIMITS[p.position]
             const teamFull=MAX_PLAYERS_PER_CLUB&&(clubCounts[p.team_id]||0)>=MAX_PLAYERS_PER_CLUB
-            const overBudget=!chosen&&cost+Number(p.price)>BUDGET+.0001
+            const overBudget=!chosen&&Number.isFinite(effectiveBudget)&&cost+Number(p.price)>effectiveBudget+.0001
             const disabled=!chosen&&(ids.length>=SQUAD_SIZE||posFull||teamFull||overBudget)
             const availabilityNote=(availabilityIsIssue(p.availability)||p.availability?.availability_type==='return')
               ? availabilityCompactNote(p.availability)
