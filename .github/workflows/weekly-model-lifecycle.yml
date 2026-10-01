@@ -7,6 +7,7 @@ on:
       - "supabase/functions/run-live-sim-chunk/**"
       - "supabase/functions/run-staging-optimizer/**"
       - "supabase/functions/model-refresh-control/**"
+      - "supabase/functions/refresh-availability/**"
       - "supabase/functions/weekly-model-lifecycle/**"
       - "model/optimizer_rules.py"
       - "model/optimize_candidate.py"
@@ -44,6 +45,19 @@ jobs:
           token="$(printf '%s' "$response" | jq -er '.value')"
           echo "::add-mask::$token"
           echo "token=$token" >> "$GITHUB_OUTPUT"
+
+      - name: Refresh availability source
+        id: availability
+        shell: bash
+        env:
+          OIDC_TOKEN: ${{ steps.oidc.outputs.token }}
+        run: |
+          set -euo pipefail
+          response="$(curl --fail --show-error --silent --max-time 90 \
+            -H "Authorization: Bearer $OIDC_TOKEN" \
+            "$FUNCTIONS_URL/refresh-availability")"
+          echo "$response" | jq .
+          echo "changed=$(printf '%s' "$response" | jq -r '.changed // 0')" >> "$GITHUB_OUTPUT"
 
       - name: Refresh upstream inputs
         id: ingest

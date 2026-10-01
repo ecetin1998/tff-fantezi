@@ -1,7 +1,7 @@
 'use client'
 import { useMemo, useState } from 'react'
 import Link from 'next/link'
-import { availabilityCompactNote, availabilityExpectedReturn, availabilityReason, availabilityStatusLabel } from '@/lib/availability'
+import { availabilityReason, availabilityStatusLabel } from '@/lib/availability'
 import {playerLabel} from '@/lib/playerPresentation'
 
 const posLabel=p=>({GK:'KL',DEF:'DEF',MID:'OS',FWD:'FOR'}[p]||p||'—')
@@ -14,25 +14,23 @@ export default function AvailabilityTable({ rows }){
   const teams=useMemo(()=>[...new Set((rows||[]).map(r=>r.team).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'tr')),[rows])
   const filtered=useMemo(()=>rows.filter(r=>
     (!team||r.team===team) &&
-    (!type||r.availability_type===type) &&
-    (!q||(`${r.player?.full_name||''} ${r.player?.short_label||''} ${r.team||''} ${r.canonical_reason||''} ${r.expected_return_date||''} ${r.suspension_fixture||''}`).toLocaleLowerCase('tr').includes(q.toLocaleLowerCase('tr')))
+    (!type||(type==='risk' ? Number(r.availability_probability)>0&&Number(r.availability_probability)<1 : r.availability_type===type)) &&
+    (!q||(`${r.player?.full_name||''} ${r.player?.short_label||''} ${r.team||''} ${r.canonical_reason||''} ${r.suspension_fixture||''}`).toLocaleLowerCase('tr').includes(q.toLocaleLowerCase('tr')))
   ),[rows,team,type,q])
 
   const injuryCount=(rows||[]).filter(r=>r.availability_type==='injuries').length
   const suspensionCount=(rows||[]).filter(r=>r.availability_type==='suspensions').length
-  const returnCount=(rows||[]).filter(r=>r.availability_type==='return').length
-  const detailedCount=(rows||[]).filter(r=>r.expected_return_date||r.suspension_fixture).length
+  const riskCount=(rows||[]).filter(r=>Number(r.availability_probability)>0&&Number(r.availability_probability)<1).length
 
   return <>
     <section className="availability-overview-grid">
       <div className="card"><span>Sakatlık</span><b>{injuryCount}</b><small>takip edilen oyuncu</small></div>
       <div className="card"><span>Ceza</span><b>{suspensionCount}</b><small>maç cezası kaydı</small></div>
-      <div className="card"><span>Dönüş</span><b>{returnCount}</b><small>dönüş / yeniden kullanım</small></div>
-      <div className="card"><span>Detaylı durum</span><b>{detailedCount}</b><small>dönüş / ceza bilgisi olan</small></div>
+      <div className="card"><span>Riskli</span><b>{riskCount}</b><small>oynama ihtimali düşmüş oyuncu</small></div>
     </section>
 
     <div className="filters availability-filters">
-      <input value={q} onChange={e=>setQ(e.target.value)} placeholder="Oyuncu, takım, sakatlık veya dönüş ara..."/>
+      <input value={q} onChange={e=>setQ(e.target.value)} placeholder="Oyuncu, takım veya sakatlık ara..."/>
       <select value={team} onChange={e=>setTeam(e.target.value)}>
         <option value="">Tüm takımlar</option>
         {teams.map(t=><option key={t} value={t}>{t}</option>)}
@@ -41,22 +39,21 @@ export default function AvailabilityTable({ rows }){
         <option value="">Tüm durumlar</option>
         <option value="injuries">Sakatlık</option>
         <option value="suspensions">Ceza</option>
-        <option value="return">Dönüş</option>
+        <option value="risk">Riskli</option>
       </select>
     </div>
 
     <div className="table-summary availability-summary">
       <span><b>{filtered.length}</b> kayıt gösteriliyor</span>
-      <span>Sadece karar için gerekli sakatlık / ceza ve dönüş bilgileri gösterilir.</span>
+      <span>Yalnız güncel sakatlık, ceza ve oynama riski gösterilir.</span>
     </div>
 
     <div className="card table-wrap availability-table-wrap"><table className="availability-table-v2">
       <thead><tr>
         <th>#</th><th>Oyuncu</th><th>Takım</th><th>Mevki</th><th>Durum</th><th>Oynama %</th>
-        <th>Sakatlık / ceza</th><th>Dönüş / ceza maçı</th>
+        <th>Sakatlık / ceza</th><th>Ceza maçı</th>
       </tr></thead>
       <tbody>{filtered.map((r,i)=>{
-        const note=availabilityCompactNote(r)
         return <tr key={`${r.player_id}-${i}`}>
           <td>#{i+1}</td>
           <td>{r.player?<Link className="player-link" href={'/players/'+r.player_id}><b>{playerLabel(r.player)}</b></Link>:'—'}</td>
@@ -65,14 +62,14 @@ export default function AvailabilityTable({ rows }){
           <td><span className={`status-chip ${r.availability_type||''}`}>{availabilityStatusLabel(r)}</span></td>
           <td>{(Number(r.availability_probability??1)*100).toFixed(0)}%</td>
           <td className="availability-note-cell"><b>{availabilityReason(r)||'—'}</b></td>
-          <td className="availability-return-cell">{r.suspension_fixture||availabilityExpectedReturn(r.expected_return_date)||'—'}</td>
+          <td className="availability-return-cell">{r.availability_type==='suspensions'?(r.suspension_fixture||'—'):'—'}</td>
         </tr>
       })}</tbody>
     </table></div>
 
     <div className="availability-card-list">
       {filtered.map((r,i)=>{
-        const note=availabilityCompactNote(r)
+        const note=availabilityReason(r)
         return <Link href={'/players/'+r.player_id} className="card availability-mobile-card" key={'mobile-'+r.player_id+'-'+i}>
           <div className="availability-mobile-head">
             <span className={`pos ${r.player?.position}`}>{posLabel(r.player?.position)}</span>

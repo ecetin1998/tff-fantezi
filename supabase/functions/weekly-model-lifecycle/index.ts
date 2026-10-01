@@ -135,7 +135,7 @@ async function sourceStatus(sb:any,current:any){
     sb.from("scout_player_season_stats").select("player_id,updated_at").eq("season","2026-27").eq("through_gameweek",gw),
     sb.from("scout_players").select("id,team_id,updated_at").eq("active",true),
     sb.from("scout_match_history").select("match_id,home_team_id,away_team_id,kickoff_at,source_updated_at").eq("season","2026-27").eq("gameweek",target),
-    sb.from("scout_availability").select("player_id,checked_at").eq("run_id",current.id)
+    sb.from("scout_availability").select("player_id,checked_at,detail_source_updated_at").eq("run_id",current.id)
   ])
   for(const q of [preds,hist,weekly,teamStats,playerStats,players,targetHist,availability])if(q.error)throw q.error
   const fixtureCount=(preds.data||[]).length
@@ -159,7 +159,7 @@ async function sourceStatus(sb:any,current:any){
       ...(teamStats.data||[]).map((x:any)=>x.source_updated_at),
       ...(playerStats.data||[]).map((x:any)=>x.updated_at),
       ...(players.data||[]).map((x:any)=>x.updated_at),
-      ...(availability.data||[]).map((x:any)=>x.checked_at),
+      ...(availability.data||[]).map((x:any)=>x.detail_source_updated_at),
       ...(targetHist.data||[]).map((x:any)=>x.source_updated_at)
     )).toISOString()
   }
@@ -411,6 +411,14 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
     ?new Date(Math.max(...availabilityTimes)).toISOString()
     :null
   const availabilityAge=ageHours(availabilityLatest)
+  const availabilitySourceTimes=(availabilityQ.data||[])
+    .map((x:any)=>x.detail_source_updated_at)
+    .filter(Boolean)
+    .map((value:any)=>new Date(value).getTime())
+    .filter(Number.isFinite)
+  const availabilitySourceLatest=availabilitySourceTimes.length
+    ?new Date(Math.max(...availabilitySourceTimes)).toISOString()
+    :availabilityLatest
   if(!availabilityLatest||availabilityAge>24){
     return {
       refresh_required:false,reason:"AVAILABILITY_STALE",
@@ -419,7 +427,7 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
     }
   }
   const latestSourceAt=new Date(newer(
-    availabilityLatest,
+    availabilitySourceLatest,
     playersUpdatedQ.data?.updated_at,
     current.source_updated_at
   )).toISOString()
