@@ -50,7 +50,6 @@ function xiBounds(formations:string[]){
 }
 function effectiveRules(rules:any,card:any){
   const formations=[...(Array.isArray(rules.formations)?rules.formations.map(String):[])];
-  if(card.attack&&!formations.includes("2-5-3"))formations.push("2-5-3");
   const baseBudget=n(rules.budget);
   const squad=card.attack
     ?{GK:2,DEF:3,MID:5,FWD:5}
@@ -59,7 +58,7 @@ function effectiveRules(rules:any,card:any){
     ...rules,
     squad,
     formations,
-    effectiveBudget:card.unlimited?null:(card.attack?baseBudget+5:baseBudget),
+    effectiveBudget:card.unlimited?null:baseBudget,
   };
 }
 function buildModel(rows:any[],variant:string,rules:any,card:any,reference:any=null){
