@@ -142,7 +142,7 @@ export function MobileMenu({ primary, analysis }){
       {analysis.map(([href,label])=>
         <MenuRow onClick={close} active={matches(path,href)} key={href} href={href} label={label}/>
       )}
-      <MenuRow onClick={close} href="/pricing" label="Fantezi Pro"/>
+      <MenuRow onClick={close} href="/pricing" label="Gelişmiş Üyelik"/>
       {auth.loaded&&auth.signedIn?<MenuRow onClick={close} active={matches(path,'/profile')} href="/profile" label="Profilim"/>:null}
       {!auth.loaded?null:auth.signedIn
         ? <button className="mobile-menu-row mobile-menu-logout" onClick={handleLogout} type="button" disabled={signingOut}><span className="mobile-menu-row-icon"><MenuIcon href="/login"/></span><span>{signingOut?'Çıkılıyor…':'Çıkış'}</span></button>
