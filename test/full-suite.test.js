@@ -30,6 +30,7 @@ const jsTests=[
   'model/weeklyLifecycleContract.test.js',
   'model/matchCardXfpContract.test.js',
   'model/teamAnalysisExplorerContract.test.js',
+  'model/accessTierContract.test.js',
   'model/sssPremiumRefreshContract.test.js',
   'model/perfDeadlineReadabilityContract.test.js',
 ]

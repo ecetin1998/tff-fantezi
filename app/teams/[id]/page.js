@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { getTeamDetail, getTeamFixturesOverview } from '@/lib/data'
+import { getAuthState, getTeamDetail, getTeamFixturesOverview } from '@/lib/data'
+import AccessGate from '@/components/AccessGate'
 import { teamCssVars } from '@/lib/teamThemes'
 import TeamRoster from '@/components/TeamRoster'
 import {playerLabel} from '@/lib/playerPresentation'
@@ -24,8 +25,9 @@ const posLabel=p=>({GK:'KL',DEF:'DEF',MID:'OS',FWD:'FOR'}[p]||p||'—')
 
 export default async function TeamPage({params}){
   const {id}=await params
-  const data=await getTeamDetail(id)
+  const [data,auth]=await Promise.all([getTeamDetail(id),getAuthState()])
   if(!data) notFound()
+  const isPro=auth.plan==='pro'
 
   const {team,run,season:s,tactical,history,currentMatches=[],currentMatch,opponent,players,fantasyByGameweek}=data
   const isHome=currentMatch?Number(currentMatch.home_team_id)===Number(team.id):false
@@ -138,7 +140,7 @@ export default async function TeamPage({params}){
       <div className="card xg-diff-stat"><span>xG farkı / maç</span><b>{xgDiffPerMatch>0?'+':''}{num(xgDiffPerMatch)}</b><small>toplam {Number(s?.xg_diff||0)>0?'+':''}{num(s?.xg_diff)}</small></div>
     </section>
 
-    <section className="card profile-card team-tactical-profile">
+    {isPro?<section className="card profile-card team-tactical-profile">
       <div className="panel-head">
         <div><span className="eyebrow">GÜÇLÜ / ZAYIF YANLAR</span><h2>Atak ve savunma profili</h2></div>
         <small>{hasAdvancedProfile?`Detay profil MH${tactical.advanced_profile_through_gameweek} • ${tactical.advanced_profile_matches} maç`:tacticalCoverage==='event_complete'?'Detay olay verisi tam':'Genel hücum/savunma profili'}</small>
@@ -233,7 +235,13 @@ export default async function TeamPage({params}){
           </div>
         </div>
       </div>:<p className="muted">Gerçek gol/şut koordinatı, ceza sahası–uzak mesafe ve kontra kırılımları için olay-seviyesi kaynak henüz yok. Yukarıdaki yön profili gerçek saha rolleri ve aksiyonlardan türetilmiştir; gözlenen olay konumu gibi sunulmaz.</p>}
-    </section>
+    </section>:<AccessGate
+      compact
+      tier="pro"
+      eyebrow="PRO • TAKIM DERİNLİĞİ"
+      title="Gelişmiş hücum-savunma profilini aç."
+      description="Hücum kanalları, rakibin saldırı yönü, duran top üretimi, baskı ve gelişmiş takım eşleşmeleri Pro üyelikte görünür."
+    />}
 
     <section className="card team-roster-section team-roster-v2">
       <div className="panel-head team-roster-head">
@@ -286,7 +294,7 @@ export default async function TeamPage({params}){
       </section>
     </div>
 
-    <details className="card profile-card team-advanced-details">
+    {isPro?<details className="card profile-card team-advanced-details">
       <summary>
         <span><small>İLERİ TAKIM İSTATİSTİKLERİ</small><b>Teknik sezon profilini göster</b></span>
         <i>+</i>
@@ -311,6 +319,6 @@ export default async function TeamPage({params}){
         </div>
         {s?.coverage_note?<small className="team-profile-coverage">{s.coverage_note}</small>:null}
       </div>
-    </details>
+    </details>:null}
   </div>
 }

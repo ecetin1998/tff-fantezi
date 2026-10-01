@@ -1,27 +1,45 @@
-import { getRecommendation } from '@/lib/data'
+import { getAuthState, getRecommendation } from '@/lib/data'
 import SquadPitchView from '@/components/SquadPitchView'
+import AccessGate from '@/components/AccessGate'
+import {playerLabel} from '@/lib/playerPresentation'
 
 export const metadata={title:'Kadro Önerileri'}
 
 export const revalidate=300
 
 export default async function Squads(){
-  const [rec,alt]=await Promise.all([getRecommendation('recommended'),getRecommendation('alternative')])
+  const auth=await getAuthState()
+  const rec=await getRecommendation('recommended')
+  const alt=auth.plan==='pro'?await getRecommendation('alternative'):null
+
   return <>
     <div className="section-title">
       <div>
         <span className="eyebrow">KADRO OPTİMİZASYONU</span>
         <h1>MH{rec.run?.gameweek||'—'} Kadro Önerileri</h1>
       </div>
-      <span className="muted">Aynı saha görünümü • ilk 11 • yedek • kaptan • xFP</span>
+      <span className="muted">{auth.tier==='visitor'?'Ziyaretçi önizlemesi':auth.plan==='pro'?'Pro görünümü':'Ücretsiz üye görünümü'}</span>
     </div>
 
     <div className="squad-tabs-note">
       <span>● Önerilen: dengeli maksimum beklenen puan • risk dağıtımı için aynı takımın KL+DEF oyuncularından ilk 11’de en fazla 2 kişi</span>
-      <span>◇ Agresif 11: xFP'yi koruyup tavanı artırır • Önerilen XI'den 2-4 oyuncu farklı • kaptan ceiling odaklı</span>
+      <span>◇ Agresif 11: xFP'yi koruyup tavanı artırır • Önerilen XI'den 2-4 oyuncu farklı • kaptan tavan odaklı</span>
     </div>
 
-    <div className="unified-squad-list">
+    {auth.tier==='visitor'?<>
+      <section className="card recommendation-preview-card">
+        <div><span className="eyebrow">ÜCRETSİZ ÖNİZLEME</span><h2>Model kadrosundan ilk adaylar</h2><p>Önerilen kadronun tamamını ve yedekleri görmek için ücretsiz hesap aç.</p></div>
+        <div className="recommendation-preview-list">
+          {(rec.members||[]).filter(x=>x.squad_slot==='XI').slice(0,3).map((m,i)=><div key={m.player_id}><span>#{i+1}</span><b>{playerLabel(m.player)}</b><small>{m.team} • {Number(m.xfp||0).toFixed(2)} xFP</small></div>)}
+        </div>
+      </section>
+      <AccessGate
+        tier="member"
+        eyebrow="ÜCRETSİZ ÜYELİK"
+        title="Önerilen 15 kişilik kadroyu ücretsiz hesapla aç."
+        description="Ücretsiz üyelikte Önerilen Kadro, ilk 11, yedekler, kaptan ve kendi kadronu kaydetme özelliği açılır."
+      />
+    </>:<div className="unified-squad-list">
       <section className="card unified-squad-card">
         <SquadPitchView
           members={rec.members}
@@ -34,17 +52,22 @@ export default async function Squads(){
         />
       </section>
 
-      <section className="card unified-squad-card">
+      {auth.plan==='pro'?<section className="card unified-squad-card">
         <SquadPitchView
-          members={alt.members}
+          members={alt?.members||[]}
           title="AGRESİF 11"
-          gameweek={alt.run?.gameweek}
-          budget={alt.recommendation?.budget}
-          xiXfp={alt.recommendation?.xi_xfp}
+          gameweek={alt?.run?.gameweek}
+          budget={alt?.recommendation?.budget}
+          xiXfp={alt?.recommendation?.xi_xfp}
           variant="alternative"
           showBench
         />
-      </section>
-    </div>
+      </section>:<AccessGate
+        tier="pro"
+        eyebrow="PRO • AGRESİF 11"
+        title="Tavan odaklı ikinci kadroyu aç."
+        description="Agresif 11, xFP tabanını korurken P90 ve yüksek skor potansiyeline daha fazla ağırlık verir."
+      />}
+    </div>}
   </>
 }

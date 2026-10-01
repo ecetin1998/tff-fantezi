@@ -1,12 +1,14 @@
 import Link from 'next/link'
-import { getHomeOverview } from '@/lib/data'
+import { getAuthState, getHomeOverview } from '@/lib/data'
 import { teamCssVars, teamHref } from '@/lib/teamThemes'
 import {playerLabel} from '@/lib/playerPresentation'
 
 export const revalidate=300
 
 export default async function Home(){
-  const {run,best,value,teamXfpLeader,top25,playerCount,matchCount}=await getHomeOverview()
+  const [overview,auth]=await Promise.all([getHomeOverview(),getAuthState()])
+  const {run,best,value,teamXfpLeader,top25,playerCount,matchCount}=overview
+  const isPro=auth.plan==='pro'
   const latestDataAt=run?.decision_data_at||run?.source_updated_at||null
   const sourceUpdated=latestDataAt?new Intl.DateTimeFormat('tr-TR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit',timeZone:'Europe/Istanbul'}).format(new Date(latestDataAt)):'—'
   const modelUpdated=run?.generated_at?new Intl.DateTimeFormat('tr-TR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit',timeZone:'Europe/Istanbul'}).format(new Date(run.generated_at)):'—'
@@ -34,11 +36,17 @@ export default async function Home(){
       val:Number(teamXfpLeader?.total_xfp||0).toFixed(2),unit:'xFP',
       href:teamHref(teamXfpLeader?.name,teamXfpLeader?.id),team:teamXfpLeader?.name,
     },
-    {
+    isPro?{
       label:`MH${run?.gameweek||'—'} Top-25 adayı #1`,
       title:playerLabel(top25),meta:`${top25?.team||'—'} • üst dilime çıkma profili`,
       val:`#${Number(top25?.projection?.top25_rank||1)}`,unit:'Top25',
       href:top25?'/players/'+top25.id:'/players',team:top25?.team,
+    }:{
+      label:'PRO • Tavan analizi',
+      title:'Top-25 ve P90',
+      meta:'yüksek skor adayları • gelişmiş dağılım',
+      val:'PRO',unit:'analiz',
+      href:'/pricing',team:null,
     },
   ]
 
@@ -89,7 +97,7 @@ export default async function Home(){
       <div className="home-guide-copy">
         <span className="eyebrow">MODELİ NASIL OKUYACAKSIN?</span>
         <h2>Tek sayıya değil,<br/><span>dağılıma bak.</span></h2>
-        <p><strong>xFP</strong> ortalama beklentiyi, <strong>P90</strong> yüksek tavanı, <strong>Top‑25</strong> ise haftanın üst puan dilimine girme profilini anlatır. Aynı oyuncu her metriğin lideri olmak zorunda değildir.</p>
+        <p><strong>xFP</strong> ortalama beklentiyi gösterir. <strong>P90</strong> ve <strong>Top‑25</strong> yüksek tavanı ve haftanın üst puan dilimine girme profilini anlatan Pro katmanlarıdır.</p>
         <Link href="/sss" className="home-guide-link">Metodolojiyi aç <span>→</span></Link>
       </div>
       <div className="home-guide-metrics">

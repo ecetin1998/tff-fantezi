@@ -1,13 +1,13 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { getPlayerDetail } from '@/lib/data'
+import { getAuthState, getPlayerDetail } from '@/lib/data'
+import AccessGate from '@/components/AccessGate'
 import { teamCssVars } from '@/lib/teamThemes'
 import { availabilityCompactNote, availabilityIsIssue } from '@/lib/availability'
 import {playerLabel,predictionConfidenceLabel} from '@/lib/playerPresentation'
 import {playerRoleLabel} from '@/lib/playerRole'
 
 export const revalidate=300
-export const dynamic='force-static'
 export const dynamicParams=true
 export async function generateStaticParams(){ return [] }
 export async function generateMetadata({params}){
@@ -33,8 +33,9 @@ function MetricGrid({items,className=''}){
 
 export default async function PlayerPage({ params }){
   const { id }=await params
-  const data=await getPlayerDetail(id)
+  const [data,auth]=await Promise.all([getPlayerDetail(id),getAuthState()])
   if(!data) notFound()
+  const isPro=auth.plan==='pro'
 
   const {run,player,projection:p,availability:a,role:r,season:s,modelFeatures:mf,weekly,matches=[]}=data
   const closedWeeks=[...(weekly||[])].sort((x,y)=>Number(x.gameweek||0)-Number(y.gameweek||0))
@@ -66,9 +67,11 @@ export default async function PlayerPage({ params }){
     {label:'xFP',value:num(p?.xfp),note:`MH${run?.gameweek||'—'} beklenen`,emphasis:true},
     {label:'İlk 11',value:pct(p?.xi_probability),note:'başlama ihtimali'},
     {label:'xDakika',value:num(p?.x_minutes,0),note:'beklenen süre'},
-    {label:'6+ puan',value:pct(p?.six_plus_probability),note:'yüksek getiri ihtimali'},
-    {label:'P90',value:num(p?.p90,1),note:'üst %10 eşiği'},
     {label:'F/P',value:num(p?.value_score),note:'fiyat verimliliği'},
+    ...(isPro?[
+      {label:'6+ puan',value:pct(p?.six_plus_probability),note:'yüksek getiri ihtimali'},
+      {label:'P90',value:num(p?.p90,1),note:'üst %10 eşiği'},
+    ]:[])
   ]
 
   const scenarioMetrics=[
@@ -84,7 +87,7 @@ export default async function PlayerPage({ params }){
     {label:'Maç',value:played},
     {label:'İlk 11',value:Number(s?.starts||0)},
     {label:'Dakika',value:num(s?.minutes,0)},
-    {label:'6+ maç',value:Number(s?.six_plus_count||0)},
+    ...(isPro?[{label:'6+ maç',value:Number(s?.six_plus_count||0)}]:[]),
   ]
   if(isGK){
     seasonMetrics.push(
@@ -94,7 +97,9 @@ export default async function PlayerPage({ params }){
   }else{
     seasonMetrics.push(
       {label:'Gol',value:Number(s?.goals||0)},
-      {label:'Asist',value:Number(s?.assists||0)},
+      {label:'Asist',value:Number(s?.assists||0)}
+    )
+    if(isPro)seasonMetrics.push(
       {label:'xG toplam',value:num(s?.xg_total)},
       {label:'xA / 90',value:s?.xa_per90===null||s?.xa_per90===undefined?num(s?.xa_model_per90):num(s?.xa_per90),note:s?.xa_per90===null||s?.xa_per90===undefined?'model/prior':'gözlenen'},
       {label:'Şut',value:s?.shots===null||s?.shots===undefined?'—':Number(s.shots)},
@@ -171,7 +176,7 @@ export default async function PlayerPage({ params }){
       <MetricGrid items={decisionMetrics} className="decision-metrics"/>
     </section>
 
-    <div className="profile-grid player-profile-main-grid">
+    {isPro?<div className="profile-grid player-profile-main-grid">
       <section className="card profile-card player-scenario-card">
         <div className="player-detail-section-head">
           <div><span className="eyebrow">PUAN ARALIĞI</span><h2>Olası sonuç dağılımı</h2></div>
@@ -191,7 +196,13 @@ export default async function PlayerPage({ params }){
         <MetricGrid items={roleMetrics} className="role-metrics"/>
         <p className="player-role-caption">Son maçlardaki kullanım ile önceki dönemi yan yana gösterir; rotasyon değişimini daha kolay görürsün.</p>
       </section>
-    </div>
+    </div>:<AccessGate
+      compact
+      tier="pro"
+      eyebrow="PRO • OYUNCU DERİNLİĞİ"
+      title="Puan dağılımı, xG/xA ve rol değişimini aç."
+      description="P25/P75/P90, 6+ ihtimali, beklenen gol/asist ve son maç rol-dakika karşılaştırmaları Pro üyelikte görünür."
+    />}
 
     <section className="card profile-card season-card player-season-card">
       <div className="panel-head">
@@ -213,7 +224,7 @@ export default async function PlayerPage({ params }){
         <div><span>Son puan</span><b>{lastWeek?Number(lastWeek.points||0):'—'}</b></div>
         <div><span>Son 3 ort.</span><b>{recentWeeks.length?recentAverage.toFixed(2):'—'}</b></div>
         <div><span>En yüksek</span><b>{closedWeeks.length?bestWeek:'—'}</b></div>
-        <div><span>6+ maç</span><b>{Number(s?.six_plus_count||0)}</b></div>
+        {isPro?<div><span>6+ maç</span><b>{Number(s?.six_plus_count||0)}</b></div>:<div><span>Oynadığı maç</span><b>{played}</b></div>}
       </div>
       {closedWeeks.length?
         <div className="weekly-history-grid">{closedWeeks.map(h=>
@@ -226,7 +237,7 @@ export default async function PlayerPage({ params }){
         :<p className="muted">Henüz kapanmış hafta verisi yok.</p>}
     </section>
 
-    <details className="card profile-card player-advanced-details">
+    {isPro?<details className="card profile-card player-advanced-details">
       <summary>
         <span>
           <small>İLERİ MODEL DETAYLARI</small>
@@ -250,6 +261,6 @@ export default async function PlayerPage({ params }){
         </div>
         <div className="player-model-note"><span>Rol özeti</span><p>{r?.signal||'Belirgin rol değişimi yok.'}</p></div>
       </div>
-    </details>
+    </details>:null}
   </div>
 }
