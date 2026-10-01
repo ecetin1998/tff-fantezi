@@ -5,7 +5,8 @@ import { teamCssVars } from '@/lib/teamThemes'
 import { availabilityCompactNote, availabilityIsIssue } from '@/lib/availability'
 import {BUDGET,FORMATION_MAP,MAX_PLAYERS_PER_CLUB,SQUAD_LIMITS,SQUAD_SIZE,STARTING_GK,STARTING_XI_SIZE,TRANSFER_RULES} from '@/lib/rules'
 import {pitchPlayerLabel,playerLabel} from '@/lib/playerPresentation'
-import {ATTACK_FORMATION,MANAGER_CARDS,MANAGER_CARD_NONE,captainMultiplierForCard,managerCardInfo,normalizeManagerCard} from '@/lib/managerCards'
+import ManagerCardPicker from '@/components/ManagerCardPicker'
+import {ATTACK_FORMATION,ATTACK_SQUAD_LIMITS,MANAGER_CARDS,MANAGER_CARD_NONE,captainMultiplierForCard,managerCardInfo,normalizeManagerCard} from '@/lib/managerCards'
 const POS_ORDER={GK:0,DEF:1,MID:2,FWD:3}
 const posLabel={GK:'KL',DEF:'DEF',MID:'OS',FWD:'FOR'}
 
@@ -95,6 +96,7 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
   const [managerCard,setManagerCard]=useState(normalizedInitialManagerCard)
   const cardInfo=managerCardInfo(managerCard)
   const effectiveFormationMap=useMemo(()=>formationMapForCard(managerCard),[managerCard])
+  const effectiveSquadLimits=managerCard==='attack'?ATTACK_SQUAD_LIMITS:SQUAD_LIMITS
   const captainMultiplier=captainMultiplierForCard(managerCard)
   const effectiveBudget=cardInfo.unlimitedBudget?Number.POSITIVE_INFINITY:Number(cardInfo.budget||BUDGET)
 
@@ -136,7 +138,7 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
   const clubCounts=selected.reduce((a,p)=>(a[p.team_id]=(a[p.team_id]||0)+1,a),{})
   const clubLimitOk=!MAX_PLAYERS_PER_CLUB||Object.values(clubCounts).every(n=>n<=MAX_PLAYERS_PER_CLUB)
   const budgetOk=!Number.isFinite(effectiveBudget)||cost<=effectiveBudget+.0001
-  const validRoster=ids.length===SQUAD_SIZE&&Object.entries(SQUAD_LIMITS).every(([k,v])=>(counts[k]||0)===v)&&budgetOk&&clubLimitOk
+  const validRoster=ids.length===SQUAD_SIZE&&Object.entries(effectiveSquadLimits).every(([k,v])=>(counts[k]||0)===v)&&budgetOk&&clubLimitOk
   const liveFormation=formationFromXIIds(xiIds,map,effectiveFormationMap)
   const validXI=xiIds.length===STARTING_XI_SIZE&&xiIds.every(id=>ids.includes(id))&&Boolean(liveFormation)&&liveFormation===formation
   const valid=validRoster&&validXI&&Boolean(captainId)&&xiIds.includes(captainId)&&map.get(captainId)?.position!=='GK'
@@ -171,6 +173,17 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
     return {key,lineup,base,total,captain:cap,complete:lineup.length===STARTING_XI_SIZE}
   }).sort((a,b)=>b.total-a.total),[ids,map,effectiveFormationMap,cardInfo.benchBoost,selectedTotal,captainMultiplier])
   const bestFormation=formationOptions.find(x=>x.complete)?.key||formation
+  const managerCardPreviewXfp=useMemo(()=>Object.fromEntries(MANAGER_CARDS.map(card=>{
+    const limits=card.id==='attack'?ATTACK_SQUAD_LIMITS:SQUAD_LIMITS
+    const rosterReady=ids.length===SQUAD_SIZE&&Object.entries(limits).every(([position,required])=>(counts[position]||0)===required)
+    if(!rosterReady)return [card.id,null]
+    const planForCard=bestXIPlan(ids,map,formationMapForCard(card.id),captainMultiplierForCard(card.id))
+    if(!planForCard)return [card.id,null]
+    const info=managerCardInfo(card.id)
+    const base=info.benchBoost?selectedTotal:planForCard.base
+    const bonus=planForCard.captain?xfp(planForCard.captain)*Math.max(0,captainMultiplierForCard(card.id)-1):0
+    return [card.id,base+bonus]
+  })),[ids,map,counts,selectedTotal])
   const captainCandidates=[...xi].filter(p=>p.position!=='GK').sort((a,b)=>xfp(b)-xfp(a)).slice(0,3)
 
   const teams=useMemo(()=>[...new Set(players.map(p=>p.team).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'tr')),[players])
@@ -270,7 +283,7 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
   function add(id){
     const p=map.get(id)
     if(!p||ids.includes(id)||ids.length>=SQUAD_SIZE)return
-    if((counts[p.position]||0)>=SQUAD_LIMITS[p.position])return
+    if((counts[p.position]||0)>=effectiveSquadLimits[p.position])return
     if(MAX_PLAYERS_PER_CLUB&&(clubCounts[p.team_id]||0)>=MAX_PLAYERS_PER_CLUB)return
     if(Number.isFinite(effectiveBudget)&&cost+Number(p.price)>effectiveBudget+.0001)return
     const next=[...ids,id]
@@ -469,7 +482,7 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
           <div className="pitch-mark box bottom"/>
 
           {['GK','DEF','MID','FWD'].map(position=><div className={`roster-row roster-${position}`} key={position}>
-            {Array.from({length:SQUAD_LIMITS[position]},(_,slot)=>{
+            {Array.from({length:Math.max(effectiveSquadLimits[position],rosterByPos[position]?.length||0)},(_,slot)=>{
               const p=rosterByPos[position]?.[slot]
               if(p)return <div className="roster-player" key={p.id}>
                 <button type="button" className="remove-player roster-remove" onClick={()=>remove(p.id)} aria-label="Oyuncuyu çıkar">×</button>
@@ -565,21 +578,22 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
           <h3>{plan==='pro'?cardInfo.label:'Menajer kartı analizi'}</h3>
           <p>{plan==='pro'?cardInfo.description:'Haftanın kartını seçerek diziliş, bütçe ve puan etkisini kadrona uygula.'}</p>
         </div>
-        <label className="manager-card-select">
-          <span>Bu hafta</span>
-          <select value={managerCard} onChange={e=>changeManagerCard(e.target.value)} disabled={plan!=='pro'||isLocked}>
-            {MANAGER_CARDS.map(card=><option value={card.id} key={card.id}>{card.label}</option>)}
-          </select>
-        </label>
         <div className="manager-card-effects">
           {plan!=='pro'?<span>Gelişmiş üyelikte açılır</span>:<>
             <span>Kaptan {captainMultiplier}×</span>
             {cardInfo.benchBoost?<span>15 oyuncu puana dahil</span>:null}
-            {cardInfo.attack?<span>2-5-3 • 105m bütçe</span>:null}
+            {cardInfo.attack?<span>2 KL / 3 DEF / 5 OS / 5 FOR • 2-5-3 • 105m</span>:null}
             {cardInfo.unlimitedBudget?<span>Bütçe sınırı yok</span>:null}
             {managerCard===MANAGER_CARD_NONE?<span>Standart kurallar</span>:<span>MH{gameweek||'—'} için seçili</span>}
           </>}
         </div>
+        <ManagerCardPicker
+          value={managerCard}
+          onChange={changeManagerCard}
+          disabled={plan!=='pro'||isLocked}
+          xfpByCard={plan==='pro'?managerCardPreviewXfp:{}}
+          compact
+        />
       </div>
 
       <div className="formation-suggestions">
@@ -675,7 +689,7 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
       <div className="squad-save-row">
         <div className="squad-validity">
           <div className="club-counts">{Object.entries(clubCounts).sort((a,b)=>b[1]-a[1]).map(([teamId,count])=>{const p=selected.find(x=>String(x.team_id)===String(teamId));return <span className={count>=MAX_PLAYERS_PER_CLUB?'limit':''} key={teamId}>{p?.team||teamId}: {count}/{MAX_PLAYERS_PER_CLUB}</span>})}</div>
-          <span className={validRoster?'ok':''}>{validRoster?'✓':'○'} 2 KL / 5 DEF / 5 OS / 3 FOR</span>
+          <span className={validRoster?'ok':''}>{validRoster?'✓':'○'} {effectiveSquadLimits.GK} KL / {effectiveSquadLimits.DEF} DEF / {effectiveSquadLimits.MID} OS / {effectiveSquadLimits.FWD} FOR</span>
           <span className={budgetOk?'ok':''}>{budgetOk?'✓':'○'} {cardInfo.unlimitedBudget?'Bütçe sınırı kaldırıldı':cardInfo.attack?'105m Hücum bütçesi':'Bütçe limiti'}</span>
           <span className={clubLimitOk?'ok':''}>{clubLimitOk?'✓':'○'} Kulüp başına en fazla {MAX_PLAYERS_PER_CLUB}</span>
           <span className={validXI?'ok':''}>{validXI?'✓':'○'} {liveFormation===formation?'Seçili diziliş hazır':'İlk 11 dizilişi güncellenmeli'}</span>
