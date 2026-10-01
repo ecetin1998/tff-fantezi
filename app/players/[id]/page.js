@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation'
 import { getAuthState, getPlayerDetail } from '@/lib/data'
 import AccessGate from '@/components/AccessGate'
 import { teamCssVars } from '@/lib/teamThemes'
-import { availabilityCompactNote, availabilityIsIssue } from '@/lib/availability'
+import { availabilityIsIssue, availabilityReason } from '@/lib/availability'
 import {playerLabel,predictionConfidenceLabel} from '@/lib/playerPresentation'
 import {playerRoleLabel} from '@/lib/playerRole'
 
@@ -52,8 +52,8 @@ export default async function PlayerPage({ params }){
   }))
   const opponent=p?.opponent_name || fixtures.map(f=>f.opponentName).filter(Boolean).join(' + ') || '—'
   const hasAvailabilityIssue=availabilityIsIssue(a)
-  const hasAvailabilityInfo=a && (hasAvailabilityIssue || a.availability_type==='return' || a.expected_return_date || a.suspension_fixture || a.canonical_reason)
-  const availabilityNote=availabilityCompactNote(a)
+  const hasAvailabilityInfo=Boolean(a&&hasAvailabilityIssue)
+  const availabilityNote=availabilityReason(a)
   const isGK=player.position==='GK'
   const isDEF=player.position==='DEF'
   const themeStyle=teamCssVars(player.team)
@@ -154,9 +154,9 @@ export default async function PlayerPage({ params }){
       </div>
     </section>
 
-    {hasAvailabilityInfo?<div className={`availability-line player-detail-alert ${a?.availability_type==='return'?'is-return':''}`}>
+    {hasAvailabilityInfo?<div className="availability-line player-detail-alert">
       <div className="player-availability-copy">
-        <span>{a?.availability_type==='return'?'DÖNÜŞ NOTU':'UYGUNLUK UYARISI'}</span>
+        <span>UYGUNLUK UYARISI</span>
         <b>{availabilityNote||'Oynama durumu takip ediliyor'}</b>
       </div>
     </div>:null}
