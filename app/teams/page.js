@@ -18,7 +18,7 @@ export default async function Teams(){
     </div>
     <div className="team-analysis-legend">
       <span><b>Bu hafta xG</b> maç özelindeki gol üretim beklentisi</span>
-      <span><b>CS</b> gol yememe olasılığı</span>
+      <span><b>Gol yememe</b> olasılığı</span>
       <span><b>Toplam xFP</b> takım oyuncularının haftalık toplam beklentisi</span>
       <span><b>xG farkı</b> sezonluk hücum-savunma dengesi</span>
     </div>
