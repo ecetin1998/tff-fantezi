@@ -5,6 +5,7 @@ import {getAuthState,getSquadPlayerPool,getRecommendation} from '@/lib/data'
 import {BUDGET,FORMATION_SET,SQUAD_SIZE} from '@/lib/rules'
 import {playerLabel} from '@/lib/playerPresentation'
 import {reportServerError} from '@/lib/observability'
+import {MANAGER_CARD_NONE,captainMultiplierForCard,managerCardInfo,normalizeManagerCard} from '@/lib/managerCards'
 
 export const metadata={title:'Benim Kadrom'}
 
@@ -13,6 +14,8 @@ const key=(gw,id)=>`${gw}:${id}`
 function scoreSnapshot(snapshot,pointMap,posMap){
   const members=Array.isArray(snapshot.members)?snapshot.members:[]
   if(!members.length)return null
+  const managerCard=normalizeManagerCard(snapshot.manager_card||members[0]?.manager_card||MANAGER_CARD_NONE)
+  const cardInfo=managerCardInfo(managerCard)
   const finalRows=members.map(x=>pointMap.get(key(snapshot.gameweek,Number(x.player_id))))
   if(finalRows.some(row=>!row))return null
   const played=id=>Number(pointMap.get(key(snapshot.gameweek,id))?.minutes||0)>0
@@ -40,9 +43,16 @@ function scoreSnapshot(snapshot,pointMap,posMap){
     }
   }
 
-  let total=final.reduce((sum,id)=>sum+points(id),0)
+  let total=cardInfo.benchBoost
+    ?members.reduce((sum,row)=>sum+points(Number(row.player_id)),0)
+    :final.reduce((sum,id)=>sum+points(id),0)
   const captain=Number(snapshot.captain_id)
-  if(final.includes(captain)&&played(captain))total+=points(captain)
+  const captainCounted=cardInfo.benchBoost
+    ?members.some(row=>Number(row.player_id)===captain)
+    :final.includes(captain)
+  if(captainCounted&&played(captain)){
+    total+=points(captain)*Math.max(0,captainMultiplierForCard(managerCard)-1)
+  }
   return total
 }
 
@@ -76,6 +86,9 @@ export default async function Squad({searchParams}){
   }))
 
   const currentSnapshot=(snapshots||[]).find(s=>Number(s.gameweek)===Number(run?.gameweek))
+  const initialManagerCard=auth.plan==='pro'
+    ?normalizeManagerCard(currentSnapshot?.members?.[0]?.manager_card||MANAGER_CARD_NONE)
+    :MANAGER_CARD_NONE
   if(currentSnapshot?.members?.length)initialState=currentSnapshot.members.map(x=>({player_id:Number(x.player_id),is_captain:Boolean(x.is_captain),bench_order:x.bench_order===null?null:Number(x.bench_order)}))
 
   let recommendedBenchOrder=0
@@ -102,6 +115,7 @@ export default async function Squad({searchParams}){
     {sp?.error?<div className="alert error">{sp.error}</div>:null}
 
     <SquadBuilder players={players} initialState={initialState} recommendedState={recommendedState}
+      initialManagerCard={initialManagerCard}
       plan={auth.plan} gameweek={run?.gameweek} deadlineAt={gameweekRow?.deadline_at||null} locked={locked}
       transferScenarios={[]}/>
 
@@ -120,6 +134,7 @@ export default async function Squad({searchParams}){
           <div className="squad-history-captain">
             <small>Kaptan</small>
             <b>{playerLabel(playerMap.get(Number(s.captain_id)))}</b>
+            <em>{managerCardInfo(s.members?.[0]?.manager_card).label}</em>
           </div>
           <div className="squad-history-score">
             <small>Gerçek puan</small>
