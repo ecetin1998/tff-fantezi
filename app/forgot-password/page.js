@@ -12,7 +12,7 @@ const ERRORS={
   auth_failed:'Şifre yenileme bağlantısı gönderilemedi. Lütfen tekrar dene.',
 }
 const MESSAGES={
-  reset_sent:'Şifre yenileme bağlantısı gönderildi. E-posta kutunu ve spam klasörünü kontrol et.',
+  reset_sent:'Şifre yenileme bağlantısı gönderildi. E-posta kutunu ve gereksiz klasörünü kontrol et.',
 }
 
 export default async function ForgotPassword({searchParams}){
