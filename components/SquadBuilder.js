@@ -54,6 +54,14 @@ function buildXI(ids,formation,map,formationMap=FORMATION_MAP){
   }
   return out
 }
+function fitRosterToLimits(ids,map,limits){
+  const out=[]
+  for(const pos of ['GK','DEF','MID','FWD']){
+    const arr=ids.map(id=>map.get(id)).filter(p=>p?.position===pos).sort((a,b)=>xfp(b)-xfp(a))
+    out.push(...arr.slice(0,Number(limits[pos]||0)).map(p=>p.id))
+  }
+  return out
+}
 
 function bestXIPlan(ids,map,formationMap=FORMATION_MAP,captainMultiplier=2){
   let best=null
@@ -323,18 +331,23 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
   function changeManagerCard(value){
     if(plan!=='pro'||isLocked)return
     const next=normalizeManagerCard(value)
-    setManagerCard(next)
     const nextMap=formationMapForCard(next)
-    if(ids.length===SQUAD_SIZE){
-      const planForCard=bestXIPlan(ids,map,nextMap,captainMultiplierForCard(next))
-      if(planForCard){
-        setFormation(planForCard.key)
-        setXiIds(planForCard.lineup)
-        setCaptainId(planForCard.captain?.id||null)
-      }
-    }else if(!nextMap[formation]){
-      setFormation('4-3-3')
-      setXiIds(buildXI(ids,'4-3-3',map,nextMap))
+    const nextLimits=squadLimitsForCard(next,SQUAD_LIMITS)
+    const nextIds=fitRosterToLimits(ids,map,nextLimits)
+    setManagerCard(next)
+    setIds(nextIds)
+    const planForCard=bestXIPlan(nextIds,map,nextMap,captainMultiplierForCard(next))
+    if(planForCard){
+      setFormation(planForCard.key)
+      setXiIds(planForCard.lineup)
+      setCaptainId(planForCard.captain?.id||null)
+    }else{
+      const fallback=nextMap[formation]?formation:(nextMap['4-3-3']?'4-3-3':Object.keys(nextMap)[0])
+      setFormation(fallback)
+      const nextXI=buildXI(nextIds,fallback,map,nextMap)
+      setXiIds(nextXI)
+      const cap=nextXI.map(id=>map.get(id)).filter(p=>p&&p.position!=='GK').sort((a,b)=>xfp(b)-xfp(a))[0]
+      setCaptainId(cap?.id||null)
     }
     setSwapTarget(null)
   }
