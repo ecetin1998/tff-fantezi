@@ -263,6 +263,8 @@ Deno.serve(async(req:Request)=>{
         variant,budget,formation:solved.formation,xi_xfp:xiXfp,
         xi_xfp_with_card:cardTotal,captain_xfp:xiXfp+captainBonus,
         manager_card:cardId,
+        budget_limit:Number.isFinite(rules.effectiveBudget)?Number(rules.effectiveBudget):null,
+        unlimited_budget:Boolean(card.unlimited),
       },
       members,
     }),{headers:CORS});
