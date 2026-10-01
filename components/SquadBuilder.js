@@ -5,6 +5,7 @@ import { teamCssVars } from '@/lib/teamThemes'
 import { availabilityCompactNote, availabilityIsIssue } from '@/lib/availability'
 import {BUDGET,FORMATION_MAP,MAX_PLAYERS_PER_CLUB,SQUAD_LIMITS,SQUAD_SIZE,STARTING_GK,STARTING_XI_SIZE,TRANSFER_RULES} from '@/lib/rules'
 import {pitchPlayerLabel,playerLabel} from '@/lib/playerPresentation'
+import ManagerCardPicker from '@/components/ManagerCardPicker'
 import {ATTACK_FORMATION,MANAGER_CARDS,MANAGER_CARD_NONE,captainMultiplierForCard,managerCardInfo,normalizeManagerCard,squadLimitsForCard} from '@/lib/managerCards'
 const POS_ORDER={GK:0,DEF:1,MID:2,FWD:3}
 const posLabel={GK:'KL',DEF:'DEF',MID:'OS',FWD:'FOR'}
@@ -180,6 +181,17 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
     return {key,lineup,base,total,captain:cap,complete:lineup.length===STARTING_XI_SIZE}
   }).sort((a,b)=>b.total-a.total),[ids,map,effectiveFormationMap,cardInfo.benchBoost,selectedTotal,captainMultiplier])
   const bestFormation=formationOptions.find(x=>x.complete)?.key||formation
+  const managerCardPreviewXfp=useMemo(()=>Object.fromEntries(MANAGER_CARDS.map(card=>{
+    const limits=squadLimitsForCard(card.id,SQUAD_LIMITS)
+    const rosterReady=ids.length===SQUAD_SIZE&&Object.entries(limits).every(([position,required])=>(counts[position]||0)===required)
+    if(!rosterReady)return [card.id,null]
+    const planForCard=bestXIPlan(ids,map,formationMapForCard(card.id),captainMultiplierForCard(card.id))
+    if(!planForCard)return [card.id,null]
+    const info=managerCardInfo(card.id)
+    const base=info.benchBoost?selectedTotal:planForCard.base
+    const bonus=planForCard.captain?xfp(planForCard.captain)*Math.max(0,captainMultiplierForCard(card.id)-1):0
+    return [card.id,base+bonus]
+  })),[ids,map,counts,selectedTotal])
   const captainCandidates=[...xi].filter(p=>p.position!=='GK').sort((a,b)=>xfp(b)-xfp(a)).slice(0,3)
 
   const teams=useMemo(()=>[...new Set(players.map(p=>p.team).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'tr')),[players])
@@ -579,12 +591,6 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
           <h3>{plan==='pro'?cardInfo.label:'Menajer kartı analizi'}</h3>
           <p>{plan==='pro'?cardInfo.description:'Haftanın kartını seçerek diziliş, bütçe ve puan etkisini kadrona uygula.'}</p>
         </div>
-        <label className="manager-card-select">
-          <span>Bu hafta</span>
-          <select value={managerCard} onChange={e=>changeManagerCard(e.target.value)} disabled={plan!=='pro'||isLocked}>
-            {MANAGER_CARDS.map(card=><option value={card.id} key={card.id}>{card.label}</option>)}
-          </select>
-        </label>
         <div className="manager-card-effects">
           {plan!=='pro'?<span>Gelişmiş üyelikte açılır</span>:<>
             <span>Kaptan {captainMultiplier}×</span>
@@ -594,6 +600,13 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
             {managerCard===MANAGER_CARD_NONE?<span>Standart kurallar</span>:<span>MH{gameweek||'—'} için seçili</span>}
           </>}
         </div>
+        <ManagerCardPicker
+          value={managerCard}
+          onChange={changeManagerCard}
+          disabled={plan!=='pro'||isLocked}
+          xfpByCard={plan==='pro'?managerCardPreviewXfp:{}}
+          compact
+        />
       </div>
 
       <div className="formation-suggestions">
