@@ -2,10 +2,10 @@ import Link from 'next/link'
 import SquadBuilder from '@/components/SquadBuilder'
 import {createClient} from '@/lib/supabase/server'
 import {getAuthState,getSquadPlayerPool,getRecommendation} from '@/lib/data'
-import {BUDGET,FORMATION_SET,SQUAD_SIZE} from '@/lib/rules'
+import {BUDGET,FORMATIONS,SQUAD_SIZE} from '@/lib/rules'
 import {playerLabel} from '@/lib/playerPresentation'
 import {reportServerError} from '@/lib/observability'
-import {MANAGER_CARD_NONE,captainMultiplierForCard,managerCardInfo,normalizeManagerCard} from '@/lib/managerCards'
+import {MANAGER_CARD_NONE,captainMultiplierForCard,formationsForCard,managerCardInfo,normalizeManagerCard} from '@/lib/managerCards'
 
 export const metadata={title:'Benim Kadrom'}
 
@@ -16,6 +16,7 @@ function scoreSnapshot(snapshot,pointMap,posMap){
   if(!members.length)return null
   const managerCard=normalizeManagerCard(snapshot.manager_card||members[0]?.manager_card||MANAGER_CARD_NONE)
   const cardInfo=managerCardInfo(managerCard)
+  const formationSet=new Set(formationsForCard(managerCard,FORMATIONS))
   const finalRows=members.map(x=>pointMap.get(key(snapshot.gameweek,Number(x.player_id))))
   if(finalRows.some(row=>!row))return null
   const played=id=>Number(pointMap.get(key(snapshot.gameweek,id))?.minutes||0)>0
@@ -39,7 +40,7 @@ function scoreSnapshot(snapshot,pointMap,posMap){
     const counts={DEF:0,MID:0,FWD:0}
     for(const id of trial){const pos=posMap.get(id);if(pos in counts)counts[pos]++}
     const trialFormation=`${counts.DEF}-${counts.MID}-${counts.FWD}`
-    if(FORMATION_SET.has(trialFormation)){
+    if(formationSet.has(trialFormation)){
       final[final.indexOf(missing)]=reserve;used.add(reserve)
     }
   }
