@@ -101,7 +101,7 @@ export default async function Home(){
         <Link href="/sss" className="home-guide-link">Metodolojiyi aç <span>→</span></Link>
       </div>
       <div className="home-guide-metrics">
-        <div><b>xFP</b><span>Beklenen fantasy puanı</span><small>Ortalama senaryo</small></div>
+        <div><b>xFP</b><span>Beklenen fantezi puanı</span><small>Ortalama senaryo</small></div>
         <div><b>xDakika</b><span>Beklenen oynama süresi</span><small>Rol + ilk 11 ihtimali</small></div>
         <div><b>P90</b><span>Üst %10 puan eşiği</span><small>Tavan senaryosu</small></div>
         <div><b>İlk 25</b><span>Üst dilime girme profili</span><small>Patlama ihtimali</small></div>
