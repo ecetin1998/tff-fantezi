@@ -291,7 +291,7 @@
 .scope :global(.lineup-workbench-head) h2{margin:4px 0 3px;color:#202b48;font-size:22px}
 .scope :global(.lineup-workbench-head) p{margin:0;color:#78829a;font-size:9px}
 .scope :global(.formation-suggestions){
-  display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:6px;margin-bottom:10px
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(82px,1fr));gap:6px;margin-bottom:10px
 }
 .scope :global(.formation-option){
   position:relative;min-width:0;padding:9px 6px;border:1px solid #e0e6ef;border-radius:10px;
