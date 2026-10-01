@@ -17,7 +17,7 @@ export const metadata={
 
 const quickStart=[
   ['1','Adayları bul','Oyuncu Analizi’nde xFP, İlk 11, xDakika ve tavan metrikleriyle oyuncu havuzunu daralt.'],
-  ['2','Eşleşmeyi kontrol et','Maç Tahminleri ve Takım Analizi’nde rakip xG, galibiyet/CS ihtimali ile hücum-savunma eşleşmesini birlikte oku.'],
+  ['2','Eşleşmeyi kontrol et','Maç Tahminleri ve Takım Analizi’nde rakip xG, galibiyet/gol yememe ihtimali ile hücum-savunma eşleşmesini birlikte oku.'],
   ['3','Kadroyu kur','Kadro Önerileri’ndeki Önerilen ve Agresif 11’i referans al; sonra Benim Kadrom’da 15 kişilik takımını düzenle.'],
 ]
 
@@ -52,7 +52,7 @@ const glossary=[
   ['F/P', 'Fiyat/performans göstergesi. Oyuncunun fiyatına göre model beklentisinin ne kadar verimli olduğunu karşılaştırmaya yardım eder.'],
   ['Hücum eşleşmesi', 'Rakibin savunma profiline göre takımın hücum tarafındaki haftalık eşleşme sinyalidir: Avantajlı, Dengeli veya Dezavantajlı.'],
   ['Savunma eşleşmesi', 'Rakibin hücum profiline göre takımın savunma/gol yememe tarafındaki haftalık eşleşme sinyalidir: Avantajlı, Dengeli veya Dezavantajlı.'],
-  ['Puan bandı', 'P25–P90 gibi aralıklar tek bir xFP sayısından daha geniş olası sonuç alanını gösterir. Fantezi puanı doğal olarak değişkendir.'],
+  ['Puan aralığı', 'P25–P90 gibi aralıklar tek bir xFP sayısından daha geniş olası sonuç alanını gösterir. Fantezi puanı doğal olarak değişkendir.'],
   ['İlk 25', 'Yüksek skor adaylarını ortalama xFP’den ayrı bir üst-tavan katmanıyla tarar. Ana xFP hesabının veya kadro optimizasyonunun yerine geçmez.'],
   ['Kalite Kontrolü / GEÇTİ', 'Yeni model çıktısının veri bütünlüğü, aktif oyuncu kapsamı, dakika/rol ve yayın kontrollerini geçtiğini belirtir. Kontrolü geçmeyen aday sürüm yayınlanmaz.'],
 ]
@@ -67,7 +67,7 @@ const faqs=[
   ['Önerilen Kadro ile Agresif 11 arasındaki fark nedir?', 'Önerilen Kadro daha dengeli biçimde yüksek beklenen puanı ve risk dağılımını hedefler. Agresif 11 ise xFP tabanını çok bozmadan daha yüksek tavan senaryosuna yönelir; P90 ve yüksek skor potansiyeline daha fazla ağırlık verir.'],
   ['Neden daha düşük xFP’li bir oyuncu Agresif 11’de olabilir?', 'Agresif 11 yalnız ortalama xFP’yi maksimize etmez. Üst senaryo potansiyeli, P90, gol/asist tavanı ve kaptanlık ceiling’i daha fazla önem kazanır. Bu nedenle ortalaması biraz düşük ama tavanı güçlü bir oyuncu seçilebilir.'],
   ['Hücumcu bekler ve farklı rolde oynayan oyuncular nasıl değerlendiriliyor?', 'Fantezi pozisyonu ile gerçek saha rolü aynı şey değildir. Model; bek, kanat bek, hibrit kanat, ileri çıkan savunmacı veya pozisyon dışı kullanılan oyuncuların takım hücum payını, xG/xA potansiyelini, dakika rolünü ve rakip eşleşmesini ayrı sinyaller olarak işler.'],
-  ['Takım Analizi sayfasını nasıl okumalıyım?', 'Önce takımın bu haftaki rakibini ve ev/deplasman durumunu gör. Ardından Bu hafta xG ve Rakip xG ile maçın yönünü, Galibiyet ve CS ile olasılık profilini, Toplam xFP ile oyuncu havuzunun genel fantezi potansiyelini değerlendir. Hücum ve Savunma eşleşmesi rozetleri bu yorumu ayrı ayrı özetler.'],
+  ['Takım Analizi sayfasını nasıl okumalıyım?', 'Önce takımın bu haftaki rakibini ve ev/deplasman durumunu gör. Ardından Bu hafta xG ve Rakip xG ile maçın yönünü, Galibiyet ve gol yememe ihtimaliyle olasılık profilini, Toplam xFP ile oyuncu havuzunun genel fantezi potansiyelini değerlendir. Hücum ve Savunma eşleşmesi rozetleri bu yorumu ayrı ayrı özetler.'],
   ['Hücum ve savunma eşleşmesindeki “Avantajlı” ne demek?', 'Bu etiket tek başına takımın maçı kazanacağı anlamına gelmez. Hücum etiketi takımın rakip savunmasına karşı üretim koşullarını; savunma etiketi ise rakibin hücumuna karşı gol yememe/savunma koşullarını özetler.'],
   ['Bu hafta xG ile Rakip xG neden ayrı?', 'Bu hafta xG takımın beklenen hücum üretimini, Rakip xG ise karşı takımın beklenen üretimini gösterir. İkisini birlikte okumak hem hücumcular hem de kaleci/defans seçimleri için daha anlamlıdır.'],
   ['Sakat veya cezalı oyuncu neden bazen listede görünüyor?', 'Oyuncu havuzunda bulunması ile o hafta puan üretmesi farklı şeylerdir. Oynayamayacağı doğrulanan oyuncuların uygunluk ve dakika beklentisi düşürülür; kesin yok durumunda model pozitif xFP üretmemelidir. Dönüş yapan oyuncular ise dakika ve ilk 11 rolü yeniden dağıtılarak hesaba alınır.'],
