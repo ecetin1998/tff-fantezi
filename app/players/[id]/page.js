@@ -71,9 +71,16 @@ export default async function PlayerPage({ params }){
   const recentAverage=recentWeeks.length?recentWeeks.reduce((sum,w)=>sum+Number(w.points||0),0)/recentWeeks.length:0
   const lastWeek=closedWeeks.at(-1)
   const bestWeek=closedWeeks.length?Math.max(...closedWeeks.map(w=>Number(w.points||0))):0
-  const replayRows=(replay||[]).filter(row=>row.predicted_xfp!==null&&row.actual_points!==null)
-  const replayMae=replayRows.length?replayRows.reduce((sum,row)=>sum+Math.abs(Number(row.predicted_xfp||0)-Number(row.actual_points||0)),0)/replayRows.length:null
-  const replayMax=Math.max(1,...replayRows.flatMap(row=>[Number(row.predicted_xfp||0),Number(row.actual_points||0),Number(row.predicted_p90||0)]))
+  const replayRows=(replay||[])
+    .filter(row=>row.actual_points!==null&&row.actual_points!==undefined&&row.p25!==null&&row.p25!==undefined&&row.p90!==null&&row.p90!==undefined)
+    .map(row=>{
+      const low=Number(row.p25||0),high=Number(row.p90||0),actual=Number(row.actual_points||0)
+      const inside=actual>=low&&actual<=high
+      const distance=inside?0:actual<low?low-actual:actual-high
+      return {...row,low,high,actual,inside,distance,status:inside?'inside':actual<low?'below':'above'}
+    })
+  const replayHitCount=replayRows.filter(row=>row.inside).length
+  const replayHitRate=replayRows.length?replayHitCount/replayRows.length:null
 
   const decisionMetrics=[
     {label:'xFP',value:num(p?.xfp),note:`MH${run?.gameweek||'—'} beklenen`,emphasis:true},
@@ -250,9 +257,22 @@ export default async function PlayerPage({ params }){
     </section>
 
     {replayRows.length?<section className="card profile-card player-prediction-history">
-      <div className="panel-head"><div><span className="eyebrow">TAHMİN vs GERÇEKLEŞEN</span><h2>Geçmiş haftalarda model ne bekledi?</h2></div><span className="pill">Ort. hata {replayMae===null?'—':replayMae.toFixed(2)}</span></div>
-      <div className="prediction-history-list">{replayRows.map(row=><div className="prediction-history-row" key={row.gameweek}><span className="prediction-week">MH{row.gameweek}</span><div className="prediction-bars"><div><small>xFP {num(row.predicted_xfp,1)}</small><i className="predicted" style={{width:`${Math.min(100,Number(row.predicted_xfp||0)/replayMax*100)}%`}}/></div><div><small>Gerçek {num(row.actual_points,0)}</small><i className="actual" style={{width:`${Math.min(100,Number(row.actual_points||0)/replayMax*100)}%`}}/></div></div><b className={Math.abs(Number(row.predicted_xfp||0)-Number(row.actual_points||0))<=2?'close':'wide'}>{Number(row.actual_points||0)-Number(row.predicted_xfp||0)>=0?'+':''}{(Number(row.actual_points||0)-Number(row.predicted_xfp||0)).toFixed(1)}</b></div>)}</div>
-      <p className="muted prediction-history-note">Geçmiş haftalar modelin geriye dönük test çıktısıdır; canlı haftadaki xFP ile birebir aynı veri anını temsil etmez.</p>
+      <div className="panel-head">
+        <div><span className="eyebrow">TAHMİN ARALIĞI vs GERÇEKLEŞEN</span><h2>Model hangi puan aralığını bekledi, oyuncu ne aldı?</h2></div>
+        <span className="pill">Aralık içinde {replayHitCount}/{replayRows.length}{replayHitRate!==null?` • ${Math.round(replayHitRate*100)}%`:''}</span>
+      </div>
+      <div className="prediction-history-list">{replayRows.map(row=><div className="prediction-history-row range-view" key={row.gameweek}>
+        <span className="prediction-week">MH{row.gameweek}</span>
+        <div className="prediction-range-copy">
+          <span><small>Tahmin aralığı • P25–P90</small><b>{num(row.low,1)} – {num(row.high,1)}</b></span>
+          <span><small>Gerçek puan</small><b>{num(row.actual,0)}</b></span>
+          <small className="prediction-center-note">Merkez xFP {num(row.predicted_xfp,1)}{row.history_mode==='live_frozen'?' • maç öncesi dondurulan tahmin':' • geriye dönük test'}</small>
+        </div>
+        <b className={'range-result '+row.status}>
+          {row.inside?'Aralık içinde':row.status==='below'?`P25 altı • -${row.distance.toFixed(1)}`:`P90 üstü • +${row.distance.toFixed(1)}`}
+        </b>
+      </div>)}</div>
+      <p className="muted prediction-history-note">Burada başarıyı tek bir xFP noktasına göre değil, modelin ürettiği P25–P90 dağılım aralığına göre okuyoruz. MH7 ve sonrası gerçek haftalar kapanınca maç öncesi dondurulan tahminler otomatik olarak bu geçmişe eklenir.</p>
     </section>:null}
 
     {isPro?<details className="card profile-card player-advanced-details">
