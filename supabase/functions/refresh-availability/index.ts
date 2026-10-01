@@ -138,7 +138,8 @@ function parseSource(html:string){
     const team=htmlText(sec[1])
     if(!team)continue
     for(const tr of sec[2].matchAll(/<tr[^>]*>([\s\S]*?)<\/tr>/gi)){
-      const cells=[...tr[1].matchAll(/<t[dh][^>]*>([\s\S]*?)<\/t[dh]>/gi)].map(m=>htmlText(m[1]))
+      const rawCells=[...tr[1].matchAll(/<t[dh][^>]*>([\s\S]*?)<\/t[dh]>/gi)].map(m=>htmlText(m[1]))
+      const cells=rawCells[0]?.trim()?rawCells:rawCells.slice(1)
       if(cells.length<2||normalize(cells[0])==="oyuncu")continue
       const player=cells[0]?.trim()
       const reason=cells[1]?.trim()
