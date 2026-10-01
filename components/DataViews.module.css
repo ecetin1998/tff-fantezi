@@ -3704,3 +3704,67 @@
     width:100%;
   }
 }
+
+.scope :global(.availability-updated-card){
+  background:linear-gradient(135deg,#f8fbff,#f1faf8);
+  border-color:#d9e7e4;
+}
+.scope :global(.availability-updated-card) b{
+  font-size:18px;
+  color:#087e72;
+  font-variant-numeric:tabular-nums;
+}
+.scope :global(.availability-updated-card) small{
+  color:#6f7b92;
+  font-weight:800;
+}
+@media(max-width:430px){
+  .scope :global(.availability-updated-card) b{font-size:17px}
+}
+
+/* Final mobile availability layout: lives in DataViews so older responsive rules cannot override it. */
+@media(max-width:760px){
+  .scope :global(.availability-mobile-card){padding:14px;overflow:hidden}
+  .scope :global(.availability-mobile-head){
+    display:grid;
+    grid-template-columns:44px minmax(0,1fr)!important;
+    grid-template-areas:"pos player" "status status";
+    column-gap:10px;
+    row-gap:8px;
+    align-items:start;
+    min-width:0;
+  }
+  .scope :global(.availability-mobile-head)>:global(.pos){
+    grid-area:pos;position:static!important;width:44px!important;min-width:44px!important;margin:0;align-self:start
+  }
+  .scope :global(.availability-mobile-player){grid-area:player;min-width:0;padding-top:1px}
+  .scope :global(.availability-mobile-player) b{
+    display:block;min-width:0;font-size:14px;line-height:1.25;white-space:normal!important;
+    overflow:visible!important;text-overflow:clip!important;overflow-wrap:anywhere;color:#26324f
+  }
+  .scope :global(.availability-mobile-player) small{display:block;margin-top:3px;font-size:10.5px;color:#8791a6}
+  .scope :global(.availability-mobile-head)>:global(.status-chip){
+    grid-area:status!important;grid-column:auto!important;justify-self:start;position:static!important;margin:0
+  }
+}
+@media(max-width:430px){
+  .scope :global(.availability-mobile-head){grid-template-columns:44px minmax(0,1fr)!important}
+}
+
+/* P25/P90 labels belong to the coloured interval; actual value belongs to its marker. */
+.scope :global(.range-track){margin-bottom:38px}
+.scope :global(.range-bound){
+  position:absolute;top:22px;z-index:2;color:#7d88a1;font-size:8px;font-weight:900;white-space:nowrap
+}
+.scope :global(.range-p25){transform:translateX(0)}
+.scope :global(.range-p90){transform:translateX(-100%)}
+.scope :global(.range-actual-label){
+  position:absolute;top:40px;z-index:3;color:#26324f;font-size:9px;font-weight:950;white-space:nowrap;
+  transform:translateX(-50%)
+}
+.scope :global(.prediction-range-visual)>small{margin-top:0}
+.scope :global(.range-labels){display:none!important}
+@media(max-width:620px){
+  .scope :global(.range-bound){font-size:7.5px}
+  .scope :global(.range-actual-label){font-size:8.5px}
+}
