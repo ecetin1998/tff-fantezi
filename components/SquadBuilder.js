@@ -446,7 +446,7 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
         <small>MH{gameweek||'—'} tahmini</small>
       </div>
       <div className="squad-toolbar">
-        <button type="button" className="squad-tool-btn" onClick={fillRecommended} disabled={isLocked}>Model Kadrosu</button>
+        <button type="button" className="squad-tool-btn" onClick={fillRecommended} disabled={isLocked}>{managerCard===MANAGER_CARD_NONE?'Model Kadrosu':'Standart Model Kadrosu'}</button>
         <button type="button" className="squad-tool-btn danger" onClick={reset} disabled={isLocked}>Sıfırla</button>
         <button type="button" className="squad-tool-btn primary-jump" onClick={goToLineup} disabled={!validRoster}>İlk 11’i Diz ↓</button>
       </div>
@@ -696,7 +696,11 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
     <section className="card squad-insight-bar">
       <div className="squad-model-guidance">
         <span className="eyebrow">MODEL ÖNERİSİ</span>
-        {!recommendedIds.length?<>
+        {managerCard!==MANAGER_CARD_NONE?<>
+          <h2>{cardInfo.label} aktif</h2>
+          <p>Bu hafta standart model kadrosuna göre transfer kıyasını kapattım; seçtiğin kart bütçe, diziliş ve puan hesabını değiştirebilir. Kart için yeniden optimize edilen Önerilen ve Agresif 11'i Kadro Önerileri ekranından kullan.</p>
+          <a className="squad-tool-btn model-apply-btn" href="/squads">Kartlı kadro önerisini aç</a>
+        </>:!recommendedIds.length?<>
           <h2>Model kadrosu henüz hazır değil</h2>
           <p>Bu haftanın önerilen kadrosu yayınlandığında mevcut kadronla burada karşılaştırılacak.</p>
         </>:ids.length!==SQUAD_SIZE?<>
