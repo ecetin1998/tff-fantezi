@@ -61,7 +61,7 @@ function effectiveRules(rules:any,card:any){
     ...rules,
     squad,
     formations,
-    effectiveBudget:card.unlimited?null:baseBudget,
+    effectiveBudget:card.unlimited?null:(card.attack?baseBudget+5:baseBudget),
   };
 }
 function buildModel(rows:any[],variant:string,rules:any,card:any,reference:any=null){
