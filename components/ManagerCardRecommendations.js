@@ -16,6 +16,8 @@ function SquadCard({data,title,variant,cardActive=false}){
       xiXfp={data.recommendation?.xi_xfp_with_card??data.recommendation?.captain_xfp??data.recommendation?.xi_xfp}
       variant={variant}
       scoreLabel={cardActive?'Kartlı hafta xFP':'İlk 11 xFP'}
+      budgetLimit={data.recommendation?.budget_limit??100}
+      unlimitedBudget={Boolean(data.recommendation?.unlimited_budget)}
       showBench
     />
   </section>
