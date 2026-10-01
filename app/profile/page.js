@@ -32,7 +32,7 @@ export default async function Profile(){
   const isPro=auth.plan==='pro'
   const accountName=dummyAliases[auth.email]||auth.email?.split('@')[0]||'Kullanıcı'
   const features=isPro
-    ?['Tüm oyuncu havuzu ve maç tahminleri','Benim Kadrom ve tam Önerilen Kadro','P25 / P75 / P90 ve 6+ ihtimali','xG / xA ve gelişmiş rol-dakika analizi','Agresif 11 ve gelişmiş takım eşleşmeleri']
+    ?['Tüm oyuncu havuzu ve maç tahminleri','Benim Kadrom ve tam Önerilen Kadro','P25 / P75 / P90 ve 6+ ihtimali','xG / xA ve gelişmiş rol-dakika analizi','Agresif 11 ve gelişmiş takım eşleşmeleri','Menajer kartı optimizasyonu ve kartlı hafta hesabı']
     :['Tüm oyuncu havuzu ve filtreler','Tüm maç tahminleri ve fantezi yorumları','Benim Kadrom • 15 oyuncu / 100m','Tam Önerilen Kadro','Tam sakatlık / ceza görünümü']
 
   return <div className="profile-page">
