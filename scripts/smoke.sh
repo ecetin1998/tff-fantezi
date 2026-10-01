@@ -41,12 +41,79 @@ PUBLIC_ROUTES=(
   "/backtest"
   "/pricing"
   "/sss"
+  "/squad"
+  "/profile"
+  "/login"
+  "/signup"
+  "/forgot-password"
+  "/reset-password"
+  "/confirm-email"
 )
 
 for path in "${PUBLIC_ROUTES[@]}"; do
   code="$(status_code "$BASE_URL$path")"
   [[ "$code" == "200" ]] || fail "$path returned HTTP $code"
   echo "PASS route $path"
+done
+
+echo "Checking visible Turkish UI language"
+for path in "${PUBLIC_ROUTES[@]}"; do
+  safe_name="$(printf '%s' "$path" | sed 's#^/$#home#; s#^/##; s#[/?&=]#_#g')"
+  html_file="$TMP_DIR/lang-${safe_name}.html"
+  curl_retry -fsSL "$BASE_URL$path" > "$html_file"
+
+  node - "$html_file" "$path" <<'NODE'
+const fs=require('node:fs')
+const [,,file,path]=process.argv
+let html=fs.readFileSync(file,'utf8')
+html=html
+  .replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi,' ')
+  .replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi,' ')
+  .replace(/<svg\b[^>]*>[\s\S]*?<\/svg>/gi,' ')
+  .replace(/<[^>]+>/g,' ')
+  .replace(/&nbsp;|&#160;/gi,' ')
+  .replace(/&amp;/gi,'&')
+  .replace(/&quot;/gi,'"')
+  .replace(/&#39;|&apos;/gi,"'")
+  .replace(/\s+/g,' ')
+  .trim()
+
+const forbidden=[
+  [/\bFantasy\b/i,'Fantasy'],
+  [/\bScout(?:Plus)?\b/i,'Scout'],
+  [/\bFree\b/i,'Free'],
+  [/\bPro\b/i,'Pro'],
+  [/\bPremium\b/i,'Premium'],
+  [/\bReady\b/i,'Ready'],
+  [/\bPass\b/i,'Pass'],
+  [/\bRefresh\b/i,'Refresh'],
+  [/\bReplay\b/i,'Replay'],
+  [/\bSnapshot\b/i,'Snapshot'],
+  [/clean\s*sheet/i,'clean sheet'],
+  [/Top-?25/i,'Top-25'],
+  [/vice[- ]captain/i,'vice-captain'],
+  [/\bCross\b/i,'Cross'],
+  [/\bDripling\b/i,'Dripling'],
+  [/\bSwap\b/i,'Swap'],
+  [/\bHit\b/i,'Hit'],
+  [/\bCeiling\b/i,'Ceiling'],
+  [/\bBeta\b/i,'Beta'],
+  [/\bAvailability\b/i,'Availability'],
+  [/\bHome\b/i,'Home'],
+  [/\bAway\b/i,'Away'],
+  [/\bLogin\b/i,'Login'],
+  [/\bSignup\b/i,'Signup'],
+  [/\bPassword\b/i,'Password'],
+  [/\bProfile\b/i,'Profile'],
+  [/\bDashboard\b/i,'Dashboard'],
+]
+const leaks=forbidden.filter(([pattern])=>pattern.test(html)).map(([,label])=>label)
+if(leaks.length){
+  console.error(path+': visible English terms leaked: '+leaks.join(', '))
+  process.exit(1)
+}
+NODE
+  echo "PASS Turkish UI $path"
 done
 
 SECTIONS=(all summary players matches squads availability roles weekly performance)
