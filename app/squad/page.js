@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import SquadBuilder from '@/components/SquadBuilder'
 import {createClient} from '@/lib/supabase/server'
-import {getAuthState,getSquadPlayerPool,getRecommendation} from '@/lib/data'
+import {getAuthState,getFutureFixturePlan,getSquadPlayerPool,getRecommendation} from '@/lib/data'
 import {BUDGET,FORMATIONS,SQUAD_SIZE} from '@/lib/rules'
 import {playerLabel} from '@/lib/playerPresentation'
 import {reportServerError} from '@/lib/observability'
@@ -74,6 +74,7 @@ export default async function Squad({searchParams}){
   </div></div>
 
   const {players,run}=pool
+  const futurePlan=run?.gameweek?await getFutureFixturePlan(Number(run.gameweek)+1,2):{byTeam:{}}
   const {members:recommended}=recommendation
   const {data:pageData,error:pageError}=run?.gameweek
     ?await supabase.rpc('scout_my_squad_page',{p_gameweek:run.gameweek})
@@ -119,7 +120,7 @@ export default async function Squad({searchParams}){
     <SquadBuilder players={players} initialState={initialState} recommendedState={recommendedState}
       initialManagerCard={initialManagerCard}
       plan={auth.plan} gameweek={run?.gameweek} deadlineAt={gameweekRow?.deadline_at||null} locked={locked}
-      transferScenarios={[]}/>
+      transferScenarios={[]} futurePlan={futurePlan}/>
 
     <section className="card squad-history-card">
       <div className="squad-history-head">

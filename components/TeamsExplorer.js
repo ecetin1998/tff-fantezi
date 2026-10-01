@@ -8,6 +8,7 @@ const matchupLabel={good:'Avantajlı',neutral:'Dengeli',tough:'Dezavantajlı'}
 const pct=v=>`${(Number(v||0)*100).toFixed(0)}%`
 const num=(v,d=2)=>Number(v||0).toFixed(d)
 const venueLabel=v=>v==='HOME'?'Ev sahibi':v==='AWAY'?'Deplasman':'—'
+const fixtureLevelLabel={good:'Kolay',neutral:'Dengeli',tough:'Zor'}
 const normalize=value=>String(value||'').toLocaleLowerCase('tr').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/ı/g,'i')
 
 const sortOptions=[
@@ -111,6 +112,11 @@ export default function TeamsExplorer({teams=[],gameweek}){
             <div className={metricClass('season_xg_per_match')}><span>Sezon xG/maç</span><b>{num(team.season_xg_per_match)}</b></div>
             <div className={metricClass('season_xga_per_match')}><span>Sezon xGA/maç</span><b>{num(team.season_xga_per_match)}</b></div>
           </div>
+          <div className="fixture-strength-strip" aria-label="5 maç haftalık fikstür gücü">
+            {(team.fixture_strip||[]).map((f,i)=><span className={'fixture-strength '+(f.level||'neutral')} title={`MH${f.gameweek} • ${venueLabel(f.venue)} • ${f.opponent}`} key={f.gameweek+'-'+i}>
+              <small>MH{f.gameweek}</small><b>{f.opponent}</b><em>{fixtureLevelLabel[f.level]||'Dengeli'}</em>
+            </span>)}
+          </div>
           <div className="team-analysis-matchup-line">
             <span className={'matchup-pill '+team.attack_level+(attackSelected(team)?' is-selected-filter':'')}>Hücum: {matchupLabel[team.attack_level]}</span>
             <span className={'matchup-pill '+team.defense_level+(defenseSelected(team)?' is-selected-filter':'')}>Savunma: {matchupLabel[team.defense_level]}</span>
@@ -121,7 +127,7 @@ export default function TeamsExplorer({teams=[],gameweek}){
       <div className="card table-wrap desktop-team-analysis-table">
         <table>
           <thead><tr>
-            <th>Takım</th><th>MH{gameweek||'—'} rakibi</th><th className={venue?'is-filtered-head':''}>E/D</th><th className={(attack||defense)?'is-filtered-head':''}>Eşleşme</th>
+            <th>Takım</th><th>MH{gameweek||'—'} rakibi</th><th className={venue?'is-filtered-head':''}>E/D</th><th>5 MH fikstür</th><th className={(attack||defense)?'is-filtered-head':''}>Eşleşme</th>
             {head('xg','Bu hafta xG')}{head('oppXg','Bu hafta rakip xG')}{head('win','Galibiyet')}{head('cs','Gol yememe')}
             {head('total_xfp','Toplam xFP')}{head('season_xg_per_match','Sezon xG/maç')}{head('season_xga_per_match','xGA/maç')}
           </tr></thead>
@@ -129,6 +135,7 @@ export default function TeamsExplorer({teams=[],gameweek}){
             <td><Link className="team-analysis-name" href={'/teams/'+team.id}><span className="team-mini-shirt" aria-hidden="true"><i/></span><b>{team.name}</b></Link></td>
             <td><div className="team-analysis-opponents">{(team.fixtures||[]).map((f,i)=><Link href={'/teams/'+f.opponent_id} key={i}>{f.opponent}</Link>)}</div></td>
             <td className={venue?'is-filtered-cell':''}>{(team.fixtures||[]).map((f,i)=><span className={'venue-mini'+(venue&&f.venue===venue?' is-selected-filter':'')} key={i}>{venueLabel(f.venue)}</span>)}</td>
+            <td><div className="fixture-strength-strip compact">{(team.fixture_strip||[]).map((f,i)=><span className={'fixture-strength '+(f.level||'neutral')} title={`MH${f.gameweek} • ${f.opponent}`} key={f.gameweek+'-'+i}><small>MH{f.gameweek}</small><b>{f.opponent}</b></span>)}</div></td>
             <td className={(attack||defense)?'is-filtered-cell':''}><div className="team-matchup-cell"><span className={'matchup-pill '+team.attack_level+(attackSelected(team)?' is-selected-filter':'')}>Hücum: {matchupLabel[team.attack_level]}</span><span className={'matchup-pill '+team.defense_level+(defenseSelected(team)?' is-selected-filter':'')}>Savunma: {matchupLabel[team.defense_level]}</span></div></td>
             <td className={cellClass('xg')}><b>{num(team.xg)}</b></td>
             <td className={cellClass('oppXg')}>{num(team.oppXg)}</td><td className={cellClass('win')}>{pct(team.win)}</td><td className={cellClass('cs')}>{pct(team.cs)}</td>

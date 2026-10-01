@@ -46,7 +46,7 @@ export default async function PlayerPage({ params }){
   if(!data) notFound()
   const isPro=auth.plan==='pro'
 
-  const {run,player,projection:p,availability:a,role:r,season:s,modelFeatures:mf,weekly,matches=[]}=data
+  const {run,player,projection:p,availability:a,role:r,season:s,modelFeatures:mf,weekly,replay=[],matches=[]}=data
   const closedWeeks=[...(weekly||[])].sort((x,y)=>Number(x.gameweek||0)-Number(y.gameweek||0))
   const playedWeeks=closedWeeks.filter(w=>Number(w.minutes||0)>0)
   const played=Number(s?.matches_played ?? playedWeeks.length)
@@ -71,6 +71,9 @@ export default async function PlayerPage({ params }){
   const recentAverage=recentWeeks.length?recentWeeks.reduce((sum,w)=>sum+Number(w.points||0),0)/recentWeeks.length:0
   const lastWeek=closedWeeks.at(-1)
   const bestWeek=closedWeeks.length?Math.max(...closedWeeks.map(w=>Number(w.points||0))):0
+  const replayRows=(replay||[]).filter(row=>row.predicted_xfp!==null&&row.actual_points!==null)
+  const replayMae=replayRows.length?replayRows.reduce((sum,row)=>sum+Math.abs(Number(row.predicted_xfp||0)-Number(row.actual_points||0)),0)/replayRows.length:null
+  const replayMax=Math.max(1,...replayRows.flatMap(row=>[Number(row.predicted_xfp||0),Number(row.actual_points||0),Number(row.predicted_p90||0)]))
 
   const decisionMetrics=[
     {label:'xFP',value:num(p?.xfp),note:`MH${run?.gameweek||'—'} beklenen`,emphasis:true},
@@ -245,6 +248,12 @@ export default async function PlayerPage({ params }){
         )}</div>
         :<p className="muted">Henüz kapanmış hafta verisi yok.</p>}
     </section>
+
+    {replayRows.length?<section className="card profile-card player-prediction-history">
+      <div className="panel-head"><div><span className="eyebrow">TAHMİN vs GERÇEKLEŞEN</span><h2>Geçmiş haftalarda model ne bekledi?</h2></div><span className="pill">MAE {replayMae===null?'—':replayMae.toFixed(2)}</span></div>
+      <div className="prediction-history-list">{replayRows.map(row=><div className="prediction-history-row" key={row.gameweek}><span className="prediction-week">MH{row.gameweek}</span><div className="prediction-bars"><div><small>xFP {num(row.predicted_xfp,1)}</small><i className="predicted" style={{width:`${Math.min(100,Number(row.predicted_xfp||0)/replayMax*100)}%`}}/></div><div><small>Gerçek {num(row.actual_points,0)}</small><i className="actual" style={{width:`${Math.min(100,Number(row.actual_points||0)/replayMax*100)}%`}}/></div></div><b className={Math.abs(Number(row.predicted_xfp||0)-Number(row.actual_points||0))<=2?'close':'wide'}>{Number(row.actual_points||0)-Number(row.predicted_xfp||0)>=0?'+':''}{(Number(row.actual_points||0)-Number(row.predicted_xfp||0)).toFixed(1)}</b></div>)}</div>
+      <p className="muted prediction-history-note">Geçmiş haftalar güncel modelin replay çıktısıdır; canlı haftadaki xFP ile birebir aynı veri anını temsil etmez.</p>
+    </section>:null}
 
     {isPro?<details className="card profile-card player-advanced-details">
       <summary>

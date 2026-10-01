@@ -35,6 +35,7 @@ const jsTests=[
   'model/turkishUiLanguageContract.test.js',
   'model/perfDeadlineReadabilityContract.test.js',
   'model/managerCardsContract.test.js',
+  'model/productUxExpansionContract.test.js',
 ]
 
 for(const file of jsTests){

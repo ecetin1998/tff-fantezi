@@ -187,3 +187,12 @@
   .scope :global(.manager-card-roster-copy){align-items:flex-start;flex-direction:column;gap:7px}
   .scope :global(.manager-card-roster-effect){justify-content:flex-start}
 }
+
+.scope :global(.manager-card-choice)>small{display:flex;align-items:center;justify-content:space-between;gap:5px;flex-wrap:wrap}
+.scope :global(.manager-card-delta){font-style:normal;font-size:7px;font-weight:950;padding:2px 5px;border-radius:999px;white-space:nowrap}
+.scope :global(.manager-card-delta):global(.positive){background:#e6f7f3;color:#087e72}
+.scope :global(.manager-card-delta):global(.negative){background:#fff0ef;color:#ae5c55}
+.scope :global(.manager-card-weekly-read){margin:9px 0 11px;padding:10px 12px;border:1px solid #d5e8e4;border-radius:12px;background:rgba(247,253,251,.9);display:grid;gap:3px}
+.scope :global(.manager-card-weekly-read)>span{font-size:7px;font-weight:950;letter-spacing:.07em;color:#75829b}
+.scope :global(.manager-card-weekly-read)>b{font-size:12px;color:#26324f}.scope :global(.manager-card-weekly-read)>b em{font-style:normal;color:#087e72;margin-left:5px}
+.scope :global(.manager-card-weekly-read)>small{font-size:7.5px;line-height:1.45;color:#8792a8}
