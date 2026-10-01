@@ -38,7 +38,7 @@ export default function ResetPasswordForm({serverError=null}){
         if(error)throw error
         if(!cancelled)setReady(true)
       }catch{
-        if(!cancelled)setLinkError('Şifre yenileme bağlantısı geçersiz veya süresi dolmuş. Giriş sayfasından yeni bağlantı iste.')
+        if(!cancelled)setLinkError('Şifre yenileme bağlantısı geçersiz veya süresi dolmuş. Şifremi Unuttum sayfasından yeni bağlantı iste.')
       }
     }
 

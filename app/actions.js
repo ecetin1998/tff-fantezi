@@ -80,32 +80,32 @@ export async function signup(formData){
   const siteUrl=await getSiteUrl()
   const email=String(formData.get('email')||'').trim()
   const password=String(formData.get('password')||'')
-  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))redirect('/login?error=email_required')
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))redirect('/signup?error=email_required')
   const passwordPolicy=await passwordPolicyCode(password)
-  if(passwordPolicy)redirect('/login?error='+passwordPolicy)
+  if(passwordPolicy)redirect('/signup?error='+passwordPolicy)
   const {error}=await supabase.auth.signUp({email,password,options:{emailRedirectTo:siteUrl+'/confirm-email'}})
-  if(error)redirect('/login?error='+authErrorCode(error))
-  redirect('/login?message=check_email')
+  if(error)redirect('/signup?error='+authErrorCode(error))
+  redirect('/signup?message=check_email')
 }
 
 export async function resendConfirmation(formData){
   const supabase=await createClient()
   const siteUrl=await getSiteUrl()
   const email=String(formData.get('email')||'').trim()
-  if(!email)redirect('/login?error=email_required')
+  if(!email)redirect('/signup?error=email_required#verification')
   const {error}=await supabase.auth.resend({type:'signup',email,options:{emailRedirectTo:siteUrl+'/confirm-email'}})
-  if(error)redirect('/login?error='+authErrorCode(error))
-  redirect('/login?message=resend_sent')
+  if(error)redirect('/signup?error='+authErrorCode(error)+'#verification')
+  redirect('/signup?message=resend_sent#verification')
 }
 
 export async function requestPasswordReset(formData){
   const supabase=await createClient()
   const siteUrl=await getSiteUrl()
   const email=String(formData.get('email')||'').trim()
-  if(!email)redirect('/login?error=email_required')
+  if(!email)redirect('/forgot-password?error=email_required')
   const {error}=await supabase.auth.resetPasswordForEmail(email,{redirectTo:siteUrl+'/reset-password'})
-  if(error)redirect('/login?error='+authErrorCode(error))
-  redirect('/login?message=reset_sent')
+  if(error)redirect('/forgot-password?error='+authErrorCode(error))
+  redirect('/forgot-password?message=reset_sent')
 }
 
 export async function updatePassword(formData){

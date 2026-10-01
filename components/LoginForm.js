@@ -1,22 +1,15 @@
 'use client'
+import Link from 'next/link'
 import {useSearchParams} from 'next/navigation'
-import {login,signup,resendConfirmation,requestPasswordReset} from '@/app/actions'
+import {login} from '@/app/actions'
 
 const ERRORS={
   invalid_credentials:'Kullanıcı adı/e-posta veya şifre hatalı.',
-  email_not_confirmed:'E-posta adresini doğrulaman gerekiyor.',
-  already_registered:'Bu e-posta adresi zaten kayıtlı.',
-  weak_password:'Şifre en az 8 karakter olmalı.',
-  leaked_password:'Bu şifre bilinen veri sızıntılarında yer alıyor. Başka bir şifre seç.',
-  password_check_failed:'Şifre güvenlik kontrolü tamamlanamadı. Lütfen tekrar dene.',
+  email_not_confirmed:'E-posta adresini doğrulaman gerekiyor. Yeni doğrulama mailini Hesap Oluştur sayfasından isteyebilirsin.',
   rate_limited:'Çok fazla deneme yapıldı. Biraz sonra tekrar dene.',
-  auth_failed:'İşlem tamamlanamadı. Lütfen tekrar dene.',
-  email_required:'E-posta adresini gir.',
+  auth_failed:'Giriş tamamlanamadı. Lütfen tekrar dene.',
 }
 const MESSAGES={
-  check_email:'Doğrulama e-postasını kontrol et. Mail gelmezse aşağıdan tekrar gönderebilirsin.',
-  resend_sent:'Doğrulama e-postası tekrar gönderildi. Gelen kutusu ve spam klasörünü kontrol et.',
-  reset_sent:'Şifre yenileme bağlantısı gönderildi. E-posta kutunu kontrol et.',
   password_updated:'Şifren güncellendi. Yeni şifrenle giriş yapabilirsin.',
   pro_login_required:'Pro talebini kaydetmek için giriş yap.',
 }
@@ -26,30 +19,22 @@ export default function LoginForm(){
   const error=ERRORS[String(sp.get('error')||'')]||null
   const message=MESSAGES[String(sp.get('message')||'')]||null
   return <div className="auth-wrap"><div className="card auth-card">
-    <span className="eyebrow">HESABIN</span><h1>Giriş yap</h1><p>Kadronu kaydet, her hafta modelle karşılaştır.</p>
+    <span className="eyebrow">HESABIN</span>
+    <h1>Giriş yap</h1>
+    <p>Hesabına gir ve kaldığın yerden devam et.</p>
     {error?<div className="alert error">{error}</div>:null}
     {message?<div className="alert">{message}</div>:null}
-    <form className="auth-form">
+    <form className="auth-form" action={login}>
       <label>E-posta / kullanıcı adı<input name="email" type="text" autoComplete="username" placeholder="E-posta veya kullanıcı adı" required/></label>
       <label>Şifre<input name="password" type="password" autoComplete="current-password" minLength="6" required/></label>
-      <div className="auth-actions">
-        <button formAction={login} className="cta">Giriş yap</button>
-        <button formAction={signup} className="secondary">Hesap oluştur</button>
-      </div>
+      <button className="cta" type="submit">Giriş yap</button>
     </form>
-    <div className="auth-resend">
-      <span>Şifreni mi unuttun?</span>
-      <form action={requestPasswordReset}>
-        <input name="email" type="email" autoComplete="email" placeholder="E-posta adresin" required/>
-        <button className="ghost-btn" type="submit">Şifre yenileme bağlantısı gönder</button>
-      </form>
-    </div>
-    <div className="auth-resend">
-      <span>Hesabın oluştu ama doğrulama maili gelmedi mi?</span>
-      <form action={resendConfirmation}>
-        <input name="email" type="email" autoComplete="email" placeholder="E-posta adresin" required/>
-        <button className="ghost-btn" type="submit">Doğrulama mailini tekrar gönder</button>
-      </form>
+    <div className="auth-link-stack">
+      <Link href="/forgot-password">Şifremi unuttum</Link>
+      <span>Hesabın yok mu? <Link href="/signup">Hesap oluştur</Link></span>
+      {String(sp.get('error')||'')==='email_not_confirmed'
+        ?<span>Doğrulama maili gelmediyse <Link href="/signup#verification">tekrar gönder</Link>.</span>
+        :null}
     </div>
   </div></div>
 }

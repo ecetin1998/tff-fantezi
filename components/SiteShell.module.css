@@ -557,3 +557,13 @@
 .scope :global(.profile-feature-list) li:before{content:'✓';position:absolute;left:0;color:var(--green);font-weight:900}
 .scope :global(.profile-actions){display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}
 @media(max-width:760px){.scope :global(.profile-grid){grid-template-columns:1fr}.scope :global(.profile-card){padding:20px}.scope :global(.profile-info-row){align-items:flex-start;flex-direction:column;gap:5px}.scope :global(.profile-info-row) b{text-align:left}.scope :global(.profile-actions)>*{flex:1 1 100%}}
+
+.scope :global(.auth-card-wide){width:min(540px,100%)}
+.scope :global(.auth-form)>:global(.cta),.scope :global(.auth-form)>:global(.secondary){width:100%}
+.scope :global(.auth-link-stack){display:grid;gap:10px;margin-top:18px;padding-top:18px;border-top:1px solid var(--line);font-size:13px;color:var(--muted)}
+.scope :global(.auth-link-stack) a{color:var(--green);font-weight:800}
+.scope :global(.auth-link-stack) a:hover{text-decoration:underline}
+.scope :global(.auth-utility-section){margin-top:26px;padding-top:24px;border-top:1px solid var(--line)}
+.scope :global(.auth-utility-section) h2{font-size:22px;margin:7px 0}
+.scope :global(.auth-utility-section) p{font-size:13px;line-height:1.6;margin:0}
+@media(max-width:570px){.scope :global(.auth-card),.scope :global(.auth-card-wide){padding:22px}.scope :global(.auth-card) h1{font-size:32px}}

@@ -1,6 +1,6 @@
 import ResetPasswordForm from '@/components/ResetPasswordForm'
 
-export const metadata={title:'Şifre Yenile'}
+export const metadata={title:'Şifre Yenile',robots:{index:false,follow:false}}
 
 const ERRORS={
   weak_password:'Şifre en az 8 karakter olmalı.',
