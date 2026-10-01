@@ -151,3 +151,39 @@
   .scope :global(.manager-card-choice){min-height:80px;padding:10px}
   .scope :global(.manager-card-choice)>b{font-size:13px}
 }
+
+.scope :global(.manager-card-roster-control){
+  margin:0 0 14px;padding:13px 14px 14px;
+  border:1px solid #dbe6e5;border-radius:15px;
+  background:linear-gradient(145deg,#fbfefd 0%,#f4f9f8 64%,#f7f5ff 100%);
+  box-shadow:0 9px 24px rgba(35,48,83,.045);
+}
+.scope :global(.manager-card-roster-control):global(.active){
+  border-color:#b9ddd7;
+  background:linear-gradient(145deg,#f2fbf8 0%,#edf8f5 68%,#f7f4ff 100%);
+}
+.scope :global(.manager-card-roster-copy){
+  display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px
+}
+.scope :global(.manager-card-roster-copy) h3{
+  margin:4px 0 0;color:#263550;font-size:16px;line-height:1.15;letter-spacing:-.02em
+}
+.scope :global(.manager-card-roster-effect){
+  display:flex;align-items:center;justify-content:flex-end;gap:5px;flex-wrap:wrap
+}
+.scope :global(.manager-card-roster-effect)>span{
+  min-height:25px;display:inline-flex;align-items:center;padding:5px 7px;
+  border:1px solid #d9e4e6;border-radius:999px;background:#fff;
+  color:#66728a;font-size:7px;font-weight:900;white-space:nowrap
+}
+.scope :global(.manager-card-roster-control):global(.active) :global(.manager-card-roster-effect)>span{
+  border-color:#c4e2dc;color:#087d71;background:#fff
+}
+.scope :global(.manager-card-roster-control) :global(.manager-card-buttons){
+  grid-column:auto;margin-top:0
+}
+@media(max-width:760px){
+  .scope :global(.manager-card-roster-control){padding:12px;margin-bottom:12px}
+  .scope :global(.manager-card-roster-copy){align-items:flex-start;flex-direction:column;gap:7px}
+  .scope :global(.manager-card-roster-effect){justify-content:flex-start}
+}
