@@ -5,7 +5,7 @@ import {createClient} from '@/lib/supabase/client'
 import SquadPitchView from '@/components/SquadPitchView'
 import {MANAGER_CARDS,MANAGER_CARD_NONE,managerCardInfo,normalizeManagerCard} from '@/lib/managerCards'
 
-function SquadCard({data,title,variant}){
+function SquadCard({data,title,variant,cardActive=false}){
   if(!data?.members?.length)return <section className="card unified-squad-card"><div className="manager-card-error">Bu kart için kadro üretilemedi.</div></section>
   return <section className="card unified-squad-card">
     <SquadPitchView
@@ -15,6 +15,7 @@ function SquadCard({data,title,variant}){
       budget={data.recommendation?.budget}
       xiXfp={data.recommendation?.xi_xfp_with_card??data.recommendation?.captain_xfp??data.recommendation?.xi_xfp}
       variant={variant}
+      scoreLabel={cardActive?'Kartlı hafta xFP':'İlk 11 xFP'}
       showBench
     />
   </section>
@@ -78,8 +79,8 @@ export default function ManagerCardRecommendations({baseRecommended,baseAlternat
     {loading?<div className="manager-card-loading">Kart etkisine göre Önerilen ve Agresif kadro yeniden hesaplanıyor…</div>:null}
     {error?<div className="manager-card-error">{error}</div>:null}
     <div className="unified-squad-list">
-      <SquadCard data={active?.recommended} title={managerCard===MANAGER_CARD_NONE?'ÖNERİLEN KADRO':`ÖNERİLEN • ${cardInfo.shortLabel}`} variant="recommended"/>
-      <SquadCard data={active?.alternative} title={managerCard===MANAGER_CARD_NONE?'AGRESİF 11':`AGRESİF • ${cardInfo.shortLabel}`} variant="alternative"/>
+      <SquadCard data={active?.recommended} title={managerCard===MANAGER_CARD_NONE?'ÖNERİLEN KADRO':`ÖNERİLEN • ${cardInfo.shortLabel}`} variant="recommended" cardActive={managerCard!==MANAGER_CARD_NONE}/>
+      <SquadCard data={active?.alternative} title={managerCard===MANAGER_CARD_NONE?'AGRESİF 11':`AGRESİF • ${cardInfo.shortLabel}`} variant="alternative" cardActive={managerCard!==MANAGER_CARD_NONE}/>
     </div>
   </>
 }
