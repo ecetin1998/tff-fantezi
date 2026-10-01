@@ -96,7 +96,7 @@ export default async function Squad({searchParams}){
   return <>
     <div className="section-title squad-page-title"><div><span className="eyebrow">FANTEZİ TAKIM YÖNETİMİ</span><h1>Benim Kadrom</h1>
       <p className="muted">MH{run?.gameweek||'—'} • {SQUAD_SIZE} oyuncu • {BUDGET}m bütçe</p></div>
-      <span className={`plan ${auth.plan}`}>{auth.plan.toUpperCase()}</span>
+      <span className={`plan ${auth.plan}`}>{auth.plan==='pro'?'GELİŞMİŞ':'ÜCRETSİZ'}</span>
     </div>
     {sp?.saved?<div className="alert">Kadro, ilk 11, yedek sırası ve kaptan kaydedildi.</div>:null}
     {sp?.error?<div className="alert error">{sp.error}</div>:null}
@@ -107,7 +107,7 @@ export default async function Squad({searchParams}){
 
     <section className="card squad-history-card">
       <div className="squad-history-head">
-        <div><span className="eyebrow">HAFTALIK SNAPSHOT</span><h2>Geçmiş haftalar</h2></div>
+        <div><span className="eyebrow">HAFTALIK KAYIT</span><h2>Geçmiş haftalar</h2></div>
         <p>Hafta kilitlendikten sonra kayıtlı 15'li kadro, otomatik yedekler ve kaptan bonusuyla gerçek puanın burada kesinleşir.</p>
       </div>
       {snapshotHistory.length?<div className="squad-history-list">{snapshotHistory.map(s=>{
@@ -128,7 +128,7 @@ export default async function Squad({searchParams}){
         </article>
       })}</div>:<div className="squad-history-empty">
         <b>Henüz tamamlanan maç haftası yok.</b>
-        <span>MH{currentGameweek||'—'} kadron aktif. Hafta kapanıp oyuncu puanları kesinleşince ilk snapshot burada görünecek.</span>
+        <span>MH{currentGameweek||'—'} kadron aktif. Hafta kapanıp oyuncu puanları kesinleşince ilk haftalık kayıt burada görünecek.</span>
       </div>}
     </section>
   </>
