@@ -22,6 +22,14 @@ const pct=v=>`${(Number(v||0)*100).toFixed(0)}%`
 const num=(v,d=2)=>Number(v||0).toFixed(d)
 const venue=v=>v==='HOME'?'Ev':v==='AWAY'?'Dep':'—'
 const posLabel=p=>({GK:'KL',DEF:'DEF',MID:'OS',FWD:'FOR'}[p]||p||'—')
+const xaSourceLabel=value=>{
+  const source=String(value||'')
+  if(!source)return '—'
+  if(source==='position_prior')return 'Mevki öncülü'
+  if(source==='preseason_player_prior')return 'Sezon öncesi oyuncu öncülü'
+  if(source.startsWith('fotmob_'))return 'Gözlenen maç verisi'
+  return 'Model verisi'
+}
 function MetricGrid({items,className=''}){
   return <div className={`player-detail-metric-grid ${className}`}>
     {items.map(item=><div className={item.emphasis?'is-emphasis':''} key={item.label}>
@@ -257,7 +265,7 @@ export default async function PlayerPage({ params }){
           <div><span>Veri güveni</span><b>{predictionConfidenceLabel(run,p)}</b></div>
           {!isGK?<div><span>Takım gol payı</span><b>{pct(r?.team_goal_share)}</b></div>:null}
           {!isGK?<div><span>Model xA / 90</span><b>{mf?.effective_xa_per90===null||mf?.effective_xa_per90===undefined?'—':num(mf.effective_xa_per90,3)}</b></div>:null}
-          {!isGK?<div><span>xA kaynağı</span><b>{s?.xa_source||'—'}</b></div>:null}
+          {!isGK?<div><span>xA veri türü</span><b>{xaSourceLabel(s?.xa_source)}</b></div>:null}
           {detailedRole?<div><span>Detay rol</span><b>{detailedRole}</b></div>:null}
         </div>
         <div className="player-model-note"><span>Rol özeti</span><p>{r?.signal||'Belirgin rol değişimi yok.'}</p></div>
