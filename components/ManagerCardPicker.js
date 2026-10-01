@@ -26,7 +26,7 @@ export default function ManagerCardPicker({
       >
         <span>{card.shortLabel}</span>
         <b>{loading?'Hesaplanıyor…':hasXfp?`${Number(xfp).toFixed(1)} xFP`:card.id===MANAGER_CARD_NONE?'Standart':card.id==='attack'?'Kadro değişmeli':'Kadro tamamlanmalı'}</b>
-        <small>{card.id==='attack'?'2 KL / 3 DEF / 5 OS / 5 FOR':card.captainMultiplier>2?`Kaptan ${card.captainMultiplier}×`:card.benchBoost?'15 oyuncu puanda':card.unlimitedBudget?'Bütçe sınırı yok':'Normal kurallar'}</small>
+        <small>{card.id==='attack'?'105m • 2 KL / 3 DEF / 5 OS / 5 FOR':card.captainMultiplier>2?`Kaptan ${card.captainMultiplier}×`:card.benchBoost?'15 oyuncu puanda':card.unlimitedBudget?'Bütçe sınırı yok':'Normal kurallar'}</small>
       </button>
     })}
   </div>
