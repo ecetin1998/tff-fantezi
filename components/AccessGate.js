@@ -20,7 +20,7 @@ export default function AccessGate({
     <div className="access-gate-actions">
       {member
         ?<Link className="cta" href="/login">Ücretsiz hesap aç / giriş yap</Link>
-        :<Link className="cta" href="/pricing">Pro özelliklerini gör</Link>}
+        :<Link className="cta" href="/pricing">Gelişmiş özellikleri gör</Link>}
       <Link className="secondary" href="/sss">Nasıl çalışıyor?</Link>
     </div>
   </section>
