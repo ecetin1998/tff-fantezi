@@ -77,7 +77,7 @@ const faqs=[
   ['Model hangi veriyi kullanıyor?', 'Model; güncel sezon performansı, takım hücum-savunma profili, oyuncu rolü ve dakika beklentisi, ilk 11 ihtimali, sakatlık/ceza durumu, fikstür, ev-deplasman, geçmiş fantasy çıktıları ve oyuncunun takım içindeki gol/asist payı gibi sinyalleri birlikte değerlendirir.'],
   ['Tahminler ne zaman güncelleniyor?', 'Yayındaki model yalnız yeni veri ve model zinciri gerekli kalite kontrollerini geçtiğinde değiştirilir. Yeni aday sürüm veri bütünlüğü ve QA kontrollerinden geçer; başarısız olursa önceki çalışan sürüm korunur.'],
   ['Model Performansı sayfası ne işe yarıyor?', 'Model Performansı tahmin sisteminin kendisini denetler. Güncel modelin geçmiş haftalarda sonucu görmeden nasıl davranacağını ölçen replay testleri ile maç öncesi dondurulan canlı tahminleri ayrı gösterir.'],
-  ['Siteyi kullanmak için hesap açmak gerekiyor mu?', 'Genel oyuncu, maç, takım, puan, rol ve model analizleri hesap açmadan görüntülenebilir. Benim Kadrom özelliğinde kişisel takımını kaydetmek için giriş yapman gerekir.'],
+  ['Siteyi kullanmak için hesap açmak gerekiyor mu?', 'Hayır. Ziyaretçi olarak Oyuncu Analizi’nde xFP’ye göre ilk 15 oyuncuyu ve Maç Tahminleri’nde haftanın öne çıkan tek maçını görebilirsin. Ücretsiz hesap açınca tüm temel oyuncu havuzu, filtreler, tüm maç tahminleri ve Benim Kadrom açılır. Pro üyelik ise P25/P90, 6+ ihtimali, xG/xA, gelişmiş rol-dakika ve Agresif 11 gibi ileri analizleri açar.'],
   ['Fantezi Pro şu anda aktif ücretli üyelik mi?', 'Beta döneminde temel özellikler ücretsizdir. Fantezi Pro için hedef özellikler ve hedef fiyat gösteriliyor; şu anda ücretli satış yerine Pro talebi bekleme listesi üzerinden ölçülüyor.'],
 ]
 
