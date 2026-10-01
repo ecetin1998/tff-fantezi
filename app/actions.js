@@ -5,11 +5,22 @@ import {headers} from 'next/headers'
 import {reportServerError} from '@/lib/observability'
 import {passwordPolicyCode} from '@/lib/passwordSecurity'
 import {BENCH_SIZE,BUDGET,FORMATION_SET,MAX_PLAYERS_PER_CLUB,SQUAD_LIMITS,SQUAD_SIZE,STARTING_GK,STARTING_XI_SIZE} from '@/lib/rules'
+import {SUPABASE_PUBLISHABLE_KEY,SUPABASE_URL} from '@/lib/config'
 
-const LOGIN_ALIASES=Object.freeze({
-  adminfree:'dummy.free.20261001@example.com',
-  adminpro:'dummy.pro.20261001@example.com',
-})
+const DUMMY_LOGIN_ALIASES=new Set(['adminfree','adminpro'])
+
+async function signInDummyAccount(supabase,username,password){
+  const response=await fetch(SUPABASE_URL+'/functions/v1/dummy-login',{
+    method:'POST',
+    headers:{'Content-Type':'application/json',apikey:SUPABASE_PUBLISHABLE_KEY},
+    body:JSON.stringify({username,password}),
+    cache:'no-store',
+  })
+  if(!response.ok)return {error:{code:'invalid_credentials',message:'Invalid login credentials'}}
+  const payload=await response.json()
+  if(!payload?.token_hash)return {error:{code:'auth_failed',message:'Dummy login token missing'}}
+  return supabase.auth.verifyOtp({type:payload.type||'magiclink',token_hash:payload.token_hash})
+}
 
 function authErrorCode(error){
   const code=String(error?.code||'').toLowerCase()
@@ -46,9 +57,11 @@ function squadError(message=''){
 export async function login(formData){
   const supabase=await createClient()
   const identifier=String(formData.get('email')||'').trim()
-  const email=LOGIN_ALIASES[identifier.toLowerCase()]||identifier
+  const normalized=identifier.toLowerCase()
   const password=String(formData.get('password')||'')
-  const {error}=await supabase.auth.signInWithPassword({email,password})
+  const {error}=DUMMY_LOGIN_ALIASES.has(normalized)
+    ?await signInDummyAccount(supabase,normalized,password)
+    :await supabase.auth.signInWithPassword({email:identifier,password})
   if(error)redirect('/login?error='+authErrorCode(error))
   redirect('/squad')
 }
