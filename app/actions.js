@@ -6,6 +6,7 @@ import {reportServerError} from '@/lib/observability'
 import {passwordPolicyCode} from '@/lib/passwordSecurity'
 import {BENCH_SIZE,BUDGET,FORMATION_SET,MAX_PLAYERS_PER_CLUB,SQUAD_LIMITS,SQUAD_SIZE,STARTING_GK,STARTING_XI_SIZE} from '@/lib/rules'
 import {SUPABASE_PUBLISHABLE_KEY,SUPABASE_URL} from '@/lib/config'
+import {ATTACK_FORMATION,MANAGER_CARD_NONE,managerCardInfo,normalizeManagerCard} from '@/lib/managerCards'
 
 const DUMMY_LOGIN_ALIASES=new Set(['adminfree','adminpro'])
 
@@ -35,16 +36,18 @@ function authErrorCode(error){
 }
 
 function squadError(message=''){
-  const key=String(message).match(/(AUTH_REQUIRED|INVALID_SQUAD|SQUAD_MUST_HAVE_15_UNIQUE_PLAYERS|SQUAD_HAS_INACTIVE_OR_UNKNOWN_PLAYER|INVALID_POSITION_COUNTS|BUDGET_EXCEEDED|INVALID_STARTING_XI|INVALID_BENCH|INVALID_BENCH_ORDER|INVALID_CAPTAIN|INVALID_FORMATION|CLUB_LIMIT_EXCEEDED)/)?.[1]
+  const key=String(message).match(/(AUTH_REQUIRED|PRO_REQUIRED|INVALID_MANAGER_CARD|INVALID_SQUAD|SQUAD_MUST_HAVE_15_UNIQUE_PLAYERS|SQUAD_HAS_INACTIVE_OR_UNKNOWN_PLAYER|INVALID_POSITION_COUNTS|BUDGET_EXCEEDED|INVALID_STARTING_XI|INVALID_BENCH|INVALID_BENCH_ORDER|INVALID_CAPTAIN|INVALID_FORMATION|CLUB_LIMIT_EXCEEDED)/)?.[1]
   return ({
     AUTH_REQUIRED:'Oturum bulunamadı. Tekrar giriş yap.',
+    PRO_REQUIRED:'Menajer kartları Gelişmiş üyeliğe özeldir.',
+    INVALID_MANAGER_CARD:'Geçersiz menajer kartı seçimi.',
     SQUAD_LOCKED:'Bu maç haftası kilitlendi. Kadro artık değiştirilemez.',
     GAMEWEEK_DEADLINE_MISSING:'Maç haftası son tarihi bulunamadı.',
     INVALID_SQUAD:'Kadro verisi geçersiz.',
     SQUAD_MUST_HAVE_15_UNIQUE_PLAYERS:`Kadro ${SQUAD_SIZE} benzersiz oyuncudan oluşmalı.`,
     SQUAD_HAS_INACTIVE_OR_UNKNOWN_PLAYER:'Kadroda aktif olmayan veya bulunamayan oyuncu var.',
     INVALID_POSITION_COUNTS:`Kadro dağılımı ${SQUAD_LIMITS.GK} KL / ${SQUAD_LIMITS.DEF} DEF / ${SQUAD_LIMITS.MID} OS / ${SQUAD_LIMITS.FWD} FOR olmalı.`,
-    BUDGET_EXCEEDED:`${BUDGET}m bütçe aşıldı.`,
+    BUDGET_EXCEEDED:'Seçili menajer kartı için bütçe sınırı aşıldı.',
     INVALID_STARTING_XI:'İlk 11 geçersiz.',
     INVALID_BENCH:'Yedek kulübesi tam 4 oyuncu olmalı.',
     INVALID_BENCH_ORDER:'Yedek sıraları 1, 2, 3, 4 olmalı.',
@@ -133,6 +136,8 @@ export async function saveSquad(_prevState,formData){
   if(!userId)return {ok:false,error:'Oturum bulunamadı. Tekrar giriş yap.',signature:''}
 
   const signature=String(formData.get('squad_signature')||'')
+  const managerCard=normalizeManagerCard(formData.get('manager_card')||MANAGER_CARD_NONE)
+  const cardInfo=managerCardInfo(managerCard)
   let ids=[]
   let squadState=[]
   try{ids=JSON.parse(String(formData.get('player_ids')||'[]')).map(Number).filter(Number.isFinite)}catch{}
@@ -143,6 +148,18 @@ export async function saveSquad(_prevState,formData){
       bench_order:x.bench_order===null||x.bench_order===undefined?null:Number(x.bench_order)
     })).filter(x=>Number.isFinite(x.player_id))
   }catch{}
+
+  if(managerCard!==MANAGER_CARD_NONE){
+    const {data:subscription,error:subscriptionError}=await supabase.from('scout_subscriptions')
+      .select('plan,status,valid_until').eq('user_id',userId).maybeSingle()
+    if(subscriptionError){
+      reportServerError('action:saveSquad:subscription',subscriptionError)
+      return {ok:false,error:'Üyelik durumu doğrulanamadı.',signature:''}
+    }
+    const activePro=subscription?.plan==='pro'&&['active','trialing'].includes(subscription?.status)&&
+      (!subscription?.valid_until||new Date(subscription.valid_until)>new Date())
+    if(!activePro)return {ok:false,error:'Menajer kartları Gelişmiş üyeliğe özeldir.',signature:''}
+  }
 
   ids=[...new Set(ids)]
   const stateIds=[...new Set(squadState.map(x=>x.player_id))]
@@ -159,7 +176,8 @@ export async function saveSquad(_prevState,formData){
   const counts=(players||[]).reduce((a,p)=>(a[p.position]=(a[p.position]||0)+1,a),{})
   if(!Object.entries(SQUAD_LIMITS).every(([position,required])=>(counts[position]||0)===required))return {ok:false,error:`Kadro dağılımı ${SQUAD_LIMITS.GK} KL / ${SQUAD_LIMITS.DEF} DEF / ${SQUAD_LIMITS.MID} OS / ${SQUAD_LIMITS.FWD} FOR olmalı.`,signature:''}
   const total=(players||[]).reduce((s,p)=>s+Number(p.price||0),0)
-  if(total>BUDGET+.0001)return {ok:false,error:`${BUDGET}m bütçe aşıldı.`,signature:''}
+  const effectiveBudget=cardInfo.unlimitedBudget?Number.POSITIVE_INFINITY:Number(cardInfo.budget||BUDGET)
+  if(Number.isFinite(effectiveBudget)&&total>effectiveBudget+.0001)return {ok:false,error:`${effectiveBudget}m bütçe aşıldı.`,signature:''}
 
   if(MAX_PLAYERS_PER_CLUB){
     const clubCounts=(players||[]).reduce((a,p)=>(a[p.team_id]=(a[p.team_id]||0)+1,a),{})
@@ -174,10 +192,12 @@ export async function saveSquad(_prevState,formData){
   const xi=xiState.map(x=>playerMap.get(x.player_id)).filter(Boolean)
   const xiCounts=xi.reduce((a,p)=>(a[p.position]=(a[p.position]||0)+1,a),{})
   const formation=(xiCounts.DEF||0)+'-'+(xiCounts.MID||0)+'-'+(xiCounts.FWD||0)
-  if((xiCounts.GK||0)!==STARTING_GK||!FORMATION_SET.has(formation))return {ok:false,error:'İlk 11 izin verilen dizilişlerden biri olmalı.',signature:''}
+  const formationAllowed=FORMATION_SET.has(formation)||(managerCard==='attack'&&formation===ATTACK_FORMATION)
+  if((xiCounts.GK||0)!==STARTING_GK||!formationAllowed)return {ok:false,error:'İlk 11 seçilen menajer kartının izin verdiği dizilişlerden biri olmalı.',signature:''}
   if(squadState.filter(x=>x.is_captain).length!==1||xiState.filter(x=>x.is_captain).length!==1)return {ok:false,error:'İlk 11 içinde tam bir kaptan seçilmeli.',signature:''}
 
-  const {error}=await supabase.rpc('save_user_squad',{p_members:squadState})
+  const rpcMembers=squadState.map(row=>({...row,manager_card:managerCard}))
+  const {error}=await supabase.rpc('save_user_squad',{p_members:rpcMembers})
   if(error){
     reportServerError('action:saveSquad:rpc',error)
     return {ok:false,error:squadError(error.message),signature:''}

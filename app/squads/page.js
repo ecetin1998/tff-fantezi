@@ -2,6 +2,7 @@ import { getAuthState, getRecommendation } from '@/lib/data'
 import SquadPitchView from '@/components/SquadPitchView'
 import AccessGate from '@/components/AccessGate'
 import {playerLabel} from '@/lib/playerPresentation'
+import ManagerCardRecommendations from '@/components/ManagerCardRecommendations'
 
 export const metadata={title:'Kadro Önerileri'}
 
@@ -39,7 +40,10 @@ export default async function Squads(){
         title="Önerilen 15 kişilik kadroyu ücretsiz hesapla aç."
         description="Ücretsiz üyelikte Önerilen Kadro, ilk 11, yedekler, kaptan ve kendi kadronu kaydetme özelliği açılır."
       />
-    </>:<div className="unified-squad-list">
+    </>:auth.plan==='pro'?<ManagerCardRecommendations
+      baseRecommended={rec}
+      baseAlternative={alt}
+    />:<div className="unified-squad-list">
       <section className="card unified-squad-card">
         <SquadPitchView
           members={rec.members}
@@ -51,23 +55,12 @@ export default async function Squads(){
           showBench
         />
       </section>
-
-      {auth.plan==='pro'?<section className="card unified-squad-card">
-        <SquadPitchView
-          members={alt?.members||[]}
-          title="AGRESİF 11"
-          gameweek={alt?.run?.gameweek}
-          budget={alt?.recommendation?.budget}
-          xiXfp={alt?.recommendation?.xi_xfp}
-          variant="alternative"
-          showBench
-        />
-      </section>:<AccessGate
+      <AccessGate
         tier="pro"
-        eyebrow="GELİŞMİŞ • AGRESİF 11"
-        title="Tavan odaklı ikinci kadroyu aç."
-        description="Agresif 11, xFP tabanını korurken P90 ve yüksek skor potansiyeline daha fazla ağırlık verir."
-      />}
+        eyebrow="GELİŞMİŞ • MENAJER KARTLARI"
+        title="Menajer kartı optimizasyonunu ve Agresif 11'i aç."
+        description="Gelişmiş üyelikte seçtiğin menajer kartına göre kadro, diziliş, kaptan ve bütçe yeniden hesaplanır."
+      />
     </div>}
   </>
 }

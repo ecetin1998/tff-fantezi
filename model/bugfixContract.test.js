@@ -69,7 +69,7 @@ assert.match(builder,/p\.position!=='GK'\?<button[^\n]+captain-toggle/)
 assert.match(builder,/map\.get\(captainId\)\?\.position!=='GK'/)
 assert.doesNotMatch(builder,/club-counts">\$/)
 assert.doesNotMatch(builder,/bütçe kullanılmıyor/i)
-assert.match(builder,/Kalan: \{bank\.toFixed\(1\)\}m/)
+assert.match(builder,/Kalan: \${bank\.toFixed\(1\)}m/)
 for(const file of ['app/actions.js','app/squad/page.js','components/SquadBuilder.js','rules/tff-fantasy.json','lib/rules.js']){
   assert.doesNotMatch(read(file),/vice_captain|VICE_CAPTAIN|Yardımcı kaptan|Yrd\. kaptan/i,file+' must not expose vice captain')
 }

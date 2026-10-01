@@ -48,6 +48,7 @@ export default async function Pricing({searchParams}){
           <li>P25 / P75 / P90 ve 6+ ihtimali</li>
           <li>xG / xA ve gelişmiş rol-dakika analizi</li>
           <li>Agresif 11 ve İlk 25/tavan katmanı</li>
+          <li>Menajer kartı optimizasyonu • öneriler + Benim Kadrom</li>
           <li>Gelişmiş takım/rakip eşleşmeleri</li>
           <li>Çok haftalı transfer planlayıcı (geliştirme aşamasında)</li>
         </ul>

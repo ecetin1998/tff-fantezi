@@ -20,6 +20,9 @@ export default function SquadPitchView({
   compact=false,
   showBench=true,
   variant='recommended',
+  scoreLabel='İlk 11 xFP',
+  budgetLimit=100,
+  unlimitedBudget=false,
 }){
   const xi=members.filter(m=>m.squad_slot==='XI')
   const bench=members.filter(m=>m.squad_slot!=='XI').sort((a,b)=>Number(a.sort_order||0)-Number(b.sort_order||0))
@@ -33,8 +36,8 @@ export default function SquadPitchView({
         <h2>{gameweek?`MH${gameweek} • `:''}{formation}</h2>
       </div>
       <div className="readonly-squad-head-right">
-        {budget!==undefined&&budget!==null?<span><small>Harcanan</small><b>{Number(budget).toFixed(1)}m • Kalan {(100-Number(budget)).toFixed(1)}m</b></span>:null}
-        {xiXfp!==undefined&&xiXfp!==null?<span><small>İlk 11 xFP</small><b>{Number(xiXfp).toFixed(2)}</b></span>:null}
+        {budget!==undefined&&budget!==null?<span><small>Harcanan</small><b>{Number(budget).toFixed(1)}m • {unlimitedBudget?'Bütçe sınırı yok':`Kalan ${Math.max(0,Number(budgetLimit||100)-Number(budget)).toFixed(1)}m`}</b></span>:null}
+        {xiXfp!==undefined&&xiXfp!==null?<span><small>{scoreLabel}</small><b>{Number(xiXfp).toFixed(2)}</b></span>:null}
         {actionHref?<Link className="pill" href={actionHref}>{actionLabel}</Link>:null}
       </div>
       <span className="formation-summary-pill"><small>Taktik</small><b>{formation}</b></span>
