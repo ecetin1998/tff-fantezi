@@ -8,6 +8,7 @@ import {playerLabel,predictionConfidenceLabel} from '@/lib/playerPresentation'
 import {playerRoleLabel} from '@/lib/playerRole'
 
 export const revalidate=300
+export const dynamic='force-dynamic'
 export const dynamicParams=true
 export async function generateStaticParams(){ return [] }
 export async function generateMetadata({params}){
