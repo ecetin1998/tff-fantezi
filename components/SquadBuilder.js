@@ -5,6 +5,7 @@ import { teamCssVars } from '@/lib/teamThemes'
 import { availabilityCompactNote, availabilityIsIssue } from '@/lib/availability'
 import {BUDGET,FORMATION_MAP,MAX_PLAYERS_PER_CLUB,SQUAD_LIMITS,SQUAD_SIZE,STARTING_GK,STARTING_XI_SIZE,TRANSFER_RULES} from '@/lib/rules'
 import {pitchPlayerLabel,playerLabel} from '@/lib/playerPresentation'
+import {ATTACK_FORMATION,MANAGER_CARDS,MANAGER_CARD_NONE,captainMultiplierForCard,managerCardInfo,normalizeManagerCard} from '@/lib/managerCards'
 const POS_ORDER={GK:0,DEF:1,MID:2,FWD:3}
 const posLabel={GK:'KL',DEF:'DEF',MID:'OS',FWD:'FOR'}
 
@@ -30,17 +31,22 @@ function stateSignature(payload=[]){
 }
 function displayName(player){ return pitchPlayerLabel(player) }
 function shirtMark(player){ return posLabel[player?.position] || player?.position || '—' }
-function formationFromState(state,map){
+function formationMapForCard(card){
+  return card==='attack'
+    ?{...FORMATION_MAP,[ATTACK_FORMATION]:{DEF:2,MID:5,FWD:3}}
+    :FORMATION_MAP
+}
+function formationFromState(state,map,formationMap=FORMATION_MAP){
   const starters=state.filter(x=>x.bench_order===null).map(x=>map.get(x.player_id)).filter(Boolean)
   if(starters.length!==STARTING_XI_SIZE)return '4-3-3'
   const d=starters.filter(p=>p.position==='DEF').length
   const m=starters.filter(p=>p.position==='MID').length
   const f=starters.filter(p=>p.position==='FWD').length
   const key=`${d}-${m}-${f}`
-  return FORMATION_MAP[key]?key:'4-3-3'
+  return formationMap[key]?key:'4-3-3'
 }
-function buildXI(ids,formation,map){
-  const need={GK:STARTING_GK,...FORMATION_MAP[formation]}
+function buildXI(ids,formation,map,formationMap=FORMATION_MAP){
+  const need={GK:STARTING_GK,...formationMap[formation]}
   const out=[]
   for(const pos of ['GK','DEF','MID','FWD']){
     const arr=ids.map(id=>map.get(id)).filter(p=>p?.position===pos).sort((a,b)=>xfp(b)-xfp(a))
@@ -49,21 +55,21 @@ function buildXI(ids,formation,map){
   return out
 }
 
-function bestXIPlan(ids,map){
+function bestXIPlan(ids,map,formationMap=FORMATION_MAP,captainMultiplier=2){
   let best=null
-  for(const key of Object.keys(FORMATION_MAP)){
-    const lineup=buildXI(ids,key,map)
+  for(const key of Object.keys(formationMap)){
+    const lineup=buildXI(ids,key,map,formationMap)
     if(lineup.length!==STARTING_XI_SIZE)continue
     const lineupPlayers=lineup.map(id=>map.get(id)).filter(Boolean)
     const captain=[...lineupPlayers].filter(p=>p.position!=='GK').sort((a,b)=>xfp(b)-xfp(a))[0]||null
     const base=lineupPlayers.reduce((sum,p)=>sum+xfp(p),0)
-    const total=base+xfp(captain)
+    const total=base+xfp(captain)*Math.max(0,captainMultiplier-1)
     if(!best||total>best.total)best={key,lineup,captain,base,total}
   }
   return best
 }
 
-function formationFromXIIds(ids,map){
+function formationFromXIIds(ids,map,formationMap=FORMATION_MAP){
   const players=ids.map(id=>map.get(id)).filter(Boolean)
   if(players.length!==STARTING_XI_SIZE)return null
   const gk=players.filter(p=>p.position==='GK').length
@@ -72,10 +78,10 @@ function formationFromXIIds(ids,map){
   const f=players.filter(p=>p.position==='FWD').length
   if(gk!==STARTING_GK)return null
   const key=`${d}-${m}-${f}`
-  return FORMATION_MAP[key]?key:null
+  return formationMap[key]?key:null
 }
 
-export default function SquadBuilder({ players, initialState=[], recommendedState=[], plan='free', gameweek, deadlineAt=null, locked=false, transferScenarios=[] }){
+export default function SquadBuilder({ players, initialState=[], recommendedState=[], initialManagerCard=MANAGER_CARD_NONE, plan='free', gameweek, deadlineAt=null, locked=false, transferScenarios=[] }){
   const map=useMemo(()=>new Map(players.map(p=>[p.id,p])),[players])
   const initialIds=useMemo(()=>initialState.map(x=>x.player_id).filter(id=>map.has(id)),[initialState,map])
   const initialFormation=useMemo(()=>formationFromState(initialState,map),[initialState,map])
