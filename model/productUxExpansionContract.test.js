@@ -1,0 +1,5 @@
+const fs=require('node:fs')
+const assert=require('node:assert/strict')
+const read=p=>fs.readFileSync(p,'utf8')
+const home=read('app/page.js'),nav=read('components/Nav.js'),search=read('components/GlobalPlayerSearch.js'),route=read('app/api/player-search/route.js'),detail=read('app/players/[id]/page.js'),data=read('lib/data.js'),health=read('app/model-health/page.js'),css=read('components/PremiumViews.module.css')
+assert.match(home,/KADRON İÇİN BU HAFTA/);assert.match(home,/getMySquadOverview/);assert.match(nav,/GlobalPlayerSearch/);assert.match(nav,/Model Sağlığı/);assert.match(search,/Oyuncu ara/);assert.match(route,/stale-while-revalidate/);assert.match(detail,/TAHMİN vs GERÇEKLEŞEN/);assert.match(detail,/replayMae/);assert.match(data,/scout_replay_players/);assert.match(data,/getMySquadOverview/);assert.match(data,/getModelHealthOverview/);assert.match(health,/MODEL OPERASYONU/);assert.match(health,/YAYIN KAPILARI/);assert.match(css,/scroll-padding-bottom/);assert.match(css,/safe-area-inset-bottom/);assert.match(css,/prediction-history-list/);console.log('product ux expansion contract ok')
