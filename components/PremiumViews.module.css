@@ -2487,3 +2487,18 @@
   .scope :global(.access-gate-actions) :global(.cta),
   .scope :global(.access-gate-actions) :global(.secondary){width:100%}
 }
+
+
+/* ===== PRODUCT UX EXPANSION ===== */
+.scope :global(.global-player-search-trigger){width:38px;height:38px;border:1px solid #dfe5ef;border-radius:11px;background:#fff;color:#53607d;display:grid;place-items:center;cursor:pointer}
+.scope :global(.global-player-search-trigger) svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round}
+.scope :global(.global-player-search-trigger):hover{background:#f6f9fd;color:#087e72;border-color:#cfe5e1}
+.scope :global(.global-player-search-layer){position:fixed;inset:0;z-index:300;display:grid;place-items:start center;padding:86px 16px 16px}
+.scope :global(.global-search-backdrop){position:absolute;inset:0;border:0;background:rgba(25,35,62,.28);backdrop-filter:blur(5px)}
+.scope :global(.global-player-search-panel){position:relative;width:min(620px,100%);border:1px solid #dce3ed;border-radius:18px;background:rgba(255,255,255,.99);box-shadow:0 28px 80px rgba(35,48,83,.22);overflow:hidden}
+.scope :global(.global-player-search-input){display:grid;grid-template-columns:24px minmax(0,1fr) auto;gap:9px;align-items:center;padding:12px;border-bottom:1px solid #e7ebf2}
+.scope :global(.global-player-search-input) svg{width:20px;height:20px;fill:none;stroke:#71809a;stroke-width:1.9}.scope :global(.global-player-search-input) input{border:0;outline:0;background:transparent;color:#1f2b49;font-size:16px;min-width:0}.scope :global(.global-player-search-input) button{border:0;background:#f3f6fa;color:#66728d;padding:8px 10px;border-radius:9px;font-size:10px;font-weight:850}
+.scope :global(.global-player-search-results){padding:7px;display:grid;gap:3px;max-height:min(62vh,520px);overflow:auto}.scope :global(.global-player-search-results)>p{padding:18px;margin:0;color:#7b879e;text-align:center}.scope :global(.global-player-search-results)>a{display:grid;grid-template-columns:38px minmax(0,1fr) auto;gap:10px;align-items:center;padding:9px 10px;border-radius:11px;color:#26324f;text-decoration:none}.scope :global(.global-player-search-results)>a:hover{background:#f1f8f6}.scope :global(.global-player-search-results)>a>span:nth-child(2){min-width:0;display:grid;gap:2px}.scope :global(.global-player-search-results)>a b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:12px}.scope :global(.global-player-search-results)>a small{font-size:9px;color:#8792a8}.scope :global(.global-player-search-results)>a>strong{text-align:right;font-size:16px;color:#087e72}.scope :global(.global-player-search-results)>a>strong small{display:block;font-size:7px}
+.scope :global(.page-loading-skeleton){display:grid;gap:12px}.scope :global(.page-loading-skeleton)>div{height:92px;border-radius:18px;background:linear-gradient(90deg,#edf1f6 25%,#f7f9fc 45%,#edf1f6 65%);background-size:220% 100%;animation:premium-skeleton 1.2s linear infinite}.scope :global(.page-loading-skeleton)>div:nth-child(2){height:220px}.scope :global(.page-loading-skeleton)>div:nth-child(3){height:340px}@keyframes premium-skeleton{to{background-position:-220% 0}}
+@media(max-width:900px){:global(html).scope{scroll-padding-bottom:calc(112px + env(safe-area-inset-bottom))}:global(body).scope{padding-bottom:calc(108px + env(safe-area-inset-bottom))}.scope main{padding-bottom:calc(136px + env(safe-area-inset-bottom))}.scope footer{padding-bottom:calc(122px + env(safe-area-inset-bottom))}.scope :global(.global-player-search-layer){padding-top:76px}}
+@media(max-width:560px){.scope :global(.global-player-search-trigger){width:36px;height:36px}}
