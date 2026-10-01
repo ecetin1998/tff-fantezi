@@ -32,6 +32,7 @@ const jsTests=[
   'model/teamAnalysisExplorerContract.test.js',
   'model/accessTierContract.test.js',
   'model/sssPremiumRefreshContract.test.js',
+  'model/turkishUiLanguageContract.test.js',
   'model/perfDeadlineReadabilityContract.test.js',
 ]
 
