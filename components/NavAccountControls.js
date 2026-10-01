@@ -37,7 +37,7 @@ export default function NavAccountControls(){
   }
 
   return <>
-    <Link href="/pricing" className="pro-btn">{state.pro?'PRO ✓':'PRO'}</Link>
+    <Link href="/pricing" className="pro-btn">{state.pro?'GELİŞMİŞ ✓':'GELİŞMİŞ'}</Link>
     {!state.loaded
       ?<span className="ghost-btn desktop-auth" aria-hidden="true">•••</span>
       :state.signedIn
