@@ -100,7 +100,7 @@ export default function FAQPage(){
     <section className="faq-hero">
       <div className="faq-hero-copy">
         <span className="eyebrow">SSS & FANTEZİ FUTBOL REHBERİ</span>
-        <h1>Fantezi Rehberi’u doğru okumak için tek rehber.</h1>
+        <h1>Fantezi Rehberi’ni doğru okumak için tek rehber.</h1>
         <p>Oyuncu Analizi’nden Takım Analizi’ne, xFP’den P90’a ve Agresif 11’e kadar sitedeki karar ekranlarını ve model terimlerini güncel haliyle açıklar.</p>
         <div className="faq-hero-meta">
           <span><b>{menuItems.length}</b> analiz ekranı</span>
