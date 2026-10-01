@@ -17,13 +17,13 @@ export async function renderRolesPage(page=1){
   if(auth.plan!=='pro')return <>
     <div className="section-title">
       <div><span className="eyebrow">ROL TAKİBİ</span><h1>Rol & Dakika Takibi</h1></div>
-      <span className="muted">Pro analiz</span>
+      <span className="muted">Gelişmiş analiz</span>
     </div>
     <AccessGate
       tier="pro"
-      eyebrow="PRO • ROL & DAKİKA"
+      eyebrow="GELİŞMİŞ • ROL & DAKİKA"
       title="Rotasyon değişimini ve dakika sinyallerini aç."
-      description="Son maçlardaki ilk 11 değişimi, dakika farkı, rol yükselişi/düşüşü ve tahmini kullanım görünümü Pro üyelikte açılır."
+      description="Son maçlardaki ilk 11 değişimi, dakika farkı, rol yükselişi/düşüşü ve tahmini kullanım görünümü Gelişmiş üyelikte açılır."
     />
   </>
   const {run,rows}=await getRoleSignals()
@@ -58,7 +58,7 @@ export async function renderRolesPage(page=1){
         return <Link href={'/players/'+r.player_id} className={`role-change-card ${signalClass(r.signal)}`} key={r.player_id}>
           <div className="role-change-head"><span className={`pos ${r.player?.position}`}>{posLabel(r.player?.position)}</span><div><b>{playerLabel(r.player)}</b><small>{r.team||'—'}</small></div><em>{r.signal}</em></div>
           <div className="role-change-metrics">
-            <span><small>XI değişimi</small><b>{xiDelta>0?'+':''}{xiDelta.toFixed(0)} pp</b></span>
+            <span><small>İlk 11 değişimi</small><b>{xiDelta>0?'+':''}{xiDelta.toFixed(0)} yüzde puan</b></span>
             <span><small>Dk değişimi</small><b>{minDelta>0?'+':''}{minDelta.toFixed(0)} dk</b></span>
             <span><small>MH{run?.gameweek||'—'} İlk 11</small><b>{pct(r.predicted_xi_probability)}</b></span>
             <span><small>xDakika</small><b>{num(r.x_minutes)}</b></span>
@@ -70,7 +70,7 @@ export async function renderRolesPage(page=1){
     <section className="card role-table-card">
       <div className="panel-head"><div><span className="eyebrow">TÜM OYUNCULAR</span><h2>Rol & dakika görünümü</h2></div><small>{PAGE_SIZE} oyuncu / sayfa</small></div>
       <div className="table-wrap role-decision-table"><table>
-        <thead><tr><th>#</th><th>Oyuncu</th><th>Takım</th><th>Mevki</th><th>Sinyal</th><th>Son 2 XI</th><th>XI Δ</th><th>Son 2 Dk</th><th>Dk Δ</th><th>Tahmin XI</th><th>xDk</th></tr></thead>
+        <thead><tr><th>#</th><th>Oyuncu</th><th>Takım</th><th>Mevki</th><th>Sinyal</th><th>Son 2 İlk 11</th><th>İlk 11 farkı</th><th>Son 2 Dk</th><th>Dk Δ</th><th>Tahmini İlk 11</th><th>xDk</th></tr></thead>
         <tbody>{pageRows.map((r,i)=>{
           const xiDelta=(Number(r.last2_xi_probability||0)-Number(r.previous2_xi_probability||0))*100
           const minDelta=Number(r.last2_minutes||0)-Number(r.previous2_minutes||0)
