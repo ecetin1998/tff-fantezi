@@ -6,6 +6,11 @@ import {reportServerError} from '@/lib/observability'
 import {passwordPolicyCode} from '@/lib/passwordSecurity'
 import {BENCH_SIZE,BUDGET,FORMATION_SET,MAX_PLAYERS_PER_CLUB,SQUAD_LIMITS,SQUAD_SIZE,STARTING_GK,STARTING_XI_SIZE} from '@/lib/rules'
 
+const LOGIN_ALIASES=Object.freeze({
+  adminfree:'dummy.free.20261001@example.com',
+  adminpro:'dummy.pro.20261001@example.com',
+})
+
 function authErrorCode(error){
   const code=String(error?.code||'').toLowerCase()
   const message=String(error?.message||'').toLowerCase()
@@ -40,7 +45,8 @@ function squadError(message=''){
 
 export async function login(formData){
   const supabase=await createClient()
-  const email=String(formData.get('email')||'').trim()
+  const identifier=String(formData.get('email')||'').trim()
+  const email=LOGIN_ALIASES[identifier.toLowerCase()]||identifier
   const password=String(formData.get('password')||'')
   const {error}=await supabase.auth.signInWithPassword({email,password})
   if(error)redirect('/login?error='+authErrorCode(error))
@@ -61,6 +67,7 @@ export async function signup(formData){
   const siteUrl=await getSiteUrl()
   const email=String(formData.get('email')||'').trim()
   const password=String(formData.get('password')||'')
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))redirect('/login?error=email_required')
   const passwordPolicy=await passwordPolicyCode(password)
   if(passwordPolicy)redirect('/login?error='+passwordPolicy)
   const {error}=await supabase.auth.signUp({email,password,options:{emailRedirectTo:siteUrl+'/confirm-email'}})
