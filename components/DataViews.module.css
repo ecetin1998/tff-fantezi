@@ -3768,3 +3768,18 @@
   .scope :global(.range-bound){font-size:7.5px}
   .scope :global(.range-actual-label){font-size:8.5px}
 }
+
+/* Collision-safe labels for narrow / low-value P25–P90 intervals. */
+.scope :global(.range-track){margin-bottom:50px}
+.scope :global(.range-bound){top:22px}
+.scope :global(.range-p25){transform:translateX(0)}
+.scope :global(.range-p90){transform:translateX(-100%)}
+.scope :global(.range-actual-label){top:43px;transform:translateX(-50%);max-width:90px;text-align:center}
+.scope :global(.range-actual-label):global(.edge-left){transform:translateX(0)}
+.scope :global(.range-actual-label):global(.edge-right){transform:translateX(-100%)}
+.scope :global(.prediction-range-visual)>small{display:block;margin-top:0;clear:both}
+@media(max-width:620px){
+  .scope :global(.range-track){margin-bottom:48px}
+  .scope :global(.range-bound){font-size:7.5px}
+  .scope :global(.range-actual-label){top:41px;font-size:8.5px}
+}
