@@ -69,17 +69,17 @@ export default function PlayersTable({players,total,page,pageCount,teams,filters
       </select>
     </div>:null}
 
-    <div className="table-summary">{isVisitor?<><b>İlk {players.length}</b> oyuncu • xFP sıralaması • tüm oyuncu havuzu ücretsiz üyelikle açılır</>:<><b>{total}</b> oyuncu • {isPro?'Pro analiz görünümü':'ücretsiz üye görünümü'}</>}</div>
+    <div className="table-summary">{isVisitor?<><b>İlk {players.length}</b> oyuncu • xFP sıralaması • tüm oyuncu havuzu ücretsiz üyelikle açılır</>:<><b>{total}</b> oyuncu • {isPro?'Gelişmiş analiz görünümü':'ücretsiz üye görünümü'}</>}</div>
     <div className="projection-legend">
       Karar metrikleri: <b>İlk 11</b> + <b>xDakika</b> oynama ihtimalini, <b>xFP</b> ortalama beklentiyi gösterir.
-      {isPro?<span> <b>P25/P90</b>, <b>6+</b>, <b>xG</b> ve <b>xA</b> Pro dağılım/üretim katmanlarıdır.</span>:<span> Puan dağılımı, 6+ ihtimali ve xG/xA detayları Pro üyelikte açılır.</span>}
+      {isPro?<span> <b>P25/P90</b>, <b>6+</b>, <b>xG</b> ve <b>xA</b> Gelişmiş üyelik dağılım/üretim katmanlarıdır.</span>:<span> Puan dağılımı, 6+ ihtimali ve xG/xA detayları Gelişmiş üyelikte açılır.</span>}
     </div>
     {!isVisitor&&!isPro?<AccessGate
       compact
       tier="pro"
-      eyebrow="PRO ANALİZ"
+      eyebrow="GELİŞMİŞ ANALİZ"
       title="Tavan ve üretim metriklerini aç."
-      description="P25/P90 dağılımı, 6+ ihtimali, xG/xA ve gelişmiş rol analizi Pro üyelikte görünür."
+      description="P25/P90 dağılımı, 6+ ihtimali, xG/xA ve gelişmiş rol analizi Gelişmiş üyelikte görünür."
     />:null}
 
     {!players.length?<div className="card empty-filter-state">Bu filtrelerle eşleşen oyuncu bulunamadı.</div>:<>
