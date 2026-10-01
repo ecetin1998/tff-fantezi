@@ -6,7 +6,7 @@ import {reportServerError} from '@/lib/observability'
 import {passwordPolicyCode} from '@/lib/passwordSecurity'
 import {BENCH_SIZE,BUDGET,FORMATION_SET,MAX_PLAYERS_PER_CLUB,SQUAD_LIMITS,SQUAD_SIZE,STARTING_GK,STARTING_XI_SIZE} from '@/lib/rules'
 import {SUPABASE_PUBLISHABLE_KEY,SUPABASE_URL} from '@/lib/config'
-import {ATTACK_FORMATION,ATTACK_SQUAD_LIMITS,MANAGER_CARD_NONE,managerCardInfo,normalizeManagerCard} from '@/lib/managerCards'
+import {ATTACK_SQUAD_LIMITS,MANAGER_CARD_NONE,managerCardInfo,normalizeManagerCard} from '@/lib/managerCards'
 
 const DUMMY_LOGIN_ALIASES=new Set(['adminfree','adminpro'])
 
@@ -36,7 +36,7 @@ function authErrorCode(error){
 }
 
 function squadError(message=''){
-  const key=String(message).match(/(AUTH_REQUIRED|PRO_REQUIRED|INVALID_MANAGER_CARD|INVALID_SQUAD|SQUAD_MUST_HAVE_15_UNIQUE_PLAYERS|SQUAD_HAS_INACTIVE_OR_UNKNOWN_PLAYER|INVALID_POSITION_COUNTS|BUDGET_EXCEEDED|INVALID_STARTING_XI|INVALID_BENCH|INVALID_BENCH_ORDER|INVALID_CAPTAIN|INVALID_FORMATION|CLUB_LIMIT_EXCEEDED)/)?.[1]
+  const key=String(message).match(/(AUTH_REQUIRED|PRO_REQUIRED|INVALID_MANAGER_CARD|SQUAD_LOCKED|GAMEWEEK_DEADLINE_MISSING|INVALID_SQUAD|SQUAD_MUST_HAVE_15_UNIQUE_PLAYERS|SQUAD_HAS_INACTIVE_OR_UNKNOWN_PLAYER|INVALID_POSITION_COUNTS|BUDGET_EXCEEDED|INVALID_STARTING_XI|INVALID_BENCH|INVALID_BENCH_ORDER|INVALID_CAPTAIN|INVALID_FORMATION|CLUB_LIMIT_EXCEEDED)/)?.[1]
   return ({
     AUTH_REQUIRED:'Oturum bulunamadı. Tekrar giriş yap.',
     PRO_REQUIRED:'Menajer kartları Gelişmiş üyeliğe özeldir.',
@@ -193,7 +193,7 @@ export async function saveSquad(_prevState,formData){
   const xi=xiState.map(x=>playerMap.get(x.player_id)).filter(Boolean)
   const xiCounts=xi.reduce((a,p)=>(a[p.position]=(a[p.position]||0)+1,a),{})
   const formation=(xiCounts.DEF||0)+'-'+(xiCounts.MID||0)+'-'+(xiCounts.FWD||0)
-  const formationAllowed=FORMATION_SET.has(formation)||(managerCard==='attack'&&formation===ATTACK_FORMATION)
+  const formationAllowed=FORMATION_SET.has(formation)
   if((xiCounts.GK||0)!==STARTING_GK||!formationAllowed)return {ok:false,error:'İlk 11 seçilen menajer kartının izin verdiği dizilişlerden biri olmalı.',signature:''}
   if(squadState.filter(x=>x.is_captain).length!==1||xiState.filter(x=>x.is_captain).length!==1)return {ok:false,error:'İlk 11 içinde tam bir kaptan seçilmeli.',signature:''}
 
