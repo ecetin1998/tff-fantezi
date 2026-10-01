@@ -98,7 +98,7 @@ function formationFromXIIds(ids,map,formationMap=FORMATION_MAP){
   return formationMap[key]?key:null
 }
 
-export default function SquadBuilder({ players, initialState=[], recommendedState=[], initialManagerCard=MANAGER_CARD_NONE, plan='free', gameweek, deadlineAt=null, locked=false, transferScenarios=[] }){
+export default function SquadBuilder({ players, initialState=[], recommendedState=[], initialManagerCard=MANAGER_CARD_NONE, plan='free', gameweek, deadlineAt=null, locked=false, transferScenarios=[], futurePlan=null }){
   const map=useMemo(()=>new Map(players.map(p=>[p.id,p])),[players])
   const normalizedInitialManagerCard=plan==='pro'?normalizeManagerCard(initialManagerCard):MANAGER_CARD_NONE
   const initialFormationMap=useMemo(()=>formationMapForCard(normalizedInitialManagerCard),[normalizedInitialManagerCard])
@@ -262,6 +262,26 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
     MANAGER_CARDS.map(card=>[card.id,cardRecommendations[card.id]?.xfp??null])
   ),[cardRecommendations])
   const captainCandidates=[...xi].filter(p=>p.position!=='GK').sort((a,b)=>xfp(b)-xfp(a)).slice(0,3)
+  const playerPlanFactor=p=>{
+    const future=(futurePlan?.byTeam?.[p?.team_id]||[]).slice(0,2)
+    return 1+future.reduce((sum,f)=>sum+Number(['GK','DEF'].includes(p?.position)?f.defense_factor:f.attack_factor),0)
+  }
+  const threeWeekScore=p=>xfp(p)*playerPlanFactor(p)
+  const transferPlanRows=plan==='pro'&&ids.length===SQUAD_SIZE?[...selected].flatMap(out=>{
+    const candidatePool=players
+      .filter(inn=>inn.active&&inn.position===out.position&&!ids.includes(inn.id))
+      .sort((a,b)=>threeWeekScore(b)-threeWeekScore(a))
+      .slice(0,30)
+    return candidatePool.map(inn=>{
+      const nextCost=cost-Number(out.price||0)+Number(inn.price||0)
+      if(Number.isFinite(effectiveBudget)&&nextCost>effectiveBudget+.0001)return null
+      const nextClubCount=(clubCounts[inn.team_id]||0)+(inn.team_id===out.team_id?0:1)
+      if(MAX_PLAYERS_PER_CLUB&&nextClubCount>MAX_PLAYERS_PER_CLUB)return null
+      const rawGain=threeWeekScore(inn)-threeWeekScore(out)
+      const hitCost=freeTransfersRemaining>0?0:Number(TRANSFER_RULES.hit_cost||4)
+      return {out,inn,rawGain,hitCost,netGain:rawGain-hitCost,nextCost,fixtures:(futurePlan?.byTeam?.[inn.team_id]||[]).slice(0,2)}
+    }).filter(Boolean)
+  }).sort((a,b)=>b.netGain-a.netGain).slice(0,3):[]
 
   const teams=useMemo(()=>[...new Set(players.map(p=>p.team).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'tr')),[players])
   const candidates=useMemo(()=>{
@@ -954,8 +974,13 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
         </>}
       </div>
       <div className={`pro-lock ${plan==='pro'?'unlocked':''}`}>
-        <span>GELİŞMİŞ</span><b>4 MH Transfer Planlayıcısı</b>
-        {transferScenarios.length?<div className="transfer-scenarios">{transferScenarios.map(s=><div key={s.transfers}><b>{s.transfers} transfer</b><span>{Number(s.net_gain||0)>=0?'+':''}{Number(s.net_gain||0).toFixed(2)} net</span>{s.recommended?<em>Önerilen</em>:null}</div>)}</div>:<small>{plan==='pro'?'Model senaryoları yeni yenilemeyle burada görünecek.':'Çok haftalı transfer zinciri ve transfer cezası analizi.'}</small>}
+        <span>GELİŞMİŞ</span><b>3 MH Transfer Planlayıcısı</b>
+        {plan==='pro'&&transferPlanRows.length?<div className="transfer-plan-list">{transferPlanRows.map((row,i)=><div className="transfer-plan-row" key={row.out.id+'-'+row.inn.id}>
+          <span className="transfer-rank">#{i+1}</span>
+          <div><b>{playerLabel(row.out)} → {playerLabel(row.inn)}</b><small>MH{gameweek||'—'} + sonraki 2 hafta • {row.fixtures.map(f=>`MH${f.gameweek} ${f.opponent}`).join(' • ')||'fikstür bekleniyor'}</small></div>
+          <strong className={row.netGain>=0?'positive':'negative'}>{row.netGain>=0?'+':''}{row.netGain.toFixed(2)}<small>net xFP</small></strong>
+        </div>)}</div>:<small>{plan==='pro'?'Mevcut kadro, güncel xFP ve sonraki iki fikstür gücüyle anlamlı tek-transfer fırsatı aranıyor.':'3 haftalık fikstür ayarlı transfer fırsatları ve transfer cezası analizi.'}</small>}
+        {plan==='pro'?<small className="transfer-plan-note">Plan skoru gelecekteki kesin xFP değildir; mevcut xFP, rakip sezon xG/xGA gücü ve saha avantajıyla ayarlanır.</small>:null}
       </div>
     </section>
   </div>
