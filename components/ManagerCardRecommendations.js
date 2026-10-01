@@ -73,7 +73,7 @@ export default function ManagerCardRecommendations({baseRecommended,baseAlternat
       <div className="manager-card-effects">
         <span>Kaptan {cardInfo.captainMultiplier}×</span>
         {cardInfo.benchBoost?<span>15 oyuncu puana dahil</span>:null}
-        {cardInfo.attack?<span>2-5-3 • 105m bütçe</span>:null}
+        {cardInfo.attack?<span>2 KL / 3 DEF / 5 OS / 5 FOR • 105m</span>:null}
         {cardInfo.unlimitedBudget?<span>Bütçe sınırı yok</span>:null}
         {managerCard===MANAGER_CARD_NONE?<span>Standart kurallar</span>:<span>Kartlı optimizasyon</span>}
       </div>
