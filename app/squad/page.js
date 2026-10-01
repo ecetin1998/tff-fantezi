@@ -5,7 +5,7 @@ import {getAuthState,getSquadPlayerPool,getRecommendation} from '@/lib/data'
 import {BUDGET,FORMATION_SET,SQUAD_SIZE} from '@/lib/rules'
 import {playerLabel} from '@/lib/playerPresentation'
 import {reportServerError} from '@/lib/observability'
-import {MANAGER_CARD_NONE,captainMultiplierForCard,managerCardInfo,normalizeManagerCard} from '@/lib/managerCards'
+import {ATTACK_FORMATION,MANAGER_CARD_NONE,captainMultiplierForCard,managerCardInfo,normalizeManagerCard} from '@/lib/managerCards'
 
 export const metadata={title:'Benim Kadrom'}
 
@@ -38,7 +38,8 @@ function scoreSnapshot(snapshot,pointMap,posMap){
     const trial=final.map(id=>id===missing?reserve:id)
     const counts={DEF:0,MID:0,FWD:0}
     for(const id of trial){const pos=posMap.get(id);if(pos in counts)counts[pos]++}
-    if(FORMATION_SET.has(`${counts.DEF}-${counts.MID}-${counts.FWD}`)){
+    const trialFormation=`${counts.DEF}-${counts.MID}-${counts.FWD}`
+    if(FORMATION_SET.has(trialFormation)||(cardInfo.attack&&trialFormation===ATTACK_FORMATION)){
       final[final.indexOf(missing)]=reserve;used.add(reserve)
     }
   }
