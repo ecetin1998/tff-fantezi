@@ -19,11 +19,11 @@ export default async function Pricing({searchParams}){
     <div className="access-tier-grid">
       <article className="card access-tier-card">
         <span>ZİYARETÇİ</span><strong>0 TL</strong>
-        <p>Siteyi hesap açmadan incele. Ana sayfa, Fantezi Puanları, temel Maç/Takım Analizi, Model Performansı ve rehber açık kalır.</p>
+        <p>Siteyi hesap açmadan incele ve modelin nasıl çalıştığını gör. Oyuncu ve maç ekranlarında sınırlı ama gerçek bir önizleme açık kalır.</p>
         <ul>
-          <li>Temel oyuncu xFP / İlk 11 / xDakika</li>
-          <li>Sakatlık-ceza önizlemesi</li>
-          <li>Kadro önerisi önizlemesi</li>
+          <li>Oyuncu Analizi: xFP'ye göre ilk 15 oyuncu</li>
+          <li>Maç Tahminleri: haftanın 1 öne çıkan maçı</li>
+          <li>Sakatlık-ceza ve kadro önerisi önizlemeleri</li>
           <li>Benim Kadrom kapalı</li>
         </ul>
         <Link href="/players" className="secondary">Siteyi incele</Link>
@@ -33,10 +33,10 @@ export default async function Pricing({searchParams}){
         <span>ÜCRETSİZ ÜYE</span><strong>0 TL</strong>
         <p>Ziyaretçideki her şeye ek olarak kişisel kadronu kur, kaydet ve modelin dengeli önerisini kullan.</p>
         <ul>
+          <li>Tüm oyuncu havuzu, arama ve filtreler</li>
+          <li>Tüm maç tahminleri ve fantasy okumaları</li>
           <li>Benim Kadrom • 15 oyuncu / 100m</li>
-          <li>İlk 11, yedek ve kaptan yönetimi</li>
-          <li>Tam Önerilen Kadro</li>
-          <li>Tam sakatlık / ceza görünümü</li>
+          <li>Tam Önerilen Kadro ve sakatlık / ceza görünümü</li>
         </ul>
         {auth.tier==='visitor'?<Link href="/login" className="cta">Ücretsiz hesap aç</Link>:<div className="access-current-plan">Aktif seviyen</div>}
       </article>
