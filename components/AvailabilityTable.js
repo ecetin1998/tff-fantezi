@@ -14,7 +14,7 @@ export default function AvailabilityTable({ rows }){
   const teams=useMemo(()=>[...new Set((rows||[]).map(r=>r.team).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'tr')),[rows])
   const filtered=useMemo(()=>rows.filter(r=>
     (!team||r.team===team) &&
-    (!type||r.availability_type===type) &&
+    (!type||(type==='risk' ? Number(r.availability_probability)>0&&Number(r.availability_probability)<1 : r.availability_type===type)) &&
     (!q||(`${r.player?.full_name||''} ${r.player?.short_label||''} ${r.team||''} ${r.canonical_reason||''} ${r.suspension_fixture||''}`).toLocaleLowerCase('tr').includes(q.toLocaleLowerCase('tr')))
   ),[rows,team,type,q])
 
@@ -39,6 +39,7 @@ export default function AvailabilityTable({ rows }){
         <option value="">Tüm durumlar</option>
         <option value="injuries">Sakatlık</option>
         <option value="suspensions">Ceza</option>
+        <option value="risk">Riskli</option>
       </select>
     </div>
 
