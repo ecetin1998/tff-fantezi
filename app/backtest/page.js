@@ -257,7 +257,7 @@ export default async function BacktestPage(){
         {resolvedLearning.length?<><div className="panel-head" style={{marginTop:24}}><div><span className="eyebrow">KAPANAN KARARLAR</span><h3>Çözülen veya değişiklik gerektirmeyenler</h3></div><small>{resolvedLearning.length} kayıt</small></div>
         <div className="learning-grid">{resolvedLearning.map(item=><article key={item.id} className="learning-card">
           <div><span>{'MH'+item.after_gameweek+' sonrası'}</span><em>{learningStatus[item.status]||item.status}</em></div>
-          <h3>{item.component}</h3><p>{item.summary_tr||item.signal}</p>
+          <h3>{localizeModelText(item.component)}</h3><p>{localizeModelText(item.summary_tr||item.signal)}</p>
         </article>)}</div></>:null}
       </div>:<div className="empty-learning-state">Güncel kurgu geriye dönük testi tamamlanınca öğrenme sinyalleri burada oluşacak.</div>}
     </section>
