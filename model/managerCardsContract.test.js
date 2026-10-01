@@ -94,6 +94,6 @@ assert.match(css,/manager-card-roster-control/)
 assert.match(layout,/ManagerCards\.module\.css/)
 assert.match(pitch,/budgetLimit=100/)
 assert.match(pitch,/Bütçe sınırı yok/)
-assert.match(sss,/105m'ye çıkarır/)
+assert.match(sss,/105m’ye çıkarır/)
 
 console.log('manager cards contract ok')
