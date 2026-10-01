@@ -54,6 +54,7 @@ function effectiveRules(rules:any,card:any){
   const baseBudget=n(rules.budget);
   return {
     ...rules,
+    squad:card.attack?{GK:2,DEF:3,MID:5,FWD:5}:(rules.squad||{}),
     formations,
     effectiveBudget:card.unlimited?null:(card.attack?baseBudget+5:baseBudget),
   };
