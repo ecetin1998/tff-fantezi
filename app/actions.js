@@ -47,7 +47,7 @@ function squadError(message=''){
     SQUAD_MUST_HAVE_15_UNIQUE_PLAYERS:`Kadro ${SQUAD_SIZE} benzersiz oyuncudan oluşmalı.`,
     SQUAD_HAS_INACTIVE_OR_UNKNOWN_PLAYER:'Kadroda aktif olmayan veya bulunamayan oyuncu var.',
     INVALID_POSITION_COUNTS:`Kadro dağılımı ${SQUAD_LIMITS.GK} KL / ${SQUAD_LIMITS.DEF} DEF / ${SQUAD_LIMITS.MID} OS / ${SQUAD_LIMITS.FWD} FOR olmalı.`,
-    BUDGET_EXCEEDED:`${BUDGET}m bütçe aşıldı.`,
+    BUDGET_EXCEEDED:'Seçili menajer kartı için bütçe sınırı aşıldı.',
     INVALID_STARTING_XI:'İlk 11 geçersiz.',
     INVALID_BENCH:'Yedek kulübesi tam 4 oyuncu olmalı.',
     INVALID_BENCH_ORDER:'Yedek sıraları 1, 2, 3, 4 olmalı.',
