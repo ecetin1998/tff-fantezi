@@ -250,9 +250,9 @@ export default async function PlayerPage({ params }){
     </section>
 
     {replayRows.length?<section className="card profile-card player-prediction-history">
-      <div className="panel-head"><div><span className="eyebrow">TAHMİN vs GERÇEKLEŞEN</span><h2>Geçmiş haftalarda model ne bekledi?</h2></div><span className="pill">MAE {replayMae===null?'—':replayMae.toFixed(2)}</span></div>
+      <div className="panel-head"><div><span className="eyebrow">TAHMİN vs GERÇEKLEŞEN</span><h2>Geçmiş haftalarda model ne bekledi?</h2></div><span className="pill">Ort. hata {replayMae===null?'—':replayMae.toFixed(2)}</span></div>
       <div className="prediction-history-list">{replayRows.map(row=><div className="prediction-history-row" key={row.gameweek}><span className="prediction-week">MH{row.gameweek}</span><div className="prediction-bars"><div><small>xFP {num(row.predicted_xfp,1)}</small><i className="predicted" style={{width:`${Math.min(100,Number(row.predicted_xfp||0)/replayMax*100)}%`}}/></div><div><small>Gerçek {num(row.actual_points,0)}</small><i className="actual" style={{width:`${Math.min(100,Number(row.actual_points||0)/replayMax*100)}%`}}/></div></div><b className={Math.abs(Number(row.predicted_xfp||0)-Number(row.actual_points||0))<=2?'close':'wide'}>{Number(row.actual_points||0)-Number(row.predicted_xfp||0)>=0?'+':''}{(Number(row.actual_points||0)-Number(row.predicted_xfp||0)).toFixed(1)}</b></div>)}</div>
-      <p className="muted prediction-history-note">Geçmiş haftalar güncel modelin replay çıktısıdır; canlı haftadaki xFP ile birebir aynı veri anını temsil etmez.</p>
+      <p className="muted prediction-history-note">Geçmiş haftalar modelin geriye dönük test çıktısıdır; canlı haftadaki xFP ile birebir aynı veri anını temsil etmez.</p>
     </section>:null}
 
     {isPro?<details className="card profile-card player-advanced-details">
