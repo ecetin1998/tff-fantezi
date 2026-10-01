@@ -473,6 +473,35 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
           <button type="button" className="squad-tool-btn jump-link" onClick={goToLineup} disabled={!validRoster}>İlk 11’i Diz ↓</button>
         </div>
 
+        <div className={`manager-card-roster-control ${managerCard!==MANAGER_CARD_NONE?'active':''} ${plan==='pro'?'unlocked':'locked'}`}>
+          <div className="manager-card-roster-copy">
+            <div>
+              <span className="eyebrow">GELİŞMİŞ • MENAJER KARTI</span>
+              <h3>{plan==='pro'?cardInfo.label:'Menajer kartı seçimi'}</h3>
+            </div>
+            <div className="manager-card-roster-effect">
+              {plan!=='pro'
+                ?<span>Gelişmiş üyelikte açılır</span>
+                :cardInfo.attack
+                  ?<><span>2 KL</span><span>3 DEF</span><span>5 OS</span><span>5 FOR</span></>
+                  :cardInfo.unlimitedBudget
+                    ?<span>Bütçe sınırı yok</span>
+                    :cardInfo.benchBoost
+                      ?<span>15 oyuncu puana dahil</span>
+                      :cardInfo.captainMultiplier>2
+                        ?<span>Kaptan {captainMultiplier}×</span>
+                        :<span>Standart kadro yapısı • 2 / 5 / 5 / 3</span>}
+            </div>
+          </div>
+          <ManagerCardPicker
+            value={managerCard}
+            onChange={changeManagerCard}
+            disabled={plan!=='pro'||isLocked}
+            xfpByCard={plan==='pro'?managerCardPreviewXfp:{}}
+            compact
+          />
+        </div>
+
         <div className="roster-pitch">
           <div className="pitch-mark center-line"/>
           <div className="pitch-mark center-circle"/>
