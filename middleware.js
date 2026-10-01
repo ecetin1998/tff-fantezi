@@ -8,6 +8,8 @@ export const config={
   matcher:[
     '/squad/:path*',
     '/login/:path*',
+    '/signup/:path*',
+    '/forgot-password/:path*',
     '/reset-password/:path*',
     '/confirm-email/:path*',
     '/auth/:path*',
