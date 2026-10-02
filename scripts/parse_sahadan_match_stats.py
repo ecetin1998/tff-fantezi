@@ -13,7 +13,11 @@ URLS=[
 "https://www.sahadan.com/mac/kocaelispor-vs-gaziantep-fk/cjxu8u3pt1koim3dig3pvv09g/istatistikler/oyuncu",
 "https://www.sahadan.com/mac/erzurumspor-fk-vs-samsunspor/ck9d08o1wrut7snbkdo3ob8yc/istatistikler/oyuncu",
 ]
-TARGET={"şut":"shots","orta":"crosses","çalım":"takeons"}\n\ndef stat_kind(title):\n    if "yarat" in title: return "key_passes"\n    return TARGET.get(title)
+TARGET={"şut":"shots","orta":"crosses","çalım":"takeons"}
+
+def stat_kind(title):
+    if "yarat" in title: return "key_passes"
+    return TARGET.get(title)
 
 def norm(s):
     return re.sub(r"\s+"," ",s or "").strip().casefold()
@@ -31,7 +35,8 @@ def parse(url,html):
     out=[]; seen=set()
     for head in soup.find_all("div"):
         title=norm(head.get_text(" ",strip=True))
-        stat=stat_kind(title)\n        if not stat: continue
+        stat=stat_kind(title)
+        if not stat: continue
         card=head
         for _ in range(6):
             if card is None: break
