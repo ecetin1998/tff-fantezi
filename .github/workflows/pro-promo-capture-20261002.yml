@@ -14,6 +14,7 @@ jobs:
     env:
       PROMO_CAPTURE_PRO: "1"
       NEXT_PUBLIC_SITE_URL: http://127.0.0.1:3000
+      NEXT_PUBLIC_PROMO_CAPTURE_PRO: "1"
     steps:
       - uses: actions/checkout@v4
 
@@ -52,11 +53,24 @@ jobs:
             "  const recommendedState=(recommended||[]).map(x=>({player_id:Number(x.player_id),is_captain:Boolean(x.is_captain),bench_order:x.squad_slot==='XI'?null:(++recommendedBenchOrder)}))\n  if(promoCapture)initialState=recommendedState"
           );
           fs.writeFileSync('app/squad/page.js',squad);
+
+          let nav=fs.readFileSync('components/NavAccountControls.js','utf8');
+          nav=nav.replace(
+            "export default function NavAccountControls(){\n  const [state,setState]=useState({loaded:false,signedIn:false,pro:false})",
+            "export default function NavAccountControls(){\n  const promoPro=process.env.NEXT_PUBLIC_PROMO_CAPTURE_PRO==='1'\n  const [state,setState]=useState(promoPro?{loaded:true,signedIn:true,pro:true}:{loaded:false,signedIn:false,pro:false})"
+          );
+          nav=nav.replace(
+            "  useEffect(()=>{\n    const supabase=createClient()",
+            "  useEffect(()=>{\n    if(promoPro)return\n    const supabase=createClient()"
+          );
+          nav=nav.replace("  },[])","  },[promoPro])");
+          fs.writeFileSync('components/NavAccountControls.js',nav);
           EOF
 
-      - name: Start local current site
+      - name: Build and start isolated Pro preview
         run: |
-          npm run dev -- --hostname 127.0.0.1 > /tmp/promo-next.log 2>&1 &
+          npm run build
+          npm run start -- --hostname 127.0.0.1 > /tmp/promo-next.log 2>&1 &
           echo $! > /tmp/promo-next.pid
           for i in {1..90}; do
             if curl -fsS http://127.0.0.1:3000/ >/dev/null; then exit 0; fi
