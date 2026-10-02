@@ -10,48 +10,53 @@ function draw(root){
   try{rows=JSON.parse(root.dataset.weeklyPoints||'[]')}catch{return}
   if(!rows.length)return
   root.innerHTML=''
-  const width=960,height=260,pad={l:42,r:18,t:22,b:38}
+  const width=960,height=300,pad={l:48,r:20,t:30,b:42}
   const vals=rows.map(r=>Number(r.points||0))
-  const min=Math.min(0,...vals),max=Math.max(6,...vals)
+  const rawMin=Math.min(0,...vals),rawMax=Math.max(6,...vals)
+  const extra=Math.max(2,(rawMax-rawMin)*.12)
+  const min=Math.floor(rawMin-extra),max=Math.ceil(rawMax+extra)
   const span=Math.max(1,max-min)
-  const x=i=>pad.l+(width-pad.l-pad.r)*(rows.length===1?.5:i/(rows.length-1))
-  const y=v=>pad.t+(height-pad.t-pad.b)*(1-(Number(v)-min)/span)
+  const plotW=width-pad.l-pad.r,plotH=height-pad.t-pad.b
+  const slot=plotW/Math.max(rows.length,8)
+  const x=i=>pad.l+slot*(i+.5)
+  const y=v=>pad.t+plotH*(1-(Number(v)-min)/span)
+  const zeroY=y(0)
   const svg=make('svg',{viewBox:`0 0 ${width} ${height}`,preserveAspectRatio:'xMidYMid meet',role:'img','aria-label':'Haftalık fantezi puanları grafiği'})
   const grid=make('g',{class:'weekly-points-grid'})
-  const ticks=4
-  for(let i=0;i<=ticks;i++){
-    const val=min+span*i/ticks, yy=y(val)
+  for(let i=0;i<=4;i++){
+    const val=min+span*i/4,yy=y(val)
     grid.append(make('line',{x1:pad.l,x2:width-pad.r,y1:yy,y2:yy}))
-    const label=make('text',{x:pad.l-9,y:yy+4,'text-anchor':'end'});label.textContent=val.toFixed(0);grid.append(label)
+    const label=make('text',{x:pad.l-10,y:yy+4,'text-anchor':'end'});label.textContent=Math.round(val);grid.append(label)
   }
   svg.append(grid)
-  if(min<0&&max>0)svg.append(make('line',{class:'weekly-zero-line',x1:pad.l,x2:width-pad.r,y1:y(0),y2:y(0)}))
-  const path=make('path',{class:'weekly-points-line',d:rows.map((r,i)=>`${i?'L':'M'} ${x(i)} ${y(r.points)}`).join(' ')})
-  svg.append(path)
+  svg.append(make('line',{class:'weekly-zero-line',x1:pad.l,x2:width-pad.r,y1:zeroY,y2:zeroY}))
   rows.forEach((r,i)=>{
+    const value=Number(r.points||0),yy=y(value)
+    const barW=Math.min(58,slot*.58),barY=Math.min(yy,zeroY),barH=Math.max(3,Math.abs(zeroY-yy))
     const g=make('g',{class:'weekly-point'})
-    const dot=make('circle',{cx:x(i),cy:y(r.points),r:5,tabindex:0})
-    const title=make('title');title.textContent=`MH${r.gameweek}: ${r.points} puan${r.minutes===null?'':` • ${Math.round(r.minutes)} dk`}`;dot.append(title);g.append(dot)
-    const val=make('text',{class:'weekly-point-value',x:x(i),y:y(r.points)-11,'text-anchor':'middle'});val.textContent=String(r.points);g.append(val)
-    const step=rows.length>20?4:rows.length>12?2:1
-    if(i%step===0||i===rows.length-1){const lab=make('text',{class:'weekly-week-label',x:x(i),y:height-13,'text-anchor':'middle'});lab.textContent='MH'+r.gameweek;g.append(lab)}
+    const bar=make('rect',{class:value<0?'weekly-score-bar negative':'weekly-score-bar',x:x(i)-barW/2,y:barY,width:barW,height:barH,rx:8,tabindex:0})
+    const title=make('title');title.textContent=`MH${r.gameweek}: ${value} puan${r.minutes===null?'':` • ${Math.round(r.minutes)} dk`}`;bar.append(title);g.append(bar)
+    const valueLabel=make('text',{class:'weekly-point-value',x:x(i),y:value>=0?barY-9:barY+barH+17,'text-anchor':'middle'});valueLabel.textContent=String(value);g.append(valueLabel)
+    const week=make('text',{class:'weekly-week-label',x:x(i),y:height-14,'text-anchor':'middle'});week.textContent='MH'+r.gameweek;g.append(week)
     svg.append(g)
   })
   root.append(svg)
 }
+
 export default function WeeklyPointsChartEnhancer(){
   useEffect(()=>{document.querySelectorAll('.weekly-points-chart').forEach(draw)},[])
   return <style>{`
-    .weekly-points-chart{width:100%;margin-top:14px;overflow:hidden}
-    .weekly-points-chart svg{display:block;width:100%;height:auto;min-height:210px;overflow:visible}
-    .weekly-points-grid line{stroke:rgba(148,163,184,.16);stroke-width:1}
-    .weekly-points-grid text,.weekly-week-label{fill:var(--muted,#94a3b8);font-size:11px;font-weight:700}
-    .weekly-zero-line{stroke:rgba(148,163,184,.35);stroke-dasharray:5 5}
-    .weekly-points-line{fill:none;stroke:var(--team-primary,#7c3aed);stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
-    .weekly-point circle{fill:var(--surface,#0f172a);stroke:var(--team-primary,#7c3aed);stroke-width:3;outline:none}
-    .weekly-point circle:focus{stroke-width:5}
-    .weekly-point-value{fill:var(--text,#f8fafc);font-size:11px;font-weight:800}
+    .weekly-points-chart{width:100%;margin-top:14px;overflow:hidden;border-radius:16px;background:rgba(15,23,42,.025);padding:8px 4px 0}
+    .weekly-points-chart svg{display:block;width:100%;height:auto;aspect-ratio:960/300}
+    .weekly-points-grid line{stroke:rgba(100,116,139,.18);stroke-width:1}
+    .weekly-points-grid text,.weekly-week-label{fill:#64748b;font-size:12px;font-weight:750}
+    .weekly-zero-line{stroke:rgba(71,85,105,.42);stroke-width:1.5}
+    .weekly-score-bar{fill:#16a34a;opacity:.88;outline:none}
+    .weekly-score-bar.negative{fill:#dc2626}
+    .weekly-score-bar:hover,.weekly-score-bar:focus{opacity:1;stroke:rgba(15,23,42,.35);stroke-width:2}
+    .weekly-point-value{fill:#0f172a;font-size:13px;font-weight:850}
     .weekly-points-chart-fallback{display:flex;gap:8px;flex-wrap:wrap}
-    @media(max-width:620px){.weekly-points-chart{overflow-x:auto;overscroll-behavior-inline:contain}.weekly-points-chart svg{width:max(680px,100%);height:auto;aspect-ratio:960/260}.weekly-point-value{font-size:10px}.weekly-points-grid text,.weekly-week-label{font-size:9px}}
+    @media(prefers-color-scheme:dark){.weekly-points-chart{background:rgba(255,255,255,.025)}.weekly-points-grid text,.weekly-week-label{fill:#94a3b8}.weekly-point-value{fill:#f8fafc}}
+    @media(max-width:620px){.weekly-points-chart{overflow-x:auto;overscroll-behavior-inline:contain}.weekly-points-chart svg{width:max(700px,100%);height:auto;aspect-ratio:960/300}}
   `}</style>
 }
