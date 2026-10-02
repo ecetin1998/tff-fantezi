@@ -145,13 +145,16 @@ function parseSource(html:string){
       const reason=cells[1]?.trim()
       if(!player||!reason)continue
       const isSuspension=/cezali|cezalı/i.test(reason)
+      const suspensionMatch=reason.match(/Cezalı olduğu maç\(lar\):\s*([^|]+)/i)?.[1]?.trim()||null
       rows.push({
         source_team:team,
         source_player:player,
         kind:isSuspension?"suspensions":"injuries",
         reason:reason.replace(/Cezalı olduğu maç\(lar\):[\s\S]*/i,"").trim(),
         injury_date:isSuspension?null:parseDate(cells[2]||""),
+        suspension_date:isSuspension?parseDate(cells[2]||""):null,
         expected_return:isSuspension?null:(cells[3]||null),
+        source_suspension_fixture:isSuspension?suspensionMatch:null,
       })
     }
   }
@@ -231,7 +234,7 @@ Deno.serve(async(req:Request)=>{
     const next=new Map<number,any>()
 
     for(const row of matched){
-      const suspensionFixture=row.kind==="suspensions"?formatFixture(fixturesByTeam.get(row.team_id),teams):null
+      const suspensionFixture=row.kind==="suspensions"?(row.source_suspension_fixture||formatFixture(fixturesByTeam.get(row.team_id),teams)):null
       const expected=row.expected_return?.trim()||null
       next.set(row.player_id,{
         run_id:runId,
@@ -244,6 +247,7 @@ Deno.serve(async(req:Request)=>{
         source_url:SOURCE_URL,
         source_reason:row.reason,
         injury_date:row.injury_date,
+        suspension_end:row.suspension_date,
         expected_return:expected,
         expected_return_date:expected?expectedDate(expected):null,
         suspension_fixture:suspensionFixture,
@@ -265,6 +269,7 @@ Deno.serve(async(req:Request)=>{
         source_url:SOURCE_URL,
         source_reason:null,
         injury_date:null,
+        suspension_end:null,
         expected_return:null,
         expected_return_date:null,
         suspension_fixture:null,
@@ -276,7 +281,7 @@ Deno.serve(async(req:Request)=>{
 
     const comparable=(r:any)=>JSON.stringify([
       r?.availability_type,Number(r?.availability_probability??1),r?.canonical_reason||null,
-      r?.injury_date||null,r?.expected_return||null,r?.expected_return_date||null,r?.suspension_fixture||null
+      r?.injury_date||null,r?.suspension_end||null,r?.expected_return||null,r?.expected_return_date||null,r?.suspension_fixture||null
     ])
     let changed=0
     for(const row of next.values()){

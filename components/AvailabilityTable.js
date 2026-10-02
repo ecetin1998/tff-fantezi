@@ -1,7 +1,7 @@
 'use client'
 import { useMemo, useState } from 'react'
 import Link from 'next/link'
-import { availabilityReason, availabilityStatusLabel } from '@/lib/availability'
+import { availabilityDetailLine, availabilityStatusLabel } from '@/lib/availability'
 import {playerLabel} from '@/lib/playerPresentation'
 
 const posLabel=p=>({GK:'KL',DEF:'DEF',MID:'OS',FWD:'FOR'}[p]||p||'—')
@@ -54,7 +54,7 @@ export default function AvailabilityTable({ rows }){
     <div className="card table-wrap availability-table-wrap"><table className="availability-table-v2">
       <thead><tr>
         <th>#</th><th>Oyuncu</th><th>Takım</th><th>Mevki</th><th>Durum</th><th>Oynama %</th>
-        <th>Sakatlık / ceza</th><th>Ceza maçı</th>
+        <th>Sakatlık / ceza detayı</th>
       </tr></thead>
       <tbody>{filtered.map((r,i)=>{
         return <tr key={`${r.player_id}-${i}`}>
@@ -72,7 +72,7 @@ export default function AvailabilityTable({ rows }){
 
     <div className="availability-card-list">
       {filtered.map((r,i)=>{
-        const note=availabilityReason(r)
+        const note=availabilityDetailLine(r)
         return <Link href={'/players/'+r.player_id} className="card availability-mobile-card" key={'mobile-'+r.player_id+'-'+i}>
           <div className="availability-mobile-head">
             <span className={`pos ${r.player?.position}`}>{posLabel(r.player?.position)}</span>
