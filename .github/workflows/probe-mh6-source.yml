@@ -15,10 +15,10 @@ jobs:
           url='https://www.sahadan.com/mac/corum-fk-vs-alanyaspor/cjb4iy9yti4b15ka3395yxjbo/istatistikler/oyuncu'
           curl -L --compressed -A 'Mozilla/5.0' --max-time 30 -o /tmp/page.html -w 'HTTP=%{http_code} bytes=%{size_download}\n' "$url"
           python3 - <<'PY'
-          import re
-          s=open('/tmp/page.html',errors='ignore').read()
-          print('title=', re.findall(r'<title[^>]*>(.*?)</title>',s,re.I|re.S)[:1])
-          for needle in ['Fatih','Aksoy','chances','cross','takeon','player','statistics']:
-              print(needle, s.lower().find(needle.lower()))
-          print(re.sub(r'\s+',' ',s[:4000])[:4000])
+          import json
+          from bs4 import BeautifulSoup
+          s=open('/tmp/page.html',errors='ignore').read(); soup=BeautifulSoup(s,'html.parser'); x=soup.find('script',id='__NUXT_DATA__'); raw=json.loads(x.string)
+          for i,v in enumerate(raw):
+              if isinstance(v,dict) and 'type' in v and 'players' in v:
+                  print('OBJ',i,v)
           PY
