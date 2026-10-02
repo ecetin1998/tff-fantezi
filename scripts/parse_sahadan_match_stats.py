@@ -120,10 +120,13 @@ def main():
         print(f"SOURCE {u} rows={len(parsed)}",file=sys.stderr)
     agg={}
     for r in rows:
-        k=(r["player_name"],r["team_name"])
-        x=agg.setdefault(k,{"player_name":k[0],"team_name":k[1],"shots":0,"shots_on_target":0,"key_passes":0,"crosses":0,"successful_crosses":0,"takeons":0,"successful_takeons":0,"source_matches":0})
+        k=norm(r["player_name"])
+        if k not in agg:
+            agg[k]={"player_name":r["player_name"],"team_name":r.get("team_name") or "","shots":0,"shots_on_target":0,"key_passes":0,"crosses":0,"successful_crosses":0,"takeons":0,"successful_takeons":0,"source_matches":0}
+        x=agg[k]
+        if r.get("team_name"): x["team_name"]=r["team_name"]
         x["source_matches"]+=1
-        for f in ["shots","shots_on_target","key_passes","crosses","successful_crosses","takeons","successful_takeons"]:
-            if r.get(f) is not None:x[f]+=int(r[f])
+        for field in ["shots","shots_on_target","key_passes","crosses","successful_crosses","takeons","successful_takeons"]:
+            if r.get(field) is not None:x[field]+=int(r[field])
     print(json.dumps({"gameweek":6,"rows":list(agg.values())},ensure_ascii=False,separators=(",",":")))
 if __name__=="__main__": main()
