@@ -116,6 +116,39 @@ Deno.serve(async(req:Request)=>{
       return Response.json({ok,sources,stale,upstream_configured:Boolean(endpoint),upstream_called:Boolean(endpoint),upstream_status:upstreamStatus,upstream_error:upstreamError})
     }
 
+    if(stage==="advanced_freshness"){
+      const current=await sb.from("scout_model_runs").select("gameweek").eq("is_current",true).eq("status","ready").limit(1).single()
+      if(current.error)throw current.error
+      const gw=Number(current.data.gameweek)
+      const players=await sb.from("scout_players").select("id").eq("active",true)
+      if(players.error)throw players.error
+      const activeIds=new Set((players.data||[]).map((x:any)=>Number(x.id)))
+      const stats=await sb.from("scout_player_season_stats").select("player_id,through_gameweek,advanced_through_gameweek,minutes").eq("season","2026-27").eq("through_gameweek",gw)
+      if(stats.error)throw stats.error
+      const active=(stats.data||[]).filter((x:any)=>activeIds.has(Number(x.player_id)))
+      const stale=active.filter((x:any)=>Number(x.advanced_through_gameweek||0)<gw)
+      // Zero-minute players have no observed action events; advancing their coverage marker is safe.
+      if(body.repair===true){
+        const zeroMinute=stale.filter((x:any)=>Number(x.minutes||0)===0).map((x:any)=>Number(x.player_id))
+        if(zeroMinute.length){
+          const q=await sb.from("scout_player_season_stats").update({
+            advanced_through_gameweek:gw,advanced_updated_at:new Date().toISOString()
+          }).eq("season","2026-27").eq("through_gameweek",gw).in("player_id",zeroMinute)
+          if(q.error)throw q.error
+        }
+      }
+      const verify=await sb.from("scout_player_season_stats").select("player_id,advanced_through_gameweek,minutes").eq("season","2026-27").eq("through_gameweek",gw)
+      if(verify.error)throw verify.error
+      const remaining=(verify.data||[]).filter((x:any)=>activeIds.has(Number(x.player_id))&&Number(x.advanced_through_gameweek||0)<gw&&Number(x.minutes||0)>0)
+      const pass=remaining.length===0
+      return Response.json({
+        ok:pass,pass,current_gameweek:gw,active_players:activeIds.size,
+        advanced_current:activeIds.size-remaining.length,stale_played_players:remaining.length,
+        stale_player_ids:remaining.slice(0,30).map((x:any)=>Number(x.player_id)),
+        note:pass?"advanced data covers current MH":"played-player advanced data must be ingested through current MH"
+      },{status:pass?200:409})
+    }
+
     if(stage==="candidate"){
       const current=await sb.from("scout_model_runs").select("id,generated_at,source_updated_at").eq("is_current",true).maybeSingle()
       if(current.error)throw current.error
