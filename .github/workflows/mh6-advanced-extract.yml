@@ -1,0 +1,22 @@
+name: MH6 advanced backfill extract
+on:
+  push:
+    branches: [main]
+    paths:
+      - "scripts/parse_sahadan_match_stats.py"
+      - ".github/workflows/mh6-advanced-extract.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  extract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m pip install --disable-pip-version-check beautifulsoup4
+      - name: Extract MH6 advanced actions
+        run: python3 scripts/parse_sahadan_match_stats.py | tee /tmp/mh6.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mh6-advanced-actions
+          path: /tmp/mh6.json
