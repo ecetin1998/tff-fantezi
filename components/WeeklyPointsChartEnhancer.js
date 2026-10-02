@@ -16,7 +16,7 @@ function draw(root){
   const span=Math.max(1,max-min)
   const x=i=>pad.l+(width-pad.l-pad.r)*(rows.length===1?.5:i/(rows.length-1))
   const y=v=>pad.t+(height-pad.t-pad.b)*(1-(Number(v)-min)/span)
-  const svg=make('svg',{viewBox:`0 0 ${width} ${height}`,role:'img','aria-label':'Haftalık fantezi puanları grafiği'})
+  const svg=make('svg',{viewBox:`0 0 ${width} ${height}`,preserveAspectRatio:'xMidYMid meet',role:'img','aria-label':'Haftalık fantezi puanları grafiği'})
   const grid=make('g',{class:'weekly-points-grid'})
   const ticks=4
   for(let i=0;i<=ticks;i++){
@@ -52,6 +52,6 @@ export default function WeeklyPointsChartEnhancer(){
     .weekly-point circle:focus{stroke-width:5}
     .weekly-point-value{fill:var(--text,#f8fafc);font-size:11px;font-weight:800}
     .weekly-points-chart-fallback{display:flex;gap:8px;flex-wrap:wrap}
-    @media(max-width:620px){.weekly-points-chart svg{min-height:180px}.weekly-point-value{font-size:10px}.weekly-points-grid text,.weekly-week-label{font-size:9px}}
+    @media(max-width:620px){.weekly-points-chart{overflow-x:auto;overscroll-behavior-inline:contain}.weekly-points-chart svg{width:max(680px,100%);height:auto;aspect-ratio:960/260}.weekly-point-value{font-size:10px}.weekly-points-grid text,.weekly-week-label{font-size:9px}}
   `}</style>
 }
