@@ -26,7 +26,7 @@ async function authorized(req:Request){
       head.alg!=="RS256"||!head.kid||p.iss!==ISS||!aud||
       Number(p.exp||0)<now-30||Number(p.nbf||0)>now+30||
       p.repository_id!==REPO_ID||p.repository!==REPO||
-      p.ref!=="refs/heads/main"||p.event_name!=="workflow_dispatch"
+      p.ref!=="refs/heads/main"||!["workflow_dispatch","push"].includes(String(p.event_name||""))
     )return false
     const jwks=await fetch(JWKS).then(r=>r.json())
     const jwk=(jwks.keys||[]).find((k:any)=>k.kid===head.kid)
@@ -80,6 +80,92 @@ Deno.serve(async(req:Request)=>{
     const playerStats=Array.isArray(body.player_stats)?body.player_stats:[]
     const events=Array.isArray(body.events)?body.events:[]
     const sb=createClient(Deno.env.get("SUPABASE_URL")!,Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!)
+
+    if(body.mode==="weekly_delta"){
+      const norm=(v:any)=>String(v||"").normalize("NFD").replace(/[\\u0300-\\u036f]/g,"").toLocaleLowerCase("tr-TR").replace(/[^a-z0-9]+/g," ").trim()
+      const teamNorm=(v:any)=>norm(v).replace(/\\b(fk|sk|caykur)\\b/g,"").replace(/\\s+/g," ").trim()
+      const teamsQ=await sb.from("scout_teams").select("id,name")
+      if(teamsQ.error)throw teamsQ.error
+      const teamById=new Map((teamsQ.data||[]).map((t:any)=>[Number(t.id),String(t.name)]))
+      const playersQ=await sb.from("scout_players").select("id,full_name,display_name,short_label,team_id").eq("active",true)
+      if(playersQ.error)throw playersQ.error
+      const players=(playersQ.data||[]).map((p:any)=>({...p,team_name:teamById.get(Number(p.team_id))||""}))
+      const sourceRows=Array.isArray(body.weekly_stats)?body.weekly_stats:[]
+      const unmatched:any[]=[]
+      const resolved:any[]=[]
+      for(const x of sourceRows){
+        const n=norm(x.player_name),tn=teamNorm(x.team_name)
+        let pool=players.filter((p:any)=>!tn||teamNorm(p.team_name)===tn||teamNorm(p.team_name).includes(tn)||tn.includes(teamNorm(p.team_name)))
+        const exact=pool.filter((p:any)=>[p.full_name,p.display_name,p.short_label].some((v:any)=>norm(v)===n))
+        let hit=exact.length===1?exact[0]:null
+        if(!hit){
+          const bits=n.split(" ").filter(Boolean),last=bits.at(-1)||"",first=(bits[0]||"")[0]||""
+          const fuzzy=pool.filter((p:any)=>{
+            const pb=norm(p.full_name).split(" ").filter(Boolean)
+            return (pb.at(-1)||"")===last && (!first||(pb[0]||"")[0]===first)
+          })
+          if(fuzzy.length===1)hit=fuzzy[0]
+        }
+        if(!hit){unmatched.push({player_name:x.player_name,team_name:x.team_name});continue}
+        resolved.push({
+          season,gameweek:throughGameweek,player_id:Number(hit.id),
+          shots:Math.max(0,Math.round(finite(x.shots)??0)),
+          shots_on_target:Math.max(0,Math.round(finite(x.shots_on_target)??0)),
+          key_passes:Math.max(0,Math.round(finite(x.key_passes)??0)),
+          crosses:Math.max(0,Math.round(finite(x.crosses)??0)),
+          successful_crosses:Math.max(0,Math.round(finite(x.successful_crosses)??0)),
+          takeons:Math.max(0,Math.round(finite(x.takeons)??0)),
+          successful_takeons:Math.max(0,Math.round(finite(x.successful_takeons)??0)),
+          source:String(body.source||"sahadan_match_actions"),
+          source_updated_at:new Date().toISOString(),
+        })
+      }
+      const dedup=new Map<number,any>()
+      for(const r of resolved){
+        const old=dedup.get(r.player_id)
+        if(!old){dedup.set(r.player_id,r);continue}
+        for(const k of ["shots","shots_on_target","key_passes","crosses","successful_crosses","takeons","successful_takeons"])old[k]+=r[k]
+      }
+      const weekly=[...dedup.values()]
+      if(weekly.length){
+        const w=await sb.from("scout_player_advanced_weekly").upsert(weekly,{onConflict:"season,gameweek,player_id"})
+        if(w.error)throw w.error
+      }
+      const ids=[...new Set(weekly.map((r:any)=>r.player_id))]
+      if(ids.length){
+        const bq=await sb.from("scout_player_advanced_baseline").select("*").eq("season",season).in("player_id",ids)
+        if(bq.error)throw bq.error
+        const wq=await sb.from("scout_player_advanced_weekly").select("*").eq("season",season).lte("gameweek",throughGameweek).in("player_id",ids)
+        if(wq.error)throw wq.error
+        const byBase=new Map((bq.data||[]).map((r:any)=>[Number(r.player_id),r]))
+        const sums=new Map<number,any>()
+        for(const r of wq.data||[]){
+          const id=Number(r.player_id),a=sums.get(id)||{shots:0,shots_on_target:0,key_passes:0,crosses:0,successful_crosses:0,takeons:0,successful_takeons:0}
+          for(const k of Object.keys(a))a[k]+=Number(r[k]||0)
+          sums.set(id,a)
+        }
+        for(const id of ids){
+          const b:any=byBase.get(id)
+          if(!b)continue
+          const a=sums.get(id)||{}
+          const patch:any={advanced_through_gameweek:throughGameweek,advanced_updated_at:new Date().toISOString(),advanced_source:String(body.source||"sahadan_match_actions")}
+          for(const k of ["shots","shots_on_target","key_passes","crosses","successful_crosses","takeons","successful_takeons"])patch[k]=Number(b[k]||0)+Number(a[k]||0)
+          const uq=await sb.from("scout_player_season_stats").update(patch).eq("season",season).eq("player_id",id)
+          if(uq.error)throw uq.error
+        }
+      }
+      if(unmatched.length===0 && Number(body.source_match_count||0)>=9){
+        const cq=await sb.from("scout_player_season_stats").update({
+          advanced_through_gameweek:throughGameweek,
+          advanced_updated_at:new Date().toISOString(),
+          advanced_source:String(body.source||"sahadan_match_actions"),
+        }).eq("season",season).eq("through_gameweek",throughGameweek)
+        if(cq.error)throw cq.error
+      }
+      const refresh=await sb.rpc("scout_refresh_enrichment_profiles",{p_season:season,p_through_gameweek:throughGameweek})
+      if(refresh.error)throw refresh.error
+      return Response.json({ok:unmatched.length===0,mode:"weekly_delta",matched:weekly.length,unmatched,source_match_count:Number(body.source_match_count||0),qa:refresh.data},{status:unmatched.length?409:200})
+    }
 
     let roleWrites=0
     for(const raw of roles){
