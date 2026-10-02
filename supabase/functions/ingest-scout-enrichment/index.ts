@@ -144,13 +144,17 @@ Deno.serve(async(req:Request)=>{
           for(const k of Object.keys(a))a[k]+=Number(r[k]||0)
           sums.set(id,a)
         }
+        const patches:any[]=[]
         for(const id of ids){
           const b:any=byBase.get(id)
           if(!b)continue
           const a=sums.get(id)||{}
-          const patch:any={advanced_through_gameweek:throughGameweek,advanced_updated_at:new Date().toISOString(),advanced_source:String(body.source||"sahadan_match_actions")}
+          const patch:any={season,player_id:id,advanced_through_gameweek:throughGameweek,advanced_updated_at:new Date().toISOString(),advanced_source:String(body.source||"sahadan_match_actions")}
           for(const k of ["shots","shots_on_target","key_passes","crosses","successful_crosses","takeons","successful_takeons"])patch[k]=Number(b[k]||0)+Number(a[k]||0)
-          const uq=await sb.from("scout_player_season_stats").update(patch).eq("season",season).eq("player_id",id)
+          patches.push(patch)
+        }
+        if(patches.length){
+          const uq=await sb.from("scout_player_season_stats").upsert(patches,{onConflict:"season,player_id"})
           if(uq.error)throw uq.error
         }
       }
