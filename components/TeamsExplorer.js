@@ -23,6 +23,7 @@ const sortOptions=[
 const sortLabels=Object.fromEntries(sortOptions)
 
 export default function TeamsExplorer({teams=[],gameweek}){
+  const [openFixture,setOpenFixture]=useState(null)
   const [q,setQ]=useState('')
   const [venue,setVenue]=useState('')
   const [attack,setAttack]=useState('')
@@ -113,9 +114,14 @@ export default function TeamsExplorer({teams=[],gameweek}){
             <div className={metricClass('season_xga_per_match')}><span>Sezon xGA/maç</span><b>{num(team.season_xga_per_match)}</b></div>
           </div>
           <div className="fixture-strength-strip" aria-label="5 maç haftalık fikstür gücü">
-            {(team.fixture_strip||[]).map((f,i)=><span className={'fixture-strength '+(f.level||'neutral')} title={`MH${f.gameweek} • ${venueLabel(f.venue)} • ${f.opponent}`} key={f.gameweek+'-'+i}>
-              <small>MH{f.gameweek}</small><b>{f.opponent}</b><em>{fixtureLevelLabel[f.level]||'Dengeli'}</em>
-            </span>)}
+            {(team.fixture_strip||[]).map((f,i)=>{
+              const key=team.id+'-'+f.gameweek+'-'+i
+              const isOpen=openFixture===key
+              return <button type="button" className={'fixture-strength fixture-strength-button '+(f.level||'neutral')+(isOpen?' is-open':'')} title={`MH${f.gameweek} • ${venueLabel(f.venue)} • ${f.opponent}`} key={f.gameweek+'-'+i} onClick={e=>{e.preventDefault();e.stopPropagation();setOpenFixture(isOpen?null:key)}}>
+                <small>MH{f.gameweek}</small><b>{f.opponent}</b><em>{fixtureLevelLabel[f.level]||'Dengeli'}</em>
+                {isOpen?<span className="fixture-popover"><strong>{venueLabel(f.venue)} • {f.opponent}</strong><small>{f.xg!==null&&f.xg!==undefined?`Takım xG ${num(f.xg)}`:'xG hafta yaklaştığında'}{f.opp_xg!==null&&f.opp_xg!==undefined?` • Rakip xG ${num(f.opp_xg)}`:''}</small><small>{f.attack_level?`Hücum: ${matchupLabel[f.attack_level]||'Dengeli'}`:''}{f.defense_level?` • Savunma: ${matchupLabel[f.defense_level]||'Dengeli'}`:''}</small></span>:null}
+              </button>
+            })}
           </div>
           <div className="team-analysis-matchup-line">
             <span className={'matchup-pill '+team.attack_level+(attackSelected(team)?' is-selected-filter':'')}>Hücum: {matchupLabel[team.attack_level]}</span>
