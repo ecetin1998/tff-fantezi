@@ -110,8 +110,8 @@ jobs:
 
           // 2) Oyuncu Analizi — videonun en uzun ürün bölümü.
           await goto('/players',2200); await shot('02-players'); await scroll(420,1200); await page.waitForTimeout(900);
-          const firstPlayer=page.locator('a[href^="/players/"]').first();
-          if(await firstPlayer.count()){ await firstPlayer.click(); await page.waitForLoadState('networkidle'); await page.waitForTimeout(1500); await shot('03-player-detail'); await scroll(520,1200); await page.waitForTimeout(900); }
+          const playerHref=await page.locator('a[href^="/players/"]').evaluateAll(els=>els.map(e=>e.getAttribute('href')).find(Boolean)||null);
+          if(playerHref){ await goto(playerHref,1500); await shot('03-player-detail'); await scroll(520,1200); await page.waitForTimeout(900); }
 
           // 3) Fantezi Puanları.
           await goto('/points',1500); await shot('04-points'); await scroll(350,900);
@@ -127,8 +127,8 @@ jobs:
 
           // 7) Takım Analizi + detay.
           await goto('/teams',2000); await shot('08-teams'); await scroll(480,1100); await page.waitForTimeout(700);
-          const firstTeam=page.locator('a[href^="/teams/"]').first();
-          if(await firstTeam.count()){ await firstTeam.click(); await page.waitForLoadState('networkidle'); await page.waitForTimeout(1200); await shot('09-team-detail'); await scroll(450,1000); await page.waitForTimeout(600); }
+          const teamHref=await page.locator('a[href^="/teams/"]').evaluateAll(els=>els.map(e=>e.getAttribute('href')).find(Boolean)||null);
+          if(teamHref){ await goto(teamHref,1200); await shot('09-team-detail'); await scroll(450,1000); await page.waitForTimeout(600); }
 
           // 8) Yardımcı karar ekranları — daha kısa.
           await goto('/availability',1400); await shot('10-availability'); await scroll(320,800);
