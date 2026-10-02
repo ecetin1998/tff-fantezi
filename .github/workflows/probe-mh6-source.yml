@@ -1,0 +1,24 @@
+name: Probe MH6 source
+on:
+  push:
+    branches: [chore/probe-mh6-source]
+permissions:
+  contents: read
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fetch one MH6 player-stats page
+        shell: bash
+        run: |
+          set -euo pipefail
+          url='https://www.sahadan.com/mac/corum-fk-vs-alanyaspor/cjb4iy9yti4b15ka3395yxjbo/istatistikler/oyuncu'
+          curl -L --compressed -A 'Mozilla/5.0' --max-time 30 -o /tmp/page.html -w 'HTTP=%{http_code} bytes=%{size_download}\n' "$url"
+          python3 - <<'PY'
+          import re
+          s=open('/tmp/page.html',errors='ignore').read()
+          print('title=', re.findall(r'<title[^>]*>(.*?)</title>',s,re.I|re.S)[:1])
+          for needle in ['Fatih','Aksoy','chances','cross','takeon','player','statistics']:
+              print(needle, s.lower().find(needle.lower()))
+          print(re.sub(r'\s+',' ',s[:4000])[:4000])
+          PY
