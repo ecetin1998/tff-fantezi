@@ -4,6 +4,7 @@ import premiumViews from '@/components/PremiumViews.module.css'
 import dataViews from '@/components/DataViews.module.css'
 import managerCards from '@/components/ManagerCards.module.css'
 import Nav from '@/components/Nav'
+import PredictionHistoryChartEnhancer from '@/components/PredictionHistoryChartEnhancer'
 
 const cssScopes=[siteShell.scope,premiumViews.scope,dataViews.scope,managerCards.scope].join(' ')
 
@@ -27,4 +28,4 @@ export const headers={
   'Referrer-Policy':'strict-origin-when-cross-origin',
   'X-Content-Type-Options':'nosniff'
 }
-export default function RootLayout({children}){return <html lang="tr" className={cssScopes}><body className={cssScopes}><Nav/><main>{children}</main><footer><span>Fantezi Rehberi • bağımsız analiz platformu</span><a href="/sss">SSS & Rehber</a><span>Resmî TFF ürünü değildir.</span></footer></body></html>}
+export default function RootLayout({children}){return <html lang="tr" className={cssScopes}><body className={cssScopes}><Nav/><main>{children}</main><PredictionHistoryChartEnhancer/><footer><span>Fantezi Rehberi • bağımsız analiz platformu</span><a href="/sss">SSS & Rehber</a><span>Resmî TFF ürünü değildir.</span></footer></body></html>}
