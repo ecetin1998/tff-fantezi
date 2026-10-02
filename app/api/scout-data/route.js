@@ -177,8 +177,7 @@ export async function GET(request){
       return Response.redirect(canonical,308)
     }
     if(!allowed.has(requested))return reply({schema_version:SCOUT_FEED_SCHEMA_VERSION,error:'Bilinmeyen bölüm.'},400)
-    const keyed=fullAuthorized(request)
-    const full=(requested==='performance'||requested==='roles')&&keyed
+    const full=(requested==='performance'||requested==='roles')&&fullAuthorized(request)
     const payload=shouldUsePublicPayloadCache(full)
       ?await buildCached(requested,parsed.team,parsed.position,parsed.limit,parsed.fieldsKey)
       :applyScoutFilters(await buildPayload(requested,true),parsed)
