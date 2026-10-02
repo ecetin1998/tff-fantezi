@@ -125,8 +125,17 @@ export default function ManagerCardRecommendations({baseRecommended,baseAlternat
       {bestWeeklyCard?<div className="manager-card-weekly-read">
         <span>BU HAFTAKİ MODEL FARKI</span>
         <b>{bestWeeklyCard.card.shortLabel} <em>{bestWeeklyCard.delta>=0?'+':''}{bestWeeklyCard.delta.toFixed(1)} xFP</em></b>
-        <small>Yalnız MH{active?.run?.gameweek||baseRecommended?.run?.gameweek||'—'} etkisi; kartı sezon içinde hangi hafta kullanmanın daha değerli olacağı ayrıca değerlendirilmelidir.</small>
+        <small>Yalnız MH{active?.run?.gameweek||baseRecommended?.run?.gameweek||'—'} etkisi.</small>
       </div>:null}
+      <div className="manager-card-calendar">
+        <div><span>KART ZAMANLAMASI</span><b>Bu hafta ölçülüyor</b></div>
+        <div className="manager-card-calendar-weeks">
+          <span className="current">MH{active?.run?.gameweek||baseRecommended?.run?.gameweek||'—'}<b>{bestWeeklyCard?((bestWeeklyCard.delta>=0?'+':'')+bestWeeklyCard.delta.toFixed(1)+' xFP'):'—'}</b></span>
+          <span>Sonraki MH<b>Hafta açılınca</b></span>
+          <span>+2 MH<b>Hafta açılınca</b></span>
+        </div>
+        <small>İleri haftalar için dondurulmuş projeksiyon oluştuğunda aynı alanda kartın haftalık xFP farkları karşılaştırılacak; mevcut haftanın verisini gelecek hafta tahmini gibi göstermiyoruz.</small>
+      </div>
       <ManagerCardPicker
         value={managerCard}
         onChange={loadCard}
