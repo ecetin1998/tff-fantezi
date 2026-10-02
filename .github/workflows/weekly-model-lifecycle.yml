@@ -71,6 +71,7 @@ jobs:
           echo "configured=$(printf '%s' "$response" | jq -r '.upstream_configured // false')" >> "$GITHUB_OUTPUT"
 
       - name: Require advanced player data through current MH
+        id: advanced
         shell: bash
         env:
           OIDC_TOKEN: ${{ steps.oidc.outputs.token }}
@@ -81,6 +82,26 @@ jobs:
             -H "Content-Type: application/json" \
             --data '{"stage":"advanced_freshness","repair":true}' \
             "$FUNCTIONS_URL/model-refresh-control")"
+          echo "$response" | jq .
+          test "$(printf '%s' "$response" | jq -r '.pass // false')" = "true"
+
+      - name: Retry upstream sync when prediction inputs are incomplete
+        if: failure() && steps.ingest.outputs.configured == 'true'
+        shell: bash
+        env:
+          OIDC_TOKEN: ${{ steps.oidc.outputs.token }}
+        run: |
+          set -euo pipefail
+          for attempt in 1 2 3; do
+            echo "Prediction-input repair attempt $attempt/3"
+            curl --fail --show-error --silent --max-time 240 --retry 3 --retry-delay 5 --retry-all-errors \
+              -H "Authorization: Bearer $OIDC_TOKEN" -H "Content-Type: application/json" \
+              --data '{"stage":"ingest","strict":false}' "$FUNCTIONS_URL/model-refresh-control" | jq .
+            sleep $((attempt * 20))
+          done
+          response="$(curl --show-error --silent --max-time 90 \
+            -H "Authorization: Bearer $OIDC_TOKEN" -H "Content-Type: application/json" \
+            --data '{"stage":"advanced_freshness","repair":true}' "$FUNCTIONS_URL/model-refresh-control")"
           echo "$response" | jq .
           test "$(printf '%s' "$response" | jq -r '.pass // false')" = "true"
 
