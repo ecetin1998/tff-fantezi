@@ -6,7 +6,7 @@ export default function WeeklyPointsChart({rows=[]}){
   const gid=useId().replace(/:/g,'')
   const data=useMemo(()=>[...rows].sort((a,b)=>a.gameweek-b.gameweek),[rows])
   if(!data.length)return null
-  const W=960,H=280,p={l:46,r:20,t:30,b:40}
+  const W=640,H=260,p={l:40,r:14,t:30,b:38}
   const values=data.map(x=>Number(x.points||0)),lo=Math.min(0,...values),hi=Math.max(6,...values)
   const extra=Math.max(2,(hi-lo)*.12),min=Math.floor(lo-extra),max=Math.ceil(hi+extra),span=Math.max(1,max-min)
   const x=i=>p.l+(W-p.l-p.r)*(data.length===1?.5:i/(data.length-1))
@@ -33,7 +33,7 @@ export default function WeeklyPointsChart({rows=[]}){
       .weekly-area{color:#16a34a}.weekly-line{fill:none;stroke:#16a34a;stroke-width:4;stroke-linecap:round;stroke-linejoin:round}
       .weekly-dot{fill:#fff;stroke:#16a34a;stroke-width:4;pointer-events:none}.weekly-dot-hit{fill:transparent;outline:none;cursor:pointer}
       .weekly-value{fill:#0f172a;font-size:12px;font-weight:850;pointer-events:none}.weekly-tooltip rect{fill:#0f172a;opacity:.94}.weekly-tooltip text{fill:#fff;font-size:11px;font-weight:750}
-      @media(max-width:620px){.weekly-points-react-chart{overflow-x:auto}.weekly-points-react-chart svg{width:700px;max-width:none}}
+      @media(max-width:620px){.weekly-points-react-chart{overflow:hidden;margin-top:10px}.weekly-points-react-chart svg{width:100%;max-width:100%;height:auto;aspect-ratio:640/260}.weekly-grid text,.weekly-x-label{font-size:12px}.weekly-value{font-size:13px}.weekly-line{stroke-width:3}}
     `}</style>
   </div>
 }

@@ -37,7 +37,11 @@ function renderChart(host,rows){
   const innerH=height-pad.top-pad.bottom
   const maxValue=Math.max(5,...rows.flatMap(row=>[row.high,row.actual,row.xfp].filter(Number.isFinite)))
   const yMax=Math.ceil((maxValue+1)/5)*5
-  const x=gw=>pad.left+((gw-1)/33)*innerW
+  const firstGw=Math.min(...rows.map(row=>row.gameweek))
+  const lastGw=Math.max(...rows.map(row=>row.gameweek))
+  const visibleStart=width<560?firstGw:1
+  const visibleEnd=width<560?Math.max(lastGw,visibleStart+5):34
+  const x=gw=>pad.left+((gw-visibleStart)/Math.max(1,visibleEnd-visibleStart))*innerW
   const y=value=>pad.top+innerH-(Math.max(0,value)/yMax)*innerH
 
   host.innerHTML=''
@@ -61,9 +65,9 @@ function renderChart(host,rows){
   axisTitle.textContent='Puan'
   svg.appendChild(axisTitle)
 
-  const labelEvery=width<560?5:2
-  for(let gw=1;gw<=34;gw++){
-    if(gw!==1&&gw!==34&&gw%labelEvery!==0)continue
+  const labelEvery=width<560?1:2
+  for(let gw=visibleStart;gw<=visibleEnd;gw++){
+    if(gw!==visibleStart&&gw!==visibleEnd&&gw%labelEvery!==0)continue
     const label=svgEl('text',{x:x(gw),y:height-13,'text-anchor':'middle',fill:'currentColor','fill-opacity':'.58','font-size':'10'})
     label.textContent='MH'+gw
     svg.appendChild(label)
