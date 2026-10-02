@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation'
 import { getAuthState, getPlayerDetail } from '@/lib/data'
 import AccessGate from '@/components/AccessGate'
 import { teamCssVars } from '@/lib/teamThemes'
-import { availabilityIsIssue, availabilityReason } from '@/lib/availability'
+import { availabilityDetailLine, availabilityIsIssue } from '@/lib/availability'
 import {playerLabel,predictionConfidenceLabel} from '@/lib/playerPresentation'
 import {playerRoleLabel} from '@/lib/playerRole'
 
@@ -71,7 +71,7 @@ export default async function PlayerPage({ params }){
   const opponent=p?.opponent_name || fixtures.map(f=>f.opponentName).filter(Boolean).join(' + ') || '—'
   const hasAvailabilityIssue=availabilityIsIssue(a)
   const hasAvailabilityInfo=Boolean(a&&hasAvailabilityIssue)
-  const availabilityNote=availabilityReason(a)
+  const availabilityNote=availabilityDetailLine(a)
   const isGK=player.position==='GK'
   const isDEF=player.position==='DEF'
   const themeStyle=teamCssVars(player.team)
