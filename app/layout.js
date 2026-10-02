@@ -22,4 +22,9 @@ export const metadata={
   },
   twitter:{card:'summary_large_image',title:'Fantezi Rehberi',description:'Süper Lig fantezi analiz merkezi.'},
 }
+export const viewport={width:'device-width',initialScale:1,viewportFit:'cover'}
+export const headers={
+  'Referrer-Policy':'strict-origin-when-cross-origin',
+  'X-Content-Type-Options':'nosniff'
+}
 export default function RootLayout({children}){return <html lang="tr" className={cssScopes}><body className={cssScopes}><Nav/><main>{children}</main><footer><span>Fantezi Rehberi • bağımsız analiz platformu</span><a href="/sss">SSS & Rehber</a><span>Resmî TFF ürünü değildir.</span></footer></body></html>}
