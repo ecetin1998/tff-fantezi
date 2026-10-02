@@ -64,8 +64,7 @@ export default function AvailabilityTable({ rows }){
           <td><span className={`pos ${r.player?.position}`}>{posLabel(r.player?.position)}</span></td>
           <td><span className={`status-chip ${r.availability_type||''}`}>{availabilityStatusLabel(r)}</span></td>
           <td>{(Number(r.availability_probability??1)*100).toFixed(0)}%</td>
-          <td className="availability-note-cell"><b>{availabilityReason(r)||'—'}</b></td>
-          <td className="availability-return-cell">{r.availability_type==='suspensions'?(r.suspension_fixture||'—'):'—'}</td>
+          <td className="availability-note-cell"><b>{availabilityDetailLine(r)||'—'}</b></td>
         </tr>
       })}</tbody>
     </table></div>
