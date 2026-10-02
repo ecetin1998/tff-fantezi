@@ -26,8 +26,7 @@ const posLabel=p=>({GK:'KL',DEF:'DEF',MID:'OS',FWD:'FOR'}[p]||p||'—')
 
 export default async function TeamPage({params}){
   const {id}=await params
-  const [data,auth]=await Promise.all([getTeamDetail(id),getAuthState()])
-  if(!data) notFound()
+  const auth=await getAuthState()
   const isPro=auth.plan==='pro'
   if(!isPro)return <div className="team-player-page detail-pro-gate-page">
     <Link href="/teams" className="back-link">← Takımlara dön</Link>
@@ -38,6 +37,8 @@ export default async function TeamPage({params}){
       description="Takımın xG/xGA profili, fantezi karar özeti, oyuncu havuzu, maç geçmişi ve gelişmiş hücum-savunma analizi için Gelişmiş üyeliğe geç."
     />
   </div>
+  const data=await getTeamDetail(id)
+  if(!data) notFound()
 
   const {team,run,season:s,tactical,history,currentMatches=[],currentMatch,opponent,players,fantasyByGameweek}=data
   const isHome=currentMatch?Number(currentMatch.home_team_id)===Number(team.id):false

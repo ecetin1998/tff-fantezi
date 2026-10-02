@@ -36,9 +36,7 @@ function playerRow(p){
     projection:p.projection?{
       opponent_name:p.projection.opponent_name,venue:p.projection.venue,
       xi_probability:p.projection.xi_probability,x_minutes:p.projection.x_minutes,
-      xfp:p.projection.xfp,p25:p.projection.p25,p75:p.projection.p75,p90:p.projection.p90,
-      six_plus_probability:p.projection.six_plus_probability,expected_goals:p.projection.expected_goals,
-      expected_assists:p.projection.expected_assists,value_score:p.projection.value_score,
+      xfp:p.projection.xfp,value_score:p.projection.value_score,
       availability_probability:p.projection.availability_probability
     }:null,
     availability:p.availability?{
@@ -104,6 +102,7 @@ async function buildPayload(section,full){
     }))}
   }
   if(section==='roles'){
+    if(!full)return {meta,section,error:'Bu bölüm Gelişmiş erişim gerektirir.',rows:[]}
     const d=await getRoleSignals()
     return {meta,section,current_run:safeRun(d.run),rows:(d.rows||[]).map(r=>({
       player_id:r.player_id,team_id:r.player?.team_id||null,position:r.player?.position||null,signal:r.signal,predicted_xi_probability:r.predicted_xi_probability,x_minutes:r.x_minutes,
@@ -158,7 +157,7 @@ const buildCached=unstable_cache(
   async(section,team,position,limit,fieldsKey)=>applyScoutFilters(await buildPayload(section,false),{
     team:team||null,position:position||null,limit:limit||null,fields:fieldsKey?fieldsKey.split(','):[]
   }),
-  ['scout-data-v3-public'],
+  ['scout-data-v4-public'],
   {revalidate:60}
 )
 
@@ -178,7 +177,7 @@ export async function GET(request){
       return Response.redirect(canonical,308)
     }
     if(!allowed.has(requested))return reply({schema_version:SCOUT_FEED_SCHEMA_VERSION,error:'Bilinmeyen bölüm.'},400)
-    const full=requested==='performance'&&fullAuthorized(request)
+    const full=(requested==='performance'||requested==='roles')&&fullAuthorized(request)
     const payload=shouldUsePublicPayloadCache(full)
       ?await buildCached(requested,parsed.team,parsed.position,parsed.limit,parsed.fieldsKey)
       :applyScoutFilters(await buildPayload(requested,true),parsed)
