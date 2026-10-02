@@ -1,0 +1,82 @@
+name: Build Pro promo with ElevenLabs
+
+on:
+  push:
+    branches:
+      - chore/pro-promo-elevenlabs-final
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Download verified Pro capture
+        uses: actions/download-artifact@v4
+        with:
+          name: fantezi-rehberi-pro-capture-20261002
+          path: capture
+          run-id: 36986308293
+          github-token: ${{ github.token }}
+
+      - name: Install ffmpeg
+        run: npm install --no-save --no-package-lock ffmpeg-static
+
+      - name: Fetch ElevenLabs Arda voiceover
+        run: |
+          curl -L --fail --retry 3 'https://storage.googleapis.com/xi-backend/database/workspace/546ac3d9b678407090a5978e58303cc6/content_generation/75FvnG8nCmprKmlfqYSL/FK0f6gbefqOnTA2TOz7F/content.mp3?X-Goog-Algorithm=GOOG4-RSA-SHA256&X-Goog-Credential=xi-backend-prod%40xi-labs.iam.gserviceaccount.com%2F20261002%2Fauto%2Fstorage%2Fgoog4_request&X-Goog-Date=20261002T085107Z&X-Goog-Expires=7200&X-Goog-SignedHeaders=host&X-Goog-Signature=63ee129f02723cf53afcccce137e25904e256d2b72bf943cfab44477d6ab907b05c715a03e2ede7a983a19c7eae99e8b0edbf95d0db52ed3d85ad2f3ee66712941ddd8d0ca0ee90a77530ca4edbde84c01a0adc2d92c4bfcd5c42b07f88f071aef72b7fe261f92f1fe81c1b8469270ae626ac3165be0f1118ac04fe02ebe1703ebc29c7773788975b2eff4727a76c97a3b7d49d1a8e65cbd290a3d17a3d099707da54cea7ea73e0567adfda828a5271c5641ba50212ee073034fb0ff8b8475b596be80712e3b72236ff044eaec102629d0a4c5897f37dcbfaea53fc41c1aff1e877f4039795986e684b2ac50ccd63b0af7e395c16fc60fba88ea48e7e7e21c32' -o elevenlabs-arda.mp3
+          test -s elevenlabs-arda.mp3
+
+      - name: Build weighted Pro tour
+        run: |
+          set -e
+          FFMPEG="$(node -p "require('ffmpeg-static')")"
+          mkdir -p clips output
+
+          make_clip () {
+            img="$1"; dur="$2"; out="$3"
+            "$FFMPEG" -y -loop 1 -framerate 30 -i "$img" -t "$dur" \
+              -vf "scale=1280:720:force_original_aspect_ratio=decrease,pad=1280:720:(ow-iw)/2:(oh-ih)/2:color=white,format=yuv420p" \
+              -r 30 -c:v libx264 -preset medium -crf 19 -an "$out"
+          }
+
+          make_clip capture/screens/01-home.png          3.72 clips/00.mp4
+          make_clip capture/screens/02-players.png       5.13 clips/01.mp4
+          make_clip capture/screens/03-player-detail.png 5.49 clips/02.mp4
+          make_clip capture/screens/04-points.png        2.66 clips/03.mp4
+          make_clip capture/screens/05-matches.png       4.96 clips/04.mp4
+          make_clip capture/screens/06-squads.png        5.75 clips/05.mp4
+          make_clip capture/screens/07-my-squad.png      5.75 clips/06.mp4
+          make_clip capture/screens/08-teams.png         3.54 clips/07.mp4
+          make_clip capture/screens/09-team-detail.png   3.01 clips/08.mp4
+          make_clip capture/screens/10-availability.png  2.48 clips/09.mp4
+          make_clip capture/screens/11-roles.png         2.83 clips/10.mp4
+          make_clip capture/screens/12-backtest.png      2.92 clips/11.mp4
+          make_clip capture/screens/13-model-health.png  2.12 clips/12.mp4
+          make_clip capture/screens/14-pricing.png       1.77 clips/13.mp4
+          make_clip capture/screens/15-sss.png           1.86 clips/14.mp4
+
+          for i in $(seq -w 0 14); do echo "file 'clips/$i.mp4'"; done > list.txt
+          "$FFMPEG" -y -f concat -safe 0 -i list.txt -c copy tour-silent.mp4
+
+          "$FFMPEG" -y -i tour-silent.mp4 -i elevenlabs-arda.mp3 \
+            -filter_complex "[1:a]apad=pad_dur=3[a]" \
+            -map 0:v:0 -map "[a]" -c:v copy -c:a aac -b:a 192k -ar 48000 \
+            -t 54 -movflags +faststart output/fantezi_rehberi_pro_tanitim_elevenlabs.mp4
+
+          cp elevenlabs-arda.mp3 output/fantezi_rehberi_elevenlabs_arda.mp3
+
+      - name: Upload corrected final
+        uses: actions/upload-artifact@v4
+        with:
+          name: fantezi-rehberi-pro-elevenlabs-final
+          path: output
+          retention-days: 7
