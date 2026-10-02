@@ -1,7 +1,7 @@
 name: Probe MH6 source
 on:
   push:
-    branches: [main]
+    branches: [chore/probe-mh6-source]
 permissions:
   contents: read
 jobs:
