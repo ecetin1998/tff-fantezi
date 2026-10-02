@@ -256,13 +256,11 @@ export default async function PlayerPage({ params }){
         {isPro?<div><span>6+ maç</span><b>{Number(s?.six_plus_count||0)}</b></div>:<div><span>Oynadığı maç</span><b>{played}</b></div>}
       </div>
       {closedWeeks.length?
-        <div className="weekly-history-grid">{closedWeeks.map(h=>
-          <div className="week-score" key={h.id||`${player.id}-${h.gameweek}`}>
-            <span>MH{h.gameweek}</span>
-            <strong>{h.points}</strong>
-            <small>{h.minutes!==null&&h.minutes!==undefined?`${Number(h.minutes).toFixed(0)} dk`:'kesinleşmiş puan'}</small>
+        <div className="weekly-points-chart" data-weekly-points={JSON.stringify(closedWeeks.map(h=>({gameweek:Number(h.gameweek||0),points:Number(h.points||0),minutes:h.minutes===null||h.minutes===undefined?null:Number(h.minutes)})))}>
+          <div className="weekly-points-chart-fallback" aria-label="Haftalık fantezi puanları">
+            {closedWeeks.map(h=><span key={h.id||String(player.id)+'-'+String(h.gameweek)}>MH{h.gameweek}: {Number(h.points||0)} puan</span>)}
           </div>
-        )}</div>
+        </div>
         :<p className="muted">Henüz kapanmış hafta verisi yok.</p>}
     </section>
 
