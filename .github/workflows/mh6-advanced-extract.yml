@@ -15,7 +15,7 @@ jobs:
       - uses: actions/checkout@v4
       - run: python3 -m pip install --disable-pip-version-check beautifulsoup4
       - name: Extract MH6 advanced actions
-        run: python3 scripts/parse_sahadan_match_stats.py | tee /tmp/mh6.json
+        shell: bash\n        run: |\n          set -euo pipefail\n          python3 scripts/parse_sahadan_match_stats.py | tee /tmp/mh6.json
       - uses: actions/upload-artifact@v4
         with:
           name: mh6-advanced-actions
