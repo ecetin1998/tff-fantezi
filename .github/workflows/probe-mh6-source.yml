@@ -8,17 +8,16 @@ jobs:
   probe:
     runs-on: ubuntu-latest
     steps:
-      - name: Fetch one MH6 player-stats page
+      - name: Inspect embedded MH6 stats payload
         shell: bash
         run: |
           set -euo pipefail
-          url='https://www.sahadan.com/mac/corum-fk-vs-alanyaspor/cjb4iy9yti4b15ka3395yxjbo/istatistikler/oyuncu'
-          curl -L --compressed -A 'Mozilla/5.0' --max-time 30 -o /tmp/page.html -w 'HTTP=%{http_code} bytes=%{size_download}\n' "$url"
+          curl -Ls --compressed -A 'Mozilla/5.0' --max-time 30 'https://www.sahadan.com/mac/corum-fk-vs-alanyaspor/cjb4iy9yti4b15ka3395yxjbo/istatistikler/oyuncu' -o /tmp/page.html
           python3 - <<'PY'
           import re
           s=open('/tmp/page.html',errors='ignore').read()
-          print('title=', re.findall(r'<title[^>]*>(.*?)</title>',s,re.I|re.S)[:1])
-          for needle in ['Fatih','Aksoy','chances','cross','takeon','player','statistics']:
-              print(needle, s.lower().find(needle.lower()))
-          print(re.sub(r'\s+',' ',s[:4000])[:4000])
+          for needle in ['Fatih Aksoy','chancesCreated','chances_created','takeons']:
+              i=s.lower().find(needle.lower())
+              print('\n###',needle,i)
+              if i>=0: print(re.sub(r'\\s+',' ',s[max(0,i-1200):i+4500]))
           PY
