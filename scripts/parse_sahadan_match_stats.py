@@ -30,6 +30,46 @@ def fetch(url):
     req=urllib.request.Request(url,headers={"User-Agent":"Mozilla/5.0"})
     with urllib.request.urlopen(req,timeout=30) as r:return r.read().decode("utf-8","ignore")
 
+
+def parse_nuxt_chances(soup,url):
+    script=soup.find("script",id="__NUXT_DATA__")
+    if not script or not script.string: return []
+    try: raw=json.loads(script.string)
+    except Exception: return []
+    cache={}; resolving=set()
+    def R(i):
+        if not isinstance(i,int): return i
+        if i<0 or i>=len(raw): return None
+        if i in cache: return cache[i]
+        if i in resolving: return None
+        resolving.add(i); v=raw[i]
+        if isinstance(v,dict):
+            out={}; cache[i]=out
+            for k,val in v.items(): out[k]=R(val) if isinstance(val,int) else val
+        elif isinstance(v,list):
+            out=[]; cache[i]=out
+            for val in v: out.append(R(val) if isinstance(val,int) else val)
+        else: out=v; cache[i]=out
+        resolving.discard(i); return out
+    rows=[]; seen=set()
+    for v in raw:
+        if not isinstance(v,dict) or "type" not in v or "players" not in v: continue
+        typ=R(v["type"]) if isinstance(v["type"],int) else v["type"]
+        if typ!="chances_created": continue
+        players=R(v["players"]) if isinstance(v["players"],int) else []
+        if not isinstance(players,list): continue
+        for item in players:
+            if not isinstance(item,dict): continue
+            p=item.get("player") or {}
+            name=str(p.get("name") or p.get("match_name") or "").strip() if isinstance(p,dict) else ""
+            total=item.get("total")
+            if not name or not isinstance(total,(int,float)): continue
+            key=(name,item.get("team_id"))
+            if key in seen: continue
+            seen.add(key)
+            rows.append({"source_url":url,"stat":"key_passes","player_name":name,"team_name":"","source_team_id":item.get("team_id"),"key_passes":int(total)})
+    return rows
+
 def parse(url,html):
     soup=BeautifulSoup(html,"html.parser")
     out=[]; seen=set()
@@ -69,6 +109,8 @@ def parse(url,html):
             elif stat=="takeons":
                 item["takeons"]=int(vals[-1]); item["successful_takeons"]=int(vals[0]) if len(vals)>1 else None
             out.append(item)
+    if not any(r.get("stat")=="key_passes" for r in out):
+        out.extend(parse_nuxt_chances(soup,url))
     return out
 
 def main():
