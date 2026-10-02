@@ -110,10 +110,49 @@ Deno.serve(async(req:Request)=>{
         match_history:await latestTimestamp(sb,"scout_match_history","source_updated_at"),
         weekly_points:await latestTimestamp(sb,"scout_player_weekly_points","source_updated_at"),
       }
+      const currentRun=await sb.from("scout_model_runs").select("gameweek").eq("is_current",true).eq("status","ready").limit(1).single()
+      if(currentRun.error)throw currentRun.error
+      const gw=Number(currentRun.data.gameweek)
+      const [playersQ,pstatsQ,tstatsQ,histQ,weeklyQ,targetQ]=await Promise.all([
+        sb.from("scout_players").select("id").eq("active",true),
+        sb.from("scout_player_season_stats").select("player_id,through_gameweek,advanced_through_gameweek,minutes").eq("season","2026-27").eq("through_gameweek",gw),
+        sb.from("scout_team_season_stats").select("team_id").eq("through_gameweek",gw),
+        sb.from("scout_match_history").select("match_id,match_status,fantasy_closure").eq("season","2026-27").eq("gameweek",gw),
+        sb.from("scout_player_weekly_points").select("match_id,is_final").eq("gameweek",gw),
+        sb.from("scout_match_history").select("match_id,home_team_id,away_team_id").eq("season","2026-27").eq("gameweek",gw+1)
+      ])
+      for(const q of [playersQ,pstatsQ,tstatsQ,histQ,weeklyQ,targetQ])if(q.error)throw q.error
+      const activeIds=new Set((playersQ.data||[]).map((x:any)=>Number(x.id)))
+      const activeStats=(pstatsQ.data||[]).filter((x:any)=>activeIds.has(Number(x.player_id)))
+      const advancedMissing=activeStats.filter((x:any)=>Number(x.minutes||0)>0&&Number(x.advanced_through_gameweek||0)<gw)
+      const fixtureCount=(histQ.data||[]).length
+      const finalMatches=new Set((weeklyQ.data||[]).filter((x:any)=>x.is_final).map((x:any)=>String(x.match_id))).size
+      const targetTeams=new Set((targetQ.data||[]).flatMap((x:any)=>[Number(x.home_team_id),Number(x.away_team_id)]))
+      const coverage={
+        gameweek:gw,
+        active_players:activeIds.size,
+        player_stats:activeStats.length,
+        team_stats:(tstatsQ.data||[]).length,
+        fixtures:fixtureCount,
+        closed_fixtures:(histQ.data||[]).filter((x:any)=>x.match_status==="Bitti"&&x.fantasy_closure==="KAPANDI").length,
+        final_actual_matches:finalMatches,
+        advanced_missing_played:advancedMissing.length,
+        target_gameweek:gw+1,
+        target_fixtures:(targetQ.data||[]).length,
+        target_teams:targetTeams.size
+      }
+      const coverageIssues=[
+        activeStats.length!==activeIds.size?"player_stats":null,
+        (tstatsQ.data||[]).length!==18?"team_stats":null,
+        advancedMissing.length?"advanced_stats":null,
+        fixtureCount>0&&coverage.closed_fixtures!==fixtureCount?"match_closure":null,
+        fixtureCount>0&&finalMatches!==fixtureCount?"weekly_actuals":null,
+        !(targetQ.data||[]).length||targetTeams.size!==18?"next_fixtures":null
+      ].filter(Boolean)
       const stale=Object.entries(sources).filter(([,value])=>ageHours(value as string)>24).map(([name,value])=>({name,value,age_hours:ageHours(value as string)}))
-      const ok=!upstreamError&&!stale.length
-      if(!ok&&strict)return Response.json({ok:false,error:upstreamError||"source data is stale",sources,stale,upstream_configured:Boolean(endpoint),upstream_status:upstreamStatus},{status:409})
-      return Response.json({ok,sources,stale,upstream_configured:Boolean(endpoint),upstream_called:Boolean(endpoint),upstream_status:upstreamStatus,upstream_error:upstreamError})
+      const ok=!upstreamError&&!stale.length&&!coverageIssues.length
+      if(!ok&&strict)return Response.json({ok:false,error:upstreamError||"source data is stale",sources,stale,coverage,coverage_issues:coverageIssues,upstream_configured:Boolean(endpoint),upstream_status:upstreamStatus},{status:409})
+      return Response.json({ok,sources,stale,coverage,coverage_issues:coverageIssues,upstream_configured:Boolean(endpoint),upstream_called:Boolean(endpoint),upstream_status:upstreamStatus,upstream_error:upstreamError})
     }
 
     if(stage==="advanced_freshness"){
