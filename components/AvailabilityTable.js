@@ -16,7 +16,7 @@ export default function AvailabilityTable({ rows }){
   const filtered=useMemo(()=>rows.filter(r=>
     (!team||r.team===team) &&
     (!type||(type==='risk' ? Number(r.availability_probability)>0&&Number(r.availability_probability)<1 : r.availability_type===type)) &&
-    (!q||(`${r.player?.full_name||''} ${r.player?.short_label||''} ${r.team||''} ${r.canonical_reason||''} ${r.suspension_fixture||''}`).toLocaleLowerCase('tr').includes(q.toLocaleLowerCase('tr')))
+    (!q||(`${r.player?.full_name||''} ${r.player?.short_label||''} ${r.team||''} ${r.canonical_reason||''} ${r.expected_return||''} ${r.suspension_fixture||''}`).toLocaleLowerCase('tr').includes(q.toLocaleLowerCase('tr')))
   ),[rows,team,type,q])
 
   const injuryCount=(rows||[]).filter(r=>r.availability_type==='injuries').length
