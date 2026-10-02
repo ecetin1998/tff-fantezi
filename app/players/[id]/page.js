@@ -42,8 +42,7 @@ function MetricGrid({items,className=''}){
 
 export default async function PlayerPage({ params }){
   const { id }=await params
-  const [data,auth]=await Promise.all([getPlayerDetail(id),getAuthState()])
-  if(!data) notFound()
+  const auth=await getAuthState()
   const isPro=auth.plan==='pro'
   if(!isPro)return <div className="team-player-page detail-pro-gate-page">
     <Link href="/players" className="back-link">← Oyunculara dön</Link>
@@ -54,6 +53,8 @@ export default async function PlayerPage({ params }){
       description="P25–P90 dağılımı, rol ve dakika sinyalleri, sezon istatistikleri, haftalık performans ve tahmin geçmişi için Gelişmiş üyeliğe geç."
     />
   </div>
+  const data=await getPlayerDetail(id)
+  if(!data) notFound()
 
   const {run,player,projection:p,availability:a,role:r,season:s,modelFeatures:mf,weekly,replay=[],matches=[]}=data
   const closedWeeks=[...(weekly||[])].sort((x,y)=>Number(x.gameweek||0)-Number(y.gameweek||0))
