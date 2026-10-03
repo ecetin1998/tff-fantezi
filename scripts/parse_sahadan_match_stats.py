@@ -88,6 +88,86 @@ def main():
     for r in rows:
         k=(norm(r["player_name"]),str(r.get("source_team_id") or r.get("team_name") or ""))
         if k not in agg:
+            agg[k]={"player_name":r["player_name"],"team_name":r.get("team_name") or "","shots":0,"shots_on_target":0,"key_passes":0,"crosses":0,"successful_crosses":0,"takeons":0,"successful_takeons":0,"source_matches":0,"source_team_id":r.get("source_team_id")}
+        x=agg[k]
+        if r.get("team_name"): x["team_name"]=r["team_name"]
+        x["source_matches"]=max(x["source_matches"],1)
+        for field in ["shots","shots_on_target","key_passes","crosses","successful_crosses","takeons","successful_takeons"]:
+            if r.get(field) is not None:x[field]+=int(r[field])
+    rows=list(agg.values())
+    bad=[x for x in rows if x["shots"]>20 or x["shots_on_target"]>x["shots"] or x["successful_crosses"]>x["crosses"] or x["successful_takeons"]>x["takeons"]]
+    if bad: raise RuntimeError("advanced stat sanity failure: "+json.dumps(bad[:10],ensure_ascii=False))
+    print(json.dumps({"gameweek":6,"rows":rows},ensure_ascii=False,separators=(",",":")))
+if __name__=="__main__": main()def resolve_nuxt(raw):
+    cache={}; resolving=set()
+    def R(v):
+        if not isinstance(v,int): return v
+        if v<0 or v>=len(raw): return None
+        if v in cache: return cache[v]
+        if v in resolving: return None
+        resolving.add(v); x=raw[v]
+        if isinstance(x,dict):
+            out={}; cache[v]=out
+            for k,z in x.items(): out[k]=R(z)
+        elif isinstance(x,list):
+            out=[]; cache[v]=out
+            for z in x: out.append(R(z))
+        else: out=x
+        resolving.discard(v); return out
+    return R
+
+def parse(url,html):
+    soup=BeautifulSoup(html,"html.parser")
+    script=soup.find("script",id="__NUXT_DATA__")
+    if not script or not script.string: raise RuntimeError("NUXT data missing: "+url)
+    raw=json.loads(script.string); R=resolve_nuxt(raw)
+    mapping={
+      "shots":("shots","total","target","shots_on_target"),
+      "chances_created":("key_passes","total",None,None),
+      "crosses":("crosses","total","success","successful_crosses"),
+      "takeons":("takeons","total","success","successful_takeons"),
+    }
+    out=[]; seen=set()
+    for v in raw:
+        if not isinstance(v,dict) or "type" not in v or "players" not in v: continue
+        typ=R(v["type"])
+        if typ not in mapping: continue
+        stat,total_key,success_key,success_field=mapping[typ]
+        players=R(v["players"])
+        if not isinstance(players,list): continue
+        for item in players:
+            if not isinstance(item,dict): continue
+            p=item.get("player") or {}
+            if not isinstance(p,dict): continue
+            name=str(p.get("name") or p.get("match_name") or "").strip()
+            total=item.get(total_key); team_id=item.get("team_id")
+            if not name or not isinstance(total,(int,float)): continue
+            key=(typ,name,team_id)
+            if key in seen: continue
+            seen.add(key)
+            row={"source_url":url,"stat":stat,"player_name":name,"team_name":"","source_team_id":team_id,stat:int(total)}
+            if success_field:
+                z=item.get(success_key)
+                row[success_field]=int(z) if isinstance(z,(int,float)) else 0
+            out.append(row)
+    return out
+
+def validate(rows):
+    for r in rows:
+        if r["shots"]>20: raise RuntimeError("impossible shots: "+repr(r))
+        if r["shots_on_target"]>r["shots"]: raise RuntimeError("shots_on_target > shots: "+repr(r))
+        if r["successful_crosses"]>r["crosses"]: raise RuntimeError("successful_crosses > crosses: "+repr(r))
+        if r["successful_takeons"]>r["takeons"]: raise RuntimeError("successful_takeons > takeons: "+repr(r))
+
+def main():
+    rows=[]
+    for u in URLS:
+        html=fetch(u); parsed=parse(u,html); rows.extend(parsed)
+        print(f"SOURCE {u} rows={len(parsed)}",file=sys.stderr)
+    agg={}
+    for r in rows:
+        k=(norm(r["player_name"]),str(r.get("source_team_id") or r.get("team_name") or ""))
+        if k not in agg:
             agg[k]={"player_name":r["player_name"],"team_name":r.get("team_name") or "","shots":0,"shots_on_target":0,"key_passes":0,"crosses":0,"successful_crosses":0,"takeons":0,"successful_takeons":0,"source_matches":0}
         x=agg[k]
         if r.get("team_name"): x["team_name"]=r["team_name"]
