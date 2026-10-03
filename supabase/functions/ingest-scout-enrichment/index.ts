@@ -100,6 +100,15 @@ Deno.serve(async(req:Request)=>{
         "kerem akturkoglu":"kerem akturkoglu","anil yasar":"anil yasar","levent mercan":"levent mercan","m sissoho":"moussa sissoho",
         "l perez":"lucas perez","m haidara":"massadio haidara","l tomasson":"logi tomasson","ertugrul taskiran":"ertugrul taskiran"
       }
+      const mh6SourcePlayerIds:Record<string,number>={
+        "d sanchez":516,"c winck":94,"a benedyczak":75,"guven yalcin":81,"r toth":679,"ali yavuz kol":72,
+        "m rafferty":78,"kerem demirbay":77,"j jessen":88,"e mendes":97,"ayberk karapo":71,"e shomurodov":404,
+        "r luiz":1545,"o diabate":326,"orkun kokcu":281,"d vlahovic":593,"m rashica":257,"ridvan yilmaz":259,
+        "a murillo":277,"e poku":1141,"salih ozcan":285,"f miretti":1209,"ilhan fakili":278,"v cerny":279,
+        "rhaldney":304,"a matos":313,"r akonnor":811,"ege yildirim":292,"bekir boke":712,"f hadergjonaj":427,
+        "h ui jo":417,"a abdullahi":495,"kerem akturkoglu":169,"halil dervisoglu":536,"l perez":572,
+        "m haidara":132,"l tomasson":457
+      }
       const unmatched:any[]=[]
       const resolved:any[]=[]
       for(const x of sourceRows){
@@ -114,7 +123,7 @@ Deno.serve(async(req:Request)=>{
         })
         if(!pool.length)pool=players
         const exact=pool.filter((p:any)=>[p.full_name,p.display_name,p.short_label].some((v:any)=>norm(v)===n))
-        let hit=exact.length===1?exact[0]:null
+        let hit=players.find((p:any)=>Number(p.id)===mh6SourcePlayerIds[rawN]) || (exact.length===1?exact[0]:null)
         if(!hit){
           const bits=n.split(" ").filter(Boolean),last=bits.at(-1)||"",first=(bits[0]||"")[0]||""
           const fuzzy=pool.filter((p:any)=>{
