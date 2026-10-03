@@ -163,7 +163,7 @@ Deno.serve(async(req:Request)=>{
           const b:any=byBase.get(id)
           if(!b)continue
           const a=sums.get(id)||{}
-          const patch:any={season,player_id:id,advanced_through_gameweek:throughGameweek,advanced_updated_at:new Date().toISOString(),advanced_source:String(body.source||"sahadan_match_actions")}
+          const existing=await sb.from("scout_player_season_stats").select("through_gameweek").eq("season",season).eq("player_id",id).maybeSingle(); if(existing.error)throw existing.error; const patch:any={season,player_id:id,through_gameweek:Number(existing.data?.through_gameweek||throughGameweek),advanced_through_gameweek:throughGameweek,advanced_updated_at:new Date().toISOString(),advanced_source:String(body.source||"sahadan_match_actions")}
           for(const k of ["shots","shots_on_target","key_passes","crosses","successful_crosses","takeons","successful_takeons"])patch[k]=Number(b[k]||0)+Number(a[k]||0)
           patches.push(patch)
         }
