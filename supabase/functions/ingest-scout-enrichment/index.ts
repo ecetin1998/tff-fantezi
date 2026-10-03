@@ -87,7 +87,7 @@ Deno.serve(async(req:Request)=>{
       const teamsQ=await sb.from("scout_teams").select("id,name")
       if(teamsQ.error)throw teamsQ.error
       const teamById=new Map((teamsQ.data||[]).map((t:any)=>[Number(t.id),String(t.name)]))
-      const playersQ=await sb.from("scout_players").select("id,full_name,display_name,short_label,team_id").eq("active",true)
+      const participantQ=await sb.from("scout_player_weekly_points").select("player_id,minutes").eq("gameweek",throughGameweek).gt("minutes",0); if(participantQ.error)throw participantQ.error; const participantIds=new Set((participantQ.data||[]).map((x:any)=>Number(x.player_id))); const playersQ=await sb.from("scout_players").select("id,full_name,display_name,short_label,team_id").in("id",[...participantIds])
       if(playersQ.error)throw playersQ.error
       const players=(playersQ.data||[]).map((p:any)=>({...p,team_name:teamById.get(Number(p.team_id))||""}))
       const sourceRows=Array.isArray(body.weekly_stats)?body.weekly_stats:[]
@@ -104,7 +104,12 @@ Deno.serve(async(req:Request)=>{
       const resolved:any[]=[]
       for(const x of sourceRows){
         const rawN=norm(x.player_name),n=aliases[rawN]||rawN,tn=teamNorm(x.team_name)
-        let pool=players.filter((p:any)=>!tn||teamNorm(p.team_name)===tn||teamNorm(p.team_name).includes(tn)||tn.includes(teamNorm(p.team_name)))
+        const sourceUrl=norm(x.source_url||"")
+        let pool=players.filter((p:any)=>{
+          const pt=teamNorm(p.team_name)
+          return tn ? (pt===tn||pt.includes(tn)||tn.includes(pt)) : (!sourceUrl||sourceUrl.includes(pt))
+        })
+        if(!pool.length)pool=players
         const exact=pool.filter((p:any)=>[p.full_name,p.display_name,p.short_label].some((v:any)=>norm(v)===n))
         let hit=exact.length===1?exact[0]:null
         if(!hit){
