@@ -1,0 +1,32 @@
+name: Probe NUXT structure
+on:
+  push:
+    branches: [probe/nuxt-structure-20261003]
+permissions: {contents: read}
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - run: python3 -m pip install --disable-pip-version-check beautifulsoup4
+      - shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --compressed -A 'Mozilla/5.0' --max-time 30 -o /tmp/page.html 'https://www.sahadan.com/mac/corum-fk-vs-alanyaspor/cjb4iy9yti4b15ka3395yxjbo/istatistikler/oyuncu'
+          python3 - <<'PY'
+          import json
+          from bs4 import BeautifulSoup
+          s=open('/tmp/page.html',errors='ignore').read(); raw=json.loads(BeautifulSoup(s,'html.parser').find('script',id='__NUXT_DATA__').string)
+          def val(x):
+            return raw[x] if isinstance(x,int) and 0<=x<len(raw) else x
+          for i,v in enumerate(raw):
+            if isinstance(v,dict) and 'type' in v and 'players' in v:
+              print('OBJ',i,'TYPE',repr(val(v['type'])),'RAW',repr(v))
+              p=val(v['players'])
+              if isinstance(p,list):
+                print('PLAYERS_RAW',repr(p[:3]))
+                for z in p[:2]:
+                  q=val(z)
+                  print('PLAYER_OBJ',repr(q))
+                  if isinstance(q,dict):
+                    print('PLAYER_RESOLVED',{k:val(x) for k,x in q.items()})
+          PY
