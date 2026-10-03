@@ -1,5 +1,5 @@
 name: Weekly model lifecycle
-# MH6 advanced gate verified stale=0; rerun lifecycle after backfill.\n# MH6 advanced gate verified before lifecycle run
+# MH6 advanced gate verified stale=0; rerun lifecycle after canonical availability fix.\n# MH6 advanced gate verified before lifecycle run
 
 on:
   push:
