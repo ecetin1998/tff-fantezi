@@ -254,6 +254,7 @@ Deno.serve(async(req:Request)=>{
         detail_source_label:"availability_primary",
         detail_source_url:SOURCE_URL,
         detail_source_updated_at:sourceUpdated,
+        suspension_end:row.suspension_date,
       })
     }
 
@@ -276,6 +277,7 @@ Deno.serve(async(req:Request)=>{
         detail_source_label:"availability_primary",
         detail_source_url:SOURCE_URL,
         detail_source_updated_at:sourceUpdated,
+        suspension_end:null,
       })
     }
 
