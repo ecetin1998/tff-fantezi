@@ -88,7 +88,7 @@ def main():
     for r in rows:
         k=(norm(r["player_name"]),str(r.get("source_team_id") or r.get("team_name") or ""))
         if k not in agg:
-            agg[k]={"player_name":r["player_name"],"team_name":r.get("team_name") or "","shots":0,"shots_on_target":0,"key_passes":0,"crosses":0,"successful_crosses":0,"takeons":0,"successful_takeons":0,"source_matches":0,"source_team_id":r.get("source_team_id")}
+            agg[k]={"player_name":r["player_name"],"team_name":r.get("team_name") or "","source_url":r.get("source_url") or "","source_team_id":r.get("source_team_id"),"shots":0,"shots_on_target":0,"key_passes":0,"crosses":0,"successful_crosses":0,"takeons":0,"successful_takeons":0,"source_matches":0,"source_team_id":r.get("source_team_id")}
         x=agg[k]
         if r.get("team_name"): x["team_name"]=r["team_name"]
         x["source_matches"]=max(x["source_matches"],1)
