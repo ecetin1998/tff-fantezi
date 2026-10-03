@@ -1,5 +1,5 @@
 name: MH6 advanced backfill extract
-# Canonical MH6 advanced-data writer. Structured-source validation enabled.
+# Canonical MH6 advanced-data writer. Structured-source validation enabled; parser EOF validated.
 on:
   push:
     branches: [main]
