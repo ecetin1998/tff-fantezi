@@ -98,4 +98,4 @@ def main():
     bad=[x for x in rows if x["shots"]>20 or x["shots_on_target"]>x["shots"] or x["successful_crosses"]>x["crosses"] or x["successful_takeons"]>x["takeons"]]
     if bad: raise RuntimeError("advanced stat sanity failure: "+json.dumps(bad[:10],ensure_ascii=False))
     print(json.dumps({"gameweek":6,"rows":rows},ensure_ascii=False,separators=(",",":")))
-if __name__=="__main__": main()\n
+if __name__=="__main__": main()
