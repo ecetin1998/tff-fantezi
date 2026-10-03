@@ -31,86 +31,52 @@ def fetch(url):
     with urllib.request.urlopen(req,timeout=30) as r:return r.read().decode("utf-8","ignore")
 
 
-def parse_nuxt_chances(soup,url):
-    script=soup.find("script",id="__NUXT_DATA__")
-    if not script or not script.string: return []
-    try: raw=json.loads(script.string)
-    except Exception: return []
+def resolve_nuxt(raw):
     cache={}; resolving=set()
-    def R(i):
-        if not isinstance(i,int): return i
-        if i<0 or i>=len(raw): return None
-        if i in cache: return cache[i]
-        if i in resolving: return None
-        resolving.add(i); v=raw[i]
+    def R(x):
+        if not isinstance(x,int): return x
+        if x<0 or x>=len(raw): return None
+        if x in cache:return cache[x]
+        if x in resolving:return None
+        resolving.add(x); v=raw[x]
         if isinstance(v,dict):
-            out={}; cache[i]=out
-            for k,val in v.items(): out[k]=R(val) if isinstance(val,int) else val
+            out={}; cache[x]=out
+            for k,z in v.items():out[k]=R(z)
         elif isinstance(v,list):
-            out=[]; cache[i]=out
-            for val in v: out.append(R(val) if isinstance(val,int) else val)
-        else: out=v; cache[i]=out
-        resolving.discard(i); return out
-    rows=[]; seen=set()
-    for v in raw:
-        if not isinstance(v,dict) or "type" not in v or "players" not in v: continue
-        typ=R(v["type"]) if isinstance(v["type"],int) else v["type"]
-        if typ!="chances_created": continue
-        players=R(v["players"]) if isinstance(v["players"],int) else []
-        if not isinstance(players,list): continue
-        for item in players:
-            if not isinstance(item,dict): continue
-            p=item.get("player") or {}
-            name=str(p.get("name") or p.get("match_name") or "").strip() if isinstance(p,dict) else ""
-            total=item.get("total")
-            if not name or not isinstance(total,(int,float)): continue
-            key=(name,item.get("team_id"))
-            if key in seen: continue
-            seen.add(key)
-            rows.append({"source_url":url,"stat":"key_passes","player_name":name,"team_name":"","source_team_id":item.get("team_id"),"key_passes":int(total)})
-    return rows
+            out=[]; cache[x]=out
+            for z in v:out.append(R(z))
+        else:out=v
+        resolving.discard(x);return out
+    return R
 
 def parse(url,html):
-    soup=BeautifulSoup(html,"html.parser")
-    out=[]; seen=set()
-    for head in soup.find_all("div"):
-        title=norm(head.get_text(" ",strip=True))
-        stat=stat_kind(title)
-        if not stat: continue
-        card=head
-        for _ in range(6):
-            if card is None: break
-            classes=" ".join(card.get("class",[]))
-            if "rounded-base" in classes: break
-            card=card.parent
-        if card is None: continue
-        stat=TARGET[title]
-        for a in card.select("a[title]"):
-            row=a.parent
-            if row is None: continue
-            player=(a.get("title") or "").strip()
-            spans=a.find_all("span")
-            team=spans[-1].get_text(" ",strip=True) if len(spans)>1 else ""
-            vals=[]
-            for d in row.find_all("div",class_=lambda c:c and "text-center" in (c if isinstance(c,str) else " ".join(c)),recursive=False):
-                v=number(d.get_text(" ",strip=True))
-                if v is not None: vals.append(v)
-            if not player or not vals: continue
-            key=(stat,player,team)
-            if key in seen: continue
+    soup=BeautifulSoup(html,"html.parser"); script=soup.find("script",id="__NUXT_DATA__")
+    if not script or not script.string: raise RuntimeError("NUXT data missing: "+url)
+    raw=json.loads(script.string); R=resolve_nuxt(raw); out=[]; seen=set()
+    mapping={"shots":"shots","chances_created":"key_passes","crosses":"crosses","takeons":"takeons"}
+    for v in raw:
+        if not isinstance(v,dict) or "type" not in v or "players" not in v:continue
+        typ=R(v["type"])
+        if typ not in mapping:continue
+        players=R(v["players"])
+        if not isinstance(players,list):continue
+        for item in players:
+            if not isinstance(item,dict):continue
+            p=item.get("player") or {}
+            name=str(p.get("name") or p.get("match_name") or "").strip() if isinstance(p,dict) else ""
+            if not name:continue
+            team_id=item.get("team_id"); key=(typ,name,team_id)
+            if key in seen:continue
             seen.add(key)
-            item={"source_url":url,"stat":stat,"player_name":player,"team_name":team}
-            if stat=="shots":
-                item["shots"]=int(vals[-1]); item["shots_on_target"]=int(vals[0]) if len(vals)>1 else None
-            elif stat=="key_passes":
-                item["key_passes"]=int(vals[0])
-            elif stat=="crosses":
-                item["crosses"]=int(vals[-1]); item["successful_crosses"]=int(vals[0]) if len(vals)>1 else None
-            elif stat=="takeons":
-                item["takeons"]=int(vals[-1]); item["successful_takeons"]=int(vals[0]) if len(vals)>1 else None
-            out.append(item)
-    if not any(r.get("stat")=="key_passes" for r in out):
-        out.extend(parse_nuxt_chances(soup,url))
+            x={"source_url":url,"stat":mapping[typ],"player_name":name,"team_name":"","source_team_id":team_id}
+            if typ=="shots":
+                x["shots"]=int(item.get("total") or 0); x["shots_on_target"]=int(item.get("target") or 0)
+            elif typ=="chances_created": x["key_passes"]=int(item.get("total") or 0)
+            elif typ=="crosses":
+                x["crosses"]=int(item.get("total") or 0); x["successful_crosses"]=int(item.get("success") or 0)
+            elif typ=="takeons":
+                x["takeons"]=int(item.get("total") or 0); x["successful_takeons"]=int(item.get("success") or 0)
+            out.append(x)
     return out
 
 def main():
@@ -120,13 +86,16 @@ def main():
         print(f"SOURCE {u} rows={len(parsed)}",file=sys.stderr)
     agg={}
     for r in rows:
-        k=norm(r["player_name"])
+        k=(norm(r["player_name"]),str(r.get("source_team_id") or r.get("team_name") or ""))
         if k not in agg:
             agg[k]={"player_name":r["player_name"],"team_name":r.get("team_name") or "","shots":0,"shots_on_target":0,"key_passes":0,"crosses":0,"successful_crosses":0,"takeons":0,"successful_takeons":0,"source_matches":0}
         x=agg[k]
         if r.get("team_name"): x["team_name"]=r["team_name"]
-        x["source_matches"]+=1
+        x["source_matches"]=max(x["source_matches"],1)
         for field in ["shots","shots_on_target","key_passes","crosses","successful_crosses","takeons","successful_takeons"]:
             if r.get(field) is not None:x[field]+=int(r[field])
-    print(json.dumps({"gameweek":6,"rows":list(agg.values())},ensure_ascii=False,separators=(",",":")))
+    rows=list(agg.values())
+    bad=[x for x in rows if x["shots"]>20 or x["shots_on_target"]>x["shots"] or x["successful_crosses"]>x["crosses"] or x["successful_takeons"]>x["takeons"]]
+    if bad: raise RuntimeError("advanced stat sanity failure: "+json.dumps(bad[:10],ensure_ascii=False))
+    print(json.dumps({"gameweek":6,"rows":rows},ensure_ascii=False,separators=(",",":")))
 if __name__=="__main__": main()
