@@ -159,42 +159,25 @@ Deno.serve(async(req:Request)=>{
       const current=await sb.from("scout_model_runs").select("gameweek").eq("is_current",true).eq("status","ready").limit(1).single()
       if(current.error)throw current.error
       const gw=Number(current.data.gameweek)
-      const players=await sb.from("scout_players").select("id").eq("active",true)
-      if(players.error)throw players.error
-      const activeIds=new Set((players.data||[]).map((x:any)=>Number(x.id)))
-      // The current model run is the prediction week (e.g. MH7), while observed
-      // season/action stats are closed through the previous week (e.g. MH6).
-      // Resolve the latest actually-ingested season week instead of querying
-      // through_gameweek=current run, which can return zero rows and falsely PASS.
-      const latestStats=await sb.from("scout_player_season_stats")
-        .select("through_gameweek").eq("season","2026-27")
-        .order("through_gameweek",{ascending:false}).limit(1).maybeSingle()
+      const latestStats=await sb.from("scout_player_season_stats").select("through_gameweek").eq("season","2026-27").order("through_gameweek",{ascending:false}).limit(1).maybeSingle()
       if(latestStats.error)throw latestStats.error
       const observedGw=Number(latestStats.data?.through_gameweek||0)
       if(!observedGw)return Response.json({ok:false,pass:false,current_gameweek:gw,error:"no season stats coverage"},{status:409})
-      const stats=await sb.from("scout_player_season_stats").select("player_id,through_gameweek,advanced_through_gameweek,minutes").eq("season","2026-27").eq("through_gameweek",observedGw)
-      if(stats.error)throw stats.error
-      const active=(stats.data||[]).filter((x:any)=>activeIds.has(Number(x.player_id)))
-      const stale=active.filter((x:any)=>Number(x.advanced_through_gameweek||0)<gw)
-      // Zero-minute players have no observed action events; advancing their coverage marker is safe.
-      if(body.repair===true){
-        const zeroMinute=stale.filter((x:any)=>Number(x.minutes||0)===0).map((x:any)=>Number(x.player_id))
-        if(zeroMinute.length){
-          const q=await sb.from("scout_player_season_stats").update({
-            advanced_through_gameweek:observedGw,advanced_updated_at:new Date().toISOString()
-          }).eq("season","2026-27").eq("through_gameweek",observedGw).in("player_id",zeroMinute)
-          if(q.error)throw q.error
-        }
-      }
-      const verify=await sb.from("scout_player_season_stats").select("player_id,advanced_through_gameweek,minutes").eq("season","2026-27").eq("through_gameweek",observedGw)
-      if(verify.error)throw verify.error
-      const remaining=(verify.data||[]).filter((x:any)=>activeIds.has(Number(x.player_id))&&Number(x.advanced_through_gameweek||0)<gw&&Number(x.minutes||0)>0)
+      const [participantsQ,statsQ]=await Promise.all([
+        sb.from("scout_player_weekly_points").select("player_id,minutes").eq("gameweek",observedGw).gt("minutes",0),
+        sb.from("scout_player_season_stats").select("player_id,advanced_through_gameweek").eq("season","2026-27").eq("through_gameweek",observedGw)
+      ])
+      if(participantsQ.error)throw participantsQ.error
+      if(statsQ.error)throw statsQ.error
+      const participantIds=new Set((participantsQ.data||[]).map((x:any)=>Number(x.player_id)))
+      const markers=new Map((statsQ.data||[]).map((x:any)=>[Number(x.player_id),Number(x.advanced_through_gameweek||0)]))
+      const remaining=[...participantIds].filter((id:number)=>(markers.get(id)||0)<observedGw)
       const pass=remaining.length===0
       return Response.json({
-        ok:pass,pass,current_gameweek:gw,active_players:activeIds.size,
-        observed_gameweek:observedGw,advanced_current:activeIds.size-remaining.length,stale_played_players:remaining.length,
-        stale_player_ids:remaining.slice(0,30).map((x:any)=>Number(x.player_id)),
-        note:pass?`advanced data covers observed MH${observedGw}`:`played-player advanced data must be ingested through MH${observedGw}`
+        ok:pass,pass,current_gameweek:gw,observed_gameweek:observedGw,
+        played_players:participantIds.size,advanced_current:participantIds.size-remaining.length,
+        stale_played_players:remaining.length,stale_player_ids:remaining.slice(0,30),
+        note:pass?`advanced data covers all MH${observedGw} participants`:`played-player advanced data must be ingested through MH${observedGw}`
       },{status:pass?200:409})
     }
 
