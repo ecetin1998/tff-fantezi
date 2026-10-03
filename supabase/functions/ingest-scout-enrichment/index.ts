@@ -104,6 +104,9 @@ Deno.serve(async(req:Request)=>{
       const resolved:any[]=[]
       for(const x of sourceRows){
         const rawN=norm(x.player_name),n=aliases[rawN]||rawN,tn=teamNorm(x.team_name)
+        const sourceTeamId=Number(x.source_team_id||0)
+        const sourceTeamMap:Record<number,number>={21774:14,7285:8}
+        const mappedTeamId=sourceTeamMap[sourceTeamId]||0
         const sourceUrl=norm(x.source_url||"")
         let pool=players.filter((p:any)=>{
           const pt=teamNorm(p.team_name)
