@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import json,re,sys,urllib.request
+import json,re,sys,urllib.request,urllib.error,time
 from bs4 import BeautifulSoup
 
 URLS=[
