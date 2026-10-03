@@ -1,4 +1,4 @@
-name: Weekly model lifecycle
+name: Weekly model lifecycle\n# MH6 advanced gate verified before lifecycle run
 
 on:
   push:
