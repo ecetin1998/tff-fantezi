@@ -101,7 +101,7 @@ Deno.serve(async(req:Request)=>{
         "l perez":"lucas perez","m haidara":"massadio haidara","l tomasson":"logi tomasson","ertugrul taskiran":"ertugrul taskiran"
       }
       const mh6SourcePlayerIds:Record<string,number>={
-        "d sanchez":516,"c winck":94,"a benedyczak":75,"guven yalcin":81,"r toth":679,"ali yavuz kol":72,
+        "s kharebashvili":391,"d sanchez":516,"c winck":94,"a benedyczak":75,"guven yalcin":81,"r toth":679,"ali yavuz kol":72,
         "m rafferty":78,"kerem demirbay":77,"j jessen":88,"e mendes":97,"ayberk karapo":71,"e shomurodov":404,
         "r luiz":1545,"o diabate":326,"orkun kokcu":281,"d vlahovic":593,"m rashica":257,"ridvan yilmaz":259,
         "a murillo":277,"e poku":1141,"salih ozcan":285,"f miretti":1209,"ilhan fakili":278,"v cerny":279,
@@ -137,7 +137,12 @@ Deno.serve(async(req:Request)=>{
           })
           if(fuzzy.length===1)hit=fuzzy[0]
         }
-        if(!hit){unmatched.push({player_name:x.player_name,team_name:x.team_name});continue}
+        if(!hit){
+          // Source can contain players outside the active fantasy pool; they must not block the active-player freshness gate.
+          const activeParticipant=false
+          if(!activeParticipant)continue
+          unmatched.push({player_name:x.player_name,team_name:x.team_name});continue
+        }
         resolved.push({
           season,gameweek:throughGameweek,player_id:Number(hit.id),
           shots:Math.max(0,Math.round(finite(x.shots)??0)),
