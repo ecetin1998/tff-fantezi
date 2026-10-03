@@ -185,14 +185,15 @@ Deno.serve(async(req:Request)=>{
     const sourceUpdated=sourceUpdatedAt(html)
     const now=new Date().toISOString()
 
-    const [runQ,playersQ,teamsQ,fixturesQ]=await Promise.all([
-      sb.from("scout_model_runs").select("id,gameweek").eq("is_current",true).eq("status","ready").limit(1).single(),
+    const runQ=await sb.from("scout_model_runs").select("id,gameweek").eq("is_current",true).eq("status","ready").limit(1).single()
+    if(runQ.error)throw runQ.error
+    const runId=runQ.data.id
+    const [playersQ,teamsQ,fixturesQ]=await Promise.all([
       sb.from("scout_players").select("id,full_name,display_name,short_label,team_id").eq("active",true),
       sb.from("scout_teams").select("id,name"),
-      sb.from("scout_match_predictions").select("match_id,home_team_id,away_team_id,kickoff_at").eq("run_id",runQ.data?.id||"").order("kickoff_at",{ascending:true}),
+      sb.from("scout_match_predictions").select("match_id,home_team_id,away_team_id,kickoff_at").eq("run_id",runId).order("kickoff_at",{ascending:true}),
     ])
-    for(const q of [runQ,playersQ,teamsQ,fixturesQ])if(q.error)throw q.error
-    const runId=runQ.data.id
+    for(const q of [playersQ,teamsQ,fixturesQ])if(q.error)throw q.error
     const teams=new Map<number,string>((teamsQ.data||[]).map((t:any)=>[Number(t.id),String(t.name)]))
     const teamBySource=new Map<string,number>()
     for(const row of parsed){
