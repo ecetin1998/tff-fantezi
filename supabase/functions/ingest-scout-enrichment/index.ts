@@ -91,18 +91,32 @@ Deno.serve(async(req:Request)=>{
       if(playersQ.error)throw playersQ.error
       const players=(playersQ.data||[]).map((p:any)=>({...p,team_name:teamById.get(Number(p.team_id))||""}))
       const sourceRows=Array.isArray(body.weekly_stats)?body.weekly_stats:[]
+      const aliases:Record<string,string>={
+        "i jakobs":"ismail jakobs","d sanchez":"davinson sanchez","franculino":"franculino dju","eren elmali":"eren elmali",
+        "l ugochukwu":"lesley ugochukwu","r toth":"regö toth","a skov olsen":"andreas skov olsen","e shomurodov":"eldor shomurodov",
+        "r luiz":"roberto luiz","p martor":"peter martor","umut meras":"umut meras","ali turap bulbul":"ali turap bulbul",
+        "a sowe":"ali sowe","taha sahin":"taha sahin","j ramirez":"jhonatan ramirez","f hadergjonaj":"floran hadergjonaj",
+        "h ui jo":"hwang ui jo","e meschack":"elias meschack","ivan cedric":"ivan cedric","a abdullahi":"abdullahi",
+        "kerem akturkoglu":"kerem akturkoglu","anil yasar":"anil yasar","levent mercan":"levent mercan","m sissoho":"moussa sissoho",
+        "l perez":"lucas perez","m haidara":"massadio haidara","l tomasson":"logi tomasson","ertugrul taskiran":"ertugrul taskiran"
+      }
       const unmatched:any[]=[]
       const resolved:any[]=[]
       for(const x of sourceRows){
-        const n=norm(x.player_name),tn=teamNorm(x.team_name)
+        const rawN=norm(x.player_name),n=aliases[rawN]||rawN,tn=teamNorm(x.team_name)
         let pool=players.filter((p:any)=>!tn||teamNorm(p.team_name)===tn||teamNorm(p.team_name).includes(tn)||tn.includes(teamNorm(p.team_name)))
         const exact=pool.filter((p:any)=>[p.full_name,p.display_name,p.short_label].some((v:any)=>norm(v)===n))
         let hit=exact.length===1?exact[0]:null
         if(!hit){
           const bits=n.split(" ").filter(Boolean),last=bits.at(-1)||"",first=(bits[0]||"")[0]||""
           const fuzzy=pool.filter((p:any)=>{
-            const pb=norm(p.full_name).split(" ").filter(Boolean)
-            return (pb.at(-1)||"")===last && (!first||(pb[0]||"")[0]===first)
+            const names=[p.full_name,p.display_name,p.short_label].map((v:any)=>norm(v)).filter(Boolean)
+            return names.some((pn:string)=>{
+              const pb=pn.split(" ").filter(Boolean)
+              if(pn===n||pn.includes(n)||n.includes(pn))return true
+              if(bits.length===1)return pb.includes(n)
+              return (pb.at(-1)||"")===last && (!first||(pb[0]||"")[0]===first)
+            })
           })
           if(fuzzy.length===1)hit=fuzzy[0]
         }
