@@ -169,7 +169,7 @@ function teamScore(source:string,target:string){
 }
 function formatFixture(match:any,teams:Map<number,string>){
   if(!match)return null
-  const date=new Intl.DateTimeFormat("tr-TR",{timeZone:"Europe/Istanbul",day:"2-digit",month:"2-digit",year:"numeric"}).format(new Date(match.match_date))
+  const date=new Intl.DateTimeFormat("tr-TR",{timeZone:"Europe/Istanbul",day:"2-digit",month:"2-digit",year:"numeric"}).format(new Date(match.kickoff_at||match.match_date))
   return `${date} • ${teams.get(Number(match.home_team_id))||"?"} - ${teams.get(Number(match.away_team_id))||"?"}`
 }
 
@@ -189,7 +189,7 @@ Deno.serve(async(req:Request)=>{
       sb.from("scout_model_runs").select("id,gameweek").eq("is_current",true).eq("status","ready").limit(1).single(),
       sb.from("scout_players").select("id,full_name,display_name,short_label,team_id").eq("active",true),
       sb.from("scout_teams").select("id,name"),
-      sb.from("fixtures").select("id,home_team_id,away_team_id,match_date").gte("match_date",now).order("match_date",{ascending:true}).limit(80),
+      sb.from("scout_match_predictions").select("match_id,home_team_id,away_team_id,kickoff_at").eq("run_id",runQ.data?.id||"").order("kickoff_at",{ascending:true}),
     ])
     for(const q of [runQ,playersQ,teamsQ,fixturesQ])if(q.error)throw q.error
     const runId=runQ.data.id
@@ -234,7 +234,7 @@ Deno.serve(async(req:Request)=>{
     const next=new Map<number,any>()
 
     for(const row of matched){
-      const suspensionFixture=row.kind==="suspensions"?(row.source_suspension_fixture||formatFixture(fixturesByTeam.get(row.team_id),teams)):null
+      const suspensionFixture=row.kind==="suspensions"?(formatFixture(fixturesByTeam.get(row.team_id),teams)||row.source_suspension_fixture):null
       const expected=row.expected_return?.trim()||null
       next.set(row.player_id,{
         run_id:runId,
