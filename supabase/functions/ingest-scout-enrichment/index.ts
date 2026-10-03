@@ -123,7 +123,7 @@ Deno.serve(async(req:Request)=>{
         })
         if(!pool.length)pool=players
         const exact=pool.filter((p:any)=>[p.full_name,p.display_name,p.short_label].some((v:any)=>norm(v)===n))
-        let hit=players.find((p:any)=>Number(p.id)===mh6SourcePlayerIds[rawN]) || (exact.length===1?exact[0]:null)
+        let hit=mh6SourcePlayerIds[rawN] ? {id:mh6SourcePlayerIds[rawN]} : (exact.length===1?exact[0]:null)
         if(!hit){
           const bits=n.split(" ").filter(Boolean),last=bits.at(-1)||"",first=(bits[0]||"")[0]||""
           const fuzzy=pool.filter((p:any)=>{
