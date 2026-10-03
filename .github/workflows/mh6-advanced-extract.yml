@@ -1,4 +1,5 @@
 name: MH6 advanced backfill extract
+# Re-run after ingest/gate fixes; this workflow is the canonical MH6 advanced-data writer.
 on:
   push:
     branches: [main]
