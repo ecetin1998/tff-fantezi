@@ -191,7 +191,7 @@ Deno.serve(async(req:Request)=>{
     const [playersQ,teamsQ,fixturesQ]=await Promise.all([
       sb.from("scout_players").select("id,full_name,display_name,short_label,team_id").eq("active",true),
       sb.from("scout_teams").select("id,name"),
-      sb.from("scout_match_predictions").select("match_id,home_team_id,away_team_id,kickoff_at").eq("run_id",runId).order("kickoff_at",{ascending:true}),
+      sb.from("fixtures").select("id,home_team_id,away_team_id,match_date").eq("gameweek",Number(runQ.data.gameweek)).order("match_date",{ascending:true}),
     ])
     for(const q of [playersQ,teamsQ,fixturesQ])if(q.error)throw q.error
     const teams=new Map<number,string>((teamsQ.data||[]).map((t:any)=>[Number(t.id),String(t.name)]))
