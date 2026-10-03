@@ -82,7 +82,7 @@ Deno.serve(async(req:Request)=>{
     const sb=createClient(Deno.env.get("SUPABASE_URL")!,Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!)
 
     if(body.mode==="weekly_delta"){
-      const norm=(v:any)=>String(v||"").normalize("NFD").replace(/[\\u0300-\\u036f]/g,"").toLocaleLowerCase("tr-TR").replace(/[^a-z0-9]+/g," ").trim()
+      const norm=(v:any)=>String(v||"").normalize("NFD").replace(/[\\u0300-\\u036f]/g,"").toLowerCase().replace(/ı/g,"i").replace(/ş/g,"s").replace(/ğ/g,"g").replace(/ç/g,"c").replace(/ö/g,"o").replace(/ü/g,"u").replace(/[^a-z0-9]+/g," ").trim()
       const teamNorm=(v:any)=>norm(v).replace(/\\b(fk|sk|caykur)\\b/g,"").replace(/\\s+/g," ").trim()
       const teamsQ=await sb.from("scout_teams").select("id,name")
       if(teamsQ.error)throw teamsQ.error
