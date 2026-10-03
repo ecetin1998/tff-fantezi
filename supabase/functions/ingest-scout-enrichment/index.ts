@@ -91,6 +91,8 @@ Deno.serve(async(req:Request)=>{
       if(playersQ.error)throw playersQ.error
       const players=(playersQ.data||[]).map((p:any)=>({...p,team_name:teamById.get(Number(p.team_id))||""}))
       const sourceRows=Array.isArray(body.weekly_stats)?body.weekly_stats:[]
+      // Sahadan team ids are not our DB ids. Resolve them dynamically from source rows
+      // when the source supplied a team name; otherwise name matching below remains conservative.
       const aliases:Record<string,string>={
         "i jakobs":"ismail jakobs","d sanchez":"davinson sanchez","franculino":"franculino dju","eren elmali":"eren elmali",
         "l ugochukwu":"lesley ugochukwu","r toth":"regö toth","a skov olsen":"andreas skov olsen","e shomurodov":"eldor shomurodov",
@@ -103,7 +105,11 @@ Deno.serve(async(req:Request)=>{
       const unmatched:any[]=[]
       const resolved:any[]=[]
       for(const x of sourceRows){
-        const rawN=norm(x.player_name),n=aliases[rawN]||rawN,tn=teamNorm(x.team_name)
+        const rawN=norm(x.player_name),n=aliases[rawN]||rawN
+        const sourceTeamId=Number(x.source_team_id||0)
+        const sourceTeamAliases:Record<number,string>={21774:"Alanyaspor",7285:"Çorum FK"}
+        const sourceTeamName=sourceTeamAliases[sourceTeamId]||""
+        const tn=teamNorm(x.team_name||sourceTeamName)
         let pool=players.filter((p:any)=>!tn||teamNorm(p.team_name)===tn||teamNorm(p.team_name).includes(tn)||tn.includes(teamNorm(p.team_name)))
         const exact=pool.filter((p:any)=>[p.full_name,p.display_name,p.short_label].some((v:any)=>norm(v)===n))
         let hit=exact.length===1?exact[0]:null
