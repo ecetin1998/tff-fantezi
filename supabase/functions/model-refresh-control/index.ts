@@ -210,11 +210,23 @@ Deno.serve(async(req:Request)=>{
       const q=await sb.rpc("scout_data_integrity_qa",{p_run_id:runId})
       if(q.error)throw q.error
       const pass=Boolean(q.data?.pass)
-      const av=await sb.from("scout_availability").select("checked_at").eq("run_id",runId).order("checked_at",{ascending:false}).limit(1).maybeSingle()
+      let av=await sb.from("scout_availability").select("checked_at").eq("run_id",runId).order("checked_at",{ascending:false}).limit(1).maybeSingle()
       if(av.error)throw av.error
+      let availabilitySourceRunId=runId
+      if(!av.data?.checked_at){
+        const candidate=await sb.from("scout_model_runs").select("gameweek").eq("id",runId).single()
+        if(candidate.error)throw candidate.error
+        const current=await sb.from("scout_model_runs").select("id,gameweek").eq("is_current",true).eq("status","ready").limit(1).single()
+        if(current.error)throw current.error
+        if(Number(current.data.gameweek)===Number(candidate.data.gameweek)){
+          av=await sb.from("scout_availability").select("checked_at").eq("run_id",current.data.id).order("checked_at",{ascending:false}).limit(1).maybeSingle()
+          if(av.error)throw av.error
+          availabilitySourceRunId=current.data.id
+        }
+      }
       const availabilityFresh=ageHours(av.data?.checked_at)<=24
-      await upsertGate(sb,runId,{data_integrity_pass:pass,availability_freshness:availabilityFresh,details:{data_integrity:q.data}})
-      return Response.json({ok:pass&&availabilityFresh,pass,availability_freshness:availabilityFresh,result:q.data},{status:pass&&availabilityFresh?200:409})
+      await upsertGate(sb,runId,{data_integrity_pass:pass,availability_freshness:availabilityFresh,details:{data_integrity:q.data,availability_source_run_id:availabilitySourceRunId}})
+      return Response.json({ok:pass&&availabilityFresh,pass,availability_freshness:availabilityFresh,availability_source_run_id:availabilitySourceRunId,result:q.data},{status:pass&&availabilityFresh?200:409})
     }
 
     if(stage==="bugfix"){
