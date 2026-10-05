@@ -3728,6 +3728,40 @@
   .scope :global(.availability-updated-card) b{font-size:17px}
 }
 
+/* Final mobile role-change layout: mirror availability cards so position never overlaps player text. */
+@media(max-width:760px){
+  .scope :global(.role-change-card){padding:14px;overflow:hidden}
+  .scope :global(.role-change-head){
+    display:grid;
+    grid-template-columns:44px minmax(0,1fr)!important;
+    grid-template-areas:"pos player" "signal signal";
+    column-gap:10px;
+    row-gap:8px;
+    align-items:start;
+    min-width:0;
+  }
+  .scope :global(.role-change-head)>:global(.pos){
+    grid-area:pos;position:static!important;width:44px!important;min-width:44px!important;margin:0;align-self:start
+  }
+  .scope :global(.role-change-head)>div{
+    grid-area:player;min-width:0;padding-top:1px
+  }
+  .scope :global(.role-change-head)>div b{
+    display:block;min-width:0;font-size:14px;line-height:1.25;white-space:normal!important;
+    overflow:visible!important;text-overflow:clip!important;overflow-wrap:anywhere;color:#26324f
+  }
+  .scope :global(.role-change-head)>div small{
+    display:block;margin-top:3px;font-size:10.5px;color:#8791a6
+  }
+  .scope :global(.role-change-head)>em{
+    grid-area:signal!important;grid-column:auto!important;justify-self:start;position:static!important;
+    max-width:none;margin:0;font-size:9px;padding:5px 8px
+  }
+}
+@media(max-width:430px){
+  .scope :global(.role-change-head){grid-template-columns:44px minmax(0,1fr)!important}
+}
+
 /* Final mobile availability layout: lives in DataViews so older responsive rules cannot override it. */
 @media(max-width:760px){
   .scope :global(.availability-mobile-card){padding:14px;overflow:hidden}
