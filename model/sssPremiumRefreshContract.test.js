@@ -4,7 +4,7 @@ const assert=require('node:assert/strict')
 const page=fs.readFileSync('app/sss/page.js','utf8')
 const css=fs.readFileSync('components/DataViews.module.css','utf8')
 
-assert.match(page,/Fantezi Rehberi’ni doğru okumak için tek rehber/)
+assert.match(page,/Fantezi Lig Rehberi’ni doğru okumak için tek rehber/)
 assert.match(page,/3 ADIMDA KULLANIM/)
 assert.match(page,/Takım Analizi/)
 assert.match(page,/Agresif 11/)
