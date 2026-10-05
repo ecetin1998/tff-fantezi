@@ -1722,9 +1722,9 @@
     overflow:visible;
     scrollbar-width:auto;
   }
-  .scope :global(.desktop-nav)>a,
-  .scope :global(.desktop-more)>button{
-    color:#43506b;
+  .scope :global(.topbar) :global(.desktop-nav)>a,
+  .scope :global(.topbar) :global(.desktop-more)>button{
+    color:#2f3d5a;
     font-size:12px;
     font-weight:800;
   }
@@ -1746,10 +1746,16 @@
     margin-top:0;
     overflow:visible;
   }
-  .scope :global(.desktop-more-panel) a{
-    color:#3d4b67;
+  .scope :global(.topbar) :global(.desktop-more-panel) a{
+    color:#26344f;
     font-size:12px;
-    font-weight:750;
+    font-weight:800;
+    opacity:1;
+  }
+  .scope :global(.topbar) :global(.desktop-more-panel) a:hover,
+  .scope :global(.topbar) :global(.desktop-more-panel) a:global(.nav-active){
+    background:#e8f5f2;
+    color:#056d64;
   }
 }
 
