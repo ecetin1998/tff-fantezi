@@ -44,7 +44,8 @@ for(const table of [
   assert.equal(new RegExp("from\\('"+table+"'\\)\\.select\\(['\"]\\*['\"]\\)").test(data),false,table+' must use explicit public columns')
 }
 assert.match(data,/async function checked\(/)
-assert.match(data,/data:getPlayerDetail:projection/)
+assert.match(data,/data:getPlayerDetail:card/)
+assert.match(data,/v_current_player_cards/)
 assert.match(data,/data:getTeamDetail:season/)
 assert.match(data,/async function _getRecommendation[\s\S]*offlineBuild\(\)/)
 assert.match(data,/async function _getTeamFixturesOverview[\s\S]*offlineBuild\(\)/)
