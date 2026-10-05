@@ -116,7 +116,7 @@ assert.match(playersTable,/router\.replace/)
 const playerDetailRoute=read('app/players/[id]/page.js')
 assert.doesNotMatch(playerDetailRoute,/dynamic='force-static'/,'Tier-aware player detail must render per session so Pro fields are not serialized to non-Pro users.')
 assert.match(playerDetailRoute,/getAuthState/,'Tier-aware player detail must resolve access on the server.')
-assert.match(playerDetailRoute,/if\(!data\) notFound\(\)/,'Unknown player ids must still resolve through notFound().')
+assert.match(playerDetailRoute,/if\(!data\)\s*notFound\(\)/,'Unknown player ids must still resolve through notFound().')
 assert.match(playerDetailRoute,/generateStaticParams\(\)\{ return \[\] \}/,'Player detail ids should be generated on demand and cached.')
 
 assert.match(data,/unstable_cache\(_getTeamDetail/)
