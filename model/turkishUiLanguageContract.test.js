@@ -62,7 +62,7 @@ const matches=read('app/matches/page.js')
 const sss=read('app/sss/page.js')
 const presentation=read('lib/playerPresentation.js')
 
-assert.match(nav,/Fantezi Rehberi/)
+assert.match(nav,/Fantezi Lig Rehberi/)
 assert.match(nav,/DENEME/)
 assert.match(pricing,/GELİŞMİŞ ÜYELİK/)
 assert.match(home,/İlk 25/)
