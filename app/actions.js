@@ -8,7 +8,7 @@ import {BENCH_SIZE,BUDGET,FORMATIONS,MAX_PLAYERS_PER_CLUB,SQUAD_LIMITS,SQUAD_SIZ
 import {SUPABASE_PUBLISHABLE_KEY,SUPABASE_URL} from '@/lib/config'
 import {MANAGER_CARD_NONE,formationsForCard,managerCardInfo,normalizeManagerCard,squadLimitsForCard} from '@/lib/managerCards'
 
-const DUMMY_LOGIN_ALIASES=new Set(['adminfree','adminpro'])
+const DUMMY_LOGIN_ALIASES=new Set(['adminfree','adminpro','emircan','baris','serhat','oguz','serdar','erdem','celil','ekin'])
 
 async function signInDummyAccount(supabase,username,password){
   const response=await fetch(SUPABASE_URL+'/functions/v1/dummy-login',{
