@@ -9,7 +9,7 @@ import WeeklyPointsChartEnhancer from '@/components/WeeklyPointsChartEnhancer'
 
 const cssScopes=[siteShell.scope,premiumViews.scope,dataViews.scope,managerCards.scope].join(' ')
 
-const siteUrl=process.env.NEXT_PUBLIC_SITE_URL||'https://tff-fantezi.ecetin1998.workers.dev'
+const siteUrl=process.env.NEXT_PUBLIC_SITE_URL||'https://fanteziligrehberi.com'
 export const metadata={
   metadataBase:new URL(siteUrl),
   title:{default:'Fantezi Rehberi — Süper Lig Fantezi',template:'%s | Fantezi Rehberi'},
