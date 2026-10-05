@@ -10,11 +10,11 @@ export default function NavAccountControls(){
   useEffect(()=>{
     const supabase=createClient()
     let alive=true
-    let currentUserId=null
+    let currentUserId
 
     const applySession=session=>{
       const userId=session?.user?.id||null
-      if(currentUserId===userId&&alive&&state.loaded)return
+      if(currentUserId===userId)return
       currentUserId=userId
       if(alive)setState({loaded:true,signedIn:Boolean(userId)})
     }
