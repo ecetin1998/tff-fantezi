@@ -188,12 +188,13 @@ Deno.serve(async(req:Request)=>{
     const runQ=await sb.from("scout_model_runs").select("id,gameweek").eq("is_current",true).eq("status","ready").limit(1).single()
     if(runQ.error)throw runQ.error
     const runId=runQ.data.id
-    const [playersQ,teamsQ,fixturesQ]=await Promise.all([
+    const [playersQ,teamsQ,predictedFixturesQ,fixturesQ]=await Promise.all([
       sb.from("scout_players").select("id,full_name,display_name,short_label,team_id").eq("active",true),
       sb.from("scout_teams").select("id,name"),
+      sb.from("scout_match_predictions").select("match_id,home_team_id,away_team_id,kickoff_at").eq("run_id",runId).order("kickoff_at",{ascending:true}),
       sb.from("fixtures").select("id,home_team_id,away_team_id,match_date").eq("gameweek",Number(runQ.data.gameweek)).order("match_date",{ascending:true}),
     ])
-    for(const q of [playersQ,teamsQ,fixturesQ])if(q.error)throw q.error
+    for(const q of [playersQ,teamsQ,predictedFixturesQ,fixturesQ])if(q.error)throw q.error
     const teams=new Map<number,string>((teamsQ.data||[]).map((t:any)=>[Number(t.id),String(t.name)]))
     const teamBySource=new Map<string,number>()
     for(const row of parsed){
@@ -205,7 +206,8 @@ Deno.serve(async(req:Request)=>{
     }
 
     const fixturesByTeam=new Map<number,any>()
-    for(const m of fixturesQ.data||[]){
+    const canonicalFixtures=(predictedFixturesQ.data||[]).length?predictedFixturesQ.data:fixturesQ.data||[]
+    for(const m of canonicalFixtures){
       for(const id of [Number(m.home_team_id),Number(m.away_team_id)]){
         if(!fixturesByTeam.has(id))fixturesByTeam.set(id,m)
       }
