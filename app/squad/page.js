@@ -74,11 +74,12 @@ export default async function Squad({searchParams}){
   </div></div>
 
   const {players,run}=pool
-  const futurePlan=run?.gameweek?await getFutureFixturePlan(Number(run.gameweek)+1,2):{byTeam:{}}
   const {members:recommended}=recommendation
-  const {data:pageData,error:pageError}=run?.gameweek
-    ?await supabase.rpc('scout_my_squad_page',{p_gameweek:run.gameweek})
-    :{data:null,error:null}
+  const [futurePlan,pageResult]=await Promise.all([
+    run?.gameweek?getFutureFixturePlan(Number(run.gameweek)+1,2):Promise.resolve({byTeam:{}}),
+    run?.gameweek?supabase.rpc('scout_my_squad_page',{p_gameweek:run.gameweek}):Promise.resolve({data:null,error:null}),
+  ])
+  const {data:pageData,error:pageError}=pageResult
   if(pageError)reportServerError('squad:pageData',pageError,{gameweek:run?.gameweek})
 
   const gameweekRow=pageData?.gameweek||null
