@@ -206,6 +206,7 @@ Deno.serve(async(req:Request)=>{
     }
 
     const fixturesByTeam=new Map<number,any>()
+    // Use the current run fixture set so suspension QA follows rescheduled live fixtures.
     const canonicalFixtures=(predictedFixturesQ.data||[]).length?predictedFixturesQ.data:fixturesQ.data||[]
     for(const m of canonicalFixtures){
       for(const id of [Number(m.home_team_id),Number(m.away_team_id)]){
