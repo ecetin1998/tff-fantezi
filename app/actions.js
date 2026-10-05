@@ -123,6 +123,40 @@ export async function updatePassword(formData){
   redirect('/login?message=password_updated')
 }
 
+export async function changePassword(_prevState,formData){
+  const supabase=await createClient()
+  const {data:claimsData}=await supabase.auth.getClaims()
+  if(!claimsData?.claims?.sub)return {ok:false,error:'Oturum bulunamadı. Tekrar giriş yap.',message:null}
+
+  const password=String(formData.get('password')||'')
+  const confirm=String(formData.get('confirm_password')||'')
+  if(password!==confirm)return {ok:false,error:'Şifreler eşleşmiyor.',message:null}
+
+  const passwordPolicy=await passwordPolicyCode(password)
+  if(passwordPolicy){
+    const errors={
+      weak_password:'Şifre en az 8 karakter olmalı.',
+      leaked_password:'Bu şifre bilinen veri sızıntılarında yer alıyor. Başka bir şifre seç.',
+      password_check_failed:'Şifre güvenlik kontrolü tamamlanamadı. Lütfen tekrar dene.',
+    }
+    return {ok:false,error:errors[passwordPolicy]||'Şifre güncellenemedi.',message:null}
+  }
+
+  const {error}=await supabase.auth.updateUser({password})
+  if(error){
+    const code=authErrorCode(error)
+    const errors={
+      same_password:'Yeni şifre mevcut şifrenle aynı olamaz.',
+      weak_password:'Şifre en az 8 karakter olmalı.',
+      leaked_password:'Bu şifre bilinen veri sızıntılarında yer alıyor. Başka bir şifre seç.',
+      password_check_failed:'Şifre güvenlik kontrolü tamamlanamadı. Lütfen tekrar dene.',
+    }
+    return {ok:false,error:errors[code]||'Şifre güncellenemedi. Lütfen tekrar dene.',message:null}
+  }
+
+  return {ok:true,error:null,message:'Şifren güncellendi.'}
+}
+
 export async function logout(){
   const supabase=await createClient()
   await supabase.auth.signOut()
