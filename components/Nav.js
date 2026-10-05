@@ -12,7 +12,7 @@ export default function Nav(){
     <header className="topbar">
       <Link href="/" className="brand">
         <span className="brand-mark">FR</span>
-        <span className="brand-copy"><b>Fantezi Rehberi</b><small>Süper Lig analiz merkezi</small></span>
+        <span className="brand-copy"><b>Fantezi Lig Rehberi</b><small>Süper Lig analiz merkezi</small></span>
         <span className="beta">DENEME</span>
       </Link>
       <DesktopNavLinks primary={primary} analysis={analysis}/>
