@@ -51,7 +51,9 @@ PUBLIC_ROUTES=(
 )
 
 for path in "${PUBLIC_ROUTES[@]}"; do
-  code="$(status_code "$BASE_URL$path")"
+  safe_name="$(printf '%s' "$path" | sed 's#^/$#home#; s#^/##; s#[/?&=]#_#g')"
+  html_file="$TMP_DIR/route-${safe_name}.html"
+  code="$(curl_retry -sS -o "$html_file" -w '%{http_code}' "$BASE_URL$path")"
   [[ "$code" == "200" ]] || fail "$path returned HTTP $code"
   echo "PASS route $path"
 done
@@ -59,8 +61,7 @@ done
 echo "Checking visible Turkish UI language"
 for path in "${PUBLIC_ROUTES[@]}"; do
   safe_name="$(printf '%s' "$path" | sed 's#^/$#home#; s#^/##; s#[/?&=]#_#g')"
-  html_file="$TMP_DIR/lang-${safe_name}.html"
-  curl_retry -fsSL "$BASE_URL$path" > "$html_file"
+  html_file="$TMP_DIR/route-${safe_name}.html"
 
   node - "$html_file" "$path" <<'NODE'
 const fs=require('node:fs')
@@ -184,9 +185,9 @@ summary_size="$(wc -c < "$TMP_DIR/summary.json" | tr -d ' ')"
 echo "PASS summary size $summary_size bytes"
 
 cp "$TMP_DIR/players.json" "$TMP_DIR/players-live.json"
-curl_retry -fsSL "$BASE_URL/players/419" > "$TMP_DIR/player-419.html"
-curl_retry -fsSL "$BASE_URL/matches" > "$TMP_DIR/matches.html"
-curl_retry -fsSL "$BASE_URL/" > "$TMP_DIR/home.html"
+cp "$TMP_DIR/route-players_419.html" "$TMP_DIR/player-419.html"
+cp "$TMP_DIR/route-matches.html" "$TMP_DIR/matches.html"
+cp "$TMP_DIR/route-home.html" "$TMP_DIR/home.html"
 curl_retry -fsSL "$BASE_URL/robots.txt" > "$TMP_DIR/robots.txt"
 curl_retry -fsSL "$BASE_URL/sitemap.xml" > "$TMP_DIR/sitemap.xml"
 
