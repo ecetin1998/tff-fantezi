@@ -2,7 +2,7 @@ import Link from 'next/link'
 
 export const metadata={
   title:'Süper Lig Fantezi SSS ve Rehber',
-  description:'Fantezi Rehberi nasıl kullanılır? xFP, xDakika, P25/P90, 6+ ihtimali, xG, xA, takım analizi, fantezi puanları ve kadro önerileri için güncel rehber.',
+  description:'Fantezi Lig Rehberi nasıl kullanılır? xFP, xDakika, P25/P90, 6+ ihtimali, xG, xA, takım analizi, fantezi puanları ve kadro önerileri için güncel rehber.',
   keywords:[
     'Süper Lig fantezi','Süper Lig fantezi futbol','fantezi futbol Türkiye','xFP nedir',
     'fantezi puanları','kadro önerisi','xDakika','ilk 11 ihtimali','xG xA','fantezi futbol rehberi'
@@ -10,7 +10,7 @@ export const metadata={
   alternates:{canonical:'/sss'},
   openGraph:{
     title:'Süper Lig Fantezi SSS ve Rehber',
-    description:'Fantezi Rehberi menüleri, fantezi futbol terimleri, xFP ve model metrikleri için güncel açıklamalı rehber.',
+    description:'Fantezi Lig Rehberi menüleri, fantezi futbol terimleri, xFP ve model metrikleri için güncel açıklamalı rehber.',
     url:'/sss',
   },
 }
@@ -58,8 +58,8 @@ const glossary=[
 ]
 
 const faqs=[
-  ['Fantezi Rehberi nedir?', 'Fantezi Rehberi, Süper Lig fantezi kararlarını desteklemek için oyuncu, takım, fikstür, rol, dakika ve olasılık verilerini tek yerde birleştiren bağımsız bir analiz platformudur. Oyuncu xFP tahminleri, kadro önerileri, maç ve takım analizleri ile model performansını birlikte sunar.'],
-  ['Fantezi Rehberi resmî TFF sitesi mi?', 'Hayır. Fantezi Rehberi bağımsız bir analiz platformudur ve resmî TFF ürünü değildir. Amaç, fantezi futbol oynarken veriyi daha anlaşılır ve karşılaştırılabilir hale getirmektir.'],
+  ['Fantezi Lig Rehberi nedir?', 'Fantezi Lig Rehberi, Süper Lig fantezi kararlarını desteklemek için oyuncu, takım, fikstür, rol, dakika ve olasılık verilerini tek yerde birleştiren bağımsız bir analiz platformudur. Oyuncu xFP tahminleri, kadro önerileri, maç ve takım analizleri ile model performansını birlikte sunar.'],
+  ['Fantezi Lig Rehberi resmî TFF sitesi mi?', 'Hayır. Fantezi Lig Rehberi bağımsız bir analiz platformudur ve resmî TFF ürünü değildir. Amaç, fantezi futbol oynarken veriyi daha anlaşılır ve karşılaştırılabilir hale getirmektir.'],
   ['Bir oyuncuyu seçerken ilk hangi metriklere bakmalıyım?', 'Önce xFP, İlk 11 %, xDakika ve rakip eşleşmesini birlikte oku. Sonra P90/6+ gibi tavan metrikleriyle risk-getiri profilini kontrol et. Fiyat ve toplam puan ise kararın bağlamını tamamlar.'],
   ['xFP yüksekse oyuncu kesin yüksek puan alır mı?', 'Hayır. xFP çok sayıda olası senaryonun ortalamasıdır. Gol, asist, kart, gol yememe, kurtarış, bonus ve dakika gibi olaylar tek maçta yüksek oynaklık yaratabilir. Bu yüzden xFP ile birlikte P25/P90, 6+ ihtimali ve dakika güvenini de okumak daha doğrudur.'],
   ['P90 neden xFP’den çok daha yüksek olabilir?', 'xFP ortalama beklentiyi, P90 ise yüksek tavan senaryosunu gösterir. Özellikle gol/asist potansiyeli yüksek fakat sonucu değişken oyuncularda P90 ile xFP arasında büyük fark olması normaldir.'],
@@ -101,7 +101,7 @@ export default function FAQPage(){
     <section className="faq-hero">
       <div className="faq-hero-copy">
         <span className="eyebrow">SSS & FANTEZİ FUTBOL REHBERİ</span>
-        <h1>Fantezi Rehberi’ni doğru okumak için tek rehber.</h1>
+        <h1>Fantezi Lig Rehberi’ni doğru okumak için tek rehber.</h1>
         <p>Oyuncu Analizi’nden Takım Analizi’ne, xFP’den P90’a ve Agresif 11’e kadar sitedeki karar ekranlarını ve model terimlerini güncel haliyle açıklar.</p>
         <div className="faq-hero-meta">
           <span><b>{menuItems.length}</b> analiz ekranı</span>
