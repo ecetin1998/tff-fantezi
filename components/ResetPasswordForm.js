@@ -15,13 +15,22 @@ export default function ResetPasswordForm({serverError=null}){
       const supabase=createClient()
       const url=new URL(window.location.href)
       const code=url.searchParams.get('code')
+      const tokenHash=url.searchParams.get('token_hash')
+      const type=url.searchParams.get('type')
       const hash=new URLSearchParams(url.hash.slice(1))
       const accessToken=hash.get('access_token')
       const refreshToken=hash.get('refresh_token')
 
       try{
         let error=null
-        if(code){
+        if(tokenHash&&type==='recovery'){
+          ;({error}=await supabase.auth.verifyOtp({token_hash:tokenHash,type:'recovery'}))
+          if(!error){
+            url.searchParams.delete('token_hash')
+            url.searchParams.delete('type')
+            window.history.replaceState(null,'',url.pathname+(url.searchParams.toString()?'?'+url.searchParams.toString():''))
+          }
+        }else if(code){
           ;({error}=await supabase.auth.exchangeCodeForSession(code))
           if(!error){
             url.searchParams.delete('code')
