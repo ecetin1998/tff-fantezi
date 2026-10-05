@@ -75,7 +75,7 @@ async function getSiteUrl(){
   const h=await headers()
   const host=h.get('x-forwarded-host')||h.get('host')
   const proto=h.get('x-forwarded-proto')||(host?.includes('localhost')?'http':'https')
-  return host?proto+'://'+host:'https://tff-fantezi.ecetin1998.workers.dev'
+  return host?proto+'://'+host:'https://fanteziligrehberi.com'
 }
 
 export async function signup(formData){
