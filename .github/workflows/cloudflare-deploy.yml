@@ -19,6 +19,7 @@ jobs:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
       NEXT_PUBLIC_SITE_URL: https://fanteziligrehberi.com
+      NEXT_PUBLIC_SUPABASE_REDIRECT_URL: https://fanteziligrehberi.com/auth/confirm
       NEXT_PUBLIC_BUILD_SHA: ${{ github.sha }}
       BASE_URL: https://fanteziligrehberi.com
     steps:
