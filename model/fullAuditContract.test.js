@@ -38,7 +38,8 @@ assert.match(data,/async function _getPlayersPage/)
 for(const table of ['scout_player_projections','scout_player_season_stats','scout_match_predictions','scout_role_signals','scout_player_weekly_points']){
   assert.doesNotMatch(data,new RegExp("from\\('"+table+"'\\)\\s*\\.select\\('\\*'\\)"),table+' must use explicit public columns')
 }
-assert.match(data,/data:getPlayerDetail:projection/)
+assert.match(data,/data:getPlayerDetail:card/)
+assert.match(data,/v_current_player_cards/)
 assert.match(data,/data:getTeamDetail:weekly/)
 assert.match(data,/data:getTeamFixturesOverview:matches/)
 assert.match(data,/matches:fixtures/)
