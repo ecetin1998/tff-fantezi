@@ -9,9 +9,12 @@ export const metadata={title:'Kadro Önerileri'}
 export const revalidate=300
 
 export default async function Squads(){
-  const auth=await getAuthState()
-  const rec=await getRecommendation('recommended')
-  const alt=auth.plan==='pro'?await getRecommendation('alternative'):null
+  const [auth,rec,altCandidate]=await Promise.all([
+    getAuthState(),
+    getRecommendation('recommended'),
+    getRecommendation('alternative'),
+  ])
+  const alt=auth.plan==='pro'?altCandidate:null
 
   return <>
     <div className="section-title">
