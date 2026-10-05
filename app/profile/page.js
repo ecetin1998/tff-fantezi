@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import AccessGate from '@/components/AccessGate'
+import ProfilePasswordForm from '@/components/ProfilePasswordForm'
 import {getAuthState} from '@/lib/data'
 
 export const metadata={
@@ -58,6 +59,13 @@ export default async function Profile(){
         <ul className="profile-feature-list">{features.map(item=><li key={item}>{item}</li>)}</ul>
       </section>
     </div>
+
+    <section className="card profile-card" style={{marginTop:16}}>
+      <span className="eyebrow">GÜVENLİK</span>
+      <h2>Şifre değiştir</h2>
+      <p className="muted">Yeni şifreni belirle. Değişiklik hesabında hemen geçerli olur.</p>
+      <ProfilePasswordForm/>
+    </section>
 
     <div className="profile-actions">
       <Link className="cta" href="/squad">Benim Kadrom</Link>
