@@ -13,7 +13,7 @@ const posLabel=p=>({GK:'KL',DEF:'DEF',MID:'OS',FWD:'FOR'}[p]||p||'—')
 const signalClass=s=>s==='ROL YÜKSELİYOR'?'up':s==='ROL DÜŞÜYOR'?'down':s==='DÖNÜŞ'?'return':s==='YOK'?'out':'stable'
 
 export async function renderRolesPage(page=1){
-  const auth=await getAuthState()
+  const [auth,roleData]=await Promise.all([getAuthState(),getRoleSignals()])
   if(auth.plan!=='pro')return <>
     <div className="section-title">
       <div><span className="eyebrow">ROL TAKİBİ</span><h1>Rol & Dakika Takibi</h1></div>
@@ -26,7 +26,7 @@ export async function renderRolesPage(page=1){
       description="Son maçlardaki ilk 11 değişimi, dakika farkı, rol yükselişi/düşüşü ve tahmini kullanım görünümü Gelişmiş üyelikte açılır."
     />
   </>
-  const {run,rows}=await getRoleSignals()
+  const {run,rows}=roleData
   const order={'ROL YÜKSELİYOR':0,'DÖNÜŞ':1,'ROL DÜŞÜYOR':2,'YOK':3,'BELİRGİN DEĞİŞİM YOK':4}
   const sorted=[...rows].sort((a,b)=>(order[a.signal]??9)-(order[b.signal]??9)||Number(b.x_minutes)-Number(a.x_minutes))
   const changed=sorted.filter(r=>r.signal&&r.signal!=='BELİRGİN DEĞİŞİM YOK')
