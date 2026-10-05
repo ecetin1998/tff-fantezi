@@ -12,21 +12,21 @@ const cssScopes=[siteShell.scope,premiumViews.scope,dataViews.scope,managerCards
 const siteUrl=process.env.NEXT_PUBLIC_SITE_URL||'https://fanteziligrehberi.com'
 export const metadata={
   metadataBase:new URL(siteUrl),
-  title:{default:'Fantezi Rehberi — Süper Lig Fantezi',template:'%s | Fantezi Rehberi'},
+  title:{default:'Fantezi Lig Rehberi — Süper Lig Fantezi',template:'%s | Fantezi Lig Rehberi'},
   description:'Süper Lig fantezi için xFP, dakika, rol, kadro ve maç tahminleri.',
   openGraph:{
     type:'website',
     locale:'tr_TR',
-    siteName:'Fantezi Rehberi',
-    title:'Fantezi Rehberi — Süper Lig Fantezi',
+    siteName:'Fantezi Lig Rehberi',
+    title:'Fantezi Lig Rehberi — Süper Lig Fantezi',
     description:'Süper Lig fantezi için oyuncu, maç ve kadro analizleri.',
     url:siteUrl,
   },
-  twitter:{card:'summary_large_image',title:'Fantezi Rehberi',description:'Süper Lig fantezi analiz merkezi.'},
+  twitter:{card:'summary_large_image',title:'Fantezi Lig Rehberi',description:'Süper Lig fantezi analiz merkezi.'},
 }
 export const viewport={width:'device-width',initialScale:1,viewportFit:'cover'}
 export const headers={
   'Referrer-Policy':'strict-origin-when-cross-origin',
   'X-Content-Type-Options':'nosniff'
 }
-export default function RootLayout({children}){return <html lang="tr" className={cssScopes}><body className={cssScopes}><Nav/><main>{children}</main><PredictionHistoryChartEnhancer/><footer><span>Fantezi Rehberi • bağımsız analiz platformu</span><a href="/sss">SSS & Rehber</a><span>Resmî TFF ürünü değildir.</span></footer></body></html>}
+export default function RootLayout({children}){return <html lang="tr" className={cssScopes}><body className={cssScopes}><Nav/><main>{children}</main><PredictionHistoryChartEnhancer/><footer><span>Fantezi Lig Rehberi • bağımsız analiz platformu</span><a href="/sss">SSS & Rehber</a><span>Resmî TFF ürünü değildir.</span></footer></body></html>}
