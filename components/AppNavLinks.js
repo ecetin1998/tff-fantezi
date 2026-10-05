@@ -85,13 +85,14 @@ export function MobileMenu({ primary, analysis }){
 
   useEffect(()=>setOpen(false),[path])
   useEffect(()=>{
+    if(!open)return
     const supabase=createClient()
     let alive=true
     const sync=async()=>{const {data:{session}}=await supabase.auth.getSession();if(alive)setAuth({loaded:true,signedIn:Boolean(session?.user)})}
     sync()
     const {data}=supabase.auth.onAuthStateChange((_event,session)=>{if(alive)setAuth({loaded:true,signedIn:Boolean(session?.user)})})
     return()=>{alive=false;data.subscription.unsubscribe()}
-  },[])
+  },[open])
 
 
   useEffect(()=>{
