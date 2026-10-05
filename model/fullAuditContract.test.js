@@ -40,7 +40,7 @@ for(const table of ['scout_player_projections','scout_player_season_stats','scou
 }
 assert.match(data,/getPlayersForRunShared\(run\.id\)/)
 assert.match(data,/getMatchesForRunShared\(run\.id\)/)
-assert.match(data,/data:getTeamDetail:weekly/)
+assert.match(data,/getWeeklyPointsShared\(\)/)
 assert.match(data,/getTeamFixturesOverviewShared=unstable_cache/)
 assert.match(data,/matches:fixtures/)
 assert.match(data,/currentMatches:fixtures/)
