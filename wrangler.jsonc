@@ -25,5 +25,15 @@
   },
   "observability": {
     "enabled": true
-  }
+  },
+  "routes": [
+    {
+      "pattern": "fanteziligrehberi.com",
+      "custom_domain": true
+    },
+    {
+      "pattern": "www.fanteziligrehberi.com",
+      "custom_domain": true
+    }
+  ]
 }
