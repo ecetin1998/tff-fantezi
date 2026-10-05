@@ -4,13 +4,8 @@ const assert=require('node:assert/strict')
 const config=JSON.parse(fs.readFileSync('vercel.json','utf8'))
 assert.equal(
   config?.git?.deploymentEnabled,
-  undefined,
-  'deploymentEnabled wildcard rules must not block main production deploys'
-)
-assert.match(
-  String(config?.ignoreCommand||''),
-  /VERCEL_GIT_COMMIT_REF.*main/,
-  'Non-main Git deployments must exit through the ignored-build step before consuming a preview build.'
+  false,
+  'Vercel Git deployments must stay disabled because Cloudflare Workers is production.'
 )
 
 const workflows=fs.readdirSync('.github/workflows').filter(x=>/\.ya?ml$/i.test(x))
