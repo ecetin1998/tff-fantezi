@@ -1,6 +1,6 @@
 import { ImageResponse } from 'next/og'
 
-export const alt='Fantezi Rehberi — Süper Lig Fantezi Analiz Merkezi'
+export const alt='Fantezi Lig Rehberi — Süper Lig Fantezi Analiz Merkezi'
 export const size={width:1200,height:630}
 export const contentType='image/png'
 
