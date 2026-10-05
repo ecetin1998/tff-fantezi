@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 import { getAuthState, getPlayerDetail } from '@/lib/data'
 import AccessGate from '@/components/AccessGate'
 import WeeklyPointsChart from '@/components/WeeklyPointsChart'
+import PredictionHistoryChartEnhancer from '@/components/PredictionHistoryChartEnhancer'
 import { teamCssVars } from '@/lib/teamThemes'
 import { availabilityDetailLine, availabilityIsIssue } from '@/lib/availability'
 import {playerLabel,predictionConfidenceLabel} from '@/lib/playerPresentation'
@@ -314,5 +315,6 @@ export default async function PlayerPage({ params }){
         <div className="player-model-note"><span>Rol özeti</span><p>{r?.signal||'Belirgin rol değişimi yok.'}</p></div>
       </div>
     </details>:null}
+    <PredictionHistoryChartEnhancer/>
   </div>
 }
