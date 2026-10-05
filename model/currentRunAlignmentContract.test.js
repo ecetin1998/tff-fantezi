@@ -15,7 +15,7 @@ const section=(start,end)=>{
 const playerLoader=section('async function _loadPlayersForRun','async function _getPlayersWithProjection')
 const players=section('async function _getPlayersWithProjection','const HOME_PLAYER_COLUMNS')
 const availability=section('async function _getAvailability','async function _getRoleSignals')
-const roles=section('async function _getRoleSignals','export async function getAuthState')
+const roles=section('async function _getRoleSignals','const AUTH_PLAN_TTL_MS')
 const team=section('async function _getTeamDetail','async function _getBacktestOverview')
 const matches=section('async function _getMatches','async function _getRecommendation')
 const recommendation=section('async function _getRecommendation','async function _getAvailability')
