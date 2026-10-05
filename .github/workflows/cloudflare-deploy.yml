@@ -18,9 +18,9 @@ jobs:
     env:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-      NEXT_PUBLIC_SITE_URL: https://tff-fantezi.ecetin1998.workers.dev
+      NEXT_PUBLIC_SITE_URL: https://fanteziligrehberi.com
       NEXT_PUBLIC_BUILD_SHA: ${{ github.sha }}
-      BASE_URL: https://tff-fantezi.ecetin1998.workers.dev
+      BASE_URL: https://fanteziligrehberi.com
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
