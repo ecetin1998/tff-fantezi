@@ -44,9 +44,9 @@ assert.doesNotMatch(squadPool,/v_current_player_cards/)
 assert.equal((data.match(/from\('v_current_player_cards_public'\)/g)||[]).length,1,'All public current-player surfaces should share one canonical Pro-less card query.')
 assert.doesNotMatch(playerLoader,/from\('v_current_player_cards'\)/,'Public player loader must not query the Pro-bearing view.')
 
-assert.match(home,/import \{[^}]*getAuthState[^}]*getHomeOverview[^}]*\} from '@\/lib\/data'/)
+assert.match(home,/import \{[^}]*getHomeOverview[^}]*\} from '@\/lib\/data'/)
 assert.match(home,/getHomeOverview\(\)/)
-assert.match(home,/getAuthState\(\)/)
+assert.doesNotMatch(home,/getAuthState\(\)/,'Public home render must stay cacheable and session-independent.')
 assert.doesNotMatch(home,/getPlayersWithProjection|getMatches\(/)
 
 assert.match(squad,/getSquadPlayerPool/)
