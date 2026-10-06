@@ -78,7 +78,7 @@ assert.match(read('.github/workflows/post-deploy-smoke.yml'),/head_sha/)
 assert.equal(fs.existsSync('vercel.json'),true)
 const vercelConfig=JSON.parse(read('vercel.json'))
 assert.equal(vercelConfig?.git?.deploymentEnabled,false,'Vercel Git deployments must stay disabled; Cloudflare is production.')
-assert.equal(fs.existsSync('proxy.js'),false,'Global auth proxy stays removed; auth is route-scoped.')
+assert.equal(fs.existsSync('proxy.js'),true,'Supabase SSR proxy must refresh expiring auth cookies.')
 assert.equal(fs.existsSync('middleware.js'),false)
 
 const optimizer=read('supabase/functions/run-staging-optimizer/index.ts')
