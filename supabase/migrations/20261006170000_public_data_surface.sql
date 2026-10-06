@@ -1,0 +1,3 @@
+-- Keep anonymous/public UI on explicit allow-list views. Raw model tables are revoked after deployment.
+-- Views are SECURITY INVOKER so underlying RLS remains authoritative.
+-- Applied live through Supabase migration: add_safe_public_match_and_replay_views.\n
