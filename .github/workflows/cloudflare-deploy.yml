@@ -46,6 +46,18 @@ jobs:
           npm test
       - name: Install Cloudflare build tooling
         run: npm install --no-save --package-lock=false @opennextjs/cloudflare@1.20.6 wrangler@4.142.0 @opentelemetry/api@1.9.0
+      - name: Ensure OpenNext KV namespace
+        shell: bash
+        run: |
+          set -euo pipefail
+          KV_ID="$(npx wrangler kv namespace list | node -e "let s='';process.stdin.on('data',d=>s+=d).on('end',()=>{const a=JSON.parse(s);const x=a.find(v=>String(v.title||'').endsWith('NEXT_INC_CACHE_KV'));if(x)process.stdout.write(x.id)})")"
+          if [ -z "$KV_ID" ]; then
+            npx wrangler kv namespace create NEXT_INC_CACHE_KV --update-config
+          else
+            KV_ID="$KV_ID" node -e "const fs=require('fs');const p='wrangler.jsonc';let s=fs.readFileSync(p,'utf8');s=s.replace('AUTO_CONFIGURED_BY_CI',process.env.KV_ID);fs.writeFileSync(p,s)"
+          fi
+        env:
+          KV_ID: ${{ env.KV_ID }}
       - name: Deploy
         run: npm run deploy
       - name: Verify deployed commit
