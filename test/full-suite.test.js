@@ -36,6 +36,7 @@ const jsTests=[
   'model/perfDeadlineReadabilityContract.test.js',
   'model/managerCardsContract.test.js',
   'model/productUxExpansionContract.test.js',
+  'model/squadScoringParity.test.js',
 ]
 
 for(const file of jsTests){
