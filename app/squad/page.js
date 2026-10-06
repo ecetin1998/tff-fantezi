@@ -95,7 +95,7 @@ export default async function Squad({searchParams}){
   if(currentSnapshot?.members?.length)initialState=currentSnapshot.members.map(x=>({player_id:Number(x.player_id),is_captain:Boolean(x.is_captain),bench_order:x.bench_order===null?null:Number(x.bench_order)}))
 
   let recommendedBenchOrder=0
-  const recommendedState=(recommended||[]).map(x=>({player_id:Number(x.player_id),is_captain:Boolean(x.is_captain),bench_order:x.squad_slot==='XI'?null:(++recommendedBenchOrder)}))
+  const recommendedState=(recommended||[]).map(x=>({player_id:Number(x.player_id),full_name:x.player?.full_name||null,is_captain:Boolean(x.is_captain),bench_order:x.squad_slot==='XI'?null:(++recommendedBenchOrder)}))
 
   const pointRows=Array.isArray(pageData?.points)?pageData.points:[]
   const positionRows=Array.isArray(pageData?.players)?pageData.players:[]
