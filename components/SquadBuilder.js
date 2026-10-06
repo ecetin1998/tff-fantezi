@@ -23,6 +23,16 @@ function formatCountdown(ms){
   const days=Math.floor(total/86400),hours=Math.floor((total%86400)/3600),minutes=Math.floor((total%3600)/60)
   return days>0?`${days}g ${hours}s ${minutes}dk`:`${hours}s ${minutes}dk`
 }
+function DeadlineCountdown({deadlineAt,locked}){
+  const [now,setNow]=useState(()=>Date.now())
+  useEffect(()=>{
+    if(!deadlineAt||locked)return
+    const timer=setInterval(()=>setNow(Date.now()),1000)
+    return ()=>clearInterval(timer)
+  },[deadlineAt,locked])
+  const expired=Boolean(deadlineAt&&now>=new Date(deadlineAt).getTime())
+  return <small>{locked||expired?'Kadro salt okunur.':deadlineAt?`İlk maçtan 1 saat önce • ${formatCountdown(Math.max(0,new Date(deadlineAt).getTime()-now))}`:'Takvim bekleniyor'}</small>
+}
 function formatDeadline(value){
   if(!value)return '—'
   const date=new Date(value)
@@ -127,15 +137,7 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
   },[initialState,initialXI,map])
   const [captainId,setCaptainId]=useState(initialCaptainId)
   const [poolLimit,setPoolLimit]=useState(180)
-  const [now,setNow]=useState(0)
-  useEffect(()=>{
-    if(!deadlineAt||locked)return
-    const tick=()=>setNow(Date.now())
-    tick()
-    const timer=setInterval(tick,1000)
-    return ()=>clearInterval(timer)
-  },[deadlineAt,locked])
-  const isLocked=locked||Boolean(deadlineAt&&now&&now>=new Date(deadlineAt).getTime())
+  const isLocked=locked||Boolean(deadlineAt&&Date.now()>=new Date(deadlineAt).getTime())
   const [q,setQ]=useState('')
   const [pos,setPos]=useState('')
   const [team,setTeam]=useState('')
@@ -263,32 +265,62 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
     MANAGER_CARDS.map(card=>[card.id,cardRecommendations[card.id]?.xfp??null])
   ),[cardRecommendations])
   const captainCandidates=[...xi].filter(p=>p.position!=='GK').sort((a,b)=>xfp(b)-xfp(a)).slice(0,3)
+  const futureByTeamWeek=useMemo(()=>{
+    const out=new Map()
+    for(const [teamId,fixtures] of Object.entries(futurePlan?.byTeam||{})){
+      const grouped=new Map()
+      for(const fixture of fixtures||[]){
+        const gw=Number(fixture.gameweek)
+        if(!Number.isFinite(gw))continue
+        const list=grouped.get(gw)||[];list.push(fixture);grouped.set(gw,list)
+      }
+      out.set(Number(teamId),grouped)
+    }
+    return out
+  },[futurePlan])
+  const baseGameweek=Number(gameweek||0)
   const playerPlanFactor=(p,week)=>{
     if(week===0)return 1
-    const future=(futurePlan?.byTeam?.[p?.team_id]||[])[week-1]
-    if(!future)return 0
-    const factor=Number(['GK','DEF'].includes(p?.position)?future.defense_factor:future.attack_factor)
-    const availability=Number(future.availability_probability??p?.projection?.availability_probability??1)
-    return Math.max(0,factor||0)*Math.max(0,Math.min(1,availability))
+    const fixtures=futureByTeamWeek.get(Number(p?.team_id))?.get(baseGameweek+week)||[]
+    if(!fixtures.length)return 0
+    const todayAvailability=Math.max(0,Math.min(1,Number(p?.projection?.availability_probability??1)))
+    const returnAt=p?.availability?.expected_return_date?new Date(p.availability.expected_return_date).getTime():null
+    const suspensionEnd=Number(p?.availability?.suspension_end??p?.availability?.suspension_fixture??0)
+    return fixtures.reduce((sum,future)=>{
+      const factor=Math.max(0,Number(['GK','DEF'].includes(p?.position)?future.defense_factor:future.attack_factor)||0)
+      const kickoff=future.kickoff_at?new Date(future.kickoff_at).getTime():null
+      const recovered=returnAt&&kickoff&&kickoff>=returnAt?1:todayAvailability
+      const available=suspensionEnd&&Number(future.gameweek)<=suspensionEnd?0:recovered
+      return sum+factor*Math.max(0,Math.min(1,available))
+    },0)
   }
-  const currentThreeWeekScore=ids.length===SQUAD_SIZE?scoreSquad(ids,{playerMap:map,weeks:[0,1,2],weekFactor:playerPlanFactor,captainMultiplier}).total:-Infinity
-  const transferPlanRows=plan==='pro'&&ids.length===SQUAD_SIZE?[...selected].flatMap(out=>{
-    const candidatePool=players.filter(inn=>inn.active&&inn.position===out.position&&!ids.includes(inn.id)).slice(0,80)
-    return candidatePool.map(inn=>{
-      const nextCost=cost-Number(out.price||0)+Number(inn.price||0)
-      if(Number.isFinite(effectiveBudget)&&nextCost>effectiveBudget+.0001)return null
-      const nextIds=ids.map(id=>id===out.id?inn.id:id)
-      const nextPlayers=nextIds.map(id=>map.get(id)).filter(Boolean)
-      const counts=nextPlayers.reduce((a,p)=>(a[p.team_id]=(a[p.team_id]||0)+1,a),{})
-      if(MAX_PLAYERS_PER_CLUB&&Object.values(counts).some(n=>n>MAX_PLAYERS_PER_CLUB))return null
-      const nextScore=scoreSquad(nextIds,{playerMap:map,weeks:[0,1,2],weekFactor:playerPlanFactor,captainMultiplier}).total
-      const rawGain=nextScore-currentThreeWeekScore
-      const hitCost=freeTransfersRemaining>0?0:Number(TRANSFER_RULES.hit_cost||4)
-      const netGain=rawGain-hitCost
-      if(!Number.isFinite(netGain)||netGain<=0.5)return null
-      return {out,inn,rawGain,hitCost,netGain,nextCost,fixtures:(futurePlan?.byTeam?.[inn.team_id]||[]).slice(0,2)}
-    }).filter(Boolean)
-  }).sort((a,b)=>b.netGain-a.netGain).slice(0,3):[]
+  const transferPlanRows=useMemo(()=>{
+    if(plan!=='pro'||ids.length!==SQUAD_SIZE)return []
+    const weeks=[0,1,2]
+    const currentThreeWeekScore=scoreSquad(ids,{playerMap:map,weeks,weekFactor:playerPlanFactor,captainMultiplier}).total
+    const hitCost=freeTransfersRemaining>0?0:Number(TRANSFER_RULES.hit_cost||4)
+    const roughValue=p=>weeks.reduce((sum,w)=>sum+xfp(p)*playerPlanFactor(p,w),0)
+    const shortlist=[]
+    for(const out of selected){
+      const candidatePool=players.filter(inn=>inn.active&&inn.position===out.position&&!ids.includes(inn.id)).slice(0,80)
+      for(const inn of candidatePool){
+        const nextCost=cost-Number(out.price||0)+Number(inn.price||0)
+        if(Number.isFinite(effectiveBudget)&&nextCost>effectiveBudget+.0001)continue
+        const upperBound=roughValue(inn)-roughValue(out)+Math.max(0,roughValue(inn))*(captainMultiplier-1)-hitCost
+        const floor=shortlist.length>=3?shortlist[shortlist.length-1].netGain:.5
+        if(upperBound<=Math.max(.5,floor))continue
+        const nextIds=ids.map(id=>id===out.id?inn.id:id),nextPlayers=nextIds.map(id=>map.get(id)).filter(Boolean)
+        const clubCounts=nextPlayers.reduce((a,p)=>(a[p.team_id]=(a[p.team_id]||0)+1,a),{})
+        if(MAX_PLAYERS_PER_CLUB&&Object.values(clubCounts).some(n=>n>MAX_PLAYERS_PER_CLUB))continue
+        const nextScore=scoreSquad(nextIds,{playerMap:map,weeks,weekFactor:playerPlanFactor,captainMultiplier}).total
+        const rawGain=nextScore-currentThreeWeekScore,netGain=rawGain-hitCost
+        if(!Number.isFinite(netGain)||netGain<=.5)continue
+        shortlist.push({out,inn,rawGain,hitCost,netGain,nextCost,fixtures:(futurePlan?.byTeam?.[inn.team_id]||[]).slice(0,2)})
+        shortlist.sort((a,b)=>b.netGain-a.netGain);if(shortlist.length>3)shortlist.length=3
+      }
+    }
+    return shortlist
+  },[plan,ids,map,players,selected,cost,effectiveBudget,freeTransfersRemaining,captainMultiplier,futurePlan,futureByTeamWeek,baseGameweek])
 
   const teams=useMemo(()=>[...new Set(players.map(p=>p.team).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'tr')),[players])
   const candidates=useMemo(()=>{
@@ -336,8 +368,8 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
 
   const modelMove=useMemo(()=>{
     if(recommendedIds.length!==SQUAD_SIZE||ids.length!==SQUAD_SIZE||recommendedRosterMatch)return null
-    const currentPlan=scoreSquad(ids,{playerMap:map,weeks:[0],captainMultiplier}).firstWeek
-    const currentScore=scoreSquad(ids,{playerMap:map,weeks:[0],captainMultiplier}).total
+    const currentScored=scoreSquad(ids,{playerMap:map,weeks:[0],captainMultiplier})
+    const currentPlan=currentScored.firstWeek,currentScore=currentScored.total
     if(!currentPlan)return null
     const recommendedSet=new Set(recommendedIds),currentSet=new Set(ids)
     const outs=selected.filter(p=>!recommendedSet.has(p.id))
@@ -616,7 +648,7 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
       <div className={`squad-deadline-status ${isLocked?'locked':''}`}>
         <span>{isLocked?'HAFTA KİLİTLİ':'KADRO SON TARİHİ'}</span>
         <b>{formatDeadline(deadlineAt)}</b>
-        <small>{isLocked?'Kadro salt okunur.':deadlineAt?`İlk maçtan 1 saat önce • ${formatCountdown(Math.max(0,new Date(deadlineAt).getTime()-now))}`:'Takvim bekleniyor'}</small>
+        <DeadlineCountdown deadlineAt={deadlineAt} locked={locked}/>
       </div>
       <div className="squad-control-stat">
         <span>Kadro</span>
