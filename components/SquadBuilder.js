@@ -109,7 +109,7 @@ function formationFromXIIds(ids,map,formationMap=FORMATION_MAP){
   return formationMap[key]?key:null
 }
 
-export default function SquadBuilder({ players, initialState=[], recommendedState=[], initialManagerCard=MANAGER_CARD_NONE, plan='free', gameweek, deadlineAt=null, locked=false, transferScenarios=[], futurePlan=null, deadlineExpired=false, transferRights=null }){
+export default function SquadBuilder({ players, initialState=[], recommendedState=[], initialManagerCard=MANAGER_CARD_NONE, plan='free', gameweek, deadlineAt=null, locked=false, transferScenarios=[], futurePlan=null, deadlineExpired=false, transferRights=null, recommendedRunId=null, poolRunId=null }){
   const map=useMemo(()=>new Map(players.map(p=>[p.id,p])),[players])
   const normalizedInitialManagerCard=plan==='pro'?normalizeManagerCard(initialManagerCard):MANAGER_CARD_NONE
   const initialFormationMap=useMemo(()=>formationMapForCard(normalizedInitialManagerCard),[normalizedInitialManagerCard])
@@ -346,6 +346,8 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
   useEffect(()=>setPoolLimit(180),[q,pos,team,sortKey,sortDir])
   const visibleCandidates=candidates.slice(0,poolLimit)
 
+  const recommendationRunMismatch=Boolean(recommendedRunId&&poolRunId&&recommendedRunId!==poolRunId)
+  const missingRecommended=useMemo(()=>recommendedState.filter(x=>!map.has(Number(x.player_id))),[recommendedState,map])
   const recommendedIds=useMemo(
     ()=>recommendedState.map(x=>Number(x.player_id)).filter(id=>map.has(id)).slice(0,SQUAD_SIZE),
     [recommendedState,map]
@@ -370,7 +372,7 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
   },[recommendedRosterMatch,recommendedXiIds,xiIds,captainId,recommendedCaptainId])
 
   const modelMove=useMemo(()=>{
-    if(recommendedIds.length!==SQUAD_SIZE||ids.length!==SQUAD_SIZE||recommendedRosterMatch)return null
+    if(recommendationRunMismatch||missingRecommended.length||recommendedIds.length!==SQUAD_SIZE||ids.length!==SQUAD_SIZE||recommendedRosterMatch)return null
     const currentScored=scoreSquad(ids,{playerMap:map,weeks:[0],captainMultiplier})
     const currentPlan=currentScored.firstWeek,currentScore=currentScored.total
     if(!currentPlan)return null
@@ -391,7 +393,7 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
       if(!best||candidate.netGain>best.netGain)best=candidate
     }
     return best
-  },[recommendedIds,recommendedRosterMatch,ids,selected,bank,map,freeTransfersRemaining,captainMultiplier])
+  },[recommendedIds,recommendedRosterMatch,ids,selected,bank,map,freeTransfersRemaining,captainMultiplier,recommendationRunMismatch,missingRecommended])
 
   function applyModelMove(){
     if(!modelMove||modelMove.netGain<=0)return
@@ -1009,6 +1011,9 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
       </div>
       <div className={`pro-lock ${plan==='pro'?'unlocked':''}`}>
         <span>GELİŞMİŞ</span><b>3 MH Transfer Planlayıcısı</b>
+        {plan==='pro'&&recommendationRunMismatch?<p className="muted">Model güncelleniyor; öneri ile oyuncu havuzu aynı koşuya geldiğinde karşılaştırma açılacak.</p>:null}
+        {plan==='pro'&&missingRecommended.length?<p className="muted">Model önerisindeki {missingRecommended.length} oyuncu güncel havuzda yok; eksik kadro otomatik uygulanmayacak.</p>:null}
+        {plan==='pro'&&recommendedRosterMatch&&transferPlanRows.length?<p className="muted">Bu hafta model optimumundasın; aşağıdakiler 3 haftalık bakış.</p>:null}
         {plan==='pro'&&transferPlanRows.length?<div className="transfer-plan-list">{transferPlanRows.map((row,i)=><div className="transfer-plan-row" key={row.out.id+'-'+row.inn.id}>
           <span className="transfer-rank">#{i+1}</span>
           <div><b>{playerLabel(row.out)} → {playerLabel(row.inn)}</b><small>MH{gameweek||'—'} + sonraki 2 hafta • {row.fixtures.map(f=>`MH${f.gameweek} ${f.opponent}`).join(' • ')||'fikstür bekleniyor'}</small></div>
