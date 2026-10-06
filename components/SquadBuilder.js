@@ -1012,7 +1012,7 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
       <div className={`pro-lock ${plan==='pro'?'unlocked':''}`}>
         <span>GELİŞMİŞ</span><b>3 MH Transfer Planlayıcısı</b>
         {plan==='pro'&&recommendationRunMismatch?<p className="muted">Model güncelleniyor; öneri ile oyuncu havuzu aynı koşuya geldiğinde karşılaştırma açılacak.</p>:null}
-        {plan==='pro'&&missingRecommended.length?<p className="muted">Model önerisindeki {missingRecommended.length} oyuncu güncel havuzda yok; eksik kadro otomatik uygulanmayacak.</p>:null}
+        {plan==='pro'&&missingRecommended.length?<p className="muted">Model önerisindeki {missingRecommended.map(x=>x.full_name||`#${x.player_id}`).join(', ')} güncel havuzda yok; eksik kadro otomatik uygulanmayacak.</p>:null}
         {plan==='pro'&&recommendedRosterMatch&&transferPlanRows.length?<p className="muted">Bu hafta model optimumundasın; aşağıdakiler 3 haftalık bakış.</p>:null}
         {plan==='pro'&&transferPlanRows.length?<div className="transfer-plan-list">{transferPlanRows.map((row,i)=><div className="transfer-plan-row" key={row.out.id+'-'+row.inn.id}>
           <span className="transfer-rank">#{i+1}</span>
