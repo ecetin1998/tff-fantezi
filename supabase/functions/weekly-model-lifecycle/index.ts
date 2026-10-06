@@ -492,7 +492,7 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
   const inputRows=(inputsQ.data||[]).map((x:any)=>{
     const av=avMap.get(Number(x.player_id))
     const availability=clamp(0,1,n(av?.availability_probability,x.availability))
-    // role_probability is a conditional lineup-selection weight, not the simulated XI result.
+    // Feedback guard: role_probability is a conditional lineup-selection weight, not the simulated XI result.
     // Re-feeding the previous simulated XI into the next intraday run recursively flattens
     // starters and inflates bench players on every refresh. Always anchor this weight to the
     // latest non-intraday baseline; availability remains a separate multiplier in simulation.
