@@ -64,9 +64,9 @@ for(const file of ['rules/tff-fantasy.json','lib/rules.js','app/actions.js','app
 const playersPage=read('app/players/page.js')
 const playersTable=read('components/PlayersTable.js')
 assert.doesNotMatch(playersPage,/Suspense/)
-assert.match(playersPage,/searchParams/)
-assert.match(playersPage,/getPlayersPage/)
-assert.doesNotMatch(playersTable,/useSearchParams/)
+assert.doesNotMatch(playersPage,/searchParams/)
+assert.match(playersPage,/getPlayersWithProjection/)
+assert.match(playersTable,/staticPool/)
 assert.match(playersTable,/const PAGE_SIZE=50/)
 assert.match(playersTable,/router\.replace/)
 
