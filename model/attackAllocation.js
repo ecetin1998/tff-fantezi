@@ -38,7 +38,7 @@ function attackWeights(player,matches=[]){
   const xgRate=Number(rates[0]||0),goalRate=Number(rates[1]||0);
   const assistRate=Number(rates[2]||0),xaRate=Number(rates[3]||0);
   const setPiecePrior=normalizedDefenderRole(player)==='CB'
-    ?Math.max(0,Number(player.team_set_piece_xg_per_match||0))*Math.max(0,Math.min(.35,Number(player.heading_box_share??.08)))
+    ?Math.max(0,Number(player.team_set_piece_xg_per_match||0))*Math.max(0,Math.min(.35,Number(player.heading_box_share ?? 0.08)))
     :0;
   const adjustedXg=Math.max(xgRate*.45,xgRate-attenuation*excess/(2+exposure))+setPiecePrior;
   return {
