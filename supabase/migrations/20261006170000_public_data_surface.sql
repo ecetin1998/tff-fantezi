@@ -1,3 +1,19 @@
--- Keep anonymous/public UI on explicit allow-list views. Raw model tables are revoked after deployment.
--- Views are SECURITY INVOKER so underlying RLS remains authoritative.
--- Applied live through Supabase migration: add_safe_public_match_and_replay_views.\n
+-- Public allow-list views. These are definer views owned by postgres so raw model tables can stay revoked from anon/auth.
+alter view public.v_current_player_cards set (security_invoker=false);
+alter view public.v_current_player_cards_public set (security_invoker=false);
+alter view public.v_scout_match_predictions_public set (security_invoker=false);
+alter view public.v_scout_replay_players_public set (security_invoker=false);
+alter view public.v_scout_replay_weeks_public set (security_invoker=false);
+
+revoke all privileges on public.v_current_player_cards from anon,authenticated;
+revoke all privileges on public.scout_match_predictions from anon,authenticated;
+revoke all privileges on public.scout_replay_players from anon,authenticated;
+revoke all privileges on public.scout_replay_weeks from anon,authenticated;
+revoke all privileges on public.scout_role_signals from anon,authenticated;
+
+grant select on public.v_current_player_cards_public to anon,authenticated;
+grant select on public.v_scout_match_predictions_public to anon,authenticated;
+grant select on public.v_scout_replay_players_public to anon,authenticated;
+grant select on public.v_scout_replay_weeks_public to anon,authenticated;
+revoke execute on function public.scout_pro_player_cards(uuid) from anon;
+grant execute on function public.scout_pro_player_cards(uuid) to authenticated;
