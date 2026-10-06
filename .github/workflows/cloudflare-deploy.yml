@@ -46,6 +46,9 @@ jobs:
           npm test
       - name: Install Cloudflare build tooling
         run: npm install --no-save --package-lock=false @opennextjs/cloudflare@1.20.6 wrangler@4.142.0 @opentelemetry/api@1.9.0
+      - name: Ensure OpenNext R2 cache bucket
+        shell: bash
+        run: npx wrangler r2 bucket create tff-fantezi-next-cache || true
       - name: Deploy
         run: npm run deploy
       - name: Verify deployed commit

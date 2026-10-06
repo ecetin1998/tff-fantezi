@@ -8,6 +8,7 @@ import {BUDGET,FORMATION_MAP,MAX_PLAYERS_PER_CLUB,SQUAD_LIMITS,SQUAD_SIZE,STARTI
 import {pitchPlayerLabel,playerLabel} from '@/lib/playerPresentation'
 import ManagerCardPicker from '@/components/ManagerCardPicker'
 import {ATTACK_FORMATIONS,MANAGER_CARDS,MANAGER_CARD_NONE,captainMultiplierForCard,managerCardInfo,normalizeManagerCard,squadLimitsForCard} from '@/lib/managerCards'
+import {scoreSquad} from '@/lib/squadScoring'
 const POS_ORDER={GK:0,DEF:1,MID:2,FWD:3}
 const posLabel={GK:'KL',DEF:'DEF',MID:'OS',FWD:'FOR'}
 const ATTACK_FORMATION_MAP=Object.freeze(Object.fromEntries(ATTACK_FORMATIONS.map(value=>{
@@ -262,24 +263,30 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
     MANAGER_CARDS.map(card=>[card.id,cardRecommendations[card.id]?.xfp??null])
   ),[cardRecommendations])
   const captainCandidates=[...xi].filter(p=>p.position!=='GK').sort((a,b)=>xfp(b)-xfp(a)).slice(0,3)
-  const playerPlanFactor=p=>{
-    const future=(futurePlan?.byTeam?.[p?.team_id]||[]).slice(0,2)
-    return 1+future.reduce((sum,f)=>sum+Number(['GK','DEF'].includes(p?.position)?f.defense_factor:f.attack_factor),0)
+  const playerPlanFactor=(p,week)=>{
+    if(week===0)return 1
+    const future=(futurePlan?.byTeam?.[p?.team_id]||[])[week-1]
+    if(!future)return 0
+    const factor=Number(['GK','DEF'].includes(p?.position)?future.defense_factor:future.attack_factor)
+    const availability=Number(future.availability_probability??p?.projection?.availability_probability??1)
+    return Math.max(0,factor||0)*Math.max(0,Math.min(1,availability))
   }
-  const threeWeekScore=p=>xfp(p)*playerPlanFactor(p)
+  const currentThreeWeekScore=ids.length===SQUAD_SIZE?scoreSquad(ids,{playerMap:map,weeks:[0,1,2],weekFactor:playerPlanFactor,captainMultiplier}).total:-Infinity
   const transferPlanRows=plan==='pro'&&ids.length===SQUAD_SIZE?[...selected].flatMap(out=>{
-    const candidatePool=players
-      .filter(inn=>inn.active&&inn.position===out.position&&!ids.includes(inn.id))
-      .sort((a,b)=>threeWeekScore(b)-threeWeekScore(a))
-      .slice(0,30)
+    const candidatePool=players.filter(inn=>inn.active&&inn.position===out.position&&!ids.includes(inn.id)).slice(0,80)
     return candidatePool.map(inn=>{
       const nextCost=cost-Number(out.price||0)+Number(inn.price||0)
       if(Number.isFinite(effectiveBudget)&&nextCost>effectiveBudget+.0001)return null
-      const nextClubCount=(clubCounts[inn.team_id]||0)+(inn.team_id===out.team_id?0:1)
-      if(MAX_PLAYERS_PER_CLUB&&nextClubCount>MAX_PLAYERS_PER_CLUB)return null
-      const rawGain=threeWeekScore(inn)-threeWeekScore(out)
+      const nextIds=ids.map(id=>id===out.id?inn.id:id)
+      const nextPlayers=nextIds.map(id=>map.get(id)).filter(Boolean)
+      const counts=nextPlayers.reduce((a,p)=>(a[p.team_id]=(a[p.team_id]||0)+1,a),{})
+      if(MAX_PLAYERS_PER_CLUB&&Object.values(counts).some(n=>n>MAX_PLAYERS_PER_CLUB))return null
+      const nextScore=scoreSquad(nextIds,{playerMap:map,weeks:[0,1,2],weekFactor:playerPlanFactor,captainMultiplier}).total
+      const rawGain=nextScore-currentThreeWeekScore
       const hitCost=freeTransfersRemaining>0?0:Number(TRANSFER_RULES.hit_cost||4)
-      return {out,inn,rawGain,hitCost,netGain:rawGain-hitCost,nextCost,fixtures:(futurePlan?.byTeam?.[inn.team_id]||[]).slice(0,2)}
+      const netGain=rawGain-hitCost
+      if(!Number.isFinite(netGain)||netGain<=0.5)return null
+      return {out,inn,rawGain,hitCost,netGain,nextCost,fixtures:(futurePlan?.byTeam?.[inn.team_id]||[]).slice(0,2)}
     }).filter(Boolean)
   }).sort((a,b)=>b.netGain-a.netGain).slice(0,3):[]
 
@@ -329,35 +336,27 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
 
   const modelMove=useMemo(()=>{
     if(recommendedIds.length!==SQUAD_SIZE||ids.length!==SQUAD_SIZE||recommendedRosterMatch)return null
-    const currentPlan=bestXIPlan(ids,map,effectiveFormationMap,captainMultiplier)
+    const currentPlan=scoreSquad(ids,{playerMap:map,weeks:[0],captainMultiplier}).firstWeek
+    const currentScore=scoreSquad(ids,{playerMap:map,weeks:[0],captainMultiplier}).total
     if(!currentPlan)return null
-    const recommendedSet=new Set(recommendedIds)
-    const currentSet=new Set(ids)
+    const recommendedSet=new Set(recommendedIds),currentSet=new Set(ids)
     const outs=selected.filter(p=>!recommendedSet.has(p.id))
     const ins=recommendedIds.map(id=>map.get(id)).filter(p=>p&&!currentSet.has(p.id))
     let best=null
-
-    for(const out of outs){
-      for(const inn of ins){
-        if(inn.position!==out.position)continue
-        if(Number(inn.price)>Number(out.price)+bank+0.001)continue
-        const nextIds=ids.map(id=>id===out.id?inn.id:id)
-        if(MAX_PLAYERS_PER_CLUB){
-          const nextPlayers=nextIds.map(id=>map.get(id)).filter(Boolean)
-          const nextClubCounts=nextPlayers.reduce((a,p)=>(a[p.team_id]=(a[p.team_id]||0)+1,a),{})
-          if(Object.values(nextClubCounts).some(n=>n>MAX_PLAYERS_PER_CLUB))continue
-        }
-        const nextPlan=bestXIPlan(nextIds,map,effectiveFormationMap,captainMultiplier)
-        if(!nextPlan)continue
-        const gain=nextPlan.total-currentPlan.total
-        const hitCost=freeTransfersRemaining>0?0:Number(TRANSFER_RULES.hit_cost||4)
-        const netGain=gain-hitCost
-        const candidate={out,inn,gain,netGain,hitCost,plan:nextPlan,nextIds}
-        if(!best||candidate.netGain>best.netGain)best=candidate
-      }
+    for(const out of outs)for(const inn of ins){
+      if(inn.position!==out.position||Number(inn.price)>Number(out.price)+bank+0.001)continue
+      const nextIds=ids.map(id=>id===out.id?inn.id:id)
+      const nextPlayers=nextIds.map(id=>map.get(id)).filter(Boolean)
+      const counts=nextPlayers.reduce((a,p)=>(a[p.team_id]=(a[p.team_id]||0)+1,a),{})
+      if(MAX_PLAYERS_PER_CLUB&&Object.values(counts).some(n=>n>MAX_PLAYERS_PER_CLUB))continue
+      const scored=scoreSquad(nextIds,{playerMap:map,weeks:[0],captainMultiplier})
+      if(!scored.firstWeek)continue
+      const gain=scored.total-currentScore,hitCost=freeTransfersRemaining>0?0:Number(TRANSFER_RULES.hit_cost||4)
+      const candidate={out,inn,gain,netGain:gain-hitCost,hitCost,plan:scored.firstWeek,nextIds}
+      if(!best||candidate.netGain>best.netGain)best=candidate
     }
     return best
-  },[recommendedIds,recommendedRosterMatch,ids,selected,bank,map,freeTransfersRemaining,effectiveFormationMap,captainMultiplier])
+  },[recommendedIds,recommendedRosterMatch,ids,selected,bank,map,freeTransfersRemaining,captainMultiplier])
 
   function applyModelMove(){
     if(!modelMove||modelMove.netGain<=0)return

@@ -1,7 +1,7 @@
 const fs=require('node:fs')
 const assert=require('node:assert/strict')
 
-const proxy=fs.readFileSync('middleware.js','utf8')
+const proxy=fs.readFileSync('proxy.js','utf8')
 const expected=['/squad/:path*','/login/:path*','/reset-password/:path*','/confirm-email/:path*','/auth/:path*','/pricing/:path*']
 for(const matcher of expected)assert.equal(proxy.includes("'"+matcher+"'"),true)
 assert.equal(proxy.includes("'/((?!_next"),false)

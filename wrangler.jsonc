@@ -3,37 +3,22 @@
   "main": ".open-next/worker.js",
   "name": "tff-fantezi",
   "compatibility_date": "2026-09-26",
-  "compatibility_flags": [
-    "nodejs_compat",
-    "global_fetch_strictly_public"
-  ],
-  "assets": {
-    "directory": ".open-next/assets",
-    "binding": "ASSETS"
+  "compatibility_flags": ["nodejs_compat","global_fetch_strictly_public"],
+  "assets": {"directory": ".open-next/assets","binding": "ASSETS"},
+  "cache": {"enabled": true},
+  "r2_buckets": [{"binding":"NEXT_INC_CACHE_R2_BUCKET","bucket_name":"tff-fantezi-next-cache"}],
+  "services": [{"binding":"WORKER_SELF_REFERENCE","service":"tff-fantezi"}],
+  "durable_objects": {
+    "bindings": [
+      {"name":"NEXT_CACHE_DO_QUEUE","class_name":"DOQueueHandler"},
+      {"name":"NEXT_TAG_CACHE_DO_SHARDED","class_name":"DOShardedTagCache"}
+    ]
   },
-  "cache": {
-    "enabled": true
-  },
-  "services": [
-    {
-      "binding": "WORKER_SELF_REFERENCE",
-      "service": "tff-fantezi"
-    }
-  ],
-  "images": {
-    "binding": "IMAGES"
-  },
-  "observability": {
-    "enabled": true
-  },
+  "migrations": [{"tag":"v1","new_sqlite_classes":["DOQueueHandler","DOShardedTagCache"]}],
+  "images": {"binding": "IMAGES"},
+  "observability": {"enabled": true},
   "routes": [
-    {
-      "pattern": "fanteziligrehberi.com",
-      "custom_domain": true
-    },
-    {
-      "pattern": "www.fanteziligrehberi.com",
-      "custom_domain": true
-    }
+    {"pattern":"fanteziligrehberi.com","custom_domain":true},
+    {"pattern":"www.fanteziligrehberi.com","custom_domain":true}
   ]
 }
