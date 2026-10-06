@@ -15,9 +15,9 @@ const securityHeaders=[
 ]
 const publicEdgeCacheHeaders=[{key:'Cloudflare-CDN-Cache-Control',value:'public, max-age=300, stale-while-revalidate=600'}]
 const privateEdgeCacheHeaders=[{key:'Cloudflare-CDN-Cache-Control',value:'private, no-store'}]
-const publicEdgeRoutes=['/','/players','/matches','/squads','/teams','/points','/availability','/sss']
+const publicEdgeRoutes=['/teams','/points','/sss']
 const privateEdgeRoutes=[
-  '/players/:id','/teams/:id','/roles','/roles/:path*','/backtest','/squad','/squad/:path*',
+  '/','/players','/matches','/squads','/availability','/players/:id','/teams/:id','/roles','/roles/:path*','/backtest','/squad','/squad/:path*',
   '/pricing','/pricing/:path*','/login','/login/:path*','/reset-password','/reset-password/:path*',
   '/confirm-email','/confirm-email/:path*','/auth/:path*','/api/health','/api/scout-data/summary'
 ]
