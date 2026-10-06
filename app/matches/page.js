@@ -184,7 +184,7 @@ export default async function Matches(){
 
           <div className="match-team-xfp-strip">
             <div className="match-team-xfp-side" style={teamCssVars(m.home_team)}>
-              <span><small>{m.home_team} toplam xFP</small><b>{Number(homeFantasy.total_xfp||0).toFixed(2)}</b></span>
+              <span><small>{m.home_team} XI ağırlıklı xFP</small><b>{Number(homeFantasy.total_xfp||0).toFixed(2)}</b></span>
               <Link href={homeTop?'/players/'+homeTop.player_id:'/players'} title={homeTop?.name||''}>
                 <small>En yüksek xFP</small>
                 <b>{homeTop?.name||'—'}</b>
@@ -192,7 +192,7 @@ export default async function Matches(){
               </Link>
             </div>
             <div className="match-team-xfp-side away" style={teamCssVars(m.away_team)}>
-              <span><small>{m.away_team} toplam xFP</small><b>{Number(awayFantasy.total_xfp||0).toFixed(2)}</b></span>
+              <span><small>{m.away_team} XI ağırlıklı xFP</small><b>{Number(awayFantasy.total_xfp||0).toFixed(2)}</b></span>
               <Link href={awayTop?'/players/'+awayTop.player_id:'/players'} title={awayTop?.name||''}>
                 <small>En yüksek xFP</small>
                 <b>{awayTop?.name||'—'}</b>
