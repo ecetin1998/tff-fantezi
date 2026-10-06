@@ -113,7 +113,7 @@ assert.match(playersPage,/getPlayersWithProjection/)
 assert.match(playersTable,/staticPool/,'Player list must filter the static public pool client-side.')
 assert.match(playersTable,/router\.replace/)
 const playerDetailRoute=read('app/players/[id]/page.js')
-assert.doesNotMatch(playerDetailRoute,/force-dynamic/,'Public player detail must remain ISR-safe; Pro data belongs in an overlay island.')
+assert.match(playerDetailRoute,/getPlayerDetailPro/,'Pro player detail must use an authorized overlay rather than the public payload.')
 assert.match(playerDetailRoute,/if\(!data\)\s*notFound\(\)/,'Unknown player ids must still resolve through notFound().')
 assert.match(playerDetailRoute,/generateStaticParams\(\)\{ return \[\] \}/,'Player detail ids should be generated on demand and cached.')
 
