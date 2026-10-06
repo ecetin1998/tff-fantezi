@@ -23,6 +23,8 @@ concurrency:
 jobs:
   dispatch:
     if: github.event_name == 'push'
+    env:
+      REVALIDATE_SECRET: ${{ secrets.REVALIDATE_SECRET }}
     runs-on: ubuntu-latest
     steps:
       - name: Dispatch protected optimizer refresh
@@ -66,7 +68,7 @@ jobs:
           curl --fail --show-error --silent --max-time 300             --header "Authorization: Bearer $OIDC_TOKEN"             "$FUNCTIONS_URL/run-staging-optimizer?mode=alternative"
           echo
       - name: Revalidate application cache
-        if: ${{ secrets.REVALIDATE_SECRET != '' }}
+        if: env.REVALIDATE_SECRET != ''
         env:
           REVALIDATE_SECRET: ${{ secrets.REVALIDATE_SECRET }}
         run: |
