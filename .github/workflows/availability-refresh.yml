@@ -54,3 +54,12 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: gh workflow run weekly-model-lifecycle.yml --repo "${{ github.repository }}" --ref main
+      - name: Revalidate application cache
+        if: success()
+        env:
+          REVALIDATE_SECRET: ${{ secrets.SCOUT_REVALIDATE_SECRET }}
+        run: |
+          test -n "$REVALIDATE_SECRET"
+          curl --fail --show-error --silent -X POST -H "x-revalidate-secret: $REVALIDATE_SECRET" https://fanteziligrehberi.com/api/revalidate
+          echo
+
