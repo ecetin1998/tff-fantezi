@@ -5,7 +5,7 @@ const data=fs.readFileSync('lib/data.js','utf8')
 const page=fs.readFileSync('app/matches/page.js','utf8')
 const css=fs.readFileSync('components/DataViews.module.css','utf8')
 
-assert.ok(data.includes('total_xfp:rows.reduce((sum,p)=>sum+Number(p.xfp||0)*Math.max(0,Math.min(1,Number(p.xi_probability||0))),0),'),'Team xFP must be XI-probability weighted.')
+assert.ok(data.includes('total_xfp:rows.reduce((sum,p)=>sum+Number(p.xfp||0),0),'),'Team xFP must sum player xFP without double-weighting XI probability.')
 assert.match(data,/top_player:ranked\[0\]\|\|null/)
 assert.match(data,/name:displayName\(p\)/,'Match fantasy leaders must use the off-pitch full-name helper.')
 assert.match(page,/match-team-xfp-strip/)
