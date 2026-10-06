@@ -18,12 +18,12 @@ export default function PlayersTable({players,total,page,pageCount,teams,filters
   const [pool,setPool]=useState(players)
   const isPro=tier==='pro'
   const isVisitor=tier==='visitor'
-  const [q,setQ]=useState(activeFilters?.q||'')
+  const activeFilters=staticPool?localFilters:filters
+  const [q,setQ]=useState(filters?.q||'')
 
   useEffect(()=>{if(!staticPool)setQ(activeFilters?.q||'')},[activeFilters?.q,staticPool])
   useEffect(()=>{if(!staticPool)return;const p=new URLSearchParams(window.location.search);const next={q:p.get('q')||'',team:p.get('team')||'',pos:p.get('pos')||'',sort:p.get('sort')||'xfp',dir:p.get('dir')||'desc',page:Number(p.get('page')||1)};setLocalFilters(next);setQ(next.q);fetch('/api/access',{cache:'no-store'}).then(r=>r.json()).then(async a=>{setTier(a.tier||'visitor');if(a.plan==='pro'){const res=await fetch('/api/pro-player-overlay',{cache:'no-store'});if(res.ok){const d=await res.json();if(!runId||!d.run_id||d.run_id===runId){const overlay=new Map((d.rows||[]).map(x=>[Number(x.player_id),x]));setPool(current=>current.map(p=>{const x=overlay.get(Number(p.id));return x?{...p,projection:{...p.projection,p25:x.p25,p75:x.p75,p90:x.p90,six_plus_probability:x.six_plus_probability,expected_goals:x.expected_goals,expected_assists:x.expected_assists,top25_score:x.top25_score,top25_rank:x.top25_rank}}:p}))}}}}).catch(()=>{})},[staticPool,runId])
 
-  const activeFilters=staticPool?localFilters:filters
   const navigate=useCallback(patch=>{
     const next={...(activeFilters||{}),...patch}
     const params=new URLSearchParams()
