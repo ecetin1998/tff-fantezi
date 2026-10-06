@@ -1,11 +1,11 @@
-import {updateSession} from '@/lib/supabase/proxy'
+import {NextResponse} from 'next/server'
 
-export async function proxy(request){
-  // Supabase SSR refreshes expiring access tokens and rotates the refresh cookie here.
-  // Public static assets/data feeds stay outside this matcher.
-  return updateSession(request)
+export function proxy(){
+  // Authenticated pages/actions resolve Supabase cookies server-side. Keeping the
+  // global proxy edge-safe avoids OpenNext's experimental Node middleware bundle.
+  return NextResponse.next()
 }
 
 export const config={
-  matcher:['/squad/:path*','/roles/:path*','/players/:id','/teams/:id','/api/access','/api/pro-player-overlay']
+  matcher:['/squad/:path*','/roles/:path*','/api/access','/api/pro-player-overlay']
 }
