@@ -30,9 +30,9 @@ export default async function Home(){
       href:value?'/players/'+value.id:'/players',team:value?.team,
     },
     {
-      label:`MH${run?.gameweek||'—'} XI ağırlıklı takım xFP lideri`,
+      label:`MH${run?.gameweek||'—'} takım beklenen fantezi puanı lideri`,
       title:teamXfpLeader?.name||'—',
-      meta:`${teamXfpLeader?.player_count||0} aktif oyuncu • XI olasılığı ağırlıklı beklenti`,
+      meta:`${teamXfpLeader?.player_count||0} aktif oyuncu • takım beklenen fantezi puanı`,
       val:Number(teamXfpLeader?.total_xfp||0).toFixed(2),unit:'xFP',
       href:teamHref(teamXfpLeader?.name,teamXfpLeader?.id),team:teamXfpLeader?.name,
     },
