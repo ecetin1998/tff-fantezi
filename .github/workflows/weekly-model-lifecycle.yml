@@ -374,7 +374,10 @@ jobs:
         env:
           REVALIDATE_SECRET: ${{ secrets.SCOUT_REVALIDATE_SECRET }}
         run: |
-          test -n "$REVALIDATE_SECRET"
+          if [ -z "$REVALIDATE_SECRET" ]; then
+            echo "SCOUT_REVALIDATE_SECRET is not configured; skipping cache revalidation."
+            exit 0
+          fi
           curl --fail --show-error --silent -X POST -H "x-revalidate-secret: $REVALIDATE_SECRET" https://fanteziligrehberi.com/api/revalidate
           echo
 
