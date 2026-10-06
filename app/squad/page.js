@@ -120,7 +120,7 @@ export default async function Squad({searchParams}){
     <SquadBuilder players={players} initialState={initialState} recommendedState={recommendedState}
       initialManagerCard={initialManagerCard}
       plan={auth.plan} gameweek={run?.gameweek} deadlineAt={gameweekRow?.deadline_at||null} locked={locked}
-      transferScenarios={[]} futurePlan={futurePlan}/>
+      transferScenarios={[]} futurePlan={futurePlan} deadlineExpired={Boolean(gameweekRow?.deadline_at&&new Date(gameweekRow.deadline_at).getTime()<=Date.now())}/>
 
     <section className="card squad-history-card">
       <div className="squad-history-head">
