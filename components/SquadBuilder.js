@@ -109,7 +109,7 @@ function formationFromXIIds(ids,map,formationMap=FORMATION_MAP){
   return formationMap[key]?key:null
 }
 
-export default function SquadBuilder({ players, initialState=[], recommendedState=[], initialManagerCard=MANAGER_CARD_NONE, plan='free', gameweek, deadlineAt=null, locked=false, transferScenarios=[], futurePlan=null, deadlineExpired=false }){
+export default function SquadBuilder({ players, initialState=[], recommendedState=[], initialManagerCard=MANAGER_CARD_NONE, plan='free', gameweek, deadlineAt=null, locked=false, transferScenarios=[], futurePlan=null, deadlineExpired=false, transferRights=null }){
   const map=useMemo(()=>new Map(players.map(p=>[p.id,p])),[players])
   const normalizedInitialManagerCard=plan==='pro'?normalizeManagerCard(initialManagerCard):MANAGER_CARD_NONE
   const initialFormationMap=useMemo(()=>formationMapForCard(normalizedInitialManagerCard),[normalizedInitialManagerCard])
@@ -152,8 +152,11 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
   const counts=selected.reduce((a,p)=>(a[p.position]=(a[p.position]||0)+1,a),{})
   const cost=selected.reduce((s,p)=>s+Number(p.price||0),0)
   const bank=Number.isFinite(effectiveBudget)?effectiveBudget-cost:Number.POSITIVE_INFINITY
-  const transfersUsed=initialIds.filter(id=>!ids.includes(id)).length
-  const freeTransfersRemaining=Math.max(0,Number(TRANSFER_RULES.free_per_week||0)-transfersUsed)
+  const baselineUsed=Number(transferRights?.used||0)
+  const liveChanges=initialIds.filter(id=>!ids.includes(id)).length
+  const transfersUsed=baselineUsed+liveChanges
+  const bankedTransfers=Math.max(1,Number(transferRights?.banked||TRANSFER_RULES.free_per_week||1))
+  const freeTransfersRemaining=Math.max(0,bankedTransfers-transfersUsed)
   const clubCounts=selected.reduce((a,p)=>(a[p.team_id]=(a[p.team_id]||0)+1,a),{})
   const clubLimitOk=!MAX_PLAYERS_PER_CLUB||Object.values(clubCounts).every(n=>n<=MAX_PLAYERS_PER_CLUB)
   const budgetOk=!Number.isFinite(effectiveBudget)||cost<=effectiveBudget+.0001
