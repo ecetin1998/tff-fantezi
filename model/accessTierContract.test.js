@@ -21,7 +21,7 @@ const proLockdown=read('supabase/migrations/20261002123000_pro_data_surface_lock
 assert.match(data,/tier:'visitor'/)
 assert.match(data,/tier:activePro \? 'pro' : 'member'/)
 assert.match(playersPage,/accessTier="visitor"/,'Public ISR player HTML must not vary by session.')
-assert.match(playersTable,/const isPro=accessTier==='pro'/)
+assert.match(playersTable,/const isPro=tier==='pro'/)
 assert.match(playersTable,/staticPool/)
 assert.match(playerDetail,/getAuthState/)
 assert.match(playerDetail,/GELİŞMİŞ • OYUNCU DERİNLİĞİ/)
