@@ -7,5 +7,5 @@ export async function proxy(request){
 }
 
 export const config={
-  matcher:['/((?!_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml|api/scout-data|api/player-search|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|css|js)$).*)']
+  matcher:['/squad/:path*','/roles/:path*','/players/:id','/teams/:id','/api/access','/api/pro-player-overlay']
 }
