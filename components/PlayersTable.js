@@ -1,5 +1,5 @@
 'use client'
-import {useCallback,useEffect,useState} from 'react'
+import {useCallback,useEffect,useMemo,useState} from 'react'
 import Link from 'next/link'
 import {useRouter} from 'next/navigation'
 import {teamCssVars} from '@/lib/teamThemes'
@@ -11,38 +11,40 @@ import AccessGate from '@/components/AccessGate'
 const posLabel=p=>({GK:'KL',DEF:'DEF',MID:'OS',FWD:'FOR'}[p]||p||'—')
 const PAGE_SIZE=50
 
-export default function PlayersTable({players,total,page,pageCount,teams,filters,accessTier='visitor'}){
+export default function PlayersTable({players,total,page,pageCount,teams,filters,accessTier='visitor',staticPool=false,runId=null}){
   const router=useRouter()
-  const isPro=accessTier==='pro'
-  const isVisitor=accessTier==='visitor'
+  const [tier,setTier]=useState(accessTier)
+  const [localFilters,setLocalFilters]=useState(filters||{})
+  const [pool,setPool]=useState(players)
+  const isPro=tier==='pro'
+  const isVisitor=tier==='visitor'
+  const activeFilters=staticPool?localFilters:filters
   const [q,setQ]=useState(filters?.q||'')
 
-  useEffect(()=>{setQ(filters?.q||'')},[filters?.q])
+  useEffect(()=>{if(!staticPool)setQ(activeFilters?.q||'')},[activeFilters?.q,staticPool])
+  useEffect(()=>{if(!staticPool)return;const p=new URLSearchParams(window.location.search);const next={q:p.get('q')||'',team:p.get('team')||'',pos:p.get('pos')||'',sort:p.get('sort')||'xfp',dir:p.get('dir')||'desc',page:Number(p.get('page')||1)};setLocalFilters(next);setQ(next.q);fetch('/api/access',{cache:'no-store'}).then(r=>r.json()).then(async a=>{setTier(a.tier||'visitor');if(a.plan==='pro'){const res=await fetch('/api/pro-player-overlay',{cache:'no-store'});if(res.ok){const d=await res.json();if(!runId||!d.run_id||d.run_id===runId){const overlay=new Map((d.rows||[]).map(x=>[Number(x.player_id),x]));setPool(current=>current.map(p=>{const x=overlay.get(Number(p.id));return x?{...p,projection:{...p.projection,p25:x.p25,p75:x.p75,p90:x.p90,six_plus_probability:x.six_plus_probability,expected_goals:x.expected_goals,expected_assists:x.expected_assists,top25_score:x.top25_score,top25_rank:x.top25_rank}}:p}))}}}}).catch(()=>{})},[staticPool,runId])
 
   const navigate=useCallback(patch=>{
-    const next={...(filters||{}),...patch}
+    const next={...(activeFilters||{}),...patch}
     const params=new URLSearchParams()
-    if(next.q)params.set('q',next.q)
-    if(next.team)params.set('team',next.team)
-    if(next.pos)params.set('pos',next.pos)
-    if(next.sort&&next.sort!=='xfp')params.set('sort',next.sort)
-    if(next.dir&&next.dir!=='desc')params.set('dir',next.dir)
-    if(Number(next.page||1)>1)params.set('page',String(next.page))
+    if(next.q)params.set('q',next.q);if(next.team)params.set('team',next.team);if(next.pos)params.set('pos',next.pos)
+    if(next.sort&&next.sort!=='xfp')params.set('sort',next.sort);if(next.dir&&next.dir!=='desc')params.set('dir',next.dir);if(Number(next.page||1)>1)params.set('page',String(next.page))
     const query=params.toString()
-    router.replace('/players'+(query?'?'+query:''),{scroll:false})
-  },[filters,router])
+    if(staticPool){setLocalFilters(next);window.history.replaceState(null,'','/players'+(query?'?'+query:''))}
+    else router.replace('/players'+(query?'?'+query:''),{scroll:false})
+  },[activeFilters,router,staticPool])
 
   useEffect(()=>{
-    if(q===(filters?.q||''))return
+    if(q===(activeFilters?.q||''))return
     const timer=setTimeout(()=>navigate({q,page:1}),250)
     return ()=>clearTimeout(timer)
-  },[q,filters?.q,navigate])
+  },[q,activeFilters?.q,navigate])
 
   const changeSort=key=>{
-    const same=filters?.sort===key
-    navigate({sort:key,dir:same&&filters?.dir==='desc'?'asc':'desc',page:1})
+    const same=activeFilters?.sort===key
+    navigate({sort:key,dir:same&&activeFilters?.dir==='desc'?'asc':'desc',page:1})
   }
-  const head=(key,label)=><th onClick={()=>changeSort(key)}>{label}{filters?.sort===key?<span className="sortmark">{filters?.dir==='asc'?' ↑':' ↓'}</span>:null}</th>
+  const head=(key,label)=><th onClick={()=>changeSort(key)}>{label}{activeFilters?.sort===key?<span className="sortmark">{activeFilters?.dir==='asc'?' ↑':' ↓'}</span>:null}</th>
   const pct=v=>String((Number(v||0)*100).toFixed(0))+'%'
   const num=(v,d=2)=>Number(v||0).toFixed(d)
   const playerNote=p=>{
@@ -51,25 +53,28 @@ export default function PlayersTable({players,total,page,pageCount,teams,filters
     const visible=availabilityIsIssue(a)||a.availability_type==='return'||a.expected_return_date||a.suspension_fixture
     return visible?availabilityCompactNote(a):''
   }
-  const offset=(Math.max(1,Number(page||1))-1)*PAGE_SIZE
+  const localRows=useMemo(()=>{if(!staticPool)return players;const f=localFilters||{},needle=String(f.q||'').toLocaleLowerCase('tr');let rows=pool.filter(p=>(!f.team||p.team===f.team)&&(!f.pos||p.position===f.pos)&&(!needle||(`${p.full_name} ${p.team} ${p.projection?.opponent_name||''}`).toLocaleLowerCase('tr').includes(needle)));const val=(p,k)=>k==='name'?p.full_name:k==='team'?p.team:k==='pos'?p.position:k==='opp'?p.projection?.opponent_name:k==='price'?Number(p.price||0):k==='points'?Number(p.total_points||0):k==='xi'?Number(p.projection?.xi_probability||0):k==='minutes'?Number(p.projection?.x_minutes||0):k==='p25'?Number(p.projection?.p25||0):k==='p90'?Number(p.projection?.p90||0):k==='six'?Number(p.projection?.six_plus_probability||0):k==='xg'?Number(p.projection?.expected_goals||0):k==='xa'?Number(p.projection?.expected_assists||0):k==='value'?Number(p.projection?.value_score||0):Number(p.projection?.xfp||0);rows=[...rows].sort((a,b)=>{const av=val(a,f.sort||'xfp'),bv=val(b,f.sort||'xfp'),cmp=typeof av==='string'?String(av).localeCompare(String(bv),'tr'):av-bv;return f.dir==='asc'?cmp:-cmp});return rows},[staticPool,players,pool,localFilters])
+  const effectiveTotal=staticPool?localRows.length:total,effectivePage=staticPool?Math.max(1,Number(localFilters?.page||1)):page,effectivePageCount=staticPool?Math.max(1,Math.ceil(effectiveTotal/PAGE_SIZE)):pageCount
+  const visiblePlayers=staticPool?(isVisitor?localRows.slice(0,15):localRows.slice((effectivePage-1)*PAGE_SIZE,effectivePage*PAGE_SIZE)):players
+  const offset=(Math.max(1,Number(effectivePage||1))-1)*PAGE_SIZE
 
   return <>
     {!isVisitor?<div className="filters player-filters">
       <input value={q} onChange={e=>setQ(e.target.value)} placeholder="Oyuncu, takım veya rakip ara..." aria-label="Oyuncu ara"/>
-      <select value={filters?.team||''} onChange={e=>navigate({team:e.target.value,page:1})}>
+      <select value={activeFilters?.team||''} onChange={e=>navigate({team:e.target.value,page:1})}>
         <option value="">Tüm takımlar</option>{(teams||[]).map(t=><option key={t}>{t}</option>)}
       </select>
-      <select value={filters?.pos||''} onChange={e=>navigate({pos:e.target.value,page:1})}>
+      <select value={activeFilters?.pos||''} onChange={e=>navigate({pos:e.target.value,page:1})}>
         <option value="">Tüm mevkiler</option><option value="GK">KL</option><option value="DEF">DEF</option><option value="MID">OS</option><option value="FWD">FOR</option>
       </select>
-      <select className="mobile-sort-select" value={filters?.sort||'xfp'} onChange={e=>navigate({sort:e.target.value,dir:'desc',page:1})}>
+      <select className="mobile-sort-select" value={activeFilters?.sort||'xfp'} onChange={e=>navigate({sort:e.target.value,dir:'desc',page:1})}>
         <option value="xfp">xFP'ye göre</option><option value="xi">İlk 11 ihtimaline göre</option><option value="minutes">Dakikaya göre</option>
         {isPro?<><option value="p90">P90'a göre</option><option value="six">6+ ihtimaline göre</option></>:null}
         <option value="points">Toplam puana göre</option><option value="value">F/P'ye göre</option><option value="price">Fiyata göre</option>
       </select>
     </div>:null}
 
-    <div className="table-summary">{isVisitor?<><b>İlk {players.length}</b> oyuncu • xFP sıralaması • tüm oyuncu havuzu ücretsiz üyelikle açılır</>:<><b>{total}</b> oyuncu • {isPro?'Gelişmiş analiz görünümü':'ücretsiz üye görünümü'}</>}</div>
+    <div className="table-summary">{isVisitor?<><b>İlk {visiblePlayers.length}</b> oyuncu • xFP sıralaması • tüm oyuncu havuzu ücretsiz üyelikle açılır</>:<><b>{effectiveTotal}</b> oyuncu • {isPro?'Gelişmiş analiz görünümü':'ücretsiz üye görünümü'}</>}</div>
     <div className="projection-legend">
       Karar metrikleri: <b>İlk 11</b> + <b>xDakika</b> oynama ihtimalini, <b>xFP</b> ortalama beklentiyi gösterir.
       {isPro?<span> <b>P25/P90</b>, <b>6+</b>, <b>xG</b> ve <b>xA</b> Gelişmiş üyelik dağılım/üretim katmanlarıdır.</span>:<span> Puan dağılımı, 6+ ihtimali ve xG/xA detayları Gelişmiş üyelikte açılır.</span>}
@@ -82,9 +87,9 @@ export default function PlayersTable({players,total,page,pageCount,teams,filters
       description="P25/P90 dağılımı, 6+ ihtimali, xG/xA ve gelişmiş rol analizi Gelişmiş üyelikte görünür."
     />:null}
 
-    {!players.length?<div className="card empty-filter-state">Bu filtrelerle eşleşen oyuncu bulunamadı.</div>:<>
+    {!visiblePlayers.length?<div className="card empty-filter-state">Bu filtrelerle eşleşen oyuncu bulunamadı.</div>:<>
       <div className="player-card-list">
-        {players.map((p,i)=><Link href={'/players/'+p.id} className="card mobile-player-card team-accent-card" style={teamCssVars(p.team)} key={p.id}>
+        {visiblePlayers.map((p,i)=><Link href={'/players/'+p.id} className="card mobile-player-card team-accent-card" style={teamCssVars(p.team)} key={p.id}>
           <div className="mobile-player-top">
             <div className="mobile-card-badges"><span className="weekly-rank">#{offset+i+1}</span><span className={'pos '+p.position}>{posLabel(p.position)}</span></div>
             <div className="mobile-player-name"><b>{playerLabel(p)}</b><span>{p.team}{playerRoleLabel(p)?' • '+playerRoleLabel(p):''} • {num(p.price,1)}m</span><small className="player-meta-badges">{fixtureBadge(p.projection)?<em>{fixtureBadge(p.projection)}</em>:null}</small></div>
@@ -105,7 +110,7 @@ export default function PlayersTable({players,total,page,pageCount,teams,filters
         <th className="rank-col">#</th>{head('name','Oyuncu')}{head('team','Takım')}{head('pos','Mevki')}{head('opp','Rakip')}<th>E/D</th>
         {head('price','Fiyat')}{head('points','Toplam Puan')}{head('xi','İlk 11')}{head('minutes','xDk')}{head('xfp','xFP')}
         {isPro?<>{head('p25','P25')}{head('p90','P90')}{head('six','6+ %')}{head('xg','xG')}{head('xa','xA')}</>:null}{head('value','F/P')}
-      </tr></thead><tbody>{players.map((p,i)=><tr className="team-player-row clickable-row" style={teamCssVars(p.team)} key={p.id}
+      </tr></thead><tbody>{visiblePlayers.map((p,i)=><tr className="team-player-row clickable-row" style={teamCssVars(p.team)} key={p.id}
         tabIndex={0} onClick={e=>{if(!e.target.closest('a,button,input,select'))router.push('/players/'+p.id)}} onKeyDown={e=>{if(e.key==='Enter')router.push('/players/'+p.id)}}>
         <td className="rank-col">#{offset+i+1}</td>
         <td><Link className="player-link team-player-link" href={'/players/'+p.id}><i className="club-dot"/><b>{playerLabel(p)}</b></Link>{fixtureBadge(p.projection)?<small className="cell-note">{fixtureBadge(p.projection)}</small>:null}{playerNote(p)?<small className="cell-note">{playerNote(p)}</small>:null}</td>
@@ -123,10 +128,10 @@ export default function PlayersTable({players,total,page,pageCount,teams,filters
       description="Ücretsiz hesapla arama, takım/mevki filtreleri, tüm temel oyuncu verileri ve Benim Kadrom açılır."
     />:null}
 
-    {!isVisitor&&pageCount>1?<div className="pagination-bar">
-      <button type="button" disabled={page<=1} onClick={()=>navigate({page:Math.max(1,page-1)})}>← Önceki</button>
-      <span>Sayfa <b>{page}</b> / {pageCount}</span>
-      <button type="button" disabled={page>=pageCount} onClick={()=>navigate({page:Math.min(pageCount,page+1)})}>Sonraki →</button>
+    {!isVisitor&&effectivePageCount>1?<div className="pagination-bar">
+      <button type="button" disabled={effectivePage<=1} onClick={()=>navigate({page:Math.max(1,effectivePage-1)})}>← Önceki</button>
+      <span>Sayfa <b>{effectivePage}</b> / {effectivePageCount}</span>
+      <button type="button" disabled={effectivePage>=effectivePageCount} onClick={()=>navigate({page:Math.min(effectivePageCount,effectivePage+1)})}>Sonraki →</button>
     </div>:null}
   </>
 }

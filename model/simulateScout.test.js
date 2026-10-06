@@ -124,3 +124,14 @@ function zeroEventInput(doubleWeek=false){
 }
 
 console.log('DGW, opponent-aware saves, red-card and bonus-tie checks passed');
+
+{
+  const input=zeroEventInput(false);
+  input.matches[0].away_lambda=1.15;
+  for(const p of input.players.filter(x=>x.club===1&&x.pos==='DEF')){p.durations=[90];p.duration_weights=[1];p.role=1;}
+  const out=simulateScout(input,5000,20261006).filter(p=>p.club===1&&p.pos==='DEF'&&p.minutes>=80);
+  assert.ok(out.length>=2,'DEF QA needs at least two stable defenders');
+  const cs=out.map(p=>p.components.cs),conceded=out.map(p=>p.components.conceded);
+  assert.ok(Math.max(...cs)-Math.min(...cs)<.12,'same-team stable DEF clean-sheet expectation should align');
+  assert.ok(Math.max(...conceded)-Math.min(...conceded)<.12,'same-team stable DEF conceded expectation should align');
+}

@@ -24,3 +24,11 @@ assert(singleShotCap(cb)<singleShotCap(fb)&&singleShotCap(fb)<singleShotCap(wb),
 assert(attackWeights(wb,single).adjustedXg>attackWeights(cb,single).adjustedXg,'attacking wing-back retains more single-shot threat than a centre-back');
 
 console.log('Attack allocation checks passed');
+
+{
+  const cb={id:77,pos:'DEF',sub_role:'CB',rates:[.08,.04,0,0],team_set_piece_xg_per_match:.42,heading_box_share:.16};
+  const without=attackWeights({...cb,team_set_piece_xg_per_match:0},[]);
+  const withPrior=attackWeights(cb,[]);
+  assert.ok(withPrior.adjustedXg>without.adjustedXg,'CB set-piece prior should lift forecast xG');
+  assert.ok(withPrior.setPiecePrior>0,'set-piece prior breakdown must be logged');
+}

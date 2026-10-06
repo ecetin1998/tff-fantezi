@@ -1,6 +1,6 @@
-const fs=require('node:fs')
-const assert=require('node:assert/strict')
-
-assert.equal(fs.existsSync('proxy.js'),false,'Global auth proxy should stay removed: route handlers/pages enforce auth and OpenNext Node proxy adds an unnecessary request/bundle.')
-assert.equal(fs.existsSync('middleware.js'),false,'Legacy middleware must not return.')
-console.log('proxyMatcher: no global auth middleware/proxy; auth remains route-scoped')
+const fs=require('node:fs'),assert=require('node:assert/strict')
+const source=fs.readFileSync('proxy.js','utf8')
+assert.match(source,/updateSession/)
+for(const route of ['/squad/:path*','/roles/:path*','/players/:id','/teams/:id','/api/access','/api/pro-player-overlay'])assert.ok(source.includes(route),route+' must refresh SSR auth')
+assert.ok(!source.includes('/api/scout-data'), 'keyed/public data feed must bypass auth proxy')
+console.log('proxyMatcher: SSR refresh limited to auth-dependent routes')

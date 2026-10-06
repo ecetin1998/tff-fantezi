@@ -1,14 +1,13 @@
 import Link from 'next/link'
-import { getAuthState, getHomeOverview } from '@/lib/data'
+import { getHomeOverview } from '@/lib/data'
 import { teamCssVars, teamHref } from '@/lib/teamThemes'
 import {playerLabel} from '@/lib/playerPresentation'
 
 export const revalidate=300
 
 export default async function Home(){
-  const [overview,auth]=await Promise.all([getHomeOverview(),getAuthState()])
+  const overview=await getHomeOverview()
   const {run,best,value,teamXfpLeader,top25,playerCount,matchCount}=overview
-  const isPro=auth.plan==='pro'
   const latestDataAt=run?.decision_data_at||run?.source_updated_at||null
   const sourceUpdated=latestDataAt?new Intl.DateTimeFormat('tr-TR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit',timeZone:'Europe/Istanbul'}).format(new Date(latestDataAt)):'—'
   const modelUpdated=run?.generated_at?new Intl.DateTimeFormat('tr-TR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit',timeZone:'Europe/Istanbul'}).format(new Date(run.generated_at)):'—'
@@ -30,18 +29,13 @@ export default async function Home(){
       href:value?'/players/'+value.id:'/players',team:value?.team,
     },
     {
-      label:`MH${run?.gameweek||'—'} XI ağırlıklı takım xFP lideri`,
+      label:`MH${run?.gameweek||'—'} takım beklenen fantezi puanı lideri`,
       title:teamXfpLeader?.name||'—',
-      meta:`${teamXfpLeader?.player_count||0} aktif oyuncu • XI olasılığı ağırlıklı beklenti`,
+      meta:`${teamXfpLeader?.player_count||0} aktif oyuncu • takım beklenen fantezi puanı`,
       val:Number(teamXfpLeader?.total_xfp||0).toFixed(2),unit:'xFP',
       href:teamHref(teamXfpLeader?.name,teamXfpLeader?.id),team:teamXfpLeader?.name,
     },
-    isPro?{
-      label:`MH${run?.gameweek||'—'} İlk 25 adayı #1`,
-      title:playerLabel(top25),meta:`${top25?.team||'—'} • üst dilime çıkma profili`,
-      val:`#${Number(top25?.projection?.top25_rank||1)}`,unit:'İlk 25',
-      href:top25?'/players/'+top25.id:'/players',team:top25?.team,
-    }:{
+{
       label:'GELİŞMİŞ • Tavan analizi',
       title:'İlk 25 ve P90',
       meta:'yüksek skor adayları • gelişmiş dağılım',

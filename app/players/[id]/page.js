@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { getAuthState, getPlayerDetail } from '@/lib/data'
+import { getAuthState, getPlayerDetail, getPlayerDetailPro } from '@/lib/data'
 import AccessGate from '@/components/AccessGate'
 import WeeklyPointsChart from '@/components/WeeklyPointsChart'
 import PredictionHistoryChartEnhancer from '@/components/PredictionHistoryChartEnhancer'
@@ -57,7 +57,10 @@ export default async function PlayerPage({ params }){
     />
   </div>
 
-  const {run,player,projection:p,availability:a,role:r,season:s,modelFeatures:mf,weekly,replay=[],matches=[]}=data
+  const pro=await getPlayerDetailPro(id,data.run?.id)
+  const {run,player,availability:a,role:r,season:s,modelFeatures:mf,weekly,matches=[]}=data
+  const p={...(data.projection||{}),...(pro?.projection||{})}
+  const replay=[...(data.replay||[]).filter(row=>row.history_mode!=='live_frozen'),...(pro?.history||[]).map(row=>({...row,history_mode:'live_frozen'}))].sort((a,b)=>Number(a.gameweek)-Number(b.gameweek)).slice(-12)
   const closedWeeks=[...(weekly||[])].sort((x,y)=>Number(x.gameweek||0)-Number(y.gameweek||0))
   const playedWeeks=closedWeeks.filter(w=>Number(w.minutes||0)>0)
   const played=Number(s?.matches_played ?? playedWeeks.length)

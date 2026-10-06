@@ -37,7 +37,10 @@ function attackWeights(player,matches=[]){
   const attenuation=observed.length>=5?.55:.85;
   const xgRate=Number(rates[0]||0),goalRate=Number(rates[1]||0);
   const assistRate=Number(rates[2]||0),xaRate=Number(rates[3]||0);
-  const adjustedXg=Math.max(xgRate*.45,xgRate-attenuation*excess/(2+exposure));
+  const setPiecePrior=normalizedDefenderRole(player)==='CB'
+    ?Math.max(0,Number(player.team_set_piece_xg_per_match||0))*Math.max(0,Math.min(.35,Number(player.heading_box_share ?? 0.08)))
+    :0;
+  const adjustedXg=Math.max(xgRate*.45,xgRate-attenuation*excess/(2+exposure))+setPiecePrior;
   return {
     goal:Math.max(1e-6,.75*adjustedXg+.25*goalRate),
     assist:Math.max(1e-6,.70*xaRate+.30*assistRate),
@@ -45,6 +48,7 @@ function attackWeights(player,matches=[]){
     singleShotExcess:excess,
     singleShotCap:cap,
     subRole:normalizedDefenderRole(player),
+    setPiecePrior,
   };
 }
 

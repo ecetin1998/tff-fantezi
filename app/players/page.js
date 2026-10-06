@@ -1,42 +1,15 @@
 import PlayersTable from '@/components/PlayersTable'
-import {getAuthState,getPlayersPage} from '@/lib/data'
+import {getPlayersWithProjection} from '@/lib/data'
 
 export const revalidate=300
-export const metadata={
-  title:'Oyuncu Analizi',
-  description:'Süper Lig fantezi oyuncuları için xFP, ilk 11 ihtimali, beklenen dakika, puan aralığı ve fiyat/performans analizi.'
-}
+export const metadata={title:'Oyuncu Analizi',description:'Süper Lig fantezi oyuncuları için xFP, ilk 11 ihtimali, beklenen dakika, puan aralığı ve fiyat/performans analizi.'}
 
-export default async function Players({searchParams}){
-  const sp=await searchParams
-  const requestedSort=sp?.sort||'xfp'
-  const requestedOptions={
-    q:sp?.q||'',
-    team:sp?.team||'',
-    pos:sp?.pos||'',
-    sort:requestedSort,
-    dir:sp?.dir||'desc',
-    page:Number(sp?.page||1),
-    pageSize:50,
-  }
-  const auth=await getAuthState()
-  const isVisitor=auth.tier==='visitor'
-  const advancedSorts=new Set(['p25','p90','six','xg','xa'])
-  const sort=auth.plan==='pro'||!advancedSorts.has(requestedSort)?requestedSort:'xfp'
-  const needsRestrictedView=isVisitor||(auth.plan!=='pro'&&sort!==requestedSort)
-  const data=await getPlayersPage(needsRestrictedView?{
-    q:isVisitor?'':requestedOptions.q,
-    team:isVisitor?'':requestedOptions.team,
-    pos:isVisitor?'':requestedOptions.pos,
-    sort:isVisitor?'xfp':sort,
-    dir:isVisitor?'desc':requestedOptions.dir,
-    page:isVisitor?1:requestedOptions.page,
-    pageSize:isVisitor?15:50,
-    pro:false,
-  }:{...requestedOptions,pro:auth.plan==='pro'})
-  const {players,run,total,page,pageCount,teams,filters}=data
+export default async function Players(){
+  const {players,run}=await getPlayersWithProjection()
+  const active=(players||[]).filter(p=>p.active)
+  const teams=[...new Set(active.map(p=>p.team).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'tr'))
   return <>
-    <div className="section-title"><div><span className="eyebrow">OYUNCU HAVUZU</span><h1>MH{run?.gameweek||'—'} Oyuncu Analizi</h1></div><span className="muted">{total} oyuncu • karar odaklı görünüm</span></div>
-    <PlayersTable players={players} total={total} page={page} pageCount={pageCount} teams={teams} filters={filters} accessTier={auth.tier}/>
+    <div className="section-title"><div><span className="eyebrow">OYUNCU HAVUZU</span><h1>MH{run?.gameweek||'—'} Oyuncu Analizi</h1></div><span className="muted">{active.length} oyuncu • karar odaklı görünüm</span></div>
+    <PlayersTable players={active} total={active.length} page={1} pageCount={1} teams={teams} filters={{q:'',team:'',pos:'',sort:'xfp',dir:'desc',page:1}} accessTier="visitor" staticPool runId={run?.id||null}/>
   </>
 }
