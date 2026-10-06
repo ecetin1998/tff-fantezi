@@ -73,7 +73,7 @@ export default async function Squad({searchParams}){
     createClient(),
   ])
   const {players,run}=pool
-  const {members:recommended}=recommendation
+  const {members:recommended,recommendation:recommendedMeta}=recommendation
   const [futurePlan,pageResult]=await Promise.all([
     run?.gameweek?getFutureFixturePlan(Number(run.gameweek)+1,2):Promise.resolve({byTeam:{}}),
     run?.gameweek?supabase.rpc('scout_my_squad_page',{p_gameweek:run.gameweek}):Promise.resolve({data:null,error:null}),
@@ -118,7 +118,7 @@ export default async function Squad({searchParams}){
     {sp?.error?<div className="alert error">{sp.error}</div>:null}
 
     <SquadBuilder players={players} initialState={initialState} recommendedState={recommendedState}
-      initialManagerCard={initialManagerCard}
+      initialManagerCard={initialManagerCard} recommendedRunId={recommendedMeta?.run_id||null} poolRunId={run?.id||null}
       plan={auth.plan} gameweek={run?.gameweek} deadlineAt={gameweekRow?.deadline_at||null} locked={locked}
       transferScenarios={[]} futurePlan={futurePlan} transferRights={pageData?.transfer_rights||null} deadlineExpired={Boolean(gameweekRow?.deadline_at&&new Date(gameweekRow.deadline_at).getTime()<=Date.now())}/>
 
