@@ -109,7 +109,7 @@ function formationFromXIIds(ids,map,formationMap=FORMATION_MAP){
   return formationMap[key]?key:null
 }
 
-export default function SquadBuilder({ players, initialState=[], recommendedState=[], initialManagerCard=MANAGER_CARD_NONE, plan='free', gameweek, deadlineAt=null, locked=false, transferScenarios=[], futurePlan=null }){
+export default function SquadBuilder({ players, initialState=[], recommendedState=[], initialManagerCard=MANAGER_CARD_NONE, plan='free', gameweek, deadlineAt=null, locked=false, transferScenarios=[], futurePlan=null, deadlineExpired=false }){
   const map=useMemo(()=>new Map(players.map(p=>[p.id,p])),[players])
   const normalizedInitialManagerCard=plan==='pro'?normalizeManagerCard(initialManagerCard):MANAGER_CARD_NONE
   const initialFormationMap=useMemo(()=>formationMapForCard(normalizedInitialManagerCard),[normalizedInitialManagerCard])
@@ -137,7 +137,7 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
   },[initialState,initialXI,map])
   const [captainId,setCaptainId]=useState(initialCaptainId)
   const [poolLimit,setPoolLimit]=useState(180)
-  const isLocked=locked||Boolean(deadlineAt&&Date.now()>=new Date(deadlineAt).getTime())
+  const isLocked=locked||deadlineExpired
   const [q,setQ]=useState('')
   const [pos,setPos]=useState('')
   const [team,setTeam]=useState('')
@@ -279,7 +279,7 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
     return out
   },[futurePlan])
   const baseGameweek=Number(gameweek||0)
-  const playerPlanFactor=(p,week)=>{
+  const playerPlanFactor=useMemo(()=>((p,week)=>{
     if(week===0)return 1
     const fixtures=futureByTeamWeek.get(Number(p?.team_id))?.get(baseGameweek+week)||[]
     if(!fixtures.length)return 0
@@ -293,7 +293,7 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
       const available=suspensionEnd&&Number(future.gameweek)<=suspensionEnd?0:recovered
       return sum+factor*Math.max(0,Math.min(1,available))
     },0)
-  }
+  }),[futureByTeamWeek,baseGameweek])
   const transferPlanRows=useMemo(()=>{
     if(plan!=='pro'||ids.length!==SQUAD_SIZE)return []
     const weeks=[0,1,2]
@@ -320,7 +320,7 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
       }
     }
     return shortlist
-  },[plan,ids,map,players,selected,cost,effectiveBudget,freeTransfersRemaining,captainMultiplier,futurePlan,futureByTeamWeek,baseGameweek])
+  },[plan,ids,map,players,selected,cost,effectiveBudget,freeTransfersRemaining,captainMultiplier,futurePlan,futureByTeamWeek,baseGameweek,playerPlanFactor])
 
   const teams=useMemo(()=>[...new Set(players.map(p=>p.team).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'tr')),[players])
   const candidates=useMemo(()=>{
