@@ -109,7 +109,7 @@ function formationFromXIIds(ids,map,formationMap=FORMATION_MAP){
   return formationMap[key]?key:null
 }
 
-export default function SquadBuilder({ players, initialState=[], recommendedState=[], initialManagerCard=MANAGER_CARD_NONE, plan='free', gameweek, deadlineAt=null, locked=false, transferScenarios=[], futurePlan=null, deadlineExpired=false, transferRights=null, recommendedRunId=null, poolRunId=null }){
+export default function SquadBuilder({ players, initialState=[], recommendedState=[], initialManagerCard=MANAGER_CARD_NONE, plan='free', gameweek, deadlineAt=null, locked=false, transferScenarios=[], futurePlan=null, transferRights=null, recommendedRunId=null, poolRunId=null }){
   const map=useMemo(()=>new Map(players.map(p=>[p.id,p])),[players])
   const normalizedInitialManagerCard=plan==='pro'?normalizeManagerCard(initialManagerCard):MANAGER_CARD_NONE
   const initialFormationMap=useMemo(()=>formationMapForCard(normalizedInitialManagerCard),[normalizedInitialManagerCard])
@@ -137,7 +137,7 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
   },[initialState,initialXI,map])
   const [captainId,setCaptainId]=useState(initialCaptainId)
   const [poolLimit,setPoolLimit]=useState(180)
-  const isLocked=locked||deadlineExpired
+  const isLocked=locked
   const [q,setQ]=useState('')
   const [pos,setPos]=useState('')
   const [team,setTeam]=useState('')
@@ -323,7 +323,7 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
       }
     }
     return shortlist
-  },[plan,ids,map,players,selected,cost,effectiveBudget,freeTransfersRemaining,captainMultiplier,futurePlan,futureByTeamWeek,baseGameweek,playerPlanFactor])
+  },[plan,ids,map,players,selected,cost,effectiveBudget,freeTransfersRemaining,captainMultiplier,futurePlan,playerPlanFactor])
 
   const teams=useMemo(()=>[...new Set(players.map(p=>p.team).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'tr')),[players])
   const candidates=useMemo(()=>{
