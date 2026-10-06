@@ -391,15 +391,16 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
   const deadline=kickoff-36e5
   if(now>=deadline)return {refresh_required:false,reason:"CURRENT_WEEK_LOCKED",deadline_at:new Date(deadline).toISOString()}
 
-  const [latestMetaQ,availabilityQ,rolesQ,goalConfigQ,playersUpdatedQ,currentProjectionQ]=await Promise.all([
+  const [latestMetaQ,stableMetaQ,availabilityQ,rolesQ,goalConfigQ,playersUpdatedQ,currentProjectionQ]=await Promise.all([
     sb.from("scout_replay_input_meta").select("*").eq("gameweek",gw).order("created_at",{ascending:false}).limit(1).maybeSingle(),
+    sb.from("scout_replay_input_meta").select("benchmark_version").eq("gameweek",gw).not("benchmark_version","ilike","intraday-%").order("created_at",{ascending:false}).limit(1).maybeSingle(),
     sb.from("scout_availability").select("*").eq("run_id",current.id),
     sb.from("scout_role_signals").select("*").eq("run_id",current.id),
     sb.from("scout_goal_distribution_config").select("version,alpha_used,gate_benchmark").eq("active",true).order("created_at",{ascending:false}).limit(1).maybeSingle(),
     sb.from("scout_players").select("updated_at").eq("active",true).order("updated_at",{ascending:false}).limit(1).maybeSingle(),
     sb.from("scout_player_projections").select("player_id,opponent_name,venue,confidence,data_confidence").eq("run_id",current.id)
   ])
-  for(const q of [latestMetaQ,availabilityQ,rolesQ,goalConfigQ,playersUpdatedQ,currentProjectionQ])if(q.error)throw q.error
+  for(const q of [latestMetaQ,stableMetaQ,availabilityQ,rolesQ,goalConfigQ,playersUpdatedQ,currentProjectionQ])if(q.error)throw q.error
   if(!latestMetaQ.data)return {refresh_required:false,reason:"CURRENT_SIM_INPUT_META_MISSING"}
 
   const availabilityTimes=(availabilityQ.data||[])
@@ -453,12 +454,19 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
   }
 
   const sourceBenchmark=String(latestMetaQ.data.benchmark_version)
-  const [inputsQ,matchesQ]=await Promise.all([
+  const stableRoleBenchmark=String(stableMetaQ.data?.benchmark_version||sourceBenchmark)
+  const [inputsQ,matchesQ,stableInputsQ]=await Promise.all([
     sb.from("scout_replay_player_inputs").select("*").eq("gameweek",gw).eq("benchmark_version",sourceBenchmark).order("player_id"),
-    sb.from("scout_replay_match_inputs").select("*").eq("gameweek",gw).eq("benchmark_version",sourceBenchmark).order("match_id")
+    sb.from("scout_replay_match_inputs").select("*").eq("gameweek",gw).eq("benchmark_version",sourceBenchmark).order("match_id"),
+    stableRoleBenchmark===sourceBenchmark
+      ?Promise.resolve({data:null,error:null})
+      :sb.from("scout_replay_player_inputs").select("player_id,role_probability").eq("gameweek",gw).eq("benchmark_version",stableRoleBenchmark).order("player_id")
   ])
-  for(const q of [inputsQ,matchesQ])if(q.error)throw q.error
+  for(const q of [inputsQ,matchesQ,stableInputsQ])if(q.error)throw q.error
   if(!(inputsQ.data||[]).length||!(matchesQ.data||[]).length)throw new Error("CURRENT_SIM_INPUT_COVERAGE_MISSING")
+  const stableRoleMap=new Map(
+    ((stableInputsQ.data||inputsQ.data)||[]).map((x:any)=>[Number(x.player_id),n(x.role_probability,.5)])
+  )
 
   const revision=sourceRevision(latestSourceAt)
   const codeRevision=String(codeSha||"nocode").slice(0,8)
@@ -483,17 +491,17 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
 
   const inputRows=(inputsQ.data||[]).map((x:any)=>{
     const av=avMap.get(Number(x.player_id))
-    const role=roleMap.get(Number(x.player_id))
     const availability=clamp(0,1,n(av?.availability_probability,x.availability))
-    const integratedXi=n(role?.predicted_xi_probability,NaN)
-    const conditionalRole=Number.isFinite(integratedXi)&&availability>1e-6
-      ?integratedXi/availability
-      :n(x.role_probability)
+    // role_probability is a conditional lineup-selection weight, not the simulated XI result.
+    // Re-feeding the previous simulated XI into the next intraday run recursively flattens
+    // starters and inflates bench players on every refresh. Always anchor this weight to the
+    // latest non-intraday baseline; availability remains a separate multiplier in simulation.
+    const stableRole=n(stableRoleMap.get(Number(x.player_id)),n(x.role_probability,.5))
     return {
       ...x,benchmark_version:benchmark,
       availability,
-      role_probability:clamp(.000001,.999999,conditionalRole),
-      source_note:`intraday refresh from ${sourceBenchmark}; source ${latestSourceAt}`
+      role_probability:clamp(.000001,.999999,stableRole),
+      source_note:`intraday refresh from ${sourceBenchmark}; role baseline ${stableRoleBenchmark}; source ${latestSourceAt}`
     }
   })
   const matchInputs=(matchesQ.data||[]).map((x:any)=>({...x,benchmark_version:benchmark,source_note:`intraday refresh from ${sourceBenchmark}`}))
