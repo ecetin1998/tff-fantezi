@@ -65,3 +65,12 @@ jobs:
           set -euo pipefail
           curl --fail --show-error --silent --max-time 300             --header "Authorization: Bearer $OIDC_TOKEN"             "$FUNCTIONS_URL/run-staging-optimizer?mode=alternative"
           echo
+      - name: Revalidate application cache
+        if: success()
+        env:
+          REVALIDATE_SECRET: ${{ secrets.SCOUT_REVALIDATE_SECRET }}
+        run: |
+          test -n "$REVALIDATE_SECRET"
+          curl --fail --show-error --silent -X POST -H "x-revalidate-secret: $REVALIDATE_SECRET" https://fanteziligrehberi.com/api/revalidate
+          echo
+
