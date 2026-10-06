@@ -59,13 +59,7 @@ function scoreSnapshot(snapshot,pointMap,posMap){
 }
 
 export default async function Squad({searchParams}){
-  const [auth,sp,pool,recommendation,supabase]=await Promise.all([
-    getAuthState(),
-    searchParams,
-    getSquadPlayerPool(),
-    getRecommendation('recommended'),
-    createClient()
-  ])
+  const [auth,sp]=await Promise.all([getAuthState(),searchParams])
 
   if(!auth.userId)return <div className="auth-wrap"><div className="card auth-card squad-login-card">
     <span className="eyebrow">BENİM KADROM</span><h1>Kendi fantezi takımını kur</h1>
@@ -73,6 +67,11 @@ export default async function Squad({searchParams}){
     <Link className="cta" href="/login">Giriş / kayıt</Link>
   </div></div>
 
+  const [pool,recommendation,supabase]=await Promise.all([
+    getSquadPlayerPool(),
+    getRecommendation('recommended'),
+    createClient(),
+  ])
   const {players,run}=pool
   const {members:recommended}=recommendation
   const [futurePlan,pageResult]=await Promise.all([
