@@ -1,11 +1,6 @@
 const fs=require('node:fs')
 const assert=require('node:assert/strict')
 
-const proxy=fs.readFileSync('proxy.js','utf8')
-const expected=['/squad/:path*','/login/:path*','/reset-password/:path*','/confirm-email/:path*','/auth/:path*','/pricing/:path*']
-for(const matcher of expected)assert.equal(proxy.includes("'"+matcher+"'"),true)
-assert.equal(proxy.includes("'/((?!_next"),false)
-for(const publicRoute of ['/players','/points','/matches','/teams','/squads','/availability','/roles','/backtest','/sss']){
-  assert.equal(proxy.includes("'"+publicRoute+"/:path*'"),false)
-}
-console.log('proxyMatcher: Cloudflare middleware session refresh limited to auth/private surfaces')
+assert.equal(fs.existsSync('proxy.js'),false,'Global auth proxy should stay removed: route handlers/pages enforce auth and OpenNext Node proxy adds an unnecessary request/bundle.')
+assert.equal(fs.existsSync('middleware.js'),false,'Legacy middleware must not return.')
+console.log('proxyMatcher: no global auth middleware/proxy; auth remains route-scoped')
