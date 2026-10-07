@@ -11,7 +11,7 @@ export default function AvailabilityTable({ rows, freshnessAt=null }){
   const [team,setTeam]=useState('')
   const [type,setType]=useState('')
   const [q,setQ]=useState('')
-  const [sort,setSort]=useState('status')
+  const [sort,setSort]=useState({key:null,dir:'asc'})
 
   const teams=useMemo(()=>[...new Set((rows||[]).map(r=>r.team).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'tr')),[rows])
   const filtered=useMemo(()=>rows.filter(r=>
@@ -22,8 +22,10 @@ export default function AvailabilityTable({ rows, freshnessAt=null }){
 
   const eventDate=r=>r.availability_type==='suspensions'?r.suspension_end:r.injury_date
   const returnLabel=r=>r.availability_type==='suspensions'?(r.suspension_fixture||''):availabilityReturnLabel(r)
-  if(sort==='event')filtered.sort((a,b)=>String(eventDate(b)||'').localeCompare(String(eventDate(a)||'')))
-  if(sort==='return')filtered.sort((a,b)=>String(a.expected_return_date||a.suspension_end||'9999').localeCompare(String(b.expected_return_date||b.suspension_end||'9999')))
+  const sortValue=(r,key)=>key==='event'?String(eventDate(r)||''):String(r.expected_return_date||r.suspension_end||'')
+  if(sort.key)filtered.sort((a,b)=>{const av=sortValue(a,sort.key),bv=sortValue(b,sort.key); if(!av)return 1;if(!bv)return -1;const n=av.localeCompare(bv);return sort.dir==='asc'?n:-n})
+  const toggleSort=key=>setSort(s=>s.key===key?{key,dir:s.dir==='asc'?'desc':'asc'}:{key,dir:'asc'})
+  const arrow=key=>sort.key===key?(sort.dir==='asc'?' ↑':' ↓'):' ↕'
 
   const injuryCount=(rows||[]).filter(r=>r.availability_type==='injuries').length
   const suspensionCount=(rows||[]).filter(r=>r.availability_type==='suspensions').length
@@ -50,9 +52,6 @@ export default function AvailabilityTable({ rows, freshnessAt=null }){
         <option value="suspensions">Ceza</option>
         <option value="risk">Riskli</option>
       </select>
-      <select value={sort} onChange={e=>setSort(e.target.value)}>
-        <option value="status">Duruma göre</option><option value="event">Sakatlık / ceza zamanı</option><option value="return">Beklenen dönüş</option>
-      </select>
     </div>
 
     <div className="table-summary availability-summary">
@@ -63,7 +62,7 @@ export default function AvailabilityTable({ rows, freshnessAt=null }){
     <div className="card table-wrap availability-table-wrap"><table className="availability-table-v2">
       <thead><tr>
         <th>#</th><th>Oyuncu</th><th>Takım</th><th>Mevki</th><th>Durum</th><th>Oynama %</th>
-        <th>Detay</th><th>Sakatlık / ceza zamanı</th><th>Beklenen dönüş</th>
+        <th>Detay</th><th><button type="button" className="table-sort-button" onClick={()=>toggleSort('event')}>Sakatlık / ceza zamanı{arrow('event')}</button></th><th><button type="button" className="table-sort-button" onClick={()=>toggleSort('return')}>Beklenen dönüş{arrow('return')}</button></th>
       </tr></thead>
       <tbody>{filtered.map((r,i)=>{
         return <tr key={`${r.player_id}-${i}`}>
