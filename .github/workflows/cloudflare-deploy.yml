@@ -1,9 +1,10 @@
 name: Cloudflare Workers deploy
 
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
+
+# Production deploys are explicit. This prevents every tiny main/UI commit from
+# rebuilding and bulk-populating the remote KV incremental cache.
 
 permissions:
   contents: read
