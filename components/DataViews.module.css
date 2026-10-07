@@ -3823,3 +3823,16 @@
   .scope :global(.range-bound){font-size:7.5px}
   .scope :global(.range-actual-label){top:41px;font-size:8.5px}
 }
+
+
+/* Desktop data-table readability: player analysis + weekly fantasy points. */
+@media(min-width:761px){
+  .scope :global(.desktop-player-table) table,
+  .scope :global(.simplified-weekly-table) table{font-size:11.5px}
+  .scope :global(.desktop-player-table) th,
+  .scope :global(.simplified-weekly-table) th{font-size:9.5px}
+  .scope :global(.desktop-player-table) td,
+  .scope :global(.simplified-weekly-table) td{font-size:11.5px;line-height:1.35}
+  .scope :global(.desktop-player-table) td b,
+  .scope :global(.simplified-weekly-table) td b{font-size:12px}
+}
