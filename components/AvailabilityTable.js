@@ -62,7 +62,7 @@ export default function AvailabilityTable({ rows, freshnessAt=null }){
     <div className="card table-wrap availability-table-wrap"><table className="availability-table-v2">
       <thead><tr>
         <th>#</th><th>Oyuncu</th><th>Takım</th><th>Mevki</th><th>Durum</th><th>Oynama %</th>
-        <th>Detay</th><th><button type="button" className="table-sort-button" onClick={()=>toggleSort('event')}>Sakatlık / ceza zamanı{arrow('event')}</button></th><th><button type="button" className="table-sort-button" onClick={()=>toggleSort('return')}>Beklenen dönüş{arrow('return')}</button></th>
+        <th>Detay</th><th><button type="button" style={{appearance:'none',border:0,background:'transparent',padding:0,margin:0,font:'inherit',fontWeight:'inherit',color:'inherit',textAlign:'left',cursor:'pointer'}} onClick={()=>toggleSort('event')}>Sakatlık / ceza zamanı{arrow('event')}</button></th><th><button type="button" style={{appearance:'none',border:0,background:'transparent',padding:0,margin:0,font:'inherit',fontWeight:'inherit',color:'inherit',textAlign:'left',cursor:'pointer'}} onClick={()=>toggleSort('return')}>Beklenen dönüş{arrow('return')}</button></th>
       </tr></thead>
       <tbody>{filtered.map((r,i)=>{
         return <tr key={`${r.player_id}-${i}`}>
