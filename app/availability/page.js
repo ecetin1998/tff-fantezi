@@ -17,7 +17,7 @@ export default async function Availability(){
       </div>
       <span className="muted">{auth.tier==='visitor'?visibleRows.length+'/'+rows.length+' önizleme':rows.length+' kayıt'}</span>
     </div>
-    <AvailabilityTable rows={visibleRows}/>
+    <AvailabilityTable rows={visibleRows} freshnessAt={run?.availability_checked_at||null}/>
     {auth.tier==='visitor'&&rows.length>visibleRows.length?<AccessGate
       compact
       tier="member"

@@ -1,16 +1,17 @@
 'use client'
 import { useMemo, useState } from 'react'
 import Link from 'next/link'
-import { availabilityDetailLine, availabilityStatusLabel } from '@/lib/availability'
+import { availabilityDateLabel, availabilityReturnLabel, availabilityReason, availabilityStatusLabel } from '@/lib/availability'
 import {playerLabel} from '@/lib/playerPresentation'
 
 const posLabel=p=>({GK:'KL',DEF:'DEF',MID:'OS',FWD:'FOR'}[p]||p||'—')
 const fmtUpdate=value=>value?new Intl.DateTimeFormat('tr-TR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit',timeZone:'Europe/Istanbul'}).format(new Date(value)):'—'
 
-export default function AvailabilityTable({ rows }){
+export default function AvailabilityTable({ rows, freshnessAt=null }){
   const [team,setTeam]=useState('')
   const [type,setType]=useState('')
   const [q,setQ]=useState('')
+  const [sort,setSort]=useState('status')
 
   const teams=useMemo(()=>[...new Set((rows||[]).map(r=>r.team).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'tr')),[rows])
   const filtered=useMemo(()=>rows.filter(r=>
@@ -19,17 +20,22 @@ export default function AvailabilityTable({ rows }){
     (!q||(`${r.player?.full_name||''} ${r.player?.short_label||''} ${r.team||''} ${r.canonical_reason||''} ${r.suspension_fixture||''}`).toLocaleLowerCase('tr').includes(q.toLocaleLowerCase('tr')))
   ),[rows,team,type,q])
 
+  const eventDate=r=>r.availability_type==='suspensions'?r.suspension_end:r.injury_date
+  const returnLabel=r=>r.availability_type==='suspensions'?(r.suspension_fixture||''):availabilityReturnLabel(r)
+  if(sort==='event')filtered.sort((a,b)=>String(eventDate(b)||'').localeCompare(String(eventDate(a)||'')))
+  if(sort==='return')filtered.sort((a,b)=>String(a.expected_return_date||a.suspension_end||'9999').localeCompare(String(b.expected_return_date||b.suspension_end||'9999')))
+
   const injuryCount=(rows||[]).filter(r=>r.availability_type==='injuries').length
   const suspensionCount=(rows||[]).filter(r=>r.availability_type==='suspensions').length
   const riskCount=(rows||[]).filter(r=>Number(r.availability_probability)>0&&Number(r.availability_probability)<1).length
-  const latestCheckedAt=(rows||[]).map(r=>r.checked_at).filter(Boolean).sort((a,b)=>new Date(b)-new Date(a))[0]||null
+  const latestCheckedAt=freshnessAt||(rows||[]).map(r=>r.checked_at).filter(Boolean).sort((a,b)=>new Date(b)-new Date(a))[0]||null
 
   return <>
     <section className="availability-overview-grid">
       <div className="card"><span>Sakatlık</span><b>{injuryCount}</b><small>takip edilen oyuncu</small></div>
       <div className="card"><span>Ceza</span><b>{suspensionCount}</b><small>maç cezası kaydı</small></div>
       <div className="card"><span>Riskli</span><b>{riskCount}</b><small>oynama ihtimali düşmüş oyuncu</small></div>
-      <div className="card availability-updated-card"><span>Son güncelleme</span><b>{latestCheckedAt?fmtUpdate(latestCheckedAt).split(' ')[1]:'—'}</b><small>{latestCheckedAt?fmtUpdate(latestCheckedAt).split(' ')[0]:'veri zamanı yok'}</small></div>
+      <div className="card availability-updated-card"><span>Son veri kontrolü</span><b>{latestCheckedAt?fmtUpdate(latestCheckedAt).split(' ')[1]:'—'}</b><small>{latestCheckedAt?fmtUpdate(latestCheckedAt).split(' ')[0]:'veri zamanı yok'}</small></div>
     </section>
 
     <div className="filters availability-filters">
@@ -44,6 +50,9 @@ export default function AvailabilityTable({ rows }){
         <option value="suspensions">Ceza</option>
         <option value="risk">Riskli</option>
       </select>
+      <select value={sort} onChange={e=>setSort(e.target.value)}>
+        <option value="status">Duruma göre</option><option value="event">Sakatlık / ceza zamanı</option><option value="return">Beklenen dönüş</option>
+      </select>
     </div>
 
     <div className="table-summary availability-summary">
@@ -54,7 +63,7 @@ export default function AvailabilityTable({ rows }){
     <div className="card table-wrap availability-table-wrap"><table className="availability-table-v2">
       <thead><tr>
         <th>#</th><th>Oyuncu</th><th>Takım</th><th>Mevki</th><th>Durum</th><th>Oynama %</th>
-        <th>Sakatlık / ceza detayı</th>
+        <th>Detay</th><th>Sakatlık / ceza zamanı</th><th>Beklenen dönüş</th>
       </tr></thead>
       <tbody>{filtered.map((r,i)=>{
         return <tr key={`${r.player_id}-${i}`}>
@@ -64,14 +73,14 @@ export default function AvailabilityTable({ rows }){
           <td><span className={`pos ${r.player?.position}`}>{posLabel(r.player?.position)}</span></td>
           <td><span className={`status-chip ${r.availability_type||''}`}>{availabilityStatusLabel(r)}</span></td>
           <td>{(Number(r.availability_probability??1)*100).toFixed(0)}%</td>
-          <td className="availability-note-cell"><b>{availabilityDetailLine(r)||'—'}</b></td>
+          <td className="availability-note-cell"><b>{availabilityReason(r)||'—'}</b></td><td>{availabilityDateLabel(eventDate(r))||'—'}</td><td>{returnLabel(r)||'—'}</td>
         </tr>
       })}</tbody>
     </table></div>
 
     <div className="availability-card-list">
       {filtered.map((r,i)=>{
-        const note=availabilityDetailLine(r)
+        const note=availabilityReason(r)
         return <Link href={'/players/'+r.player_id} className="card availability-mobile-card" key={'mobile-'+r.player_id+'-'+i}>
           <div className="availability-mobile-head">
             <span className={`pos ${r.player?.position}`}>{posLabel(r.player?.position)}</span>
@@ -80,7 +89,7 @@ export default function AvailabilityTable({ rows }){
           </div>
           <p>{note||'Detay yok'}</p>
           <div className="availability-mobile-meta">
-            <span><small>Oynama</small><b>{(Number(r.availability_probability??1)*100).toFixed(0)}%</b></span>
+            <span><small>Oynama</small><b>{(Number(r.availability_probability??1)*100).toFixed(0)}%</b></span><span><small>Sakatlık / ceza</small><b>{availabilityDateLabel(eventDate(r))||'—'}</b></span><span><small>Beklenen dönüş</small><b>{returnLabel(r)||'—'}</b></span>
           </div>
         </Link>
       })}
