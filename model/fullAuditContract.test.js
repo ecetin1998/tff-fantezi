@@ -46,7 +46,8 @@ assert.match(data,/matches:fixtures/)
 assert.match(data,/currentMatches:fixtures/)
 
 const passwordSecurity=read('lib/passwordSecurity.js')
-assert.match(passwordSecurity,/return 'password_check_failed'/,'Password breach-check outages must fail closed.')
+assert.match(passwordSecurity,/length\s*<\s*8/,'Passwords must be at least eight characters.')
+assert.doesNotMatch(passwordSecurity,/pwnedpasswords|createHash|fetch\(/,'Password validation must not depend on a breach-check service.')
 
 const pitch=read('components/SquadPitchView.js')
 assert.match(pitch,/function displayName\(player\)\{ return pitchPlayerLabel\(player\) \}/)
