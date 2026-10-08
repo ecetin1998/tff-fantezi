@@ -41,3 +41,11 @@
 @keyframes route-loading-slide{0%{transform:translateX(-110%)}65%{transform:translateX(185%)}100%{transform:translateX(185%)}}
 @media(max-width:760px){.route-loading{padding-top:18px}.route-loading-grid{grid-template-columns:1fr}.route-loading-grid>div{height:128px}}
 @media(prefers-reduced-motion:reduce){.route-loading-bar,.route-loading-title,.route-loading-grid>div{animation:none}}
+
+/* Signup password visibility control */
+.signup-password-field{display:grid;gap:6px}
+.signup-password-input{position:relative;display:flex;align-items:center}
+.auth-form .signup-password-input input{width:100%;padding-right:80px;min-width:0}
+.signup-password-toggle{position:absolute;right:9px;top:50%;transform:translateY(-50%);border:0;background:transparent;color:inherit;font:inherit;font-size:13px;font-weight:700;cursor:pointer;padding:8px;min-height:36px}
+.signup-password-toggle:hover,.signup-password-toggle:focus-visible{text-decoration:underline}
+.signup-password-hint{color:var(--muted,#a5adba);font-size:12px;line-height:1.5}

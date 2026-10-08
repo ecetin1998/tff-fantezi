@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import SignupPasswordField from '@/components/SignupPasswordField'
 import {resendConfirmation,signup} from '@/app/actions'
 
 export const metadata={
@@ -34,7 +35,7 @@ export default async function Signup({searchParams}){
 
     <form className="auth-form" action={signup}>
       <label>E-posta<input name="email" type="email" autoComplete="email" placeholder="E-posta adresin" required/></label>
-      <label>Şifre<input name="password" type="password" autoComplete="new-password" minLength="8" required/></label>
+      <SignupPasswordField/>
       <button className="cta" type="submit">Hesap oluştur</button>
     </form>
 
