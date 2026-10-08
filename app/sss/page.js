@@ -31,7 +31,6 @@ const menuItems=[
   ['/teams', 'Takım Analizi', 'Takımları haftanın rakibi, ev/deplasman, bu hafta xG, rakip xG, galibiyet, gol yememe, takım toplam xFP ve hücum/savunma eşleşmesine göre karşılaştırır ve filtrelersin.'],
   ['/availability', 'Sakatlık / Ceza Durumu', 'Sakat, cezalı, dönüş yapan veya oynama ihtimali düşen oyuncuların güncel uygunluk durumunu takip edersin.'],
   ['/roles', 'Rol & Dakika Takibi', 'İlk 11 ve dakika rolü yükselen/düşen oyuncuları, son maçlardaki kullanım değişimiyle birlikte görürsün.'],
-  ['/backtest', 'Model Performansı', 'Güncel modelin geçmiş haftalardaki geriye dönük test sonuçlarını, canlı dondurulmuş tahminleri ve öğrenme sinyallerini ayrı ayrı incelersin.'],
   ['/pricing', 'Gelişmiş Üyelik', 'Deneme dönemindeki gelişmiş üyelik planını ve planlanan gelişmiş özellikleri görürsün. Şu anda gelişmiş üyelik talebi bekleme listesi üzerinden toplanıyor.'],
 ]
 
@@ -77,7 +76,6 @@ const faqs=[
   ['Maç Tahminlerinde xG ve Ev sahibi/Beraberlik/Deplasman ne anlatıyor?', 'xG takımların üretmesi beklenen gol kalitesini; üçlü olasılık barı ise ev sahibi galibiyeti, beraberlik ve deplasman galibiyeti ihtimallerini gösterir. Bunlar kesin skor iddiası değil, olasılık dağılımının özetidir.'],
   ['Model hangi veriyi kullanıyor?', 'Model; güncel sezon performansı, takım hücum-savunma profili, oyuncu rolü ve dakika beklentisi, ilk 11 ihtimali, sakatlık/ceza durumu, fikstür, ev-deplasman, geçmiş fantezi çıktıları ve oyuncunun takım içindeki gol/asist payı gibi sinyalleri birlikte değerlendirir.'],
   ['Tahminler ne zaman güncelleniyor?', 'Yayındaki model yalnız yeni veri ve model zinciri gerekli kalite kontrollerini geçtiğinde değiştirilir. Yeni aday sürüm veri bütünlüğü ve kalite kontrollerinden geçer; başarısız olursa önceki çalışan sürüm korunur.'],
-  ['Model Performansı sayfası ne işe yarıyor?', 'Model Performansı tahmin sisteminin kendisini denetler. Güncel modelin geçmiş haftalarda sonucu görmeden nasıl davranacağını ölçen geriye dönük testler ile maç öncesi dondurulan canlı tahminleri ayrı gösterir.'],
   ['Siteyi kullanmak için hesap açmak gerekiyor mu?', 'Hayır. Ziyaretçi olarak Oyuncu Analizi’nde xFP’ye göre ilk 15 oyuncuyu ve Maç Tahminleri’nde haftanın öne çıkan tek maçını görebilirsin. Ücretsiz hesap açınca tüm temel oyuncu havuzu, filtreler, tüm maç tahminleri ve Benim Kadrom açılır. Gelişmiş üyelik ise P25/P90, 6+ ihtimali, xG/xA, gelişmiş rol-dakika, Agresif 11 ve menajer kartı optimizasyonu gibi ileri analizleri açar.'],
   ['Gelişmiş üyelik şu anda aktif ücretli üyelik mi?', 'Deneme döneminde temel özellikler ücretsizdir. Gelişmiş üyelik için hedef özellikler ve hedef fiyat gösteriliyor; şu anda ücretli satış yerine gelişmiş üyelik talebi bekleme listesi üzerinden ölçülüyor.'],
 ]
