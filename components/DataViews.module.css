@@ -3836,3 +3836,13 @@
   .scope :global(.desktop-player-table) td b,
   .scope :global(.simplified-weekly-table) td b{font-size:12px}
 }
+
+/* Readable desktop labels for dense role analysis without changing grid sizing. */
+@media(min-width:901px){
+.scope :global(.role-summary-grid) span{font-size:var(--type-caption);line-height:1.35}
+.scope :global(.role-summary-grid) small{font-size:var(--type-caption);line-height:1.4}
+.scope :global(.role-change-head)>div small{font-size:var(--type-caption);line-height:1.35}
+.scope :global(.role-change-head) em{font-size:var(--type-caption);line-height:1.3;white-space:normal}
+.scope :global(.role-change-metrics) small{font-size:var(--type-caption);line-height:1.35}
+.scope :global(.role-decision-table) :global(.signal){font-size:var(--type-caption);line-height:1.3}
+}
