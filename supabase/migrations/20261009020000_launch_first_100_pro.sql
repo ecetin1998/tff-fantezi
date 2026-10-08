@@ -1,4 +1,4 @@
--- First 100 waitlist accounts receive free launch Pro after verified email.
+-- First 100 waitlist accounts receive free launch Pro through the 2026-27 season after verified email.
 -- Existing applicants retain their chronological position.
 create or replace function public.scout_claim_launch_pro()
 returns jsonb
@@ -10,8 +10,10 @@ declare
   v_email text;
   v_verified boolean;
   v_existing record;
+  v_end constant timestamptz := '2027-07-01 00:00:00+03'::timestamptz;
 begin
   if v_uid is null then raise exception 'Authentication required'; end if;
+  if now() >= v_end then return jsonb_build_object('status','ended'); end if;
   perform pg_advisory_xact_lock(20261009, 100);
   insert into public.scout_pro_interest(user_id,source)
     values(v_uid,'pricing')
@@ -32,9 +34,9 @@ begin
     and (v_existing.valid_until is null or v_existing.valid_until>now())
   then return jsonb_build_object('status','activated'); end if;
   insert into public.scout_subscriptions(user_id,plan,status,provider,valid_until,updated_at)
-  values(v_uid,'pro','active','launch100',null,now())
+  values(v_uid,'pro','active','launch100',v_end,now())
   on conflict (user_id) do update set
-    plan='pro',status='active',provider='launch100',valid_until=null,updated_at=now()
+    plan='pro',status='active',provider='launch100',valid_until=v_end,updated_at=now()
   where public.scout_subscriptions.provider is null
     or public.scout_subscriptions.provider='launch100'
     or public.scout_subscriptions.status not in ('active','trialing');
