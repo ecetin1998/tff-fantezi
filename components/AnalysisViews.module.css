@@ -2536,3 +2536,13 @@
     line-height:1.55 !important;
   }
 }
+
+/* Consistent information hierarchy in model-performance analysis at 100% zoom. */
+@media(min-width:901px){
+.scope :global(.backtest-summary-grid) span,.scope :global(.backtest-summary-grid) small{font-size:var(--type-caption);line-height:1.35}
+.scope :global(.backtest-explainer) p{font-size:var(--type-caption);line-height:1.5}
+.scope :global(.backtest-page) :global(.panel-head)>small{font-size:var(--type-caption);line-height:1.4}
+.scope :global(.backtest-table) th{font-size:var(--type-caption)}
+.scope :global(.backtest-table){font-size:var(--type-caption)}
+.scope :global(.backtest-mode){font-size:var(--type-caption);line-height:1.3}
+}
