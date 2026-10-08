@@ -3,7 +3,8 @@ import { getHomeOverview } from '@/lib/data'
 import { teamCssVars, teamHref } from '@/lib/teamThemes'
 import {playerLabel} from '@/lib/playerPresentation'
 
-export const revalidate=300
+// Do not cache a timestamp-dependent freshness badge in ISR/KV.
+export const dynamic='force-dynamic'
 
 export default async function Home(){
   const overview=await getHomeOverview()
