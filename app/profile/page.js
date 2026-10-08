@@ -1,6 +1,8 @@
 import Link from 'next/link'
 import AccessGate from '@/components/AccessGate'
 import ProfilePasswordForm from '@/components/ProfilePasswordForm'
+import {sendProfileEmailVerification} from '@/app/actions'
+import {createClient} from '@/lib/supabase/server'
 import {getAuthState} from '@/lib/data'
 
 export const metadata={
@@ -13,8 +15,8 @@ const dummyAliases={
   'dummy.pro.20261001@example.com':'adminpro',
 }
 
-export default async function Profile(){
-  const auth=await getAuthState()
+export default async function Profile({searchParams}){
+  const [auth,sp]=await Promise.all([getAuthState(),searchParams])
 
   if(!auth.signedIn){
     return <div className="profile-page">
@@ -30,6 +32,11 @@ export default async function Profile(){
     </div>
   }
 
+  const supabase=await createClient()
+  const {data:{user}}=await supabase.auth.getUser()
+  const {data:verification}=user?await supabase.from('scout_email_verifications').select('email').eq('user_id',user.id).maybeSingle():{data:null}
+  const emailVerified=Boolean(verification?.email && verification.email===user?.email)
+  const verificationMessage={sent:'Doğrulama bağlantısı e-posta adresine gönderildi.',success:'E-posta adresin doğrulandı.',already:'E-posta adresin zaten doğrulanmış.',invalid:'Bağlantı geçersiz veya süresi dolmuş. Yeni bağlantı iste.',send_failed:'E-posta gönderilemedi. Biraz sonra tekrar dene.',configuration:'Doğrulama henüz yapılandırılmadı.',save_failed:'Doğrulama kaydedilemedi. Lütfen tekrar dene.'}[String(sp?.verification||'')]
   const isPro=auth.plan==='pro'
   const accountName=dummyAliases[auth.email]||auth.email?.split('@')[0]||'Kullanıcı'
   const features=isPro
@@ -48,6 +55,7 @@ export default async function Profile(){
         <div className="profile-info-list">
           <div className="profile-info-row"><span>Kullanıcı</span><b>{accountName}</b></div>
           <div className="profile-info-row"><span>E-posta</span><b>{auth.email||'—'}</b></div>
+          <div className="profile-info-row"><span>E-posta doğrulaması</span><b>{emailVerified?'Doğrulandı':'Doğrulanmadı'}</b></div>
           <div className="profile-info-row"><span>Hesap durumu</span><b className="profile-active">Aktif</b></div>
           <div className="profile-info-row"><span>Üyelik</span><b>{isPro?'Gelişmiş üyelik':'Ücretsiz üye'}</b></div>
         </div>
@@ -59,6 +67,14 @@ export default async function Profile(){
         <ul className="profile-feature-list">{features.map(item=><li key={item}>{item}</li>)}</ul>
       </section>
     </div>
+
+    <section className="card profile-card" style={{marginTop:16}}>
+      <span className="eyebrow">E-POSTA GÜVENLİĞİ</span>
+      <h2>{emailVerified?"E-posta adresin doğrulandı":"E-posta adresin henüz doğrulanmadı"}</h2>
+      <p className="muted">{emailVerified?"Pro üyelik için e-posta doğrulaman hazır.":"Ücretsiz üyeliğini kullanmaya devam edebilirsin. Pro üyelik için e-posta adresini doğrulaman gerekecek."}</p>
+      {verificationMessage?<p role="status">{verificationMessage}</p>:null}
+      {!emailVerified?<form action={sendProfileEmailVerification}><button className="secondary" type="submit">E-postamı doğrula</button></form>:null}
+    </section>
 
     <section className="card profile-card" style={{marginTop:16}}>
       <span className="eyebrow">GÜVENLİK</span>
