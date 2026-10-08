@@ -16,13 +16,48 @@ export default function PlayersTable({players,total,page,pageCount,teams,filters
   const [tier,setTier]=useState(accessTier)
   const [localFilters,setLocalFilters]=useState(filters||{})
   const [pool,setPool]=useState(players)
+  const [overlayError,setOverlayError]=useState(false)
   const isPro=tier==='pro'
   const isVisitor=tier==='visitor'
   const activeFilters=staticPool?localFilters:filters
   const [q,setQ]=useState(filters?.q||'')
 
   useEffect(()=>{if(!staticPool)setQ(activeFilters?.q||'')},[activeFilters?.q,staticPool])
-  useEffect(()=>{if(!staticPool)return;const p=new URLSearchParams(window.location.search);const next={q:p.get('q')||'',team:p.get('team')||'',pos:p.get('pos')||'',sort:p.get('sort')||'xfp',dir:p.get('dir')||'desc',page:Number(p.get('page')||1)};setLocalFilters(next);setQ(next.q);fetch('/api/access',{cache:'no-store'}).then(r=>r.json()).then(async a=>{setTier(a.tier||'visitor');if(a.plan==='pro'){const res=await fetch('/api/pro-player-overlay',{cache:'no-store'});if(res.ok){const d=await res.json();if(!runId||!d.run_id||d.run_id===runId){const overlay=new Map((d.rows||[]).map(x=>[Number(x.player_id),x]));setPool(current=>current.map(p=>{const x=overlay.get(Number(p.id));return x?{...p,projection:{...p.projection,p25:x.p25,p75:x.p75,p90:x.p90,six_plus_probability:x.six_plus_probability,expected_goals:x.expected_goals,expected_assists:x.expected_assists,top25_score:x.top25_score,top25_rank:x.top25_rank}}:p}))}}}}).catch(()=>{})},[staticPool,runId])
+  useEffect(()=>{
+    if(!staticPool)return
+    let cancelled=false
+    const p=new URLSearchParams(window.location.search)
+    const next={q:p.get('q')||'',team:p.get('team')||'',pos:p.get('pos')||'',sort:p.get('sort')||'xfp',dir:p.get('dir')||'desc',page:Number(p.get('page')||1)}
+    setLocalFilters(next)
+    setQ(next.q)
+    setPool(players)
+    setOverlayError(false)
+    async function loadOverlay(){
+      try{
+        const accessResponse=await fetch('/api/access',{cache:'no-store'})
+        if(!accessResponse.ok)throw new Error('Access check failed')
+        const access=await accessResponse.json()
+        if(cancelled)return
+        setTier(access.tier||'visitor')
+        if(access.plan!=='pro')return
+        const response=await fetch('/api/pro-player-overlay',{cache:'no-store'})
+        if(!response.ok)throw new Error('Pro metrics request failed')
+        const data=await response.json()
+        if(runId&&data.run_id!==runId)throw new Error('Model run mismatch')
+        if(!Array.isArray(data.rows))throw new Error('Invalid metrics response')
+        if(cancelled)return
+        const overlay=new Map(data.rows.map(x=>[Number(x.player_id),x]))
+        setPool(current=>current.map(player=>{
+          const extra=overlay.get(Number(player.id))
+          return extra?{...player,projection:{...player.projection,p25:extra.p25,p75:extra.p75,p90:extra.p90,six_plus_probability:extra.six_plus_probability,expected_goals:extra.expected_goals,expected_assists:extra.expected_assists,top25_score:extra.top25_score,top25_rank:extra.top25_rank}}:player
+        }))
+      }catch{
+        if(!cancelled)setOverlayError(true)
+      }
+    }
+    loadOverlay()
+    return()=>{cancelled=true}
+  },[staticPool,runId,players])
 
   const navigate=useCallback(patch=>{
     const next={...(activeFilters||{}),...patch}
@@ -45,8 +80,8 @@ export default function PlayersTable({players,total,page,pageCount,teams,filters
     navigate({sort:key,dir:same&&activeFilters?.dir==='desc'?'asc':'desc',page:1})
   }
   const head=(key,label)=><th onClick={()=>changeSort(key)}>{label}{activeFilters?.sort===key?<span className="sortmark">{activeFilters?.dir==='asc'?' ↑':' ↓'}</span>:null}</th>
-  const pct=v=>String((Number(v||0)*100).toFixed(0))+'%'
-  const num=(v,d=2)=>Number(v||0).toFixed(d)
+  const pct=v=>v===null||v===undefined||v===''?'—':String((Number(v)*100).toFixed(0))+'%'
+  const num=(v,d=2)=>v===null||v===undefined||v===''?'—':Number(v).toFixed(d)
   const playerNote=p=>{
     const a=p.availability
     if(!a)return ''
@@ -75,6 +110,7 @@ export default function PlayersTable({players,total,page,pageCount,teams,filters
     </div>:null}
 
     <div className="table-summary">{isVisitor?<><b>İlk {visiblePlayers.length}</b> oyuncu • xFP sıralaması • tüm oyuncu havuzu ücretsiz üyelikle açılır</>:<><b>{effectiveTotal}</b> oyuncu • {isPro?'Gelişmiş analiz görünümü':'ücretsiz üye görünümü'}</>}</div>
+    {isPro&&overlayError?<div className="alert error" role="alert">Gelişmiş istatistikler yüklenemedi. Güncel veriler için sayfayı yenile.</div>:null}
     <div className="projection-legend">
       Karar metrikleri: <b>İlk 11</b> + <b>xDakika</b> oynama ihtimalini, <b>xFP</b> ortalama beklentiyi gösterir.
       {isPro?<span> <b>P25/P90</b>, <b>6+</b>, <b>xG</b> ve <b>xA</b> Gelişmiş üyelik dağılım/üretim katmanlarıdır.</span>:<span> Puan dağılımı, 6+ ihtimali ve xG/xA detayları Gelişmiş üyelikte açılır.</span>}
