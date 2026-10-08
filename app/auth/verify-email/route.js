@@ -10,10 +10,10 @@ export async function GET(request){
   const code=url.searchParams.get('code')
   const token_hash=url.searchParams.get('token_hash')
   const type=url.searchParams.get('type')
-  if(!code && !(token_hash && type==='email'))return redirect('invalid')
+  if(!code && !(token_hash && ['email','magiclink'].includes(type)))return redirect('invalid')
   const result=code
     ?await supabase.auth.exchangeCodeForSession(code)
-    :await supabase.auth.verifyOtp({type:'email',token_hash})
+    :await supabase.auth.verifyOtp({type,token_hash})
   if(result.error)return redirect('invalid')
   const {data:{user},error}=await supabase.auth.getUser()
   if(error||!user?.id||!user?.email)return redirect('invalid')
