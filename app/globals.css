@@ -49,3 +49,11 @@
 .signup-password-toggle{position:absolute;right:9px;top:50%;transform:translateY(-50%);border:0;background:transparent;color:inherit;font:inherit;font-size:13px;font-weight:700;cursor:pointer;padding:8px;min-height:36px}
 .signup-password-toggle:hover,.signup-password-toggle:focus-visible{text-decoration:underline}
 .signup-password-hint{color:var(--muted,#a5adba);font-size:12px;line-height:1.5}
+
+
+/* One-time successful registration dialog */
+.signup-success-overlay{position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.68);display:grid;place-items:center;padding:20px}
+.signup-success-dialog{width:min(440px,100%);display:grid;gap:14px;box-shadow:0 24px 90px rgba(0,0,0,.35);outline:none}
+.signup-success-dialog h2{margin:0;font-size:clamp(23px,4vw,30px)}
+.signup-success-dialog p{margin:0;line-height:1.6}
+.signup-success-dialog .cta{justify-self:end;min-width:110px;cursor:pointer}

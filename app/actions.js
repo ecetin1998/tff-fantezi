@@ -80,15 +80,17 @@ async function getSiteUrl(){
 
 export async function signup(formData){
   const supabase=await createClient()
-  const siteUrl=await getSiteUrl()
   const email=String(formData.get('email')||'').trim()
   const password=String(formData.get('password')||'')
   if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))redirect('/signup?error=email_required')
   const passwordPolicy=await passwordPolicyCode(password)
   if(passwordPolicy)redirect('/signup?error='+passwordPolicy)
-  const {error}=await supabase.auth.signUp({email,password,options:{emailRedirectTo:siteUrl+'/confirm-email'}})
+  const {data,error}=await supabase.auth.signUp({email,password})
   if(error)redirect('/signup?error='+authErrorCode(error))
-  redirect('/signup?message=check_email')
+  // Requires Supabase Auth > Providers > Email > Confirm email = OFF.
+  // Never claim registration succeeded if the provider still requires confirmation.
+  if(!data?.session)redirect('/signup?error=signup_session_unavailable')
+  redirect('/?signup=success')
 }
 
 export async function resendConfirmation(formData){
