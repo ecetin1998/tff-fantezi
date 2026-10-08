@@ -24,5 +24,8 @@ export async function GET(request){
   const {error:writeError}=await admin.from('scout_email_verifications')
     .upsert({user_id:user.id,email:user.email,verified_at:new Date().toISOString()},{onConflict:'user_id'})
   if(writeError)return redirect('save_failed')
+  // Activate a reserved launch slot after mailbox ownership is proven.
+  const {error:claimError}=await supabase.rpc('scout_claim_launch_pro')
+  if(claimError)console.error('Launch Pro claim failed after verification:',claimError.code)
   return redirect('success')
 }
