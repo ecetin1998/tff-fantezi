@@ -2114,3 +2114,14 @@
 .scope :global(.squad-tool-btn){font-size:var(--type-label);line-height:1.3;white-space:normal}
 .scope :global(.squad-stage-legend){font-size:var(--type-caption);line-height:1.35}
 }
+
+/* Squad workspace: readable controls and supporting copy without resizing pitch markers. */
+.scope :global(.squad-deadline-status)>span,.scope :global(.squad-deadline-status)>small,.scope :global(.squad-stage-legend),.scope :global(.squad-validity),.scope :global(.squad-model-guidance) small{font-size:var(--type-caption);line-height:1.4}
+.scope :global(.squad-control-stat)>span,.scope :global(.squad-formation-control)>span,.scope :global(.player-picker-head) small,.scope :global(.squad-history-head) small{font-size:var(--type-caption);line-height:1.4}
+.scope :global(.squad-tool-btn),.scope :global(.squad-save-btn){font-size:var(--type-label);line-height:1.35}
+@media(max-width:760px){
+.scope :global(.squad-control-strip)>*,.scope :global(.squad-toolbar)>*,.scope :global(.player-picker-head)>*,.scope :global(.squad-history-head)>*{min-width:0}
+.scope :global(.squad-tool-btn){white-space:normal;overflow-wrap:anywhere}
+.scope :global(.squad-formation-control) select{font-size:16px}
+.scope :global(.squad-stage-legend),.scope :global(.squad-validity){white-space:normal;overflow-wrap:anywhere}
+}

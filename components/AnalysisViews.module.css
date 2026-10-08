@@ -2546,3 +2546,13 @@
 .scope :global(.backtest-table){font-size:var(--type-caption)}
 .scope :global(.backtest-mode){font-size:var(--type-caption);line-height:1.3}
 }
+
+/* Player analysis/detail: consistent secondary typography and resilient mobile wrapping. */
+.scope :global(.player-detail-identity) small,.scope :global(.player-identity-pills) small,.scope :global(.player-role-caption),.scope :global(.player-model-note),.scope :global(.player-detail-section-head) small{font-size:var(--type-caption);line-height:1.45}
+.scope :global(.player-detail-alert),.scope :global(.player-fixture-chip),.scope :global(.player-decision-card) small{font-size:var(--type-label);line-height:1.4}
+.scope :global(.player-detail-hero),.scope :global(.player-detail-identity),.scope :global(.player-profile-main-grid)>*,.scope :global(.player-detail-metric-grid)>*{min-width:0}
+@media(max-width:760px){
+.scope :global(.player-detail-identity),.scope :global(.player-detail-section-head){min-width:0;overflow-wrap:anywhere}
+.scope :global(.player-identity-pills){flex-wrap:wrap;row-gap:5px}
+.scope :global(.player-role-caption),.scope :global(.player-model-note){white-space:normal;overflow-wrap:anywhere}
+}
