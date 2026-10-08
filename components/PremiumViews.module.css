@@ -2582,3 +2582,12 @@
 .scope :global(.match-date-label){flex-wrap:wrap;row-gap:2px}
 .scope :global(.home-hero-mini)>div{min-width:0;overflow-wrap:anywhere}
 }
+
+/* Recommendation summary: readable values, flexible labels on narrow screens. */
+.scope :global(.recommendation-preview-list) small,.scope :global(.recommendation-preview-list)>div>span{font-size:var(--type-caption);line-height:1.4}
+.scope :global(.recommendation-preview-card) p{font-size:var(--type-label);line-height:1.5}
+.scope :global(.recommendation-preview-list)>div{min-width:0}
+@media(max-width:760px){
+.scope :global(.recommendation-preview-card)>*,.scope :global(.recommendation-preview-list)>div>*{min-width:0}
+.scope :global(.recommendation-preview-list)>div>span{white-space:normal;overflow-wrap:anywhere}
+}
