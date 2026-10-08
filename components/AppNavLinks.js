@@ -4,12 +4,19 @@ import { useEffect, useRef, useState } from 'react'
 import { usePathname } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 
+const adminOnlyPaths=new Set(['/backtest','/model-health'])
+const adminEmail='dummy.pro.20261001@example.com'
+const visibleAnalysis=(items,email)=>items.filter(([href])=>!adminOnlyPaths.has(href)||email===adminEmail)
+
 const matches=(path,href)=>href==='/' ? path==='/' : path===href || path.startsWith(href+'/')
 
 export function DesktopNavLinks({ primary, analysis }){
   const path=usePathname()
   const [open,setOpen]=useState(false)
+  const [adminEmailValue,setAdminEmailValue]=useState(null)
   const wrapRef=useRef(null)
+  useEffect(()=>{const supabase=createClient();let alive=true;supabase.auth.getUser().then(({data})=>{if(alive)setAdminEmailValue(data?.user?.email||null)});const {data}=supabase.auth.onAuthStateChange((_event,session)=>{if(alive)setAdminEmailValue(session?.user?.email||null)});return()=>{alive=false;data.subscription.unsubscribe()}},[])
+
 
   useEffect(()=>setOpen(false),[path])
 
@@ -34,14 +41,14 @@ export function DesktopNavLinks({ primary, analysis }){
     <div className="desktop-more" ref={wrapRef}>
       <button
         type="button"
-        className={analysis.some(([href])=>matches(path,href))?'nav-active':''}
+        className={visibleAnalysis(analysis,adminEmailValue).some(([href])=>matches(path,href))?'nav-active':''}
         aria-expanded={open}
         onClick={()=>setOpen(v=>!v)}
       >
         Detaylı Analizler <span className={open?'chevron up':'chevron'}>⌄</span>
       </button>
       {open?<div className="desktop-more-panel">
-        {analysis.map(([href,label])=>
+        {visibleAnalysis(analysis,adminEmailValue).map(([href,label])=>
           <Link prefetch={false} onClick={()=>setOpen(false)} className={matches(path,href)?'nav-active':''} key={href} href={href}>{label}</Link>
         )}
       </div>:null}
@@ -77,7 +84,7 @@ function MenuRow({ href,label,onClick,active=false,prefetch }){
 }
 
 export function MobileMenu({ primary, analysis }){
-  const [auth,setAuth]=useState({loaded:false,signedIn:false})
+  const [auth,setAuth]=useState({loaded:false,signedIn:false,email:null})
   const [signingOut,setSigningOut]=useState(false)
   const path=usePathname()
   const [open,setOpen]=useState(false)
@@ -88,9 +95,9 @@ export function MobileMenu({ primary, analysis }){
     if(!open)return
     const supabase=createClient()
     let alive=true
-    const sync=async()=>{const {data:{session}}=await supabase.auth.getSession();if(alive)setAuth({loaded:true,signedIn:Boolean(session?.user)})}
+    const sync=async()=>{const {data:{session}}=await supabase.auth.getSession();if(alive)setAuth({loaded:true,signedIn:Boolean(session?.user),email:session?.user?.email||null})}
     sync()
-    const {data}=supabase.auth.onAuthStateChange((_event,session)=>{if(alive)setAuth({loaded:true,signedIn:Boolean(session?.user)})})
+    const {data}=supabase.auth.onAuthStateChange((_event,session)=>{if(alive)setAuth({loaded:true,signedIn:Boolean(session?.user),email:session?.user?.email||null})})
     return()=>{alive=false;data.subscription.unsubscribe()}
   },[open])
 
@@ -118,7 +125,7 @@ export function MobileMenu({ primary, analysis }){
       setSigningOut(false)
       return
     }
-    setAuth({loaded:true,signedIn:false})
+    setAuth({loaded:true,signedIn:false,email:null})
     setOpen(false)
     window.location.replace('/')
   }
@@ -140,7 +147,7 @@ export function MobileMenu({ primary, analysis }){
         <MenuRow onClick={close} active={matches(path,href)} key={href} href={href} label={label}/>
       )}
       <MenuRow onClick={close} active={matches(path,'/squad')} href="/squad" label="Benim Kadrom"/>
-      {analysis.map(([href,label])=>
+      {visibleAnalysis(analysis,auth.email).map(([href,label])=>
         <MenuRow onClick={close} active={matches(path,href)} key={href} href={href} label={label} prefetch={false}/>
       )}
       <MenuRow onClick={close} href="/pricing" label="Gelişmiş Üyelik"/>
