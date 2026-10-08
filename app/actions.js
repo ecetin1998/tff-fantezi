@@ -80,7 +80,6 @@ async function getSiteUrl(){
 
 export async function signup(formData){
   const supabase=await createClient()
-  const siteUrl=await getSiteUrl()
   const email=String(formData.get('email')||'').trim()
   const password=String(formData.get('password')||'')
   if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))redirect('/signup?error=email_required')
