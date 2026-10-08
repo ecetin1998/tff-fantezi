@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import SignupPasswordField from '@/components/SignupPasswordField'
-import {resendConfirmation,signup} from '@/app/actions'
+import {signup} from '@/app/actions'
 
 export const metadata={
   title:'Hesap Oluştur',
@@ -15,23 +15,17 @@ const ERRORS={
   password_check_failed:'Şifre güvenlik kontrolü tamamlanamadı. Lütfen tekrar dene.',
   rate_limited:'Çok fazla deneme yapıldı. Biraz sonra tekrar dene.',
   auth_failed:'İşlem tamamlanamadı. Lütfen tekrar dene.',
+  signup_session_unavailable:'Kayıt oluşturuldu ancak otomatik giriş açılamadı. Lütfen giriş yapmayı dene.',
 }
-const MESSAGES={
-  check_email:'Hesabın oluşturuldu. Doğrulama e-postasını kontrol et; gelen kutusunda yoksa aşağıdan tekrar gönderebilirsin.',
-  resend_sent:'Doğrulama e-postası tekrar gönderildi. Gelen kutusu ve gereksiz klasörünü kontrol et.',
-}
-
 export default async function Signup({searchParams}){
   const sp=await searchParams
   const error=ERRORS[String(sp?.error||'')]||null
-  const message=MESSAGES[String(sp?.message||'')]||null
 
   return <div className="auth-wrap"><div className="card auth-card auth-card-wide">
     <span className="eyebrow">YENİ HESAP</span>
     <h1>Hesap oluştur</h1>
     <p>Ücretsiz hesabını oluştur; tüm temel oyuncu ve maç analizlerini, Benim Kadrom'u ve kişisel özellikleri aç.</p>
     {error?<div className="alert error">{error}</div>:null}
-    {message?<div className="alert">{message}</div>:null}
 
     <form className="auth-form" action={signup}>
       <label>E-posta<input name="email" type="email" autoComplete="email" placeholder="E-posta adresin" required/></label>
@@ -43,14 +37,5 @@ export default async function Signup({searchParams}){
       <span>Zaten hesabın var mı? <Link href="/login">Giriş yap</Link></span>
     </div>
 
-    <section className="auth-utility-section" id="verification">
-      <span className="eyebrow">DOĞRULAMA E-POSTASI</span>
-      <h2>Doğrulama e-postası gelmedi mi?</h2>
-      <p>Hesabı oluştururken kullandığın e-posta adresini gir; yeni doğrulama bağlantısı gönderelim.</p>
-      <form className="auth-form" action={resendConfirmation}>
-        <label>E-posta<input name="email" type="email" autoComplete="email" placeholder="E-posta adresin" required/></label>
-        <button className="secondary" type="submit">Doğrulama e-postasını tekrar gönder</button>
-      </form>
-    </section>
   </div></div>
 }
