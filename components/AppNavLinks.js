@@ -15,7 +15,7 @@ export function DesktopNavLinks({ primary, analysis }){
   const [open,setOpen]=useState(false)
   const [adminEmailValue,setAdminEmailValue]=useState(null)
   const wrapRef=useRef(null)
-  useEffect(()=>{const supabase=createClient();let alive=true;supabase.auth.getUser().then(({data})=>{if(alive)setAdminEmailValue(data?.user?.email||null)});const {data}=supabase.auth.onAuthStateChange((_event,session)=>{if(alive)setAdminEmailValue(session?.user?.email||null)});return()=>{alive=false;data.subscription.unsubscribe()}},[])
+  useEffect(()=>{const supabase=createClient();let alive=true;supabase.auth.getSession().then(({data})=>{if(alive)setAdminEmailValue(data?.session?.user?.email||null)});const {data}=supabase.auth.onAuthStateChange((_event,session)=>{if(alive)setAdminEmailValue(session?.user?.email||null)});return()=>{alive=false;data.subscription.unsubscribe()}},[])
 
 
   useEffect(()=>setOpen(false),[path])
