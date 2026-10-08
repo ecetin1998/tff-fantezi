@@ -90,7 +90,7 @@ export async function signup(formData){
   // Requires Supabase Auth > Providers > Email > Confirm email = OFF.
   // Never claim registration succeeded if the provider still requires confirmation.
   if(!data?.session)redirect('/signup?error=signup_session_unavailable')
-  redirect('/squad')
+  redirect('/?signup=success')
 }
 
 export async function resendConfirmation(formData){
