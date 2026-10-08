@@ -2566,3 +2566,19 @@
   .scope :global(.availability-mobile-head)>:global(.status-chip){grid-area:status;justify-self:start;position:static!important;margin:0}
   .scope :global(.availability-mobile-card)>p{margin:10px 0 9px}
 }
+
+/* Shared readable labels: homepage, teams and match predictions on desktop and mobile. */
+.scope :global(.team-card) :global(.muted),.scope :global(.team-metrics) span,.scope :global(.team-card-open){font-size:var(--type-caption);line-height:1.4}
+.scope :global(.team-detail-stat-grid) span{font-size:var(--type-caption);line-height:1.4}
+.scope :global(.match-team-meta) small{font-size:var(--type-caption);line-height:1.35;white-space:normal;overflow-wrap:anywhere}
+.scope :global(.match-date-label) b{font-size:var(--type-label);line-height:1.35}
+.scope :global(.home-live-pill){font-size:var(--type-label);line-height:1.3}
+.scope :global(.home-hero-mini) small,.scope :global(.home-hero-mini) span{font-size:var(--type-caption);line-height:1.4}
+.scope :global(.home-highlight-grid) small,.scope :global(.home-highlight-grid) :global(.muted){font-size:var(--type-caption);line-height:1.4}
+@media(max-width:760px){
+.scope :global(.team-metrics)>div{min-width:0}
+.scope :global(.match-team-meta){flex-wrap:wrap;row-gap:3px}
+.scope :global(.match-team-meta) small{min-width:0}
+.scope :global(.match-date-label){flex-wrap:wrap;row-gap:2px}
+.scope :global(.home-hero-mini)>div{min-width:0;overflow-wrap:anywhere}
+}
