@@ -1,11 +1,16 @@
 import Link from 'next/link'
 import { joinProWaitlist } from '@/app/actions'
 import { getAuthState } from '@/lib/data'
+import {createClient} from '@/lib/supabase/server'
 
 export const metadata={title:'Gelişmiş Üyelik'}
 
 export default async function Pricing({searchParams}){
   const [auth,sp]=await Promise.all([getAuthState(),searchParams])
+  const supabase=await createClient()
+  const {data:{user}}=await supabase.auth.getUser()
+  const {data:verification}=user?await supabase.from('scout_email_verifications').select('email').eq('user_id',user.id).maybeSingle():{data:null}
+  const emailVerified=Boolean(verification?.email && verification.email===user?.email)
   return <div className="pricing access-pricing">
     <div className="section-title centered"><div>
       <span className="eyebrow">ERİŞİM SEVİYELERİ</span>
@@ -52,6 +57,7 @@ export default async function Pricing({searchParams}){
           <li>Gelişmiş takım/rakip eşleşmeleri</li>
           <li>Çok haftalı transfer planlayıcı (geliştirme aşamasında)</li>
         </ul>
+        {auth.userId && !emailVerified?<p className="muted">Gelişmiş üyelik etkinleştirilmeden önce <Link href="/profile">e-posta adresini doğrulaman</Link> gerekecek. Bekleme listesine şimdi katılabilirsin.</p>:null}
         {auth.plan==='pro'
           ?<div className="access-current-plan pro">GELİŞMİŞ aktif ✓</div>
           :auth.userId
