@@ -1,13 +1,18 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 
 export default function ConfirmEmailPage(){
   const [message,setMessage]=useState('E-posta doğrulanıyor...')
+  const [failed,setFailed]=useState(false)
+  // React Strict Mode may re-run effects; confirmation tokens are single-use.
+  const started=useRef(false)
 
   useEffect(()=>{
-    let cancelled=false
+    if(started.current)return
+    started.current=true
 
     async function confirm(){
       const supabase=createClient()
@@ -18,8 +23,10 @@ export default function ConfirmEmailPage(){
       const hash=new URLSearchParams(url.hash.slice(1))
       const accessToken=hash.get('access_token')
       const refreshToken=hash.get('refresh_token')
+      const linkError=url.searchParams.get('error_description')||hash.get('error_description')
 
       try{
+        if(linkError)throw new Error('Bağlantı geçersiz veya süresi dolmuş.')
         let authError=null
 
         if(tokenHash&&type){
@@ -42,24 +49,30 @@ export default function ConfirmEmailPage(){
           }
         }
 
-        if(authError) throw authError
-        if(cancelled)return
+        // A token may have been consumed already by the auth client or a previous visit.
+        // Only accept that case when Supabase confirms the current user's email.
+        const {data:{user},error:userError}=await supabase.auth.getUser()
+        if(userError||!user?.email_confirmed_at)throw authError||userError||new Error('E-posta henüz doğrulanmamış.')
+
+        window.history.replaceState(null,'',url.pathname)
         setMessage('E-posta doğrulandı. Kadrona yönlendiriliyorsun...')
         window.setTimeout(()=>window.location.replace('/squad'),300)
       }catch(error){
-        if(cancelled)return
-        setMessage('Doğrulama tamamlanamadı.')
-        window.setTimeout(()=>window.location.replace('/login?error=auth_failed'),700)
+        setFailed(true)
+        setMessage('Doğrulama bağlantısı kullanılamadı veya süresi dolmuş olabilir. Hesabına giriş yapabiliyorsan e-posta doğrulama durumunu kontrol edebilirsin. Aksi hâlde yeni doğrulama e-postası iste.')
       }
     }
 
     confirm()
-    return()=>{cancelled=true}
   },[])
 
   return <div className="auth-wrap"><div className="card auth-card">
     <span className="eyebrow">HESAP DOĞRULAMA</span>
     <h1>E-posta kontrolü</h1>
     <p>{message}</p>
+    {failed?<div className="auth-link-stack">
+      <Link href="/login">Giriş yap</Link>
+      <Link href="/signup#verification">Yeni doğrulama e-postası iste</Link>
+    </div>:null}
   </div></div>
 }
