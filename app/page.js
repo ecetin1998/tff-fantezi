@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import SignupSuccessDialog from '@/components/SignupSuccessDialog'
 import { getHomeOverview } from '@/lib/data'
 import { teamCssVars, teamHref } from '@/lib/teamThemes'
 import {playerLabel} from '@/lib/playerPresentation'
@@ -46,6 +47,7 @@ export default async function Home(){
   ]
 
   return <div className="home-shell">
+    <SignupSuccessDialog/>
     <section className="home-intro-layout">
       <div className="card home-intro-hero">
         <div className="home-hero-kicker">
