@@ -263,13 +263,47 @@ export async function saveSquad(_prevState,formData){
 
 export async function joinProWaitlist(){
   const supabase=await createClient()
-  const {data:claimsData}=await supabase.auth.getClaims()
-  const userId=claimsData?.claims?.sub
-  if(!userId)redirect('/login?message=pro_login_required')
-  const {error}=await supabase.from('scout_pro_interest').upsert({user_id:userId,source:'pricing'},{onConflict:'user_id',ignoreDuplicates:true})
+  const {data:{user},error:authError}=await supabase.auth.getUser()
+  if(authError||!user?.id)redirect('/login?message=pro_login_required')
+
+  const {data:existing,error:lookupError}=await supabase.from('scout_pro_interest').select('user_id').eq('user_id',user.id).maybeSingle()
+  if(lookupError){
+    reportServerError('action:joinProWaitlist:lookup',lookupError)
+    redirect('/pricing?error=waitlist_failed')
+  }
+  if(existing)redirect('/pricing?joined=1')
+
+  const {error}=await supabase.from('scout_pro_interest').insert({user_id:user.id,source:'pricing'})
   if(error){
+    // A concurrent duplicate is a successful registration, not another notification.
+    if(error.code==='23505')redirect('/pricing?joined=1')
     reportServerError('action:joinProWaitlist',error)
     redirect('/pricing?error=waitlist_failed')
+  }
+
+  // Server-only credentials: never expose the provider key or recipient in the browser.
+  const apiKey=process.env.RESEND_API_KEY
+  const recipient=process.env.ADMIN_NOTIFICATION_EMAIL
+  if(!apiKey||!recipient){
+    reportServerError('action:joinProWaitlist:notification_config',new Error('Missing RESEND_API_KEY or ADMIN_NOTIFICATION_EMAIL'))
+    redirect('/pricing?joined=1&notification=pending')
+  }
+  try{
+    const response=await fetch('https://api.resend.com/emails',{
+      method:'POST',
+      headers:{Authorization:'Bearer '+apiKey,'Content-Type':'application/json'},
+      body:JSON.stringify({
+        from:'Fantezi Lig Rehberi <bildirim@fanteziligrehberi.com>',
+        to:[recipient],
+        subject:'Yeni Gelişmiş Üyelik Talebi | Fantezi Lig Rehberi',
+        text:'Gelişmiş üyelik bekleme listesine yeni bir kullanıcı katıldı.\\nE-posta: '+(user.email||'Bilinmiyor')+'\\nKayıt zamanı: '+new Date().toISOString()+'\\nKaydı Supabase scout_pro_interest tablosundan inceleyebilirsin.',
+      }),
+      signal:AbortSignal.timeout(7000),
+    })
+    if(!response.ok)throw new Error('Notification provider status: '+response.status)
+  }catch(notificationError){
+    reportServerError('action:joinProWaitlist:notification',notificationError)
+    redirect('/pricing?joined=1&notification=pending')
   }
   redirect('/pricing?joined=1')
 }
