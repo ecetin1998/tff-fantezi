@@ -1,6 +1,7 @@
 import { getBacktestOverview } from '@/lib/data'
 
-export const revalidate=300
+// Reduce KV ISR writes for read-heavy historical data.
+export const revalidate=1800
 export const metadata={title:'Model Performansı'}
 
 const num=(v,d=2)=>v===null||v===undefined?'—':Number(v).toFixed(d)
