@@ -58,7 +58,8 @@ export default async function PlayerPage({ params }){
   </div>
 
   const pro=await getPlayerDetailPro(id,data.run?.id)
-  const {run,player,availability:a,role:r,season:s,modelFeatures:mf,weekly,matches=[]}=data
+  const {run,player,availability:a,season:s,modelFeatures:mf,weekly,matches=[]}=data
+  const r=pro?.role||null
   const p={...(data.projection||{}),...(pro?.projection||{})}
   const replay=[...(data.replay||[]).filter(row=>row.history_mode!=='live_frozen'),...(pro?.history||[]).map(row=>({...row,history_mode:'live_frozen'}))].sort((a,b)=>Number(a.gameweek)-Number(b.gameweek)).slice(-12)
   const closedWeeks=[...(weekly||[])].sort((x,y)=>Number(x.gameweek||0)-Number(y.gameweek||0))
@@ -153,10 +154,10 @@ export default async function PlayerPage({ params }){
   )
 
   const roleMetrics=[
-    {label:'Son 2 maç İlk 11',value:pct(r?.last2_xi_probability)},
-    {label:'Önceki 2 maç İlk 11',value:pct(r?.previous2_xi_probability)},
-    {label:'Son 2 dakika',value:num(r?.last2_minutes,1)},
-    {label:'Önceki 2 dakika',value:num(r?.previous2_minutes,1)},
+    {label:'Son 2 maç İlk 11',value:r?.last2_xi_probability==null?'Veri yok':pct(r.last2_xi_probability)},
+    {label:'Önceki 2 maç İlk 11',value:r?.previous2_xi_probability==null?'Veri yok':pct(r.previous2_xi_probability)},
+    {label:'Son 2 dakika',value:r?.last2_minutes==null?'Veri yok':num(r.last2_minutes,1)},
+    {label:'Önceki 2 dakika',value:r?.previous2_minutes==null?'Veri yok':num(r.previous2_minutes,1)},
   ]
 
   return <div className="team-player-page player-detail-v2" style={themeStyle}>
