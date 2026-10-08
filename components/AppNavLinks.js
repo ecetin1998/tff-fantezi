@@ -42,7 +42,7 @@ export function DesktopNavLinks({ primary, analysis }){
       </button>
       {open?<div className="desktop-more-panel">
         {analysis.map(([href,label])=>
-          <Link onClick={()=>setOpen(false)} className={matches(path,href)?'nav-active':''} key={href} href={href}>{label}</Link>
+          <Link prefetch={false} onClick={()=>setOpen(false)} className={matches(path,href)?'nav-active':''} key={href} href={href}>{label}</Link>
         )}
       </div>:null}
     </div>
@@ -69,8 +69,8 @@ function MenuIcon({ href }){
   return <svg {...common}><circle cx="12" cy="12" r="8.5"/><path d="M8 12h8"/></svg>
 }
 
-function MenuRow({ href,label,onClick,active=false }){
-  return <Link onClick={onClick} className={active?'active mobile-menu-row':'mobile-menu-row'} href={href}>
+function MenuRow({ href,label,onClick,active=false,prefetch }){
+  return <Link prefetch={prefetch} onClick={onClick} className={active?'active mobile-menu-row':'mobile-menu-row'} href={href}>
     <span className="mobile-menu-row-icon"><MenuIcon href={href}/></span>
     <span>{label}</span>
   </Link>
@@ -141,7 +141,7 @@ export function MobileMenu({ primary, analysis }){
       )}
       <MenuRow onClick={close} active={matches(path,'/squad')} href="/squad" label="Benim Kadrom"/>
       {analysis.map(([href,label])=>
-        <MenuRow onClick={close} active={matches(path,href)} key={href} href={href} label={label}/>
+        <MenuRow onClick={close} active={matches(path,href)} key={href} href={href} label={label} prefetch={false}/>
       )}
       <MenuRow onClick={close} href="/pricing" label="Gelişmiş Üyelik"/>
       {auth.loaded&&auth.signedIn?<MenuRow onClick={close} active={matches(path,'/profile')} href="/profile" label="Profilim"/>:null}
