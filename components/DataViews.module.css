@@ -3846,3 +3846,15 @@
 .scope :global(.role-change-metrics) small{font-size:var(--type-caption);line-height:1.35}
 .scope :global(.role-decision-table) :global(.signal){font-size:var(--type-caption);line-height:1.3}
 }
+
+/* Player analysis: maintain legible metadata in dense tables and mobile cards. */
+@media(min-width:901px){
+.scope :global(.desktop-player-table) th{font-size:var(--type-caption);line-height:1.4}
+.scope :global(.desktop-player-table) td{font-size:var(--type-label);line-height:1.45}
+.scope :global(.desktop-player-table) td small,.scope :global(.desktop-player-table) :global(.cell-note){font-size:var(--type-caption);line-height:1.4}
+}
+@media(max-width:900px){
+.scope :global(.mobile-player-name) span,.scope :global(.mobile-player-top)>div:first-child small{font-size:var(--type-caption);line-height:1.4}
+.scope :global(.mobile-player-top)>*,.scope :global(.mobile-player-metrics)>*{min-width:0}
+.scope :global(.player-filters) input,.scope :global(.player-filters) select{font-size:16px;min-width:0}
+}
