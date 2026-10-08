@@ -567,3 +567,10 @@
 .scope :global(.auth-utility-section) h2{font-size:22px;margin:7px 0}
 .scope :global(.auth-utility-section) p{font-size:13px;line-height:1.6;margin:0}
 @media(max-width:570px){.scope :global(.auth-card),.scope :global(.auth-card-wide){padding:22px}.scope :global(.auth-card) h1{font-size:32px}}
+
+/* Mobile navigation: accessible labels without changing fixed icon geometry. */
+@media(max-width:760px){
+.scope :global(.mobile-bottom-nav) b{font-size:10px;line-height:1.2;letter-spacing:0}
+.scope :global(.mobile-bottom-nav) a{min-width:0;text-align:center}
+.scope :global(.mobile-menu-panel) a,.scope :global(.mobile-menu-panel) button{overflow-wrap:anywhere}
+}
