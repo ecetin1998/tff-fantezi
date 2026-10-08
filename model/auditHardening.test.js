@@ -10,7 +10,7 @@ const learning=fs.readFileSync('supabase/migrations/20260927101018_ensure_learni
 const privacy=fs.readFileSync('supabase/migrations/20260927101100_post_deploy_restrict_sensitive_public_columns.sql','utf8')
 const lockdown=fs.readFileSync('supabase/migrations/20260927101200_post_deploy_squad_write_lockdown.sql','utf8')
 const proLockdown=fs.readFileSync('supabase/migrations/20261002123000_pro_data_surface_lockdown.sql','utf8')
-assert.match(actions,/ignoreDuplicates:true/)
+assert.match(actions,/scout_claim_launch_pro/)
 assert.match(actions,/MAX_PLAYERS_PER_CLUB/)
 assert.match(publicClient,/failFastPublicFetch/)
 assert.match(api,/section==='summary'/)

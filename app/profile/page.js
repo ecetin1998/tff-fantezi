@@ -2,6 +2,7 @@ import Link from 'next/link'
 import AccessGate from '@/components/AccessGate'
 import ProfilePasswordForm from '@/components/ProfilePasswordForm'
 import {sendProfileEmailVerification} from '@/app/actions'
+import VerifyEmailButton from '@/components/VerifyEmailButton'
 import {createClient} from '@/lib/supabase/server'
 import {getAuthState} from '@/lib/data'
 
@@ -36,7 +37,7 @@ export default async function Profile({searchParams}){
   const {data:{user}}=await supabase.auth.getUser()
   const {data:verification}=user?await supabase.from('scout_email_verifications').select('email').eq('user_id',user.id).maybeSingle():{data:null}
   const emailVerified=Boolean(verification?.email && verification.email===user?.email)
-  const verificationMessage={sent:'Doğrulama bağlantısı e-posta adresine gönderildi.',success:'E-posta adresin doğrulandı.',already:'E-posta adresin zaten doğrulanmış.',invalid:'Bağlantı geçersiz veya süresi dolmuş. Yeni bağlantı iste.',send_failed:'E-posta gönderilemedi. Biraz sonra tekrar dene.',configuration:'Doğrulama henüz yapılandırılmadı.',save_failed:'Doğrulama kaydedilemedi. Lütfen tekrar dene.'}[String(sp?.verification||'')]
+  const verificationMessage={sent:'Doğrulama bağlantısı gönderildi. Gelen kutunu ve spam klasörünü kontrol et.',success:'E-posta adresin doğrulandı.',already:'E-posta adresin zaten doğrulanmış.',invalid:'Bağlantı geçersiz veya süresi dolmuş. Yeni bağlantı iste.',send_failed:'E-posta gönderilemedi. Biraz sonra tekrar dene.',configuration:'Doğrulama henüz yapılandırılmadı.',save_failed:'Doğrulama kaydedilemedi. Lütfen tekrar dene.'}[String(sp?.verification||'')]
   const isPro=auth.plan==='pro'
   const accountName=dummyAliases[auth.email]||auth.email?.split('@')[0]||'Kullanıcı'
   const features=isPro
@@ -72,8 +73,8 @@ export default async function Profile({searchParams}){
       <span className="eyebrow">E-POSTA GÜVENLİĞİ</span>
       <h2>{emailVerified?"E-posta adresin doğrulandı":"E-posta adresin henüz doğrulanmadı"}</h2>
       <p className="muted">{emailVerified?"Pro üyelik için e-posta doğrulaman hazır.":"Ücretsiz üyeliğini kullanmaya devam edebilirsin. Pro üyelik için e-posta adresini doğrulaman gerekecek."}</p>
-      {verificationMessage?<p role="status">{verificationMessage}</p>:null}
-      {!emailVerified?<form action={sendProfileEmailVerification}><button className="secondary" type="submit">E-postamı doğrula</button></form>:null}
+      {verificationMessage?<div role="status" aria-live="polite" style={{marginTop:16,padding:'14px 16px',borderRadius:12,border:'1px solid var(--border, #9ca3af)',background:'rgba(133, 185, 72, .13)',fontWeight:650,lineHeight:1.5}}>{verificationMessage}</div>:null}
+      {!emailVerified?<form action={sendProfileEmailVerification}><VerifyEmailButton/></form>:null}
     </section>
 
     <section className="card profile-card" style={{marginTop:16}}>

@@ -18,6 +18,9 @@ export default async function Pricing({searchParams}){
       <p className="muted">Temel analiz herkese açık. Hesap açınca kadronu kaydedersin; gelişmiş üyelik, tavan ve gelişmiş karar katmanlarını açar.</p>
     </div></div>
 
+    {sp?.launch==='activated'?<div className="alert">Tebrikler! İlk 100 kullanıcı kampanyasıyla Gelişmiş üyeliğin ücretsiz olarak açıldı.</div>:null}
+    {sp?.launch==='verify_email'?<div className="alert">İlk 100 kontenjanında yerin ayrıldı. Gelişmiş üyeliğini açmak için <Link href="/profile">e-posta adresini doğrula</Link>.</div>:null}
+    {sp?.launch==='full'?<div className="alert">İlk 100 kişilik ücretsiz kontenjan doldu. Talebin bekleme listesine alındı.</div>:null}
     {sp?.joined?<div className="alert">Gelişmiş üyelik listesine eklendin. Ücretli üyelik açıldığında ilk haber alanlardan olacaksın.</div>:null}
     {sp?.error==='waitlist_failed'?<div className="alert error">Gelişmiş üyelik talebi şu anda kaydedilemedi. Lütfen tekrar dene.</div>:null}
 
@@ -47,7 +50,7 @@ export default async function Pricing({searchParams}){
       </article>
 
       <article className="card access-tier-card pro featured">
-        <span>GELİŞMİŞ ÜYELİK</span><strong>99 TL<small>/ay hedef</small></strong>
+        <span>GELİŞMİŞ ÜYELİK</span><strong>İlk 100'e ücretsiz<small> • lansman kampanyası</small></strong>
         <p>Ortalama beklentinin ötesine geç: tavan, risk, rol ve gelişmiş eşleşme katmanlarını aç.</p>
         <ul>
           <li>P25 / P75 / P90 ve 6+ ihtimali</li>
@@ -57,11 +60,11 @@ export default async function Pricing({searchParams}){
           <li>Gelişmiş takım/rakip eşleşmeleri</li>
           <li>Çok haftalı transfer planlayıcı (geliştirme aşamasında)</li>
         </ul>
-        {auth.userId && !emailVerified?<p className="muted">Gelişmiş üyelik etkinleştirilmeden önce <Link href="/profile">e-posta adresini doğrulaman</Link> gerekecek. Bekleme listesine şimdi katılabilirsin.</p>:null}
+        {auth.userId && !emailVerified?<p className="muted">İlk 100 kampanyası kapsamında Gelişmiş üyelik etkinleştirilmeden önce <Link href="/profile">e-posta adresini doğrulaman</Link> gerekecek. Bekleme listesine şimdi katılabilirsin.</p>:null}
         {auth.plan==='pro'
           ?<div className="access-current-plan pro">GELİŞMİŞ aktif ✓</div>
           :auth.userId
-            ?<form action={joinProWaitlist}><button className="cta">Gelişmiş üyeliği istiyorum</button></form>
+            ?<form action={joinProWaitlist}><button className="cta">İlk 100'e katıl • ücretsiz</button></form>
             :<Link href="/login?message=pro_login_required" className="cta">Giriş yap ve Gelişmiş üyelik talebi bırak</Link>}
       </article>
     </div>

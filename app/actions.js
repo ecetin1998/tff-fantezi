@@ -263,13 +263,16 @@ export async function saveSquad(_prevState,formData){
 
 export async function joinProWaitlist(){
   const supabase=await createClient()
-  const {data:claimsData}=await supabase.auth.getClaims()
-  const userId=claimsData?.claims?.sub
-  if(!userId)redirect('/login?message=pro_login_required')
-  const {error}=await supabase.from('scout_pro_interest').upsert({user_id:userId,source:'pricing'},{onConflict:'user_id',ignoreDuplicates:true})
+  const {data:{user},error:authError}=await supabase.auth.getUser()
+  if(authError||!user?.id)redirect('/login?message=pro_login_required')
+  const {data,error}=await supabase.rpc('scout_claim_launch_pro')
   if(error){
-    reportServerError('action:joinProWaitlist',error)
+    reportServerError('action:joinProWaitlist:launch',error)
     redirect('/pricing?error=waitlist_failed')
   }
+  const result=Array.isArray(data)?data[0]:data
+  if(result?.status==='activated')redirect('/pricing?launch=activated')
+  if(result?.status==='verify_email')redirect('/pricing?launch=verify_email')
+  if(result?.status==='full')redirect('/pricing?launch=full')
   redirect('/pricing?joined=1')
 }
