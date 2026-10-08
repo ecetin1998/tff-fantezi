@@ -67,17 +67,22 @@ export default async function Squad({searchParams}){
     <Link className="cta" href="/login">Giriş / kayıt</Link>
   </div></div>
 
-  const [pool,recommendation,supabase]=await Promise.all([
-    getSquadPlayerPool(),
-    getRecommendation('recommended'),
-    createClient(),
-  ])
+  const recommendationPromise=getRecommendation('recommended')
+  const supabasePromise=createClient()
+  const pool=await getSquadPlayerPool()
   const {players,run}=pool
-  const {members:recommended,recommendation:recommendedMeta}=recommendation
-  const [futurePlan,pageResult]=await Promise.all([
-    run?.gameweek?getFutureFixturePlan(Number(run.gameweek)+1,2):Promise.resolve({byTeam:{}}),
-    run?.gameweek?supabase.rpc('scout_my_squad_page',{p_gameweek:run.gameweek}):Promise.resolve({data:null,error:null}),
+  const futurePlanPromise=run?.gameweek
+    ?getFutureFixturePlan(Number(run.gameweek)+1,2)
+    :Promise.resolve({byTeam:{}})
+  const pageResultPromise=run?.gameweek
+    ?supabasePromise.then(supabase=>supabase.rpc('scout_my_squad_page',{p_gameweek:run.gameweek}))
+    :Promise.resolve({data:null,error:null})
+  const [recommendation,futurePlan,pageResult]=await Promise.all([
+    recommendationPromise,
+    futurePlanPromise,
+    pageResultPromise,
   ])
+  const {members:recommended,recommendation:recommendedMeta}=recommendation
   const {data:pageData,error:pageError}=pageResult
   if(pageError)reportServerError('squad:pageData',pageError,{gameweek:run?.gameweek})
 
