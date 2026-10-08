@@ -93,6 +93,25 @@ export async function signup(formData){
   redirect('/?signup=success')
 }
 
+
+export async function sendProfileEmailVerification(){
+  const supabase=await createClient()
+  const {data:{user},error:userError}=await supabase.auth.getUser()
+  if(userError||!user?.email)redirect('/login')
+  const {data:existing}=await supabase.from('scout_email_verifications').select('email').eq('user_id',user.id).maybeSingle()
+  if(existing?.email===user.email)redirect('/profile?verification=already')
+  const siteUrl=await getSiteUrl()
+  const {error}=await supabase.auth.signInWithOtp({
+    email:user.email,
+    options:{shouldCreateUser:false,emailRedirectTo:siteUrl+'/auth/verify-email'},
+  })
+  if(error){
+    reportServerError('action:sendProfileEmailVerification',error)
+    redirect('/profile?verification=send_failed')
+  }
+  redirect('/profile?verification=sent')
+}
+
 export async function resendConfirmation(formData){
   const supabase=await createClient()
   const siteUrl=await getSiteUrl()
