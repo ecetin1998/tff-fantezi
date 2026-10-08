@@ -1,7 +1,8 @@
 import WeeklyPointsTable from '@/components/WeeklyPointsTable'
 import { getWeeklyPoints } from '@/lib/data'
 
-export const revalidate=300
+// Reduce KV ISR writes for read-heavy historical data.
+export const revalidate=600
 export const metadata={title:'Fantezi Puanları'}
 
 export default async function WeeklyPoints(){
