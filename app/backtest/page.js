@@ -1,4 +1,5 @@
-import { getBacktestOverview } from '@/lib/data'
+import { getBacktestOverview,getAuthState } from '@/lib/data'
+import { notFound } from 'next/navigation'
 
 // Reduce KV ISR writes for read-heavy historical data.
 export const revalidate=1800
@@ -109,6 +110,8 @@ const tendency=v=>{
 }
 
 export default async function BacktestPage(){
+  const auth=await getAuthState()
+  if(auth.email!=='dummy.pro.20261001@example.com'||auth.plan!=='pro')notFound()
   const {currentRun,currentRunQa,replayWeeks,liveWeeks,learning,replayPlayers,livePlayers,preseasonCoverage}=await getBacktestOverview()
   const replayClosed=replayWeeks.filter(w=>w.status==='closed')
   const latestLive=liveWeeks.length?liveWeeks[liveWeeks.length-1]:null
