@@ -934,9 +934,6 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
           <p>Model kadrosuna geçişte şu an tek transferle pozitif net xFP yok. Sırf eşleşmek için ceza puanlı transfer önermiyorum.</p>
         </>}
       </div>
-)}</div>:<small>{plan==='pro'?'Mevcut kadro, güncel xFP ve sonraki iki fikstür gücüyle anlamlı tek-transfer fırsatı aranıyor.':'3 haftalık fikstür ayarlı transfer fırsatları ve transfer cezası analizi.'}</small>}
-        {plan==='pro'?<small className="transfer-plan-note">Plan skoru gelecekteki kesin xFP değildir; mevcut xFP, rakip sezon xG/xGA gücü ve saha avantajıyla ayarlanır.</small>:null}
-      </div>
     </section>
   </div>
 }
