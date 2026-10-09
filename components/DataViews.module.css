@@ -3863,3 +3863,17 @@
 .scope :global(.player-filters) input:focus-visible,.scope :global(.player-filters) select:focus-visible{outline:2px solid #16b8a6;outline-offset:2px}
 .scope :global(.player-filters)[aria-busy="true"] input,.scope :global(.player-filters)[aria-busy="true"] select{opacity:.7}
 @media(max-width:620px){.scope :global(.section-title){flex-wrap:wrap;min-width:0}.scope :global(.section-title)>*{min-width:0}.scope :global(.section-title) h1{overflow-wrap:anywhere}}
+
+/* Match predictions: make probabilities and team metrics easier to scan. */
+.scope :global(.match-analysis-card) :global(.outcome-bar-labeled){min-height:16px;border-radius:999px;overflow:hidden}
+.scope :global(.match-analysis-card) :global(.match-fantasy-meta)>span{min-width:0}
+.scope :global(.match-analysis-card) :global(.match-fantasy-meta) small{overflow-wrap:anywhere;line-height:1.4}
+.scope :global(.match-analysis-card) :global(.match-fantasy-meta) b{font-variant-numeric:tabular-nums}
+.scope :global(.match-analysis-card) :global(.match-team-xfp-side){min-width:0}
+.scope :global(.match-analysis-card) :global(.match-team-xfp-side) b{font-variant-numeric:tabular-nums}
+@media(max-width:620px){
+.scope :global(.match-analysis-card){min-width:0}
+.scope :global(.match-analysis-card) :global(.match-team-link){min-width:0}
+.scope :global(.match-analysis-card) :global(.match-team-link) b{overflow-wrap:anywhere}
+.scope :global(.match-analysis-card) :global(.match-fantasy-meta)>span{min-width:0}
+}
