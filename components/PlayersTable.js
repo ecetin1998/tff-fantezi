@@ -49,7 +49,7 @@ export default function PlayersTable({players,total,page,pageCount,teams,filters
         for(let attempt=0;attempt<3;attempt++){
           if(cancelled)return
           try{
-            const response=await fetch('/api/pro-player-overlay',{cache:'no-store'})
+            const response=await fetch('/api/pro-player-overlay'+(runId?'?run_id='+encodeURIComponent(runId):''),{cache:'no-store'})
             if(!response.ok){
               if(![403,429,500,502,503,504].includes(response.status))throw new Error('Pro metrics HTTP '+response.status)
               if(attempt===2){
