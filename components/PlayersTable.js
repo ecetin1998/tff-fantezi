@@ -41,17 +41,33 @@ export default function PlayersTable({players,total,page,pageCount,teams,filters
         if(cancelled)return
         setTier(access.tier||'visitor')
         if(access.plan!=='pro')return
-        let response=await fetch('/api/pro-player-overlay',{cache:'no-store'})
-        if(response.status===503){
-          await new Promise(resolve=>setTimeout(resolve,400))
+        // Session cookies can refresh between the access check and the Pro RPC.
+        // Retry transient 403/5xx failures with a bounded backoff, never bypassing auth.
+        let data=null
+        for(let attempt=0;attempt<3;attempt++){
           if(cancelled)return
-          response=await fetch('/api/pro-player-overlay',{cache:'no-store'})
+          try{
+            const response=await fetch('/api/pro-player-overlay',{cache:'no-store'})
+            if(!response.ok){
+              if(![403,429,500,502,503,504].includes(response.status))throw new Error('Pro metrics HTTP '+response.status)
+              if(attempt===2)throw new Error('Pro metrics HTTP '+response.status)
+            }else{
+              const payload=await response.json()
+              if(!Array.isArray(payload.rows))throw new Error('Invalid metrics response')
+              if(runId&&payload.run_id!==runId){
+                if(attempt===2)throw new Error('Model run mismatch')
+              }else{
+                data=payload
+                break
+              }
+            }
+          }catch(error){
+            if(attempt===2)throw error
+          }
+          await new Promise(resolve=>setTimeout(resolve,500*(attempt+1)))
         }
-        if(!response.ok)throw new Error('Pro metrics request failed: '+response.status)
-        const data=await response.json()
-        if(runId&&data.run_id!==runId)throw new Error('Model run mismatch')
-        if(!Array.isArray(data.rows))throw new Error('Invalid metrics response')
         if(cancelled)return
+        if(!data)throw new Error('Pro metrics unavailable')
         const overlay=new Map(data.rows.map(x=>[Number(x.player_id),x]))
         setPool(current=>current.map(player=>{
           const extra=overlay.get(Number(player.id))
