@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import SquadBuilder from '@/components/SquadBuilder'
 import {createClient} from '@/lib/supabase/server'
-import {getAuthState,getFutureFixturePlan,getSquadPlayerPool,getRecommendation} from '@/lib/data'
+import {getAuthState,getSquadPlayerPool,getRecommendation} from '@/lib/data'
 import {BUDGET,FORMATIONS,SQUAD_SIZE} from '@/lib/rules'
 import {playerLabel} from '@/lib/playerPresentation'
 import {reportServerError} from '@/lib/observability'
@@ -71,15 +71,11 @@ export default async function Squad({searchParams}){
   const supabasePromise=createClient()
   const pool=await getSquadPlayerPool()
   const {players,run}=pool
-  const futurePlanPromise=run?.gameweek
-    ?getFutureFixturePlan(Number(run.gameweek)+1,2)
-    :Promise.resolve({byTeam:{}})
   const pageResultPromise=run?.gameweek
     ?supabasePromise.then(supabase=>supabase.rpc('scout_my_squad_page',{p_gameweek:run.gameweek}))
     :Promise.resolve({data:null,error:null})
-  const [recommendation,futurePlan,pageResult]=await Promise.all([
+  const [recommendation,pageResult]=await Promise.all([
     recommendationPromise,
-    futurePlanPromise,
     pageResultPromise,
   ])
   const {members:recommended,recommendation:recommendedMeta}=recommendation
