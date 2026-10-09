@@ -1,5 +1,5 @@
 'use client'
-import { startTransition, useActionState, useEffect, useMemo, useRef, useState, useTransition } from 'react'
+import { useActionState, useEffect, useMemo, useRef, useState, useTransition } from 'react'
 import { saveSquad } from '@/app/actions'
 import {createClient} from '@/lib/supabase/client'
 import { teamCssVars } from '@/lib/teamThemes'
