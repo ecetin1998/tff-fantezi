@@ -3858,3 +3858,8 @@
 .scope :global(.mobile-player-top)>*,.scope :global(.mobile-player-metrics)>*{min-width:0}
 .scope :global(.player-filters) input,.scope :global(.player-filters) select{font-size:16px;min-width:0}
 }
+
+/* Filter keyboard focus and mobile heading wrapping. */
+.scope :global(.player-filters) input:focus-visible,.scope :global(.player-filters) select:focus-visible{outline:2px solid #16b8a6;outline-offset:2px}
+.scope :global(.player-filters)[aria-busy="true"] input,.scope :global(.player-filters)[aria-busy="true"] select{opacity:.7}
+@media(max-width:620px){.scope :global(.section-title){flex-wrap:wrap;min-width:0}.scope :global(.section-title)>*{min-width:0}.scope :global(.section-title) h1{overflow-wrap:anywhere}}
