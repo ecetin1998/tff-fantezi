@@ -14,6 +14,7 @@ const PAGE_SIZE=50
 export default function PlayersTable({players,total,page,pageCount,teams,filters,accessTier='visitor',staticPool=false,runId=null}){
   const router=useRouter()
   const [tier,setTier]=useState(accessTier)
+  const [accessPending,setAccessPending]=useState(staticPool)
   const [localFilters,setLocalFilters]=useState(filters||{})
   const [pool,setPool]=useState(players)
   const [overlayError,setOverlayError]=useState(false)
@@ -53,6 +54,8 @@ export default function PlayersTable({players,total,page,pageCount,teams,filters
         }))
       }catch{
         if(!cancelled)setOverlayError(true)
+      }finally{
+        if(!cancelled)setAccessPending(false)
       }
     }
     loadOverlay()
@@ -94,6 +97,12 @@ export default function PlayersTable({players,total,page,pageCount,teams,filters
   const offset=(Math.max(1,Number(effectivePage||1))-1)*PAGE_SIZE
 
   return <>
+    {accessPending&&isVisitor?<div className="filters player-filters" aria-label="Filtreler hazırlanıyor" aria-busy="true">
+      <input disabled placeholder="Oyuncu, takım veya rakip ara..." aria-label="Oyuncu arama yükleniyor"/>
+      <select disabled aria-label="Takım filtresi yükleniyor"><option>Tüm takımlar</option></select>
+      <select disabled aria-label="Mevki filtresi yükleniyor"><option>Tüm mevkiler</option></select>
+      <select disabled className="mobile-sort-select" aria-label="Sıralama yükleniyor"><option>xFP'ye göre</option></select>
+    </div>:null}
     {!isVisitor?<div className="filters player-filters">
       <input value={q} onChange={e=>setQ(e.target.value)} placeholder="Oyuncu, takım veya rakip ara..." aria-label="Oyuncu ara"/>
       <select value={activeFilters?.team||''} onChange={e=>navigate({team:e.target.value,page:1})}>
