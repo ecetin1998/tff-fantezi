@@ -121,7 +121,7 @@ export default async function Squad({searchParams}){
     <SquadBuilder players={players} initialState={initialState} recommendedState={recommendedState}
       initialManagerCard={initialManagerCard} recommendedRunId={recommendedMeta?.run_id||null} poolRunId={run?.id||null}
       plan={auth.plan} gameweek={run?.gameweek} deadlineAt={gameweekRow?.deadline_at||null} locked={locked}
-      transferScenarios={[]} futurePlan={futurePlan} transferRights={pageData?.transfer_rights||null}/>
+      transferScenarios={[]} transferRights={pageData?.transfer_rights||null}/>
 
     <section className="card squad-history-card">
       <div className="squad-history-head">
