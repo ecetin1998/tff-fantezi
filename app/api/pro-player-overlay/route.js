@@ -5,7 +5,7 @@ export const dynamic='force-dynamic'
 
 const privateHeaders={'Cache-Control':'private, no-store'}
 
-export async function GET(){
+export async function GET(request){
   const requestId=randomUUID()
   const started=Date.now()
   let stage='auth'
@@ -16,7 +16,11 @@ export async function GET(){
       return Response.json({error:'PRO_REQUIRED',request_id:requestId},{status:403,headers:privateHeaders})
     }
     stage='current_run'
-    const run=await getCurrentRun()
+    const requestedRun=request.nextUrl.searchParams.get('run_id')
+    if(requestedRun&&!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(requestedRun)){
+      return Response.json({error:'INVALID_RUN_ID',request_id:requestId},{status:400,headers:privateHeaders})
+    }
+    const run=requestedRun?{id:requestedRun}:await getCurrentRun()
     stage='pro_rpc'
     const rows=run?await getProOverlayForRun(run.id):[]
     console.info('pro-player-overlay completed',{requestId,elapsedMs:Date.now()-started,rowCount:rows.length,hasRun:Boolean(run)})
