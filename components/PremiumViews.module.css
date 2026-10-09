@@ -2591,3 +2591,16 @@
 .scope :global(.recommendation-preview-card)>*,.scope :global(.recommendation-preview-list)>div>*{min-width:0}
 .scope :global(.recommendation-preview-list)>div>span{white-space:normal;overflow-wrap:anywhere}
 }
+
+/* Squad recommendations: readable summary and consistent card layout. */
+.scope :global(.squad-tabs-note){line-height:1.5}
+.scope :global(.squad-tabs-note)>span{overflow-wrap:anywhere}
+.scope :global(.unified-squad-list)>:global(.unified-squad-card){min-width:0}
+.scope :global(.unified-squad-card) :is(h2,h3){overflow-wrap:anywhere}
+.scope :global(.recommendation-preview-list) b{overflow-wrap:anywhere;line-height:1.4}
+.scope :global(.recommendation-preview-list) small{overflow-wrap:anywhere}
+@media(max-width:620px){
+.scope :global(.squad-tabs-note){gap:9px}
+.scope :global(.recommendation-preview-card){min-width:0}
+.scope :global(.unified-squad-list){min-width:0}
+}
