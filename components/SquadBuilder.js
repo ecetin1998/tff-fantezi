@@ -461,16 +461,16 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
   }
 
   async function fillRecommended(){
-    if(isLocked)return
+    if(isLocked||isAutoFilling)return
     setAutoFillError('')
-    if(managerCard===MANAGER_CARD_NONE){
-      applyRecommendationState(recommendedState)
-      return
-    }
-    if(plan!=='pro')return
-
+    if(managerCard!==MANAGER_CARD_NONE&&plan!=='pro')return
     setIsAutoFilling(true)
     try{
+      if(managerCard===MANAGER_CARD_NONE){
+        await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)))
+        applyRecommendationState(recommendedState)
+        return
+      }
       let entry=cardRecommendations[managerCard]
       if(!entry?.state?.length){
         const supabase=createClient()
@@ -668,20 +668,7 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
         <b>{selectedTotal.toFixed(1)}</b>
         <small>MH{gameweek||'—'} tahmini</small>
       </div>
-      <div className="squad-toolbar">
-        <button type="button" className="squad-tool-btn auto-fill-btn" onClick={fillRecommended} disabled={isLocked||isAutoFilling||(managerCard!==MANAGER_CARD_NONE&&plan!=='pro')}>{isAutoFilling?'Hazırlanıyor…':'Otomatik Doldur'}</button>
-        <button type="button" className="squad-tool-btn danger" onClick={reset} disabled={isLocked}>Sıfırla</button>
-        <button type="button" className="squad-tool-btn primary-jump" onClick={goToLineup} disabled={!validRoster}>İlk 11’i Diz ↓</button>
-      </div>
-      {autoFillError?<small className="save-squad-error auto-fill-error">{autoFillError}</small>:null}
-    </section>
 
-    <section className={`card deadline-check-card ${deadlineWarnings.length?'has-risk':'is-clean'}`}>
-      <div className="deadline-check-head">
-        <div><span className="eyebrow">DEADLINE KONTROLÜ</span><h2>{deadlineWarnings.length?`${deadlineWarnings.length} kontrol noktası var`:'Kadro temiz görünüyor'}</h2></div>
-        <span>{deadlineAt?formatDeadline(deadlineAt):'Takvim bekleniyor'}</span>
-      </div>
-      {deadlineWarnings.length?<div className="deadline-warning-list">{deadlineWarnings.slice(0,5).map((warning,i)=><div className={`deadline-warning ${warning.type}`} key={warning.type+'-'+i}><b>!</b><span>{warning.text}</span></div>)}</div>:<p>Mevcut kadroda bütçe, kulüp limiti, uygunluk veya dakika açısından kritik bir uyarı görünmüyor.</p>}
     </section>
 
     <div className="my-squad-layout roster-builder-layout" ref={rosterRef}>
@@ -691,8 +678,13 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
             <span className="eyebrow">1. AŞAMA • {SQUAD_SIZE} KİŞİLİK KADRO</span>
             <h2>Kadronu oluştur</h2>
           </div>
-          <button type="button" className="squad-tool-btn jump-link" onClick={goToLineup} disabled={!validRoster}>İlk 11’i Diz ↓</button>
+          <div className="squad-stage-actions">
+            <button type="button" className="squad-tool-btn auto-fill-btn" onClick={fillRecommended} disabled={isLocked||isAutoFilling||(managerCard!==MANAGER_CARD_NONE&&plan!=='pro')} aria-busy={isAutoFilling}>{isAutoFilling?'Dolduruluyor…':'Otomatik Doldur'}</button>
+            <button type="button" className="squad-tool-btn danger" onClick={reset} disabled={isLocked||isAutoFilling}>Sıfırla</button>
+            <button type="button" className="squad-tool-btn jump-link" onClick={goToLineup} disabled={!validRoster||isAutoFilling}>İlk 11’i Diz ↓</button>
+          </div>
         </div>
+        {autoFillError?<small className="save-squad-error auto-fill-error">{autoFillError}</small>:null}
 
         <div className={`manager-card-roster-control ${managerCard!==MANAGER_CARD_NONE?'active':''} ${plan==='pro'?'unlocked':'locked'}`}>
           <div className="manager-card-roster-copy">
