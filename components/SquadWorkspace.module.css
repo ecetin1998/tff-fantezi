@@ -2169,3 +2169,30 @@
 .scope :global(.my-squad-shell) :global(.picker-list){max-height:min(58dvh,520px)}
 .scope :global(.my-squad-shell) :global(.squad-stage-actions) :global(.squad-tool-btn){min-height:46px}
 }
+
+/* Mobile roster stage: three equal actions; prevent single button spanning a row. */
+@media(max-width:760px){
+.scope :global(.my-squad-shell) :global(.roster-stage) :global(.squad-stage-head){display:block}
+.scope :global(.my-squad-shell) :global(.roster-stage) :global(.squad-stage-head)>div:first-child{margin-bottom:12px}
+.scope :global(.my-squad-shell) :global(.roster-stage) :global(.squad-stage-actions){
+display:grid!important;
+grid-template-columns:repeat(3,minmax(0,1fr))!important;
+align-items:stretch;
+justify-content:stretch;
+width:100%;
+gap:6px;
+}
+.scope :global(.my-squad-shell) :global(.roster-stage) :global(.squad-stage-actions)>button{
+grid-column:auto!important;
+grid-row:auto!important;
+width:100%!important;
+min-width:0;
+min-height:48px;
+margin:0;
+padding:8px 4px;
+font-size:11px;
+line-height:1.25;
+white-space:normal;
+overflow-wrap:anywhere;
+}
+}
