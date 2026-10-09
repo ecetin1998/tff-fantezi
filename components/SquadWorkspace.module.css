@@ -2152,3 +2152,20 @@
 .scope :global(.my-squad-shell) :global(.squad-stage-actions){width:100%;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
 .scope :global(.my-squad-shell) :global(.squad-stage-actions) :global(.squad-tool-btn){width:100%;min-height:44px;padding:8px 5px;font-size:11px}
 }
+
+/* Mobile squad polish: reliable tap targets and readable picker values. */
+.scope :global(.my-squad-shell) :global(.squad-stage-actions) button:focus-visible,
+.scope :global(.my-squad-shell) :global(.picker-player)>button:focus-visible,
+.scope :global(.my-squad-shell) :global(.picker-filters) :is(input,select):focus-visible{
+  outline:2px solid #0b8e82;
+  outline-offset:2px;
+}
+.scope :global(.my-squad-shell) :global(.picker-list){scrollbar-gutter:stable}
+.scope :global(.my-squad-shell) :global(.picker-player)>button{touch-action:manipulation}
+.scope :global(.my-squad-shell) :global(.squad-stage-actions) button{touch-action:manipulation}
+@media(max-width:760px){
+.scope :global(.my-squad-shell) :global(.picker-filters) :is(input,select){min-height:42px}
+.scope :global(.my-squad-shell) :global(.picker-player)>button{min-height:34px;min-width:30px}
+.scope :global(.my-squad-shell) :global(.picker-list){max-height:min(58dvh,520px)}
+.scope :global(.my-squad-shell) :global(.squad-stage-actions) :global(.squad-tool-btn){min-height:46px}
+}
