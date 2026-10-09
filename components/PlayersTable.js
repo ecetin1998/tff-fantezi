@@ -18,6 +18,7 @@ export default function PlayersTable({players,total,page,pageCount,teams,filters
   const [localFilters,setLocalFilters]=useState(filters||{})
   const [pool,setPool]=useState(players)
   const [overlayError,setOverlayError]=useState(false)
+  const [overlayRequestId,setOverlayRequestId]=useState(null)
   const isPro=tier==='pro'
   const isVisitor=tier==='visitor'
   const activeFilters=staticPool?localFilters:filters
@@ -33,6 +34,7 @@ export default function PlayersTable({players,total,page,pageCount,teams,filters
     setQ(next.q)
     setPool(players)
     setOverlayError(false)
+    setOverlayRequestId(null)
     async function loadOverlay(){
       try{
         const accessResponse=await fetch('/api/access',{cache:'no-store'})
@@ -50,7 +52,11 @@ export default function PlayersTable({players,total,page,pageCount,teams,filters
             const response=await fetch('/api/pro-player-overlay',{cache:'no-store'})
             if(!response.ok){
               if(![403,429,500,502,503,504].includes(response.status))throw new Error('Pro metrics HTTP '+response.status)
-              if(attempt===2)throw new Error('Pro metrics HTTP '+response.status)
+              if(attempt===2){
+                const details=await response.json().catch(()=>({}))
+                if(!cancelled)setOverlayRequestId(details.request_id||null)
+                throw new Error('Pro metrics HTTP '+response.status)
+              }
             }else{
               const payload=await response.json()
               if(!Array.isArray(payload.rows))throw new Error('Invalid metrics response')
@@ -140,7 +146,7 @@ export default function PlayersTable({players,total,page,pageCount,teams,filters
     </div>:null}
 
     <div className="table-summary">{isVisitor?<><b>İlk {visiblePlayers.length}</b> oyuncu • xFP sıralaması • tüm oyuncu havuzu ücretsiz üyelikle açılır</>:<><b>{effectiveTotal}</b> oyuncu • {isPro?'Gelişmiş analiz görünümü':'ücretsiz üye görünümü'}</>}</div>
-    {isPro&&overlayError?<div className="alert error" role="alert">Gelişmiş istatistikler yüklenemedi. Güncel veriler için sayfayı yenile.</div>:null}
+    {isPro&&overlayError?<div className="alert error" role="alert">Gelişmiş istatistikler yüklenemedi. Güncel veriler için sayfayı yenile.{overlayRequestId?' Hata kodu: '+overlayRequestId:''}</div>:null}
     <div className="projection-legend">
       Karar metrikleri: <b>İlk 11</b> + <b>xDakika</b> oynama ihtimalini, <b>xFP</b> ortalama beklentiyi gösterir.
       {isPro?<span> <b>P25/P90</b>, <b>6+</b>, <b>xG</b> ve <b>xA</b> Gelişmiş üyelik dağılım/üretim katmanlarıdır.</span>:<span> Puan dağılımı, 6+ ihtimali ve xG/xA detayları Gelişmiş üyelikte açılır.</span>}
