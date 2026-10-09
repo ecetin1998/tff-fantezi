@@ -41,8 +41,13 @@ export default function PlayersTable({players,total,page,pageCount,teams,filters
         if(cancelled)return
         setTier(access.tier||'visitor')
         if(access.plan!=='pro')return
-        const response=await fetch('/api/pro-player-overlay',{cache:'no-store'})
-        if(!response.ok)throw new Error('Pro metrics request failed')
+        let response=await fetch('/api/pro-player-overlay',{cache:'no-store'})
+        if(response.status===503){
+          await new Promise(resolve=>setTimeout(resolve,400))
+          if(cancelled)return
+          response=await fetch('/api/pro-player-overlay',{cache:'no-store'})
+        }
+        if(!response.ok)throw new Error('Pro metrics request failed: '+response.status)
         const data=await response.json()
         if(runId&&data.run_id!==runId)throw new Error('Model run mismatch')
         if(!Array.isArray(data.rows))throw new Error('Invalid metrics response')
