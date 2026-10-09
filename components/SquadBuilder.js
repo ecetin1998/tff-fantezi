@@ -136,7 +136,6 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
     return saved&&initialXI.includes(saved)&&savedPlayer?.position!=='GK'?saved:(initialXI.map(id=>map.get(id)).filter(p=>p&&p.position!=='GK').sort((a,b)=>xfp(b)-xfp(a))[0]?.id||null)
   },[initialState,initialXI,map])
   const [captainId,setCaptainId]=useState(initialCaptainId)
-  const [poolLimit,setPoolLimit]=useState(180)
   const isLocked=locked
   const [q,setQ]=useState('')
   const [pos,setPos]=useState('')
@@ -343,8 +342,7 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
     })
     return out
   },[players,pos,team,q,sortKey,sortDir])
-  useEffect(()=>setPoolLimit(180),[q,pos,team,sortKey,sortDir])
-  const visibleCandidates=candidates.slice(0,poolLimit)
+  const visibleCandidates=candidates
 
   const recommendationRunMismatch=Boolean(recommendedRunId&&poolRunId&&recommendedRunId!==poolRunId)
   const missingRecommended=useMemo(()=>recommendedState.filter(x=>!map.has(Number(x.player_id))),[recommendedState,map])
@@ -755,7 +753,7 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
       <aside className="player-picker card" ref={pickerRef}>
         <div className="player-picker-head">
           <div><span className="eyebrow">OYUNCU SEÇİMİ</span><h2>Oyuncu havuzu</h2></div>
-          <span>{Math.min(poolLimit,candidates.length)}/{candidates.length}</span>
+          <span>{candidates.length} oyuncu</span>
         </div>
 
         <div className="picker-filters">
@@ -809,7 +807,6 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
                 <b>{playerLabel(p)}</b>
                 <small><strong>{p.team}</strong><em>Rakip: {p.projection?.opponent_name||'—'}</em></small>
                 {availabilityNote?<small className="picker-availability-note">{availabilityNote}</small>:null}
-                {!chosen?<button type="button" className="picker-simulate-link" onClick={()=>simulatePlayer(p)} disabled={isLocked}>Kadroma göre hesapla</button>:null}
               </div>
               <div className={`picker-value price ${sortKey==='price'?'active':''}`}>{Number(p.price||0).toFixed(1)}m</div>
               <div className={`picker-value xfp ${sortKey==='xfp'?'active':''}`}>{xfp(p).toFixed(2)}</div>
@@ -824,7 +821,6 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
             </div>
           })}
         </div>
-        {visibleCandidates.length<candidates.length?<button type="button" className="squad-tool-btn" onClick={()=>setPoolLimit(v=>v+180)} disabled={isLocked}>Daha fazla göster ({candidates.length-visibleCandidates.length})</button>:null}
       </aside>
     </div>
 
