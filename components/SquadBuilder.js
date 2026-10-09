@@ -1,5 +1,5 @@
 'use client'
-import { useActionState, useEffect, useMemo, useRef, useState } from 'react'
+import { startTransition, useActionState, useEffect, useMemo, useRef, useState, useTransition } from 'react'
 import { saveSquad } from '@/app/actions'
 import {createClient} from '@/lib/supabase/client'
 import { teamCssVars } from '@/lib/teamThemes'
@@ -226,6 +226,7 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
   const [cardRecommendations,setCardRecommendations]=useState({})
   const [loadingCards,setLoadingCards]=useState(()=>new Set())
   const [isAutoFilling,setIsAutoFilling]=useState(false)
+  const [isSquadUpdating,startSquadUpdate]=useTransition()
   const [autoFillError,setAutoFillError]=useState('')
   const [simulation,setSimulation]=useState(null)
 
@@ -468,7 +469,7 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
     try{
       if(managerCard===MANAGER_CARD_NONE){
         await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)))
-        applyRecommendationState(recommendedState)
+        startSquadUpdate(()=>applyRecommendationState(recommendedState))
         return
       }
       let entry=cardRecommendations[managerCard]
@@ -482,7 +483,7 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
         setCardRecommendations(current=>({...current,[managerCard]:entry}))
       }
       if(!entry?.state?.length)throw new Error('Bu kart için optimize kadro oluşturulamadı.')
-      applyRecommendationState(entry.state)
+      startSquadUpdate(()=>applyRecommendationState(entry.state))
     }catch{
       setAutoFillError('Seçili kart için otomatik kadro hazırlanamadı. Tekrar deneyebilirsin.')
     }finally{
@@ -491,7 +492,9 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
   }
   function reset(){
     const fallback=effectiveFormationMap['4-3-3']?'4-3-3':Object.keys(effectiveFormationMap)[0]
-    setIds([]);setXiIds([]);setCaptainId(null);setSwapTarget(null);setFormation(fallback);setSimulation(null)
+    startSquadUpdate(()=>{
+      setIds([]);setXiIds([]);setCaptainId(null);setSwapTarget(null);setFormation(fallback);setSimulation(null)
+    })
   }
 
   function simulatePlayer(target){
@@ -679,9 +682,9 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
             <h2>Kadronu oluştur</h2>
           </div>
           <div className="squad-stage-actions">
-            <button type="button" className="squad-tool-btn auto-fill-btn" onClick={fillRecommended} disabled={isLocked||isAutoFilling||(managerCard!==MANAGER_CARD_NONE&&plan!=='pro')} aria-busy={isAutoFilling}>{isAutoFilling?'Dolduruluyor…':'Otomatik Doldur'}</button>
-            <button type="button" className="squad-tool-btn danger" onClick={reset} disabled={isLocked||isAutoFilling}>Sıfırla</button>
-            <button type="button" className="squad-tool-btn jump-link" onClick={goToLineup} disabled={!validRoster||isAutoFilling}>İlk 11’i Diz ↓</button>
+            <button type="button" className="squad-tool-btn auto-fill-btn" onClick={fillRecommended} disabled={isLocked||isAutoFilling||isSquadUpdating||(managerCard!==MANAGER_CARD_NONE&&plan!=='pro')} aria-busy={isAutoFilling||isSquadUpdating}>{isAutoFilling||isSquadUpdating?'Dolduruluyor…':'Otomatik Doldur'}</button>
+            <button type="button" className="squad-tool-btn danger" onClick={reset} disabled={isLocked||isAutoFilling||isSquadUpdating}>Sıfırla</button>
+            <button type="button" className="squad-tool-btn jump-link" onClick={goToLineup} disabled={!validRoster||isAutoFilling||isSquadUpdating}>İlk 11’i Diz ↓</button>
           </div>
         </div>
         {autoFillError?<small className="save-squad-error auto-fill-error">{autoFillError}</small>:null}
