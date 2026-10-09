@@ -1,5 +1,5 @@
 'use client'
-import { useActionState, useEffect, useMemo, useRef, useState } from 'react'
+import { useActionState, useEffect, useMemo, useRef, useState, useTransition } from 'react'
 import { saveSquad } from '@/app/actions'
 import {createClient} from '@/lib/supabase/client'
 import { teamCssVars } from '@/lib/teamThemes'
@@ -189,15 +189,6 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
   }
   const riskP25=bandTotal('p25')
   const riskP90=bandTotal('p90')
-  const deadlineWarnings=[]
-  if(ids.length!==SQUAD_SIZE)deadlineWarnings.push({type:'roster',text:`Kadro ${ids.length}/${SQUAD_SIZE}; eksik slotları tamamla.`})
-  if(ids.length===SQUAD_SIZE&&!budgetOk)deadlineWarnings.push({type:'budget',text:'Bütçe sınırı aşılıyor.'})
-  if(ids.length===SQUAD_SIZE&&!clubLimitOk)deadlineWarnings.push({type:'club',text:'Bir kulüpten oyuncu sınırı aşılmış.'})
-  const availabilityRisks=selected.filter(p=>Number(p?.projection?.availability_probability??1)<.8)
-  if(availabilityRisks.length)deadlineWarnings.push({type:'availability',text:`${availabilityRisks.length} oyuncunun oynama durumu riskli: ${availabilityRisks.slice(0,2).map(playerLabel).join(', ')}${availabilityRisks.length>2?'…':''}`})
-  const rotationRisks=xi.filter(p=>Number(p?.projection?.xi_probability||0)<.55||Number(p?.projection?.x_minutes||0)<45)
-  if(rotationRisks.length)deadlineWarnings.push({type:'rotation',text:`${rotationRisks.length} ilk 11 oyuncusunda dakika/başlama riski var: ${rotationRisks.slice(0,2).map(playerLabel).join(', ')}${rotationRisks.length>2?'…':''}`})
-  if(captainPlayer&&Number(captainPlayer?.projection?.availability_probability??1)<.8)deadlineWarnings.push({type:'captain',text:`Kaptan ${playerLabel(captainPlayer)} oynama riski taşıyor.`})
   const rosterByPos=useMemo(()=>Object.fromEntries(['GK','DEF','MID','FWD'].map(position=>[
     position,
     ids.map(id=>map.get(id)).filter(p=>p?.position===position).sort((a,b)=>xfp(b)-xfp(a))
@@ -226,6 +217,7 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
   const [cardRecommendations,setCardRecommendations]=useState({})
   const [loadingCards,setLoadingCards]=useState(()=>new Set())
   const [isAutoFilling,setIsAutoFilling]=useState(false)
+  const [isSquadUpdating,startSquadUpdate]=useTransition()
   const [autoFillError,setAutoFillError]=useState('')
   const [simulation,setSimulation]=useState(null)
 
@@ -267,63 +259,6 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
     MANAGER_CARDS.map(card=>[card.id,cardRecommendations[card.id]?.xfp??null])
   ),[cardRecommendations])
   const captainCandidates=[...xi].filter(p=>p.position!=='GK').sort((a,b)=>xfp(b)-xfp(a)).slice(0,3)
-  const futureByTeamWeek=useMemo(()=>{
-    const out=new Map()
-    for(const [teamId,fixtures] of Object.entries(futurePlan?.byTeam||{})){
-      const grouped=new Map()
-      for(const fixture of fixtures||[]){
-        const gw=Number(fixture.gameweek)
-        if(!Number.isFinite(gw))continue
-        const list=grouped.get(gw)||[];list.push(fixture);grouped.set(gw,list)
-      }
-      out.set(Number(teamId),grouped)
-    }
-    return out
-  },[futurePlan])
-  const baseGameweek=Number(gameweek||0)
-  const playerPlanFactor=useMemo(()=>((p,week)=>{
-    if(week===0)return 1
-    const fixtures=futureByTeamWeek.get(Number(p?.team_id))?.get(baseGameweek+week)||[]
-    if(!fixtures.length)return 0
-    const todayAvailability=Math.max(0,Math.min(1,Number(p?.projection?.availability_probability??1)))
-    const returnAt=p?.availability?.expected_return_date?new Date(p.availability.expected_return_date).getTime():null
-    const suspensionEnd=Number(p?.availability?.suspension_end??p?.availability?.suspension_fixture??0)
-    return fixtures.reduce((sum,future)=>{
-      const factor=Math.max(0,Number(['GK','DEF'].includes(p?.position)?future.defense_factor:future.attack_factor)||0)
-      const kickoff=future.kickoff_at?new Date(future.kickoff_at).getTime():null
-      const recovered=returnAt&&kickoff&&kickoff>=returnAt?1:todayAvailability
-      const available=suspensionEnd&&Number(future.gameweek)<=suspensionEnd?0:recovered
-      return sum+factor*Math.max(0,Math.min(1,available))
-    },0)
-  }),[futureByTeamWeek,baseGameweek])
-  const transferPlanRows=useMemo(()=>{
-    if(plan!=='pro'||ids.length!==SQUAD_SIZE)return []
-    const weeks=[0,1,2]
-    const currentThreeWeekScore=scoreSquad(ids,{playerMap:map,weeks,weekFactor:playerPlanFactor,captainMultiplier}).total
-    const hitCost=freeTransfersRemaining>0?0:Number(TRANSFER_RULES.hit_cost||4)
-    const roughValue=p=>weeks.reduce((sum,w)=>sum+xfp(p)*playerPlanFactor(p,w),0)
-    const shortlist=[]
-    for(const out of selected){
-      const candidatePool=players.filter(inn=>inn.active&&inn.position===out.position&&!ids.includes(inn.id)).slice(0,80)
-      for(const inn of candidatePool){
-        const nextCost=cost-Number(out.price||0)+Number(inn.price||0)
-        if(Number.isFinite(effectiveBudget)&&nextCost>effectiveBudget+.0001)continue
-        const upperBound=roughValue(inn)-roughValue(out)+Math.max(0,roughValue(inn))*(captainMultiplier-1)-hitCost
-        const floor=shortlist.length>=3?shortlist[shortlist.length-1].netGain:.5
-        if(upperBound<=Math.max(.5,floor))continue
-        const nextIds=ids.map(id=>id===out.id?inn.id:id),nextPlayers=nextIds.map(id=>map.get(id)).filter(Boolean)
-        const clubCounts=nextPlayers.reduce((a,p)=>(a[p.team_id]=(a[p.team_id]||0)+1,a),{})
-        if(MAX_PLAYERS_PER_CLUB&&Object.values(clubCounts).some(n=>n>MAX_PLAYERS_PER_CLUB))continue
-        const nextScore=scoreSquad(nextIds,{playerMap:map,weeks,weekFactor:playerPlanFactor,captainMultiplier}).total
-        const rawGain=nextScore-currentThreeWeekScore,netGain=rawGain-hitCost
-        if(!Number.isFinite(netGain)||netGain<=.5)continue
-        shortlist.push({out,inn,rawGain,hitCost,netGain,nextCost,fixtures:(futurePlan?.byTeam?.[inn.team_id]||[]).slice(0,2)})
-        shortlist.sort((a,b)=>b.netGain-a.netGain);if(shortlist.length>3)shortlist.length=3
-      }
-    }
-    return shortlist
-  },[plan,ids,map,players,selected,cost,effectiveBudget,freeTransfersRemaining,captainMultiplier,futurePlan,playerPlanFactor])
-
   const teams=useMemo(()=>[...new Set(players.map(p=>p.team).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'tr')),[players])
   const candidates=useMemo(()=>{
     let out=players.filter(p=>
@@ -461,16 +396,16 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
   }
 
   async function fillRecommended(){
-    if(isLocked)return
+    if(isLocked||isAutoFilling)return
     setAutoFillError('')
-    if(managerCard===MANAGER_CARD_NONE){
-      applyRecommendationState(recommendedState)
-      return
-    }
-    if(plan!=='pro')return
-
+    if(managerCard!==MANAGER_CARD_NONE&&plan!=='pro')return
     setIsAutoFilling(true)
     try{
+      if(managerCard===MANAGER_CARD_NONE){
+        await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)))
+        startSquadUpdate(()=>applyRecommendationState(recommendedState))
+        return
+      }
       let entry=cardRecommendations[managerCard]
       if(!entry?.state?.length){
         const supabase=createClient()
@@ -482,7 +417,7 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
         setCardRecommendations(current=>({...current,[managerCard]:entry}))
       }
       if(!entry?.state?.length)throw new Error('Bu kart için optimize kadro oluşturulamadı.')
-      applyRecommendationState(entry.state)
+      startSquadUpdate(()=>applyRecommendationState(entry.state))
     }catch{
       setAutoFillError('Seçili kart için otomatik kadro hazırlanamadı. Tekrar deneyebilirsin.')
     }finally{
@@ -491,7 +426,9 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
   }
   function reset(){
     const fallback=effectiveFormationMap['4-3-3']?'4-3-3':Object.keys(effectiveFormationMap)[0]
-    setIds([]);setXiIds([]);setCaptainId(null);setSwapTarget(null);setFormation(fallback);setSimulation(null)
+    startSquadUpdate(()=>{
+      setIds([]);setXiIds([]);setCaptainId(null);setSwapTarget(null);setFormation(fallback);setSimulation(null)
+    })
   }
 
   function simulatePlayer(target){
@@ -668,20 +605,7 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
         <b>{selectedTotal.toFixed(1)}</b>
         <small>MH{gameweek||'—'} tahmini</small>
       </div>
-      <div className="squad-toolbar">
-        <button type="button" className="squad-tool-btn auto-fill-btn" onClick={fillRecommended} disabled={isLocked||isAutoFilling||(managerCard!==MANAGER_CARD_NONE&&plan!=='pro')}>{isAutoFilling?'Hazırlanıyor…':'Otomatik Doldur'}</button>
-        <button type="button" className="squad-tool-btn danger" onClick={reset} disabled={isLocked}>Sıfırla</button>
-        <button type="button" className="squad-tool-btn primary-jump" onClick={goToLineup} disabled={!validRoster}>İlk 11’i Diz ↓</button>
-      </div>
-      {autoFillError?<small className="save-squad-error auto-fill-error">{autoFillError}</small>:null}
-    </section>
 
-    <section className={`card deadline-check-card ${deadlineWarnings.length?'has-risk':'is-clean'}`}>
-      <div className="deadline-check-head">
-        <div><span className="eyebrow">DEADLINE KONTROLÜ</span><h2>{deadlineWarnings.length?`${deadlineWarnings.length} kontrol noktası var`:'Kadro temiz görünüyor'}</h2></div>
-        <span>{deadlineAt?formatDeadline(deadlineAt):'Takvim bekleniyor'}</span>
-      </div>
-      {deadlineWarnings.length?<div className="deadline-warning-list">{deadlineWarnings.slice(0,5).map((warning,i)=><div className={`deadline-warning ${warning.type}`} key={warning.type+'-'+i}><b>!</b><span>{warning.text}</span></div>)}</div>:<p>Mevcut kadroda bütçe, kulüp limiti, uygunluk veya dakika açısından kritik bir uyarı görünmüyor.</p>}
     </section>
 
     <div className="my-squad-layout roster-builder-layout" ref={rosterRef}>
@@ -691,8 +615,13 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
             <span className="eyebrow">1. AŞAMA • {SQUAD_SIZE} KİŞİLİK KADRO</span>
             <h2>Kadronu oluştur</h2>
           </div>
-          <button type="button" className="squad-tool-btn jump-link" onClick={goToLineup} disabled={!validRoster}>İlk 11’i Diz ↓</button>
+          <div className="squad-stage-actions">
+            <button type="button" className="squad-tool-btn auto-fill-btn" onClick={fillRecommended} disabled={isLocked||isAutoFilling||isSquadUpdating||(managerCard!==MANAGER_CARD_NONE&&plan!=='pro')} aria-busy={isAutoFilling||isSquadUpdating}>{isAutoFilling||isSquadUpdating?'Dolduruluyor…':'Otomatik Doldur'}</button>
+            <button type="button" className="squad-tool-btn danger" onClick={reset} disabled={isLocked||isAutoFilling||isSquadUpdating}>Sıfırla</button>
+            <button type="button" className="squad-tool-btn jump-link" onClick={goToLineup} disabled={!validRoster||isAutoFilling||isSquadUpdating}>İlk 11’i Diz ↓</button>
+          </div>
         </div>
+        {autoFillError?<small className="save-squad-error auto-fill-error">{autoFillError}</small>:null}
 
         <div className={`manager-card-roster-control ${managerCard!==MANAGER_CARD_NONE?'active':''} ${plan==='pro'?'unlocked':'locked'}`}>
           <div className="manager-card-roster-copy">
@@ -1004,18 +933,6 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
           <h2>Kadron model önerisine yakın</h2>
           <p>Model kadrosuna geçişte şu an tek transferle pozitif net xFP yok. Sırf eşleşmek için ceza puanlı transfer önermiyorum.</p>
         </>}
-      </div>
-      <div className={`pro-lock ${plan==='pro'?'unlocked':''}`}>
-        <span>GELİŞMİŞ</span><b>3 MH Transfer Planlayıcısı</b>
-        {plan==='pro'&&recommendationRunMismatch?<p className="muted">Model güncelleniyor; öneri ile oyuncu havuzu aynı koşuya geldiğinde karşılaştırma açılacak.</p>:null}
-        {plan==='pro'&&missingRecommended.length?<p className="muted">Model önerisindeki {missingRecommended.map(x=>x.full_name||`#${x.player_id}`).join(', ')} güncel havuzda yok; eksik kadro otomatik uygulanmayacak.</p>:null}
-        {plan==='pro'&&recommendedRosterMatch&&transferPlanRows.length?<p className="muted">Bu hafta model optimumundasın; aşağıdakiler 3 haftalık bakış.</p>:null}
-        {plan==='pro'&&transferPlanRows.length?<div className="transfer-plan-list">{transferPlanRows.map((row,i)=><div className="transfer-plan-row" key={row.out.id+'-'+row.inn.id}>
-          <span className="transfer-rank">#{i+1}</span>
-          <div><b>{playerLabel(row.out)} → {playerLabel(row.inn)}</b><small>MH{gameweek||'—'} + sonraki 2 hafta • {row.fixtures.map(f=>`MH${f.gameweek} ${f.opponent}`).join(' • ')||'fikstür bekleniyor'}</small></div>
-          <strong className={row.netGain>=0?'positive':'negative'}>{row.netGain>=0?'+':''}{row.netGain.toFixed(2)}<small>net xFP</small></strong>
-        </div>)}</div>:<small>{plan==='pro'?'Mevcut kadro, güncel xFP ve sonraki iki fikstür gücüyle anlamlı tek-transfer fırsatı aranıyor.':'3 haftalık fikstür ayarlı transfer fırsatları ve transfer cezası analizi.'}</small>}
-        {plan==='pro'?<small className="transfer-plan-note">Plan skoru gelecekteki kesin xFP değildir; mevcut xFP, rakip sezon xG/xGA gücü ve saha avantajıyla ayarlanır.</small>:null}
       </div>
     </section>
   </div>

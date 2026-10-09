@@ -2141,3 +2141,14 @@
 .scope :global(.my-squad-shell) :global(.picker-copy)>b{font-size:11px}
 .scope :global(.my-squad-shell) :global(.picker-player)>:global(.picker-value){font-size:9.5px}
 }
+
+/* Squad actions: one compact responsive toolbar beside the stage title. */
+.scope :global(.my-squad-shell) :global(.squad-control-strip){min-width:0}
+.scope :global(.my-squad-shell) :global(.squad-stage-head){display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.scope :global(.my-squad-shell) :global(.squad-stage-actions){display:flex;align-items:center;justify-content:flex-end;flex-wrap:wrap;gap:7px;min-width:0}
+.scope :global(.my-squad-shell) :global(.squad-stage-actions) :global(.squad-tool-btn){min-width:0;min-height:38px;padding:9px 12px;font-size:12px;line-height:1.25;white-space:normal;text-align:center;overflow-wrap:anywhere;flex:0 1 auto}
+.scope :global(.my-squad-shell) :global(.squad-stage-actions) :global(.auto-fill-btn)[aria-busy="true"]{cursor:progress;opacity:.8}
+@media(max-width:760px){
+.scope :global(.my-squad-shell) :global(.squad-stage-actions){width:100%;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.scope :global(.my-squad-shell) :global(.squad-stage-actions) :global(.squad-tool-btn){width:100%;min-height:44px;padding:8px 5px;font-size:11px}
+}
