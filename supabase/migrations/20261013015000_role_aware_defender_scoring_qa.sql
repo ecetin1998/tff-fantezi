@@ -1,0 +1,56 @@
+-- Core xFP model QA correctly compares defenders of equivalent on-field
+-- defensive roles. Different tactical roles (CB vs FB/WB) can have sourced
+-- role-dependent expected scoring differences even with similar minutes and XI.
+-- Keep all existing keeper captain, XI probability and same-role xFP checks.
+-- Verified MH8 48fac586-0c0b-4671-a2a0-82535f18adc0: 0 actual
+-- same-role unexplained differences; 4 false positives were CB vs FB/WB.
+
+CREATE OR REPLACE FUNCTION public.scout_model_bugfix_qa(p_run_id uuid)
+ RETURNS jsonb
+ LANGUAGE sql
+ STABLE
+ SET search_path TO 'public'
+AS $function$
+with gk_cap as (
+  select count(*)::int n
+  from scout_squad_recommendations r
+  join scout_squad_members m on m.recommendation_id=r.id and m.is_captain=true
+  join scout_players p on p.id=m.player_id
+  where r.run_id=p_run_id and p.position='GK'
+), xi_bad as (
+  select count(*)::int n
+  from scout_player_projections
+  where run_id=p_run_id and coalesce(xi_probability,0)>1.000001
+), def_bad as (
+  select count(*)::int n
+  from scout_player_projections a
+  join scout_players pa on pa.id=a.player_id and pa.position='DEF'
+  join scout_player_projections b on b.run_id=a.run_id and b.player_id>a.player_id
+  join scout_players pb on pb.id=b.player_id and pb.position='DEF' and pb.team_id=pa.team_id
+  where a.run_id=p_run_id
+    -- Distinct sourced defensive roles have different card, role and possession
+    -- expectations. Only test otherwise-equivalent CB/CB, FB/FB, WB/WB pairs.
+    and coalesce(pa.primary_role,'DEF_UNKNOWN')=coalesce(pb.primary_role,'DEF_UNKNOWN')
+    -- Clean-sheet/base scoring comparisons only make sense for projected 60+ minute defenders.
+    -- Below 60, appearance and clean-sheet thresholds create legitimate discontinuities.
+    and coalesce(a.x_minutes,0)>=60
+    and coalesce(b.x_minutes,0)>=60
+    and abs(coalesce(a.x_minutes,0)-coalesce(b.x_minutes,0))<=3
+    and abs(coalesce(a.xi_probability,0)-coalesce(b.xi_probability,0))<=.05
+    and abs(
+      (coalesce(a.xfp,0)-coalesce(b.xfp,0))
+      -(
+        (coalesce(a.expected_goals,0)-coalesce(b.expected_goals,0))*6
+        +(coalesce(a.expected_assists,0)-coalesce(b.expected_assists,0))*3
+        +(coalesce(a.x_bonus,0)-coalesce(b.x_bonus,0))
+      )
+    )>.3
+)
+select jsonb_build_object(
+  'pass',(select n=0 from gk_cap) and (select n=0 from xi_bad) and (select n=0 from def_bad),
+  'gk_captain',(select n from gk_cap),
+  'xi_over_1',(select n from xi_bad),
+  'unexplained_same_team_def_xfp_diff',(select n from def_bad)
+);
+$function$
+
