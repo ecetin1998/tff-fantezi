@@ -49,14 +49,14 @@ for attempt in $(seq 1 8); do
     if ! python3 - "$tmp/$name" "$expected_marker" <<'PY'
 import html, pathlib, re, sys
 raw=pathlib.Path(sys.argv[1]).read_text(encoding='utf-8',errors='replace')
-raw=re.sub(r'<(script|style)\\b[^>]*>[\\s\\S]*?</\\1>',' ',raw,flags=re.I)
-raw=re.sub(r'<!--[\\s\\S]*?-->','',raw)
+raw=re.sub(r'<(script|style)\b[^>]*>[\s\S]*?</\1>',' ',raw,flags=re.I)
+raw=re.sub(r'<!--[\s\S]*?-->','',raw)
 rendered=html.unescape(re.sub(r'<[^>]+>',' ',raw))
 rendered=' '.join(rendered.split())
 expected=sys.argv[2]
 if expected not in rendered:
     print(f'MH HTML mismatch: expected visible text {expected!r}; '
-          f'visible markers: {re.findall(r"MH\\d+",rendered)[:12]}',file=sys.stderr)
+          f'visible markers: {re.findall(r"MH\d+",rendered)[:12]}',file=sys.stderr)
     sys.exit(1)
 PY
     then
