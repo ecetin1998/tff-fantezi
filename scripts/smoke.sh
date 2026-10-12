@@ -212,6 +212,28 @@ if(matches.includes('%$'))throw new Error('matches HTML contains malformed %$ pr
 NODE
 echo "PASS player/detail/domain regressions"
 
+# Publishing a new model must update the actual HTML, not just the Supabase
+# current-run pointer or the public JSON API. This caught the real MH7/MH8
+# mismatch: /api/scout-data served week 8 while / still rendered MH7.
+node - "$TMP_DIR/matches.json" "$TMP_DIR/route-home.html" "$TMP_DIR/route-players.html" "$TMP_DIR/route-matches.html" "$TMP_DIR/route-squads.html" <<'NODE'
+const fs=require('node:fs')
+const [,,apiFile,...htmlFiles]=process.argv
+const api=JSON.parse(fs.readFileSync(apiFile,'utf8'))
+const gameweek=Number(api.current_run?.gameweek)
+if(!Number.isInteger(gameweek)||gameweek<1)throw new Error('Public API current gameweek unavailable')
+const token=new RegExp('\\bMH'+gameweek+'\\b')
+for(const file of htmlFiles){
+  const visible=fs.readFileSync(file,'utf8')
+    .replace(/<script\\b[^>]*>[\\s\\S]*?<\\/script>/gi,' ')
+    .replace(/<style\\b[^>]*>[\\s\\S]*?<\\/style>/gi,' ')
+    .replace(/<[^>]+>/g,' ').replace(/\\s+/g,' ')
+  if(!token.test(visible)){
+    throw new Error(file+': public API says MH'+gameweek+' but rendered HTML uses a different model week')
+  }
+}
+console.log('PASS MH'+gameweek+' matches live API and home, player, match and squad HTML')
+NODE
+
 not_found_body="$TMP_DIR/player-not-found.html"
 not_found_code="$(curl_retry -sS -o "$not_found_body" -w '%{http_code}' "$BASE_URL/players/99999")"
 if [[ "$not_found_code" == "404" ]]; then
