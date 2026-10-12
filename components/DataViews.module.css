@@ -3890,6 +3890,8 @@
     min-width:0;
     width:100%;
     max-width:100%;
+    /* A five-week strip may be wider than the phone, not the card. */
+    overflow-x:clip;
   }
   .scope :global(.team-analysis-mobile-card){
     box-sizing:border-box;
@@ -3897,6 +3899,7 @@
     min-width:0;
     width:100%;
     max-width:100%;
+    overflow:hidden;
   }
   .scope :global(.team-analysis-mobile-head),
   .scope :global(.team-analysis-fixtures),
@@ -3906,10 +3909,16 @@
     max-width:100%;
   }
   .scope :global(.team-analysis-mobile-head){
-    grid-template-columns:42px minmax(0,1fr) auto;
+    box-sizing:border-box;
+    width:100%;
+    grid-template-columns:42px minmax(0,1fr) max-content;
+    gap:clamp(6px,2.3vw,11px);
   }
   .scope :global(.team-analysis-mobile-head)>strong{
     min-width:0;
+    justify-self:end;
+    max-width:100%;
+    font-size:clamp(14px,4.1vw,18px);
     white-space:nowrap;
     font-variant-numeric:tabular-nums;
   }
@@ -3928,6 +3937,8 @@
     min-width:0;
     overflow-x:auto;
     overflow-y:hidden;
+    flex-wrap:nowrap;
+    touch-action:pan-x;
     overscroll-behavior-x:contain;
     -webkit-overflow-scrolling:touch;
   }

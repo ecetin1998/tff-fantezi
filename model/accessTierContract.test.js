@@ -46,4 +46,25 @@ assert.match(teamDetail,/Promise\.all\(\[getAuthState\(\),getTeamDetail\(id\)\]\
 assert.doesNotMatch(scoutApi,/p25:p\.projection\.p25/)
 assert.match(scoutApi,/Bu bölüm Gelişmiş erişim gerektirir/)
 assert.match(proLockdown,/scout_replay_players/)
+
+// Pro metrics are private; an MH rollover must never look like a successful
+// empty P90 / 6+ overlay, and the client must rebind to the current run.
+const proMetricsRoute=read('app/api/pro-player-overlay/route.js')
+assert.match(proMetricsRoute,/auth\.plan!=='pro'/)
+assert.match(proMetricsRoute,/const run=await getCurrentRun\(\)/)
+assert.match(proMetricsRoute,/requestedRun&&requestedRun!==run\.id/)
+assert.match(proMetricsRoute,/MODEL_CHANGED/)
+assert.match(proMetricsRoute,/status:409/)
+assert.match(proMetricsRoute,/EMPTY_PRO_METRICS/)
+assert.match(proMetricsRoute,/rows\.length===0/)
+assert.match(proMetricsRoute,/private, no-store/)
+assert.match(playersTable,/response\.status===409/)
+assert.match(playersTable,/router\.refresh\(\)/)
+assert.match(playersTable,/overlay\.has\(Number\(player\.id\)\)/)
+assert.match(playersTable,/matched\/players\.length<\.95/)
+assert.match(playersTable,/setOverlayReady\(true\)/)
+assert.match(playersTable,/setOverlayRetry\(n=>n\+1\)/)
+assert.match(playersTable,/k==='p90'\?Number\(p\.projection\?\.p90\|\|0\)/)
+assert.match(playersTable,/k==='six'\?Number\(p\.projection\?\.six_plus_probability\|\|0\)/)
+
 console.log('access tier contract ok')
