@@ -2,7 +2,9 @@ import { getBacktestOverview,getAuthState } from '@/lib/data'
 import { notFound } from 'next/navigation'
 
 // Reduce KV ISR writes for read-heavy historical data.
-export const revalidate=1800
+// Week-aware HTML must not be frozen at build time or kept in Worker ISR
+// when the active model is promoted; data fetching stays in run-scoped caches.
+export const dynamic='force-dynamic'
 export const metadata={title:'Model Performansı'}
 
 const num=(v,d=2)=>v===null||v===undefined?'—':Number(v).toFixed(d)
