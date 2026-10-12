@@ -20,11 +20,26 @@ export async function GET(request){
     if(requestedRun&&!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(requestedRun)){
       return Response.json({error:'INVALID_RUN_ID',request_id:requestId},{status:400,headers:privateHeaders})
     }
-    const run=requestedRun?{id:requestedRun}:await getCurrentRun()
+    // The private projection view contains the CURRENT model only. If a
+    // cached players page requests an older run, the RPC returns [] without
+    // an error. That previously made P90 / 6+ silently disappear and made
+    // their sorting look broken. Never report an empty stale overlay as success.
+    const run=await getCurrentRun()
+    if(!run){
+      return Response.json({error:'NO_CURRENT_RUN',request_id:requestId},{status:503,headers:privateHeaders})
+    }
+    if(requestedRun&&requestedRun!==run.id){
+      console.info('pro-player-overlay model changed',{requestId,requestedRun,currentRun:run.id})
+      return Response.json({error:'MODEL_CHANGED',current_run_id:run.id,request_id:requestId},{status:409,headers:privateHeaders})
+    }
     stage='pro_rpc'
-    const rows=run?await getProOverlayForRun(run.id):[]
-    console.info('pro-player-overlay completed',{requestId,elapsedMs:Date.now()-started,rowCount:rows.length,hasRun:Boolean(run)})
-    return Response.json({run_id:run?.id||null,rows},{headers:privateHeaders})
+    const rows=await getProOverlayForRun(run.id)
+    if(!Array.isArray(rows)||rows.length===0){
+      console.warn('pro-player-overlay empty current run',{requestId,runId:run.id})
+      return Response.json({error:'EMPTY_PRO_METRICS',request_id:requestId},{status:503,headers:privateHeaders})
+    }
+    console.info('pro-player-overlay completed',{requestId,elapsedMs:Date.now()-started,rowCount:rows.length,hasRun:true})
+    return Response.json({run_id:run.id,rows},{headers:privateHeaders})
   }catch(error){
     const code=String(error?.code||'OVERLAY_UNAVAILABLE')
     const accessMismatch=code==='42501'
