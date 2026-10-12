@@ -1,0 +1,104 @@
+{
+  "season": "2026-27",
+  "gameweek": 7,
+  "kind": "single-source-confirmed-match-goalkeeper-saves",
+  "goalkeeper_match_count": 18,
+  "matches": [
+    {
+      "match_id": 317844,
+      "home": "Galatasaray",
+      "away": "Kasımpaşa",
+      "home_goalkeeper": "Uğurcan Çakır",
+      "away_goalkeeper": "Andreas Gianniotis",
+      "home_saves": 2,
+      "away_saves": 8,
+      "source": "https://www.sporx.com/galatasaray-kasimpasa-maci-istatistik-5904764"
+    },
+    {
+      "match_id": 317842,
+      "home": "Gençlerbirliği",
+      "away": "Amed",
+      "home_goalkeeper": "İrfan Eğribayat",
+      "away_goalkeeper": "Alban Lafont",
+      "home_saves": 3,
+      "away_saves": 2,
+      "source": "https://thefishy.uk/livematch2/genclerbirligi-v-amed-1584426"
+    },
+    {
+      "match_id": 317840,
+      "home": "Alanyaspor",
+      "away": "Erzurumspor",
+      "home_goalkeeper": "Paulo Victor",
+      "away_goalkeeper": "Ertuğrul Taşkıran",
+      "home_saves": 5,
+      "away_saves": 5,
+      "source": "https://m.sporx.com/alanyaspor-erzurumspor-fk-maci-istatistik-5904760"
+    },
+    {
+      "match_id": 317846,
+      "home": "Samsunspor",
+      "away": "Trabzonspor",
+      "home_goalkeeper": "Okan Kocuk",
+      "away_goalkeeper": "André Onana",
+      "home_saves": 4,
+      "away_saves": 6,
+      "source": "https://www.sporx.com/samsunspor-trabzonspor-maci-istatistik-5904766"
+    },
+    {
+      "match_id": 317841,
+      "home": "Rizespor",
+      "away": "Fenerbahçe",
+      "home_goalkeeper": "Yahia Fofana",
+      "away_goalkeeper": "Ederson",
+      "home_saves": 2,
+      "away_saves": 5,
+      "source": "https://m.sporx.com/rizespor-fenerbahce-maci-istatistik-5904761"
+    },
+    {
+      "match_id": 317843,
+      "home": "Konyaspor",
+      "away": "Başakşehir",
+      "home_goalkeeper": "Bahadır Han Güngördü",
+      "away_goalkeeper": "Muhammed Şengezer",
+      "home_saves": 0,
+      "away_saves": 3,
+      "source": "https://www.sporx.com/konyaspor-istanbul-basaksehir-maci-istatistik-5904763"
+    },
+    {
+      "match_id": 317838,
+      "home": "Gaziantep",
+      "away": "Çorum FK",
+      "home_goalkeeper": "Kacper Tobiasz",
+      "away_goalkeeper": "Marcos Felipe",
+      "home_saves": 4,
+      "away_saves": 2,
+      "source": "https://corumfk.com.tr/mac/2026-10-11-gaziantep-fk-corum-fk"
+    },
+    {
+      "match_id": 317845,
+      "home": "Beşiktaş",
+      "away": "Kocaelispor",
+      "home_goalkeeper": "Alexander Nübel",
+      "away_goalkeeper": "Serhat Öztasdelen",
+      "home_saves": 5,
+      "away_saves": 4,
+      "source": "https://www.sporx.com/besiktas-kocaelispor-maci-istatistik-5904765"
+    },
+    {
+      "match_id": 317839,
+      "home": "Eyüpspor",
+      "away": "Göztepe",
+      "home_goalkeeper": "Horațiu Moldovan",
+      "away_goalkeeper": "Arda Özçimen",
+      "home_saves": 3,
+      "away_saves": 4,
+      "source": "https://www.thefishy.uk/livematch2/eyupspor-v-goztepe-1584423"
+    }
+  ],
+  "limitations": [
+    "Derived from full-time match/team goalkeeper saves stats, no keeper substitutions in recorded events.",
+    "Only single-source required by user; any directly contradictory final stats must be flagged.",
+    "Eyüpspor-Göztepe latest fulltime thefishy record shows 3/4 keeper saves, replacing earlier stale interim snapshot of 3/3.",
+    "Only goalkeeper saves portion of fantasy is sourced; other remaining scoring constraints and bonus/QA still apply."
+  ]
+}
