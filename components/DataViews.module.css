@@ -3877,3 +3877,63 @@
 .scope :global(.match-analysis-card) :global(.match-team-link) b{overflow-wrap:anywhere}
 .scope :global(.match-analysis-card) :global(.match-fantasy-meta)>span{min-width:0}
 }
+
+
+/* Team explorer / iPhone width guard (MH8, Oct 2026).
+   A grid's bare 1fr track takes its minimum size from its children.
+   The 5-week 78px fixture strip can then widen the *whole* team card,
+   cutting off the right-side xFP and allowing horizontal page movement.
+   Keep the fixture strip scrollable *inside* the card instead. */
+@media (max-width:760px){
+  .scope :global(.team-analysis-card-list){
+    grid-template-columns:minmax(0,1fr);
+    min-width:0;
+    width:100%;
+    max-width:100%;
+  }
+  .scope :global(.team-analysis-mobile-card){
+    box-sizing:border-box;
+    display:block;
+    min-width:0;
+    width:100%;
+    max-width:100%;
+  }
+  .scope :global(.team-analysis-mobile-head),
+  .scope :global(.team-analysis-fixtures),
+  .scope :global(.team-analysis-mobile-metrics),
+  .scope :global(.team-analysis-matchup-line){
+    min-width:0;
+    max-width:100%;
+  }
+  .scope :global(.team-analysis-mobile-head){
+    grid-template-columns:42px minmax(0,1fr) auto;
+  }
+  .scope :global(.team-analysis-mobile-head)>strong{
+    min-width:0;
+    white-space:nowrap;
+    font-variant-numeric:tabular-nums;
+  }
+  .scope :global(.team-analysis-mobile-head)>div b,
+  .scope :global(.team-analysis-fixtures) b{
+    overflow-wrap:anywhere;
+  }
+  .scope :global(.team-analysis-fixtures)>span,
+  .scope :global(.team-analysis-mobile-metrics)>div{
+    min-width:0;
+  }
+  .scope :global(.team-analysis-mobile-card) :global(.fixture-strength-strip){
+    display:flex;
+    width:100%;
+    max-width:100%;
+    min-width:0;
+    overflow-x:auto;
+    overflow-y:hidden;
+    overscroll-behavior-x:contain;
+    -webkit-overflow-scrolling:touch;
+  }
+  .scope :global(.team-analysis-mobile-card) :global(.fixture-strength){
+    flex:0 0 78px;
+    max-width:78px;
+    min-width:0;
+  }
+}
