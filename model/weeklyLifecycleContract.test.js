@@ -166,4 +166,11 @@ assert.match(publishedWeekSmoke,/\.gameweek/,'Production smoke must validate the
 assert.match(productionDeploy,/Verify site displays current gameweek/,'Cloudflare deploy must fail if site is still showing the prior MH.')
 assert.match(productionDeploy,/workflow_dispatch:/,'Production deployment retains an explicit manual GitHub Actions trigger.')
 
+const publicModelWeekSource=read('scripts/read-current-model-week.mjs')
+assert.match(publicModelWeekSource,/\/rest\/v1\/scout_model_runs/,'Current MH must come from the real public model-run source.')
+assert.match(publicModelWeekSource,/is_current','eq.true'/,'Read only the actual published run.')
+assert.match(publicModelWeekSource,/rows\.length!==1/,'Exactly one current run must exist.')
+assert.match(productionDeploy,/node scripts\/read-current-model-week\.mjs/,'Deploy must compare site output against the RLS-controlled current week.')
+assert.doesNotMatch(productionDeploy,/ACTIONS_ID_TOKEN_REQUEST_TOKEN/,'Manual issue comments must not use an OIDC claim restricted to model-lifecycle events.')
+
 console.log('weekly lifecycle contract passed')
