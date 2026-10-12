@@ -1,0 +1,93 @@
+name: MH7 advanced source import and guarded MH8 lifecycle
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "scripts/parse_sahadan_mh7_match_stats.py"
+      - ".github/workflows/mh7-advanced-extract.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+  actions: write
+
+concurrency:
+  group: mh7-advanced-import
+  cancel-in-progress: false
+
+jobs:
+  advanced:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      FUNCTIONS_URL: https://nnoagjayvrwyjtizhnfz.supabase.co/functions/v1
+      OIDC_AUDIENCE: tff-fantezi-scout
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install provider HTML parser
+        run: python3 -m pip install --disable-pip-version-check beautifulsoup4
+      - name: Extract nine real MH7 player-stat pages
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/parse_sahadan_mh7_match_stats.py > "$RUNNER_TEMP/mh7.json"
+          jq -e '.gameweek == 7 and .source_match_count == 9 and (.rows | length >= 70)' "$RUNNER_TEMP/mh7.json"
+          echo "Matched source players: $(jq -r '.matched_source_players' "$RUNNER_TEMP/mh7.json")"
+      - name: Mint GitHub OIDC token
+        id: oidc
+        shell: bash
+        run: |
+          set -euo pipefail
+          response="$(curl --fail --show-error --silent -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=${OIDC_AUDIENCE}")"
+          token="$(printf '%s' "$response" | jq -er '.value')"
+          echo "::add-mask::$token"
+          echo "token=$token" >> "$GITHUB_OUTPUT"
+      - name: Import MH7 verified advanced actions
+        shell: bash
+        env:
+          OIDC_TOKEN: ${{ steps.oidc.outputs.token }}
+        run: |
+          set -euo pipefail
+          jq '{mode:"weekly_delta",season:"2026-27",through_gameweek:7,source:"sahadan_match_actions_gw7_2026-10-13",source_match_count:.source_match_count,weekly_stats:.rows}' "$RUNNER_TEMP/mh7.json" > "$RUNNER_TEMP/payload.json"
+          curl --fail-with-body --show-error --silent --max-time 240 \
+            -H "Authorization: Bearer $OIDC_TOKEN" \
+            -H "Content-Type: application/json" \
+            --data-binary @"$RUNNER_TEMP/payload.json" \
+            "$FUNCTIONS_URL/ingest-scout-enrichment" > "$RUNNER_TEMP/result.json"
+          jq . "$RUNNER_TEMP/result.json"
+          jq -e '.ok == true and .mode == "weekly_delta" and .source_match_count == 9' "$RUNNER_TEMP/result.json"
+      - name: Assert GW7 advanced player freshness before model
+        shell: bash
+        env:
+          OIDC_TOKEN: ${{ steps.oidc.outputs.token }}
+        run: |
+          set -euo pipefail
+          curl --fail-with-body --show-error --silent --max-time 90 \
+            -H "Authorization: Bearer $OIDC_TOKEN" \
+            -H "Content-Type: application/json" \
+            --data '{"stage":"advanced_freshness","repair":false}' \
+            "$FUNCTIONS_URL/model-refresh-control" > "$RUNNER_TEMP/advanced-gate.json"
+          jq . "$RUNNER_TEMP/advanced-gate.json"
+          jq -e '.pass == true and .observed_gameweek == 7 and .stale_played_players == 0' "$RUNNER_TEMP/advanced-gate.json"
+      - name: Launch existing gated weekly MH8 model lifecycle
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh workflow run weekly-model-lifecycle.yml --ref main
+          echo "Weekly lifecycle dispatched. Production Cloudflare code deploy remains manual."
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mh7-advanced-source-audit
+          path: |
+            ${{ runner.temp }}/mh7.json
+            ${{ runner.temp }}/result.json
+            ${{ runner.temp }}/advanced-gate.json
+          if-no-files-found: ignore
