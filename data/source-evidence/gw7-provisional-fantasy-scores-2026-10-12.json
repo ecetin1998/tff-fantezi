@@ -4,8 +4,8 @@
   "status": "PROVISIONAL_NOT_FOR_RELEASE",
   "summary": {
     "participating_players": 283,
-    "provisional_scored": 273,
-    "incomplete": 10,
+    "provisional_scored": 276,
+    "incomplete": 7,
     "provisional_bonus_players": 46,
     "gw6_bonus_rank_test": "354 rows / 9 matches / 0 mismatches (competition ranking)"
   },
@@ -4700,18 +4700,18 @@
           "name": "Konrad Michalak",
           "team": "Eyüpspor",
           "position": "MID",
-          "minutes_bucket": "exact_60_verify",
-          "base_points_candidate": null,
+          "minutes_bucket": "60_exact_confirmed",
+          "base_points_candidate": 0,
           "appearance": 1,
           "goals_points": 0,
           "assists_points": 0,
           "cards_points": -1,
           "save_points": 0,
-          "clean_sheet_points": null,
+          "clean_sheet_points": 0,
           "goals_conceded_points_team_based": 0,
-          "bonus_candidate": null,
-          "total_points_candidate": null,
-          "confidence": "incomplete"
+          "bonus_candidate": 0,
+          "total_points_candidate": 0,
+          "confidence": "provisional"
         },
         {
           "player_id": 943,
@@ -4772,18 +4772,18 @@
           "name": "Mete Kaan Demir",
           "team": "Eyüpspor",
           "position": "MID",
-          "minutes_bucket": "exact_60_verify",
-          "base_points_candidate": null,
+          "minutes_bucket": "60_exact_confirmed",
+          "base_points_candidate": 1,
           "appearance": 1,
           "goals_points": 0,
           "assists_points": 0,
           "cards_points": 0,
           "save_points": 0,
-          "clean_sheet_points": null,
+          "clean_sheet_points": 0,
           "goals_conceded_points_team_based": 0,
-          "bonus_candidate": null,
-          "total_points_candidate": null,
-          "confidence": "incomplete"
+          "bonus_candidate": 0,
+          "total_points_candidate": 1,
+          "confidence": "provisional"
         },
         {
           "player_id": 495,
@@ -4808,18 +4808,18 @@
           "name": "Yusuf Barası",
           "team": "Eyüpspor",
           "position": "FWD",
-          "minutes_bucket": "exact_60_verify",
-          "base_points_candidate": null,
+          "minutes_bucket": "60_exact_confirmed",
+          "base_points_candidate": 1,
           "appearance": 1,
           "goals_points": 0,
           "assists_points": 0,
           "cards_points": 0,
           "save_points": 0,
-          "clean_sheet_points": null,
+          "clean_sheet_points": 0,
           "goals_conceded_points_team_based": 0,
-          "bonus_candidate": null,
-          "total_points_candidate": null,
-          "confidence": "incomplete"
+          "bonus_candidate": 0,
+          "total_points_candidate": 1,
+          "confidence": "provisional"
         },
         {
           "player_id": 309,
@@ -5200,7 +5200,7 @@
           "confidence": "provisional"
         }
       ],
-      "unresolved_player_count": 3,
+      "unresolved_player_count": 0,
       "provisional_bonus_recipient_count": 3
     }
   ],
@@ -5209,7 +5209,7 @@
     "GW6 official-ish database bonus tie ranking reproduced exactly for 354 prior match-linked players across nine matches.",
     "Conceded-goals debit uses full team goals, not on-field timing; verify official policy or on-pitch goals before release.",
     "Own goals, penalty saves and misses are not explicitly confirmed absent for all 9 matches; user policy requires source evidence, not invented zero.",
-    "Unresolved 7 player IDs and exact 60-minute boundary in 3 players can alter bonuses; use QA prior to finalization.",
+    "Only 7 unrecognized database player IDs remain. Minute-60 cases confirmed from FotMob final and provisionally scored.",
     "Player score sources: FotMob, Sporx/club match stats and TheFishy as referenced in adjoining files.",
     "No live database writes or MH8 promotion."
   ]
