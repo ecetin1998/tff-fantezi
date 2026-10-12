@@ -4,7 +4,9 @@ import AccessGate from '@/components/AccessGate'
 import {playerLabel} from '@/lib/playerPresentation'
 
 export const metadata={title:'Rol ve Dakika Takibi'}
-export const revalidate=300
+// Week-aware HTML must not be frozen at build time or kept in Worker ISR
+// when the active model is promoted; data fetching stays in run-scoped caches.
+export const dynamic='force-dynamic'
 const PAGE_SIZE=100
 
 const pct=v=>`${(Number(v||0)*100).toFixed(0)}%`
