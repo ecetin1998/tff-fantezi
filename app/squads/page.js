@@ -6,7 +6,7 @@ import ManagerCardRecommendations from '@/components/ManagerCardRecommendations'
 
 export const metadata={title:'Kadro Önerileri'}
 
-export const revalidate=300
+// Current model week must be resolved per request, not from a stale ISR/R2 HTML snapshot.\nexport const dynamic='force-dynamic'
 
 export default async function Squads(){
   const [auth,rec,altCandidate]=await Promise.all([
