@@ -121,4 +121,11 @@ assert.match(availabilityWorker,/active_roster_no_reported_exception/,'Inferred 
 assert.match(availabilityWorker,/availability_probability:1/,'No current source alert defaults to a neutral availability probability.')
 assert.match(availabilityWorker,/onConflict:"run_id,player_id"/,'Availability writes remain idempotent.')
 
+const redQa=read('supabase/migrations/20261013013000_red_card_aware_team_minutes_qa.sql')
+assert.match(redQa,/expected_red_minutes/,'Team minute QA must allow only physically possible dismissal-related losses.')
+assert.match(redQa,/0\.15::numeric/,'Red-card allowance must respect the simulator red-card event probability cap.')
+assert.match(redQa,/0\.5 \* greatest\(coalesce\(p\.x_minutes,0\),0\)/,'Red-card loss must reflect shortened minutes after a dismissal.')
+assert.match(redQa,/minute_sum > 990\.25\*fixture_count/,'Excess scheduled minutes must remain forbidden.')
+assert.match(redQa,/scout_run_qa/,'Migration must preserve canonical model QA RPC.')
+
 console.log('weekly lifecycle contract passed')
