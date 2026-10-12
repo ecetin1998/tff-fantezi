@@ -1,6 +1,9 @@
-name: Verify live MH8 site and API (read-only)
+name: Verify live site week matches public API (read-only)
 
 on:
+  workflow_run:
+    workflows: ["Cloudflare Workers deploy"]
+    types: [completed]
   push:
     branches: [main]
     paths:
@@ -11,56 +14,56 @@ permissions:
   contents: read
 
 concurrency:
-  group: mh8-readonly-live-probe
+  group: verify-live-model-week
   cancel-in-progress: true
 
 jobs:
-  probe:
+  verify:
     runs-on: ubuntu-latest
     timeout-minutes: 8
     steps:
-      - name: Probe live domain, Worker, HTML and public API
+      - name: Cross-check production HTML, API and deployed revision
         shell: bash
         run: |
-          set -uo pipefail
-          overall=0
-          for origin in "https://fanteziligrehberi.com" "https://tff-fantezi.ecetin1998.workers.dev"; do
-            echo "=== ORIGIN: $origin ==="
-            for path in "/api/health" "/api/scout-data?section=matches" "/" "/?fresh_mh8_probe=20261013"; do
-              echo "--- URL: ${origin}${path}"
-              headers="$(mktemp)"
-              body="$(mktemp)"
-              status="$(curl --silent --show-error --location --max-time 35 \
-                --retry 2 --retry-all-errors --retry-delay 2 \
-                -H "Cache-Control: no-cache" \
-                -H "Accept: text/html,application/json" \
-                -D "$headers" -o "$body" -w '%{http_code}' \
-                "${origin}${path}")" || status="000"
-              echo "http_status=$status bytes=$(wc -c < "$body")"
-              grep -Ei '^(cache-control|cdn-cache-control|cf-cache-status|age|cf-ray|etag|location|x-nextjs-cache|content-type):' "$headers" | tail -n 16 || true
-              if [[ "$status" != "200" ]]; then
-                echo "unexpected response (first 300 bytes):"
-                head -c 300 "$body" || true
-                echo
-                overall=1
-              elif [[ "$path" == "/api/health" ]]; then
-                jq -c '{ok,sha,service,environment}' "$body" || overall=1
-              elif [[ "$path" == "/api/scout-data?section=matches" ]]; then
-                jq -c '{week:.current_run.gameweek,run_id:.current_run.id,run_status:.current_run.status,fixtures:(.matches|length),served_at,error}' "$body" || overall=1
-                week="$(jq -r '.current_run.gameweek // -1' "$body" 2>/dev/null || echo -1)"
-                if [[ "$week" != "8" ]]; then echo "MISMATCH: public API is not serving MH8 (actual=$week)"; overall=1; fi
-              else
-                python3 - "$body" <<'PY'
-          import re,sys
-          html=open(sys.argv[1],encoding="utf8",errors="replace").read()
-          match=re.findall(r'MH(?:7|8)(?![0-9])',html)
-          print("visible_mh_markers=" + str({x:match.count(x) for x in set(match)}))
-          print("contains_mh8=" + str("MH8" in match) + " contains_mh7=" + str("MH7" in match))
+          set -euo pipefail
+          BASE="https://fanteziligrehberi.com"
+          tmp="$(mktemp -d)"
+          trap 'rm -rf "$tmp"' EXIT
+          fetch() {
+            local path="$1" name="$2"
+            local status
+            status="$(curl --silent --show-error --location --max-time 45 \
+              --retry 3 --retry-delay 2 --retry-all-errors \
+              -H "Cache-Control: no-cache" \
+              -D "$tmp/${name}.headers" -o "$tmp/$name" \
+              -w '%{http_code}' "$BASE$path")"
+            echo "$path HTTP $status"
+            grep -Ei '^(cf-cache-status|cache-control|age):' "$tmp/${name}.headers" || true
+            [[ "$status" == "200" ]]
+          }
+          fetch "/api/health" health
+          jq -c '{ok,sha,environment}' "$tmp/health"
+          fetch "/api/scout-data?section=matches" matches_api
+          jq -c '{gameweek:.current_run.gameweek,run_id:.current_run.id,ready:.current_run.status,fixtures:(.matches|length)}' "$tmp/matches_api"
+          jq -e '.current_run.status == "ready" and .current_run.is_current == true and (.matches|length) == 9' "$tmp/matches_api" >/dev/null
+          week="$(jq -er '.current_run.gameweek' "$tmp/matches_api")"
+          fetch "/?verify_live_week=$week" home
+          fetch "/players?verify_live_week=$week" players
+          fetch "/matches?verify_live_week=$week" matches
+          fetch "/squads?verify_live_week=$week" squads
+          python3 - "$tmp" "$week" <<'PY'
+          import html,re,sys,pathlib
+          root=pathlib.Path(sys.argv[1])
+          week=sys.argv[2]
+          routes={'home':r'xFP lideri','players':r'Oyuncu Analizi','matches':r'Maç Tahminleri','squads':r'Kadro Önerileri'}
+          for route,label in routes.items():
+              source=(root/route).read_text(encoding='utf8',errors='replace')
+              clean=re.sub(r'<(script|style)\b[^>]*>[\s\S]*?</\1>',' ',source,flags=re.I)
+              clean=html.unescape(re.sub('<[^>]+>',' ',clean))
+              clean=' '.join(clean.split())
+              found=bool(re.search(r'\bMH'+week+r'\s+'+label,clean))
+              markers=re.findall(r'\bMH\d+\b',clean)
+              print(f'page={route} expected=MH{week} matched={found} visible_mh={dict((m,markers.count(m)) for m in set(markers))}')
+              if not found: raise SystemExit(f'WRONG WEEK: {route} does not show MH{week}')
+          print('LIVE MODEL WEEK VERIFIED: API and all four public pages show MH'+week)
           PY
-                if ! grep -q 'MH8' "$body"; then echo "MISMATCH: rendered HTML lacks MH8"; overall=1; fi
-              fi
-              rm -f "$headers" "$body"
-            done
-          done
-          echo "read_only_probe_status=$overall"
-          exit "$overall"
