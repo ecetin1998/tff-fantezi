@@ -19,6 +19,14 @@ BEGIN
     AND pg_get_function_identity_arguments(p.oid)='p_run_id uuid';
 
   SELECT pg_get_functiondef(fn_oid) INTO defn;
+  -- Production may already be using the stronger red-card-rate-aware QA
+  -- introduced by another guarded recovery run. Do not downgrade it or
+  -- fail a later migration replay when that valid definition exists.
+  IF strpos(defn,'expected_red_minutes')>0
+     AND strpos(defn,'greatest(6*fixture_count,coalesce(expected_red_minutes,0)+2*fixture_count)')>0 THEN
+    RAISE NOTICE 'scout_run_qa already uses source-rate-aware red card minutes QA';
+    RETURN;
+  END IF;
   IF strpos(defn, after_pattern)>0 THEN
     RAISE NOTICE 'scout_run_qa red-card minutes tolerance already applied';
     RETURN;
