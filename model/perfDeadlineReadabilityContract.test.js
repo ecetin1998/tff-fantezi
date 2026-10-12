@@ -114,3 +114,12 @@ assert.match(dataViewsCss,/Weekly mobile cards final polish 2026-09-30/)
 assert.match(dataViewsCss,/weekly-form-meta[\s\S]*grid-template-columns:repeat\(2,minmax\(0,1fr\)\) !important/,'Mobile Fantasy Points stats should stay in a clean 2x2 grid.')
 
 console.log('performance/deadline/readability contract passed')
+
+
+// Any page showing the active model must render the live current week, never a
+// build-time/ISR snapshot with the stale 'MH—' marker or last week's MH label.
+for(const route of ['app/players/page.js','app/teams/page.js','app/matches/page.js',
+    'app/squads/page.js','app/availability/page.js','app/roles/page.js',
+    'app/points/page.js','app/backtest/page.js']){
+  assert.match(read(route),/export const dynamic='force-dynamic'/,route+' must not be statically generated.')
+}
