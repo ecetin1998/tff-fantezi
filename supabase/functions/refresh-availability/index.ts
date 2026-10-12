@@ -285,6 +285,35 @@ Deno.serve(async(req:Request)=>{
       })
     }
 
+    // The availability feed is an *exceptions* list, not a complete roster.
+    // A newly-added active player absent from the feed and from the
+    // previous run still needs an explicit neutral baseline row, otherwise
+    // weekly prepare fails AVAILABILITY_COVERAGE_INCOMPLETE. Never replace
+    // sourced injuries/suspensions: those are already in `next`.
+    for(const player of playersQ.data||[]){
+      const id=Number(player.id)
+      if(!Number.isInteger(id)||next.has(id))continue
+      next.set(id,{
+        run_id:runId,
+        player_id:id,
+        availability_type:"baseline",
+        availability_probability:1,
+        reason:null,
+        canonical_reason:null,
+        checked_at:now,
+        source_url:null,
+        source_reason:null,
+        injury_date:null,
+        suspension_end:null,
+        expected_return:null,
+        expected_return_date:null,
+        suspension_fixture:null,
+        detail_source_label:"active_roster_no_reported_exception",
+        detail_source_url:SOURCE_URL,
+        detail_source_updated_at:sourceUpdated,
+      })
+    }
+
     const comparable=(r:any)=>JSON.stringify([
       r?.availability_type,Number(r?.availability_probability??1),r?.canonical_reason||null,
       r?.injury_date||null,r?.suspension_end||null,r?.expected_return||null,r?.expected_return_date||null,r?.suspension_fixture||null
