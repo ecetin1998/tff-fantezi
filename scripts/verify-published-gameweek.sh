@@ -41,25 +41,9 @@ for attempt in $(seq 1 8); do
     if [[ "$name" == home ]]; then
       expected_marker="MH${EXPECTED_GAMEWEEK} xFP lideri"
     fi
-    # React 19 streaming SSR inserts text-boundary comments between a
-    # literal "MH", a dynamic gameweek number, and its title. Browser text
-    # shows "MH8 Oyuncu Analizi", while raw HTML has
-    # "MH<!-- -->8<!-- --> Oyuncu Analizi". Compare rendered text nodes,
-    # not a contiguous byte sequence or Flight script payloads.
-    if ! python3 - "$tmp/$name" "$expected_marker" <<'PY'
-import html, pathlib, re, sys
-raw=pathlib.Path(sys.argv[1]).read_text(encoding='utf-8',errors='replace')
-raw=re.sub(r'<(script|style)\b[^>]*>[\s\S]*?</\1>',' ',raw,flags=re.I)
-raw=re.sub(r'<!--[\s\S]*?-->','',raw)
-rendered=html.unescape(re.sub(r'<[^>]+>',' ',raw))
-rendered=' '.join(rendered.split())
-expected=sys.argv[2]
-if expected not in rendered:
-    print(f'MH HTML mismatch: expected visible text {expected!r}; '
-          f'visible markers: {re.findall(r"MH\d+",rendered)[:12]}',file=sys.stderr)
-    sys.exit(1)
-PY
-    then
+    # Parse React's comment-separated SSR text nodes; do not search Flight
+    # scripts or mistake a display-correct MH8 heading for missing raw bytes.
+    if ! python3 scripts/check-rendered-week.py "$tmp/$name" "$expected_marker"; then
       echo "MH mismatch on $route: missing $expected_marker in rendered text" >&2
       success=false
     fi
