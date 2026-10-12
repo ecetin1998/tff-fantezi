@@ -16,6 +16,7 @@ on:
       - "model/optimizer_rules.py"
       - "model/optimize_candidate.py"
       - ".github/workflows/weekly-model-lifecycle.yml"
+      - "data/source-evidence/**"
       - "supabase/migrations/20260929*.sql"
   schedule:
     - cron: '17 * * * *'
