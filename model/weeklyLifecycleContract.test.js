@@ -114,4 +114,11 @@ const overlapGateFix=read('supabase/migrations/20260929164056_remove_optimizer_o
 assert.doesNotMatch(overlapGateFix,/xi_overlap<=8|optimizer_ok and overlap_ok/,'XI overlap is diagnostic only; ceiling XI must not be forced to differ.')
 assert.match(overlapGateFix,/'xi_overlap',\(select xi_overlap from overlap\)/)
 
+const redCardMinuteQA=read('supabase/migrations/20261013012500_red_card_aware_minute_qa.sql')
+assert.match(redCardMinuteQA,/minute_sum<984\\*fixture_count/,'Migration must guard the legacy minute invariant.')
+assert.match(redCardMinuteQA,/minute_sum<980\\*fixture_count/,'Red cards must permit a bounded, sub-1.1% simulated playing-time deficit.')
+assert.match(redCardMinuteQA,/minute_sum>990\\.25\\*fixture_count/,'Upper bound must remain strict to detect overallocated player minutes.')
+assert.match(redCardMinuteQA,/pg_get_functiondef/,'Patch existing QA without changing other safety rules.')
+assert.match(sim,/if\\(rc\\)\\{/,'Expected minutes fall because the simulator models red-card early exits.')
+
 console.log('weekly lifecycle contract passed')
