@@ -1,0 +1,775 @@
+{
+  "season": "2026-27",
+  "gameweek": 7,
+  "collected_on": "2026-10-12",
+  "kind": "source_evidence_not_final_fantasy_points",
+  "primary_source": "FotMob",
+  "policy": "Single source accepted; only score-impacting contradictory facts deferred. Goal clock time ignored for fantasy points. Do not impute missing saves or bonus.",
+  "matches": [
+    {
+      "id": 317844,
+      "home": "Galatasaray",
+      "away": "Kasımpaşa",
+      "score": [
+        3,
+        1
+      ],
+      "url": "https://www.fotmob.com/en-GB/matches/kasmpasa-vs-galatasaray/1guad0",
+      "goals": [
+        [
+          "Abdülkerim Bardakcı",
+          "Galatasaray",
+          "Aleksey Batrakov",
+          false
+        ],
+        [
+          "Jesurun Rak-Sakyi",
+          "Kasımpaşa",
+          null,
+          false
+        ],
+        [
+          "Barış Alper Yılmaz",
+          "Galatasaray",
+          null,
+          false
+        ],
+        [
+          "Mario Lemina",
+          "Galatasaray",
+          "Victor Osimhen",
+          false
+        ]
+      ],
+      "yellow": [
+        "Rafael Leão",
+        "Elson Mendes Da Silva",
+        "Kerem Demirbay",
+        "Davinson Sánchez",
+        "Ali Kol",
+        "Andri Fannar Baldursson"
+      ],
+      "red": [
+        "Lucas Torreira"
+      ],
+      "subs": [
+        [
+          57,
+          "Thiemoko Diarra",
+          "Güven Yalçın"
+        ],
+        [
+          58,
+          "Jesurun Rak-Sakyi",
+          "Ali Kol"
+        ],
+        [
+          67,
+          "Eren Elmalı",
+          "Rafael Leão"
+        ],
+        [
+          67,
+          "Mario Lemina",
+          "Aleksey Batrakov"
+        ],
+        [
+          70,
+          "Haris Hajradinović",
+          "Kerem Demirbay"
+        ],
+        [
+          77,
+          "Victor Osimhen",
+          "Deniz Gül"
+        ],
+        [
+          77,
+          "Leroy Sané",
+          "Abdülkerim Bardakcı"
+        ],
+        [
+          78,
+          "Jakob Vestergaard Jessen",
+          "Ayberk Karapo"
+        ],
+        [
+          88,
+          "Renato Nhaga",
+          "Gabriel Sara"
+        ]
+      ]
+    },
+    {
+      "id": 317842,
+      "home": "Gençlerbirliği",
+      "away": "Amed",
+      "score": [
+        2,
+        2
+      ],
+      "url": "https://www.fotmob.com/en-GB/matches/genclerbirligi-vs-amed-sportif/2hycm1l",
+      "goals": [
+        [
+          "Dia Saba",
+          "Amed",
+          null,
+          true
+        ],
+        [
+          "Rafael Luís",
+          "Gençlerbirliği",
+          null,
+          false
+        ],
+        [
+          "Samuel Ballet",
+          "Amed",
+          "Rayan Raveloson",
+          false
+        ],
+        [
+          "Thalisson",
+          "Gençlerbirliği",
+          "Tiago Gouveia",
+          false
+        ]
+      ],
+      "yellow": [
+        "Thalisson",
+        "İrfan Eğribayat",
+        "Umut Meraş",
+        "Metehan Baltacı",
+        "Dia Saba",
+        "Lumbardh Dellova",
+        "Fıratcan Üzüm",
+        "Alban Lafont"
+      ],
+      "red": [],
+      "subs": [
+        [
+          46,
+          "Salih Uçan",
+          "Abdurrahim Dursun"
+        ],
+        [
+          61,
+          "Ali Turap Bülbül",
+          "Mohamed Khalil"
+        ],
+        [
+          66,
+          "Hamza Aydar",
+          "Fıratcan Üzüm"
+        ],
+        [
+          81,
+          "Victor Orakpo",
+          "Rafael Luís"
+        ],
+        [
+          82,
+          "Prince Martor Jr.",
+          "Franco Tongya"
+        ],
+        [
+          84,
+          "Mehmet Yeşil",
+          "Lumbardh Dellova"
+        ],
+        [
+          84,
+          "Miraç Acer",
+          "Dia Saba"
+        ],
+        [
+          92,
+          "Cem Üstündağ",
+          "Furkan Soyalp"
+        ],
+        [
+          92,
+          "Mbaye Diagne",
+          "Ermal Krasniqi"
+        ],
+        [
+          95,
+          "Ensar Çavuşoğlu",
+          "Tiago Gouveia"
+        ]
+      ]
+    },
+    {
+      "id": 317840,
+      "home": "Alanyaspor",
+      "away": "Erzurumspor",
+      "score": [
+        0,
+        0
+      ],
+      "url": "https://www.fotmob.com/matches/alanyaspor-vs-erzurumspor-fk/it2ebc7",
+      "goals": [],
+      "yellow": [
+        "Eren Tozlu",
+        "Orhan Ovacıklı",
+        "Amar Gërxhaliu",
+        "Meschack Elia",
+        "Florent Hadërgjonaj",
+        "Arda Usluoğlu"
+      ],
+      "red": [],
+      "subs": [
+        [
+          58,
+          "Meschack Elia",
+          "İbrahim Kaya"
+        ],
+        [
+          58,
+          "Arda Usluoğlu",
+          "Iván Cédric"
+        ],
+        [
+          58,
+          "Paolo Fernandes",
+          "Ui-Jo Hwang"
+        ],
+        [
+          63,
+          "Ianis Hagi",
+          "Paolo Fernandes"
+        ],
+        [
+          78,
+          "Mustafa Fettahoğlu",
+          "Miguel Cardoso"
+        ],
+        [
+          83,
+          "Ibrahim Diabate",
+          "Eren Tozlu"
+        ],
+        [
+          83,
+          "Sefa Akgün",
+          "Martín Rodríguez"
+        ],
+        [
+          83,
+          "Bedirhan Özyurt",
+          "Fatih Aksoy"
+        ]
+      ]
+    },
+    {
+      "id": 317846,
+      "home": "Samsunspor",
+      "away": "Trabzonspor",
+      "score": [
+        0,
+        3
+      ],
+      "url": "https://www.fotmob.com/matches/samsunspor-vs-trabzonspor/358aj5",
+      "goals": [
+        [
+          "Ernest Muçi",
+          "Trabzonspor",
+          "Mustafa Eskihellaç",
+          false
+        ],
+        [
+          "Chibuike Nwaiwu",
+          "Trabzonspor",
+          null,
+          false
+        ],
+        [
+          "Franculino",
+          "Trabzonspor",
+          "Mohamed Salah",
+          false
+        ]
+      ],
+      "yellow": [
+        "Logi Tómasson",
+        "Elliot Watt"
+      ],
+      "red": [
+        "Melih Kabasakal"
+      ],
+      "subs": [
+        [
+          26,
+          "Yalçın Kayan",
+          "Celil Yüksel"
+        ],
+        [
+          46,
+          "Ozan Tufan",
+          "Ernest Muçi"
+        ],
+        [
+          46,
+          "Fatih Kaya",
+          "Anto Sekongo"
+        ],
+        [
+          67,
+          "Oskar Öhlenschlaeger",
+          "Elliot Watt"
+        ],
+        [
+          67,
+          "Elayis Tavşan",
+          "Tanguy Coulibaly"
+        ],
+        [
+          71,
+          "Sidny Lopes Cabral",
+          "Mustafa Eskihellaç"
+        ],
+        [
+          71,
+          "Cenk Özkacar",
+          "Franculino"
+        ],
+        [
+          77,
+          "Paul Onuachu",
+          "Mohamed Salah"
+        ],
+        [
+          79,
+          "Afonso Sousa",
+          "Josafat Mendes"
+        ],
+        [
+          84,
+          "Tim Jabol-Folcarelli",
+          "Aral Şimşir"
+        ]
+      ]
+    },
+    {
+      "id": 317841,
+      "home": "Rizespor",
+      "away": "Fenerbahçe",
+      "score": [
+        0,
+        3
+      ],
+      "url": "https://www.fotmob.com/matches/rizespor-vs-fenerbahce/z4go2",
+      "goals": [
+        [
+          "Marco Asensio",
+          "Fenerbahçe",
+          "Kerem Aktürkoğlu",
+          false
+        ],
+        [
+          "İrfan Can Kahveci",
+          "Fenerbahçe",
+          "Oğuz Aydın",
+          false
+        ],
+        [
+          "Oğuz Aydın",
+          "Fenerbahçe",
+          "Romelu Lukaku",
+          false
+        ]
+      ],
+      "yellow": [],
+      "red": [],
+      "subs": [
+        [
+          59,
+          "İrfan Can Kahveci",
+          "Marco Asensio"
+        ],
+        [
+          66,
+          "Iustin Doicaru",
+          "Ahmed Kutucu"
+        ],
+        [
+          72,
+          "Emrecan Bulut",
+          "Adedire Awokoya Mebude"
+        ],
+        [
+          72,
+          "Can Bozdoğan",
+          "Qazim Laçi"
+        ],
+        [
+          80,
+          "Oğuz Aydın",
+          "Vedat Muriqi"
+        ],
+        [
+          80,
+          "Romelu Lukaku",
+          "Mason Greenwood"
+        ],
+        [
+          82,
+          "Gennaro Borrelli",
+          "Taylan Antalyalı"
+        ],
+        [
+          88,
+          "Kojo Peprah Oppong",
+          "Kerem Aktürkoğlu"
+        ],
+        [
+          88,
+          "İsmail Yüksek",
+          "Mattéo Guendouzi"
+        ]
+      ]
+    },
+    {
+      "id": 317843,
+      "home": "Konyaspor",
+      "away": "Başakşehir",
+      "score": [
+        0,
+        0
+      ],
+      "url": "https://www.fotmob.com/en-GB/matches/basaksehir-vs-konyaspor/x687s",
+      "goals": [],
+      "yellow": [],
+      "red": [],
+      "subs": [
+        [
+          23,
+          "Chidozie Awaziem",
+          "Adil Demirbağ"
+        ],
+        [
+          56,
+          "Hamza Güreler",
+          "Emin Bayram"
+        ],
+        [
+          63,
+          "Yusuf Sarı",
+          "Andreas Skov Olsen"
+        ],
+        [
+          63,
+          "Ömer Ali Şahiner",
+          "Saba Kharebashvili"
+        ],
+        [
+          74,
+          "Enis Bardhi",
+          "Rajmund Tóth"
+        ],
+        [
+          80,
+          "Jakub Kałuziński",
+          "Bertuğ Yıldırım"
+        ],
+        [
+          80,
+          "Abbosbek Fayzullayev",
+          "Ivan Brnić"
+        ],
+        [
+          82,
+          "Ebrima Colley",
+          "Diogo Gonçalves"
+        ],
+        [
+          82,
+          "Mostafa Mohamed",
+          "Jackson Muleka"
+        ]
+      ]
+    },
+    {
+      "id": 317838,
+      "home": "Gaziantep",
+      "away": "Çorum FK",
+      "score": [
+        0,
+        3
+      ],
+      "url": "https://www.fotmob.com/tr/matches/gaziantep-fk-vs-corum-fk/tzrbrsj",
+      "goals": [
+        [
+          "Cengiz Ünder",
+          "Çorum FK",
+          "Mohamed Diomandé",
+          false
+        ],
+        [
+          "Alexandros Kyziridis",
+          "Çorum FK",
+          "Gökhan Sazdağı",
+          false
+        ],
+        [
+          "Markus Seehusen Karlsbakk",
+          "Çorum FK",
+          "Alexandros Kyziridis",
+          false
+        ]
+      ],
+      "yellow": [
+        "Mohamed Diomandé",
+        "Alexandros Kyziridis",
+        "Youssoufa Moukoko",
+        "Myenty Abena",
+        "Sontje Hansen"
+      ],
+      "red": [],
+      "subs": [
+        [
+          58,
+          "Ulrich Meleke",
+          "Ogün Özcicek"
+        ],
+        [
+          58,
+          "Ylber Ramadani",
+          "Berat Özdemir"
+        ],
+        [
+          59,
+          "Drissa Camara",
+          "Halil Dervişoğlu"
+        ],
+        [
+          73,
+          "Serdar Dursun",
+          "Victor Gidado"
+        ],
+        [
+          81,
+          "Markus Seehusen Karlsbakk",
+          "Gökhan Sazdağı"
+        ],
+        [
+          83,
+          "Sabahattin Destici",
+          "Luis Pérez"
+        ],
+        [
+          84,
+          "Sontje Hansen",
+          "Alexandru Maxim"
+        ],
+        [
+          84,
+          "Ermin Mahmić",
+          "Alexandros Kyziridis"
+        ],
+        [
+          84,
+          "Arda Şengül",
+          "Cengiz Ünder"
+        ],
+        [
+          85,
+          "Youssoufa Moukoko",
+          "Andrei Borza"
+        ]
+      ],
+      "note": "FotMob metin önizlemesi ile olay kaydının bulunabilirliği farklı; satırlar arama sonucundaki tam maç olaylarından derlendi. İlk 11/kurtarış doğrulanmadı."
+    },
+    {
+      "id": 317845,
+      "home": "Beşiktaş",
+      "away": "Kocaelispor",
+      "score": [
+        2,
+        1
+      ],
+      "url": "https://www.fotmob.com/tr/matches/kocaelispor-vs-besiktas/155i30",
+      "goals": [
+        [
+          "Orkun Kökçü",
+          "Beşiktaş",
+          "Václav Černý",
+          false
+        ],
+        [
+          "Show",
+          "Kocaelispor",
+          null,
+          false
+        ],
+        [
+          "Dušan Vlahović",
+          "Beşiktaş",
+          null,
+          true
+        ]
+      ],
+      "yellow": [
+        "Tayfur Bingöl",
+        "Leandro Trossard",
+        "Serhat Öztasdelen"
+      ],
+      "red": [],
+      "subs": [
+        [
+          39,
+          "İlhan Fakılı",
+          "Václav Černý"
+        ],
+        [
+          61,
+          "Rigoberto Rivas",
+          "Gonçalo Sousa"
+        ],
+        [
+          70,
+          "Tobias Gulliksen",
+          "Tayfur Bingöl"
+        ],
+        [
+          71,
+          "Kassoum Ouattara",
+          "Salih Özcan"
+        ],
+        [
+          71,
+          "Florian Ayé",
+          "Daniel Agyei"
+        ],
+        [
+          71,
+          "Emmanuel Agbadou",
+          "Emirhan Topçu"
+        ],
+        [
+          71,
+          "Wilfred Ndidi",
+          "Rıdvan Yılmaz"
+        ],
+        [
+          84,
+          "Kartal Yılmaz",
+          "Orkun Kökçü"
+        ],
+        [
+          87,
+          "Makana Baku",
+          "Onur Öztonga"
+        ],
+        [
+          87,
+          "Muharrem Cinan",
+          "Uğur Yıldız"
+        ]
+      ]
+    },
+    {
+      "id": 317839,
+      "home": "Eyüpspor",
+      "away": "Göztepe",
+      "score": [
+        0,
+        4
+      ],
+      "url": "https://www.fotmob.com/matches/goztepe-vs-eyupspor/czuaa",
+      "goals": [
+        [
+          "Juan",
+          "Göztepe",
+          null,
+          true
+        ],
+        [
+          "André Henrique",
+          "Göztepe",
+          "Richard Akonnor",
+          false
+        ],
+        [
+          "André Henrique",
+          "Göztepe",
+          null,
+          false
+        ],
+        [
+          "André Henrique",
+          "Göztepe",
+          null,
+          true
+        ]
+      ],
+      "yellow": [
+        "Juan",
+        "Seyfettin Anıl Yaşar",
+        "Konrad Michalak",
+        "Alexis Antunes"
+      ],
+      "red": [
+        "Ahmed Abdullahi"
+      ],
+      "subs": [
+        [
+          46,
+          "André Henrique",
+          "Janderson"
+        ],
+        [
+          60,
+          "Charles-André Raux Yao",
+          "Mete Kaan Demir"
+        ],
+        [
+          60,
+          "Lenny Pintor",
+          "Yusuf Barası"
+        ],
+        [
+          60,
+          "Talha Ülvan",
+          "Konrad Michalak"
+        ],
+        [
+          69,
+          "Sinclair Armstrong",
+          "Juan"
+        ],
+        [
+          76,
+          "Hamza Akman",
+          "David Costa"
+        ],
+        [
+          76,
+          "Bilal Boutobba",
+          "Chandrel Massanga"
+        ],
+        [
+          77,
+          "Efkan Bekiroğlu",
+          "Alexis Antunes"
+        ],
+        [
+          77,
+          "Alex Matos",
+          "Novatus Miroshi"
+        ],
+        [
+          81,
+          "Tino Anjorin",
+          "Rhaldney"
+        ]
+      ]
+    }
+  ],
+  "notes": [
+    "Goal assist null = no assist displayed by FotMob; NOT necessarily official zero until game rules adjudicated.",
+    "Substitution display minute is an event clock, not exact minutes played. Must apply official >60 minute and >=60 minute clean-sheet rules using final score sheet.",
+    "Full player participation and GK saves not covered by this evidence artifact. Do not set weekly final / promote without QA.",
+    "Source team/player name aliases must resolve to existing DB IDs before ingestion."
+  ]
+}

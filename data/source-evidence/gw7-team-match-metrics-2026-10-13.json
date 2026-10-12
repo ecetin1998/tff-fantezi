@@ -1,0 +1,176 @@
+{
+  "season": "2026-27",
+  "gameweek": 7,
+  "kind": "team_match_advanced_source_evidence",
+  "metrics_source": "FotMob fulltime xG/shots; keeper saves from Sporx, TFF-compatible reports per gw7-goalkeeper-saves",
+  "summary": {
+    "games": 9,
+    "total_shots": 256,
+    "total_goals": 24
+  },
+  "matches": [
+    {
+      "match_id": 317844,
+      "home": "Galatasaray",
+      "away": "Kasımpaşa",
+      "goals": [
+        3,
+        1
+      ],
+      "home_xg": 2.52,
+      "away_xg": 0.49,
+      "home_shots": 25,
+      "away_shots": 9,
+      "home_sot": 11,
+      "away_sot": 3,
+      "home_keeper_saves": 2,
+      "away_keeper_saves": 8,
+      "source_url": "https://www.fotmob.com/en-GB/matches/kasmpasa-vs-galatasaray/1guad0"
+    },
+    {
+      "match_id": 317842,
+      "home": "Gençlerbirliği",
+      "away": "Amed",
+      "goals": [
+        2,
+        2
+      ],
+      "home_xg": 0.5,
+      "away_xg": 2.16,
+      "home_shots": 11,
+      "away_shots": 19,
+      "home_sot": 4,
+      "away_sot": 5,
+      "home_keeper_saves": 3,
+      "away_keeper_saves": 2,
+      "source_url": "https://www.fotmob.com/en-GB/matches/genclerbirligi-vs-amed-sportif/2hycm1l"
+    },
+    {
+      "match_id": 317840,
+      "home": "Alanyaspor",
+      "away": "Erzurumspor",
+      "goals": [
+        0,
+        0
+      ],
+      "home_xg": 0.98,
+      "away_xg": 1.69,
+      "home_shots": 15,
+      "away_shots": 15,
+      "home_sot": 5,
+      "away_sot": 5,
+      "home_keeper_saves": 5,
+      "away_keeper_saves": 5,
+      "source_url": "https://www.fotmob.com/matches/alanyaspor-vs-erzurumspor-fk/it2ebc7"
+    },
+    {
+      "match_id": 317846,
+      "home": "Samsunspor",
+      "away": "Trabzonspor",
+      "goals": [
+        0,
+        3
+      ],
+      "home_xg": 1.66,
+      "away_xg": 2.02,
+      "home_shots": 23,
+      "away_shots": 13,
+      "home_sot": 6,
+      "away_sot": 7,
+      "home_keeper_saves": 4,
+      "away_keeper_saves": 6,
+      "source_url": "https://www.fotmob.com/matches/samsunspor-vs-trabzonspor/358aj5"
+    },
+    {
+      "match_id": 317841,
+      "home": "Rizespor",
+      "away": "Fenerbahçe",
+      "goals": [
+        0,
+        3
+      ],
+      "home_xg": 1.52,
+      "away_xg": 0.96,
+      "home_shots": 19,
+      "away_shots": 13,
+      "home_sot": 5,
+      "away_sot": 5,
+      "home_keeper_saves": 2,
+      "away_keeper_saves": 5,
+      "source_url": "https://www.fotmob.com/matches/rizespor-vs-fenerbahce/z4go2"
+    },
+    {
+      "match_id": 317843,
+      "home": "Konyaspor",
+      "away": "Başakşehir",
+      "goals": [
+        0,
+        0
+      ],
+      "home_xg": 0.41,
+      "away_xg": 0.97,
+      "home_shots": 9,
+      "away_shots": 7,
+      "home_sot": 3,
+      "away_sot": 0,
+      "home_keeper_saves": 0,
+      "away_keeper_saves": 3,
+      "source_url": "https://www.fotmob.com/en-GB/matches/basaksehir-vs-konyaspor/x687s"
+    },
+    {
+      "match_id": 317838,
+      "home": "Gaziantep",
+      "away": "Çorum FK",
+      "goals": [
+        0,
+        3
+      ],
+      "home_xg": 0.99,
+      "away_xg": 2.67,
+      "home_shots": 12,
+      "away_shots": 13,
+      "home_sot": 2,
+      "away_sot": 7,
+      "home_keeper_saves": 4,
+      "away_keeper_saves": 2,
+      "source_url": "https://www.fotmob.com/tr/matches/gaziantep-fk-vs-corum-fk/tzrbrsj"
+    },
+    {
+      "match_id": 317845,
+      "home": "Beşiktaş",
+      "away": "Kocaelispor",
+      "goals": [
+        2,
+        1
+      ],
+      "home_xg": 2.21,
+      "away_xg": 1.65,
+      "home_shots": 16,
+      "away_shots": 11,
+      "home_sot": 6,
+      "away_sot": 6,
+      "home_keeper_saves": 5,
+      "away_keeper_saves": 4,
+      "source_url": "https://www.fotmob.com/tr/matches/kocaelispor-vs-besiktas/155i30"
+    },
+    {
+      "match_id": 317839,
+      "home": "Eyüpspor",
+      "away": "Göztepe",
+      "goals": [
+        0,
+        4
+      ],
+      "home_xg": 1.39,
+      "away_xg": 3.21,
+      "home_shots": 7,
+      "away_shots": 19,
+      "home_sot": 4,
+      "away_sot": 7,
+      "home_keeper_saves": 3,
+      "away_keeper_saves": 4,
+      "source_url": "https://www.fotmob.com/matches/goztepe-vs-eyupspor/czuaa?player=186919"
+    }
+  ],
+  "provenance_note": "Shots on target are derived as goals scored + opposition goalkeeper saves (no source-displayed own goals or PK saves this week). PPDA and player xA are not refreshed here."
+}

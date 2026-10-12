@@ -1,0 +1,224 @@
+{
+  "season": "2026-27",
+  "gameweek": 7,
+  "type": "postmatch_goals_event_clock_for_on_pitch_goals_conceded",
+  "minutes_note": "90+x represented by integer 90+x; when same minute as substitution consider corresponding event order if point consequence",
+  "matches": [
+    {
+      "match_id": 317844,
+      "source": "https://www.fotmob.com/en-GB/matches/kasmpasa-vs-galatasaray/1guad0",
+      "goals": [
+        [
+          "Galatasaray",
+          45
+        ],
+        [
+          "Kasımpaşa",
+          68
+        ],
+        [
+          "Galatasaray",
+          90
+        ],
+        [
+          "Galatasaray",
+          96
+        ]
+      ]
+    },
+    {
+      "match_id": 317842,
+      "source": "https://www.fotmob.com/en-GB/matches/genclerbirligi-vs-amed-sportif/2hycm1l",
+      "goals": [
+        [
+          "Amed",
+          25
+        ],
+        [
+          "Gençlerbirliği",
+          54
+        ],
+        [
+          "Amed",
+          67
+        ],
+        [
+          "Gençlerbirliği",
+          92
+        ]
+      ]
+    },
+    {
+      "match_id": 317840,
+      "source": "https://www.fotmob.com/matches/alanyaspor-vs-erzurumspor-fk/it2ebc7",
+      "goals": []
+    },
+    {
+      "match_id": 317846,
+      "source": "https://www.fotmob.com/matches/samsunspor-vs-trabzonspor/358aj5",
+      "goals": [
+        [
+          "Trabzonspor",
+          27
+        ],
+        [
+          "Trabzonspor",
+          38
+        ],
+        [
+          "Trabzonspor",
+          40
+        ]
+      ]
+    },
+    {
+      "match_id": 317841,
+      "source": "https://www.fotmob.com/matches/rizespor-vs-fenerbahce/z4go2",
+      "goals": [
+        [
+          "Fenerbahçe",
+          12
+        ],
+        [
+          "Fenerbahçe",
+          84
+        ],
+        [
+          "Fenerbahçe",
+          87
+        ]
+      ]
+    },
+    {
+      "match_id": 317843,
+      "source": "https://www.fotmob.com/en-GB/matches/basaksehir-vs-konyaspor/x687s",
+      "goals": []
+    },
+    {
+      "match_id": 317838,
+      "source": "https://corumfk.com.tr/mac/2026-10-11-gaziantep-fk-corum-fk",
+      "goals": [
+        [
+          "Çorum FK",
+          37
+        ],
+        [
+          "Çorum FK",
+          60
+        ],
+        [
+          "Çorum FK",
+          82
+        ]
+      ]
+    },
+    {
+      "match_id": 317845,
+      "source": "https://www.fotmob.com/tr/matches/kocaelispor-vs-besiktas/155i30",
+      "goals": [
+        [
+          "Beşiktaş",
+          19
+        ],
+        [
+          "Kocaelispor",
+          27
+        ],
+        [
+          "Beşiktaş",
+          32
+        ]
+      ]
+    },
+    {
+      "match_id": 317839,
+      "source": "https://www.fotmob.com/matches/goztepe-vs-eyupspor/czuaa",
+      "goals": [
+        [
+          "Göztepe",
+          11
+        ],
+        [
+          "Göztepe",
+          54
+        ],
+        [
+          "Göztepe",
+          59
+        ],
+        [
+          "Göztepe",
+          75
+        ]
+      ]
+    }
+  ],
+  "corrections": [
+    {
+      "match_id": 317844,
+      "name": "Ayberk Karapo",
+      "old": -1,
+      "new": 0
+    },
+    {
+      "match_id": 317842,
+      "name": "Fıratcan Üzüm",
+      "old": -1,
+      "new": 0
+    },
+    {
+      "match_id": 317842,
+      "name": "Abdurrahim Dursun",
+      "old": -1,
+      "new": 0
+    },
+    {
+      "match_id": 317842,
+      "name": "Lumbardh Dellova",
+      "old": -1,
+      "new": 0
+    },
+    {
+      "match_id": 317842,
+      "name": "Ali Turap Bülbül",
+      "old": -1,
+      "new": 0
+    },
+    {
+      "match_id": 317842,
+      "name": "Hamza Aydar",
+      "old": -1,
+      "new": 0
+    },
+    {
+      "match_id": 317842,
+      "name": "Mehmet Yeşil",
+      "old": -1,
+      "new": 0
+    },
+    {
+      "match_id": 317842,
+      "name": "Miraç Acer",
+      "old": -1,
+      "new": 0
+    },
+    {
+      "match_id": 317842,
+      "name": "Ensar Çavuşoğlu",
+      "old": -1,
+      "new": 0
+    },
+    {
+      "match_id": 317845,
+      "name": "Muharrem Cinan",
+      "old": -1,
+      "new": 0
+    },
+    {
+      "match_id": 317839,
+      "name": "Talha Ülvan",
+      "old": -2,
+      "new": 0
+    }
+  ]
+}
