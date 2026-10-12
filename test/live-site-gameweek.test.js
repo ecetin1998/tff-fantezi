@@ -35,7 +35,8 @@ test('production deployment must fail if API says MH8 while any real HTML shows 
   for(const route of ['home','players','matches','squads']){
     assert.ok(check.includes(route+':'),route+' must be present in the verifier')
   }
-  assert.match(check,/grep -Fq "MH\$EXPECTED_GAMEWEEK \$label"/)
+  assert.match(check,/expected_marker="MH\$EXPECTED_GAMEWEEK \$label"/)
+  assert.match(check,/grep -Fq "\$expected_marker"/)
   assert.match(deploy,/Verify site displays current gameweek/)
   assert.match(deploy,/bash scripts\/verify-published-gameweek\.sh/)
   assert.match(deploy,/workflow_dispatch:/,'Production deploy is still initiated explicitly')
