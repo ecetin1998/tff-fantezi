@@ -19,6 +19,8 @@ export default function PlayersTable({players,total,page,pageCount,teams,filters
   const [pool,setPool]=useState(players)
   const [overlayError,setOverlayError]=useState(false)
   const [overlayRequestId,setOverlayRequestId]=useState(null)
+  const [overlayReady,setOverlayReady]=useState(false)
+  const [overlayRetry,setOverlayRetry]=useState(0)
   const isPro=tier==='pro'
   const isVisitor=tier==='visitor'
   const activeFilters=staticPool?localFilters:filters
@@ -33,6 +35,8 @@ export default function PlayersTable({players,total,page,pageCount,teams,filters
     setLocalFilters(next)
     setQ(next.q)
     setPool(players)
+    setAccessPending(true)
+    setOverlayReady(false)
     setOverlayError(false)
     setOverlayRequestId(null)
     async function loadOverlay(){
@@ -50,6 +54,16 @@ export default function PlayersTable({players,total,page,pageCount,teams,filters
           if(cancelled)return
           try{
             const response=await fetch('/api/pro-player-overlay'+(runId?'?run_id='+encodeURIComponent(runId):''),{cache:'no-store'})
+            if(response.status===409){
+              const details=await response.json().catch(()=>({}))
+              if(details.error==='MODEL_CHANGED'){
+                // The visitor HTML is stale after a successful MH rollover.
+                // Refresh to fetch the new current run instead of sorting null values.
+                router.refresh()
+                return
+              }
+              throw new Error('Pro metrics HTTP 409')
+            }
             if(!response.ok){
               if(![403,429,500,502,503,504].includes(response.status))throw new Error('Pro metrics HTTP '+response.status)
               if(attempt===2){
@@ -59,7 +73,7 @@ export default function PlayersTable({players,total,page,pageCount,teams,filters
               }
             }else{
               const payload=await response.json()
-              if(!Array.isArray(payload.rows))throw new Error('Invalid metrics response')
+              if(!Array.isArray(payload.rows)||payload.rows.length===0)throw new Error('Missing Pro metric rows')
               if(runId&&payload.run_id!==runId){
                 if(attempt===2)throw new Error('Model run mismatch')
               }else{
@@ -75,10 +89,13 @@ export default function PlayersTable({players,total,page,pageCount,teams,filters
         if(cancelled)return
         if(!data)throw new Error('Pro metrics unavailable')
         const overlay=new Map(data.rows.map(x=>[Number(x.player_id),x]))
+        const matched=players.filter(player=>overlay.has(Number(player.id))).length
+        if(players.length&&matched/players.length<.95)throw new Error('Pro metric coverage incomplete for this model')
         setPool(current=>current.map(player=>{
           const extra=overlay.get(Number(player.id))
           return extra?{...player,projection:{...player.projection,p25:extra.p25,p75:extra.p75,p90:extra.p90,six_plus_probability:extra.six_plus_probability,expected_goals:extra.expected_goals,expected_assists:extra.expected_assists,top25_score:extra.top25_score,top25_rank:extra.top25_rank}}:player
         }))
+        setOverlayReady(true)
       }catch{
         if(!cancelled)setOverlayError(true)
       }finally{
@@ -87,7 +104,7 @@ export default function PlayersTable({players,total,page,pageCount,teams,filters
     }
     loadOverlay()
     return()=>{cancelled=true}
-  },[staticPool,runId,players])
+  },[staticPool,runId,players,overlayRetry,router])
 
   const navigate=useCallback(patch=>{
     const next={...(activeFilters||{}),...patch}
@@ -146,7 +163,8 @@ export default function PlayersTable({players,total,page,pageCount,teams,filters
     </div>:null}
 
     <div className="table-summary">{isVisitor?<><b>İlk {visiblePlayers.length}</b> oyuncu • xFP sıralaması • tüm oyuncu havuzu ücretsiz üyelikle açılır</>:<><b>{effectiveTotal}</b> oyuncu • {isPro?'Gelişmiş analiz görünümü':'ücretsiz üye görünümü'}</>}</div>
-    {isPro&&overlayError?<div className="alert error" role="alert">Gelişmiş istatistikler yüklenemedi. Güncel veriler için sayfayı yenile.{overlayRequestId?' Hata kodu: '+overlayRequestId:''}</div>:null}
+    {isPro&&!overlayReady&&!overlayError?<div className="table-summary" role="status" aria-live="polite">Gelişmiş P90 ve 6+ puan verileri yükleniyor...</div>:null}
+    {isPro&&overlayError?<div className="alert error" role="alert">Gelişmiş P90 ve 6+ istatistikleri yüklenemedi.{overlayRequestId?' Hata kodu: '+overlayRequestId:''} <button type="button" onClick={()=>setOverlayRetry(n=>n+1)}>Yeniden dene</button></div>:null}
     <div className="projection-legend">
       Karar metrikleri: <b>İlk 11</b> + <b>xDakika</b> oynama ihtimalini, <b>xFP</b> ortalama beklentiyi gösterir.
       {isPro?<span> <b>P25/P90</b>, <b>6+</b>, <b>xG</b> ve <b>xA</b> Gelişmiş üyelik dağılım/üretim katmanlarıdır.</span>:<span> Puan dağılımı, 6+ ihtimali ve xG/xA detayları Gelişmiş üyelikte açılır.</span>}
