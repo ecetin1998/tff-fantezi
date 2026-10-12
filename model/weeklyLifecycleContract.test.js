@@ -114,4 +114,11 @@ const overlapGateFix=read('supabase/migrations/20260929164056_remove_optimizer_o
 assert.doesNotMatch(overlapGateFix,/xi_overlap<=8|optimizer_ok and overlap_ok/,'XI overlap is diagnostic only; ceiling XI must not be forced to differ.')
 assert.match(overlapGateFix,/'xi_overlap',\(select xi_overlap from overlap\)/)
 
+const availabilityWorker=read('supabase/functions/refresh-availability/index.ts')
+assert.match(availabilityWorker,/for\(const player of playersQ\.data\|\|\[\]\)/,'Availability refresh must cover every active roster player, not only players on the injury/suspension exception feed.')
+assert.match(availabilityWorker,/if\(!Number\.isInteger\(id\)\|\|next\.has\(id\)\)continue/,'Explicit injuries and suspensions must take precedence over inferred baselines.')
+assert.match(availabilityWorker,/active_roster_no_reported_exception/,'Inferred baseline provenance must be explicit.')
+assert.match(availabilityWorker,/availability_probability:1/,'No current source alert defaults to a neutral availability probability.')
+assert.match(availabilityWorker,/onConflict:"run_id,player_id"/,'Availability writes remain idempotent.')
+
 console.log('weekly lifecycle contract passed')
