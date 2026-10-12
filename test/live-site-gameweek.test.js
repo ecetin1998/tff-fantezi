@@ -39,7 +39,7 @@ test('production deployment must fail if API says MH8 while any real HTML shows 
     assert.ok(check.includes(route+':'),route+' must be present in the verifier')
   }
   assert.match(check,/expected_marker="MH\$EXPECTED_GAMEWEEK \$label"/)
-  assert.match(check,/grep -Fq "\$expected_marker"/)
+  assert.ok(check.includes('python3 scripts/check-rendered-week.py'), 'Rendered SSR text is checked rather than raw byte grep.')
   assert.match(deploy,/Verify site displays current gameweek/)
   assert.match(deploy,/bash scripts\/verify-published-gameweek\.sh/)
   assert.match(deploy,/workflow_dispatch:/,'Production deploy is still initiated explicitly')
