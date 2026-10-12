@@ -64,7 +64,7 @@ test('All 283 on-field participations carry sourced event points and minute thre
 test('Provisional scores cover 283 without turning evidence into finalized public Fantasy data', () => {
  const all = points.matches.flatMap(m => m.players);
  assert.equal(all.length,283);
- assert.equal(count(all,p=>p.player_id == null),7);
+ assert.equal(count(all,p=>p.player_id == null),0);
  assert.equal(count(all,p=>p.base_points_candidate == null),0);
  assert.equal(count(all,p=>p.bonus_candidate==null),0);
  assert.equal(points.status,'PROVISIONAL_NOT_FOR_RELEASE');
@@ -86,6 +86,6 @@ test('Provisional scores cover 283 without turning evidence into finalized publi
  for(const m of staging.matches){
   assert(m.players.every(p=>p.is_final===false && p.bonus_points===null), 'final or fabricated bonus in staging');
  }
- assert.equal(count(all,p=>p.player_id!==null),276);
+ assert.equal(count(all,p=>p.player_id!==null),283);
  assert.equal(count(all,p=>p.bonus_candidate>0),46);
 });
