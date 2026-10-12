@@ -1,0 +1,66 @@
+name: Verify live MH8 site and API (read-only)
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/mh8-live-probe.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: mh8-readonly-live-probe
+  cancel-in-progress: true
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Probe live domain, Worker, HTML and public API
+        shell: bash
+        run: |
+          set -uo pipefail
+          overall=0
+          for origin in "https://fanteziligrehberi.com" "https://tff-fantezi.ecetin1998.workers.dev"; do
+            echo "=== ORIGIN: $origin ==="
+            for path in "/api/health" "/api/scout-data?section=matches" "/" "/?fresh_mh8_probe=20261013"; do
+              echo "--- URL: ${origin}${path}"
+              headers="$(mktemp)"
+              body="$(mktemp)"
+              status="$(curl --silent --show-error --location --max-time 35 \
+                --retry 2 --retry-all-errors --retry-delay 2 \
+                -H "Cache-Control: no-cache" \
+                -H "Accept: text/html,application/json" \
+                -D "$headers" -o "$body" -w '%{http_code}' \
+                "${origin}${path}")" || status="000"
+              echo "http_status=$status bytes=$(wc -c < "$body")"
+              grep -Ei '^(cache-control|cdn-cache-control|cf-cache-status|age|cf-ray|etag|location|x-nextjs-cache|content-type):' "$headers" | tail -n 16 || true
+              if [[ "$status" != "200" ]]; then
+                echo "unexpected response (first 300 bytes):"
+                head -c 300 "$body" || true
+                echo
+                overall=1
+              elif [[ "$path" == "/api/health" ]]; then
+                jq -c '{ok,sha,service,environment}' "$body" || overall=1
+              elif [[ "$path" == "/api/scout-data?section=matches" ]]; then
+                jq -c '{week:.current_run.gameweek,run_id:.current_run.id,run_status:.current_run.status,fixtures:(.matches|length),served_at,error}' "$body" || overall=1
+                week="$(jq -r '.current_run.gameweek // -1' "$body" 2>/dev/null || echo -1)"
+                if [[ "$week" != "8" ]]; then echo "MISMATCH: public API is not serving MH8 (actual=$week)"; overall=1; fi
+              else
+                python3 - "$body" <<'PY'
+          import re,sys
+          html=open(sys.argv[1],encoding="utf8",errors="replace").read()
+          match=re.findall(r'MH(?:7|8)(?![0-9])',html)
+          print("visible_mh_markers=" + str({x:match.count(x) for x in set(match)}))
+          print("contains_mh8=" + str("MH8" in match) + " contains_mh7=" + str("MH7" in match))
+          PY
+                if ! grep -q 'MH8' "$body"; then echo "MISMATCH: rendered HTML lacks MH8"; overall=1; fi
+              fi
+              rm -f "$headers" "$body"
+            done
+          done
+          echo "read_only_probe_status=$overall"
+          exit "$overall"
