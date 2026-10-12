@@ -4,14 +4,23 @@
   "status": "PROVISIONAL_NOT_FOR_RELEASE",
   "summary": {
     "participating_players": 283,
-    "provisional_scored": 276,
-    "incomplete": 7,
+    "provisional_scored": 283,
+    "incomplete": 0,
     "provisional_bonus_players": 46,
     "gw6_bonus_rank_test": "354 rows / 9 matches / 0 mismatches (competition ranking)",
     "candidate_base_calculated": 283,
-    "external_players_without_db_id": 7,
+    "external_players_without_db_id": 0,
     "unresolved_point_components": 0,
-    "other_players_bonus_rank_changes": []
+    "other_players_bonus_rank_changes": [],
+    "new_user_confirmed_player_ids": {
+      "Ali Turap Bülbül": 1604,
+      "Hamza Aydar": 1605,
+      "Prince Martor Jr.": 1606,
+      "Miraç Acer": 1607,
+      "Bedirhan Özyurt": 1608,
+      "Sabahattin Destici": 1609,
+      "Onur Öztonga": 1610
+    }
   },
   "matches": [
     {
@@ -1005,7 +1014,7 @@
           "confidence": "provisional"
         },
         {
-          "player_id": null,
+          "player_id": 1604,
           "name": "Ali Turap Bülbül",
           "team": "Amed",
           "position": "DEF",
@@ -1020,11 +1029,11 @@
           "goals_conceded_points_team_based": -1,
           "bonus_candidate": 0,
           "total_points_candidate": 0,
-          "confidence": "provisional_external_player_unmapped",
+          "confidence": "provisional_user_confirmed_player",
           "source_for_position": "https://www.fotmob.com/en-GB/matches/genclerbirligi-vs-amed-sportif/2hycm1l"
         },
         {
-          "player_id": null,
+          "player_id": 1605,
           "name": "Hamza Aydar",
           "team": "Gençlerbirliği",
           "position": "DEF",
@@ -1039,7 +1048,7 @@
           "goals_conceded_points_team_based": -1,
           "bonus_candidate": 0,
           "total_points_candidate": 0,
-          "confidence": "provisional_external_player_unmapped",
+          "confidence": "provisional_user_confirmed_player",
           "source_for_position": "https://www.fotmob.com/en-GB/matches/genclerbirligi-vs-amed-sportif/2hycm1l"
         },
         {
@@ -1061,7 +1070,7 @@
           "confidence": "provisional"
         },
         {
-          "player_id": null,
+          "player_id": 1606,
           "name": "Prince Martor Jr.",
           "team": "Gençlerbirliği",
           "position": "FWD",
@@ -1076,7 +1085,7 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 1,
-          "confidence": "provisional_external_player_unmapped",
+          "confidence": "provisional_user_confirmed_player",
           "source_for_position": "https://www.fotmob.com/en-GB/matches/genclerbirligi-vs-amed-sportif/2hycm1l"
         },
         {
@@ -1098,7 +1107,7 @@
           "confidence": "provisional"
         },
         {
-          "player_id": null,
+          "player_id": 1607,
           "name": "Miraç Acer",
           "team": "Amed",
           "position": "DEF",
@@ -1113,7 +1122,7 @@
           "goals_conceded_points_team_based": -1,
           "bonus_candidate": 0,
           "total_points_candidate": 0,
-          "confidence": "provisional_external_player_unmapped",
+          "confidence": "provisional_user_confirmed_player",
           "source_for_position": "https://www.fotmob.com/en-GB/matches/genclerbirligi-vs-amed-sportif/2hycm1l"
         },
         {
@@ -1704,7 +1713,7 @@
           "confidence": "provisional"
         },
         {
-          "player_id": null,
+          "player_id": 1608,
           "name": "Bedirhan Özyurt",
           "team": "Alanyaspor",
           "position": "DEF",
@@ -1719,7 +1728,7 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 1,
-          "confidence": "provisional_external_player_unmapped",
+          "confidence": "provisional_user_confirmed_player",
           "source_for_position": "https://www.fotmob.com/matches/alanyaspor-vs-erzurumspor-fk/it2ebc7"
         }
       ],
@@ -3945,7 +3954,7 @@
           "confidence": "provisional"
         },
         {
-          "player_id": null,
+          "player_id": 1609,
           "name": "Sabahattin Destici",
           "team": "Gaziantep",
           "position": "DEF",
@@ -3960,7 +3969,7 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 1,
-          "confidence": "provisional_external_player_unmapped",
+          "confidence": "provisional_user_confirmed_player",
           "source_for_position": "https://www.gaziantepfk.org/haberler/mac-sonucu-gaziantep-fk-0-3-corum-fk"
         },
         {
@@ -4263,7 +4272,7 @@
           "confidence": "provisional"
         },
         {
-          "player_id": null,
+          "player_id": 1610,
           "name": "Onur Öztonga",
           "team": "Kocaelispor",
           "position": "DEF",
@@ -4278,7 +4287,7 @@
           "goals_conceded_points_team_based": -1,
           "bonus_candidate": 0,
           "total_points_candidate": 1,
-          "confidence": "provisional_external_player_unmapped",
+          "confidence": "provisional_user_confirmed_player",
           "source_for_position": "https://www.fotmob.com/tr/matches/kocaelispor-vs-besiktas/155i30"
         },
         {
@@ -5224,6 +5233,7 @@
     "Player score sources: FotMob, Sporx/club match stats and TheFishy as referenced in adjoining files.",
     "No live database writes or MH8 promotion.",
     "Seven reserve/starting players absent from scout_players were assigned FotMob/club-supported position for bonus-rank calculations; the player_id remains null and cannot be imported as a canonical player without roster insertion.",
-    "All 283 played players now have candidate base and tie-rank bonus; scores are NOT final and have unverified special events and official QA."
+    "All 283 played players now have candidate base and tie-rank bonus; scores are NOT final and have unverified special events and official QA.",
+    "Seven previously unmatched player records inserted into Supabase scout_players with user-confirmed names, teams and price 4.00; GW7 scout_player_prices rows inserted, IDs 1604-1610."
   ]
 }
