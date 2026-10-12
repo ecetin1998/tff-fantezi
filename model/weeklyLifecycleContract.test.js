@@ -121,4 +121,19 @@ assert.match(redCardMinuteQA,/minute_sum>990\.25\*fixture_count/,'Upper bound mu
 assert.match(redCardMinuteQA,/pg_get_functiondef/,'Patch existing QA without changing other safety rules.')
 assert.match(sim,/if\(rc\)\{/,'Expected minutes fall because the simulator models red-card early exits.')
 
+const resume=read('.github/workflows/mh8-verified-release-resume.yml')
+for(const stage of ['qa','integrity','bugfix','replay','model_gate','promote']){
+  assert.match(resume,new RegExp('stage:"'+stage+'"'),'Verified MH8 resume must execute '+stage+' gate')
+}
+assert.match(resume,/action:"close_backtest"/,'Backtest evidence must be closed before replay inherits PASS.')
+assert.match(resume,/action:"snapshot"/,'Candidate snapshot must be frozen before promotion.')
+assert.match(resume,/action:"verify"/,'Live run must be verified after promotion.')
+assert.match(resume,/simulation_count == 50000/,'Do not release an incomplete Monte Carlo candidate.')
+assert.match(resume,/result\.active_player_count == \.result\.active_projection_count/,'Every active player must have projections.')
+assert.doesNotMatch(resume,/run-live-sim-chunk\?/,'Resume a verified 50K simulation without double-counting its draws.')
+assert.match(resume,/ready_to_advance == true/,'Do not bypass the closed week and next-fixture gates.')
+assert.match(resume,/OIDC_AUDIENCE/,'Protected release must authenticate via scoped OIDC.')
+
+assert.match(redCardMinuteQA,/expected_red_minutes/,'Migration must preserve an already-deployed rate-aware QA implementation.')
+
 console.log('weekly lifecycle contract passed')
