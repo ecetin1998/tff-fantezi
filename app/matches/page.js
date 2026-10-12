@@ -3,7 +3,9 @@ import { getAuthState, getMatches } from '@/lib/data'
 import { teamCssVars } from '@/lib/teamThemes'
 import AccessGate from '@/components/AccessGate'
 
-export const revalidate=300
+// Week-aware HTML must not be frozen at build time or kept in Worker ISR
+// when the active model is promoted; data fetching stays in run-scoped caches.
+export const dynamic='force-dynamic'
 export const metadata={title:'Maç Tahminleri'}
 
 const matchupLabel={good:'Avantajlı',neutral:'Dengeli',tough:'Dezavantajlı'}
