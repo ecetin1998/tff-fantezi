@@ -20,7 +20,78 @@
       "Bedirhan Özyurt": 1608,
       "Sabahattin Destici": 1609,
       "Onur Öztonga": 1610
-    }
+    },
+    "on_pitch_conceded_corrections": 11,
+    "on_pitch_conceded_correction_players": [
+      {
+        "match_id": 317844,
+        "name": "Ayberk Karapo",
+        "old": -1,
+        "new": 0
+      },
+      {
+        "match_id": 317842,
+        "name": "Fıratcan Üzüm",
+        "old": -1,
+        "new": 0
+      },
+      {
+        "match_id": 317842,
+        "name": "Abdurrahim Dursun",
+        "old": -1,
+        "new": 0
+      },
+      {
+        "match_id": 317842,
+        "name": "Lumbardh Dellova",
+        "old": -1,
+        "new": 0
+      },
+      {
+        "match_id": 317842,
+        "name": "Ali Turap Bülbül",
+        "old": -1,
+        "new": 0
+      },
+      {
+        "match_id": 317842,
+        "name": "Hamza Aydar",
+        "old": -1,
+        "new": 0
+      },
+      {
+        "match_id": 317842,
+        "name": "Mehmet Yeşil",
+        "old": -1,
+        "new": 0
+      },
+      {
+        "match_id": 317842,
+        "name": "Miraç Acer",
+        "old": -1,
+        "new": 0
+      },
+      {
+        "match_id": 317842,
+        "name": "Ensar Çavuşoğlu",
+        "old": -1,
+        "new": 0
+      },
+      {
+        "match_id": 317845,
+        "name": "Muharrem Cinan",
+        "old": -1,
+        "new": 0
+      },
+      {
+        "match_id": 317839,
+        "name": "Talha Ülvan",
+        "old": -2,
+        "new": 0
+      }
+    ],
+    "bonus_awarded": 46,
+    "mapped": 283
   },
   "matches": [
     {
@@ -46,7 +117,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 2,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 1,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 520,
@@ -64,7 +137,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 2,
           "total_points_candidate": 9,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 1,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 516,
@@ -82,7 +157,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 1,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 1,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 533,
@@ -100,7 +177,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 3,
           "total_points_candidate": 11,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 1,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 529,
@@ -118,7 +197,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 2,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 1,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 539,
@@ -136,7 +217,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": -1,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 532,
@@ -154,7 +237,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 2,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 1,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 505,
@@ -172,7 +257,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 2,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 1,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 877,
@@ -190,7 +277,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 5,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 1306,
@@ -208,7 +297,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 1,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 1405,
@@ -226,7 +317,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 2,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 1,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 80,
@@ -244,7 +337,9 @@
           "goals_conceded_points_team_based": -1,
           "bonus_candidate": 0,
           "total_points_candidate": 3,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 3,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 94,
@@ -262,7 +357,9 @@
           "goals_conceded_points_team_based": -1,
           "bonus_candidate": 0,
           "total_points_candidate": 1,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 3,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 1075,
@@ -280,7 +377,9 @@
           "goals_conceded_points_team_based": -1,
           "bonus_candidate": 0,
           "total_points_candidate": 1,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 3,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 104,
@@ -298,7 +397,9 @@
           "goals_conceded_points_team_based": -1,
           "bonus_candidate": 0,
           "total_points_candidate": 1,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 3,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 71,
@@ -306,17 +407,19 @@
           "team": "Kasımpaşa",
           "position": "DEF",
           "minutes_bucket": "61_plus",
-          "base_points_candidate": 1,
+          "base_points_candidate": 2,
           "appearance": 2,
           "goals_points": 0,
           "assists_points": 0,
           "cards_points": 0,
           "save_points": 0,
           "clean_sheet_points": 0,
-          "goals_conceded_points_team_based": -1,
+          "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
-          "total_points_candidate": 1,
-          "confidence": "provisional"
+          "total_points_candidate": 2,
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 1,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 86,
@@ -334,7 +437,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 1,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 3,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 77,
@@ -352,7 +457,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 1,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 1,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 81,
@@ -370,7 +477,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 1,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 1,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 97,
@@ -388,7 +497,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 1,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 3,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 72,
@@ -406,7 +517,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 0,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 1,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 75,
@@ -424,7 +537,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 2,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 3,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 102,
@@ -442,7 +557,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 1,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 2,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 1543,
@@ -460,7 +577,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 1,
           "total_points_candidate": 7,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 2,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 531,
@@ -478,7 +597,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 1,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 1,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 525,
@@ -496,7 +617,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 1,
           "total_points_candidate": 7,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 1,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 92,
@@ -514,7 +637,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 1,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 2,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 507,
@@ -532,7 +657,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 4,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 514,
@@ -550,7 +677,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 1,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 88,
@@ -568,7 +697,9 @@
           "goals_conceded_points_team_based": -1,
           "bonus_candidate": 0,
           "total_points_candidate": 0,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 2,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 527,
@@ -586,7 +717,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 1,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         }
       ],
       "unresolved_player_count": 0,
@@ -615,7 +748,9 @@
           "goals_conceded_points_team_based": -1,
           "bonus_candidate": 0,
           "total_points_candidate": 1,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 2,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 541,
@@ -633,7 +768,9 @@
           "goals_conceded_points_team_based": -1,
           "bonus_candidate": 0,
           "total_points_candidate": 0,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 2,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 339,
@@ -651,7 +788,9 @@
           "goals_conceded_points_team_based": -1,
           "bonus_candidate": 0,
           "total_points_candidate": 1,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 2,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 336,
@@ -669,7 +808,9 @@
           "goals_conceded_points_team_based": -1,
           "bonus_candidate": 1,
           "total_points_candidate": 7,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 2,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 342,
@@ -677,17 +818,19 @@
           "team": "Gençlerbirliği",
           "position": "DEF",
           "minutes_bucket": "61_plus",
-          "base_points_candidate": 0,
+          "base_points_candidate": 1,
           "appearance": 2,
           "goals_points": 0,
           "assists_points": 0,
           "cards_points": -1,
           "save_points": 0,
           "clean_sheet_points": 0,
-          "goals_conceded_points_team_based": -1,
+          "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
-          "total_points_candidate": 0,
-          "confidence": "provisional"
+          "total_points_candidate": 1,
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 1,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 1545,
@@ -705,7 +848,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 3,
           "total_points_candidate": 10,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 2,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 326,
@@ -723,7 +868,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 2,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 2,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 344,
@@ -731,17 +878,19 @@
           "team": "Gençlerbirliği",
           "position": "DEF",
           "minutes_bucket": "1_to_59",
-          "base_points_candidate": 0,
+          "base_points_candidate": 1,
           "appearance": 1,
           "goals_points": 0,
           "assists_points": 0,
           "cards_points": 0,
           "save_points": 0,
           "clean_sheet_points": 0,
-          "goals_conceded_points_team_based": -1,
+          "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
-          "total_points_candidate": 0,
-          "confidence": "provisional"
+          "total_points_candidate": 1,
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 1,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 812,
@@ -759,7 +908,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 5,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 2,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 346,
@@ -777,7 +928,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 2,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 2,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 1537,
@@ -795,7 +948,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 2,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 2,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 161,
@@ -813,7 +968,9 @@
           "goals_conceded_points_team_based": -1,
           "bonus_candidate": 0,
           "total_points_candidate": 0,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 2,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 152,
@@ -831,7 +988,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 2,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 1,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 162,
@@ -839,17 +998,19 @@
           "team": "Amed",
           "position": "DEF",
           "minutes_bucket": "61_plus",
-          "base_points_candidate": 0,
+          "base_points_candidate": 1,
           "appearance": 2,
           "goals_points": 0,
           "assists_points": 0,
           "cards_points": -1,
           "save_points": 0,
           "clean_sheet_points": 0,
-          "goals_conceded_points_team_based": -1,
+          "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
-          "total_points_candidate": 0,
-          "confidence": "provisional"
+          "total_points_candidate": 1,
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 1,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 151,
@@ -867,7 +1028,9 @@
           "goals_conceded_points_team_based": -1,
           "bonus_candidate": 0,
           "total_points_candidate": 1,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 2,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 139,
@@ -885,7 +1048,9 @@
           "goals_conceded_points_team_based": -1,
           "bonus_candidate": 0,
           "total_points_candidate": 0,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 2,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 149,
@@ -903,7 +1068,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 5,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 2,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 157,
@@ -921,7 +1088,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 2,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 1,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 600,
@@ -939,7 +1108,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 3,
           "total_points_candidate": 10,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 2,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 136,
@@ -957,7 +1128,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 1,
           "total_points_candidate": 7,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 1,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 595,
@@ -975,7 +1148,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 2,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 1,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 148,
@@ -993,7 +1168,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 2,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 2,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 583,
@@ -1011,7 +1188,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 1,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 1,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 1604,
@@ -1019,18 +1198,20 @@
           "team": "Amed",
           "position": "DEF",
           "minutes_bucket": "1_to_59",
-          "base_points_candidate": 0,
+          "base_points_candidate": 1,
           "appearance": 1,
           "goals_points": 0,
           "assists_points": 0,
           "cards_points": 0,
           "save_points": 0,
           "clean_sheet_points": 0,
-          "goals_conceded_points_team_based": -1,
+          "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
-          "total_points_candidate": 0,
+          "total_points_candidate": 1,
           "confidence": "provisional_user_confirmed_player",
-          "source_for_position": "https://www.fotmob.com/en-GB/matches/genclerbirligi-vs-amed-sportif/2hycm1l"
+          "source_for_position": "https://www.fotmob.com/en-GB/matches/genclerbirligi-vs-amed-sportif/2hycm1l",
+          "conceded_while_on_pitch": 1,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 1605,
@@ -1038,18 +1219,20 @@
           "team": "Gençlerbirliği",
           "position": "DEF",
           "minutes_bucket": "1_to_59",
-          "base_points_candidate": 0,
+          "base_points_candidate": 1,
           "appearance": 1,
           "goals_points": 0,
           "assists_points": 0,
           "cards_points": 0,
           "save_points": 0,
           "clean_sheet_points": 0,
-          "goals_conceded_points_team_based": -1,
+          "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
-          "total_points_candidate": 0,
+          "total_points_candidate": 1,
           "confidence": "provisional_user_confirmed_player",
-          "source_for_position": "https://www.fotmob.com/en-GB/matches/genclerbirligi-vs-amed-sportif/2hycm1l"
+          "source_for_position": "https://www.fotmob.com/en-GB/matches/genclerbirligi-vs-amed-sportif/2hycm1l",
+          "conceded_while_on_pitch": 1,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 1504,
@@ -1067,7 +1250,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 1,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 1606,
@@ -1086,7 +1271,9 @@
           "bonus_candidate": 0,
           "total_points_candidate": 1,
           "confidence": "provisional_user_confirmed_player",
-          "source_for_position": "https://www.fotmob.com/en-GB/matches/genclerbirligi-vs-amed-sportif/2hycm1l"
+          "source_for_position": "https://www.fotmob.com/en-GB/matches/genclerbirligi-vs-amed-sportif/2hycm1l",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 135,
@@ -1094,17 +1281,19 @@
           "team": "Amed",
           "position": "DEF",
           "minutes_bucket": "1_to_59",
-          "base_points_candidate": 0,
+          "base_points_candidate": 1,
           "appearance": 1,
           "goals_points": 0,
           "assists_points": 0,
           "cards_points": 0,
           "save_points": 0,
           "clean_sheet_points": 0,
-          "goals_conceded_points_team_based": -1,
+          "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
-          "total_points_candidate": 0,
-          "confidence": "provisional"
+          "total_points_candidate": 1,
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 1,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 1607,
@@ -1112,18 +1301,20 @@
           "team": "Amed",
           "position": "DEF",
           "minutes_bucket": "1_to_59",
-          "base_points_candidate": 0,
+          "base_points_candidate": 1,
           "appearance": 1,
           "goals_points": 0,
           "assists_points": 0,
           "cards_points": 0,
           "save_points": 0,
           "clean_sheet_points": 0,
-          "goals_conceded_points_team_based": -1,
+          "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
-          "total_points_candidate": 0,
+          "total_points_candidate": 1,
           "confidence": "provisional_user_confirmed_player",
-          "source_for_position": "https://www.fotmob.com/en-GB/matches/genclerbirligi-vs-amed-sportif/2hycm1l"
+          "source_for_position": "https://www.fotmob.com/en-GB/matches/genclerbirligi-vs-amed-sportif/2hycm1l",
+          "conceded_while_on_pitch": 1,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 155,
@@ -1141,7 +1332,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 1,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 1,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 144,
@@ -1159,7 +1352,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 1,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 1,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 322,
@@ -1167,17 +1362,19 @@
           "team": "Gençlerbirliği",
           "position": "DEF",
           "minutes_bucket": "1_to_59",
-          "base_points_candidate": 0,
+          "base_points_candidate": 1,
           "appearance": 1,
           "goals_points": 0,
           "assists_points": 0,
           "cards_points": 0,
           "save_points": 0,
           "clean_sheet_points": 0,
-          "goals_conceded_points_team_based": -1,
+          "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
-          "total_points_candidate": 0,
-          "confidence": "provisional"
+          "total_points_candidate": 1,
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         }
       ],
       "unresolved_player_count": 0,
@@ -1206,7 +1403,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 3,
           "total_points_candidate": 10,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 436,
@@ -1224,7 +1423,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 1,
           "total_points_candidate": 7,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 413,
@@ -1242,7 +1443,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 1,
           "total_points_candidate": 7,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 426,
@@ -1260,7 +1463,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 1,
           "total_points_candidate": 7,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 427,
@@ -1278,7 +1483,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 5,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 435,
@@ -1296,7 +1503,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 3,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 599,
@@ -1314,7 +1523,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 3,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 429,
@@ -1332,7 +1543,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 3,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 430,
@@ -1350,7 +1563,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 1,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 910,
@@ -1368,7 +1583,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 1,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 417,
@@ -1386,7 +1603,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 1,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 51,
@@ -1404,7 +1623,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 3,
           "total_points_candidate": 10,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 53,
@@ -1422,7 +1643,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 5,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 63,
@@ -1440,7 +1663,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 1,
           "total_points_candidate": 7,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 47,
@@ -1458,7 +1683,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 1,
           "total_points_candidate": 7,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 41,
@@ -1476,7 +1703,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 5,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 48,
@@ -1494,7 +1723,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 1,
           "total_points_candidate": 7,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 59,
@@ -1512,7 +1743,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 3,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 778,
@@ -1530,7 +1763,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 3,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 58,
@@ -1548,7 +1783,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 3,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 52,
@@ -1566,7 +1803,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 1,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 746,
@@ -1584,7 +1823,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 3,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 415,
@@ -1602,7 +1843,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 0,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 437,
@@ -1620,7 +1863,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 0,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 977,
@@ -1638,7 +1883,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 1,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 421,
@@ -1656,7 +1903,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 1,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 45,
@@ -1674,7 +1923,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 1,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 1108,
@@ -1692,7 +1943,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 1,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 67,
@@ -1710,7 +1963,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 1,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 1608,
@@ -1729,7 +1984,9 @@
           "bonus_candidate": 0,
           "total_points_candidate": 1,
           "confidence": "provisional_user_confirmed_player",
-          "source_for_position": "https://www.fotmob.com/matches/alanyaspor-vs-erzurumspor-fk/it2ebc7"
+          "source_for_position": "https://www.fotmob.com/matches/alanyaspor-vs-erzurumspor-fk/it2ebc7",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         }
       ],
       "unresolved_player_count": 0,
@@ -1758,7 +2015,9 @@
           "goals_conceded_points_team_based": -1,
           "bonus_candidate": 0,
           "total_points_candidate": 2,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 3,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 472,
@@ -1776,7 +2035,9 @@
           "goals_conceded_points_team_based": -1,
           "bonus_candidate": 0,
           "total_points_candidate": 1,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 3,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 439,
@@ -1794,7 +2055,9 @@
           "goals_conceded_points_team_based": -1,
           "bonus_candidate": 0,
           "total_points_candidate": 1,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 3,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 613,
@@ -1812,7 +2075,9 @@
           "goals_conceded_points_team_based": -1,
           "bonus_candidate": 0,
           "total_points_candidate": 1,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 3,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 457,
@@ -1830,7 +2095,9 @@
           "goals_conceded_points_team_based": -1,
           "bonus_candidate": 0,
           "total_points_candidate": 0,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 3,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 462,
@@ -1848,7 +2115,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 1,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 455,
@@ -1866,7 +2135,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 1,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 3,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 453,
@@ -1884,7 +2155,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 2,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 3,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 463,
@@ -1902,7 +2175,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 1,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 3,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 467,
@@ -1920,7 +2195,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 2,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 3,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 1603,
@@ -1938,7 +2215,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 2,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 3,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 22,
@@ -1956,7 +2235,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 1,
           "total_points_candidate": 9,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 28,
@@ -1974,7 +2255,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 6,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 37,
@@ -1992,7 +2275,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 3,
           "total_points_candidate": 15,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 27,
@@ -2010,7 +2295,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 6,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 15,
@@ -2028,7 +2315,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 2,
           "total_points_candidate": 11,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 32,
@@ -2046,7 +2335,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": -2,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 1009,
@@ -2064,7 +2355,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 3,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 12,
@@ -2082,7 +2375,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 6,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 4,
@@ -2100,7 +2395,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 6,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 11,
@@ -2118,7 +2415,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 3,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 1471,
@@ -2136,7 +2435,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 6,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 466,
@@ -2154,7 +2455,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 2,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 3,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 14,
@@ -2172,7 +2475,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 1,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 446,
@@ -2190,7 +2495,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 1,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 1042,
@@ -2208,7 +2515,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 1,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 471,
@@ -2226,7 +2535,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 1,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 35,
@@ -2244,7 +2555,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 1,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 33,
@@ -2262,7 +2575,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 1,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 18,
@@ -2280,7 +2595,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 1,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 456,
@@ -2298,7 +2615,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 1,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 3,
@@ -2316,7 +2635,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 1,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         }
       ],
       "unresolved_player_count": 0,
@@ -2345,7 +2666,9 @@
           "goals_conceded_points_team_based": -1,
           "bonus_candidate": 0,
           "total_points_candidate": 1,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 3,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 356,
@@ -2363,7 +2686,9 @@
           "goals_conceded_points_team_based": -1,
           "bonus_candidate": 0,
           "total_points_candidate": 1,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 3,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 367,
@@ -2381,7 +2706,9 @@
           "goals_conceded_points_team_based": -1,
           "bonus_candidate": 0,
           "total_points_candidate": 1,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 3,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 365,
@@ -2399,7 +2726,9 @@
           "goals_conceded_points_team_based": -1,
           "bonus_candidate": 0,
           "total_points_candidate": 1,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 3,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 379,
@@ -2417,7 +2746,9 @@
           "goals_conceded_points_team_based": -1,
           "bonus_candidate": 0,
           "total_points_candidate": 1,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 3,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 373,
@@ -2435,7 +2766,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 2,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 1,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 359,
@@ -2453,7 +2786,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 2,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 1,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 351,
@@ -2471,7 +2806,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 2,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 3,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 352,
@@ -2489,7 +2826,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 2,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 1,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 378,
@@ -2507,7 +2846,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 2,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 1,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 353,
@@ -2525,7 +2866,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 2,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 3,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 166,
@@ -2543,7 +2886,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 2,
           "total_points_candidate": 9,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 170,
@@ -2561,7 +2906,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 1,
           "total_points_candidate": 7,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 172,
@@ -2579,7 +2926,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 1,
           "total_points_candidate": 7,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 180,
@@ -2597,7 +2946,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 1,
           "total_points_candidate": 7,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 182,
@@ -2615,7 +2966,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 1,
           "total_points_candidate": 7,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 185,
@@ -2633,7 +2986,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 3,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 186,
@@ -2651,7 +3006,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 3,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 176,
@@ -2669,7 +3026,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 3,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 163,
@@ -2687,7 +3046,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 1,
           "total_points_candidate": 7,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 169,
@@ -2705,7 +3066,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 1,
           "total_points_candidate": 7,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 171,
@@ -2723,7 +3086,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 2,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 199,
@@ -2741,7 +3106,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 1,
           "total_points_candidate": 7,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 1109,
@@ -2759,7 +3126,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 1,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 2,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 364,
@@ -2777,7 +3146,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 1,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 2,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 1538,
@@ -2795,7 +3166,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 1,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 2,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 178,
@@ -2813,7 +3186,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 3,
           "total_points_candidate": 12,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 590,
@@ -2831,7 +3206,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 4,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 1544,
@@ -2849,7 +3226,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 1,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 2,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 1240,
@@ -2867,7 +3246,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 1,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 175,
@@ -2885,7 +3266,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 1,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         }
       ],
       "unresolved_player_count": 0,
@@ -2914,7 +3297,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 2,
           "total_points_candidate": 8,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 214,
@@ -2932,7 +3317,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 2,
           "total_points_candidate": 8,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 221,
@@ -2950,7 +3337,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 2,
           "total_points_candidate": 8,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 222,
@@ -2968,7 +3357,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 1,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 597,
@@ -2986,7 +3377,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 2,
           "total_points_candidate": 8,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 213,
@@ -3004,7 +3397,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 3,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 202,
@@ -3022,7 +3417,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 3,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 205,
@@ -3040,7 +3437,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 3,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 679,
@@ -3058,7 +3457,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 3,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 220,
@@ -3076,7 +3477,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 3,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 210,
@@ -3094,7 +3497,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 2,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 380,
@@ -3112,7 +3517,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 3,
           "total_points_candidate": 10,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 402,
@@ -3130,7 +3537,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 2,
           "total_points_candidate": 8,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 390,
@@ -3148,7 +3557,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 1,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 396,
@@ -3166,7 +3577,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 2,
           "total_points_candidate": 8,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 391,
@@ -3184,7 +3597,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 2,
           "total_points_candidate": 8,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 407,
@@ -3202,7 +3617,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 3,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 387,
@@ -3220,7 +3637,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 3,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 388,
@@ -3238,7 +3657,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 3,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 404,
@@ -3256,7 +3677,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 2,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 385,
@@ -3274,7 +3697,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 3,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 412,
@@ -3292,7 +3717,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 2,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 217,
@@ -3310,7 +3737,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 2,
           "total_points_candidate": 8,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 397,
@@ -3328,7 +3757,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 1,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 409,
@@ -3346,7 +3777,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 1,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 400,
@@ -3364,7 +3797,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 1,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 215,
@@ -3382,7 +3817,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 1,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 384,
@@ -3400,7 +3837,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 1,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 382,
@@ -3418,7 +3857,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 1,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 206,
@@ -3436,7 +3877,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 1,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 1372,
@@ -3454,7 +3897,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 1,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         }
       ],
       "unresolved_player_count": 0,
@@ -3483,7 +3928,9 @@
           "goals_conceded_points_team_based": -1,
           "bonus_candidate": 0,
           "total_points_candidate": 2,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 3,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 572,
@@ -3501,7 +3948,9 @@
           "goals_conceded_points_team_based": -1,
           "bonus_candidate": 0,
           "total_points_candidate": 1,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 3,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 550,
@@ -3519,7 +3968,9 @@
           "goals_conceded_points_team_based": -1,
           "bonus_candidate": 0,
           "total_points_candidate": 0,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 3,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 1539,
@@ -3537,7 +3988,9 @@
           "goals_conceded_points_team_based": -1,
           "bonus_candidate": 0,
           "total_points_candidate": 1,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 3,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 564,
@@ -3555,7 +4008,9 @@
           "goals_conceded_points_team_based": -1,
           "bonus_candidate": 0,
           "total_points_candidate": 1,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 3,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 576,
@@ -3573,7 +4028,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 1,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 1,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 567,
@@ -3591,7 +4048,9 @@
           "goals_conceded_points_team_based": -1,
           "bonus_candidate": 0,
           "total_points_candidate": 1,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 3,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 559,
@@ -3609,7 +4068,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 2,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 2,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 568,
@@ -3627,7 +4088,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 2,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 3,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 573,
@@ -3645,7 +4108,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 2,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 3,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 536,
@@ -3663,7 +4128,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 1,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 1,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 234,
@@ -3681,7 +4148,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 6,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 249,
@@ -3699,7 +4168,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 6,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 187,
@@ -3717,7 +4188,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 6,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 239,
@@ -3735,7 +4208,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 6,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 235,
@@ -3753,7 +4228,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 2,
           "total_points_candidate": 11,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 389,
@@ -3771,7 +4248,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 1,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 611,
@@ -3789,7 +4268,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 5,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 247,
@@ -3807,7 +4288,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 6,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 193,
@@ -3825,7 +4308,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 1,
           "total_points_candidate": 9,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 608,
@@ -3843,7 +4328,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 3,
           "total_points_candidate": 13,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 237,
@@ -3861,7 +4348,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 2,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 557,
@@ -3879,7 +4368,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 1,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 2,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 248,
@@ -3897,7 +4388,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 1,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 561,
@@ -3915,7 +4408,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 1,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 2,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 578,
@@ -3933,7 +4428,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 1,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 1,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 585,
@@ -3951,7 +4448,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 6,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 1609,
@@ -3970,7 +4469,9 @@
           "bonus_candidate": 0,
           "total_points_candidate": 1,
           "confidence": "provisional_user_confirmed_player",
-          "source_for_position": "https://www.gaziantepfk.org/haberler/mac-sonucu-gaziantep-fk-0-3-corum-fk"
+          "source_for_position": "https://www.gaziantepfk.org/haberler/mac-sonucu-gaziantep-fk-0-3-corum-fk",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 844,
@@ -3988,7 +4489,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 0,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 1307,
@@ -4006,7 +4509,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 1,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 250,
@@ -4024,7 +4529,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 1,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 1406,
@@ -4042,7 +4549,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 0,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         }
       ],
       "unresolved_player_count": 0,
@@ -4071,7 +4580,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 3,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 1,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 277,
@@ -4089,7 +4600,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 2,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 1,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 271,
@@ -4107,7 +4620,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 2,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 1,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 282,
@@ -4125,7 +4640,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 2,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 1,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 259,
@@ -4143,7 +4660,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 2,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 1,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 285,
@@ -4161,7 +4680,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 2,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 1,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 279,
@@ -4179,7 +4700,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 4,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 1,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 1209,
@@ -4197,7 +4720,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 2,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 1,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 281,
@@ -4215,7 +4740,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 3,
           "total_points_candidate": 10,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 1,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 273,
@@ -4233,7 +4760,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 1,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 1,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 593,
@@ -4251,7 +4780,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 1,
           "total_points_candidate": 7,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 1,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 130,
@@ -4269,7 +4800,9 @@
           "goals_conceded_points_team_based": -1,
           "bonus_candidate": 0,
           "total_points_candidate": 1,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 2,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 1610,
@@ -4288,7 +4821,9 @@
           "bonus_candidate": 0,
           "total_points_candidate": 1,
           "confidence": "provisional_user_confirmed_player",
-          "source_for_position": "https://www.fotmob.com/tr/matches/kocaelispor-vs-besiktas/155i30"
+          "source_for_position": "https://www.fotmob.com/tr/matches/kocaelispor-vs-besiktas/155i30",
+          "conceded_while_on_pitch": 2,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 111,
@@ -4306,7 +4841,9 @@
           "goals_conceded_points_team_based": -1,
           "bonus_candidate": 0,
           "total_points_candidate": 1,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 2,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 131,
@@ -4324,7 +4861,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 3,
           "total_points_candidate": 10,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 2,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 113,
@@ -4342,7 +4881,9 @@
           "goals_conceded_points_team_based": -1,
           "bonus_candidate": 0,
           "total_points_candidate": 1,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 2,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 745,
@@ -4360,7 +4901,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 2,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 2,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 125,
@@ -4378,7 +4921,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 2,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 2,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 212,
@@ -4396,7 +4941,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 2,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 2,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 109,
@@ -4414,7 +4961,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 1,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 2,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 119,
@@ -4432,7 +4981,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 2,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 2,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 108,
@@ -4450,7 +5001,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 2,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 2,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 278,
@@ -4468,7 +5021,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 1,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 127,
@@ -4486,7 +5041,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 1,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 1373,
@@ -4504,7 +5061,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 1,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 270,
@@ -4522,7 +5081,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 1,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 1208,
@@ -4540,7 +5101,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 1,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 261,
@@ -4558,7 +5121,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 1,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 269,
@@ -4576,7 +5141,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 1,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 258,
@@ -4594,7 +5161,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 1,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 117,
@@ -4612,7 +5181,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 1,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 112,
@@ -4620,17 +5191,19 @@
           "team": "Kocaelispor",
           "position": "DEF",
           "minutes_bucket": "1_to_59",
-          "base_points_candidate": 0,
+          "base_points_candidate": 1,
           "appearance": 1,
           "goals_points": 0,
           "assists_points": 0,
           "cards_points": 0,
           "save_points": 0,
           "clean_sheet_points": 0,
-          "goals_conceded_points_team_based": -1,
+          "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
-          "total_points_candidate": 0,
-          "confidence": "provisional"
+          "total_points_candidate": 1,
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         }
       ],
       "unresolved_player_count": 0,
@@ -4659,7 +5232,9 @@
           "goals_conceded_points_team_based": -2,
           "bonus_candidate": 0,
           "total_points_candidate": 1,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 4,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 481,
@@ -4677,7 +5252,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 2,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 4,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 355,
@@ -4695,7 +5272,9 @@
           "goals_conceded_points_team_based": -2,
           "bonus_candidate": 0,
           "total_points_candidate": -1,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 4,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 493,
@@ -4713,7 +5292,9 @@
           "goals_conceded_points_team_based": -2,
           "bonus_candidate": 0,
           "total_points_candidate": 0,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 4,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 477,
@@ -4731,7 +5312,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 0,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 3,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 943,
@@ -4749,7 +5332,9 @@
           "goals_conceded_points_team_based": -2,
           "bonus_candidate": 0,
           "total_points_candidate": 0,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 4,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 483,
@@ -4767,7 +5352,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 2,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 4,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 500,
@@ -4785,7 +5372,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 2,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 4,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 484,
@@ -4803,7 +5392,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 1,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 3,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 495,
@@ -4821,7 +5412,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": -2,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 82,
@@ -4839,7 +5432,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 1,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 3,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 309,
@@ -4857,7 +5452,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 1,
           "total_points_candidate": 8,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 288,
@@ -4875,7 +5472,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 6,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 301,
@@ -4893,7 +5492,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 6,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 291,
@@ -4911,7 +5512,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 6,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 299,
@@ -4929,7 +5532,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 6,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 304,
@@ -4947,7 +5552,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 3,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 300,
@@ -4965,7 +5572,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 3,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 811,
@@ -4983,7 +5592,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 2,
           "total_points_candidate": 11,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 289,
@@ -5001,7 +5612,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 2,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 303,
@@ -5019,7 +5632,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 1,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 295,
@@ -5037,7 +5652,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 5,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 310,
@@ -5055,7 +5672,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 3,
           "total_points_candidate": 16,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 475,
@@ -5073,7 +5692,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 1,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 1,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 486,
@@ -5091,7 +5712,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 1,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 1,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 491,
@@ -5099,17 +5722,19 @@
           "team": "Eyüpspor",
           "position": "DEF",
           "minutes_bucket": "1_to_59",
-          "base_points_candidate": -1,
+          "base_points_candidate": 1,
           "appearance": 1,
           "goals_points": 0,
           "assists_points": 0,
           "cards_points": 0,
           "save_points": 0,
           "clean_sheet_points": 0,
-          "goals_conceded_points_team_based": -2,
+          "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
-          "total_points_candidate": -1,
-          "confidence": "provisional"
+          "total_points_candidate": 1,
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 1,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 314,
@@ -5127,7 +5752,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 1,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 503,
@@ -5145,7 +5772,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 1,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 479,
@@ -5163,7 +5792,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 1,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 308,
@@ -5181,7 +5812,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 1,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 313,
@@ -5199,7 +5832,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 1,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         },
         {
           "player_id": 1542,
@@ -5217,7 +5852,9 @@
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
           "total_points_candidate": 1,
-          "confidence": "provisional"
+          "confidence": "provisional",
+          "conceded_while_on_pitch": 0,
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
         }
       ],
       "unresolved_player_count": 0,
@@ -5234,6 +5871,7 @@
     "No live database writes or MH8 promotion.",
     "Seven reserve/starting players absent from scout_players were assigned FotMob/club-supported position for bonus-rank calculations; the player_id remains null and cannot be imported as a canonical player without roster insertion.",
     "All 283 played players now have candidate base and tie-rank bonus; scores are NOT final and have unverified special events and official QA.",
-    "Seven previously unmatched player records inserted into Supabase scout_players with user-confirmed names, teams and price 4.00; GW7 scout_player_prices rows inserted, IDs 1604-1610."
+    "Seven previously unmatched player records inserted into Supabase scout_players with user-confirmed names, teams and price 4.00; GW7 scout_player_prices rows inserted, IDs 1604-1610.",
+    "Team-wide conceded debit corrected to **only goals occurring while each GK/DEF was on pitch**; 11 base-point corrections, source goal-clock records recorded in gw7-goal-timeline-2026-10-13.json."
   ]
 }
