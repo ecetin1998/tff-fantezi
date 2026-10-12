@@ -165,5 +165,6 @@ assert.match(publishedWeekSmoke,/MH\$\{EXPECTED_GAMEWEEK\} xFP lideri/,'Producti
 assert.match(publishedWeekSmoke,/\.gameweek/,'Production smoke must validate the public JSON week.')
 assert.match(productionDeploy,/Verify site displays current gameweek/,'Cloudflare deploy must fail if site is still showing the prior MH.')
 assert.match(productionDeploy,/workflow_dispatch:/,'Production deployment retains an explicit manual GitHub Actions trigger.')
+assert.doesNotMatch(productionDeploy,/issue_comment:/,'Cloudflare production deployment cannot be triggered by issue comments after the one-time MH8 repair.')
 
 console.log('weekly lifecycle contract passed')
