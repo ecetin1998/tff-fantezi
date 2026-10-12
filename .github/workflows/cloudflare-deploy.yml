@@ -12,7 +12,6 @@ on:
 
 permissions:
   contents: read
-  id-token: write
 
 concurrency:
   group: cloudflare-production
@@ -77,24 +76,14 @@ jobs:
           exit 1
       - name: Production smoke
         run: SKIP_CDN_CHECK=1 bash scripts/smoke.sh
-      - name: Read verified live model week
+      - name: Read published model week from Supabase (RLS-controlled)
         id: current_run
         shell: bash
-        env:
-          FUNCTIONS_URL: https://nnoagjayvrwyjtizhnfz.supabase.co/functions/v1
         run: |
           set -euo pipefail
-          response="$(curl --fail-with-body --silent --show-error \
-            -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
-            "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=tff-fantezi-scout")"
-          token="$(printf '%s' "$response" | jq -er '.value')"
-          echo "::add-mask::$token"
-          response="$(curl --fail-with-body --show-error --silent --max-time 40 \
-            -H "Authorization: Bearer $token" \
-            -H 'Content-Type: application/json' \
-            --data '{"action":"status"}' "$FUNCTIONS_URL/weekly-model-lifecycle")"
-          printf '%s' "$response" | jq -e '.ok == true and .current_gameweek >= 1 and .current_run_id != null'
-          echo "gameweek=$(printf '%s' "$response" | jq -er '.current_gameweek')" >> "$GITHUB_OUTPUT"
+          gameweek="$(node scripts/read-current-model-week.mjs)"
+          test "$gameweek" -ge 1
+          echo "gameweek=$gameweek" >> "$GITHUB_OUTPUT"
       - name: Verify site displays current gameweek (not only DB)
         env:
           EXPECTED_GAMEWEEK: ${{ steps.current_run.outputs.gameweek }}
