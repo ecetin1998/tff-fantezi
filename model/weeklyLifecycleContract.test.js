@@ -128,4 +128,12 @@ assert.match(redQa,/0\.5 \* greatest\(coalesce\(p\.x_minutes,0\),0\)/,'Red-card 
 assert.match(redQa,/minute_sum > 990\.25\*fixture_count/,'Excess scheduled minutes must remain forbidden.')
 assert.match(redQa,/scout_run_qa/,'Migration must preserve canonical model QA RPC.')
 
+assert.match(worker,/targetSuspensionFixtures/,'MH rollover must derive suspension fixture labels from target match predictions.')
+assert.match(worker,/av\.availability_type==="suspensions"/,'Only sourced suspension metadata should be rebound to the target fixture.')
+const defenderRoleQa=read('supabase/migrations/20261013015000_role_aware_defender_scoring_qa.sql')
+assert.match(defenderRoleQa,/coalesce\(pa\.primary_role,'DEF_UNKNOWN'\)=coalesce\(pb\.primary_role,'DEF_UNKNOWN'\)/,
+  'Defender parity must compare equivalent sourced CB/FB/WB roles, not fundamentally different positions.')
+assert.match(defenderRoleQa,/gk_captain/,'Existing GK captain safety gate remains active.')
+assert.match(defenderRoleQa,/xi_over_1/,'Existing XI bounds gate remains active.')
+
 console.log('weekly lifecycle contract passed')
