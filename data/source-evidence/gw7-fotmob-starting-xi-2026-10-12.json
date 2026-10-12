@@ -1,0 +1,282 @@
+{
+  "season": "2026-27",
+  "gameweek": 7,
+  "type": "starting_XIs_source_evidence_not_final_fantasy_score",
+  "source": "FotMob match full-time lineups; Gaziantep additionally confirmed via club match report",
+  "matches": [
+    {
+      "match_id": 317838,
+      "source_url": "https://www.fotmob.com/tr/matches/gaziantep-fk-vs-corum-fk/tzrbrsj",
+      "home_starting_xi": [
+        "Kacper Tobiasz",
+        "Luis Pérez",
+        "Myenty Abena",
+        "Abakar Sylla",
+        "Kerim Çalhanoğlu",
+        "Ogün Özçiçek",
+        "Deian Sorescu",
+        "Victor Gidado",
+        "Alexandru Maxim",
+        "Kacper Kozłowski",
+        "Halil Dervişoğlu"
+      ],
+      "away_starting_xi": [
+        "Marcos Felipe",
+        "Alexandre Penetra",
+        "Çağlar Söyüncü",
+        "Hrvoje Smolčić",
+        "Gökhan Sazdağı",
+        "Berat Özdemir",
+        "Mohamed Diomandé",
+        "Andrei Borza",
+        "Cengiz Ünder",
+        "Alexandros Kyziridis",
+        "Jesús Ramírez"
+      ]
+    },
+    {
+      "match_id": 317839,
+      "source_url": "https://www.fotmob.com/matches/goztepe-vs-eyupspor/czuaa",
+      "home_starting_xi": [
+        "Horațiu Moldovan",
+        "Chandrel Massanga",
+        "Seyfettin Anıl Yaşar",
+        "Zak Jules",
+        "Konrad Michalak",
+        "Simone Giordano",
+        "David Costa",
+        "Taşkın İlter",
+        "Mete Kaan Demir",
+        "Ahmed Abdullahi",
+        "Yusuf Barası"
+      ],
+      "away_starting_xi": [
+        "Arda Özcimen",
+        "Taha Altıkardeş",
+        "Noah Sonko Sundberg",
+        "Malcom Bokélé",
+        "Arda Kurtulan",
+        "Rhaldney",
+        "Novatus Miroshi",
+        "Richard Akonnor",
+        "Alexis Antunes",
+        "Janderson",
+        "Juan"
+      ]
+    },
+    {
+      "match_id": 317840,
+      "source_url": "https://www.fotmob.com/matches/alanyaspor-vs-erzurumspor-fk/it2ebc7",
+      "home_starting_xi": [
+        "Paulo Victor",
+        "Nuno Lima",
+        "Fidan Aliti",
+        "Fatih Aksoy",
+        "Florent Hadërgjonaj",
+        "Gaïus Makouta",
+        "Baran Gezek",
+        "Ruan",
+        "İbrahim Kaya",
+        "Iván Cédric",
+        "Ui-Jo Hwang"
+      ],
+      "away_starting_xi": [
+        "Ertuğrul Taşkıran",
+        "Amar Gërxhaliu",
+        "Mustafa Yumlu",
+        "Nihad Mujakić",
+        "Orhan Ovacıklı",
+        "Guram Giorbelidze",
+        "Brandon Baiye",
+        "Elisha Owusu",
+        "Martín Rodríguez",
+        "Eren Tozlu",
+        "Miguel Cardoso"
+      ]
+    },
+    {
+      "match_id": 317841,
+      "source_url": "https://www.fotmob.com/matches/rizespor-vs-fenerbahce/z4go2",
+      "home_starting_xi": [
+        "Yahia Fofana",
+        "Mithat Pala",
+        "Attila Mocsi",
+        "Modibo Sagnan",
+        "Zakaria Ariss",
+        "Taylan Antalyalı",
+        "Adedire Awokoya Mebude",
+        "Ibrahim Olawoyin",
+        "Qazim Laçi",
+        "Ahmed Kutucu",
+        "Ali Sowe"
+      ],
+      "away_starting_xi": [
+        "Ederson",
+        "Nélson Semedo",
+        "Milan Škriniar",
+        "Nathan Aké",
+        "Archie Brown",
+        "N'Golo Kanté",
+        "Mattéo Guendouzi",
+        "Mason Greenwood",
+        "Marco Asensio",
+        "Kerem Aktürkoğlu",
+        "Vedat Muriqi"
+      ]
+    },
+    {
+      "match_id": 317842,
+      "source_url": "https://www.fotmob.com/en-GB/matches/genclerbirligi-vs-amed-sportif/2hycm1l",
+      "home_starting_xi": [
+        "İrfan Eğribayat",
+        "Metehan Baltacı",
+        "Dimitrios Goutas",
+        "Thalisson",
+        "Fıratcan Üzüm",
+        "Rafael Luís",
+        "Ousmane Diabate",
+        "Abdurrahim Dursun",
+        "Tiago Gouveia",
+        "Franco Tongya",
+        "Pedro Mendes"
+      ],
+      "away_starting_xi": [
+        "Alban Lafont",
+        "Ermal Krasniqi",
+        "Lumbardh Dellova",
+        "David Bates",
+        "Umut Meraş",
+        "Rayan Raveloson",
+        "Furkan Soyalp",
+        "Samuel Ballet",
+        "Dia Saba",
+        "Mohamed Khalil",
+        "Gift Orban"
+      ]
+    },
+    {
+      "match_id": 317843,
+      "source_url": "https://www.fotmob.com/en-GB/matches/basaksehir-vs-konyaspor/x687s",
+      "home_starting_xi": [
+        "Bahadır Han Güngördü",
+        "Uğurcan Yazğılı",
+        "Rayyan Baniya",
+        "Adil Demirbağ",
+        "Arthur Masuaku",
+        "Marko Jevtović",
+        "Melih İbrahimoğlu",
+        "Deniz Türüç",
+        "Rajmund Tóth",
+        "Diogo Gonçalves",
+        "Jackson Muleka"
+      ],
+      "away_starting_xi": [
+        "Muhammed Şengezer",
+        "Michał Karbownik",
+        "Emin Bayram",
+        "Ousseynou Ba",
+        "Saba Kharebashvili",
+        "Olivier Kemen",
+        "Umut Güneş",
+        "Andreas Skov Olsen",
+        "Eldor Shomurodov",
+        "Ivan Brnić",
+        "Bertuğ Yıldırım"
+      ]
+    },
+    {
+      "match_id": 317844,
+      "source_url": "https://www.fotmob.com/en-GB/matches/kasmpasa-vs-galatasaray/1guad0",
+      "home_starting_xi": [
+        "Uğurcan Çakır",
+        "Barış Alper Yılmaz",
+        "Davinson Sánchez",
+        "Abdülkerim Bardakcı",
+        "Ismail Jakobs",
+        "Lucas Torreira",
+        "Gabriel Sara",
+        "Yunus Akgün",
+        "Aleksey Batrakov",
+        "Rafael Leão",
+        "Deniz Gül"
+      ],
+      "away_starting_xi": [
+        "Andreas Gianniotis",
+        "Cláudio Winck",
+        "Kevin Mouanga",
+        "Matei Cristian Ilie",
+        "Ayberk Karapo",
+        "Andri Fannar Baldursson",
+        "Kerem Demirbay",
+        "Güven Yalçın",
+        "Elson Mendes Da Silva",
+        "Ali Kol",
+        "Adrian Benedyczak"
+      ]
+    },
+    {
+      "match_id": 317845,
+      "source_url": "https://www.fotmob.com/tr/matches/kocaelispor-vs-besiktas/155i30",
+      "home_starting_xi": [
+        "Alexander Nübel",
+        "Amir Murillo",
+        "Tiago Djaló",
+        "Emirhan Topçu",
+        "Rıdvan Yılmaz",
+        "Salih Özcan",
+        "Václav Černý",
+        "Fabio Miretti",
+        "Orkun Kökçü",
+        "Leandro Trossard",
+        "Dušan Vlahović"
+      ],
+      "away_starting_xi": [
+        "Serhat Öztasdelen",
+        "Onur Öztonga",
+        "Emir Ortakaya",
+        "Show",
+        "Uğur Yıldız",
+        "Gonçalo Sousa",
+        "Mahamadou Susoho",
+        "Berkan Kutlu",
+        "Tayfur Bingöl",
+        "Metehan Altunbaş",
+        "Daniel Agyei"
+      ]
+    },
+    {
+      "match_id": 317846,
+      "source_url": "https://www.fotmob.com/matches/samsunspor-vs-trabzonspor/358aj5",
+      "home_starting_xi": [
+        "Okan Kocuk",
+        "Josafat Mendes",
+        "Yunus Emre Çift",
+        "Gabriele Guarino",
+        "Logi Tómasson",
+        "Celil Yüksel",
+        "Elliot Watt",
+        "Tanguy Coulibaly",
+        "Anto Sekongo",
+        "Emre Kılınç",
+        "Mohamed Bayo"
+      ],
+      "away_starting_xi": [
+        "André Onana",
+        "Wagner Pina",
+        "Chibuike Nwaiwu",
+        "Stefan Savić",
+        "Mustafa Eskihellaç",
+        "Melih Kabasakal",
+        "Fabinho",
+        "Mohamed Salah",
+        "Ernest Muçi",
+        "Aral Şimşir",
+        "Franculino"
+      ]
+    }
+  ],
+  "warnings": [
+    "Starting XIs alone are not final minutes played; match substitutions and dismissal events required.",
+    "Match player identities and spelling variants must be resolved against DB player IDs prior to writes."
+  ]
+}
