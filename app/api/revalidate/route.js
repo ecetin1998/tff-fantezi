@@ -1,4 +1,4 @@
-import {revalidateTag} from 'next/cache'
+import {revalidatePath,revalidateTag} from 'next/cache'
 import {timingSafeEqual} from 'node:crypto'
 
 export const dynamic='force-dynamic'
@@ -14,5 +14,12 @@ export async function POST(request){
   const supplied=String(request.headers.get('x-revalidate-secret')||'')
   if(!equalSecret(expected,supplied))return Response.json({ok:false},{status:401})
   revalidateTag('scout-run','max')
-  return Response.json({ok:true,tag:'scout-run'})
+  // A model promotion changes both the run-scoped Data Cache and rendered
+  // Next/Cloudflare ISR HTML. Invalidating only the tag previously left the
+  // live homepage / public pages displaying MH7 while the JSON API served MH8.
+  const paths=['/','/players','/matches','/squads','/squad','/availability','/roles','/points','/teams','/backtest','/model-health']
+  for(const path of paths)revalidatePath(path)
+  revalidatePath('/players/[id]','page')
+  revalidatePath('/teams/[id]','page')
+  return Response.json({ok:true,tag:'scout-run',paths_revalidated:paths.length+2})
 }
