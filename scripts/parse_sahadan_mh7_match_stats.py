@@ -31,24 +31,50 @@ NUMERIC = (
     "successful_crosses", "takeons", "successful_takeons",
 )
 
+# Provider temporarily returns 502 responses to the same match page.
+# Retry one failed fixture without discarding earlier verified match results.
+# The fallback uses the same Opta match ID on another provider domain.
+MAX_ATTEMPTS = 8
+
+def source_candidates(url: str) -> list[str]:
+    candidates = [
+        url,
+        url.replace("https://www.sahadan.com/", "https://www.mackolik.com/"),
+        url.replace("https://www.sahadan.com/", "https://sahadan.com/"),
+    ]
+    return list(dict.fromkeys(candidates))
+
 def read_match(match_id: int, url: str) -> list[dict]:
-    for attempt in range(4):
-        try:
-            rows = parse(url, fetch(url))
-            if not rows:
-                raise RuntimeError("zero advanced action records: " + url)
-            sides = {str(row.get("source_team_id")) for row in rows if row.get("source_team_id")}
-            if len(sides) != 2:
-                raise RuntimeError(f"expected two team sources, got {sorted(sides)}: {url}")
-            for row in rows:
-                row["source_match_id"] = match_id
-            print(f"MH7 {match_id} actions={len(rows)} teams=2", file=sys.stderr)
-            return rows
-        except Exception as err:
-            if attempt == 3:
-                raise RuntimeError(f"GW7 provider extraction failed at {match_id}: {err}") from err
-            time.sleep(2 ** attempt + random.uniform(0, 1))
-    raise AssertionError("unreachable")
+    candidates = source_candidates(url)
+    errors: list[str] = []
+    for attempt in range(MAX_ATTEMPTS):
+        # Rotate sources on later attempts but keep the same canonical match ID.
+        order = candidates[attempt % len(candidates):] + candidates[:attempt % len(candidates)]
+        for provider_url in order:
+            try:
+                rows = parse(provider_url, fetch(provider_url))
+                if not rows:
+                    raise RuntimeError("zero advanced action records")
+                sides = {str(row.get("source_team_id")) for row in rows if row.get("source_team_id")}
+                if len(sides) != 2:
+                    raise RuntimeError(f"expected 2 source teams, got {sorted(sides)}")
+                for row in rows:
+                    row["source_match_id"] = match_id
+                print(f"MH7 {match_id} actions={len(rows)} teams=2 provider={provider_url.split('/')[2]} attempt={attempt+1}", file=sys.stderr)
+                return rows
+            except Exception as err:
+                # Error provenance is logged; no unverified zeros or backfilled stats.
+                errors.append(f"{provider_url.split('/')[2]}: {type(err).__name__}: {err}")
+        # Long, jittered backoff avoids re-triggering a flaky CDN on every
+        # follow-up attempt. Budget is bounded per match and by job timeout.
+        if attempt < MAX_ATTEMPTS - 1:
+            delay = min(32.0, 2.0 ** (attempt+1)) + random.uniform(1, 4)
+            print(f"MH7 {match_id}: provider retries {attempt+1}/{MAX_ATTEMPTS} failed; sleep={delay:.1f}s", file=sys.stderr)
+            time.sleep(delay)
+    raise RuntimeError(
+        f"GW7 source could not be verified for match {match_id} after {MAX_ATTEMPTS} attempts. "
+        + " | ".join(errors[-6:])
+    )
 
 def main() -> None:
     if len({mid for mid, _ in MATCH_URLS}) != 9:
@@ -56,6 +82,8 @@ def main() -> None:
     combined: list[dict] = []
     for mid, url in MATCH_URLS:
         combined.extend(read_match(mid, url))
+        # Limit the burst of consecutive requests against the provider CDN.
+        time.sleep(3.0 + random.uniform(0, 2))
 
     # One club plays one match per gameweek. Merge the different observed
     # action types into a single row per provider player+team.
