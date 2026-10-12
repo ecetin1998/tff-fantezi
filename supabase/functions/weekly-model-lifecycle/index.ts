@@ -260,6 +260,7 @@ async function prepare(sb:any,current:any,status:any,body:any={}){
     const id=Number(w.player_id);if(!recent.has(id))recent.set(id,[]);recent.get(id)!.push(w)
   }
   const teamFixtures=new Map<number,any[]>()
+  const targetSuspensionFixtures=new Map<number,string>()
   const matchInputs:any[]=[],matchPredictions:any[]=[]
   for(const fx of fixturesQ.data||[]){
     const hs=teamStats.get(Number(fx.home_team_id)),as=teamStats.get(Number(fx.away_team_id))
@@ -276,6 +277,23 @@ async function prepare(sb:any,current:any,status:any,body:any={}){
       home_xg:hl,away_xg:al,...prob,method:"weekly-auto-v1",
       model_note:"Geçen hafta kapanışından sonra güncel takım xG/xGA ve gerçekleşen bitiricilik/savunma profiliyle üretildi."
     })
+    // A suspension source row is sourced against the *current* week.
+    // Preserve the ban, but display the candidate week's actual opponent.
+    const localDateParts=new Intl.DateTimeFormat("en-GB",{
+      timeZone:"Europe/Istanbul",day:"2-digit",month:"2-digit",year:"numeric"
+    }).formatToParts(new Date(fx.kickoff_at))
+    const part=(key:string)=>localDateParts.find((p:any)=>p.type===key)?.value||""
+    const localDate=part("day")+"."+part("month")+"."+part("year")
+    const fixtureLabel=localDate+" • "+
+      (teamNames.get(Number(fx.home_team_id))||"—")+" - "+
+      (teamNames.get(Number(fx.away_team_id))||"—")
+    // If a future double gameweek has two matches, the earliest fixture is
+    // the one a one-match suspension applies to.
+    if(!targetSuspensionFixtures.has(Number(fx.home_team_id)))
+      targetSuspensionFixtures.set(Number(fx.home_team_id),fixtureLabel)
+    if(!targetSuspensionFixtures.has(Number(fx.away_team_id)))
+      targetSuspensionFixtures.set(Number(fx.away_team_id),fixtureLabel)
+
     const h={opponent:teamNames.get(Number(fx.away_team_id))||"—",venue:"HOME"}
     const a={opponent:teamNames.get(Number(fx.home_team_id))||"—",venue:"AWAY"}
     teamFixtures.set(Number(fx.home_team_id),[...(teamFixtures.get(Number(fx.home_team_id))||[]),h])
@@ -339,7 +357,12 @@ async function prepare(sb:any,current:any,status:any,body:any={}){
     if(!weightsByTeam.has(Number(p.team_id)))weightsByTeam.set(Number(p.team_id),[])
     weightsByTeam.get(Number(p.team_id))!.push({id,goal:goalWeight,assist:assistWeight,available:availability})
     const {run_id:_,...copy}=av
-    availabilityRows.push({...copy,run_id:runId})
+    availabilityRows.push({
+      ...copy,run_id:runId,
+      ...(av.availability_type==="suspensions"
+        ? {suspension_fixture:targetSuspensionFixtures.get(Number(p.team_id))||null}
+        : {}),
+    })
   }
   const roleRows=roleDraft.map(x=>{
     const peers=(weightsByTeam.get(x.team_id)||[]).filter(z=>z.available>0)
