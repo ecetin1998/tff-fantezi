@@ -1,7 +1,8 @@
 name: Cloudflare Workers deploy
 
-# Production releases must be initiated manually. The temporary issue-comment
-# repair trigger was removed after the MH8 site was successfully updated.
+# Production releases must be explicitly owner-initiated. This temporary
+# exact-command path deploys the remaining MH8 public-page fix and is removed
+# after the verified release.
 on:
   workflow_dispatch:
   # Temporary, explicitly owner-authored manual release command for MH8 HTML
