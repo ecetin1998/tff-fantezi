@@ -6,7 +6,7 @@ import {applyScoutFilters,parseScoutQuery,SCOUT_QUERY_KEYS} from '@/lib/scoutApi
 import {buildScoutSummary,SCOUT_FEED_SCHEMA_VERSION,SCOUT_FEED_SECTIONS,scoutFeedMatchRow} from '@/lib/scoutFeed'
 import {
   getAvailability,getBacktestOverview,getBacktestSummary,getMatches,getPlayersWithProjection,
-  getRecommendation,getRoleSignals,getWeeklyPoints
+  getRecommendation,getRoleSignals,getWeeklyPoints,getCurrentRun
 } from '@/lib/data'
 
 export const dynamic='force-dynamic'
@@ -154,10 +154,10 @@ async function buildPayload(section,full){
 }
 
 const buildCached=unstable_cache(
-  async(section,team,position,limit,fieldsKey)=>applyScoutFilters(await buildPayload(section,false),{
+  async(_runId,section,team,position,limit,fieldsKey)=>applyScoutFilters(await buildPayload(section,false),{
     team:team||null,position:position||null,limit:limit||null,fields:fieldsKey?fieldsKey.split(','):[]
   }),
-  ['scout-data-v4-public'],
+  ['scout-data-v5-run-scoped'],
   {revalidate:60}
 )
 
@@ -178,8 +178,10 @@ export async function GET(request){
     }
     if(!allowed.has(requested))return reply({schema_version:SCOUT_FEED_SCHEMA_VERSION,error:'Bilinmeyen bölüm.'},400)
     const full=(requested==='performance'||requested==='roles')&&fullAuthorized(request)
-    const payload=shouldUsePublicPayloadCache(full)
-      ?await buildCached(requested,parsed.team,parsed.position,parsed.limit,parsed.fieldsKey)
+    const cachePublic=shouldUsePublicPayloadCache(full)
+    const liveRun=cachePublic?await getCurrentRun():null
+    const payload=cachePublic
+      ?await buildCached(liveRun?.id||'none',requested,parsed.team,parsed.position,parsed.limit,parsed.fieldsKey)
       :applyScoutFilters(await buildPayload(requested,true),parsed)
     const versioned=payload?.schema_version?payload:{schema_version:SCOUT_FEED_SCHEMA_VERSION,...payload}
     return reply({...versioned,served_at:new Date().toISOString()},200,{privateResponse:full,varyApiKey:requested==='performance'})
