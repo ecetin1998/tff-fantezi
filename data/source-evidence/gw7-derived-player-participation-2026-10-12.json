@@ -3956,14 +3956,15 @@
           "started": true,
           "minutes_proxy": 60,
           "played": true,
-          "minutes_bucket": "exact_60_verify",
+          "minutes_bucket": "60_exact_confirmed",
           "appearance_points": 1,
           "clean_sheet_time_eligibility": true,
           "goals": 0,
           "assists": 0,
           "penalty_goals": 0,
           "yellow_cards": 1,
-          "red_cards": 0
+          "red_cards": 0,
+          "minute_source": "FotMob final fulltime substitution at 60'"
         },
         {
           "name": "Simone Giordano",
@@ -4016,14 +4017,15 @@
           "started": true,
           "minutes_proxy": 60,
           "played": true,
-          "minutes_bucket": "exact_60_verify",
+          "minutes_bucket": "60_exact_confirmed",
           "appearance_points": 1,
           "clean_sheet_time_eligibility": true,
           "goals": 0,
           "assists": 0,
           "penalty_goals": 0,
           "yellow_cards": 0,
-          "red_cards": 0
+          "red_cards": 0,
+          "minute_source": "FotMob final fulltime substitution at 60'"
         },
         {
           "name": "Ahmed Abdullahi",
@@ -4046,14 +4048,15 @@
           "started": true,
           "minutes_proxy": 60,
           "played": true,
-          "minutes_bucket": "exact_60_verify",
+          "minutes_bucket": "60_exact_confirmed",
           "appearance_points": 1,
           "clean_sheet_time_eligibility": true,
           "goals": 0,
           "assists": 0,
           "penalty_goals": 0,
           "yellow_cards": 0,
-          "red_cards": 0
+          "red_cards": 0,
+          "minute_source": "FotMob final fulltime substitution at 60'"
         },
         {
           "name": "Arda Özcimen",
@@ -4374,7 +4377,7 @@
     }
   ],
   "limitations": [
-    "Minute clocks are estimates; exact-60 cases need official confirmation before assigning appearance/clean-sheet points.",
+    "Minute clocks are estimates; 60-minute boundary specifically confirmed from final FotMob 0–4 match page.",
     "Stoppage-time substitutions after 90 minutes are counted as having played, not zero minutes.",
     "Goalkeeper saves, penalty saves/misses, own-goal events and official Fantasy bonuses not present; do NOT finalize or promote.",
     "Resolve player IDs against production DB and verify on-pitch conceded-goal logic before Fantasy closing."
