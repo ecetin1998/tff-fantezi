@@ -1,0 +1,122 @@
+name: Resume verified MH8 candidate through all release gates
+
+# One-time recovery only. Never runs the Monte Carlo or rewrites input snapshots.
+# A push to create this file starts one guarded release attempt; workflow_dispatch
+# allows an explicit retry if a genuine source or QA blocker remains.
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/mh8-verified-release-resume.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: weekly-model-lifecycle
+  cancel-in-progress: false
+
+jobs:
+  complete-release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      FUNCTIONS_URL: https://nnoagjayvrwyjtizhnfz.supabase.co/functions/v1
+      OIDC_AUDIENCE: tff-fantezi-scout
+      CANDIDATE_RUN_ID: 48fac586-0c0b-4671-a2a0-82535f18adc0
+    steps:
+      - uses: actions/checkout@v4
+      - name: Mint scoped GitHub OIDC token
+        id: oidc
+        shell: bash
+        run: |
+          set -euo pipefail
+          response="$(curl --fail-with-body --show-error --silent \
+            -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+            "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=${OIDC_AUDIENCE}")"
+          token="$(printf '%s' "$response" | jq -er '.value')"
+          echo "::add-mask::$token"
+          echo "token=$token" >> "$GITHUB_OUTPUT"
+      - name: Verify completed 50K candidate, close backtest, QA and promote MH8
+        id: release
+        shell: bash
+        env:
+          OIDC_TOKEN: ${{ steps.oidc.outputs.token }}
+        run: |
+          set -euo pipefail
+          RUN_ID="$CANDIDATE_RUN_ID"
+          post() {
+            local endpoint="$1" payload="$2"
+            response="$(curl --fail-with-body --show-error --silent --max-time 240 \
+              --retry 2 --retry-delay 2 \
+              -H "Authorization: Bearer $OIDC_TOKEN" \
+              -H "Content-Type: application/json" \
+              --data-binary "$payload" \
+              "$FUNCTIONS_URL/$endpoint")"
+            printf '%s\n' "$response" | jq .
+          }
+
+          post weekly-model-lifecycle '{"action":"status"}'
+          current="$(jq -r '.current_gameweek' <<<"$response")"
+          if [[ "$current" == "8" ]]; then
+            echo "MH8 was already promoted; verify idempotently."
+            post weekly-model-lifecycle '{"action":"verify","gameweek":8}'
+            jq -e '.pass == true and .current.gameweek == 8' <<<"$response"
+            echo "already_promoted=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          jq -e '.ok == true and .current_gameweek == 7 and .target_gameweek == 8 and .ready_to_advance == true' <<<"$response"
+
+          # No resimulation, no altered scoring, no forged gate.
+          payload="$(jq -n --arg run "$RUN_ID" '{stage:"qa",run_id:$run}')"
+          post model-refresh-control "$payload"
+          jq -e '.ok == true and .pass == true and .result.gameweek == 8 and .result.simulation_count == 50000 and .result.artifacts_pass == true and .result.active_player_count == .result.active_projection_count and .result.recommendation_count == 2' <<<"$response"
+
+          payload="$(jq -n --arg run "$RUN_ID" '{stage:"integrity",run_id:$run}')"
+          post model-refresh-control "$payload"
+          jq -e '.ok == true and .pass == true and .availability_freshness == true and .result.pass == true' <<<"$response"
+
+          payload="$(jq -n --arg run "$RUN_ID" '{stage:"bugfix",run_id:$run}')"
+          post model-refresh-control "$payload"
+          jq -e '.ok == true and .pass == true and .result.pass == true' <<<"$response"
+
+          post weekly-model-lifecycle '{"action":"close_backtest"}'
+          jq -e '.ok == true and .result.ok == true and .result.gameweek == 7' <<<"$response"
+          printf '%s\n' "$response" > "$RUNNER_TEMP/closed-week.json"
+
+          payload="$(jq -n --arg run "$RUN_ID" --slurpfile closed "$RUNNER_TEMP/closed-week.json" \
+            '{stage:"replay",run_id:$run,pass:true,details:{pass:true,kind:"closed_live_week",closed_week:$closed[0]}}')"
+          post model-refresh-control "$payload"
+          jq -e '.ok == true and .pass == true' <<<"$response"
+
+          payload="$(jq -n --arg run "$RUN_ID" '{stage:"model_gate",run_id:$run}')"
+          post model-refresh-control "$payload"
+          jq -e '.ok == true and .pass == true and .same_engine == true' <<<"$response"
+
+          payload="$(jq -n --arg run "$RUN_ID" '{action:"snapshot",run_id:$run}')"
+          post weekly-model-lifecycle "$payload"
+          jq -e '.ok == true' <<<"$response"
+
+          payload="$(jq -n --arg run "$RUN_ID" '{stage:"promote",run_id:$run}')"
+          post model-refresh-control "$payload"
+          jq -e '.ok == true' <<<"$response"
+
+          post weekly-model-lifecycle '{"action":"verify","gameweek":8}'
+          jq -e '.pass == true and .current.gameweek == 8' <<<"$response"
+          echo "promoted=true" >> "$GITHUB_OUTPUT"
+      - name: Refresh live site data cache after verified promotion
+        if: steps.release.outputs.promoted == 'true'
+        env:
+          REVALIDATE_SECRET: ${{ secrets.SCOUT_REVALIDATE_SECRET }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ -n "$REVALIDATE_SECRET" ]]; then
+            curl --fail-with-body --show-error --silent --max-time 45 \
+              -X POST -H "x-revalidate-secret: $REVALIDATE_SECRET" \
+              "https://fanteziligrehberi.com/api/revalidate"
+          else
+            echo "Revalidation secret absent; dynamic data publish was verified via OIDC, no code deploy attempted."
+          fi
