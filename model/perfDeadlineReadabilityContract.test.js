@@ -33,7 +33,7 @@ assert.doesNotMatch(data,/current-run-v2/,'Persistently cached current-run point
 assert.match(data,/export const getCurrentRun=cache\(_getCurrentRun\)/,'Use request-local memoization without fixed-key persistent run cache.')
 assert.doesNotMatch(playersPage,/searchParams/,'Player analysis filters must not make the public route dynamic.')
 assert.match(playersPage,/getPlayersWithProjection/)
-assert.match(playersPage,/revalidate=300/)
+assert.match(playersPage,/dynamic='force-dynamic'/,'Player analysis cannot freeze current week at build time.')
 assert.match(playersTable,/staticPool/)
 assert.match(playersTable,/router\.replace/)
 assert.match(data,/async function _getPlayersPage/)
