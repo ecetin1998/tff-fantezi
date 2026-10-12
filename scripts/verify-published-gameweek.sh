@@ -36,9 +36,13 @@ for attempt in $(seq 1 8); do
       success=false
       continue
     fi
-    # The page headline is server-rendered and is not part of the script payload.
-    if ! grep -Fq "MH$EXPECTED_GAMEWEEK $label" "$tmp/$name"; then
-      echo "MH mismatch on $route: missing MH$EXPECTED_GAMEWEEK $label" >&2
+    # Preserve the exact homepage-week invariant used in lifecycle contract tests.
+    expected_marker="MH$EXPECTED_GAMEWEEK $label"
+    if [[ "$name" == home ]]; then
+      expected_marker="MH${EXPECTED_GAMEWEEK} xFP lideri"
+    fi
+    if ! grep -Fq "$expected_marker" "$tmp/$name"; then
+      echo "MH mismatch on $route: missing $expected_marker" >&2
       success=false
     fi
   done
