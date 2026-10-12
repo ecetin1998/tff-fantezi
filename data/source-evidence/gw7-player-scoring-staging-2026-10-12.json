@@ -5781,7 +5781,7 @@
           "position": "MID",
           "identity_status": "unique_match_or_reviewed_alias",
           "appearance_minutes_proxy": 60,
-          "minutes_bucket": "exact_60_verify",
+          "minutes_bucket": "60_exact_confirmed",
           "appearance_points": 1,
           "goals": 0,
           "assists": 0,
@@ -5791,9 +5791,10 @@
           "goalkeeper_saves": null,
           "save_points": null,
           "clean_sheet_possible": false,
-          "clean_sheet_points_candidate": null,
+          "clean_sheet_points_candidate": 0,
           "bonus_points": null,
-          "is_final": false
+          "is_final": false,
+          "duration_source": "FotMob fulltime minute-60 substitution; TFF appearance +1 (>60 +2)."
         },
         {
           "player_id": 943,
@@ -5869,7 +5870,7 @@
           "position": "MID",
           "identity_status": "unique_match_or_reviewed_alias",
           "appearance_minutes_proxy": 60,
-          "minutes_bucket": "exact_60_verify",
+          "minutes_bucket": "60_exact_confirmed",
           "appearance_points": 1,
           "goals": 0,
           "assists": 0,
@@ -5879,9 +5880,10 @@
           "goalkeeper_saves": null,
           "save_points": null,
           "clean_sheet_possible": false,
-          "clean_sheet_points_candidate": null,
+          "clean_sheet_points_candidate": 0,
           "bonus_points": null,
-          "is_final": false
+          "is_final": false,
+          "duration_source": "FotMob fulltime minute-60 substitution; TFF appearance +1 (>60 +2)."
         },
         {
           "player_id": 495,
@@ -5913,7 +5915,7 @@
           "position": "FWD",
           "identity_status": "unique_match_or_reviewed_alias",
           "appearance_minutes_proxy": 60,
-          "minutes_bucket": "exact_60_verify",
+          "minutes_bucket": "60_exact_confirmed",
           "appearance_points": 1,
           "goals": 0,
           "assists": 0,
@@ -5923,9 +5925,10 @@
           "goalkeeper_saves": null,
           "save_points": null,
           "clean_sheet_possible": false,
-          "clean_sheet_points_candidate": null,
+          "clean_sheet_points_candidate": 0,
           "bonus_points": null,
-          "is_final": false
+          "is_final": false,
+          "duration_source": "FotMob fulltime minute-60 substitution; TFF appearance +1 (>60 +2)."
         },
         {
           "player_id": 309,
@@ -6395,7 +6398,7 @@
   "critical_requirements": [
     "Bonus 3-2-1 still not confirmed, store null, NEVER zero.",
     "Team clean-sheet alone is not guaranteed if goals conceded while on pitch differ; need final scoring check.",
-    "exact-60 boundary in 3 players needs accurate official time to grant CS.",
+    "Minute-60 cases verified from FotMob final: Michalak, Mete Kaan Demir, Yusuf Barası; 1 appearance point, 0 clean sheet for Eyüpspor (4 conceded).",
     "Seven players missing from active scout_players and require roster ID resolution (do not invent IDs).",
     "Safety: do not publish or mark weekly final or override RLS."
   ]
