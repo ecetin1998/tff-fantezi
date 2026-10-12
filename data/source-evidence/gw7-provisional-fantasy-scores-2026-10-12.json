@@ -91,7 +91,11 @@
       }
     ],
     "bonus_awarded": 46,
-    "mapped": 283
+    "mapped": 283,
+    "substitution_before_concession_clean_sheet_fixes": [
+      "Aleksey Batrakov",
+      "Rafael Leão"
+    ]
   },
   "matches": [
     {
@@ -267,19 +271,20 @@
           "team": "Galatasaray",
           "position": "MID",
           "minutes_bucket": "61_plus",
-          "base_points_candidate": 5,
+          "base_points_candidate": 6,
           "appearance": 2,
           "goals_points": 0,
           "assists_points": 3,
           "cards_points": 0,
           "save_points": 0,
-          "clean_sheet_points": 0,
+          "clean_sheet_points": 1,
           "goals_conceded_points_team_based": 0,
-          "bonus_candidate": 0,
-          "total_points_candidate": 5,
+          "bonus_candidate": 1,
+          "total_points_candidate": 7,
           "confidence": "provisional",
           "conceded_while_on_pitch": 0,
-          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock",
+          "clean_sheet_rule": "MID >=60 minutes, substituted at 67 before 68th-minute opponent goal; clean sheet protected after regular substitution"
         },
         {
           "player_id": 1306,
@@ -287,19 +292,20 @@
           "team": "Galatasaray",
           "position": "MID",
           "minutes_bucket": "61_plus",
-          "base_points_candidate": 1,
+          "base_points_candidate": 2,
           "appearance": 2,
           "goals_points": 0,
           "assists_points": 0,
           "cards_points": -1,
           "save_points": 0,
-          "clean_sheet_points": 0,
+          "clean_sheet_points": 1,
           "goals_conceded_points_team_based": 0,
           "bonus_candidate": 0,
-          "total_points_candidate": 1,
+          "total_points_candidate": 2,
           "confidence": "provisional",
           "conceded_while_on_pitch": 0,
-          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock"
+          "conceded_method": "sourced_match_goal_clock_and_official_substitution_clock",
+          "clean_sheet_rule": "MID >=60 minutes, substituted at 67 before 68th-minute opponent goal; clean sheet protected after regular substitution"
         },
         {
           "player_id": 1405,
@@ -5872,6 +5878,7 @@
     "Seven reserve/starting players absent from scout_players were assigned FotMob/club-supported position for bonus-rank calculations; the player_id remains null and cannot be imported as a canonical player without roster insertion.",
     "All 283 played players now have candidate base and tie-rank bonus; scores are NOT final and have unverified special events and official QA.",
     "Seven previously unmatched player records inserted into Supabase scout_players with user-confirmed names, teams and price 4.00; GW7 scout_player_prices rows inserted, IDs 1604-1610.",
-    "Team-wide conceded debit corrected to **only goals occurring while each GK/DEF was on pitch**; 11 base-point corrections, source goal-clock records recorded in gw7-goal-timeline-2026-10-13.json."
+    "Team-wide conceded debit corrected to **only goals occurring while each GK/DEF was on pitch**; 11 base-point corrections, source goal-clock records recorded in gw7-goal-timeline-2026-10-13.json.",
+    "At 67' two Galatasaray midfielders substituted before the team's only concession at 68': +1 MID clean sheet each; Batrakov's 3-2-1 bonus is re-ranked to +1. Lucas Torreira red at 65' not included since red cards remain accountable for later concessions."
   ]
 }
