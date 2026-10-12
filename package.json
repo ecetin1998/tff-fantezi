@@ -9,7 +9,7 @@
     "lint": "eslint .",
     "smoke": "bash scripts/smoke.sh",
     "test:runtime": "bash scripts/runtime-route-test.sh",
-    "test": "node --test test/full-suite.test.js test/gw7-source-evidence.test.js",
+    "test": "node --test test/full-suite.test.js test/gw7-source-evidence.test.js test/live-model-week-cache.test.js",
     "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
     "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
     "deploy:worker": "wrangler deploy",
