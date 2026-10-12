@@ -3,7 +3,7 @@ import { getAuthState, getMatches } from '@/lib/data'
 import { teamCssVars } from '@/lib/teamThemes'
 import AccessGate from '@/components/AccessGate'
 
-export const revalidate=300
+// Current model week must be resolved per request, not from a stale ISR/R2 HTML snapshot.\nexport const dynamic='force-dynamic'
 export const metadata={title:'Maç Tahminleri'}
 
 const matchupLabel={good:'Avantajlı',neutral:'Dengeli',tough:'Dezavantajlı'}
