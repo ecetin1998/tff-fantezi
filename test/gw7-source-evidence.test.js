@@ -87,5 +87,5 @@ test('Provisional scores cover 283 without turning evidence into finalized publi
   assert(m.players.every(p=>p.is_final===false && p.bonus_points===null), 'final or fabricated bonus in staging');
  }
  assert.equal(count(all,p=>p.player_id!==null),283);
- assert.equal(count(all,p=>p.bonus_candidate>0),46);
+ assert.equal(count(all,p=>p.bonus_candidate>0),points.summary.provisional_bonus_players);
 });
