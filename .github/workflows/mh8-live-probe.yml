@@ -58,11 +58,11 @@ jobs:
           routes={'home':r'xFP lideri','players':r'Oyuncu Analizi','matches':r'Maç Tahminleri','squads':r'Kadro Önerileri'}
           for route,label in routes.items():
               source=(root/route).read_text(encoding='utf8',errors='replace')
-              clean=re.sub(r'<(script|style)\\b[^>]*>[\\s\\S]*?</\\1>',' ',source,flags=re.I)
+              clean=re.sub(r'<(script|style)\b[^>]*>[\s\S]*?</\1>',' ',source,flags=re.I)
               clean=html.unescape(re.sub('<[^>]+>',' ',clean))
               clean=' '.join(clean.split())
-              found=bool(re.search(r'\\bMH'+week+r'\\s+'+label,clean))
-              markers=re.findall(r'\\bMH\\d+\\b',clean)
+              found=bool(re.search(r'\bMH'+week+r'\s+'+label,clean))
+              markers=re.findall(r'\bMH\d+\b',clean)
               print(f'page={route} expected=MH{week} matched={found} visible_mh={dict((m,markers.count(m)) for m in set(markers))}')
               if not found: raise SystemExit(f'WRONG WEEK: {route} does not show MH{week}')
           print('LIVE MODEL WEEK VERIFIED: API and all four public pages show MH'+week)
