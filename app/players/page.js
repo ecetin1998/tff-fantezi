@@ -1,7 +1,7 @@
 import PlayersTable from '@/components/PlayersTable'
 import {getPlayersWithProjection} from '@/lib/data'
 
-export const revalidate=300
+// Current model week must be resolved per request, not from a stale ISR/R2 HTML snapshot.\nexport const dynamic='force-dynamic'
 export const metadata={title:'Oyuncu Analizi',description:'Süper Lig fantezi oyuncuları için xFP, ilk 11 ihtimali, beklenen dakika, puan aralığı ve fiyat/performans analizi.'}
 
 export default async function Players(){
