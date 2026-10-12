@@ -1,6 +1,9 @@
 const test=require('node:test')
 const assert=require('node:assert/strict')
 const fs=require('node:fs')
+const os=require('node:os')
+const path=require('node:path')
+const {spawnSync}=require('node:child_process')
 
 const read=path=>fs.readFileSync(path,'utf8')
 
@@ -36,8 +39,25 @@ test('production deployment must fail if API says MH8 while any real HTML shows 
     assert.ok(check.includes(route+':'),route+' must be present in the verifier')
   }
   assert.match(check,/expected_marker="MH\$EXPECTED_GAMEWEEK \$label"/)
-  assert.match(check,/grep -Fq "\$expected_marker"/)
+  assert.ok(check.includes('python3 scripts/check-rendered-week.py'), 'Rendered SSR text is checked rather than raw byte grep.')
   assert.match(deploy,/Verify site displays current gameweek/)
   assert.match(deploy,/bash scripts\/verify-published-gameweek\.sh/)
   assert.match(deploy,/workflow_dispatch:/,'Production deploy is still initiated explicitly')
+})
+
+test('React 19 MH titles are checked as visible SSR text, not exact HTML bytes',()=>{
+  const temp=fs.mkdtempSync(path.join(os.tmpdir(),'mh-html-'))
+  const check=(markup,expected)=>{
+    const file=path.join(temp,'page.html')
+    fs.writeFileSync(file,markup,'utf8')
+    return spawnSync('python3',['scripts/check-rendered-week.py',file,expected],{encoding:'utf8'})
+  }
+  try{
+    const hydrated='<html><head><script>window.x="MH7 Oyuncu Analizi"</script></head><body><h1>MH<!-- -->8<!-- --> Oyuncu Analizi</h1></body></html>'
+    assert.equal(check(hydrated,'MH8 Oyuncu Analizi').status,0,'Split React dynamic gameweek must PASS.')
+    assert.notEqual(check(hydrated,'MH7 Oyuncu Analizi').status,0,'Old week only in scripts must fail.')
+    assert.equal(check('<h1>MH<!-- -->8<!-- --> Maç Tahminleri</h1>','MH8 Maç Tahminleri').status,0)
+    assert.equal(check('<h1>MH<!-- -->8<!-- --> Kadro Önerileri</h1>','MH8 Kadro Önerileri').status,0)
+    assert.notEqual(check('<h1>MH7 Oyuncu Analizi</h1>','MH8 Oyuncu Analizi').status,0)
+  }finally{fs.rmSync(temp,{recursive:true,force:true})}
 })

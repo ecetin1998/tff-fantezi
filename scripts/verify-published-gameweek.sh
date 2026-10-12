@@ -41,8 +41,10 @@ for attempt in $(seq 1 8); do
     if [[ "$name" == home ]]; then
       expected_marker="MH${EXPECTED_GAMEWEEK} xFP lideri"
     fi
-    if ! grep -Fq "$expected_marker" "$tmp/$name"; then
-      echo "MH mismatch on $route: missing $expected_marker" >&2
+    # Parse React's comment-separated SSR text nodes; do not search Flight
+    # scripts or mistake a display-correct MH8 heading for missing raw bytes.
+    if ! python3 scripts/check-rendered-week.py "$tmp/$name" "$expected_marker"; then
+      echo "MH mismatch on $route: missing $expected_marker in rendered text" >&2
       success=false
     fi
   done
