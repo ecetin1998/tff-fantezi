@@ -87,4 +87,10 @@ assert.match(analysisCss,/width:257px/)
 assert.match(analysisCss,/grid-template-columns:58px 62px 52px 64px !important/)
 assert.match(nav,/\['\/teams','Takım Analizi'\]/)
 
+
+assert.match(mobileFix,/team-analysis-card-list\)\{[\s\S]*?overflow-x:clip/)
+assert.match(mobileFix,/team-analysis-mobile-card\)\{[\s\S]*?overflow:hidden/)
+assert.match(mobileFix,/team-analysis-mobile-head\)\{[\s\S]*?grid-template-columns:42px minmax\(0,1fr\) max-content/)
+assert.match(mobileFix,/team-analysis-mobile-card\) :global\(\.fixture-strength-strip\)\{[\s\S]*?touch-action:pan-x/)
+
 console.log('team analysis explorer contract ok')
