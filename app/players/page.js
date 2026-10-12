@@ -1,7 +1,9 @@
 import PlayersTable from '@/components/PlayersTable'
 import {getPlayersWithProjection} from '@/lib/data'
 
-export const revalidate=300
+// Week-aware HTML must not be frozen at build time or kept in Worker ISR
+// when the active model is promoted; data fetching stays in run-scoped caches.
+export const dynamic='force-dynamic'
 export const metadata={title:'Oyuncu Analizi',description:'Süper Lig fantezi oyuncuları için xFP, ilk 11 ihtimali, beklenen dakika, puan aralığı ve fiyat/performans analizi.'}
 
 export default async function Players(){

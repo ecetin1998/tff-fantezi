@@ -2,7 +2,9 @@ import {getTeamFixturesOverview} from '@/lib/data'
 import TeamsExplorer from '@/components/TeamsExplorer'
 
 export const metadata={title:'Takım Analizi'}
-export const revalidate=300
+// Week-aware HTML must not be frozen at build time or kept in Worker ISR
+// when the active model is promoted; data fetching stays in run-scoped caches.
+export const dynamic='force-dynamic'
 
 export default async function Teams(){
   const {run,teams}=await getTeamFixturesOverview()

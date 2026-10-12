@@ -4,7 +4,9 @@ import { getAuthState, getAvailability } from '@/lib/data'
 
 export const metadata={title:'Sakatlık ve Ceza Durumu'}
 
-export const revalidate=300
+// Week-aware HTML must not be frozen at build time or kept in Worker ISR
+// when the active model is promoted; data fetching stays in run-scoped caches.
+export const dynamic='force-dynamic'
 
 export default async function Availability(){
   const [auth,{run,rows}]=await Promise.all([getAuthState(),getAvailability()])

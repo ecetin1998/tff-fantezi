@@ -33,7 +33,7 @@ assert.doesNotMatch(data,/current-run-v2/,'Persistently cached current-run point
 assert.match(data,/export const getCurrentRun=cache\(_getCurrentRun\)/,'Use request-local memoization without fixed-key persistent run cache.')
 assert.doesNotMatch(playersPage,/searchParams/,'Player analysis filters must not make the public route dynamic.')
 assert.match(playersPage,/getPlayersWithProjection/)
-assert.match(playersPage,/revalidate=300/)
+assert.match(playersPage,/dynamic='force-dynamic'/,'Player analysis cannot freeze current week at build time.')
 assert.match(playersTable,/staticPool/)
 assert.match(playersTable,/router\.replace/)
 assert.match(data,/async function _getPlayersPage/)
@@ -114,3 +114,12 @@ assert.match(dataViewsCss,/Weekly mobile cards final polish 2026-09-30/)
 assert.match(dataViewsCss,/weekly-form-meta[\s\S]*grid-template-columns:repeat\(2,minmax\(0,1fr\)\) !important/,'Mobile Fantasy Points stats should stay in a clean 2x2 grid.')
 
 console.log('performance/deadline/readability contract passed')
+
+
+// Any page showing the active model must render the live current week, never a
+// build-time/ISR snapshot with the stale 'MH—' marker or last week's MH label.
+for(const route of ['app/players/page.js','app/teams/page.js','app/matches/page.js',
+    'app/squads/page.js','app/availability/page.js','app/roles/page.js',
+    'app/points/page.js','app/backtest/page.js']){
+  assert.match(read(route),/export const dynamic='force-dynamic'/,route+' must not be statically generated.')
+}

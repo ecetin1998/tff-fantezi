@@ -2,7 +2,9 @@ import WeeklyPointsTable from '@/components/WeeklyPointsTable'
 import { getWeeklyPoints } from '@/lib/data'
 
 // Reduce KV ISR writes for read-heavy historical data.
-export const revalidate=600
+// Week-aware HTML must not be frozen at build time or kept in Worker ISR
+// when the active model is promoted; data fetching stays in run-scoped caches.
+export const dynamic='force-dynamic'
 export const metadata={title:'Fantezi Puanları'}
 
 export default async function WeeklyPoints(){
