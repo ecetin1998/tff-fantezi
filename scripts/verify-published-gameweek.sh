@@ -1,31 +1,57 @@
 #!/usr/bin/env bash
-# Production guard: the domain must show the exact model week that Supabase
-# reports as current. Only call this after the Cloudflare SHA health check.
+# Verify the public production site actually renders the DB-backed current MH.
+# A promoted Supabase run alone is not evidence of a successful HTML release.
 set -euo pipefail
 
 BASE_URL="${BASE_URL:-https://fanteziligrehberi.com}"
-EXPECTED_GAMEWEEK="${EXPECTED_GAMEWEEK:?Require verified Supabase current gameweek}"
+EXPECTED_GAMEWEEK="${EXPECTED_GAMEWEEK:?Require expected published gameweek}"
 BUILD_SHA="${GITHUB_SHA:-diagnostic}"
-test "$EXPECTED_GAMEWEEK" -ge 1
+[[ "$EXPECTED_GAMEWEEK" =~ ^[0-9]+$ ]] && (( EXPECTED_GAMEWEEK >= 1 ))
 
 for attempt in $(seq 1 8); do
-  # Both URLs intentionally bypass stale Cloudflare/Next shared responses.
-  home="$(curl --fail --silent --show-error --retry 2 --max-time 30 \
-    -H 'Cache-Control: no-cache' "$BASE_URL/?mh-probe=$BUILD_SHA-$attempt")"
-  payload="$(curl --fail --silent --show-error --retry 2 --max-time 30 \
-    -H 'Cache-Control: no-cache' "$BASE_URL/api/scout-data?section=summary&limit=1")"
-  published="$(printf '%s' "$payload" | jq -er '.gameweek')"
-  found_home="$(printf '%s' "$home" | grep -F -o "MH${EXPECTED_GAMEWEEK} xFP lideri" | head -1 || true)"
+  nonce="$BUILD_SHA-$attempt"
+  tmp="$(mktemp -d)"
+  success=true
 
-  if [[ "$published" == "$EXPECTED_GAMEWEEK" && -n "$found_home" ]]; then
-    printf 'Production week verified: Supabase MH%s, public API MH%s, homepage MH%s\n' \
-      "$EXPECTED_GAMEWEEK" "$published" "$EXPECTED_GAMEWEEK"
+  fetch(){
+    local route="$1" outfile="$2"
+    curl --fail --silent --show-error --location --retry 2 --retry-delay 2 \
+      --connect-timeout 10 --max-time 45 \
+      -H 'Cache-Control: no-cache' "$BASE_URL$route" > "$outfile"
+  }
+
+  if ! fetch "/api/scout-data?section=matches&limit=9" "$tmp/api"; then success=false; fi
+
+  published="error"
+  if [[ "$success" == true ]]; then
+    published="$(jq -er '.current_run.gameweek' "$tmp/api" 2>/dev/null || echo error)"
+    jq -e '.current_run.is_current == true and .current_run.status == "ready" and (.matches|length) == 9' "$tmp/api" >/dev/null || success=false
+    [[ "$published" == "$EXPECTED_GAMEWEEK" ]] || success=false
+  fi
+
+  # Dynamic SSR pages must show the LIVE model week, never old ISR/R2 HTML.
+  for entry in 'home:/:xFP lideri' 'players:/players:Oyuncu Analizi' 'matches:/matches:Maç Tahminleri' 'squads:/squads:Kadro Önerileri'; do
+    IFS=':' read -r name route label <<< "$entry"
+    if ! fetch "$route?mh-probe=$nonce" "$tmp/$name"; then
+      success=false
+      continue
+    fi
+    # The page headline is server-rendered and is not part of the script payload.
+    if ! grep -Fq "MH$EXPECTED_GAMEWEEK $label" "$tmp/$name"; then
+      echo "MH mismatch on $route: missing MH$EXPECTED_GAMEWEEK $label" >&2
+      success=false
+    fi
+  done
+
+  if [[ "$success" == true ]]; then
+    echo "PASS: production API, home, players, matches and squads all render MH$EXPECTED_GAMEWEEK"
+    rm -rf "$tmp"
     exit 0
   fi
-  printf 'Production week mismatch attempt=%s expected=MH%s api=MH%s home_has_expected=%s\n' \
-    "$attempt" "$EXPECTED_GAMEWEEK" "$published" "$([[ -n "$found_home" ]] && echo yes || echo no)" >&2
+  echo "Production MH mismatch attempt=$attempt expected=$EXPECTED_GAMEWEEK api=$published" >&2
+  rm -rf "$tmp"
   sleep 5
 done
 
-echo "Blocking false-positive deploy: homepage and public API are not on the current model week." >&2
+echo "BLOCKED: production HTML/API disagree with the verified live model week." >&2
 exit 1
