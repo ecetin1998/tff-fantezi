@@ -4,6 +4,10 @@ name: Cloudflare Workers deploy
 # repair trigger was removed after the MH8 site was successfully updated.
 on:
   workflow_dispatch:
+  # Temporary, explicitly owner-authored manual release command for MH8 HTML
+  # repair. Never deploy on a push or a comment by another account.
+  issue_comment:
+    types: [created]
 
 # Production deploys are explicit. This prevents every tiny main/UI commit from
 # rebuilding and bulk-populating the remote KV incremental cache.
@@ -17,6 +21,7 @@ concurrency:
 
 jobs:
   deploy:
+    if: ${{ github.event_name == 'workflow_dispatch' || (github.event_name == 'issue_comment' && github.event.issue.number == 266 && github.actor == 'ecetin1998' && github.event.comment.body == '/deploy-mh8-fix') }}
     runs-on: ubuntu-latest
     env:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
