@@ -145,4 +145,25 @@ assert.match(defenderRoleQa,/coalesce\(pa\.primary_role,'DEF_UNKNOWN'\)=coalesce
 assert.match(defenderRoleQa,/gk_captain/,'Existing GK captain safety gate remains active.')
 assert.match(defenderRoleQa,/xi_over_1/,'Existing XI bounds gate remains active.')
 
+const liveData=read('lib/data.js')
+const publicApi=read('app/api/scout-data/route.js')
+const edgeConfig=read('next.config.mjs')
+const publishedWeekSmoke=read('scripts/verify-published-gameweek.sh')
+const productionDeploy=read('.github/workflows/cloudflare-deploy.yml')
+
+// Model promotion changes the DB's current run. Never store that flag in
+// a fixed-key incremental cache: OpenNext/R2 may serve the previous MH for
+// much longer than the configured revalidation interval.
+assert.match(liveData,/export const getCurrentRun=cache\(_getCurrentRun\)/,'Current run query must be fresh for each request.')
+assert.doesNotMatch(liveData,/const getCurrentRunShared=unstable_cache\(/,'Do not persistently cache the is_current pointer.')
+assert.match(liveData,/getHomeOverviewBaseShared\(run\)/,'Home overview cache key must include the verified active run.')
+assert.match(liveData,/getRecommendationBundleShared\(liveRunId/,'Squad bundle cannot span multiple gameweeks.')
+assert.match(liveData,/getMatchesShared\(\(await getCurrentRun\(\)\)\?\.id/,'Fixture page must key cached payload to live run.')
+assert.match(publicApi,/buildCached\(liveRun\?\.id\|\|'none',requested/,'Public API cache key must change at model promotion.')
+assert.match(edgeConfig,/const privateEdgeRoutes=\[\s*'\/'/,'Homepage must not be served from a shared five-minute HTML CDN cache.')
+assert.match(publishedWeekSmoke,/MH\$\{EXPECTED_GAMEWEEK\} xFP lideri/,'Production smoke must validate the visible homepage week.')
+assert.match(publishedWeekSmoke,/\.gameweek/,'Production smoke must validate the public JSON week.')
+assert.match(productionDeploy,/Verify site displays current gameweek/,'Cloudflare deploy must fail if site is still showing the prior MH.')
+assert.match(productionDeploy,/workflow_dispatch:/,'Production deployment retains an explicit manual GitHub Actions trigger.')
+
 console.log('weekly lifecycle contract passed')
