@@ -121,4 +121,6 @@ assert.match(redCardMinuteQA,/minute_sum>990\.25\*fixture_count/,'Upper bound mu
 assert.match(redCardMinuteQA,/pg_get_functiondef/,'Patch existing QA without changing other safety rules.')
 assert.match(sim,/if\(rc\)\{/,'Expected minutes fall because the simulator models red-card early exits.')
 
+assert.match(redCardMinuteQA,/expected_red_minutes/,'Migration must preserve an already-deployed rate-aware QA implementation.')
+
 console.log('weekly lifecycle contract passed')
