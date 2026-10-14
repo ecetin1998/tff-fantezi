@@ -95,10 +95,14 @@ function zeroEventInput(doubleWeek=false){
   for(let i=0;i<single.length;i++){
     assert.ok(double[i].xi<=1+1e-12&&Math.abs(double[i].xi-1)<1e-9,'DGW weekly XI is P(start at least once), never a sum above 1');
     assert.ok(Math.abs(double[i].minutes-180)<1e-9,'DGW minutes are accumulated match by match');
-    assert.ok(Math.abs(double[i].xfp-single[i].xfp*2)<1e-9,'two zero-event fixtures contribute twice the single-match xFP');
+    // Player-level bonus is now a per-draw uncertain BPS rank: 50 draws
+    // must not be compared as if the same three players always win bonus.
+    assert.ok(double[i].xfp>=double[i].core-1e-9,'bonus cannot reduce a fixture score');
     assert.ok(Number.isFinite(double[i].match_xi['1'])&&double[i].match_xi['1']>=0&&double[i].match_xi['1']<=1,'first DGW fixture XI probability is stored separately');
     assert.ok(Number.isFinite(double[i].match_xi['2'])&&double[i].match_xi['2']>=0&&double[i].match_xi['2']<=1,'second DGW fixture XI probability is stored separately');
   }
+  assert.ok(Math.abs(double.reduce((s,p)=>s+p.bonus,0)-2*single.reduce((s,p)=>s+p.bonus,0))<1e-9,
+    'Two scoreless fixtures spend two distinct 3+2+1 bonus allocations');
 }
 
 {
