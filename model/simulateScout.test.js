@@ -213,3 +213,15 @@ console.log('DGW, opponent-aware saves, red-card and bonus-tie checks passed');
     'each keeper saved penalty must also debit a real attacking penalty taker');
   assert(missed<.15,'off-target missed penalties are rare and not added per player');
 }
+
+
+// A source SHA bump must NEVER silently re-run 50K against an old deployed
+// Supabase scorer and then mark the candidate as the new current run.
+{
+  const fs=require('node:fs');
+  const edge=fs.readFileSync('supabase/functions/run-live-sim-chunk/index.ts','utf8');
+  const workflow=fs.readFileSync('.github/workflows/weekly-model-lifecycle.yml','utf8');
+  assert.match(edge,/SCORER_POLICY_VERSION="gk-sot-penalty-matched-v1"/);
+  assert.equal((workflow.match(/MODEL_SCORER_POLICY_MISMATCH/g)||[]).length,6,
+    'both current-MH and next-MH runs must enforce scorer policy on reset/chunks/finalize');
+}
