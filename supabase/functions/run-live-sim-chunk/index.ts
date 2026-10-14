@@ -100,11 +100,15 @@ function normalizedRole(p){
   if(["FB","FULLBACK","LB","RB","BEK"].includes(raw))return "FB";
   return p.pos==="DEF"?"DEF":p.pos;
 }
-function allocationFor(p,a){
+function allocationFor(p,a,gameweek){
   const role=normalizedRole(p);
   const key=role==="CB"?"excess_cb":role==="FB"?"excess_fb":role==="WB"?"excess_wb":
     p.pos==="DEF"?"excess_def":p.pos==="MID"?"excess_mid":"excess_fwd";
-  const excess=a?num(a[key]):0;
+  // A one-week-stale sourced shot anomaly is still informative, but only at
+  // half strength. Never reuse older or future evidence as current match data.
+  const age=a?gameweek-1-num(a.through_gameweek):-1;
+  const freshness=age===0?1:age===1?.5:0;
+  const excess=a?num(a[key])*freshness:0;
   const exposure=a?num(a.exposure):0;
   const observed=a?num(a.observed_matches):0;
   const attenuation=observed>=5?.55:.85;
@@ -181,7 +185,9 @@ Deno.serve(async(req)=>{
       sb.from("scout_replay_player_inputs").select("*").eq("gameweek",GAMEWEEK).eq("benchmark_version",BENCHMARK).order("player_id"),
       sb.from("scout_replay_match_inputs").select("*").eq("gameweek",GAMEWEEK).eq("benchmark_version",BENCHMARK).order("match_id"),
       sb.from("scout_replay_input_meta").select("*").eq("gameweek",GAMEWEEK).eq("benchmark_version",BENCHMARK).single(),
-      sb.from("scout_player_single_shot_adjustments").select("*").eq("through_gameweek",GAMEWEEK-1),
+      sb.from("scout_player_single_shot_adjustments").select("*")
+        .gte("through_gameweek",Math.max(1,GAMEWEEK-2)).lte("through_gameweek",GAMEWEEK-1)
+        .order("through_gameweek",{ascending:false}),
       sb.from("scout_game_rules").select("rules").order("season",{ascending:false}).limit(1).single(),
       sb.from("scout_goal_distribution_config").select("version,distribution,alpha_used,gate_passed").eq("active",true).order("created_at",{ascending:false}).limit(1).maybeSingle()
     ]);
@@ -210,8 +216,9 @@ Deno.serve(async(req)=>{
     const useNb=Boolean(goalDist?.gate_passed)&&String(goalDist?.distribution||"").toUpperCase()==="NB2"&&num(goalDist?.alpha_used)>0;
     const goalAlpha=useNb?num(goalDist.alpha_used):0;
     const quotas=meta.team_formations||{};
-    const adj=new Map((aq.data||[]).map(x=>[Number(x.player_id),x]));
-    const allocation=P.map(p=>allocationFor(p,adj.get(p.id)));
+    const adj=new Map();
+    for(const a of aq.data||[])if(!adj.has(Number(a.player_id)))adj.set(Number(a.player_id),a);
+    const allocation=P.map(p=>allocationFor(p,adj.get(p.id),GAMEWEEK));
 
     let state=seed>>>0;
     const random=()=>{
