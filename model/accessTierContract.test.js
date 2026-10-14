@@ -64,7 +64,12 @@ assert.match(playersTable,/overlay\.has\(Number\(player\.id\)\)/)
 assert.match(playersTable,/matched\/players\.length<\.95/)
 assert.match(playersTable,/setOverlayReady\(true\)/)
 assert.match(playersTable,/setOverlayRetry\(n=>n\+1\)/)
-assert.match(playersTable,/k==='p90'\?Number\(p\.projection\?\.p90\|\|0\)/)
-assert.match(playersTable,/k==='six'\?Number\(p\.projection\?\.six_plus_probability\|\|0\)/)
+// Null is not a real 0%: preserve null until the authenticated overlay
+// arrives, and never silently rank all players equal during P90/6+ loading.
+assert.match(playersTable,/k==='p90'\\?p\\.projection\\?\\.p90/)
+assert.match(playersTable,/k==='six'\\?p\\.projection\\?\\.six_plus_probability/)
+assert.match(playersTable,/an=av===null\\|\\|av===undefined/)
+assert.match(playersTable,/disabled=\\{proMetricsPending\\}/)
+
 
 console.log('access tier contract ok')
