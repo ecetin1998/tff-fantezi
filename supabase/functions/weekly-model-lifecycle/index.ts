@@ -1,5 +1,5 @@
 import {createClient} from "https://esm.sh/@supabase/supabase-js@2"
-import {applyOfficialMinutesEvidence} from "./externalRole.mjs"
+import {applyOfficialMinutesEvidence,firstRecordedRate,observedPer90} from "./externalRole.mjs"
 
 const AUDIENCE="tff-fantezi-scout"
 const ISSUER="https://token.actions.githubusercontent.com"
@@ -43,7 +43,7 @@ async function authorized(req:Request){
 const n=(v:any,d=0)=>Number.isFinite(Number(v))?Number(v):d
 const clamp=(lo:number,hi:number,v:number)=>Math.max(lo,Math.min(hi,v))
 const avg=(xs:number[])=>xs.length?xs.reduce((a,b)=>a+b,0)/xs.length:0
-const per90=(v:any,minutes:any,fallback=0)=>n(minutes)>0?n(v)*90/n(minutes):fallback
+const per90=(v:any,minutes:any,fallback=0)=>observedPer90(v,minutes,fallback)
 const newer=(...xs:any[])=>xs.filter(Boolean).map(x=>new Date(x).getTime()).filter(Number.isFinite).sort((a,b)=>b-a)[0]||Date.now()
 
 const officialEvidenceQuery=(sb:any)=>sb.from("scout_official_external_appearances")
@@ -376,7 +376,7 @@ async function prepare(sb:any,current:any,status:any,body:any={}){
     const xg90=per90(s.xg_total,minutes,n(priorRates[0]))
     const g90=per90(s.goals,minutes,n(priorRates[1]))
     const a90=per90(s.assists,minutes,n(priorRates[2]))
-    const xa90=n(s.xa_per90,n(s.xa_model_per90,n(prior.effective_xa_per90,n(priorRates[3]))))
+    const xa90=firstRecordedRate(s.xa_per90,s.xa_model_per90,prior.effective_xa_per90,priorRates[3])
     const yc90=per90(s.yellow_cards,minutes,n(priorRates[4]))
     const rc90=per90(s.red_cards,minutes,n(priorRates[5]))
     const saves90=per90(s.saves,minutes,n(priorRates[6]))
