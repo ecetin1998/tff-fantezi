@@ -77,6 +77,13 @@ const {normalizedDefenderRole,singleShotCap,attackWeights}=require('./attackAllo
   const tied=bonusByCompetitionRank([0,1,2],{0:6,1:6,2:5},[90,90,90]);
   assert.deepEqual([tied[0],tied[1],tied[2]],[3,3,2],
     'equal DEF clean sheet and MID assist scores get identical tier bonus');
+  const lifecycle=fs.readFileSync('supabase/functions/weekly-model-lifecycle/index.ts','utf8');
+  assert.match(lifecycle,/firstRecordedRate\(s\.xa_per90,s\.xa_model_per90,prior\.effective_xa_per90,priorRates\[3\]\)/,
+    'weekly rollover must not discard sourced xA model when observed xA is null');
+  assert.match(lifecycle,/rates\[3\]=firstRecordedRate\(stats\.xa_per90,stats\.xa_model_per90,rates\[3\]\)/,
+    'same-week 50K refresh must fix xA inputs, not just next-week preparation');
+  assert.match(lifecycle,/team_assist_share:\(\(\)=>\{/,
+    'refresh must recompute role assist share after updating xA inputs');
   const edge=fs.readFileSync('supabase/functions/run-live-sim-chunk/index.ts','utf8');
   assert.match(edge,/const score=\[teamGoals\(match\.home_lambda\),teamGoals\(match\.away_lambda\)\]/);
   assert.match(edge,/SCORING\.goal\[P\[scorer\]\.pos\]/);
