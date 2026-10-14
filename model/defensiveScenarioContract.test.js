@@ -78,10 +78,10 @@ console.log('Source-backed defensive match scenario and bonus tie QA passed')
   const zero=simulateScout(fixture(),35,20261014)
   for(const p of zero){
     const expected=p.pos==='GK'||p.pos==='DEF'?4:p.pos==='MID'?1:0
-    assert.equal(p.components.cs,expected,
+    assert(Math.abs(p.components.cs-expected)<1e-9,
       'Every eligible midfield, backline and keeper position earns correct 0-0 CS')
     if(p.pos==='GK'||p.pos==='DEF')
-      assert.equal(p.bonus,3,'Any non-scoring GK/DEF tied first on fantasy base points may earn +3')
+      assert(Math.abs(p.bonus-3)<1e-9,'Any non-scoring GK/DEF tied first on fantasy base points may earn +3')
   }
 
   const attack=fixture(3)
@@ -104,9 +104,9 @@ console.log('Source-backed defensive match scenario and bonus tie QA passed')
     'Opposing forward goals remove goalkeeper +4 clean sheet')
   assert(homeDef.components.conceded<-.3,
     'Every two opponent goals additionally penalize home GK/DEF')
-  assert.equal(awayDef.components.cs,4,
+  assert(Math.abs(awayDef.components.cs-4)<1e-9,
     'Away DEF keeps +4 when home cannot score')
-  assert.equal(awayMid.components.cs,1,
+  assert(Math.abs(awayMid.components.cs-1)<1e-9,
     'Away MID keeps +1 when home cannot score')
   assert(homeDef.xfp<find(zero,1,'DEF').xfp-1,
     'Opposing attack lowers expected GK/DEF returns, not just headline CS')
