@@ -8,6 +8,7 @@ const jsTests=[
   'model/attackAllocation.test.js',
   'model/simulateScout.test.js',
   'model/defensiveScenarioContract.test.js',
+  'model/allPositionScoringContract.test.js',
   'model/replayAudit.test.js',
   'model/publicReadCompatibility.test.js',
   'model/auditHardening.test.js',

@@ -1,5 +1,5 @@
 import {createClient} from "https://esm.sh/@supabase/supabase-js@2"
-import {applyOfficialMinutesEvidence} from "./externalRole.mjs"
+import {applyOfficialMinutesEvidence,firstRecordedRate,observedPer90} from "./externalRole.mjs"
 
 const AUDIENCE="tff-fantezi-scout"
 const ISSUER="https://token.actions.githubusercontent.com"
@@ -43,7 +43,7 @@ async function authorized(req:Request){
 const n=(v:any,d=0)=>Number.isFinite(Number(v))?Number(v):d
 const clamp=(lo:number,hi:number,v:number)=>Math.max(lo,Math.min(hi,v))
 const avg=(xs:number[])=>xs.length?xs.reduce((a,b)=>a+b,0)/xs.length:0
-const per90=(v:any,minutes:any,fallback=0)=>n(minutes)>0?n(v)*90/n(minutes):fallback
+const per90=(v:any,minutes:any,fallback=0)=>observedPer90(v,minutes,fallback)
 const newer=(...xs:any[])=>xs.filter(Boolean).map(x=>new Date(x).getTime()).filter(Number.isFinite).sort((a,b)=>b-a)[0]||Date.now()
 
 const officialEvidenceQuery=(sb:any)=>sb.from("scout_official_external_appearances")
@@ -376,7 +376,7 @@ async function prepare(sb:any,current:any,status:any,body:any={}){
     const xg90=per90(s.xg_total,minutes,n(priorRates[0]))
     const g90=per90(s.goals,minutes,n(priorRates[1]))
     const a90=per90(s.assists,minutes,n(priorRates[2]))
-    const xa90=n(s.xa_per90,n(s.xa_model_per90,n(prior.effective_xa_per90,n(priorRates[3]))))
+    const xa90=firstRecordedRate(s.xa_per90,s.xa_model_per90,prior.effective_xa_per90,priorRates[3])
     const yc90=per90(s.yellow_cards,minutes,n(priorRates[4]))
     const rc90=per90(s.red_cards,minutes,n(priorRates[5]))
     const saves90=per90(s.saves,minutes,n(priorRates[6]))
@@ -544,14 +544,16 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
 
   const sourceBenchmark=String(latestMetaQ.data.benchmark_version)
   const stableRoleBenchmark=String(stableMetaQ.data?.benchmark_version||sourceBenchmark)
-  const [inputsQ,matchesQ,stableInputsQ]=await Promise.all([
+  const [inputsQ,matchesQ,stableInputsQ,sourceStatsQ]=await Promise.all([
     sb.from("scout_replay_player_inputs").select("*").eq("gameweek",gw).eq("benchmark_version",sourceBenchmark).order("player_id"),
     sb.from("scout_replay_match_inputs").select("*").eq("gameweek",gw).eq("benchmark_version",sourceBenchmark).order("match_id"),
     stableRoleBenchmark===sourceBenchmark
       ?Promise.resolve({data:null,error:null})
-      :sb.from("scout_replay_player_inputs").select("player_id,role_probability,durations,duration_weights").eq("gameweek",gw).eq("benchmark_version",stableRoleBenchmark).order("player_id")
+      :sb.from("scout_replay_player_inputs").select("player_id,role_probability,durations,duration_weights").eq("gameweek",gw).eq("benchmark_version",stableRoleBenchmark).order("player_id"),
+    sb.from("scout_player_season_stats").select("player_id,xa_per90,xa_model_per90")
+      .eq("season","2026-27").eq("through_gameweek",gw-1)
   ])
-  for(const q of [inputsQ,matchesQ,stableInputsQ])if(q.error)throw q.error
+  for(const q of [inputsQ,matchesQ,stableInputsQ,sourceStatsQ])if(q.error)throw q.error
   if(!(inputsQ.data||[]).length||!(matchesQ.data||[]).length)throw new Error("CURRENT_SIM_INPUT_COVERAGE_MISSING")
   const stableInputsMap=new Map(((stableInputsQ.data||inputsQ.data)||[]).map((x:any)=>[Number(x.player_id),x]))
   const stableRoleMap=new Map([...stableInputsMap.entries()].map(([id,x]:any)=>[id,n(x.role_probability,.5)]))
@@ -573,6 +575,7 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
       min_interval_hours:minInterval,input_snapshot_hash:existing.data.input_snapshot_hash||null
     }
   }
+  const sourceStatsMap=new Map((sourceStatsQ.data||[]).map((x:any)=>[Number(x.player_id),x]))
   const avMap=new Map((availabilityQ.data||[]).map((x:any)=>[Number(x.player_id),x]))
   const roleMap=new Map((rolesQ.data||[]).map((x:any)=>[Number(x.player_id),x]))
   const projectionMap=new Map((currentProjectionQ.data||[]).map((x:any)=>[Number(x.player_id),x]))
@@ -602,8 +605,11 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
       sameSlotStarter:player&&event?official.directCompetitor(player,event):false,
       availability,
     })
+    const rates=(x.rates||[]).map(Number)
+    const stats=sourceStatsMap.get(Number(x.player_id)) as any
+    if(stats)rates[3]=firstRecordedRate(stats.xa_per90,stats.xa_model_per90,rates[3])
     return {
-      ...x,benchmark_version:benchmark,availability,
+      ...x,benchmark_version:benchmark,availability,rates,
       role_probability:adjusted.role,
       durations:adjusted.applied?adjusted.durations:x.durations,
       duration_weights:adjusted.applied?adjusted.duration_weights:x.duration_weights,
@@ -641,17 +647,19 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
   const roleBase=(rolesQ.data||[]).map((x:any)=>{
     const {run_id:_,...rest}=x
     const av=avMap.get(Number(x.player_id))
+    const input=refreshedInputs.get(Number(x.player_id)) as any
     return {
       ...rest,run_id:runId,
       predicted_xi_probability:n((refreshedInputs.get(Number(x.player_id)) as any)?.role_probability,x.predicted_xi_probability),
       signal:(()=>{
         const event=official.latest.get(Number(x.player_id))
-        const input=refreshedInputs.get(Number(x.player_id)) as any
         const used=event&&String(input?.source_note||"").includes(String(event.match_ref))
         return used&&event.started&&Number(event.minutes)>=75?"RESMÎ MAÇTA İLK 11"
           :used&&event.squad_status==="unused"?"RESMÎ MAÇTA YEDEK":x.signal
       })(),
       availability_probability:clamp(0,1,n(av?.availability_probability,x.availability_probability)),
+      team_goal_share:(()=>{const rates=(input?.rates||[]).map(Number);return Math.max(1e-6,.75*n(rates[0])+.25*n(rates[1]))})(),
+      team_assist_share:(()=>{const rates=(input?.rates||[]).map(Number);return Math.max(1e-6,.70*n(rates[3])+.30*n(rates[2]))})(),
       team_id:teamByPlayer.get(Number(x.player_id))
     }
   })

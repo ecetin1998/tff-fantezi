@@ -84,3 +84,30 @@ export function applyOfficialMinutesEvidence(input) {
     applied:true,source:e.source_url,
   };
 }
+
+
+/**
+ * Preserve genuinely observed zeroes. Missing / null upstream data must not
+ * be cast to zero before evaluating a sourced prior or position fallback.
+ * This helper is shared with model-input regression tests.
+ */
+export function firstRecordedRate(...values){
+  for(const value of values){
+    if(value===null||value===undefined||value==="")continue;
+    const n=Number(value);
+    if(Number.isFinite(n))return Math.max(0,n);
+  }
+  return 0;
+}
+
+/**
+ * Existing playing time alone does not prove a stat has been observed.
+ * Fall back to a sourced rate when the upstream total is missing (not zero).
+ */
+export function observedPer90(total,minutes,fallback=0){
+  const m=Number(minutes);
+  if(!(m>0))return firstRecordedRate(fallback);
+  if(total===null||total===undefined||total==="")return firstRecordedRate(fallback);
+  const value=Number(total);
+  return Number.isFinite(value)?Math.max(0,value*90/m):firstRecordedRate(fallback);
+}

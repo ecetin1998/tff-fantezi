@@ -5,6 +5,7 @@ const GITHUB_OIDC_ISSUER="https://token.actions.githubusercontent.com";
 const GITHUB_REPOSITORY_ID="1353738004";
 const GITHUB_JWKS_URL="https://token.actions.githubusercontent.com/.well-known/jwks";
 const OPS_REF="refs/heads/main";
+const SCORER_POLICY_VERSION="gk-sot-penalty-matched-v1";
 
 function decodeJwtJson(value){
   const padded=value.replace(/-/g,"+").replace(/_/g,"/").padEnd(Math.ceil(value.length/4)*4,"=");
@@ -40,10 +41,33 @@ function cardPoints(yellow,red,scoring){return red?num(scoring.red,-3):yellow?nu
 function goalkeeperSaveRate(per90Saves){return Math.max(.55,Math.min(.82,.68+.025*(num(per90Saves)-3)))}
 function expectedKeeperSaves(opponentGoalLambda,per90Saves,exposure=1){
   const saveRate=goalkeeperSaveRate(per90Saves);
-  const goalLambda=Math.max(.05,num(opponentGoalLambda));
+  const goalLambda=Math.max(0,num(opponentGoalLambda));
   const opponentSot=goalLambda/Math.max(.12,1-saveRate);
   return Math.max(0,opponentSot*saveRate*Math.max(0,exposure));
 }
+
+// Shots on target, goals conceded and saves must belong to the SAME sampled fixture.
+// A goal consumes a shot on target; 9 saves with 2 conceded needs at least 11 on target.
+function keeperSavesForScore(conceded,opponentLambda,per90Saves,exposure,poissonDraw){
+  const goals=Math.max(0,num(conceded));
+  const shotsMean=Math.max(0,num(opponentLambda))*Math.max(0,num(exposure))
+    +expectedKeeperSaves(opponentLambda,per90Saves,exposure);
+  return Math.max(0,poissonDraw(shotsMean)-goals);
+}
+
+// A saved penalty requires both a penalty awarded and the keeper saving it.
+// There is no trustworthy current-season PK-save ledger in the model inputs.
+// Shrink player priors to a ~0.02 per team-match external baseline (not 0.02
+// per player on the pitch), with modest attacking-pressure adjustment.
+function keeperPenaltySaveChance(per90Prior,opponentLambda,exposure=1){
+  if(!(Number(opponentLambda)>0))return 0; // zero attacking xG cannot produce a penalty chance
+  const prior=Math.max(0,Math.min(.2,num(per90Prior)));
+  const leagueRate=.0195;
+  const shrunk=Math.max(.01,Math.min(.03,.8*leagueRate+.2*prior));
+  const pressure=Math.max(.8,Math.min(1.2,.9+.1*Math.max(0,num(opponentLambda))/1.3));
+  return Math.min(.036,shrunk*pressure*Math.max(0,Math.min(1,num(exposure))));
+}
+
 function redCardExitMinute(enter,leave,u){
   const start=Math.max(0,num(enter)),end=Math.max(start+1,num(leave,90));
   const draw=Math.max(0,Math.min(.999999999,num(u)));
@@ -76,11 +100,15 @@ function normalizedRole(p){
   if(["FB","FULLBACK","LB","RB","BEK"].includes(raw))return "FB";
   return p.pos==="DEF"?"DEF":p.pos;
 }
-function allocationFor(p,a){
+function allocationFor(p,a,gameweek){
   const role=normalizedRole(p);
   const key=role==="CB"?"excess_cb":role==="FB"?"excess_fb":role==="WB"?"excess_wb":
     p.pos==="DEF"?"excess_def":p.pos==="MID"?"excess_mid":"excess_fwd";
-  const excess=a?num(a[key]):0;
+  // A one-week-stale sourced shot anomaly is still informative, but only at
+  // half strength. Never reuse older or future evidence as current match data.
+  const age=a?gameweek-1-num(a.through_gameweek):-1;
+  const freshness=age===0?1:age===1?.5:0;
+  const excess=a?num(a[key])*freshness:0;
   const exposure=a?num(a.exposure):0;
   const observed=a?num(a.observed_matches):0;
   const attenuation=observed>=5?.55:.85;
@@ -115,7 +143,7 @@ Deno.serve(async(req)=>{
       const del=await sb.from("scout_replay_sim_accum").delete()
         .eq("gameweek",GAMEWEEK).eq("benchmark_version",BENCHMARK);
       if(del.error)throw del.error;
-      return Response.json({ok:true,mode:"reset",benchmark:BENCHMARK});
+      return Response.json({ok:true,mode:"reset",benchmark:BENCHMARK,policy_version:SCORER_POLICY_VERSION});
     }
 
     if((u.searchParams.get("mode")||"")==="finalize"){
@@ -150,14 +178,16 @@ Deno.serve(async(req)=>{
         if(prediction.error)throw prediction.error;
         matchDistribution="NB2";
       }
-      return Response.json({ok:true,mode:"finalize",run_id:RUN_ID,gameweek:GAMEWEEK,benchmark:BENCHMARK,draws:minDraws,result:finalized.data,match_distribution:matchDistribution});
+      return Response.json({ok:true,mode:"finalize",run_id:RUN_ID,gameweek:GAMEWEEK,benchmark:BENCHMARK,draws:minDraws,result:finalized.data,match_distribution:matchDistribution,policy_version:SCORER_POLICY_VERSION});
     }
 
     const [pq,mq,metaq,aq,rulesq,goalDistQ]=await Promise.all([
       sb.from("scout_replay_player_inputs").select("*").eq("gameweek",GAMEWEEK).eq("benchmark_version",BENCHMARK).order("player_id"),
       sb.from("scout_replay_match_inputs").select("*").eq("gameweek",GAMEWEEK).eq("benchmark_version",BENCHMARK).order("match_id"),
       sb.from("scout_replay_input_meta").select("*").eq("gameweek",GAMEWEEK).eq("benchmark_version",BENCHMARK).single(),
-      sb.from("scout_player_single_shot_adjustments").select("*").eq("through_gameweek",GAMEWEEK-1),
+      sb.from("scout_player_single_shot_adjustments").select("*")
+        .gte("through_gameweek",Math.max(1,GAMEWEEK-2)).lte("through_gameweek",GAMEWEEK-1)
+        .order("through_gameweek",{ascending:false}),
       sb.from("scout_game_rules").select("rules").order("season",{ascending:false}).limit(1).single(),
       sb.from("scout_goal_distribution_config").select("version,distribution,alpha_used,gate_passed").eq("active",true).order("created_at",{ascending:false}).limit(1).maybeSingle()
     ]);
@@ -186,8 +216,9 @@ Deno.serve(async(req)=>{
     const useNb=Boolean(goalDist?.gate_passed)&&String(goalDist?.distribution||"").toUpperCase()==="NB2"&&num(goalDist?.alpha_used)>0;
     const goalAlpha=useNb?num(goalDist.alpha_used):0;
     const quotas=meta.team_formations||{};
-    const adj=new Map((aq.data||[]).map(x=>[Number(x.player_id),x]));
-    const allocation=P.map(p=>allocationFor(p,adj.get(p.id)));
+    const adj=new Map();
+    for(const a of aq.data||[])if(!adj.has(Number(a.player_id)))adj.set(Number(a.player_id),a);
+    const allocation=P.map(p=>allocationFor(p,adj.get(p.id),GAMEWEEK));
 
     let state=seed>>>0;
     const random=()=>{
@@ -341,6 +372,25 @@ Deno.serve(async(req)=>{
           }
         }
 
+        // Penalty save and attacking penalty miss are the SAME rare fixture event.
+        // A successful penalty is already included in the shared sampled score.
+        const savedPenaltyByKeeper=new Int16Array(M);
+        for(let side=0;side<2;side++){
+          const attackers=(teams[clubs[side]]||[]).filter(i=>mins[i]>0&&P[i].pos!=="GK");
+          const opponentGK=(teams[clubs[1-side]]||[]).find(i=>P[i].pos==="GK"&&mins[i]>0);
+          const attackingLambda=side===0?match.home_lambda:match.away_lambda;
+          if(!(attackingLambda>0)||opponentGK===undefined||!attackers.length)continue;
+          const saved=random()<keeperPenaltySaveChance(P[opponentGK].rates[8],attackingLambda,mins[opponentGK]/90);
+          const wide=!saved&&random()<.005*Math.max(.8,Math.min(1.2,attackingLambda/1.3));
+          if(!saved&&!wide)continue;
+          const taker=pick(attackers,i=>Math.max(0,P[i].rates[7])*mins[i]/90);
+          if(taker!==null)comp.penalties[taker]+=SCORING.penalty_miss;
+          if(saved){
+            comp.penalties[opponentGK]+=SCORING.penalty_save;
+            savedPenaltyByKeeper[opponentGK]=1;
+          }
+        }
+
         const base={};
         for(const i of both){
           const p=P[i],rates=p.rates,exposure=mins[i]/90;
@@ -348,12 +398,10 @@ Deno.serve(async(req)=>{
           comp.cs[i]=mins[i]>=60&&score[p.club===clubs[0]?1:0]===0?SCORING.clean_sheet[p.pos]:0;
           if(SCORING.conceded_per_2[p.pos])comp.conceded[i]=Math.floor(gc[i]/2)*SCORING.conceded_per_2[p.pos];
           if(p.pos==="GK"){
-            const saveLambda=expectedKeeperSaves(opponentLambda,rates[6],exposure);
-            comp.saves[i]=Math.floor(poisson(saveLambda)/3)*SCORING.saves_per_3;
+            const normalSaves=keeperSavesForScore(gc[i],opponentLambda,rates[6],exposure,poisson);
+            // A saved penalty counts as a keeper save, never a separate invented shot.
+            comp.saves[i]=Math.floor((normalSaves+savedPenaltyByKeeper[i])/3)*SCORING.saves_per_3;
           }
-          const penaltyPressure=Math.max(.25,Math.min(3,opponentLambda/1.35));
-          comp.penalties[i]=SCORING.penalty_miss*poisson(rates[7]*exposure)
-            +(p.pos==="GK"?SCORING.penalty_save*poisson(rates[8]*exposure*penaltyPressure):0);
           base[i]=keys.reduce((sum,k)=>sum+comp[k][i],0);
         }
         const bon=bonusByCompetitionRank(both,base,mins,SCORING);
@@ -386,7 +434,7 @@ Deno.serve(async(req)=>{
       p_gameweek:GAMEWEEK,p_benchmark:BENCHMARK,p_draws:draws,p_rows:result
     });
     if(mergeError)throw mergeError;
-    return Response.json({ok:true,run_id:RUN_ID,gameweek:GAMEWEEK,benchmark:BENCHMARK,draws,seed,players:M,matches:matches.length,goal_distribution:useNb?"NB2":"Poisson",goal_alpha:goalAlpha});
+    return Response.json({ok:true,run_id:RUN_ID,gameweek:GAMEWEEK,benchmark:BENCHMARK,draws,seed,players:M,matches:matches.length,goal_distribution:useNb?"NB2":"Poisson",goal_alpha:goalAlpha,policy_version:SCORER_POLICY_VERSION});
   }catch(e){
     return Response.json({error:String(e?.message||e),stack:String(e?.stack||"").slice(0,1200)},{status:500});
   }

@@ -1,5 +1,5 @@
 const assert=require('node:assert/strict')
-const {simulateScout,cardPoints,appearancePoints,expectedKeeperSaves,bonusByCompetitionRank,redCardExitMinute,isActiveAt}=require('./simulateScout')
+const {simulateScout,cardPoints,appearancePoints,expectedKeeperSaves,keeperSavesForScore,keeperPenaltySaveChance,bonusByCompetitionRank,redCardExitMinute,isActiveAt}=require('./simulateScout')
 
 function player(id,club,pos='MID'){
   return {
@@ -134,4 +134,94 @@ console.log('DGW, opponent-aware saves, red-card and bonus-tie checks passed');
   const cs=out.map(p=>p.components.cs),conceded=out.map(p=>p.components.conceded);
   assert.ok(Math.max(...cs)-Math.min(...cs)<.12,'same-team stable DEF clean-sheet expectation should align');
   assert.ok(Math.max(...conceded)-Math.min(...conceded)<.12,'same-team stable DEF conceded expectation should align');
+}
+
+
+// Scenario-coupled keeper returns: a conceded goal consumes one on-target shot.
+{
+  const shotDraw=()=>11;
+  assert.equal(keeperSavesForScore(2,2,5.4,1,shotDraw),9,
+    '11 on-target shots including two goals give exactly nine regular saves');
+  assert.equal(keeperSavesForScore(5,2,5.4,1,shotDraw),6,
+    'more conceded goals in the SAME 11 shots leave fewer saves');
+  assert.equal(keeperSavesForScore(14,2,5.4,1,shotDraw),0,
+    'saves cannot become negative when the sampled fixture scores many goals');
+  assert.equal(keeperSavesForScore(0,0,5.4,1,()=>0),0,
+    'a match with exactly zero attacking xG must not invent goalkeeper saves');
+  assert.equal(2+Math.floor(9/3)-Math.floor(2/2),4,
+    '90min + nine saves - two conceded (zero CS) is four base Fantasy points');
+}
+
+// Rare events cannot give a goalkeeper a free +0.5 xFP every week.
+{
+  const nearTwoGoals=keeperPenaltySaveChance(.0768226686,2.0,1);
+  const keeperLow=keeperPenaltySaveChance(.0227476515,1.074,1);
+  assert(nearTwoGoals>keeperLow,'player baseline can still weakly inform PK-save odds');
+  assert(nearTwoGoals<.037,'penalty save should be rarer than once per 27 GK matches');
+  assert(nearTwoGoals*5<.19,'maximum penal-save EV should remain a small part of xFP');
+  assert(keeperPenaltySaveChance(.0768,2,0)===0,'non-playing keeper cannot save penalties');
+  assert.equal(keeperPenaltySaveChance(.1,0,1),0,
+    'an attack with zero expected shots must never generate saved penalties');
+  assert(keeperPenaltySaveChance(1,9,1)<=.036,'bad priors cannot manufacture implausible events');
+}
+
+// Bonus depends only on realised fantasy BASE points: no CB, FB, MID or FWD
+// handicap/boost is allowed after identical point events.
+{
+  const id=[0,1,2],base={0:7,1:6,2:6};
+  // GK: 7 base; MID: 2 appearance+1 CS+3 assist; DEF: 2 appearance+4 CS.
+  const b=bonusByCompetitionRank(id,base,[90,90,90]);
+  assert.deepEqual([b[0],b[1],b[2]],[3,2,2],
+    'MID assist and DEF clean sheet tied at 6 get the same official tier bonus');
+}
+
+{
+  const fs=require('node:fs');
+  for(const f of ['supabase/functions/run-live-sim-chunk/index.ts','supabase/functions/run-enrichment-replay-chunk/index.ts']){
+    const edge=fs.readFileSync(f,'utf8');
+    assert.match(edge,/keeperSavesForScore\(gc\[i\],opponentLambda,rates\[6\],exposure,poisson\)/,
+      f+' must couple saves to the actual conceded match score');
+    assert.match(edge,/keeperPenaltySaveChance\(P\[opponentGK\]\.rates\[8\],attackingLambda,mins\[opponentGK\]\/90\)/,
+      f+' must use the defending goalkeeper prior for the same penalty attempt');
+    assert.match(edge,/comp\.penalties\[taker\]\+=SCORING\.penalty_miss/,
+      f+' saved or missed penalty must debit the attacking taker');
+    assert.match(edge,/comp\.penalties\[opponentGK\]\+=SCORING\.penalty_save/,
+      f+' the same saved penalty must credit the defending keeper');
+    assert.doesNotMatch(edge,/penalty_miss\*poisson\(rates\[7\]/,
+      f+' must never independently create multiple missed penalties per player');
+    assert.doesNotMatch(edge,/penalty_save\*poisson\(rates\[8\]/,
+      f+' must not use amplified Poisson penalty saves');
+  }
+}
+
+
+// Match-level missed penalty and keeper save must occur together; no player-level
+// independent Poisson that can miss multiple penalties on a single draw.
+{
+  const input=zeroEventInput(false);
+  input.matches[0].home_lambda=.85;
+  input.matches[0].away_lambda=.85;
+  for(const p of input.players){
+    p.rates[7]=p.pos==='FWD'?.05:0;
+    if(p.pos==='GK')p.rates[8]=.20;
+  }
+  const out=simulateScout(input,12000,20261015);
+  const saved=out.filter(p=>p.pos==='GK').reduce((s,p)=>s+p.components.penalties,0)/5;
+  const missed=-out.filter(p=>p.pos!=='GK').reduce((s,p)=>s+p.components.penalties,0)/2;
+  assert(saved>=0&&saved<.1,'saved penalties are rare, below .1 per fixture');
+  assert(missed>=saved-1e-9,
+    'each keeper saved penalty must also debit a real attacking penalty taker');
+  assert(missed<.15,'off-target missed penalties are rare and not added per player');
+}
+
+
+// A source SHA bump must NEVER silently re-run 50K against an old deployed
+// Supabase scorer and then mark the candidate as the new current run.
+{
+  const fs=require('node:fs');
+  const edge=fs.readFileSync('supabase/functions/run-live-sim-chunk/index.ts','utf8');
+  const workflow=fs.readFileSync('.github/workflows/weekly-model-lifecycle.yml','utf8');
+  assert.match(edge,/SCORER_POLICY_VERSION="gk-sot-penalty-matched-v1"/);
+  assert.equal((workflow.match(/MODEL_SCORER_POLICY_MISMATCH/g)||[]).length,6,
+    'both current-MH and next-MH runs must enforce scorer policy on reset/chunks/finalize');
 }

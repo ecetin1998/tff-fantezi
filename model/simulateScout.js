@@ -64,9 +64,32 @@ function goalkeeperSaveRate(per90Saves){
 
 function expectedKeeperSaves(opponentGoalLambda,per90Saves,exposure=1){
   const saveRate=goalkeeperSaveRate(per90Saves);
-  const goalLambda=Math.max(.05,Number(opponentGoalLambda)||0);
+  const goalLambda=Math.max(0,Number(opponentGoalLambda)||0);
   const opponentSot=goalLambda/Math.max(.12,1-saveRate);
   return Math.max(0,opponentSot*saveRate*Math.max(0,exposure));
+}
+
+
+// Shots on target, goals conceded and saves must belong to the SAME sampled fixture.
+// A goal consumes a shot on target; 9 saves with 2 conceded needs at least 11 on target.
+function keeperSavesForScore(conceded,opponentLambda,per90Saves,exposure,poissonDraw){
+  const goals=Math.max(0,Number(conceded)||0);
+  const shotsMean=Math.max(0,Number(opponentLambda)||0)*Math.max(0,Number(exposure)||0)
+    +expectedKeeperSaves(opponentLambda,per90Saves,exposure);
+  return Math.max(0,poissonDraw(shotsMean)-goals);
+}
+
+// A saved penalty requires both a penalty awarded and the keeper saving it.
+// There is no trustworthy current-season PK-save ledger in the model inputs.
+// Shrink player priors to a ~0.02 per team-match external baseline (not 0.02
+// per player on the pitch), with modest attacking-pressure adjustment.
+function keeperPenaltySaveChance(per90Prior,opponentLambda,exposure=1){
+  if(!(Number(opponentLambda)>0))return 0; // zero attacking xG cannot produce a penalty chance
+  const prior=Math.max(0,Math.min(.2,Number(per90Prior)||0));
+  const leagueRate=.0195;
+  const shrunk=Math.max(.01,Math.min(.03,.8*leagueRate+.2*prior));
+  const pressure=Math.max(.8,Math.min(1.2,.9+.1*Math.max(0,Number(opponentLambda)||0)/1.3));
+  return Math.min(.036,shrunk*pressure*Math.max(0,Math.min(1,Number(exposure)||0)));
 }
 
 function redCardExitMinute(enter,leave,u){
@@ -240,6 +263,25 @@ function simulateScout(input,count,seed,attackPolicy=true){
         }
       }
 
+      // Penalty save and attacking penalty miss are the SAME rare fixture event.
+      // A successful penalty is already included in the shared sampled score.
+      const savedPenaltyByKeeper=new Int16Array(M);
+      for(let side=0;side<2;side++){
+        const attackers=(teams[clubs[side]]||[]).filter(i=>mins[i]>0&&P[i].pos!=="GK");
+        const opponentGK=(teams[clubs[1-side]]||[]).find(i=>P[i].pos==="GK"&&mins[i]>0);
+        const attackingLambda=side===0?match.home_lambda:match.away_lambda;
+        if(!(attackingLambda>0)||opponentGK===undefined||!attackers.length)continue;
+        const saved=random()<keeperPenaltySaveChance(P[opponentGK].rates[8],attackingLambda,mins[opponentGK]/90);
+        const wide=!saved&&random()<.005*Math.max(.8,Math.min(1.2,attackingLambda/1.3));
+        if(!saved&&!wide)continue;
+        const taker=pick(attackers,i=>Math.max(0,P[i].rates[7])*mins[i]/90);
+        if(taker!==null)comp.penalties[taker]+=SCORING.penalty_miss;
+        if(saved){
+          comp.penalties[opponentGK]+=SCORING.penalty_save;
+          savedPenaltyByKeeper[opponentGK]=1;
+        }
+      }
+
       const base={};
       for(const i of both){
         const p=P[i],rates=p.rates,exposure=mins[i]/90;
@@ -247,13 +289,11 @@ function simulateScout(input,count,seed,attackPolicy=true){
         // Official rule: clean sheet is a match-level team outcome plus >=60 minutes.
         comp.cs[i]=mins[i]>=60&&score[Number(p.club)===clubs[0]?1:0]===0?SCORING.clean_sheet[p.pos]:0;
         if(SCORING.conceded_per_2[p.pos])comp.conceded[i]=Math.floor(gc[i]/2)*SCORING.conceded_per_2[p.pos];
-        if(p.pos==='GK'){
-          const saveLambda=expectedKeeperSaves(opponentLambda,rates[6],exposure);
-          comp.saves[i]=Math.floor(poisson(saveLambda)/3)*SCORING.saves_per_3;
+        if(p.pos==="GK"){
+          const normalSaves=keeperSavesForScore(gc[i],opponentLambda,rates[6],exposure,poisson);
+          // A saved penalty counts as a keeper save, never a separate invented shot.
+          comp.saves[i]=Math.floor((normalSaves+savedPenaltyByKeeper[i])/3)*SCORING.saves_per_3;
         }
-        const penaltyPressure=Math.max(.25,Math.min(3,opponentLambda/1.35));
-        comp.penalties[i]=SCORING.penalty_miss*poisson(rates[7]*exposure)
-          +(p.pos==='GK'?SCORING.penalty_save*poisson(rates[8]*exposure*penaltyPressure):0);
         base[i]=keys.reduce((sum,k)=>sum+comp[k][i],0);
       }
 
@@ -321,5 +361,5 @@ function simulateScout(input,count,seed,attackPolicy=true){
 
 module.exports={
   simulateScout,cardPoints,appearancePoints,histogramQuantile,
-  expectedKeeperSaves,goalkeeperSaveRate,bonusByCompetitionRank,redCardExitMinute,isActiveAt
+  expectedKeeperSaves,goalkeeperSaveRate,keeperSavesForScore,keeperPenaltySaveChance,bonusByCompetitionRank,redCardExitMinute,isActiveAt
 };
