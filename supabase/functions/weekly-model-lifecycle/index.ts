@@ -467,16 +467,18 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
   const deadline=kickoff-36e5
   if(now>=deadline)return {refresh_required:false,reason:"CURRENT_WEEK_LOCKED",deadline_at:new Date(deadline).toISOString()}
 
-  const [latestMetaQ,stableMetaQ,availabilityQ,rolesQ,goalConfigQ,playersUpdatedQ,currentProjectionQ]=await Promise.all([
+  const [latestMetaQ,stableMetaQ,availabilityQ,rolesQ,goalConfigQ,playersUpdatedQ,currentProjectionQ,officialQ,playersQ]=await Promise.all([
     sb.from("scout_replay_input_meta").select("*").eq("gameweek",gw).order("created_at",{ascending:false}).limit(1).maybeSingle(),
     sb.from("scout_replay_input_meta").select("benchmark_version").eq("gameweek",gw).not("benchmark_version","ilike","intraday-%").order("created_at",{ascending:false}).limit(1).maybeSingle(),
     sb.from("scout_availability").select("*").eq("run_id",current.id),
     sb.from("scout_role_signals").select("*").eq("run_id",current.id),
     sb.from("scout_goal_distribution_config").select("version,alpha_used,gate_benchmark").eq("active",true).order("created_at",{ascending:false}).limit(1).maybeSingle(),
     sb.from("scout_players").select("updated_at").eq("active",true).order("updated_at",{ascending:false}).limit(1).maybeSingle(),
-    sb.from("scout_player_projections").select("player_id,opponent_name,venue,confidence,data_confidence").eq("run_id",current.id)
+    sb.from("scout_player_projections").select("player_id,opponent_name,venue,confidence,data_confidence").eq("run_id",current.id),
+    officialEvidenceQuery(sb),
+    sb.from("scout_players").select("id,team_id,position,primary_role").eq("active",true)
   ])
-  for(const q of [latestMetaQ,stableMetaQ,availabilityQ,rolesQ,goalConfigQ,playersUpdatedQ,currentProjectionQ])if(q.error)throw q.error
+  for(const q of [latestMetaQ,stableMetaQ,availabilityQ,rolesQ,goalConfigQ,playersUpdatedQ,currentProjectionQ,officialQ,playersQ])if(q.error)throw q.error
   if(!latestMetaQ.data)return {refresh_required:false,reason:"CURRENT_SIM_INPUT_META_MISSING"}
 
   const availabilityTimes=(availabilityQ.data||[])
@@ -503,10 +505,12 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
       deadline_at:new Date(deadline).toISOString()
     }
   }
+  const officialSourceLatest=(officialQ.data||[]).reduce(
+    (stamp:any,e:any)=>newer(stamp,e.source_updated_at),null
+  )
   const latestSourceAt=new Date(newer(
-    availabilitySourceLatest,
-    playersUpdatedQ.data?.updated_at,
-    current.source_updated_at
+    availabilitySourceLatest,playersUpdatedQ.data?.updated_at,
+    current.source_updated_at,officialSourceLatest
   )).toISOString()
   const hoursUntilDeadline=Math.max(0,(deadline-now)/36e5)
   const minInterval=hoursUntilDeadline<=12?2:hoursUntilDeadline<=48?6:24
@@ -564,6 +568,8 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
   const avMap=new Map((availabilityQ.data||[]).map((x:any)=>[Number(x.player_id),x]))
   const roleMap=new Map((rolesQ.data||[]).map((x:any)=>[Number(x.player_id),x]))
   const projectionMap=new Map((currentProjectionQ.data||[]).map((x:any)=>[Number(x.player_id),x]))
+  const official=officialMatchEvidence(officialQ.data||[],playersQ.data||[])
+  const officialPlayers=new Map((playersQ.data||[]).map((p:any)=>[Number(p.id),p]))
 
   const inputRows=(inputsQ.data||[]).map((x:any)=>{
     const av=avMap.get(Number(x.player_id))
@@ -573,11 +579,20 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
     // starters and inflates bench players on every refresh. Always anchor this weight to the
     // latest non-intraday baseline; availability remains a separate multiplier in simulation.
     const stableRole=n(stableRoleMap.get(Number(x.player_id)),n(x.role_probability,.5))
-    return {
-      ...x,benchmark_version:benchmark,
+    const event=official.latest.get(Number(x.player_id))
+    const player=officialPlayers.get(Number(x.player_id))
+    const adjusted=applyOfficialMinutesEvidence({
+      baseline:stableRole,durations:x.durations,durationWeights:x.duration_weights,
+      fixtureKickoff:new Date(kickoff).toISOString(),evidence:event,
+      sameSlotStarter:player&&event?official.directCompetitor(player,event):false,
       availability,
-      role_probability:clamp(.000001,.999999,stableRole),
+    })
+    return {
+      ...x,benchmark_version:benchmark,availability,
+      role_probability:adjusted.role,durations:adjusted.durations,
+      duration_weights:adjusted.duration_weights,
       source_note:`intraday refresh from ${sourceBenchmark}; role baseline ${stableRoleBenchmark}; source ${latestSourceAt}`
+        +(adjusted.applied?` • resmî maç: ${event.match_ref}`:"")
     }
   })
   const matchInputs=(matchesQ.data||[]).map((x:any)=>({...x,benchmark_version:benchmark,source_note:`intraday refresh from ${sourceBenchmark}`}))
@@ -606,11 +621,13 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
   })
   const availabilityRows=(availabilityQ.data||[]).map((x:any)=>{const {run_id:_,...rest}=x;return {...rest,run_id:runId}})
   const teamByPlayer=new Map((inputRows||[]).map((x:any)=>[Number(x.player_id),Number(x.club_id)]))
+  const refreshedInputs=new Map(inputRows.map((x:any)=>[Number(x.player_id),x]))
   const roleBase=(rolesQ.data||[]).map((x:any)=>{
     const {run_id:_,...rest}=x
     const av=avMap.get(Number(x.player_id))
     return {
       ...rest,run_id:runId,
+      predicted_xi_probability:n((refreshedInputs.get(Number(x.player_id)) as any)?.role_probability,x.predicted_xi_probability),
       availability_probability:clamp(0,1,n(av?.availability_probability,x.availability_probability)),
       team_id:teamByPlayer.get(Number(x.player_id))
     }
