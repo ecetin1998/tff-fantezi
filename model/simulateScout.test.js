@@ -112,7 +112,7 @@ function zeroEventInput(doubleWeek=false){
   const bonus=bonusByCompetitionRank(ids,base,minutes);
   assert.equal(bonus[0],3);
   assert.equal(bonus[1],3);
-  assert.equal(bonus[2],1,'two players tied first occupy the first two places; next player is rank three');
+  assert.equal(bonus[2],2,'first-place tie shares +3; next tier receives +2');
   assert.equal(bonus[3],undefined);
 }
 
