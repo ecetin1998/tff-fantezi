@@ -22,48 +22,24 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 8
     steps:
-      - name: Cross-check production HTML, API and deployed revision
+      - uses: actions/checkout@v4
+      - name: Check production health and resolve active model week
         shell: bash
         run: |
           set -euo pipefail
           BASE="https://fanteziligrehberi.com"
-          tmp="$(mktemp -d)"
-          trap 'rm -rf "$tmp"' EXIT
-          fetch() {
-            local path="$1" name="$2"
-            local status
-            status="$(curl --silent --show-error --location --max-time 45 \
-              --retry 3 --retry-delay 2 --retry-all-errors \
-              -H "Cache-Control: no-cache" \
-              -D "$tmp/${name}.headers" -o "$tmp/$name" \
-              -w '%{http_code}' "$BASE$path")"
-            echo "$path HTTP $status"
-            grep -Ei '^(cf-cache-status|cache-control|age):' "$tmp/${name}.headers" || true
-            [[ "$status" == "200" ]]
-          }
-          fetch "/api/health" health
-          jq -c '{ok,sha,environment}' "$tmp/health"
-          fetch "/api/scout-data?section=matches" matches_api
-          jq -c '{gameweek:.current_run.gameweek,run_id:.current_run.id,ready:.current_run.status,fixtures:(.matches|length)}' "$tmp/matches_api"
-          jq -e '.current_run.status == "ready" and .current_run.is_current == true and (.matches|length) == 9' "$tmp/matches_api" >/dev/null
-          week="$(jq -er '.current_run.gameweek' "$tmp/matches_api")"
-          fetch "/?verify_live_week=$week" home
-          fetch "/players?verify_live_week=$week" players
-          fetch "/matches?verify_live_week=$week" matches
-          fetch "/squads?verify_live_week=$week" squads
-          python3 - "$tmp" "$week" <<'PY'
-          import html,re,sys,pathlib
-          root=pathlib.Path(sys.argv[1])
-          week=sys.argv[2]
-          routes={'home':r'xFP lideri','players':r'Oyuncu Analizi','matches':r'Maç Tahminleri','squads':r'Kadro Önerileri'}
-          for route,label in routes.items():
-              source=(root/route).read_text(encoding='utf8',errors='replace')
-              clean=re.sub(r'<(script|style)\b[^>]*>[\s\S]*?</\1>',' ',source,flags=re.I)
-              clean=html.unescape(re.sub('<[^>]+>',' ',clean))
-              clean=' '.join(clean.split())
-              found=bool(re.search(r'\bMH'+week+r'\s+'+label,clean))
-              markers=re.findall(r'\bMH\d+\b',clean)
-              print(f'page={route} expected=MH{week} matched={found} visible_mh={dict((m,markers.count(m)) for m in set(markers))}')
-              if not found: raise SystemExit(f'WRONG WEEK: {route} does not show MH{week}')
-          print('LIVE MODEL WEEK VERIFIED: API and all four public pages show MH'+week)
-          PY
+          curl --fail --silent --show-error --location --max-time 45 \
+            --retry 3 --retry-delay 2 --retry-all-errors \
+            -H 'Cache-Control: no-cache' "$BASE/api/health" | jq -e '.ok == true'
+          api="$(curl --fail --silent --show-error --location --max-time 45 \
+            --retry 3 --retry-delay 2 --retry-all-errors \
+            -H 'Cache-Control: no-cache' "$BASE/api/scout-data?section=matches")"
+          printf '%s' "$api" | jq -e \
+            '.current_run.is_current == true and .current_run.status == "ready" and (.matches | length) == 9'
+          echo "EXPECTED_GAMEWEEK=$(printf '%s' "$api" | jq -er '.current_run.gameweek')" >> "$GITHUB_ENV"
+      - name: Verify React SSR page headings against the published gameweek
+        # Share the release verifier instead of stripping HTML tags with regex:
+        # React 19 fragments MH<!-- -->8<!-- --> into text nodes, which the
+        # previous standalone probe incorrectly interpreted as "MH 8".
+        # This check is read-only and does NOT deploy Cloudflare.
+        run: bash scripts/verify-published-gameweek.sh
