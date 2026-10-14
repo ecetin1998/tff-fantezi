@@ -59,11 +59,13 @@ console.log('Source-backed defensive match scenario and bonus tie QA passed')
 {
   const examples=[
     {base:[8,7,6],bonus:[3,2,1]},
-    {base:[8,8,6],bonus:[3,3,1]},
+    {base:[8,8,6],bonus:[3,3,2]},
     {base:[8,8,8,6],bonus:[3,3,3,0]},
     {base:[8,7,7,6],bonus:[3,2,2,0]},
-    {base:[8,8,7,7],bonus:[3,3,1,1]},
+    {base:[8,8,7,7],bonus:[3,3,2,2]},
     {base:[8,8,8,8],bonus:[3,3,3,3]},
+    {base:[8,7,6,6],bonus:[3,2,1,1]},
+    {base:[8,8,7,6],bonus:[3,3,2,0]},
   ];
   for(const example of examples){
     const ids=example.base.map((_,i)=>i)
@@ -118,6 +120,8 @@ console.log('Source-backed defensive match scenario and bonus tie QA passed')
 
 {
   const fs=require('node:fs')
+  // Production Edge and local Node must both follow dense-tier policy.
+  // Older closed-week source rows are stored historical results, not rerated here.
   const edge=fs.readFileSync('supabase/functions/run-live-sim-chunk/index.ts','utf8')
   assert.match(edge,/const score=\[teamGoals\(match\.home_lambda\),teamGoals\(match\.away_lambda\)\]/,
     'Production simulation must use a common goal outcome for both sides')
