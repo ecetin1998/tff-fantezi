@@ -647,12 +647,12 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
   const roleBase=(rolesQ.data||[]).map((x:any)=>{
     const {run_id:_,...rest}=x
     const av=avMap.get(Number(x.player_id))
+    const input=refreshedInputs.get(Number(x.player_id)) as any
     return {
       ...rest,run_id:runId,
       predicted_xi_probability:n((refreshedInputs.get(Number(x.player_id)) as any)?.role_probability,x.predicted_xi_probability),
       signal:(()=>{
         const event=official.latest.get(Number(x.player_id))
-        const input=refreshedInputs.get(Number(x.player_id)) as any
         const used=event&&String(input?.source_note||"").includes(String(event.match_ref))
         return used&&event.started&&Number(event.minutes)>=75?"RESMÎ MAÇTA İLK 11"
           :used&&event.squad_status==="unused"?"RESMÎ MAÇTA YEDEK":x.signal
