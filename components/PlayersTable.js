@@ -10,6 +10,7 @@ import AccessGate from '@/components/AccessGate'
 
 const posLabel=p=>({GK:'KL',DEF:'DEF',MID:'OS',FWD:'FOR'}[p]||p||'—')
 const PAGE_SIZE=50
+const isAdvancedSort=key=>['p25','p90','six','xg','xa'].includes(key)
 
 export default function PlayersTable({players,total,page,pageCount,teams,filters,accessTier='visitor',staticPool=false,runId=null}){
   const router=useRouter()
@@ -24,6 +25,7 @@ export default function PlayersTable({players,total,page,pageCount,teams,filters
   const isPro=tier==='pro'
   const isVisitor=tier==='visitor'
   const activeFilters=staticPool?localFilters:filters
+  const proMetricsPending=isPro&&!overlayReady
   const [q,setQ]=useState(filters?.q||'')
 
   useEffect(()=>{if(!staticPool)setQ(activeFilters?.q||'')},[activeFilters?.q,staticPool])
@@ -123,10 +125,17 @@ export default function PlayersTable({players,total,page,pageCount,teams,filters
   },[q,activeFilters?.q,navigate])
 
   const changeSort=key=>{
+    // Never silently sort identical null private metrics while the Pro
+    // RPC is still loading (or failed). A real 0% is different from null.
+    if(isPro&&isAdvancedSort(key)&&!overlayReady)return
     const same=activeFilters?.sort===key
     navigate({sort:key,dir:same&&activeFilters?.dir==='desc'?'asc':'desc',page:1})
   }
-  const head=(key,label)=><th onClick={()=>changeSort(key)}>{label}{activeFilters?.sort===key?<span className="sortmark">{activeFilters?.dir==='asc'?' ↑':' ↓'}</span>:null}</th>
+  const head=(key,label)=><th
+    onClick={()=>changeSort(key)}
+    aria-busy={isPro&&isAdvancedSort(key)&&!overlayReady?'true':undefined}
+    title={isPro&&isAdvancedSort(key)&&!overlayReady?'Gelişmiş oyuncu verileri yükleniyor':undefined}
+  >{label}{activeFilters?.sort===key?<span className="sortmark">{activeFilters?.dir==='asc'?' ↑':' ↓'}</span>:null}</th>
   const pct=v=>v===null||v===undefined||v===''?'—':String((Number(v)*100).toFixed(0))+'%'
   const num=(v,d=2)=>v===null||v===undefined||v===''?'—':Number(v).toFixed(d)
   const playerNote=p=>{
@@ -135,7 +144,7 @@ export default function PlayersTable({players,total,page,pageCount,teams,filters
     const visible=availabilityIsIssue(a)||a.availability_type==='return'||a.expected_return_date||a.suspension_fixture
     return visible?availabilityCompactNote(a):''
   }
-  const localRows=useMemo(()=>{if(!staticPool)return players;const f=localFilters||{},needle=String(f.q||'').toLocaleLowerCase('tr');let rows=pool.filter(p=>(!f.team||p.team===f.team)&&(!f.pos||p.position===f.pos)&&(!needle||(`${p.full_name} ${p.team} ${p.projection?.opponent_name||''}`).toLocaleLowerCase('tr').includes(needle)));const val=(p,k)=>k==='name'?p.full_name:k==='team'?p.team:k==='pos'?p.position:k==='opp'?p.projection?.opponent_name:k==='price'?Number(p.price||0):k==='points'?Number(p.total_points||0):k==='xi'?Number(p.projection?.xi_probability||0):k==='minutes'?Number(p.projection?.x_minutes||0):k==='p25'?Number(p.projection?.p25||0):k==='p90'?Number(p.projection?.p90||0):k==='six'?Number(p.projection?.six_plus_probability||0):k==='xg'?Number(p.projection?.expected_goals||0):k==='xa'?Number(p.projection?.expected_assists||0):k==='value'?Number(p.projection?.value_score||0):Number(p.projection?.xfp||0);rows=[...rows].sort((a,b)=>{const av=val(a,f.sort||'xfp'),bv=val(b,f.sort||'xfp'),cmp=typeof av==='string'?String(av).localeCompare(String(bv),'tr'):av-bv;return f.dir==='asc'?cmp:-cmp});return rows},[staticPool,players,pool,localFilters])
+  const localRows=useMemo(()=>{if(!staticPool)return players;const f=localFilters||{},needle=String(f.q||'').toLocaleLowerCase('tr');let rows=pool.filter(p=>(!f.team||p.team===f.team)&&(!f.pos||p.position===f.pos)&&(!needle||(`${p.full_name} ${p.team} ${p.projection?.opponent_name||''}`).toLocaleLowerCase('tr').includes(needle)));const val=(p,k)=>k==='name'?p.full_name:k==='team'?p.team:k==='pos'?p.position:k==='opp'?p.projection?.opponent_name:k==='price'?Number(p.price||0):k==='points'?Number(p.total_points||0):k==='xi'?Number(p.projection?.xi_probability||0):k==='minutes'?Number(p.projection?.x_minutes||0):k==='p25'?p.projection?.p25:k==='p90'?p.projection?.p90:k==='six'?p.projection?.six_plus_probability:k==='xg'?p.projection?.expected_goals:k==='xa'?p.projection?.expected_assists:k==='value'?Number(p.projection?.value_score||0):Number(p.projection?.xfp||0);const sortKey=isPro&&isAdvancedSort(f.sort)&&!overlayReady?'xfp':(f.sort||'xfp');rows=[...rows].sort((a,b)=>{const av=val(a,sortKey),bv=val(b,sortKey),an=av===null||av===undefined,bn=bv===null||bv===undefined;if(an!==bn)return an?1:-1;const cmp=typeof av==='string'?String(av).localeCompare(String(bv),'tr'):Number(av||0)-Number(bv||0);return (f.dir==='asc'?cmp:-cmp)||String(a.full_name||'').localeCompare(String(b.full_name||''),'tr')});return rows},[staticPool,players,pool,localFilters,isPro,overlayReady])
   const effectiveTotal=staticPool?localRows.length:total,effectivePage=staticPool?Math.max(1,Number(localFilters?.page||1)):page,effectivePageCount=staticPool?Math.max(1,Math.ceil(effectiveTotal/PAGE_SIZE)):pageCount
   const visiblePlayers=staticPool?(isVisitor?localRows.slice(0,15):localRows.slice((effectivePage-1)*PAGE_SIZE,effectivePage*PAGE_SIZE)):players
   const offset=(Math.max(1,Number(effectivePage||1))-1)*PAGE_SIZE
@@ -155,7 +164,7 @@ export default function PlayersTable({players,total,page,pageCount,teams,filters
       <select value={activeFilters?.pos||''} onChange={e=>navigate({pos:e.target.value,page:1})}>
         <option value="">Tüm mevkiler</option><option value="GK">KL</option><option value="DEF">DEF</option><option value="MID">OS</option><option value="FWD">FOR</option>
       </select>
-      <select className="mobile-sort-select" value={activeFilters?.sort||'xfp'} onChange={e=>navigate({sort:e.target.value,dir:'desc',page:1})}>
+      <select className="mobile-sort-select" value={activeFilters?.sort||'xfp'} disabled={proMetricsPending} aria-busy={proMetricsPending?'true':undefined} title={proMetricsPending?'Gelişmiş P90 ve 6+ verileri yükleniyor':undefined} onChange={e=>navigate({sort:e.target.value,dir:'desc',page:1})}>
         <option value="xfp">xFP'ye göre</option><option value="xi">İlk 11 ihtimaline göre</option><option value="minutes">Dakikaya göre</option>
         {isPro?<><option value="p90">P90'a göre</option><option value="six">6+ ihtimaline göre</option></>:null}
         <option value="points">Toplam puana göre</option><option value="value">F/P'ye göre</option><option value="price">Fiyata göre</option>
@@ -189,7 +198,7 @@ export default function PlayersTable({players,total,page,pageCount,teams,filters
           <div className="mobile-player-metrics">
             <div><span>İlk 11</span><b>{pct(p.projection?.xi_probability)}</b></div>
             <div><span>xDakika</span><b>{num(p.projection?.x_minutes,0)}</b></div>
-            {isPro?<><div><span>6+ puan</span><b>{pct(p.projection?.six_plus_probability)}</b></div><div><span>P90</span><b>{num(p.projection?.p90,1)}</b></div></>:<>
+            {isPro?<><div><span>6+ puan</span><b>{overlayReady?pct(p.projection?.six_plus_probability):overlayError?'—':'…'}</b></div><div><span>P90</span><b>{overlayReady?num(p.projection?.p90,1):overlayError?'—':'…'}</b></div></>:<>
               <div><span>F/P</span><b>{num(p.projection?.value_score)}</b></div>
               <div><span>Toplam</span><b>{num(p.total_points,0)}</b></div>
             </>}
@@ -206,7 +215,7 @@ export default function PlayersTable({players,total,page,pageCount,teams,filters
         <td><Link className="player-link team-player-link" href={'/players/'+p.id}><i className="club-dot"/><b>{playerLabel(p)}</b></Link>{fixtureBadge(p.projection)?<small className="cell-note">{fixtureBadge(p.projection)}</small>:null}{playerNote(p)?<small className="cell-note">{playerNote(p)}</small>:null}</td>
         <td><Link className="team-table-link" href={'/teams/'+p.team_id}>{p.team}</Link></td><td><span className={'pos '+p.position}>{posLabel(p.position)}</span>{playerRoleLabel(p)?<small className="cell-note">{playerRoleLabel(p)}</small>:null}</td><td>{p.projection?.opponent_name||'—'}</td><td>{p.projection?.venue==='HOME'?'Ev':p.projection?.venue==='AWAY'?'Dep':'—'}</td>
         <td>{num(p.price,1)}m</td><td><b>{num(p.total_points,0)}</b></td><td>{pct(p.projection?.xi_probability)}</td><td>{num(p.projection?.x_minutes,0)}</td><td><b>{num(p.projection?.xfp)}</b></td>
-        {isPro?<><td>{num(p.projection?.p25,1)}</td><td>{num(p.projection?.p90,1)}</td><td>{pct(p.projection?.six_plus_probability)}</td><td>{num(p.projection?.expected_goals)}</td><td>{num(p.projection?.expected_assists)}</td></>:null}<td>{num(p.projection?.value_score)}</td>
+        {isPro?<><td>{overlayReady?num(p.projection?.p25,1):overlayError?'—':'…'}</td><td>{overlayReady?num(p.projection?.p90,1):overlayError?'—':'…'}</td><td>{overlayReady?pct(p.projection?.six_plus_probability):overlayError?'—':'…'}</td><td>{overlayReady?num(p.projection?.expected_goals):overlayError?'—':'…'}</td><td>{overlayReady?num(p.projection?.expected_assists):overlayError?'—':'…'}</td></>:null}<td>{num(p.projection?.value_score)}</td>
       </tr>)}</tbody></table></div>
     </>}
 
