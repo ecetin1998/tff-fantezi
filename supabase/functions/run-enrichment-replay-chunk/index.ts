@@ -58,7 +58,7 @@ function cardPoints(yellow,red){return red?SCORING.red:yellow?SCORING.yellow:0}
 function goalkeeperSaveRate(per90Saves){return Math.max(.55,Math.min(.82,.68+.025*(num(per90Saves)-3)))}
 function expectedKeeperSaves(opponentGoalLambda,per90Saves,exposure=1){
   const saveRate=goalkeeperSaveRate(per90Saves);
-  const goalLambda=Math.max(.05,num(opponentGoalLambda));
+  const goalLambda=Math.max(0,num(opponentGoalLambda));
   const opponentSot=goalLambda/Math.max(.12,1-saveRate);
   return Math.max(0,opponentSot*saveRate*Math.max(0,exposure));
 }
@@ -77,6 +77,7 @@ function keeperSavesForScore(conceded,opponentLambda,per90Saves,exposure,poisson
 // Shrink player priors to a ~0.02 per team-match external baseline (not 0.02
 // per player on the pitch), with modest attacking-pressure adjustment.
 function keeperPenaltySaveChance(per90Prior,opponentLambda,exposure=1){
+  if(!(Number(opponentLambda)>0))return 0; // zero attacking xG cannot produce a penalty chance
   const prior=Math.max(0,Math.min(.2,num(per90Prior)));
   const leagueRate=.0195;
   const shrunk=Math.max(.01,Math.min(.03,.8*leagueRate+.2*prior));
