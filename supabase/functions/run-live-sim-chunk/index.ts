@@ -364,21 +364,36 @@ Deno.serve(async(req)=>{
           }
         }
 
+        // Penalty save and attacking penalty miss are the SAME rare fixture event.
+        // A successful penalty is already included in the shared sampled score.
+        const savedPenaltyByKeeper=new Int16Array(M);
+        for(let side=0;side<2;side++){
+          const attackers=(teams[clubs[side]]||[]).filter(i=>mins[i]>0&&P[i].pos!=="GK");
+          const opponentGK=(teams[clubs[1-side]]||[]).find(i=>P[i].pos==="GK"&&mins[i]>0);
+          const attackingLambda=side===0?match.home_lambda:match.away_lambda;
+          if(!(attackingLambda>0)||opponentGK===undefined||!attackers.length)continue;
+          const saved=random()<keeperPenaltySaveChance(P[opponentGK].rates[8],attackingLambda,mins[opponentGK]/90);
+          const wide=!saved&&random()<.005*Math.max(.8,Math.min(1.2,attackingLambda/1.3));
+          if(!saved&&!wide)continue;
+          const taker=pick(attackers,i=>Math.max(0,P[i].rates[7])*mins[i]/90);
+          if(taker!==null)comp.penalties[taker]+=SCORING.penalty_miss;
+          if(saved){
+            comp.penalties[opponentGK]+=SCORING.penalty_save;
+            savedPenaltyByKeeper[opponentGK]=1;
+          }
+        }
+
         const base={};
         for(const i of both){
           const p=P[i],rates=p.rates,exposure=mins[i]/90;
           const opponentLambda=p.club===clubs[0]?match.away_lambda:match.home_lambda;
           comp.cs[i]=mins[i]>=60&&score[p.club===clubs[0]?1:0]===0?SCORING.clean_sheet[p.pos]:0;
           if(SCORING.conceded_per_2[p.pos])comp.conceded[i]=Math.floor(gc[i]/2)*SCORING.conceded_per_2[p.pos];
-          let savedPenalty=0;
           if(p.pos==="GK"){
-            savedPenalty=random()<keeperPenaltySaveChance(rates[8],opponentLambda,exposure)?1:0;
             const normalSaves=keeperSavesForScore(gc[i],opponentLambda,rates[6],exposure,poisson);
-            // Penalty saves are also goalkeeper saves; do not double-count twice.
-            comp.saves[i]=Math.floor((normalSaves+savedPenalty)/3)*SCORING.saves_per_3;
+            // A saved penalty counts as a keeper save, never a separate invented shot.
+            comp.saves[i]=Math.floor((normalSaves+savedPenaltyByKeeper[i])/3)*SCORING.saves_per_3;
           }
-          comp.penalties[i]=SCORING.penalty_miss*poisson(rates[7]*exposure)
-            +savedPenalty*SCORING.penalty_save;
           base[i]=keys.reduce((sum,k)=>sum+comp[k][i],0);
         }
         const bon=bonusByCompetitionRank(both,base,mins,SCORING);
