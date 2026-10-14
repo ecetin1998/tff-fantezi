@@ -146,6 +146,8 @@ console.log('DGW, opponent-aware saves, red-card and bonus-tie checks passed');
     'more conceded goals in the SAME 11 shots leave fewer saves');
   assert.equal(keeperSavesForScore(14,2,5.4,1,shotDraw),0,
     'saves cannot become negative when the sampled fixture scores many goals');
+  assert.equal(keeperSavesForScore(0,0,5.4,1,()=>0),0,
+    'a match with exactly zero attacking xG must not invent goalkeeper saves');
   assert.equal(2+Math.floor(9/3)-Math.floor(2/2),4,
     '90min + nine saves - two conceded (zero CS) is four base Fantasy points');
 }
@@ -158,6 +160,8 @@ console.log('DGW, opponent-aware saves, red-card and bonus-tie checks passed');
   assert(nearTwoGoals<.037,'penalty save should be rarer than once per 27 GK matches');
   assert(nearTwoGoals*5<.19,'maximum penal-save EV should remain a small part of xFP');
   assert(keeperPenaltySaveChance(.0768,2,0)===0,'non-playing keeper cannot save penalties');
+  assert.equal(keeperPenaltySaveChance(.1,0,1),0,
+    'an attack with zero expected shots must never generate saved penalties');
   assert(keeperPenaltySaveChance(1,9,1)<=.036,'bad priors cannot manufacture implausible events');
 }
 
