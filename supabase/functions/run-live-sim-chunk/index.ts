@@ -53,13 +53,19 @@ function isActiveAt(enter,leave,minute){return num(enter)<=num(minute)&&num(leav
 function bonusByCompetitionRank(ids,base,minutes,scoring){
   const bonusValues=(scoring.bonus||[3,2,1]).map(Number);
   const ordered=ids.filter(i=>minutes[i]>0).sort((a,b)=>base[b]-base[a]||a-b);
-  const bonus={}; let previousScore=null,rank=-1;
-  for(let index=0;index<ordered.length;index++){
-    const i=ordered[index],score=base[i];
-    if(previousScore===null||score!==previousScore)rank=index;
+  const bonus={}; let previousScore=null,tier=-1,awarded=0;
+  // Dense tiers until at least three players have received bonuses.
+  // 8,8,6 -> +3,+3,+2; a three-way top tie -> +3,+3,+3.
+  for(const i of ordered){
+    const score=base[i];
+    if(previousScore===null||score!==previousScore){
+      if(awarded>=bonusValues.length)break;
+      tier++;
+    }
     previousScore=score;
-    if(rank>=bonusValues.length)break;
-    bonus[i]=bonusValues[rank];
+    if(tier>=bonusValues.length)break;
+    bonus[i]=bonusValues[tier];
+    awarded++;
   }
   return bonus;
 }

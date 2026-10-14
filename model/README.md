@@ -47,3 +47,10 @@ The canonical enrichment contract is in `docs/enrichment-data-contract.md`. Curr
 - `8,8,7,7 -> 3,3,1,1`
 
 For any change to bonus awards, prioritize independently checked finalized player points and actual game behavior over an ambiguous prose interpretation. The current Edge and Node simulators use a shared score and score-based bonus ranking. They are tested for competing **FWD vs GK/DEF/MID** outcomes, not only CBs: opponent scoring removes DEF/GK clean-sheet +4, MID clean-sheet +1, and can create further GK/DEF goals-conceded penalties. Goal and assist allocations, bonus ranks, and 6+ distributions follow the same sampled fixture. These are coupled results within each simulation, even though displayed individual marginal xFP values remain additive expectations. No blanket opponent-specific xFP penalty is justified.
+
+
+## MH8 bonus tier rule override (2026-10-14)
+
+Product-owner rule decision: **bonus is allocated by equal-score tiers, while continuing to the next tier until at least three players have received a positive bonus**. Top scores `8,8,6` therefore receive **`+3,+3,+2`**; `8,8,8` receives `+3,+3,+3` and stops; `8,8,7,7` receives `+3,+3,+2,+2` and stops; `8,7,6` receives `+3,+2,+1`. Keep entire tied tier together, even when it crosses the three-player threshold.
+
+**Source discrepancy acknowledged:** previously recorded and final MH7 row-level points (e.g. match 317840) show `7,7,6` rewarded `+3,+3,+1`, as a slot-consuming rank method. Do not modify that historical source data retroactively. The new dense-tier rule follows the product-owner's explicit specification for future **projections**, so QA and backtest comparisons should flag the rule-variant difference explicitly. Model release must still pass the validated 50,000-draw lifecycle, recommended/aggressive optimization, security and integrity gates. This source change alone does not update an already-published projection snapshot.

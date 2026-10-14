@@ -70,13 +70,17 @@ function redCardExitMinute(enter,leave,u){
 function isActiveAt(enter,leave,minute){return num(enter)<=num(minute)&&num(leave)>num(minute)}
 function bonusByCompetitionRank(ids,base,minutes){
   const ordered=ids.filter(i=>minutes[i]>0).sort((a,b)=>base[b]-base[a]||a-b);
-  const bonus={}; let previousScore=null,rank=-1;
-  for(let index=0;index<ordered.length;index++){
-    const i=ordered[index],score=base[i];
-    if(previousScore===null||score!==previousScore)rank=index;
+  const bonus={}; let previousScore=null,tier=-1,awarded=0;
+  for(const i of ordered){
+    const score=base[i];
+    if(previousScore===null||score!==previousScore){
+      if(awarded>=SCORING.bonus.length)break;
+      tier++;
+    }
     previousScore=score;
-    if(rank>=SCORING.bonus.length)break;
-    bonus[i]=SCORING.bonus[rank];
+    if(tier>=SCORING.bonus.length)break;
+    bonus[i]=SCORING.bonus[tier];
+    awarded++;
   }
   return bonus;
 }
