@@ -288,6 +288,12 @@ async function prepare(sb:any,current:any,status:any,body:any={}){
 
   const official=officialMatchEvidence(officialQ.data||[],players)
   const targetKickoff=(fixturesQ.data||[])[0]?.kickoff_at||new Date().toISOString()
+  const teamKickoffs=new Map<number,string>()
+  for(const match of fixturesQ.data||[]){
+    for(const team of [Number(match.home_team_id),Number(match.away_team_id)]){
+      if(!teamKickoffs.has(team))teamKickoffs.set(team,match.kickoff_at)
+    }
+  }
   const roleMap=new Map((rolesQ.data||[]).map((x:any)=>[Number(x.player_id),x]))
   const avMap=new Map((availabilityQ.data||[]).map((x:any)=>[Number(x.player_id),x]))
   const statsMap=new Map((statsQ.data||[]).map((x:any)=>[Number(x.player_id),x]))
@@ -356,7 +362,8 @@ async function prepare(sb:any,current:any,status:any,body:any={}){
     let roleProb=clamp(.01,.995,.65*n(r.predicted_xi_probability,n(prior.role_probability,.5))+.35*recentMinuteRate)
     const event=official.latest.get(id)
     const officialShift=applyOfficialMinutesEvidence({
-      baseline:roleProb,durations,durationWeights,fixtureKickoff:targetKickoff,
+      baseline:roleProb,durations,durationWeights,
+      fixtureKickoff:teamKickoffs.get(Number(p.team_id))||targetKickoff,
       evidence:event,sameSlotStarter:event?official.directCompetitor(p,event):false,
       availability:n(av.availability_probability,1)
     })
@@ -467,7 +474,7 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
   const deadline=kickoff-36e5
   if(now>=deadline)return {refresh_required:false,reason:"CURRENT_WEEK_LOCKED",deadline_at:new Date(deadline).toISOString()}
 
-  const [latestMetaQ,stableMetaQ,availabilityQ,rolesQ,goalConfigQ,playersUpdatedQ,currentProjectionQ,officialQ,playersQ]=await Promise.all([
+  const [latestMetaQ,stableMetaQ,availabilityQ,rolesQ,goalConfigQ,playersUpdatedQ,currentProjectionQ,officialQ,playersQ,teamFixturesQ]=await Promise.all([
     sb.from("scout_replay_input_meta").select("*").eq("gameweek",gw).order("created_at",{ascending:false}).limit(1).maybeSingle(),
     sb.from("scout_replay_input_meta").select("benchmark_version").eq("gameweek",gw).not("benchmark_version","ilike","intraday-%").order("created_at",{ascending:false}).limit(1).maybeSingle(),
     sb.from("scout_availability").select("*").eq("run_id",current.id),
@@ -476,9 +483,11 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
     sb.from("scout_players").select("updated_at").eq("active",true).order("updated_at",{ascending:false}).limit(1).maybeSingle(),
     sb.from("scout_player_projections").select("player_id,opponent_name,venue,confidence,data_confidence").eq("run_id",current.id),
     officialEvidenceQuery(sb),
-    sb.from("scout_players").select("id,team_id,position,primary_role").eq("active",true)
+    sb.from("scout_players").select("id,team_id,position,primary_role").eq("active",true),
+    sb.from("scout_match_predictions").select("home_team_id,away_team_id,kickoff_at")
+      .eq("run_id",current.id).order("kickoff_at",{ascending:true})
   ])
-  for(const q of [latestMetaQ,stableMetaQ,availabilityQ,rolesQ,goalConfigQ,playersUpdatedQ,currentProjectionQ,officialQ,playersQ])if(q.error)throw q.error
+  for(const q of [latestMetaQ,stableMetaQ,availabilityQ,rolesQ,goalConfigQ,playersUpdatedQ,currentProjectionQ,officialQ,playersQ,teamFixturesQ])if(q.error)throw q.error
   if(!latestMetaQ.data)return {refresh_required:false,reason:"CURRENT_SIM_INPUT_META_MISSING"}
 
   const availabilityTimes=(availabilityQ.data||[])
@@ -570,6 +579,12 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
   const projectionMap=new Map((currentProjectionQ.data||[]).map((x:any)=>[Number(x.player_id),x]))
   const official=officialMatchEvidence(officialQ.data||[],playersQ.data||[])
   const officialPlayers=new Map((playersQ.data||[]).map((p:any)=>[Number(p.id),p]))
+  const targetKickoffs=new Map<number,string>()
+  for(const match of teamFixturesQ.data||[]){
+    for(const team of [Number(match.home_team_id),Number(match.away_team_id)]){
+      if(!targetKickoffs.has(team))targetKickoffs.set(team,match.kickoff_at)
+    }
+  }
 
   const inputRows=(inputsQ.data||[]).map((x:any)=>{
     const av=avMap.get(Number(x.player_id))
@@ -583,7 +598,7 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
     const player=officialPlayers.get(Number(x.player_id))
     const adjusted=applyOfficialMinutesEvidence({
       baseline:stableRole,durations:x.durations,durationWeights:x.duration_weights,
-      fixtureKickoff:new Date(kickoff).toISOString(),evidence:event,
+      fixtureKickoff:targetKickoffs.get(Number(x.club_id))||new Date(kickoff).toISOString(),evidence:event,
       sameSlotStarter:player&&event?official.directCompetitor(player,event):false,
       availability,
     })
@@ -628,6 +643,13 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
     return {
       ...rest,run_id:runId,
       predicted_xi_probability:n((refreshedInputs.get(Number(x.player_id)) as any)?.role_probability,x.predicted_xi_probability),
+      signal:(()=>{
+        const event=official.latest.get(Number(x.player_id))
+        const input=refreshedInputs.get(Number(x.player_id)) as any
+        const used=event&&String(input?.source_note||"").includes(String(event.match_ref))
+        return used&&event.started&&Number(event.minutes)>=75?"RESMÎ MAÇTA İLK 11"
+          :used&&event.squad_status==="unused"?"RESMÎ MAÇTA YEDEK":x.signal
+      })(),
       availability_probability:clamp(0,1,n(av?.availability_probability,x.availability_probability)),
       team_id:teamByPlayer.get(Number(x.player_id))
     }
