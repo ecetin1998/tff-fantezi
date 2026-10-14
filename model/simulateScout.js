@@ -79,14 +79,19 @@ function isActiveAt(enter,leave,minute){
   return Number(enter)<=Number(minute)&&Number(leave)>Number(minute);
 }
 
-function bonusByCompetitionRank(ids,base,minutes){
-  const ordered=ids.filter(i=>minutes[i]>0).sort((a,b)=>base[b]-base[a]||a-b);
+// Fantasy-point equality is not a measured BPS tie. If no sourced BPS
+// exists, resolve identical fantasy totals using a neutral per-draw ranking
+// proxy. A 0-0 must not give every 6-point defender +3 by assumption.
+// The optional tieBreakers preserve genuine ties if equal scores are supplied.
+function bonusByCompetitionRank(ids,base,minutes,tieBreakers=null){
+  const ordered=ids.filter(i=>minutes[i]>0)
+    .sort((a,b)=>base[b]-base[a]||(tieBreakers?tieBreakers[b]-tieBreakers[a]:a-b));
   const bonus={};
-  let previousScore=null,rank=-1;
+  let previousScore=null,previousTie=null,rank=-1;
   for(let index=0;index<ordered.length;index++){
-    const i=ordered[index],score=base[i];
-    if(previousScore===null||score!==previousScore)rank=index;
-    previousScore=score;
+    const i=ordered[index],score=base[i],tie=tieBreakers?.[i]??null;
+    if(previousScore===null||score!==previousScore||(tieBreakers&&tie!==previousTie))rank=index;
+    previousScore=score;previousTie=tie;
     if(rank>=SCORING.bonus.length)break;
     bonus[i]=SCORING.bonus[rank];
   }
@@ -251,7 +256,11 @@ function simulateScout(input,count,seed,attackPolicy=true){
         base[i]=keys.reduce((sum,k)=>sum+comp[k][i],0);
       }
 
-      const bon=bonusByCompetitionRank(both,base,mins);
+      // Proxy for missing match-level BPS: randomized *only* among equal
+      // fantasy-base scores; identical FP is not evidence of identical BPS.
+      const tieBreakers={};
+      for(const i of both)if(mins[i]>0)tieBreakers[i]=random();
+      const bon=bonusByCompetitionRank(both,base,mins,tieBreakers);
       const key=matchKey(match,matchIndex);
       for(const i of both){
         const b=bon[i]||0,fp=base[i]+b;
