@@ -135,3 +135,40 @@ console.log('DGW, opponent-aware saves, red-card and bonus-tie checks passed');
   assert.ok(Math.max(...cs)-Math.min(...cs)<.12,'same-team stable DEF clean-sheet expectation should align');
   assert.ok(Math.max(...conceded)-Math.min(...conceded)<.12,'same-team stable DEF conceded expectation should align');
 }
+
+
+{
+  // Fantasy points do not determine BPS ranks. Previously a 0-0 gave
+  // *every* goalkeeper/defender with six base points three bonus points,
+  // sometimes spending 30+ simulated bonus points in a single fixture.
+  const input=zeroEventInput(false);
+  const out=simulateScout(input,500,20261014);
+  const bonus=out.reduce((sum,p)=>sum+p.bonus,0);
+  assert.ok(Math.abs(bonus-6)<1e-9,'Without sourced BPS, a single 0-0 must allocate 3+2+1 bonus, not 3 to every six-point defender');
+  for(const p of out.filter(x=>x.pos==='DEF')){
+    assert.ok(Math.abs(p.components.cs-4)<1e-9,'Opposing defenders both keep their clean sheets in 0-0');
+    assert.ok(p.bonus<3,'A base-Fantasy tie is not a guaranteed +3 BPS bonus');
+  }
+  const indexed=bonusByCompetitionRank(
+    [0,1,2,3],{0:6,1:6,2:6,3:6},[90,90,90,90],{0:.8,1:.6,2:.4,3:.2}
+  );
+  assert.deepEqual(indexed,{0:3,1:2,2:1},'Per-draw performance proxy resolves identical base-Fantasy totals');
+  // A genuine known performance-rank tie may still be shared.
+  const genuine=bonusByCompetitionRank(
+    [0,1,2],{0:6,1:6,2:6},[90,90,90],{0:.8,1:.8,2:.2}
+  );
+  assert.deepEqual(genuine,{0:3,1:3,2:1});
+
+  const goalInput=zeroEventInput(false);
+  goalInput.matches[0].away_lambda=3;
+  const goalOut=simulateScout(goalInput,2000,10102026);
+  const homeDef=goalOut.filter(p=>p.club===1&&p.pos==='DEF');
+  const awayDef=goalOut.filter(p=>p.club===2&&p.pos==='DEF');
+  assert(homeDef.every(p=>p.components.cs<1),'Opponent scoring eliminates most home clean sheets');
+  assert(awayDef.every(p=>Math.abs(p.components.cs-4)<1e-9),'Opposing clean sheet depends on *this* shared fixture score');
+  // Production Edge and local QA simulators must apply the same tie policy.
+  const worker=require('node:fs').readFileSync('supabase/functions/run-live-sim-chunk/index.ts','utf8');
+  assert.match(worker,/tieBreakers\[i\]=random\(\)/);
+  assert.match(worker,/bonusByCompetitionRank\(both,base,mins,SCORING,tieBreakers\)/);
+  assert.match(worker,/score\[p\.club===clubs\[0\]\?1:0\]===0/);
+}
