@@ -549,13 +549,12 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
     sb.from("scout_replay_match_inputs").select("*").eq("gameweek",gw).eq("benchmark_version",sourceBenchmark).order("match_id"),
     stableRoleBenchmark===sourceBenchmark
       ?Promise.resolve({data:null,error:null})
-      :sb.from("scout_replay_player_inputs").select("player_id,role_probability").eq("gameweek",gw).eq("benchmark_version",stableRoleBenchmark).order("player_id")
+      :sb.from("scout_replay_player_inputs").select("player_id,role_probability,durations,duration_weights").eq("gameweek",gw).eq("benchmark_version",stableRoleBenchmark).order("player_id")
   ])
   for(const q of [inputsQ,matchesQ,stableInputsQ])if(q.error)throw q.error
   if(!(inputsQ.data||[]).length||!(matchesQ.data||[]).length)throw new Error("CURRENT_SIM_INPUT_COVERAGE_MISSING")
-  const stableRoleMap=new Map(
-    ((stableInputsQ.data||inputsQ.data)||[]).map((x:any)=>[Number(x.player_id),n(x.role_probability,.5)])
-  )
+  const stableInputsMap=new Map(((stableInputsQ.data||inputsQ.data)||[]).map((x:any)=>[Number(x.player_id),x]))
+  const stableRoleMap=new Map([...stableInputsMap.entries()].map(([id,x]:any)=>[id,n(x.role_probability,.5)]))
 
   const revision=sourceRevision(latestSourceAt)
   const codeRevision=String(codeSha||"nocode").slice(0,8)
@@ -594,18 +593,20 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
     // starters and inflates bench players on every refresh. Always anchor this weight to the
     // latest non-intraday baseline; availability remains a separate multiplier in simulation.
     const stableRole=n(stableRoleMap.get(Number(x.player_id)),n(x.role_probability,.5))
+    const stableInput=stableInputsMap.get(Number(x.player_id)) as any || x
     const event=official.latest.get(Number(x.player_id))
     const player=officialPlayers.get(Number(x.player_id))
     const adjusted=applyOfficialMinutesEvidence({
-      baseline:stableRole,durations:x.durations,durationWeights:x.duration_weights,
+      baseline:stableRole,durations:stableInput.durations,durationWeights:stableInput.duration_weights,
       fixtureKickoff:targetKickoffs.get(Number(x.club_id))||new Date(kickoff).toISOString(),evidence:event,
       sameSlotStarter:player&&event?official.directCompetitor(player,event):false,
       availability,
     })
     return {
       ...x,benchmark_version:benchmark,availability,
-      role_probability:adjusted.role,durations:adjusted.durations,
-      duration_weights:adjusted.duration_weights,
+      role_probability:adjusted.role,
+      durations:adjusted.applied?adjusted.durations:x.durations,
+      duration_weights:adjusted.applied?adjusted.duration_weights:x.duration_weights,
       source_note:`intraday refresh from ${sourceBenchmark}; role baseline ${stableRoleBenchmark}; source ${latestSourceAt}`
         +(adjusted.applied?` • resmî maç: ${event.match_ref}`:"")
     }

@@ -68,7 +68,18 @@ const fs=require('node:fs')
   assert.match(worker,/applyOfficialMinutesEvidence\(/)
   assert.match(worker,/stableRoleMap/,'Intraday refresh must avoid feeding simulation outputs into inputs')
   assert.match(worker,/officialSourceLatest/,'Official external match should trigger predeadline refresh')
-  assert.match(worker,/duration_weights:adjusted\.duration_weights/,'Source minutes should update simulated duration inputs')
+  assert.match(worker,/durations:stableInput\.durations,durationWeights:stableInput\.duration_weights/,
+    'Official source must always be applied to weekly stable baseline, not prior modified intraday durations.')
+  assert.match(worker,/duration_weights:adjusted\.applied\?adjusted\.duration_weights:x\.duration_weights/,
+    'The current inputs should change only when authenticated official source is applied.')
+  const again=calc({
+    baseline:.1318777777,durations:[13,1],durationWeights:[.5555555556,.4444444444],
+    fixtureKickoff:kickoff,availability:1,evidence:played(90)
+  })
+  assert.deepEqual(again.durations,os.durations,
+    'Rechecking same official match against stable baseline must not create two 90-minute observations.')
+  assert.deepEqual(again.duration_weights,os.duration_weights,
+    'Official source weights should remain identical across all intraday candidate reruns.')
   assert.match(worker,/teamKickoffs\.get\(Number\(p\.team_id\)\)/,
     'Next-week rest days must use this club\'s first match, not the global league kickoff.')
   assert.match(worker,/targetKickoffs\.get\(Number\(x\.club_id\)\)/,
