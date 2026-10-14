@@ -50,14 +50,18 @@ function redCardExitMinute(enter,leave,u){
   return Math.max(start+1,Math.min(end-1,Math.floor(start+draw*(end-start))));
 }
 function isActiveAt(enter,leave,minute){return num(enter)<=num(minute)&&num(leave)>num(minute)}
-function bonusByCompetitionRank(ids,base,minutes,scoring){
+// Equal Fantasy points are not proof of a BPS tie. Without sourced BPS,
+// break base-point ties with per-draw neutral performance-order uncertainty
+// rather than awarding +3 to every defender in a 0-0.
+function bonusByCompetitionRank(ids,base,minutes,scoring,tieBreakers=null){
   const bonusValues=(scoring.bonus||[3,2,1]).map(Number);
-  const ordered=ids.filter(i=>minutes[i]>0).sort((a,b)=>base[b]-base[a]||a-b);
-  const bonus={}; let previousScore=null,rank=-1;
+  const ordered=ids.filter(i=>minutes[i]>0)
+    .sort((a,b)=>base[b]-base[a]||(tieBreakers?tieBreakers[b]-tieBreakers[a]:a-b));
+  const bonus={}; let previousScore=null,previousTie=null,rank=-1;
   for(let index=0;index<ordered.length;index++){
-    const i=ordered[index],score=base[i];
-    if(previousScore===null||score!==previousScore)rank=index;
-    previousScore=score;
+    const i=ordered[index],score=base[i],tie=tieBreakers?.[i]??null;
+    if(previousScore===null||score!==previousScore||(tieBreakers&&tie!==previousTie))rank=index;
+    previousScore=score;previousTie=tie;
     if(rank>=bonusValues.length)break;
     bonus[i]=bonusValues[rank];
   }
@@ -350,7 +354,11 @@ Deno.serve(async(req)=>{
             +(p.pos==="GK"?SCORING.penalty_save*poisson(rates[8]*exposure*penaltyPressure):0);
           base[i]=keys.reduce((sum,k)=>sum+comp[k][i],0);
         }
-        const bon=bonusByCompetitionRank(both,base,mins,SCORING);
+        // Draw a neutral rank only when source BPS is unavailable: the
+        // fantasy-point ties of multiple clean-sheet defenders are not BPS ties.
+        const tieBreakers={};
+        for(const i of both)if(mins[i]>0)tieBreakers[i]=random();
+        const bon=bonusByCompetitionRank(both,base,mins,SCORING,tieBreakers);
         for(const i of both){
           const b=bon[i]||0,fp=base[i]+b;
           startedAny[i]=Math.max(startedAny[i],start[i]);
