@@ -10,6 +10,7 @@ import AccessGate from '@/components/AccessGate'
 
 const posLabel=p=>({GK:'KL',DEF:'DEF',MID:'OS',FWD:'FOR'}[p]||p||'—')
 const PAGE_SIZE=50
+const isAdvancedSort=key=>['p25','p90','six','xg','xa'].includes(key)
 
 export default function PlayersTable({players,total,page,pageCount,teams,filters,accessTier='visitor',staticPool=false,runId=null}){
   const router=useRouter()
@@ -25,7 +26,6 @@ export default function PlayersTable({players,total,page,pageCount,teams,filters
   const isVisitor=tier==='visitor'
   const activeFilters=staticPool?localFilters:filters
   const proMetricsPending=isPro&&!overlayReady
-  const isAdvancedSort=key=>['p25','p90','six','xg','xa'].includes(key)
   const [q,setQ]=useState(filters?.q||'')
 
   useEffect(()=>{if(!staticPool)setQ(activeFilters?.q||'')},[activeFilters?.q,staticPool])
