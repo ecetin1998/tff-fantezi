@@ -544,14 +544,16 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
 
   const sourceBenchmark=String(latestMetaQ.data.benchmark_version)
   const stableRoleBenchmark=String(stableMetaQ.data?.benchmark_version||sourceBenchmark)
-  const [inputsQ,matchesQ,stableInputsQ]=await Promise.all([
+  const [inputsQ,matchesQ,stableInputsQ,sourceStatsQ]=await Promise.all([
     sb.from("scout_replay_player_inputs").select("*").eq("gameweek",gw).eq("benchmark_version",sourceBenchmark).order("player_id"),
     sb.from("scout_replay_match_inputs").select("*").eq("gameweek",gw).eq("benchmark_version",sourceBenchmark).order("match_id"),
     stableRoleBenchmark===sourceBenchmark
       ?Promise.resolve({data:null,error:null})
-      :sb.from("scout_replay_player_inputs").select("player_id,role_probability,durations,duration_weights").eq("gameweek",gw).eq("benchmark_version",stableRoleBenchmark).order("player_id")
+      :sb.from("scout_replay_player_inputs").select("player_id,role_probability,durations,duration_weights").eq("gameweek",gw).eq("benchmark_version",stableRoleBenchmark).order("player_id"),
+    sb.from("scout_player_season_stats").select("player_id,xa_per90,xa_model_per90")
+      .eq("season","2026-27").eq("through_gameweek",gw-1)
   ])
-  for(const q of [inputsQ,matchesQ,stableInputsQ])if(q.error)throw q.error
+  for(const q of [inputsQ,matchesQ,stableInputsQ,sourceStatsQ])if(q.error)throw q.error
   if(!(inputsQ.data||[]).length||!(matchesQ.data||[]).length)throw new Error("CURRENT_SIM_INPUT_COVERAGE_MISSING")
   const stableInputsMap=new Map(((stableInputsQ.data||inputsQ.data)||[]).map((x:any)=>[Number(x.player_id),x]))
   const stableRoleMap=new Map([...stableInputsMap.entries()].map(([id,x]:any)=>[id,n(x.role_probability,.5)]))
@@ -573,6 +575,7 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
       min_interval_hours:minInterval,input_snapshot_hash:existing.data.input_snapshot_hash||null
     }
   }
+  const sourceStatsMap=new Map((sourceStatsQ.data||[]).map((x:any)=>[Number(x.player_id),x]))
   const avMap=new Map((availabilityQ.data||[]).map((x:any)=>[Number(x.player_id),x]))
   const roleMap=new Map((rolesQ.data||[]).map((x:any)=>[Number(x.player_id),x]))
   const projectionMap=new Map((currentProjectionQ.data||[]).map((x:any)=>[Number(x.player_id),x]))
@@ -602,8 +605,11 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
       sameSlotStarter:player&&event?official.directCompetitor(player,event):false,
       availability,
     })
+    const rates=(x.rates||[]).map(Number)
+    const stats=sourceStatsMap.get(Number(x.player_id)) as any
+    if(stats)rates[3]=firstRecordedRate(stats.xa_per90,stats.xa_model_per90,rates[3])
     return {
-      ...x,benchmark_version:benchmark,availability,
+      ...x,benchmark_version:benchmark,availability,rates,
       role_probability:adjusted.role,
       durations:adjusted.applied?adjusted.durations:x.durations,
       duration_weights:adjusted.applied?adjusted.duration_weights:x.duration_weights,
@@ -652,6 +658,8 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
           :used&&event.squad_status==="unused"?"RESMÎ MAÇTA YEDEK":x.signal
       })(),
       availability_probability:clamp(0,1,n(av?.availability_probability,x.availability_probability)),
+      team_goal_share:(()=>{const rates=(input?.rates||[]).map(Number);return Math.max(1e-6,.75*n(rates[0])+.25*n(rates[1]))})(),
+      team_assist_share:(()=>{const rates=(input?.rates||[]).map(Number);return Math.max(1e-6,.70*n(rates[3])+.30*n(rates[2]))})(),
       team_id:teamByPlayer.get(Number(x.player_id))
     }
   })
