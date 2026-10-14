@@ -1,4 +1,5 @@
 import {createClient} from "https://esm.sh/@supabase/supabase-js@2"
+import {applyOfficialMinutesEvidence} from "./externalRole.mjs"
 
 const AUDIENCE="tff-fantezi-scout"
 const ISSUER="https://token.actions.githubusercontent.com"
@@ -44,6 +45,37 @@ const clamp=(lo:number,hi:number,v:number)=>Math.max(lo,Math.min(hi,v))
 const avg=(xs:number[])=>xs.length?xs.reduce((a,b)=>a+b,0)/xs.length:0
 const per90=(v:any,minutes:any,fallback=0)=>n(minutes)>0?n(v)*90/n(minutes):fallback
 const newer=(...xs:any[])=>xs.filter(Boolean).map(x=>new Date(x).getTime()).filter(Number.isFinite).sort((a,b)=>b-a)[0]||Date.now()
+
+const officialEvidenceQuery=(sb:any)=>sb.from("scout_official_external_appearances")
+  .select("match_ref,player_id,team_id,competition,finished_at,squad_status,started,minutes,source_url,source_updated_at")
+  .gte("finished_at",new Date(Date.now()-22*86400000).toISOString())
+  .lte("finished_at",new Date().toISOString())
+  .order("finished_at",{ascending:false}).limit(10000)
+function officialMatchEvidence(rows:any[],players:any[]){
+  const known=new Map(players.map((p:any)=>[Number(p.id),p]))
+  const latest=new Map<number,any>(),starters=new Map<string,Set<number>>()
+  for(const e of rows||[]){
+    const id=Number(e.player_id),p=known.get(id)
+    if(!p||Number(p.team_id)!==Number(e.team_id))continue
+    if(!latest.has(id))latest.set(id,e)
+    if(e.started&&Number(e.minutes)>0){
+      const key=String(e.match_ref)+"|"+e.team_id
+      if(!starters.has(key))starters.set(key,new Set())
+      starters.get(key)!.add(id)
+    }
+  }
+  function directCompetitor(player:any,event:any){
+    const role=String(player.primary_role||"").toUpperCase()
+    if(!((player.position==="FWD"&&role==="ST")||player.position==="GK"))return false
+    const ids=starters.get(String(event.match_ref)+"|"+player.team_id)||new Set()
+    return [...ids].some(id=>{
+      if(id===Number(player.id))return false
+      const p=known.get(id)
+      return p?.position===player.position&&String(p.primary_role||"").toUpperCase()===role
+    })
+  }
+  return {latest,directCompetitor}
+}
 const sourceRevision=(value:any)=>new Date(value).toISOString().replace(/[-:TZ.]/g,"").slice(0,14)
 const ageHours=(value:any)=>{
   if(!value)return Infinity
@@ -180,7 +212,13 @@ async function prepare(sb:any,current:any,status:any,body:any={}){
   if(priorMetaQ.error)throw priorMetaQ.error
   if(!priorMetaQ.data)throw new Error("CURRENT_SIM_INPUT_META_MISSING")
   const priorBenchmark=String(priorMetaQ.data.benchmark_version)
-  const revision=sourceRevision(status.latest_source_at)
+  const baselineRevision=sourceRevision(status.latest_source_at)
+  const officialQ=await officialEvidenceQuery(sb)
+  if(officialQ.error)throw officialQ.error
+  const latestOfficialAt=(officialQ.data||[]).reduce(
+    (time:any,e:any)=>newer(time,e.source_updated_at),status.latest_source_at
+  )
+  const revision=sourceRevision(latestOfficialAt)||baselineRevision
   const key="weekly-auto:"+current.id+":mh"+target+":"+revision
   const existing=await sb.from("scout_model_runs").select("*").eq("gameweek",target).eq("is_current",false)
     .ilike("notes","%"+key+"%").order("generated_at",{ascending:false}).limit(1).maybeSingle()
@@ -248,6 +286,8 @@ async function prepare(sb:any,current:any,status:any,body:any={}){
   if((teamStatsQ.data||[]).length!==18)throw new Error("TEAM_STATS_INCOMPLETE")
   if(!(fixturesQ.data||[]).length)throw new Error("TARGET_FIXTURES_MISSING")
 
+  const official=officialMatchEvidence(officialQ.data||[],players)
+  const targetKickoff=(fixturesQ.data||[])[0]?.kickoff_at||new Date().toISOString()
   const roleMap=new Map((rolesQ.data||[]).map((x:any)=>[Number(x.player_id),x]))
   const avMap=new Map((availabilityQ.data||[]).map((x:any)=>[Number(x.player_id),x]))
   const statsMap=new Map((statsQ.data||[]).map((x:any)=>[Number(x.player_id),x]))
@@ -311,9 +351,19 @@ async function prepare(sb:any,current:any,status:any,body:any={}){
     if(!durations.length)durations=(prior.durations||[]).map((x:any)=>clamp(1,90,n(x))).filter((x:number)=>x>0)
     if(!durations.length)durations=[p.position==="GK"?90:70]
     durations=durations.slice(0,5)
-    const durationWeights=normalizedWeights(durations.length)
+    let durationWeights=normalizedWeights(durations.length)
     const recentMinuteRate=rows.length?clamp(0,1,avg(rows.slice(0,3).map(x=>n(x.minutes)/90))):n(prior.role_probability,n(r.predicted_xi_probability,.5))
-    const roleProb=clamp(.01,.995,.65*n(r.predicted_xi_probability,n(prior.role_probability,.5))+.35*recentMinuteRate)
+    let roleProb=clamp(.01,.995,.65*n(r.predicted_xi_probability,n(prior.role_probability,.5))+.35*recentMinuteRate)
+    const event=official.latest.get(id)
+    const officialShift=applyOfficialMinutesEvidence({
+      baseline:roleProb,durations,durationWeights,fixtureKickoff:targetKickoff,
+      evidence:event,sameSlotStarter:event?official.directCompetitor(p,event):false,
+      availability:n(av.availability_probability,1)
+    })
+    if(officialShift.applied){
+      roleProb=officialShift.role;durations=officialShift.durations
+      durationWeights=officialShift.duration_weights
+    }
     const minutes=Math.max(0,n(s.minutes))
     const priorRates=(prior.rates||[]).map(Number)
     const xg90=per90(s.xg_total,minutes,n(priorRates[0]))
@@ -332,7 +382,8 @@ async function prepare(sb:any,current:any,status:any,body:any={}){
       position:p.position,price:n(p.price),availability,role_probability:roleProb,
       bench_weight:n(prior.bench_weight,1),durations,duration_weights:durationWeights,rates,
       data_confidence:prior.data_confidence||projMap.get(id)?.confidence||"medium",
-      has_individual_prior:Boolean(prior.has_individual_prior),source_note:key,
+      has_individual_prior:Boolean(prior.has_individual_prior),
+      source_note:key+(officialShift.applied?" • resmî maç: "+event.match_ref:""),
       sub_role:p.primary_role||prior.sub_role||null,role_side:p.role_side||prior.role_side||null,
       effective_xa_per90:xa90
     })
@@ -350,7 +401,9 @@ async function prepare(sb:any,current:any,status:any,body:any={}){
     const last2Min=avg(last2.map(x=>n(x.minutes))),prev2Min=avg(prev2.map(x=>n(x.minutes)))
     const last2Xi=avg(last2.map(x=>clamp(0,1,n(x.minutes)/60))),prev2Xi=avg(prev2.map(x=>clamp(0,1,n(x.minutes)/60)))
     const d=last2Xi-prev2Xi
-    const signal=d>.20?"ROL YÜKSELİYOR":d<-.20?"ROL DÜŞÜYOR":"BELİRGİN DEĞİŞİM YOK"
+    const signal=officialShift.applied&&event.started&&Number(event.minutes)>=75
+      ?"RESMÎ MAÇTA İLK 11":officialShift.applied&&event.squad_status==="unused"
+      ?"RESMÎ MAÇTA YEDEK":d>.20?"ROL YÜKSELİYOR":d<-.20?"ROL DÜŞÜYOR":"BELİRGİN DEĞİŞİM YOK"
     const goalWeight=Math.max(1e-6,.75*xg90+.25*g90)
     const assistWeight=Math.max(1e-6,.70*xa90+.30*a90)
     roleDraft.push({run_id:runId,player_id:id,last2_xi_probability:last2Xi,previous2_xi_probability:prev2Xi,last2_minutes:last2Min,previous2_minutes:prev2Min,signal,predicted_xi_probability:roleProb,x_minutes:0,availability_probability:availability,goalWeight,assistWeight,team_id:Number(p.team_id)})
