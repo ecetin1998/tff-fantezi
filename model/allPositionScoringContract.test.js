@@ -66,10 +66,10 @@ const {normalizedDefenderRole,singleShotCap,attackWeights}=require('./attackAllo
     'players allocated exactly the team match xG across shared scenario draws');
   assert(Math.abs(a.reduce((s,p)=>s+p.xassist,0)-1.19)<.09,
     'assists allocated consistently with attacking events');
-  assert.equal(gk.components.cs,4);
-  assert.equal(cb.components.cs,4);
-  assert.equal(am.components.cs,1);
-  assert.equal(st.components.cs,0);
+  assert(Math.abs(gk.components.cs-4)<1e-8);
+  assert(Math.abs(cb.components.cs-4)<1e-8);
+  assert(Math.abs(am.components.cs-1)<1e-8);
+  assert(Math.abs(st.components.cs)<1e-8);
   for(const p of out){
     const sum=Object.values(p.components).reduce((a,b)=>a+b,0)+p.bonus;
     assert(Math.abs(sum-p.xfp)<.001,'role points must be official components only: '+p.id);
