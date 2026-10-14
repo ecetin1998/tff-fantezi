@@ -69,6 +69,12 @@ const fs=require('node:fs')
   assert.match(worker,/stableRoleMap/,'Intraday refresh must avoid feeding simulation outputs into inputs')
   assert.match(worker,/officialSourceLatest/,'Official external match should trigger predeadline refresh')
   assert.match(worker,/duration_weights:adjusted\.duration_weights/,'Source minutes should update simulated duration inputs')
+  assert.match(worker,/teamKickoffs\.get\(Number\(p\.team_id\)\)/,
+    'Next-week rest days must use this club\'s first match, not the global league kickoff.')
+  assert.match(worker,/targetKickoffs\.get\(Number\(x\.club_id\)\)/,
+    'Intraday evidence must use each team\'s actual match, not the earliest fixture.')
+  assert.match(worker,/signal:\(\(\)=>\{/,'Intraday refresh must update visible role signal provenance.')
+
   assert.doesNotMatch(worker,/officialShift\.xfp|officialShift\.rates/,'Do not inject external Fantasy scoring into league expectations')
   const ddl=fs.readFileSync('supabase/migrations/20261014215000_official_external_match_appearances.sql','utf8')
   assert.match(ddl,/enable row level security/i)
