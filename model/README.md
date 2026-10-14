@@ -35,3 +35,15 @@ The canonical enrichment contract is in `docs/enrichment-data-contract.md`. Curr
 **Do not cap 3-2-1 bonus at six per match without source evidence.** Finalized MH7 match 317843 has one +3 and eight +2 players (19 bonus in all); MH7 totals 84 bonus over nine matches, and MH6 totals 81. The current bonus tie behavior reproduces this pattern. A proposed artificial six-point cap was **rejected** after checking these finalized rows; preserve actual ranked ties rather than importing rules from other competitions. The new regression test locks both the shared-score clean-sheet logic and source-backed many-way bonus ties.
 
 **Kadro-risk follow-up:** The recommended XI optimizes mean xFP. A separate *risk-aware* explanation (e.g. probability both opposing GK/DEF clean sheets survive, XI P25/P75/P90 and floor over common 50K score draws) would be a valid optional view. It must be computed from jointly sampled XI outcomes, with fixture-specific minutes, substitutions and bonus, not by penalizing both defenders' marginal xFP or pretending independent P90 values occur simultaneously. Do not mutate the verified MH8 run solely for a cosmetic conflict penalty.
+
+
+### MH7 first-place tie evidence and all-position opponent correlations (2026-10-14)
+
+**Do not conflate consecutive tie groups with allocated player slots.** In the source-closed MH7 match `317840`, Mahmut Ertuğrul Taşkıran and Paulo Victor de Mileo Vidotti both recorded **7 base / +3 bonus**; six players at **6 base / +1 bonus**, not +2. The separately closed MH7 match `317842` likewise awarded **7 base / +3** to two first-place players and **6 base / +1** to the next tied group. Thus the verified examples are:
+- `8,7,6 -> 3,2,1`
+- `8,8,6 -> 3,3,1` (two joint winners occupy places 1 and 2)
+- `8,8,8 -> 3,3,3` (no +2 or +1, all three slots occupied)
+- `8,7,7 -> 3,2,2` (second-place players tie)
+- `8,8,7,7 -> 3,3,1,1`
+
+For any change to bonus awards, prioritize independently checked finalized player points and actual game behavior over an ambiguous prose interpretation. The current Edge and Node simulators use a shared score and score-based bonus ranking. They are tested for competing **FWD vs GK/DEF/MID** outcomes, not only CBs: opponent scoring removes DEF/GK clean-sheet +4, MID clean-sheet +1, and can create further GK/DEF goals-conceded penalties. Goal and assist allocations, bonus ranks, and 6+ distributions follow the same sampled fixture. These are coupled results within each simulation, even though displayed individual marginal xFP values remain additive expectations. No blanket opponent-specific xFP penalty is justified.
