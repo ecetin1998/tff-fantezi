@@ -84,6 +84,8 @@ const {normalizedDefenderRole,singleShotCap,attackWeights}=require('./attackAllo
     'same-week 50K refresh must fix xA inputs, not just next-week preparation');
   assert.match(lifecycle,/team_assist_share:\(\(\)=>\{/,
     'refresh must recompute role assist share after updating xA inputs');
+  assert.match(lifecycle,/const roleBase=\(rolesQ\.data\|\|\[\]\)\.map\(\(x:any\)=>\{[\s\S]*?const input=refreshedInputs\.get\(Number\(x\.player_id\)\) as any[\s\S]*?team_assist_share:/,
+    'refreshed input must be in scope for all role shares, not just the signal callback');
   const edge=fs.readFileSync('supabase/functions/run-live-sim-chunk/index.ts','utf8');
   assert.match(edge,/const score=\[teamGoals\(match\.home_lambda\),teamGoals\(match\.away_lambda\)\]/);
   assert.match(edge,/SCORING\.goal\[P\[scorer\]\.pos\]/);
