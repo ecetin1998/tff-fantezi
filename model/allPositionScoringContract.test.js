@@ -23,12 +23,12 @@ const {normalizedDefenderRole,singleShotCap,attackWeights}=require('./attackAllo
   ]){
     assert.equal(singleShotCap(p),cap,label+' per-shot role allowance');
   }
-  const cb={id:1,pos:'DEF',sub_role:'CB',rates:[.13,.03,.02,.03]};
-  const wb={...cb,sub_role:'WB'};
+  const cbShot={id:1,pos:'DEF',sub_role:'CB',rates:[.13,.03,.02,.03]};
+  const wbShot={...cbShot,sub_role:'WB'};
   const isolated=[{id:1,mins:90,shots:1,xg:.55}];
-  assert(attackWeights(cb,isolated).goal<attackWeights(wb,isolated).goal,
+  assert(attackWeights(cbShot,isolated).goal<attackWeights(wbShot,isolated).goal,
     'an isolated large shot gets stronger shrinkage for CB than wing-back');
-  const noHistory=attackWeights(cb,[]);
+  const noHistory=attackWeights(cbShot,[]);
   assert(noHistory.goal>0,'ordinary CB set-piece threat with sourced rates remains possible');
 
   function team(club){
