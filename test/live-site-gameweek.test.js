@@ -61,3 +61,12 @@ test('React 19 MH titles are checked as visible SSR text, not exact HTML bytes',
     assert.notEqual(check('<h1>MH7 Oyuncu Analizi</h1>','MH8 Oyuncu Analizi').status,0)
   }finally{fs.rmSync(temp,{recursive:true,force:true})}
 })
+
+test('read-only live week probe uses the same React 19 SSR parser as production deploy',()=>{
+  const workflow=read('.github/workflows/mh8-live-probe.yml')
+  assert.match(workflow,/uses: actions\/checkout@v4/,'Read-only probe must check out the exact verifier code')
+  assert.match(workflow,/bash scripts\/verify-published-gameweek\.sh/,'Avoid a second brittle HTML parser')
+  assert.match(workflow,/EXPECTED_GAMEWEEK=/,'The verifier must check the current live API gameweek')
+  assert.doesNotMatch(workflow,/re\.sub\('<\[\^>\]\+>'/,'Do not split React streaming comments with tag-stripping regex')
+  assert.doesNotMatch(workflow,/wrangler deploy|npm run deploy/,'This workflow must never publish')
+})
