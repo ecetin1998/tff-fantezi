@@ -181,9 +181,35 @@ console.log('DGW, opponent-aware saves, red-card and bonus-tie checks passed');
     const edge=fs.readFileSync(f,'utf8');
     assert.match(edge,/keeperSavesForScore\(gc\[i\],opponentLambda,rates\[6\],exposure,poisson\)/,
       f+' must couple saves to the actual conceded match score');
-    assert.match(edge,/keeperPenaltySaveChance\(rates\[8\],opponentLambda,exposure\)/,
-      f+' must share rare penalty-save prior');
+    assert.match(edge,/keeperPenaltySaveChance\(P\[opponentGK\]\.rates\[8\],attackingLambda,mins\[opponentGK\]\/90\)/,
+      f+' must use the defending goalkeeper prior for the same penalty attempt');
+    assert.match(edge,/comp\.penalties\[taker\]\+=SCORING\.penalty_miss/,
+      f+' saved or missed penalty must debit the attacking taker');
+    assert.match(edge,/comp\.penalties\[opponentGK\]\+=SCORING\.penalty_save/,
+      f+' the same saved penalty must credit the defending keeper');
+    assert.doesNotMatch(edge,/penalty_miss\*poisson\(rates\[7\]/,
+      f+' must never independently create multiple missed penalties per player');
     assert.doesNotMatch(edge,/penalty_save\*poisson\(rates\[8\]/,
       f+' must not use amplified Poisson penalty saves');
   }
+}
+
+
+// Match-level missed penalty and keeper save must occur together; no player-level
+// independent Poisson that can miss multiple penalties on a single draw.
+{
+  const input=zeroEventInput(false);
+  input.matches[0].home_lambda=.85;
+  input.matches[0].away_lambda=.85;
+  for(const p of input.players){
+    p.rates[7]=p.pos==='FWD'?.05:0;
+    if(p.pos==='GK')p.rates[8]=.20;
+  }
+  const out=simulateScout(input,12000,20261015);
+  const saved=out.filter(p=>p.pos==='GK').reduce((s,p)=>s+p.components.penalties,0)/5;
+  const missed=-out.filter(p=>p.pos!=='GK').reduce((s,p)=>s+p.components.penalties,0)/2;
+  assert(saved>=0&&saved<.1,'saved penalties are rare, below .1 per fixture');
+  assert(missed>=saved-1e-9,
+    'each keeper saved penalty must also debit a real attacking penalty taker');
+  assert(missed<.15,'off-target missed penalties are rare and not added per player');
 }
