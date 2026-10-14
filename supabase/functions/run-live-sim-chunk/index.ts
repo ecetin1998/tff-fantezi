@@ -5,6 +5,7 @@ const GITHUB_OIDC_ISSUER="https://token.actions.githubusercontent.com";
 const GITHUB_REPOSITORY_ID="1353738004";
 const GITHUB_JWKS_URL="https://token.actions.githubusercontent.com/.well-known/jwks";
 const OPS_REF="refs/heads/main";
+const SCORER_POLICY_VERSION="gk-sot-penalty-matched-v1";
 
 function decodeJwtJson(value){
   const padded=value.replace(/-/g,"+").replace(/_/g,"/").padEnd(Math.ceil(value.length/4)*4,"=");
@@ -138,7 +139,7 @@ Deno.serve(async(req)=>{
       const del=await sb.from("scout_replay_sim_accum").delete()
         .eq("gameweek",GAMEWEEK).eq("benchmark_version",BENCHMARK);
       if(del.error)throw del.error;
-      return Response.json({ok:true,mode:"reset",benchmark:BENCHMARK});
+      return Response.json({ok:true,mode:"reset",benchmark:BENCHMARK,policy_version:SCORER_POLICY_VERSION});
     }
 
     if((u.searchParams.get("mode")||"")==="finalize"){
@@ -173,7 +174,7 @@ Deno.serve(async(req)=>{
         if(prediction.error)throw prediction.error;
         matchDistribution="NB2";
       }
-      return Response.json({ok:true,mode:"finalize",run_id:RUN_ID,gameweek:GAMEWEEK,benchmark:BENCHMARK,draws:minDraws,result:finalized.data,match_distribution:matchDistribution});
+      return Response.json({ok:true,mode:"finalize",run_id:RUN_ID,gameweek:GAMEWEEK,benchmark:BENCHMARK,draws:minDraws,result:finalized.data,match_distribution:matchDistribution,policy_version:SCORER_POLICY_VERSION});
     }
 
     const [pq,mq,metaq,aq,rulesq,goalDistQ]=await Promise.all([
@@ -426,7 +427,7 @@ Deno.serve(async(req)=>{
       p_gameweek:GAMEWEEK,p_benchmark:BENCHMARK,p_draws:draws,p_rows:result
     });
     if(mergeError)throw mergeError;
-    return Response.json({ok:true,run_id:RUN_ID,gameweek:GAMEWEEK,benchmark:BENCHMARK,draws,seed,players:M,matches:matches.length,goal_distribution:useNb?"NB2":"Poisson",goal_alpha:goalAlpha});
+    return Response.json({ok:true,run_id:RUN_ID,gameweek:GAMEWEEK,benchmark:BENCHMARK,draws,seed,players:M,matches:matches.length,goal_distribution:useNb?"NB2":"Poisson",goal_alpha:goalAlpha,policy_version:SCORER_POLICY_VERSION});
   }catch(e){
     return Response.json({error:String(e?.message||e),stack:String(e?.stack||"").slice(0,1200)},{status:500});
   }
