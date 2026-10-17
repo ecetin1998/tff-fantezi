@@ -30,6 +30,7 @@ const jsTests=[
   'model/enrichmentReplayContract.test.js',
   'model/currentRunAlignmentContract.test.js',
   'model/weeklyLifecycleContract.test.js',
+  'model/lateInjuryReadOverlayContract.test.js',
   'model/officialExternalRotation.test.js',
   'model/proPlayerMetricsMobileContract.test.js',
   'model/mh8HardeningContract.test.js',
