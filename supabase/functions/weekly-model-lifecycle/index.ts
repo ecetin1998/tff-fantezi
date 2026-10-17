@@ -472,11 +472,30 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
   const kickoff=kickoffQ.data?.kickoff_at?new Date(kickoffQ.data.kickoff_at).getTime():NaN
   if(!Number.isFinite(kickoff))return {refresh_required:false,reason:"CURRENT_KICKOFF_MISSING"}
   const deadline=kickoff-36e5
-  if(now>=deadline)return {refresh_required:false,reason:"CURRENT_WEEK_LOCKED",deadline_at:new Date(deadline).toISOString()}
+  // Squad editing remains locked at the official deadline, but forecast *views*
+  // can evolve while the gameweek is in progress. Before ANY post-kickoff
+  // recomputation, require the immutable pre-first-kickoff backtest snapshot.
+  // Its snapshot table must never be updated by later rolling forecast runs.
+  const snapshotAllowed=now<kickoff
+  if(!snapshotAllowed){
+    const frozenQ=await sb.from("scout_backtest_weeks")
+      .select("run_id,snapshot_at,prediction_mode,status,prediction_count")
+      .eq("gameweek",gw).maybeSingle()
+    if(frozenQ.error)throw frozenQ.error
+    const frozen=frozenQ.data
+    if(!frozen?.run_id||frozen.prediction_mode!=="live_frozen"||
+       !(new Date(frozen.snapshot_at).getTime()<kickoff)||
+       Number(frozen.prediction_count||0)<1||
+       !["open","closed"].includes(String(frozen.status||"")))
+      throw new Error("PRE_KICKOFF_BACKTEST_SNAPSHOT_REQUIRED")
+  }
 
   const [latestMetaQ,stableMetaQ,availabilityQ,rolesQ,goalConfigQ,playersUpdatedQ,currentProjectionQ,officialQ,playersQ,teamFixturesQ]=await Promise.all([
-    sb.from("scout_replay_input_meta").select("*").eq("gameweek",gw).order("created_at",{ascending:false}).limit(1).maybeSingle(),
-    sb.from("scout_replay_input_meta").select("benchmark_version").eq("gameweek",gw).not("benchmark_version","ilike","intraday-%").order("created_at",{ascending:false}).limit(1).maybeSingle(),
+    sb.from("scout_replay_input_meta").select("*").eq("gameweek",gw)
+      .lt("created_at",new Date(kickoff).toISOString()).order("created_at",{ascending:false}).limit(1).maybeSingle(),
+    sb.from("scout_replay_input_meta").select("benchmark_version").eq("gameweek",gw)
+      .lt("created_at",new Date(kickoff).toISOString()).not("benchmark_version","ilike","intraday-%")
+      .order("created_at",{ascending:false}).limit(1).maybeSingle(),
     sb.from("scout_availability").select("*").eq("run_id",current.id),
     sb.from("scout_role_signals").select("*").eq("run_id",current.id),
     sb.from("scout_goal_distribution_config").select("version,alpha_used,gate_benchmark").eq("active",true).order("created_at",{ascending:false}).limit(1).maybeSingle(),
@@ -522,7 +541,8 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
     current.source_updated_at,officialSourceLatest
   )).toISOString()
   const hoursUntilDeadline=Math.max(0,(deadline-now)/36e5)
-  const minInterval=hoursUntilDeadline<=12?2:hoursUntilDeadline<=48?6:24
+  // During a live week, respond to real source changes no faster than every 2h.
+  const minInterval=!snapshotAllowed?2:hoursUntilDeadline<=12?2:hoursUntilDeadline<=48?6:24
   const generatedAge=ageHours(current.generated_at)
   const codeSha=String(body.code_sha||"").trim()||null
   const configVersion=goalConfigQ.data?.version
@@ -570,7 +590,7 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
   if(existing.error)throw existing.error
   if(existing.data){
     return {
-      refresh_required:true,reused:true,run_id:existing.data.id,parent_run_id:current.id,gameweek:gw,benchmark,
+      refresh_required:true,reused:true,snapshot_allowed:snapshotAllowed,run_id:existing.data.id,parent_run_id:current.id,gameweek:gw,benchmark,
       latest_source_at:latestSourceAt,deadline_at:new Date(deadline).toISOString(),
       min_interval_hours:minInterval,input_snapshot_hash:existing.data.input_snapshot_hash||null
     }
@@ -625,7 +645,7 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
   const runInsert=await sb.from("scout_model_runs").insert({
     id:runId,gameweek:gw,model_version:current.model_version,generated_at:new Date().toISOString(),
     source_updated_at:latestSourceAt,source_cutoff:latestSourceAt,simulation_count:0,status:"building",is_current:false,
-    notes:`intraday pre-kickoff refresh • ${benchmark} • parent ${current.id} • source ${latestSourceAt}`,
+    notes:`intraday ${snapshotAllowed?"pre-kickoff":"in-week rolling"} refresh • ${benchmark} • parent ${current.id} • source ${latestSourceAt}`,
     code_sha:codeSha,config_version:configVersion
   })
   if(runInsert.error)throw runInsert.error
@@ -697,7 +717,7 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
   const runUpdate=await sb.from("scout_model_runs").update({input_snapshot_hash:inputHash}).eq("id",runId)
   if(runUpdate.error)throw runUpdate.error
   return {
-    refresh_required:true,run_id:runId,parent_run_id:current.id,gameweek:gw,benchmark,
+    refresh_required:true,snapshot_allowed:snapshotAllowed,run_id:runId,parent_run_id:current.id,gameweek:gw,benchmark,
     latest_source_at:latestSourceAt,deadline_at:new Date(deadline).toISOString(),
     min_interval_hours:minInterval,input_snapshot_hash:inputHash
   }
@@ -718,9 +738,23 @@ Deno.serve(async(req:Request)=>{
     if(action==="status")return Response.json({ok:true,...status})
     if(action==="close_backtest"){
       if(!status.complete_current)return Response.json({ok:false,error:"current gameweek not fully closed",...status},{status:409})
-      const q=await sb.rpc("scout_close_live_backtest",{p_run_id:current.id})
+      // The current live run may be a rolling post-deadline projection.
+      // Close historical accuracy against the ORIGINAL frozen backtest run,
+      // including its pre-deadline squad recommendations, never the latest.
+      const frozenQ=await sb.from("scout_backtest_weeks")
+        .select("run_id,snapshot_at,prediction_mode")
+        .eq("gameweek",Number(current.gameweek)).single()
+      if(frozenQ.error)throw frozenQ.error
+      const frozen=frozenQ.data
+      const matchQ=await sb.from("scout_match_predictions")
+        .select("kickoff_at").eq("run_id",current.id).order("kickoff_at",{ascending:true}).limit(1).single()
+      if(matchQ.error)throw matchQ.error
+      if(!frozen?.run_id||frozen.prediction_mode!=="live_frozen"||
+         !(new Date(frozen.snapshot_at).getTime()<new Date(matchQ.data.kickoff_at).getTime()))
+        throw new Error("FROZEN_BACKTEST_RUN_REQUIRED")
+      const q=await sb.rpc("scout_close_live_backtest",{p_run_id:frozen.run_id})
       if(q.error)throw q.error
-      return Response.json({ok:true,result:q.data,...status})
+      return Response.json({ok:true,result:q.data,frozen_run_id:frozen.run_id,live_run_id:current.id,...status})
     }
     if(action==="prepare"){
       const result=await prepare(sb,current,status,body)

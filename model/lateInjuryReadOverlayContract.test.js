@@ -27,8 +27,12 @@ assert.match(sql,/CASE WHEN live_availability.factor = 1 THEN pr.top25_rank ELSE
   'stale top25 ranks must not be shown as current');
 assert.doesNotMatch(sql,/UPDATE public\.scout_player_projections|DELETE FROM|TRUNCATE|DROP VIEW|GRANT EXECUTE|GRANT SELECT/i,
   'freeze immutable model predictions and RLS boundaries');
-assert.match(lifecycle,/CURRENT_WEEK_LOCKED/,
-  'locked MH may not be recomputed behind official deadline');
+assert.match(lifecycle,/PRE_KICKOFF_BACKTEST_SNAPSHOT_REQUIRED/,
+  'late-week rolling projections require a preserved kickoff-time backtest.');
+assert.match(lifecycle,/const snapshotAllowed=now<kickoff/,
+  'official squad lock is independent from rolling current-week forecasts');
+assert.match(lifecycle,/FROZEN_BACKTEST_RUN_REQUIRED/,
+  'postdeadline model refresh must not corrupt historical backtests');
 assert.match(source,/onConflict:"run_id,player_id"/,
   'source availability can refresh separately and remains run-scoped');
 console.log('late injury overlay guard, deadline freeze and Pro security contract PASS');

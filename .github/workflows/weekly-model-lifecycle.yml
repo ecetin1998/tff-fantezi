@@ -133,6 +133,7 @@ jobs:
           response="$(jq -n --arg sha "$GITHUB_SHA" '{action:"prepare_current",code_sha:$sha}' |             curl --fail --show-error --silent --max-time 240               -H "Authorization: Bearer $OIDC_TOKEN"               -H "Content-Type: application/json"               --data-binary @- "$FUNCTIONS_URL/weekly-model-lifecycle")"
           echo "$response" | jq .
           echo "refresh=$(printf '%s' "$response" | jq -r '.refresh_required // false')" >> "$GITHUB_OUTPUT"
+          echo "snapshot=$(printf '%s' "$response" | jq -r '.snapshot_allowed // false')" >> "$GITHUB_OUTPUT"
           echo "run_id=$(printf '%s' "$response" | jq -r '.run_id // empty')" >> "$GITHUB_OUTPUT"
           echo "parent_run_id=$(printf '%s' "$response" | jq -r '.parent_run_id // empty')" >> "$GITHUB_OUTPUT"
           echo "gameweek=$(printf '%s' "$response" | jq -r '.gameweek // empty')" >> "$GITHUB_OUTPUT"
@@ -189,7 +190,9 @@ jobs:
           jq -n --arg run "$RUN_ID" --arg parent "$PARENT_RUN_ID" '{stage:"model_gate",run_id:$run,parent_run_id:$parent}' |             curl --fail --show-error --silent -H "Authorization: Bearer $OIDC_TOKEN" -H "Content-Type: application/json"               --data-binary @- "$FUNCTIONS_URL/model-refresh-control" | jq .
 
       - name: Freeze refreshed current-MH snapshot
-        if: steps.status.outputs.ready != 'true' && steps.current_refresh.outputs.refresh == 'true'
+        # Only before first kickoff. A frozen week backtest already exists when
+        # publishing a rolling in-week forecast and must NEVER be overwritten.
+        if: steps.status.outputs.ready != 'true' && steps.current_refresh.outputs.refresh == 'true' && steps.current_refresh.outputs.snapshot == 'true'
         env:
           OIDC_TOKEN: ${{ steps.oidc.outputs.token }}
           RUN_ID: ${{ steps.current_refresh.outputs.run_id }}
