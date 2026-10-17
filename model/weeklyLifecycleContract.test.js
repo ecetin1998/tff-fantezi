@@ -60,6 +60,28 @@ assert.match(worker,/action==="snapshot"/)
 assert.match(worker,/action==="verify"/)
 assert.match(worker,/prepareCurrentRefresh/,'Lifecycle worker must support same-gameweek pre-kickoff refresh.')
 assert.match(worker,/AVAILABILITY_STALE/,'Current-week refresh must fail before simulation when availability is stale.')
+
+assert.doesNotMatch(worker,/if\(now>=deadline\)return \{refresh_required:false,reason:"CURRENT_WEEK_LOCKED"/,
+  'Official squad deadline must not block rolling forecast refresh through the gameweek.')
+assert.match(worker,/const snapshotAllowed=now<kickoff/,
+  'After first kickoff the model must allow refresh but skip historical re-snapshot.')
+assert.match(worker,/PRE_KICKOFF_BACKTEST_SNAPSHOT_REQUIRED/,
+  'Postkickoff live refresh must fail closed without an immutable kickoff snapshot.')
+assert.match(worker,/\.lt\("created_at",new Date\(kickoff\)\.toISOString\(\)\)/,
+  'In-week source-model inputs may not include postkickoff actual results.')
+assert.match(worker,/snapshot_allowed:snapshotAllowed/,
+  'Refresh response tells GitHub whether the immutable snapshot can be updated.')
+assert.match(worker,/FROZEN_BACKTEST_RUN_REQUIRED/,
+  'Week-close must verify a pre-first-kickoff snapshot.')
+assert.match(worker,/scout_close_live_backtest",\{p_run_id:frozen\.run_id\}/,
+  'Live rolling run must never become the retrospective backtest baseline.')
+assert.match(workflow,/echo "snapshot=\$\(printf '%s' "\$response" \| jq -r '\.snapshot_allowed \/\/ false'\)"/,
+  'Workflow receives the protected snapshot decision.')
+assert.match(workflow,/steps\.current_refresh\.outputs\.snapshot == 'true'/,
+  'Backtest freeze can run only when pre-kickoff snapshot is still allowed.')
+assert.match(workflow,/\- name: Promote refreshed current MH/,
+  'Rolling predictions still pass ordinary QA, optimize and promote.')
+
 assert.match(worker,/availabilityAge>24/)
 assert.match(worker,/source_cutoff/)
 assert.match(worker,/input_snapshot_hash/)
