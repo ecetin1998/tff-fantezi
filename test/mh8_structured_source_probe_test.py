@@ -57,6 +57,23 @@ class SourceProbeTests(unittest.TestCase):
         self.assertEqual(probe.extract_explicit_stat_values(observed),{
             "minutes_played":90,"saves":6,"goals_conceded":2
         })
+        # Real FotMob matchDetails structure observed in MH8 Gianniotis data.
+        live_shape={"name":"Andreas Gianniotis","isGoalkeeper":True,
+                    "stats":[{"title":"Top stats","key":"top_stats",
+                             "stats":{
+                                "Minutes played":{"key":"minutes_played",
+                                  "stat":{"value":90,"type":"integer"}},
+                                "Saves":{"key":"saves","stat":{"value":3,"type":"integer"}},
+                                "Goals conceded":{"key":"goals_conceded",
+                                  "stat":{"value":1,"type":"integer"}},
+                                "FotMob rating":{"key":"rating_title",
+                                  "stat":{"value":6.43,"type":"double"}}
+                             }}]}
+        self.assertEqual(probe.extract_explicit_stat_values(live_shape),
+                         {"minutes_played":90,"saves":3,"goals_conceded":1})
+        self.assertEqual(probe.extract_explicit_stat_values({"stats":[{
+            "stats":{"Saves":{"key":"saves","stat":{"value":None,"type":"integer"}}}
+        }]}),{},"null stat.value is unknown, not 0")
         self.assertEqual(probe.extract_explicit_stat_values({"stats":[]}),{},
                          "empty records are unknown, not zero")
         self.assertEqual(probe.extract_explicit_stat_values({"stats":[{
