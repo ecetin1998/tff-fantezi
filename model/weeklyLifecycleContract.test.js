@@ -224,3 +224,20 @@ assert.match(precedenceFix,/correct_condition text := '\(greatest\(6\*fixture_co
   'Existing production patch must correct SQL operator precedence explicitly.')
 assert.match(precedenceFix,/unexpected existing minute QA/,
   'Hotfix must fail closed on a changed QA expression.')
+
+assert.match(worker,/finalActiveIds\.size===activeIds\.size/,
+  'a current gameweek cannot close with missing registered Fantasy players')
+assert.match(worker,/finalActiveRows\.length===activeIds\.size/,
+  'exactly one final point record per active Fantasy player is required')
+assert.match(worker,/finalByMatch\.size===fixtureCount/,
+  'every completed fixture needs source-closed player coverage')
+assert.match(worker,/\.every\(ids=>ids\.size>=22\)/,
+  'each fixture must include both starting elevens at minimum')
+assert.match(worker,/String\(w\.source_kind\)==="fresh_closed_actual"/,
+  'probabilistic or provisional point rows may not become actual points')
+assert.match(worker,/Number\(w\.points\)===Number\(w\.base_points\)\+Number\(w\.bonus_points\)/,
+  'a final Fantasy score must reconcile its base points and award')
+assert.match(worker,/w\.minutes!=null&&w\.points!=null&&w\.base_points!=null&&w\.bonus_points!=null/,
+  'null data must not be silently coerced to zero by Number')
+assert.match(worker,/finalizedPlayerCoverage&&/,
+  'new week advancement gate must enforce complete sourced player points')
