@@ -471,6 +471,27 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
   if(kickoffQ.error)throw kickoffQ.error
   const kickoff=kickoffQ.data?.kickoff_at?new Date(kickoffQ.data.kickoff_at).getTime():NaN
   if(!Number.isFinite(kickoff))return {refresh_required:false,reason:"CURRENT_KICKOFF_MISSING"}
+  // A gameweek cannot keep producing *pre-match* 50K forecasts forever simply
+  // because the official result/closure ingestion is missing. Continue rolling
+  // updates throughout the gameweek, but stop three hours after the LAST
+  // scheduled kickoff (normal final whistle plus reasonable match delays).
+  // SourceStatus continues to require independently confirmed actuals AND a
+  // complete next-week fixture before advancing. Never invent results.
+  const lastKickoffQ=await sb.from("scout_match_predictions")
+    .select("kickoff_at").eq("run_id",current.id)
+    .order("kickoff_at",{ascending:false}).limit(1).maybeSingle()
+  if(lastKickoffQ.error)throw lastKickoffQ.error
+  const lastKickoff=lastKickoffQ.data?.kickoff_at
+    ?new Date(lastKickoffQ.data.kickoff_at).getTime():NaN
+  if(!Number.isFinite(lastKickoff))
+    return {refresh_required:false,reason:"CURRENT_LAST_KICKOFF_MISSING",gameweek:gw}
+  if(now>=lastKickoff+3*36e5){
+    return {
+      refresh_required:false,reason:"LAST_FIXTURE_WINDOW_ENDED_AWAITING_RESULTS",
+      gameweek:gw,last_kickoff_at:new Date(lastKickoff).toISOString(),
+      source_closure_required:true,next_gameweek:gw+1
+    }
+  }
   const deadline=kickoff-36e5
   // Squad editing remains locked at the official deadline, but forecast *views*
   // can evolve while the gameweek is in progress. Before ANY post-kickoff
