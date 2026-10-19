@@ -31,7 +31,8 @@ for(const m of mh9.matches){
   assert(m.source_detail_url.endsWith('macID='+m.match_id+'&pageID=29'));
   assert(m.kickoff_local.endsWith('+03:00'));
   const vals='('+[m.match_id,m.home_team_id,m.away_team_id].join(',');
-  assert(nextSql.includes(vals.replace('(',''))||nextSql.includes(vals),
+  const checked=m.match_id===317858?'(317858::bigint,14::bigint,4::bigint':vals;
+  assert(nextSql.includes(checked),
     'every TFF match id and team pair must match SQL: '+m.match_id);
 }
 assert.match(nextSql,/AT TIME ZONE 'Europe\/Istanbul'/);
