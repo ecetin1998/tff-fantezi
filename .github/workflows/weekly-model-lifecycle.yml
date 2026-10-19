@@ -17,6 +17,7 @@ on:
       - "model/optimize_candidate.py"
       - ".github/workflows/weekly-model-lifecycle.yml"
       - "supabase/migrations/20260929*.sql"
+      - "supabase/migrations/20261019195000_red_card_qa_rounding_epsilon.sql"
   schedule:
     - cron: '17 * * * *'
   workflow_dispatch:
