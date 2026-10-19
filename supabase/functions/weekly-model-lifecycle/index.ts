@@ -181,6 +181,8 @@ async function sourceStatus(sb:any,current:any){
   const finalActiveRows=finalRows.filter((w:any)=>activeIds.has(Number(w.player_id)))
   const finalActiveIds=new Set(finalActiveRows.map((w:any)=>Number(w.player_id)))
   const validFinalRows=finalActiveRows.every((w:any)=>
+    w.match_id!=null&&w.player_id!=null&&
+    w.minutes!=null&&w.points!=null&&w.base_points!=null&&w.bonus_points!=null&&
     Number.isFinite(Number(w.minutes))&&Number(w.minutes)>=0&&
     Number.isInteger(Number(w.points))&&
     Number.isInteger(Number(w.base_points))&&
