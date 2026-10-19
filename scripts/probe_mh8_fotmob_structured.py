@@ -9,6 +9,7 @@ from __future__ import annotations
 import argparse
 import json
 import re
+import time
 from datetime import datetime, timezone
 from pathlib import Path
 from urllib.error import HTTPError, URLError
@@ -123,15 +124,39 @@ def summarize(match: dict, provider_id: int, data: dict) -> dict:
             typ = str(ev.get("type") or "unknown")
             summary["event_type_counts"][typ] = summary["event_type_counts"].get(typ, 0) + 1
     stats = content.get("playerStats") or {}
-    summary["player_stats_data_shape"] = list(stats.keys())[:12] if isinstance(stats, dict) else type(stats).__name__
+    summary["player_stat_player_count"] = len(stats) if isinstance(stats, dict) else 0
+    # Only preserve player IDs for raw source matching. Do not interpret FotMob
+    # performance.fantasyScore as TFF Fantasy points or infer source minutes.
+    summary["keeper_source_stat_evidence"] = []
+    for team in lineup_teams:
+        for p in team.get("starters") or []:
+            if not isinstance(p,dict) or p.get("positionId") != 11:
+                continue
+            provider_id = p.get("id")
+            raw_stats = stats.get(str(provider_id), {}) if isinstance(stats,dict) else {}
+            summary["keeper_source_stat_evidence"].append({
+                "provider_id": provider_id, "name":p.get("name"),
+                "stat_record_found": bool(raw_stats),
+                "top_level_stat_keys":list(raw_stats.keys())[:16] if isinstance(raw_stats,dict) else [],
+                "stat_record_type":type(raw_stats).__name__,
+            })
     summary["lineup_complete"] = all(x["starter_count"] == 11 for x in summary["teams"])
+    summary["source_events"] = [{
+        "type":ev.get("type"),"time":ev.get("time"),"time_str":ev.get("timeStr"),
+        "provider_event_id":ev.get("eventId"),
+        "provider_player_id":(ev.get("player") or {}).get("id") if isinstance(ev.get("player"),dict) else None,
+        "provider_player_name":(ev.get("player") or {}).get("name") if isinstance(ev.get("player"),dict) else None,
+        "is_home":ev.get("isHome"),"own_goal":ev.get("ownGoal"),
+    } for ev in events if isinstance(ev,dict)]
     return summary
 
 
 def audit(manifest: dict, match_filter: int | None = None) -> dict:
     rows = [r for r in manifest["matches"] if match_filter is None or r["match_id"] == match_filter]
     output = []
-    for record in rows:
+    for idx, record in enumerate(rows):
+        if idx:
+            time.sleep(1.25)  # public site; avoid back-to-back requests
         base = {"fixture_id":record["match_id"], "source_url":record["candidate_fotmob_url"],
                 "status":"NOT_VERIFIED", "fantasy_final":False}
         try:
@@ -173,7 +198,10 @@ def main():
     for x in report["rows"]:
         count = (x.get("data") or {}).get("lineup_complete")
         shapes = (x.get("data") or {}).get("player_stats_data_shape")
-        print(f"  {x['fixture_id']}: {x['status']} matchIdCandidates={x.get('embedded_id_candidates')} lineup11s={count} statsShape={shapes} apiError={x.get('last_api_error_type','')}")
+        keeper_count=len((x.get("data") or {}).get("keeper_source_stat_evidence",[]))
+        player_count=(x.get("data") or {}).get("player_stat_player_count",0)
+        event_count=(x.get("data") or {}).get("observed_event_count",0)
+        print(f"  {x['fixture_id']}: {x['status']} lineup11s={count} playerStatRows={player_count} sourceEvents={event_count} gkStarters={keeper_count} apiError={x.get('last_api_error_type','')}")
 
 
 if __name__ == "__main__":

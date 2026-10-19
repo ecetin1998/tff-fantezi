@@ -51,18 +51,18 @@ jobs:
           } >> "$GITHUB_STEP_SUMMARY"
       - name: Verify structured source parser contracts
         run: python3 -m unittest discover -s test -p mh8_structured_source_probe_test.py -v
-      - name: Probe one actual FotMob matchDetails player record
+      - name: Inspect nine source-backed FotMob matchDetails player records
         run: |
           set -euo pipefail
-          python3 scripts/probe_mh8_fotmob_structured.py --fixture-id 317852 \
+          python3 scripts/probe_mh8_fotmob_structured.py \
             --output "$RUNNER_TEMP/mh8-structured-source.json"
-          jq -e '.gameweek == 8 and .covered_fixtures == 1 and
+          jq -e '.gameweek == 8 and .covered_fixtures == 9 and
                  .safe_to_close_gameweek == false and .final_fantasy_rows == 0' \
             "$RUNNER_TEMP/mh8-structured-source.json"
           {
             echo
-            echo "### Structured player event feed probe (read only)"
-            jq -r '.rows[] | "- Match \(.fixture_id): \(.status), embedded IDs: \(.embedded_id_candidates // 0), confirmed lineups: \(.data.lineup_complete // false)"' \
+            echo "### All nine structured player event coverage reports (read only)"
+            jq -r '.rows[] | "- Match \(.fixture_id): \(.status), lineups: \(.data.lineup_complete // false), source player stats: \(.data.player_stat_player_count // 0), events: \(.data.observed_event_count // 0)"' \
               "$RUNNER_TEMP/mh8-structured-source.json"
           } >> "$GITHUB_STEP_SUMMARY"
       - name: Archive source evidence and failures for review
