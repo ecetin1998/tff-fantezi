@@ -37,8 +37,19 @@ test('MH8 staged goal events match all nine TFF fulltime scorelines',()=>{
 });
 test('Do not mistake score evidence for all Fantasy component evidence',()=>{
  const all=data.matches.flatMap(m=>m.goals);
- assert.equal(count(g=>g.kind==='disputed_goal_attribution',all),1);
- assert.equal(count(g=>g.kind==='own_goal',all),1);
+ assert.equal(count(g=>g.kind==='disputed_goal_attribution',all),0,'TFF Fantasy app resolves the original competing media attribution');
+ assert.equal(count(g=>g.kind==='own_goal',all),2,'own goals of Show and Irfan Can must be scored correctly');
+ const irfan=data.matches.find(m=>m.match_id===317850)?.goals[0];
+ assert.equal(irfan.kind,'own_goal');
+ assert.equal(irfan.scorer_id,195,'TFF Fantasy app records Irfan Can Egribayat own goal');
+ assert.equal(irfan.scorer_team_id,11,'the own goal is charged to conceding club Genclerbirligi');
+ assert.equal(irfan.fantasy_attribution,'IRFAN_CAN_EGRIBAYAT_OWN_GOAL');
+ assert.equal(irfan.fantasy_source_confirmed_by,'product owner');
+ assert(!all.some(g=>g.scorer_id===1405&&g.kind!=='own_goal'),
+   'Deniz Gul must not receive goal credit on this fixture');
+ assert.equal(data.controls.expected_attribution_conflicts,0);
+ assert.equal(data.controls.expected_explicit_own_goals,2);
+ assert.equal(data.controls.official_fantasy_app_resolved_goal_attribution,true);
  const penalty=data.matches.flatMap(m=>m.special_events||[]);
  assert.equal(penalty.length,1);
  assert.equal(penalty[0].type,'saved_penalty');
