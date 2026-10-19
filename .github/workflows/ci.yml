@@ -29,11 +29,13 @@ jobs:
       - name: Install
         run: npm ci --no-audit --no-fund
       - name: Python test dependencies
-        run: python3 -m pip install --disable-pip-version-check pytest
+        run: python3 -m pip install --disable-pip-version-check pytest beautifulsoup4
       - name: Lint
         run: npm run lint
       - name: Test
         run: npm test
+      - name: MH8 structured player data source tests
+        run: python3 -m unittest discover -s test -p mh8_structured_source_probe_test.py -v
       - name: Build
         run: npm run build
       - name: Route runtime
