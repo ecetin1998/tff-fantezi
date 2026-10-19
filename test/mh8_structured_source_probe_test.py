@@ -47,5 +47,28 @@ class SourceProbeTests(unittest.TestCase):
         self.assertFalse(s["tff_bonus_verified"])
 
 
+
+    def test_source_minutes_saves_are_not_inferred_from_aggregate_stats(self):
+        observed={"stats":[{"title":"Top stats","stats":{
+            "Minutes played":{"key":"minutes_played","value":90},
+            "Saves":{"key":"saves","value":"6"},
+            "Goals conceded":{"key":"goals_conceded","value":2}
+        }}]}
+        self.assertEqual(probe.extract_explicit_stat_values(observed),{
+            "minutes_played":90,"saves":6,"goals_conceded":2
+        })
+        self.assertEqual(probe.extract_explicit_stat_values({"stats":[]}),{},
+                         "empty records are unknown, not zero")
+        self.assertEqual(probe.extract_explicit_stat_values({"stats":[{
+            "stats":{"Saves":{"key":"saves","value":None}}
+        }]}),{},"provider missing value must never become 0 saves")
+        self.assertEqual(probe.extract_explicit_stat_values({"stats":[{
+            "stats":{"Minutes played":{"key":"minutes_played","value":"3/5"}}
+        }]}),{},"not a scalar integer; refuse parsing")
+        self.assertEqual(probe.extract_explicit_stat_values({"stats":[{
+            "stats":{"Fantasy points":{"key":"fantasy_points","value":10}}
+        }]}),{},"FotMob fantasy points are not official TFF Fantasy points")
+
+
 if __name__=="__main__":
     unittest.main()
