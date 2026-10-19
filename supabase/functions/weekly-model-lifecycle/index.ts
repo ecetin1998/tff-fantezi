@@ -162,7 +162,7 @@ async function sourceStatus(sb:any,current:any){
   const [preds,hist,weekly,teamStats,playerStats,players,targetHist,availability]=await Promise.all([
     sb.from("scout_match_predictions").select("match_id").eq("run_id",current.id),
     sb.from("scout_match_history").select("match_id,match_status,fantasy_closure,source_updated_at").eq("season","2026-27").eq("gameweek",gw),
-    sb.from("scout_player_weekly_points").select("match_id,is_final,source_updated_at").eq("gameweek",gw),
+    sb.from("scout_player_weekly_points").select("player_id,match_id,minutes,points,base_points,bonus_points,is_final,source_kind,source_updated_at").eq("gameweek",gw),
     sb.from("scout_team_season_stats").select("team_id,source_updated_at").eq("through_gameweek",gw),
     sb.from("scout_player_season_stats").select("player_id,updated_at").eq("season","2026-27").eq("through_gameweek",gw),
     sb.from("scout_players").select("id,team_id,updated_at").eq("active",true),
@@ -172,16 +172,46 @@ async function sourceStatus(sb:any,current:any){
   for(const q of [preds,hist,weekly,teamStats,playerStats,players,targetHist,availability])if(q.error)throw q.error
   const fixtureCount=(preds.data||[]).length
   const closed=(hist.data||[]).filter((m:any)=>m.match_status==="Bitti"&&m.fantasy_closure==="KAPANDI").length
-  const finalMatches=new Set((weekly.data||[]).filter((w:any)=>w.is_final).map((w:any)=>String(w.match_id))).size
+  const finalRows=(weekly.data||[]).filter((w:any)=>w.is_final)
+  const finalMatches=new Set(finalRows.map((w:any)=>String(w.match_id))).size
   const activeIds=new Set((players.data||[]).map((p:any)=>Number(p.id)))
+  // Finalization MUST cover every registered active player including reserves
+  // who did not play. MH7 had exactly one sourced final row per 456 players.
+  // One fabricated final point in each fixture can no longer advance MH9.
+  const finalActiveRows=finalRows.filter((w:any)=>activeIds.has(Number(w.player_id)))
+  const finalActiveIds=new Set(finalActiveRows.map((w:any)=>Number(w.player_id)))
+  const validFinalRows=finalActiveRows.every((w:any)=>
+    w.match_id!=null&&w.player_id!=null&&
+    w.minutes!=null&&w.points!=null&&w.base_points!=null&&w.bonus_points!=null&&
+    Number.isFinite(Number(w.minutes))&&Number(w.minutes)>=0&&
+    Number.isInteger(Number(w.points))&&
+    Number.isInteger(Number(w.base_points))&&
+    Number.isInteger(Number(w.bonus_points))&&
+    Number(w.points)===Number(w.base_points)+Number(w.bonus_points)&&
+    Number(w.bonus_points)>=0&&Number(w.bonus_points)<=3&&
+    String(w.source_kind)==="fresh_closed_actual")
+  const finalByMatch=new Map<string,Set<number>>()
+  for(const row of finalActiveRows){
+    const id=String(row.match_id)
+    if(!finalByMatch.has(id))finalByMatch.set(id,new Set())
+    finalByMatch.get(id)!.add(Number(row.player_id))
+  }
+  const finalizedPlayerCoverage=validFinalRows&&
+    finalActiveIds.size===activeIds.size&&
+    finalActiveRows.length===activeIds.size&&
+    [...finalByMatch.values()].every(ids=>ids.size>=22)&&
+    finalByMatch.size===fixtureCount
   const playerStatActive=(playerStats.data||[]).filter((x:any)=>activeIds.has(Number(x.player_id))).length
   const targetTeams=new Set((targetHist.data||[]).flatMap((m:any)=>[Number(m.home_team_id),Number(m.away_team_id)]))
   const completeCurrent=fixtureCount>0&&closed===fixtureCount&&finalMatches===fixtureCount&&
+    finalizedPlayerCoverage&&
     (teamStats.data||[]).length===18&&playerStatActive===activeIds.size
   const targetReady=(targetHist.data||[]).length>0&&targetTeams.size===18
   return {
     current_gameweek:gw,target_gameweek:target,current_run_id:current.id,
     fixture_count:fixtureCount,closed_matches:closed,final_actual_matches:finalMatches,
+    finalized_active_players:finalActiveIds.size,finalized_player_rows:finalActiveRows.length,
+    finalized_player_coverage_pass:finalizedPlayerCoverage,
     active_players:activeIds.size,player_stats_current:playerStatActive,team_stats_current:(teamStats.data||[]).length,
     target_fixture_count:(targetHist.data||[]).length,target_team_count:targetTeams.size,
     complete_current:completeCurrent,target_ready:targetReady,ready_to_advance:completeCurrent&&targetReady,
