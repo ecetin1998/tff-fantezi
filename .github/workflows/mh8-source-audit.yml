@@ -62,7 +62,7 @@ jobs:
           {
             echo
             echo "### Structured player event feed probe (read only)"
-            jq -r '.rows[] | "- Match \\(.fixture_id): \\(.status), embedded IDs: \\(.embedded_id_candidates // 0), confirmed lineups: \\(.data.lineup_complete // false)"' \
+            jq -r '.rows[] | "- Match \(.fixture_id): \(.status), embedded IDs: \(.embedded_id_candidates // 0), confirmed lineups: \(.data.lineup_complete // false)"' \
               "$RUNNER_TEMP/mh8-structured-source.json"
           } >> "$GITHUB_STEP_SUMMARY"
       - name: Archive source evidence and failures for review
