@@ -40,11 +40,11 @@ jobs:
           {
             echo "### MH8 observed match-page availability (NOT Fantasy finalization)"
             echo
-            jq -r '"- Fulltime pages verified at source: \\(.fulltime_pages)/\\(.fixture_pages)"' \
+            jq -r '"- Fulltime pages verified at source: \(.fulltime_pages)/\(.fixture_pages)"' \
               "$RUNNER_TEMP/mh8-source-audit.json"
             echo "- Finalized Fantasy point rows: **0** (intentionally no writes)"
             echo
-            jq -r '.results[] | "- Match \\(.match_id): \\(.page_state)"' \
+            jq -r '.results[] | "- Match \(.match_id): \(.page_state)"' \
               "$RUNNER_TEMP/mh8-source-audit.json"
           } >> "$GITHUB_STEP_SUMMARY"
       - name: Archive source evidence and failures for review
