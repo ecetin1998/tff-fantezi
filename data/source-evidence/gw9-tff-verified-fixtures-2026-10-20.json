@@ -1,0 +1,108 @@
+{
+  "season": "2026-27",
+  "gameweek": 9,
+  "verified_on": "2026-10-20",
+  "source": {
+    "publisher": "Türkiye Futbol Federasyonu",
+    "url": "https://www.tff.org/default.aspx?ftxtID=2966&pageID=600",
+    "notice_url": "https://www.tff.org/default.aspx?ftxtID=51338&pageID=201",
+    "purpose": "2026-27 Trendyol Süper Lig MH9 TFF-backed match IDs, pairings and kickoff times"
+  },
+  "matches": [
+    {
+      "match_id": 317858,
+      "home_team_id": 14,
+      "away_team_id": 4,
+      "kickoff_local": "2026-10-23T20:00:00+03:00",
+      "home_team": "Alanyaspor",
+      "away_team": "Kocaelispor",
+      "source_detail_url": "https://www.tff.org/Default.aspx?macID=317858&pageID=29",
+      "status": "Fikstür"
+    },
+    {
+      "match_id": 317857,
+      "home_team_id": 16,
+      "away_team_id": 3,
+      "kickoff_local": "2026-10-24T13:30:00+03:00",
+      "home_team": "Eyüpspor",
+      "away_team": "Kasımpaşa",
+      "source_detail_url": "https://www.tff.org/Default.aspx?macID=317857&pageID=29",
+      "status": "Fikstür"
+    },
+    {
+      "match_id": 317856,
+      "home_team_id": 18,
+      "away_team_id": 2,
+      "kickoff_local": "2026-10-24T16:00:00+03:00",
+      "home_team": "Gaziantep",
+      "away_team": "Erzurumspor",
+      "source_detail_url": "https://www.tff.org/Default.aspx?macID=317856&pageID=29",
+      "status": "Fikstür"
+    },
+    {
+      "match_id": 317864,
+      "home_team_id": 15,
+      "away_team_id": 5,
+      "kickoff_local": "2026-10-24T19:00:00+03:00",
+      "home_team": "Samsunspor",
+      "away_team": "Amed",
+      "source_detail_url": "https://www.tff.org/Default.aspx?macID=317864&pageID=29",
+      "status": "Fikstür"
+    },
+    {
+      "match_id": 317861,
+      "home_team_id": 7,
+      "away_team_id": 11,
+      "kickoff_local": "2026-10-25T16:00:00+03:00",
+      "home_team": "Konyaspor",
+      "away_team": "Gençlerbirliği",
+      "source_detail_url": "https://www.tff.org/Default.aspx?macID=317861&pageID=29",
+      "status": "Fikstür"
+    },
+    {
+      "match_id": 317860,
+      "home_team_id": 10,
+      "away_team_id": 8,
+      "kickoff_local": "2026-10-25T19:00:00+03:00",
+      "home_team": "Göztepe",
+      "away_team": "Çorum FK",
+      "source_detail_url": "https://www.tff.org/Default.aspx?macID=317860&pageID=29",
+      "status": "Fikstür"
+    },
+    {
+      "match_id": 317859,
+      "home_team_id": 12,
+      "away_team_id": 1,
+      "kickoff_local": "2026-10-26T19:00:00+03:00",
+      "home_team": "Rizespor",
+      "away_team": "Trabzonspor",
+      "source_detail_url": "https://www.tff.org/Default.aspx?macID=317859&pageID=29",
+      "status": "Fikstür"
+    },
+    {
+      "match_id": 317863,
+      "home_team_id": 9,
+      "away_team_id": 13,
+      "kickoff_local": "2026-10-26T19:00:00+03:00",
+      "home_team": "Beşiktaş",
+      "away_team": "Başakşehir",
+      "source_detail_url": "https://www.tff.org/Default.aspx?macID=317863&pageID=29",
+      "status": "Fikstür"
+    },
+    {
+      "match_id": 317862,
+      "home_team_id": 17,
+      "away_team_id": 6,
+      "kickoff_local": "2026-10-26T21:30:00+03:00",
+      "home_team": "Galatasaray",
+      "away_team": "Fenerbahçe",
+      "source_detail_url": "https://www.tff.org/Default.aspx?macID=317862&pageID=29",
+      "status": "Fikstür"
+    }
+  ],
+  "notes": [
+    "Verified via TFF 19.10.2026 official week program detail links (all nine numeric match IDs).",
+    "Games are scheduled for Oct 23-26; no player fantasy points or projections are implied.",
+    "Fixture planner already contains exactly nine matching team IDs and times in Europe/Istanbul."
+  ]
+}
