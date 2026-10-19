@@ -6,6 +6,8 @@ on:
     paths:
       - ".github/workflows/mh8-source-audit.yml"
       - "scripts/audit_mh8_fotmob_sources.py"
+      - "scripts/probe_mh8_fotmob_structured.py"
+      - "test/mh8_structured_source_probe_test.py"
       - "test/mh8_source_audit_test.py"
       - "data/source-evidence/gw8-fotmob-match-page-candidates-2026-10-20.json"
   workflow_dispatch:
@@ -47,11 +49,29 @@ jobs:
             jq -r '.results[] | "- Match \(.match_id): \(.page_state)"' \
               "$RUNNER_TEMP/mh8-source-audit.json"
           } >> "$GITHUB_STEP_SUMMARY"
+      - name: Verify structured source parser contracts
+        run: python3 -m unittest discover -s test -p mh8_structured_source_probe_test.py -v
+      - name: Probe one actual FotMob matchDetails player record
+        run: |
+          set -euo pipefail
+          python3 scripts/probe_mh8_fotmob_structured.py --fixture-id 317852 \
+            --output "$RUNNER_TEMP/mh8-structured-source.json"
+          jq -e '.gameweek == 8 and .covered_fixtures == 1 and
+                 .safe_to_close_gameweek == false and .final_fantasy_rows == 0' \
+            "$RUNNER_TEMP/mh8-structured-source.json"
+          {
+            echo
+            echo "### Structured player event feed probe (read only)"
+            jq -r '.rows[] | "- Match \\(.fixture_id): \\(.status), embedded IDs: \\(.embedded_id_candidates // 0), confirmed lineups: \\(.data.lineup_complete // false)"' \
+              "$RUNNER_TEMP/mh8-structured-source.json"
+          } >> "$GITHUB_STEP_SUMMARY"
       - name: Archive source evidence and failures for review
         uses: actions/upload-artifact@v4
         if: always()
         with:
           name: mh8-public-page-source-coverage
-          path: ${{ runner.temp }}/mh8-source-audit.json
+          path: |
+            ${{ runner.temp }}/mh8-source-audit.json
+            ${{ runner.temp }}/mh8-structured-source.json
           if-no-files-found: warn
           retention-days: 14
