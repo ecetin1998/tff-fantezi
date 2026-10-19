@@ -25,7 +25,7 @@ DEFAULT_MANIFEST = Path("data/source-evidence/gw8-fotmob-match-page-candidates-2
 
 
 def normalized(value: str) -> str:
-    value = unicodedata.normalize("NFKD", value or "")
+    value = unicodedata.normalize("NFKD", (value or "").replace("ı", "i"))
     value = "".join(ch for ch in value if not unicodedata.combining(ch))
     return re.sub(r"[^a-z0-9]+", " ", value.casefold()).strip()
 
@@ -61,16 +61,16 @@ def extract_page_signals(html: str, match: dict) -> dict:
     home_present = mentions_team(summary, match["home_team"])
     away_present = mentions_team(summary, match["away_team"])
     score_re = re.compile(
-        rf"(?<!\\d){int(match['home_goals'])}\\s*[-–:]\\s*"
-        rf"{int(match['away_goals'])}(?!\\d)"
+        rf"(?<!\d){int(match['home_goals'])}\s*[-–:]\s*"
+        rf"{int(match['away_goals'])}(?!\d)"
     )
-    fulltime = bool(re.search(r"\\b(?:full\\s*time|finished|bitti|beendet)\\b", page, re.I))
+    fulltime = bool(re.search(r"\b(?:full\s*time|finished|bitti|beendet)\b", page, re.I))
     score_seen = bool(score_re.search(page))
     # A complete match-page status only means 'safe to inspect this page',
     # NOT that player event or score details are Fantasy-final.
     page_ready = bool(home_present and away_present and fulltime and score_seen)
-    has_events = bool(re.search(r"\\b(?:Events|Etkinlikler|Ereignisse)\\b", page, re.I))
-    has_lineup = bool(re.search(r"\\b(?:Lineups|Starting XI|Ilk 11|Aufstellung)\\b", page, re.I))
+    has_events = bool(re.search(r"\b(?:Events|Etkinlikler|Ereignisse)\b", page, re.I))
+    has_lineup = bool(re.search(r"\b(?:Lineups|Starting XI|Ilk 11|Aufstellung)\b", page, re.I))
     return {
         "match_id": match["match_id"],
         "url": match["candidate_fotmob_url"],
