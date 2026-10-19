@@ -190,3 +190,31 @@ assert.match(productionDeploy,/workflow_dispatch:/,'Production deployment retain
 assert.doesNotMatch(productionDeploy,/issue_comment:/,'Cloudflare production deployment cannot be triggered by issue comments after the one-time MH8 repair.')
 
 console.log('weekly lifecycle contract passed')
+
+const roundingMigration=read('supabase/migrations/20261019195000_red_card_qa_rounding_epsilon.sql')
+assert.match(roundingMigration,/0\.05\*fixture_count/,'Only three seconds per match may cover stored xMinute rounding.')
+assert.match(roundingMigration,/greatest\(6\*fixture_count,coalesce\(expected_red_minutes,0\)\+2\*fixture_count\)/,
+  'Preserve the two-minute Monte Carlo red-card allowance and six-minute baseline.')
+assert.match(roundingMigration,/minute_sum > 990\.25\*fixture_count/,
+  'The strict maximum total minutes may not be widened.')
+assert.match(roundingMigration,/0\.15::numeric/,
+  'Keep the physically bounded red-card rate assumption.')
+assert.doesNotMatch(roundingMigration,/update\s+(?:public\.)?scout_player_projections/i,
+  'QA epsilon must not fabricate or rewrite any model player minutes.')
+{
+  const eyupLoss=990-980.59, expectedRed=7.386252631578947;
+  assert(eyupLoss > Math.max(6,expectedRed+2),
+    'Regression sample must still fail the unadjusted QA.')
+  assert(eyupLoss <= Math.max(6,expectedRed+2)+.05,
+    'Regression sample must pass the only 0.05-minute numerical epsilon.')
+  assert(!(990-979 < Math.max(6,expectedRed+2)+.05),
+    'A genuinely eleven-minute red-card discrepancy still fails.')
+}
+
+const precedenceFix=read('supabase/migrations/20261019200500_correct_red_card_minute_qa_operator_precedence.sql')
+assert.match(roundingMigration,/new_condition text := '\(greatest\(6\*fixture_count,coalesce\(expected_red_minutes,0\)\+2\*fixture_count\)\+0\.05\*fixture_count\)'/,
+  'Rounding epsilon must be SUBTRACTED from the 990-minute lower bound, not added to it.')
+assert.match(precedenceFix,/correct_condition text := '\(greatest\(6\*fixture_count,coalesce\(expected_red_minutes,0\)\+2\*fixture_count\)\+0\.05\*fixture_count\)'/,
+  'Existing production patch must correct SQL operator precedence explicitly.')
+assert.match(precedenceFix,/unexpected existing minute QA/,
+  'Hotfix must fail closed on a changed QA expression.')
