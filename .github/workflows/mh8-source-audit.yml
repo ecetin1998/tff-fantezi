@@ -62,7 +62,7 @@ jobs:
           {
             echo
             echo "### All nine structured player event coverage reports (read only)"
-            jq -r '.rows[] | "- Match \(.fixture_id): \(.status), lineups: \(.data.lineup_complete // false), source player stats: \(.data.player_stat_player_count // 0), events: \(.data.observed_event_count // 0)"' \
+            jq -r '.rows[] | "- Match \(.fixture_id): \(.status), lineups: \(.data.lineup_complete // false), source player stats: \(.data.player_stat_player_count // 0), minutes explicitly sourced: \(.data.explicit_minutes_count // 0), saves explicitly sourced: \(.data.explicit_keeper_save_count // 0), events: \(.data.observed_event_count // 0)"' \
               "$RUNNER_TEMP/mh8-structured-source.json"
           } >> "$GITHUB_STEP_SUMMARY"
       - name: Archive source evidence and failures for review
