@@ -1,0 +1,113 @@
+{
+  "season": "2026-27",
+  "gameweek": 8,
+  "as_of": "2026-10-20",
+  "source_roles": [
+    "TFF final scores authoritative for team result",
+    "FotMob candidate match pages useful for lineups/cards/substitutions and event cross-check",
+    "TFF Fantasy official app authoritative for own goal and scoring overrides"
+  ],
+  "status": "URLS_LOCATED_EXTRACTION_PENDING",
+  "policy": "Do not mark any match complete, player points final, or saves verified from candidate URLs alone.",
+  "matches": [
+    {
+      "match_id": 317847,
+      "home_team": "Çorum FK",
+      "away_team": "Rizespor",
+      "home_goals": 2,
+      "away_goals": 1,
+      "candidate_fotmob_url": "https://www.fotmob.com/matches/rizespor-vs-corum-fk/tocmrs2",
+      "full_player_events_verified": false,
+      "goalkeeper_saves_verified": false,
+      "notes": "Url located on FotMob public match page; requires full-time page and player fact extraction, distinct from official TFF Fantasy points."
+    },
+    {
+      "match_id": 317848,
+      "home_team": "Erzurumspor",
+      "away_team": "Eyüpspor",
+      "home_goals": 2,
+      "away_goals": 0,
+      "candidate_fotmob_url": "https://www.fotmob.com/matches/eyupspor-vs-erzurumspor-fk/it2wppv",
+      "full_player_events_verified": false,
+      "goalkeeper_saves_verified": false,
+      "notes": "Url located on FotMob public match page; requires full-time page and player fact extraction, distinct from official TFF Fantasy points."
+    },
+    {
+      "match_id": 317849,
+      "home_team": "Amed",
+      "away_team": "Konyaspor",
+      "home_goals": 1,
+      "away_goals": 0,
+      "candidate_fotmob_url": "https://www.fotmob.com/matches/konyaspor-vs-amed-sportif/2jdlf0i",
+      "full_player_events_verified": false,
+      "goalkeeper_saves_verified": false,
+      "notes": "Url located on FotMob public match page; requires full-time page and player fact extraction, distinct from official TFF Fantasy points."
+    },
+    {
+      "match_id": 317850,
+      "home_team": "Gençlerbirliği",
+      "away_team": "Galatasaray",
+      "home_goals": 0,
+      "away_goals": 1,
+      "candidate_fotmob_url": "https://www.fotmob.com/matches/genclerbirligi-vs-galatasaray/28fr6c",
+      "full_player_events_verified": false,
+      "goalkeeper_saves_verified": false,
+      "notes": "Url located on FotMob public match page; requires full-time page and player fact extraction, distinct from official TFF Fantasy points."
+    },
+    {
+      "match_id": 317851,
+      "home_team": "Fenerbahçe",
+      "away_team": "Alanyaspor",
+      "home_goals": 3,
+      "away_goals": 0,
+      "candidate_fotmob_url": "https://www.fotmob.com/matches/alanyaspor-vs-fenerbahce/1h8voa",
+      "full_player_events_verified": false,
+      "goalkeeper_saves_verified": false,
+      "notes": "Url located on FotMob public match page; requires full-time page and player fact extraction, distinct from official TFF Fantasy points."
+    },
+    {
+      "match_id": 317852,
+      "home_team": "Kasımpaşa",
+      "away_team": "Samsunspor",
+      "home_goals": 4,
+      "away_goals": 1,
+      "candidate_fotmob_url": "https://www.fotmob.com/matches/kasmpasa-vs-samsunspor/1q1egc",
+      "full_player_events_verified": false,
+      "goalkeeper_saves_verified": false,
+      "notes": "Url located on FotMob public match page; requires full-time page and player fact extraction, distinct from official TFF Fantasy points."
+    },
+    {
+      "match_id": 317853,
+      "home_team": "Kocaelispor",
+      "away_team": "Göztepe",
+      "home_goals": 1,
+      "away_goals": 2,
+      "candidate_fotmob_url": "https://www.fotmob.com/matches/kocaelispor-vs-goztepe/3mwq2",
+      "full_player_events_verified": false,
+      "goalkeeper_saves_verified": false,
+      "notes": "Url located on FotMob public match page; requires full-time page and player fact extraction, distinct from official TFF Fantasy points."
+    },
+    {
+      "match_id": 317854,
+      "home_team": "Başakşehir",
+      "away_team": "Gaziantep",
+      "home_goals": 2,
+      "away_goals": 1,
+      "candidate_fotmob_url": "https://www.fotmob.com/matches/basaksehir-vs-gaziantep-fk/arr8y",
+      "full_player_events_verified": false,
+      "goalkeeper_saves_verified": false,
+      "notes": "Url located on FotMob public match page; requires full-time page and player fact extraction, distinct from official TFF Fantasy points."
+    },
+    {
+      "match_id": 317855,
+      "home_team": "Trabzonspor",
+      "away_team": "Beşiktaş",
+      "home_goals": 2,
+      "away_goals": 0,
+      "candidate_fotmob_url": "https://www.fotmob.com/matches/trabzonspor-vs-besiktas/3adfo2",
+      "full_player_events_verified": false,
+      "goalkeeper_saves_verified": false,
+      "notes": "Url located on FotMob public match page; requires full-time page and player fact extraction, distinct from official TFF Fantasy points."
+    }
+  ]
+}
