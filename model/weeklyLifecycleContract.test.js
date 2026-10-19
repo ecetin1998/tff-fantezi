@@ -65,6 +65,12 @@ assert.doesNotMatch(worker,/if\(now>=deadline\)return \{refresh_required:false,r
   'Official squad deadline must not block rolling forecast refresh through the gameweek.')
 assert.match(worker,/const snapshotAllowed=now<kickoff/,
   'After first kickoff the model must allow refresh but skip historical re-snapshot.')
+assert.match(worker,/lastKickoff\+3\*36e5/,
+  'Continue updating until the last fixture can finish, not indefinitely after the week.')
+assert.match(worker,/reason:"LAST_FIXTURE_WINDOW_ENDED_AWAITING_RESULTS"/,
+  'Missing fixture/actual ingestion after final whistle must skip expensive 50K.')
+assert.match(worker,/source_closure_required:true,next_gameweek:gw\+1/,
+  'Return a useful diagnostic, never advance without final sourced actuals.')
 assert.match(worker,/PRE_KICKOFF_BACKTEST_SNAPSHOT_REQUIRED/,
   'Postkickoff live refresh must fail closed without an immutable kickoff snapshot.')
 assert.match(worker,/\.lt\("created_at",new Date\(kickoff\)\.toISOString\(\)\)/,
