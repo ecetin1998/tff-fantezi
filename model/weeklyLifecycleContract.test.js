@@ -210,3 +210,11 @@ assert.doesNotMatch(roundingMigration,/update\s+(?:public\.)?scout_player_projec
   assert(!(990-979 < Math.max(6,expectedRed+2)+.05),
     'A genuinely eleven-minute red-card discrepancy still fails.')
 }
+
+const precedenceFix=read('supabase/migrations/20261019200500_correct_red_card_minute_qa_operator_precedence.sql')
+assert.match(roundingMigration,/new_condition text := '\(greatest\(6\*fixture_count,coalesce\(expected_red_minutes,0\)\+2\*fixture_count\)\+0\.05\*fixture_count\)'/,
+  'Rounding epsilon must be SUBTRACTED from the 990-minute lower bound, not added to it.')
+assert.match(precedenceFix,/correct_condition text := '\(greatest\(6\*fixture_count,coalesce\(expected_red_minutes,0\)\+2\*fixture_count\)\+0\.05\*fixture_count\)'/,
+  'Existing production patch must correct SQL operator precedence explicitly.')
+assert.match(precedenceFix,/unexpected existing minute QA/,
+  'Hotfix must fail closed on a changed QA expression.')
