@@ -90,6 +90,62 @@ def matches_tff(data: dict, record: dict) -> bool:
     )
 
 
+
+# Canonical source keys must come from the provider payload, never from
+# formation averages, team shots-on-target or model-generated xMinutes.
+OBSERVABLE_KEYS = frozenset({
+    "minutes_played", "saves", "goals", "assists", "goals_conceded",
+    "yellow_cards", "red_cards", "own_goals", "penalties_saved",
+    "penalties_missed",
+})
+
+
+def extract_explicit_stat_values(player_record: dict) -> dict:
+    """Extract only scalar, nonnegative, observed integer facts.
+
+    Expected shape: playerStats[playerId].stats[...].stats['Minutes played']
+    = {"key":"minutes_played","value":90}, or a future equivalent.
+    Missing is None, NOT zero; e.g. no Saves section is not 0 saves.
+    """
+    found = {}
+
+    def visit(obj: object, depth: int = 0):
+        if depth > 9:
+            return
+        if isinstance(obj, list):
+            for v in obj:
+                visit(v, depth+1)
+            return
+        if not isinstance(obj, dict):
+            return
+
+        name = str(obj.get("key") or "").casefold()
+        value = obj.get("value")
+        if name in OBSERVABLE_KEYS and name not in found:
+            if isinstance(value,int) and not isinstance(value,bool) and value >= 0:
+                found[name]=value
+            elif isinstance(value,str) and value.isdecimal() and int(value) <= 150:
+                found[name]=int(value)
+
+        for k,v in obj.items():
+            # Some provider versions use the human-readable label as the key
+            # of an object holding the raw stat rather than a keyed stat item.
+            canonical = normalized(str(k)).replace(" ","_")
+            if canonical in OBSERVABLE_KEYS and canonical not in found:
+                raw = v.get("value") if isinstance(v,dict) else v
+                if isinstance(raw,int) and not isinstance(raw,bool) and raw >= 0:
+                    found[canonical]=raw
+                elif isinstance(raw,str) and raw.isdecimal() and int(raw) <= 150:
+                    found[canonical]=int(raw)
+            if k not in ("fantasyScore","Fantasy points","fantasy_points"):
+                visit(v, depth+1)
+
+    if isinstance(player_record,dict):
+        visit(player_record)
+    return found
+
+
+
 def summarize(match: dict, provider_id: int, data: dict) -> dict:
     content = data.get("content") or {}
     lineup = content.get("lineup") or {}
@@ -140,6 +196,26 @@ def summarize(match: dict, provider_id: int, data: dict) -> dict:
                 "top_level_stat_keys":list(raw_stats.keys())[:16] if isinstance(raw_stats,dict) else [],
                 "stat_record_type":type(raw_stats).__name__,
             })
+    summary["observed_player_stat_components"] = []
+    if isinstance(stats,dict):
+        for team in summary["teams"]:
+            for player in team["starters"]+team["subs"]:
+                pid=player["provider_id"]
+                record=stats.get(str(pid))
+                if not isinstance(record,dict):
+                    continue
+                explicit=extract_explicit_stat_values(record)
+                summary["observed_player_stat_components"].append({
+                    "provider_id":pid, "player_name":player["name"],
+                    "side":team["side"],"position":player["position"],
+                    "explicit_source_metrics":explicit,
+                })
+    summary["explicit_minutes_count"] = sum(
+        "minutes_played" in p["explicit_source_metrics"]
+        for p in summary["observed_player_stat_components"])
+    summary["explicit_keeper_save_count"] = sum(
+        "saves" in p["explicit_source_metrics"]
+        for p in summary["observed_player_stat_components"])
     summary["lineup_complete"] = all(x["starter_count"] == 11 for x in summary["teams"])
     summary["source_events"] = [{
         "type":ev.get("type"),"time":ev.get("time"),"time_str":ev.get("timeStr"),
@@ -201,7 +277,9 @@ def main():
         keeper_count=len((x.get("data") or {}).get("keeper_source_stat_evidence",[]))
         player_count=(x.get("data") or {}).get("player_stat_player_count",0)
         event_count=(x.get("data") or {}).get("observed_event_count",0)
-        print(f"  {x['fixture_id']}: {x['status']} lineup11s={count} playerStatRows={player_count} sourceEvents={event_count} gkStarters={keeper_count} apiError={x.get('last_api_error_type','')}")
+        minutes=(x.get("data") or {}).get("explicit_minutes_count",0)
+        saves=(x.get("data") or {}).get("explicit_keeper_save_count",0)
+        print(f"  {x['fixture_id']}: {x['status']} lineup11s={count} playerStatRows={player_count} sourceEvents={event_count} gkStarters={keeper_count} explicitMinutes={minutes} explicitSaves={saves} apiError={x.get('last_api_error_type','')}")
 
 
 if __name__ == "__main__":
