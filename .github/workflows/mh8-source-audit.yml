@@ -1,0 +1,57 @@
+name: MH8 public match source coverage (read-only)
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/mh8-source-audit.yml"
+      - "scripts/audit_mh8_fotmob_sources.py"
+      - "test/mh8_source_audit_test.py"
+      - "data/source-evidence/gw8-fotmob-match-page-candidates-2026-10-20.json"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: mh8-source-audit
+  cancel-in-progress: false
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install public HTML parser
+        run: python3 -m pip install --disable-pip-version-check beautifulsoup4
+      - name: Unit test no-invention source guard
+        run: python3 -m unittest discover -s test -p mh8_source_audit_test.py -v
+      - name: Read nine match pages and record source availability
+        run: |
+          set -euo pipefail
+          python3 scripts/audit_mh8_fotmob_sources.py --output "$RUNNER_TEMP/mh8-source-audit.json"
+          jq -e '.gameweek == 8 and .fixture_pages == 9 and
+                 .can_close_gameweek == false and .finalized_player_rows == 0' \
+            "$RUNNER_TEMP/mh8-source-audit.json"
+          {
+            echo "### MH8 observed match-page availability (NOT Fantasy finalization)"
+            echo
+            jq -r '"- Fulltime pages verified at source: \(.fulltime_pages)/\(.fixture_pages)"' \
+              "$RUNNER_TEMP/mh8-source-audit.json"
+            echo "- Finalized Fantasy point rows: **0** (intentionally no writes)"
+            echo
+            jq -r '.results[] | "- Match \(.match_id): \(.page_state)"' \
+              "$RUNNER_TEMP/mh8-source-audit.json"
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Archive source evidence and failures for review
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mh8-public-page-source-coverage
+          path: ${{ runner.temp }}/mh8-source-audit.json
+          if-no-files-found: warn
+          retention-days: 14
