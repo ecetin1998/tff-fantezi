@@ -181,6 +181,19 @@ def summarize(match: dict, provider_id: int, data: dict) -> dict:
             summary["event_type_counts"][typ] = summary["event_type_counts"].get(typ, 0) + 1
     stats = content.get("playerStats") or {}
     summary["player_stat_player_count"] = len(stats) if isinstance(stats, dict) else 0
+    # Diagnostic-only shape preview for a bounded, public one-match sample.
+    # No actual points are calculated from this sample.
+    if match["match_id"]==317852 and isinstance(stats,dict) and stats:
+        sample_key=next(iter(stats.keys()))
+        preview=stats[sample_key]
+        sample_id=summary["teams"][0]["starters"][0]["provider_id"] if summary["teams"][0]["starters"] else None
+        summary["source_schema_diagnostic"]={
+            "stat_keys_example":list(stats.keys())[:3],
+            "lineup_starter_id_example":sample_id,
+            "lineup_to_stat_id_match":str(sample_id) in stats,
+            "sample_stats_type":type(preview).__name__,
+            "sample_stats_preview":json.dumps(preview,ensure_ascii=False)[:1700],
+        }
     # Only preserve player IDs for raw source matching. Do not interpret FotMob
     # performance.fantasyScore as TFF Fantasy points or infer source minutes.
     summary["keeper_source_stat_evidence"] = []
@@ -280,6 +293,9 @@ def main():
         minutes=(x.get("data") or {}).get("explicit_minutes_count",0)
         saves=(x.get("data") or {}).get("explicit_keeper_save_count",0)
         print(f"  {x['fixture_id']}: {x['status']} lineup11s={count} playerStatRows={player_count} sourceEvents={event_count} gkStarters={keeper_count} explicitMinutes={minutes} explicitSaves={saves} apiError={x.get('last_api_error_type','')}")
+        schema=(x.get("data") or {}).get("source_schema_diagnostic")
+        if schema:
+            print("  SOURCE_PLAYER_STAT_SCHEMA_DIAGNOSTIC "+json.dumps(schema,ensure_ascii=False))
 
 
 if __name__ == "__main__":
