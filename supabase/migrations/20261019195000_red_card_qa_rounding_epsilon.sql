@@ -11,7 +11,7 @@ DO $migration$
 DECLARE
   source_sql text;
   old_condition text := 'greatest(6*fixture_count,coalesce(expected_red_minutes,0)+2*fixture_count)';
-  new_condition text := 'greatest(6*fixture_count,coalesce(expected_red_minutes,0)+2*fixture_count) + 0.05*fixture_count';
+  new_condition text := '(greatest(6*fixture_count,coalesce(expected_red_minutes,0)+2*fixture_count)+0.05*fixture_count)';
 BEGIN
   SELECT pg_get_functiondef(p.oid) INTO source_sql
   FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace
