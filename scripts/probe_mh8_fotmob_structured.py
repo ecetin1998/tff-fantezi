@@ -120,7 +120,10 @@ def extract_explicit_stat_values(player_record: dict) -> dict:
             return
 
         name = str(obj.get("key") or "").casefold()
+        stat_object = obj.get("stat") if isinstance(obj.get("stat"),dict) else {}
         value = obj.get("value")
+        if value is None and stat_object.get("type")=="integer":
+            value=stat_object.get("value")
         if name in OBSERVABLE_KEYS and name not in found:
             if isinstance(value,int) and not isinstance(value,bool) and value >= 0:
                 found[name]=value
@@ -132,7 +135,8 @@ def extract_explicit_stat_values(player_record: dict) -> dict:
             # of an object holding the raw stat rather than a keyed stat item.
             canonical = normalized(str(k)).replace(" ","_")
             if canonical in OBSERVABLE_KEYS and canonical not in found:
-                raw = v.get("value") if isinstance(v,dict) else v
+                raw = (v.get("value") if v.get("value") is not None
+                       else (v.get("stat") or {}).get("value")) if isinstance(v,dict) else v
                 if isinstance(raw,int) and not isinstance(raw,bool) and raw >= 0:
                     found[canonical]=raw
                 elif isinstance(raw,str) and raw.isdecimal() and int(raw) <= 150:
