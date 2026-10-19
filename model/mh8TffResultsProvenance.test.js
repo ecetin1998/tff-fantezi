@@ -20,3 +20,24 @@ assert.match(sql,/IF fixture_matching<>9 THEN RAISE EXCEPTION/);
 assert.doesNotMatch(sql,/\bscout_player_weekly_points\b|\bis_final\b|fantasy_closure='KAPANDI'/,
   'Match-only ingest must not fabricate player actions or finalize the Fantasy week');
 console.log('MH8 official scoreboard source, exact nine team pairs and no-fake-fantasy closure PASS');
+
+const mh9=JSON.parse(fs.readFileSync('data/source-evidence/gw9-tff-verified-fixtures-2026-10-20.json','utf8'));
+const nextSql=fs.readFileSync('supabase/migrations/20261020140500_tff_verified_mh9_scout_match_history.sql','utf8');
+assert.equal(mh9.gameweek,9);
+assert.equal(mh9.matches.length,9);
+assert.equal(new Set(mh9.matches.map(x=>x.match_id)).size,9);
+assert.equal(new Set(mh9.matches.flatMap(x=>[x.home_team_id,x.away_team_id])).size,18);
+for(const m of mh9.matches){
+  assert(m.source_detail_url.endsWith('macID='+m.match_id+'&pageID=29'));
+  assert(m.kickoff_local.endsWith('+03:00'));
+  const vals='('+[m.match_id,m.home_team_id,m.away_team_id].join(',');
+  assert(nextSql.includes(vals.replace('(',''))||nextSql.includes(vals),
+    'every TFF match id and team pair must match SQL: '+m.match_id);
+}
+assert.match(nextSql,/AT TIME ZONE 'Europe\/Istanbul'/);
+assert.match(nextSql,/IF matched<>9 OR distinct_teams<>18 THEN/);
+assert.match(nextSql,/TFF match ID collision/);
+assert.match(nextSql,/AND home_goals IS NULL AND away_goals IS NULL/);
+assert.doesNotMatch(nextSql,/INSERT INTO public\.scout_player_weekly_points|KAPANDI/,
+ 'future fixture import must not synthesize player actuals or fake closure');
+console.log('MH9 nine source-backed match IDs, 18 club coverage and correct kickoff timezone PASS');
