@@ -2,7 +2,7 @@
   "season": "2026-27",
   "gameweek": 8,
   "as_of": "2026-10-20",
-  "source_policy": "Match-event evidence only; no fantasy point, save totals, complete minutes or final flags inferred. True football goal tally from source-confirmed 9 results. Assist attribution provisional unless explicit primary source. Conflict remains unresolved.",
+  "source_policy": "Match-event evidence only; no fantasy point, save totals, complete minutes or final flags inferred. True football goal tally from source-confirmed 9 results. Assist attribution provisional unless explicit primary source. Conflict remains unresolved. Resolved MH8 317850 for Fantasy by user-reported official TFF Fantezi Lig application (own goal Irfan Can Egribayat, NOT goal Deniz Gul).",
   "matches": [
     {
       "match_id": 317847,
@@ -94,12 +94,17 @@
       "goals": [
         {
           "side": "away",
-          "scorer_id": null,
-          "scorer": null,
+          "scorer_id": 195,
+          "scorer": "İrfan Can Eğribayat",
+          "scorer_team_id": 11,
           "minute": 88,
-          "kind": "disputed_goal_attribution",
-          "resolution": "PENDING_OFFICIAL_MATCH_REPORT",
-          "candidates": [
+          "kind": "own_goal",
+          "fantasy_attribution": "IRFAN_CAN_EGRIBAYAT_OWN_GOAL",
+          "fantasy_source": "TFF Fantezi Lig official app (user-reported observation)",
+          "fantasy_source_confirmed_by": "product owner",
+          "fantasy_action": "award own-goal penalty to player 195; do not award attacking goal to player 1405",
+          "news_source_conflict": "Galatasaray and broadcaster attributed Deniz Gül a goal, but the official Fantasy app scores an own goal against İrfan Can Eğribayat",
+          "original_candidates": [
             {
               "scorer_id": 1405,
               "scorer": "Deniz Gül",
@@ -110,7 +115,7 @@
               "scorer_id": 195,
               "scorer": "İrfan Can Eğribayat",
               "kind": "own_goal",
-              "reported_by": "Gençlerbirliği"
+              "reported_by": "Gençlerbirliği / TFF Fantezi Lig application (user-confirmed)"
             }
           ]
         }
@@ -303,13 +308,14 @@
   "controls": {
     "expected_fixture_count": 9,
     "expected_total_goals": 23,
-    "expected_attribution_conflicts": 1,
-    "expected_explicit_own_goals": 1,
+    "expected_attribution_conflicts": 0,
+    "expected_explicit_own_goals": 2,
     "expected_saved_penalty_events": 1,
     "complete_player_minutes": false,
     "complete_keeper_saves": false,
     "complete_yellow_red_cards": false,
     "complete_assist_attribution": false,
-    "ready_to_finalize_fantasy": false
+    "ready_to_finalize_fantasy": false,
+    "official_fantasy_app_resolved_goal_attribution": true
   }
 }
