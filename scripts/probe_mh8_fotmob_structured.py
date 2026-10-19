@@ -187,12 +187,27 @@ def summarize(match: dict, provider_id: int, data: dict) -> dict:
         sample_key=next(iter(stats.keys()))
         preview=stats[sample_key]
         sample_id=summary["teams"][0]["starters"][0]["provider_id"] if summary["teams"][0]["starters"] else None
+        # First key can be an UNUSED reserve with stats:[]; for diagnosing the
+        # minutes/save schema choose a STARTING goalkeeper plus an actually
+        # observed on-field player whose provider stats list is nonempty.
+        candidates=[]
+        for team in lineup_teams:
+            for player in team.get("starters") or []:
+                pid=player.get("id")
+                row=stats.get(str(pid),{}) if isinstance(stats,dict) else {}
+                if isinstance(row,dict) and row.get("stats"):
+                    candidates.append((player,row))
+        starting_keep=next(((p,row) for p,row in candidates if p.get("positionId")==11),None)
+        outfield=next(((p,row) for p,row in candidates if p.get("positionId")!=11),None)
         summary["source_schema_diagnostic"]={
             "stat_keys_example":list(stats.keys())[:3],
             "lineup_starter_id_example":sample_id,
             "lineup_to_stat_id_match":str(sample_id) in stats,
-            "sample_stats_type":type(preview).__name__,
-            "sample_stats_preview":json.dumps(preview,ensure_ascii=False)[:1700],
+            "first_random_player_stats_empty":not bool(preview.get("stats")) if isinstance(preview,dict) else None,
+            "played_keeper_id":starting_keep[0].get("id") if starting_keep else None,
+            "played_keeper_stat_preview":json.dumps(starting_keep[1],ensure_ascii=False)[:3000] if starting_keep else None,
+            "played_outfield_id":outfield[0].get("id") if outfield else None,
+            "played_outfield_stat_preview":json.dumps(outfield[1],ensure_ascii=False)[:1600] if outfield else None,
         }
     # Only preserve player IDs for raw source matching. Do not interpret FotMob
     # performance.fantasyScore as TFF Fantasy points or infer source minutes.
