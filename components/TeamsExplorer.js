@@ -3,6 +3,7 @@
 import {useMemo,useState} from 'react'
 import Link from 'next/link'
 import {teamCssVars} from '@/lib/teamThemes'
+import MultiSelectFilter from '@/components/MultiSelectFilter'
 
 const matchupLabel={good:'Avantajlı',neutral:'Dengeli',tough:'Dezavantajlı'}
 const pct=v=>`${(Number(v||0)*100).toFixed(0)}%`
@@ -25,9 +26,9 @@ const sortLabels=Object.fromEntries(sortOptions)
 export default function TeamsExplorer({teams=[],gameweek}){
   const [openFixture,setOpenFixture]=useState(null)
   const [q,setQ]=useState('')
-  const [venue,setVenue]=useState('')
-  const [attack,setAttack]=useState('')
-  const [defense,setDefense]=useState('')
+  const [venue,setVenue]=useState([])
+  const [attack,setAttack]=useState([])
+  const [defense,setDefense]=useState([])
   const [sort,setSort]=useState('xg')
   const [dir,setDir]=useState('desc')
 
@@ -35,9 +36,9 @@ export default function TeamsExplorer({teams=[],gameweek}){
     const needle=normalize(q)
     return [...teams].filter(team=>{
       const fixtures=team.fixtures||[]
-      const venueMatch=!venue||fixtures.some(f=>f.venue===venue)
-      const attackMatch=!attack||team.attack_level===attack
-      const defenseMatch=!defense||team.defense_level===defense
+      const venueMatch=!venue.length||fixtures.some(f=>venue.includes(f.venue))
+      const attackMatch=!attack.length||attack.includes(team.attack_level)
+      const defenseMatch=!defense.length||defense.includes(team.defense_level)
       const searchMatch=!needle||normalize([team.name,team.opponent,...fixtures.map(f=>f.opponent)].join(' ')).includes(needle)
       return venueMatch&&attackMatch&&defenseMatch&&searchMatch
     }).sort((a,b)=>{
@@ -53,29 +54,20 @@ export default function TeamsExplorer({teams=[],gameweek}){
   const head=(key,label)=><th className={sort===key?'team-analysis-sort-head is-selected':''} onClick={()=>changeSort(key)}>{label}{sort===key?<span className="sortmark">{dir==='asc'?' ↑':' ↓'}</span>:null}</th>
   const metricClass=key=>'team-analysis-mobile-metric'+(sort===key?' is-selected':'')
   const cellClass=key=>sort===key?'is-selected-column':''
-  const attackSelected=team=>Boolean(attack&&team.attack_level===attack)
-  const defenseSelected=team=>Boolean(defense&&team.defense_level===defense)
+  const attackSelected=team=>attack.includes(team.attack_level)
+  const defenseSelected=team=>defense.includes(team.defense_level)
 
   return <>
     <div className="filters team-analysis-filters">
       <input className={q?'is-active-filter':''} value={q} onChange={e=>setQ(e.target.value)} placeholder="Takım veya rakip ara..." aria-label="Takım ara"/>
-      <select className={venue?'is-active-filter':''} value={venue} onChange={e=>setVenue(e.target.value)}>
-        <option value="">Tüm saha durumları</option>
-        <option value="HOME">Ev sahibi</option>
-        <option value="AWAY">Deplasman</option>
-      </select>
-      <select className={attack?'is-active-filter':''} value={attack} onChange={e=>setAttack(e.target.value)}>
-        <option value="">Tüm hücum eşleşmeleri</option>
-        <option value="good">Avantajlı</option>
-        <option value="neutral">Dengeli</option>
-        <option value="tough">Dezavantajlı</option>
-      </select>
-      <select className={defense?'is-active-filter':''} value={defense} onChange={e=>setDefense(e.target.value)}>
-        <option value="">Tüm savunma eşleşmeleri</option>
-        <option value="good">Avantajlı</option>
-        <option value="neutral">Dengeli</option>
-        <option value="tough">Dezavantajlı</option>
-      </select>
+      <MultiSelectFilter ariaLabel="Saha durumu filtreleri" placeholder="Tüm saha durumları"
+        value={venue} onChange={setVenue} options={[{value:'HOME',label:'Ev sahibi'},{value:'AWAY',label:'Deplasman'}]}/>
+      <MultiSelectFilter ariaLabel="Hücum eşleşmesi filtreleri" placeholder="Tüm hücum eşleşmeleri"
+        value={attack} onChange={setAttack} options={[
+          {value:'good',label:'Avantajlı'},{value:'neutral',label:'Dengeli'},{value:'tough',label:'Dezavantajlı'}]}/>
+      <MultiSelectFilter ariaLabel="Savunma eşleşmesi filtreleri" placeholder="Tüm savunma eşleşmeleri"
+        value={defense} onChange={setDefense} options={[
+          {value:'good',label:'Avantajlı'},{value:'neutral',label:'Dengeli'},{value:'tough',label:'Dezavantajlı'}]}/>
       <select className="is-active-filter sort-filter" value={sort} onChange={e=>{setSort(e.target.value);setDir('desc')}}>
         {sortOptions.map(([value,label])=><option key={value} value={value}>{label}</option>)}
       </select>
@@ -84,9 +76,9 @@ export default function TeamsExplorer({teams=[],gameweek}){
     <div className="active-team-filters" aria-label="Seçili takım analizi alanları">
       <span className="active-filter-label">Seçili</span>
       {q?<button type="button" className="active-filter-chip search" onClick={()=>setQ('')}>Arama: {q}<b>×</b></button>:null}
-      {venue?<button type="button" className="active-filter-chip venue" onClick={()=>setVenue('')}>{venueLabel(venue)}<b>×</b></button>:null}
-      {attack?<button type="button" className={'active-filter-chip matchup '+attack} onClick={()=>setAttack('')}>Hücum: {matchupLabel[attack]}<b>×</b></button>:null}
-      {defense?<button type="button" className={'active-filter-chip matchup '+defense} onClick={()=>setDefense('')}>Savunma: {matchupLabel[defense]}<b>×</b></button>:null}
+      {venue.map(v=><button key={v} type="button" className="active-filter-chip venue" onClick={()=>setVenue(old=>old.filter(x=>x!==v))}>{venueLabel(v)}<b>×</b></button>)}
+      {attack.map(v=><button key={v} type="button" className={'active-filter-chip matchup '+v} onClick={()=>setAttack(old=>old.filter(x=>x!==v))}>Hücum: {matchupLabel[v]}<b>×</b></button>)}
+      {defense.map(v=><button key={v} type="button" className={'active-filter-chip matchup '+v} onClick={()=>setDefense(old=>old.filter(x=>x!==v))}>Savunma: {matchupLabel[v]}<b>×</b></button>)}
       <button type="button" className="active-filter-chip sort" onClick={()=>setDir(v=>v==='desc'?'asc':'desc')}>
         {sortLabels[sort]} {dir==='asc'?'↑':'↓'}
       </button>
@@ -103,7 +95,7 @@ export default function TeamsExplorer({teams=[],gameweek}){
             <strong className={sort==='total_xfp'?'is-selected-metric':''}>{num(team.total_xfp,1)}<small>xFP</small></strong>
           </div>
           <div className="team-analysis-fixtures">
-            {(team.fixtures||[]).map((f,i)=><span className={venue&&f.venue===venue?'is-selected-fixture':''} key={i}><em>{venueLabel(f.venue)}</em><b>{f.opponent}</b></span>)}
+            {(team.fixtures||[]).map((f,i)=><span className={venue.includes(f.venue)?'is-selected-fixture':''} key={i}><em>{venueLabel(f.venue)}</em><b>{f.opponent}</b></span>)}
           </div>
           <div className="team-analysis-mobile-metrics">
             <div className={metricClass('xg')}><span>Bu hafta xG</span><b>{num(team.xg)}</b></div>
@@ -133,16 +125,16 @@ export default function TeamsExplorer({teams=[],gameweek}){
       <div className="card table-wrap desktop-team-analysis-table">
         <table>
           <thead><tr>
-            <th>Takım</th><th>MH{gameweek||'—'} rakibi</th><th className={venue?'is-filtered-head':''}>E/D</th><th>5 MH fikstür</th><th className={(attack||defense)?'is-filtered-head':''}>Eşleşme</th>
+            <th>Takım</th><th>MH{gameweek||'—'} rakibi</th><th className={venue.length?'is-filtered-head':''}>E/D</th><th>5 MH fikstür</th><th className={(attack.length||defense.length)?'is-filtered-head':''}>Eşleşme</th>
             {head('xg','Bu hafta xG')}{head('oppXg','Bu hafta rakip xG')}{head('win','Galibiyet')}{head('cs','Gol yememe')}
             {head('total_xfp','Toplam xFP')}{head('season_xg_per_match','Sezon xG/maç')}{head('season_xga_per_match','xGA/maç')}
           </tr></thead>
           <tbody>{filtered.map(team=><tr className="team-analysis-row" style={teamCssVars(team.name)} key={team.id}>
             <td><Link className="team-analysis-name" href={'/teams/'+team.id}><span className="team-mini-shirt" aria-hidden="true"><i/></span><b>{team.name}</b></Link></td>
             <td><div className="team-analysis-opponents">{(team.fixtures||[]).map((f,i)=><Link href={'/teams/'+f.opponent_id} key={i}>{f.opponent}</Link>)}</div></td>
-            <td className={venue?'is-filtered-cell':''}>{(team.fixtures||[]).map((f,i)=><span className={'venue-mini'+(venue&&f.venue===venue?' is-selected-filter':'')} key={i}>{venueLabel(f.venue)}</span>)}</td>
+            <td className={venue.length?'is-filtered-cell':''}>{(team.fixtures||[]).map((f,i)=><span className={'venue-mini'+(venue.includes(f.venue)?' is-selected-filter':'')} key={i}>{venueLabel(f.venue)}</span>)}</td>
             <td><div className="fixture-strength-strip compact">{(team.fixture_strip||[]).map((f,i)=><span className={'fixture-strength '+(f.level||'neutral')} title={`MH${f.gameweek} • ${f.opponent}`} key={f.gameweek+'-'+i}><small>MH{f.gameweek}</small><b>{f.opponent}</b></span>)}</div></td>
-            <td className={(attack||defense)?'is-filtered-cell':''}><div className="team-matchup-cell"><span className={'matchup-pill '+team.attack_level+(attackSelected(team)?' is-selected-filter':'')}>Hücum: {matchupLabel[team.attack_level]}</span><span className={'matchup-pill '+team.defense_level+(defenseSelected(team)?' is-selected-filter':'')}>Savunma: {matchupLabel[team.defense_level]}</span></div></td>
+            <td className={(attack.length||defense.length)?'is-filtered-cell':''}><div className="team-matchup-cell"><span className={'matchup-pill '+team.attack_level+(attackSelected(team)?' is-selected-filter':'')}>Hücum: {matchupLabel[team.attack_level]}</span><span className={'matchup-pill '+team.defense_level+(defenseSelected(team)?' is-selected-filter':'')}>Savunma: {matchupLabel[team.defense_level]}</span></div></td>
             <td className={cellClass('xg')}><b>{num(team.xg)}</b></td>
             <td className={cellClass('oppXg')}>{num(team.oppXg)}</td><td className={cellClass('win')}>{pct(team.win)}</td><td className={cellClass('cs')}>{pct(team.cs)}</td>
             <td className={cellClass('total_xfp')}><b>{num(team.total_xfp,1)}</b></td><td className={cellClass('season_xg_per_match')}>{num(team.season_xg_per_match)}</td><td className={cellClass('season_xga_per_match')}>{num(team.season_xga_per_match)}</td>
