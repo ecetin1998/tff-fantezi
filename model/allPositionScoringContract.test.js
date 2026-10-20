@@ -80,8 +80,12 @@ const {normalizedDefenderRole,singleShotCap,attackWeights}=require('./attackAllo
   const lifecycle=fs.readFileSync('supabase/functions/weekly-model-lifecycle/index.ts','utf8');
   assert.match(lifecycle,/firstRecordedRate\(s\.xa_per90,s\.xa_model_per90,prior\.effective_xa_per90,priorRates\[3\]\)/,
     'weekly rollover must not discard sourced xA model when observed xA is null');
-  assert.match(lifecycle,/rates\[3\]=firstRecordedRate\(stats\.xa_per90,stats\.xa_model_per90,rates\[3\]\)/,
-    'same-week 50K refresh must fix xA inputs, not just next-week preparation');
+  assert.match(lifecycle,/rateRaw=stats\?firstRecordedRate\(stats\.xa_per90,stats\.xa_model_per90,rates\[3\]\)/,
+    'same-week refresh must retain original sourced xA candidate');
+  assert.match(lifecycle,/const xaReconcile=reconcileDefenderXa\(stats,player,/,
+    'same-week 50K refresh must align anomalous defender xA');
+  assert.match(lifecycle,/rates\[3\]=xaReconcile\.rate/,
+    'the same-week simulation input must consume the reconciled rate');
   assert.match(lifecycle,/team_assist_share:\(\(\)=>\{/,
     'refresh must recompute role assist share after updating xA inputs');
   assert.match(lifecycle,/const roleBase=\(rolesQ\.data\|\|\[\]\)\.map\(\(x:any\)=>\{[\s\S]*?const input=refreshedInputs\.get\(Number\(x\.player_id\)\) as any[\s\S]*?team_assist_share:/,
