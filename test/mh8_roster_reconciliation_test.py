@@ -79,5 +79,54 @@ class ReconcileTests(unittest.TestCase):
         self.assertFalse(unknown["played_from_explicit_minutes"])
 
 
+    def test_only_eight_exact_tff_fixture_proven_reviewed_aliases(self):
+        root=Path(__file__).resolve().parents[1]/"data/source-evidence"
+        roster=json.loads(ROSTER.read_text(encoding="utf-8"))
+        official=json.loads((root/"gw8-scout-to-official-tff-match-identities-2026-10-20.json").read_text(encoding="utf-8"))
+        reviewed=json.loads((root/"gw8-reviewed-player-identities-tff-2026-10-20.json").read_text(encoding="utf-8"))
+        self.assertEqual(len(reviewed["entries"]),8)
+        by_fixture={f["match_id"]: f for f in roster["fixtures"]}
+        rows={f["match_id"]: {"fixture_id":f["match_id"],
+              "status":"STRUCTURED_FIXTURE_CONFIRMED",
+              "data":{"observed_player_stat_components":[]}} for f in roster["fixtures"]}
+        for proof in reviewed["entries"]:
+            fixture=by_fixture[proof["internal_match_id"]]
+            side=("home" if fixture["home_team_id"]==proof["team_id"]
+                  else "away" if fixture["away_team_id"]==proof["team_id"] else None)
+            self.assertIsNotNone(side, "reviewed source must belong to official fixture team")
+            rows[fixture["match_id"]]["data"]["observed_player_stat_components"].append({
+                "side":side,"provider_id":proof["provider_player_id"],
+                "player_name":proof["provider_name"],"shirt_number":proof["provider_shirt_number"],
+                "explicit_source_metrics":{},
+            })
+        report={"gameweek":8,"rows":[rows[k] for k in sorted(rows)]}
+        result=m.reconcile(report,roster,reviewed,official)
+        matched={o["provider_player_id"]:o for fixture in result["matches"]
+                 for o in fixture["observations"]}
+        self.assertEqual(len(matched),8)
+        for proof in reviewed["entries"]:
+            o=matched[proof["provider_player_id"]]
+            self.assertEqual(o["scout_player_id"],proof["scout_player_id"])
+            self.assertEqual(o["mapping_method"],"reviewed_official_tff_lineup")
+            self.assertFalse(o["is_final_tff_fantasy"])
+        self.assertEqual(result["official_fantasy_points_written"],0)
+        self.assertFalse(result["safe_to_close_mh8"])
+
+        # Even an established ID must not override a different player/jersey.
+        import copy
+        bad=copy.deepcopy(report)
+        target=next(row for row in bad["rows"] if row["fixture_id"]==317849)
+        target["data"]["observed_player_stat_components"][0]["shirt_number"]="14"
+        with self.assertRaises(ValueError):
+            m.reconcile(bad,roster,reviewed,official)
+
+        bad_official=copy.deepcopy(official)
+        bad_official["matches"][0]["tff_match_id"]=123456
+        # Crosswalk drift for a reviewed fixture must be rejected, not silently ignored.
+        bad_official["matches"][2]["tff_match_id"]=999999
+        with self.assertRaises(ValueError):
+            m.reconcile(report,roster,reviewed,bad_official)
+
+
 if __name__=="__main__":
     unittest.main()
