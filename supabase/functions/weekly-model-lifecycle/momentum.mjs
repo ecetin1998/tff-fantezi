@@ -7,7 +7,7 @@
  * ledger is UNKNOWN appearance evidence, not an independently verified bench.
  * Legacy zero-minute rows also cannot be used as negative minutes evidence.
  */
-const trustedMinute=(row)=>{
+export const trustedMinute=(row)=>{
   if(!row||row.is_final!==true||row.minutes==null)return null
   const minutes=Number(row.minutes)
   if(!Number.isFinite(minutes)||minutes<0||minutes>130)return null
