@@ -113,3 +113,7 @@ published Edge xFP. It supports direction and sensitivity, not publishing.
 
 Read-only audit helper `model/defenderSourceAudit.js` and its regression
 tests implement the coverage / mismatch checks and never modify data.
+
+## Advanced shot baseline / weekly-ledger reconciliation
+
+A supplementary read-only query (see `scripts/audit_defender_features_2026_27.sql`) compared current season `shots` and `shots_on_target` with `scout_player_advanced_baseline` plus recorded `scout_player_advanced_weekly` through GW7. For **16 defenders with >35 season shots**, **all 16** have unreconciled shot totals and **15 of 16** have unreconciled shots-on-target totals. The flagged cohort includes 15 CB and 1 FB; observed season shots range from 42 to 110. This is provenance inconsistency, not conclusive proof of the true shot count. Do not overwrite the raw values, and do not alter the production xFP for a field that the current scorer does not directly consume. Before any source ingestion fix, identify the original contributing event data and test weekly/baseline idempotency.
