@@ -547,7 +547,7 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
   }
 
   function chooseEmptySlot(position){
-    setPos(position)
+    setPos([position])
     setQ('')
     pickerRef.current?.scrollIntoView({behavior:'smooth',block:'start'})
   }
