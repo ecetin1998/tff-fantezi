@@ -36,6 +36,8 @@ jobs:
         run: npm test
       - name: MH8 structured player data source tests
         run: python3 -m unittest discover -s test -p mh8_structured_source_probe_test.py -v
+      - name: MH8 roster reconciliation safety tests
+        run: python3 -m unittest discover -s test -p mh8_roster_reconciliation_test.py -v
       - name: Build
         run: npm run build
       - name: Route runtime

@@ -173,9 +173,9 @@ def summarize(match: dict, provider_id: int, data: dict) -> dict:
         subs = team.get("subs") or []
         summary["teams"].append({
             "side": side, "name": team.get("name"),
-            "starters": [{"provider_id": p.get("id"), "name": p.get("name"), "position": p.get("positionId")}
+            "starters": [{"provider_id": p.get("id"), "name": p.get("name"), "position": p.get("positionId"), "shirt_number":p.get("shirtNumber")}
                          for p in starters if isinstance(p, dict)],
-            "subs": [{"provider_id": p.get("id"), "name": p.get("name"), "position": p.get("positionId")}
+            "subs": [{"provider_id": p.get("id"), "name": p.get("name"), "position": p.get("positionId"), "shirt_number":p.get("shirtNumber")}
                      for p in subs if isinstance(p, dict)],
             "starter_count": len(starters), "sub_count": len(subs),
         })
@@ -239,7 +239,7 @@ def summarize(match: dict, provider_id: int, data: dict) -> dict:
                 explicit=extract_explicit_stat_values(record)
                 summary["observed_player_stat_components"].append({
                     "provider_id":pid, "player_name":player["name"],
-                    "side":team["side"],"position":player["position"],
+                    "side":team["side"],"position":player["position"],"shirt_number":player.get("shirt_number"),
                     "explicit_source_metrics":explicit,
                 })
     summary["explicit_minutes_count"] = sum(

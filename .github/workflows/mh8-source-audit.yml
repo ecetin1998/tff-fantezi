@@ -7,6 +7,9 @@ on:
       - ".github/workflows/mh8-source-audit.yml"
       - "scripts/audit_mh8_fotmob_sources.py"
       - "scripts/probe_mh8_fotmob_structured.py"
+      - "scripts/reconcile_mh8_provider_players.py"
+      - "test/mh8_roster_reconciliation_test.py"
+      - "data/source-evidence/gw8-scout-roster-identities-2026-10-20.json"
       - "test/mh8_structured_source_probe_test.py"
       - "test/mh8_source_audit_test.py"
       - "data/source-evidence/gw8-fotmob-match-page-candidates-2026-10-20.json"
@@ -65,6 +68,26 @@ jobs:
             jq -r '.rows[] | "- Match \(.fixture_id): \(.status), lineups: \(.data.lineup_complete // false), source player stats: \(.data.player_stat_player_count // 0), minutes explicitly sourced: \(.data.explicit_minutes_count // 0), saves explicitly sourced: \(.data.explicit_keeper_save_count // 0), events: \(.data.observed_event_count // 0)"' \
               "$RUNNER_TEMP/mh8-structured-source.json"
           } >> "$GITHUB_STEP_SUMMARY"
+      - name: Test strict provider ID to roster mapping
+        run: python3 -m unittest discover -s test -p mh8_roster_reconciliation_test.py -v
+      - name: Stage provider-to-scout identity links for audit, never finalize
+        run: |
+          set -euo pipefail
+          python3 scripts/reconcile_mh8_provider_players.py \
+            --input "$RUNNER_TEMP/mh8-structured-source.json" \
+            --output "$RUNNER_TEMP/mh8-scout-identity-audit.json"
+          jq -e '.gameweek == 8 and .source_fixtures == 9 and
+                 .official_fantasy_points_written == 0 and .safe_to_close_mh8 == false and
+                 (.matched_played + .unmatched_played) == .sourced_played' \
+            "$RUNNER_TEMP/mh8-scout-identity-audit.json"
+          {
+            echo
+            echo "### Scout player identity coverage (not official Fantasy points)"
+            jq -r '"- Matched source-observed players: \(.matched_played)/\(.sourced_played)"' \
+              "$RUNNER_TEMP/mh8-scout-identity-audit.json"
+            jq -r '.matches[] | "- Fixture \(.match_id): \(.matched_played)/\(.played_observed) linked"' \
+              "$RUNNER_TEMP/mh8-scout-identity-audit.json"
+          } >> "$GITHUB_STEP_SUMMARY"
       - name: Archive source evidence and failures for review
         uses: actions/upload-artifact@v4
         if: always()
@@ -73,5 +96,6 @@ jobs:
           path: |
             ${{ runner.temp }}/mh8-source-audit.json
             ${{ runner.temp }}/mh8-structured-source.json
+            ${{ runner.temp }}/mh8-scout-identity-audit.json
           if-no-files-found: warn
           retention-days: 14

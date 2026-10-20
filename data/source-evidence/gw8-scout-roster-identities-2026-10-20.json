@@ -1,0 +1,4178 @@
+{
+  "gameweek": 8,
+  "season": "2026-27",
+  "snapshot_date": "2026-10-20",
+  "source": "scout_players active roster (public fields only) for provider ID matching",
+  "count": 456,
+  "players": [
+    {
+      "id": 2,
+      "full_name": "Metehan Mimaroğlu",
+      "display_name": "Metehan",
+      "short_label": "Metehan",
+      "team_id": 1,
+      "position": "MID",
+      "shirt_number": 9
+    },
+    {
+      "id": 3,
+      "full_name": "Tim Jabol-Folcarelli",
+      "display_name": "Folcarelli",
+      "short_label": "Folcarelli",
+      "team_id": 1,
+      "position": "MID",
+      "shirt_number": 26
+    },
+    {
+      "id": 4,
+      "full_name": "Ernest Muçi",
+      "display_name": "Muçi",
+      "short_label": "Muçi",
+      "team_id": 1,
+      "position": "MID",
+      "shirt_number": 15
+    },
+    {
+      "id": 5,
+      "full_name": "Cihan Çanak",
+      "display_name": "Cihan",
+      "short_label": "Cihan",
+      "team_id": 1,
+      "position": "MID",
+      "shirt_number": 91
+    },
+    {
+      "id": 7,
+      "full_name": "Mehmet Umut Nayir",
+      "display_name": "Umut",
+      "short_label": "Umut",
+      "team_id": 1,
+      "position": "FWD",
+      "shirt_number": 14
+    },
+    {
+      "id": 9,
+      "full_name": "Ruslan Malinovskyi",
+      "display_name": "Malinovskyi",
+      "short_label": "Malinovskyi",
+      "team_id": 1,
+      "position": "MID",
+      "shirt_number": 17
+    },
+    {
+      "id": 10,
+      "full_name": "Noah José Damesquita E Melo Saviolo",
+      "display_name": "Saviolo",
+      "short_label": "Saviolo",
+      "team_id": 1,
+      "position": "MID",
+      "shirt_number": 70
+    },
+    {
+      "id": 11,
+      "full_name": "Doğuhan Aral Şimşir",
+      "display_name": "Aral",
+      "short_label": "Aral",
+      "team_id": 1,
+      "position": "MID",
+      "shirt_number": 58
+    },
+    {
+      "id": 12,
+      "full_name": "Mohamed Salah Hamed Mahrous Ghaly",
+      "display_name": "Salah",
+      "short_label": "Salah",
+      "team_id": 1,
+      "position": "MID",
+      "shirt_number": 10
+    },
+    {
+      "id": 14,
+      "full_name": "Ozan Tufan",
+      "display_name": "Ozan",
+      "short_label": "Ozan",
+      "team_id": 1,
+      "position": "MID",
+      "shirt_number": 11
+    },
+    {
+      "id": 15,
+      "full_name": "Mustafa Eskihellaç",
+      "display_name": "Mustafa",
+      "short_label": "Mustafa",
+      "team_id": 1,
+      "position": "DEF",
+      "shirt_number": 7
+    },
+    {
+      "id": 16,
+      "full_name": "Göktan Gürpüz",
+      "display_name": "Göktan",
+      "short_label": "Göktan",
+      "team_id": 8,
+      "position": "MID",
+      "shirt_number": 42
+    },
+    {
+      "id": 17,
+      "full_name": "Arsenii Batahov",
+      "display_name": "Batahov",
+      "short_label": "Batahov",
+      "team_id": 1,
+      "position": "DEF",
+      "shirt_number": 44
+    },
+    {
+      "id": 18,
+      "full_name": "Ebere Paul Onuachu",
+      "display_name": "Onuachu",
+      "short_label": "Onuachu",
+      "team_id": 1,
+      "position": "FWD",
+      "shirt_number": 30
+    },
+    {
+      "id": 22,
+      "full_name": "André Onana",
+      "display_name": "Onana",
+      "short_label": "Onana",
+      "team_id": 1,
+      "position": "GK",
+      "shirt_number": 24
+    },
+    {
+      "id": 27,
+      "full_name": "Stefan Savić",
+      "display_name": "Savic",
+      "short_label": "Savic",
+      "team_id": 1,
+      "position": "DEF",
+      "shirt_number": 15
+    },
+    {
+      "id": 28,
+      "full_name": "Wagner Fabrício Cardoso de Pina",
+      "display_name": "Pina",
+      "short_label": "Pina",
+      "team_id": 1,
+      "position": "DEF",
+      "shirt_number": 20
+    },
+    {
+      "id": 30,
+      "full_name": "Onuralp Çevikkan",
+      "display_name": "Onuralp",
+      "short_label": "Onuralp",
+      "team_id": 1,
+      "position": "GK",
+      "shirt_number": 25
+    },
+    {
+      "id": 32,
+      "full_name": "Melih Kabasakal",
+      "display_name": "Melih",
+      "short_label": "Melih",
+      "team_id": 1,
+      "position": "MID",
+      "shirt_number": 57
+    },
+    {
+      "id": 33,
+      "full_name": "Cenk Özkacar",
+      "display_name": "Cenk",
+      "short_label": "Cenk",
+      "team_id": 1,
+      "position": "DEF",
+      "shirt_number": 39
+    },
+    {
+      "id": 34,
+      "full_name": "Okay Yokuşlu",
+      "display_name": "Okay",
+      "short_label": "Okay",
+      "team_id": 1,
+      "position": "MID",
+      "shirt_number": 5
+    },
+    {
+      "id": 35,
+      "full_name": "Sidny Lopes Cabral",
+      "display_name": "Cabral",
+      "short_label": "Cabral",
+      "team_id": 1,
+      "position": "DEF",
+      "shirt_number": 55
+    },
+    {
+      "id": 36,
+      "full_name": "Umut Dilan Bozok",
+      "display_name": "Umut",
+      "short_label": "Umut B.",
+      "team_id": 13,
+      "position": "FWD",
+      "shirt_number": 17
+    },
+    {
+      "id": 37,
+      "full_name": "Chibuike Godfrey Nwaiwu",
+      "display_name": "Nwaiwu",
+      "short_label": "Nwaiwu",
+      "team_id": 1,
+      "position": "DEF",
+      "shirt_number": 27
+    },
+    {
+      "id": 38,
+      "full_name": "Samet Akaydin",
+      "display_name": "Samet",
+      "short_label": "Samet",
+      "team_id": 1,
+      "position": "DEF",
+      "shirt_number": 4
+    },
+    {
+      "id": 40,
+      "full_name": "Ahmet Doğan Yıldırım",
+      "display_name": "Ahmet",
+      "short_label": "Ahmet",
+      "team_id": 1,
+      "position": "GK",
+      "shirt_number": 1
+    },
+    {
+      "id": 41,
+      "full_name": "Orhan Ovacıklı",
+      "display_name": "Orhan",
+      "short_label": "Orhan",
+      "team_id": 2,
+      "position": "DEF",
+      "shirt_number": 2
+    },
+    {
+      "id": 42,
+      "full_name": "Cengizhan Bayrak",
+      "display_name": "Cengizhan",
+      "short_label": "Cengizhan",
+      "team_id": 2,
+      "position": "DEF",
+      "shirt_number": 40
+    },
+    {
+      "id": 43,
+      "full_name": "Ömer Arda Kara",
+      "display_name": "Ömer",
+      "short_label": "Ömer",
+      "team_id": 2,
+      "position": "DEF",
+      "shirt_number": 32
+    },
+    {
+      "id": 44,
+      "full_name": "Yakup Kırtay",
+      "display_name": "Yakup",
+      "short_label": "Yakup",
+      "team_id": 2,
+      "position": "DEF",
+      "shirt_number": 34
+    },
+    {
+      "id": 45,
+      "full_name": "Mustafa Fettahoğlu",
+      "display_name": "Mustafa",
+      "short_label": "Mustafa F.",
+      "team_id": 2,
+      "position": "MID",
+      "shirt_number": 8
+    },
+    {
+      "id": 47,
+      "full_name": "Nihad Mujakić",
+      "display_name": "Mujakic",
+      "short_label": "Mujakic",
+      "team_id": 2,
+      "position": "DEF",
+      "shirt_number": 29
+    },
+    {
+      "id": 48,
+      "full_name": "Guram Giorbelidze",
+      "display_name": "Giorbelidze",
+      "short_label": "Giorbelidze",
+      "team_id": 2,
+      "position": "DEF",
+      "shirt_number": 3
+    },
+    {
+      "id": 49,
+      "full_name": "Nariman Akhundzada",
+      "display_name": "Nariman",
+      "short_label": "Nariman",
+      "team_id": 2,
+      "position": "FWD",
+      "shirt_number": 90
+    },
+    {
+      "id": 51,
+      "full_name": "Mahmut Ertuğrul Taşkıran",
+      "display_name": "Ertuğrul",
+      "short_label": "Ertuğrul",
+      "team_id": 2,
+      "position": "GK",
+      "shirt_number": null
+    },
+    {
+      "id": 52,
+      "full_name": "Eren Tozlu",
+      "display_name": "Eren",
+      "short_label": "Eren",
+      "team_id": 2,
+      "position": "FWD",
+      "shirt_number": 9
+    },
+    {
+      "id": 53,
+      "full_name": "Amar Gërxhaliu",
+      "display_name": "Gerxhaliu",
+      "short_label": "Gerxhaliu",
+      "team_id": 2,
+      "position": "DEF",
+      "shirt_number": 5
+    },
+    {
+      "id": 58,
+      "full_name": "Martín Vladimir Rodríguez Torrejón",
+      "display_name": "Rodríguez",
+      "short_label": "Rodríguez",
+      "team_id": 2,
+      "position": "MID",
+      "shirt_number": 10
+    },
+    {
+      "id": 59,
+      "full_name": "Brandon Baiye",
+      "display_name": "Baiye",
+      "short_label": "Baiye",
+      "team_id": 2,
+      "position": "MID",
+      "shirt_number": 6
+    },
+    {
+      "id": 63,
+      "full_name": "Mustafa Yumlu",
+      "display_name": "Mustafa",
+      "short_label": "Mustafa Y.",
+      "team_id": 2,
+      "position": "DEF",
+      "shirt_number": 4
+    },
+    {
+      "id": 64,
+      "full_name": "Matija Orbanić",
+      "display_name": "Orbanic",
+      "short_label": "Orbanic",
+      "team_id": 2,
+      "position": "GK",
+      "shirt_number": 1
+    },
+    {
+      "id": 67,
+      "full_name": "Sefa Akgün",
+      "display_name": "Sefa",
+      "short_label": "Sefa",
+      "team_id": 2,
+      "position": "MID",
+      "shirt_number": 14
+    },
+    {
+      "id": 70,
+      "full_name": "Erkan Anapa",
+      "display_name": "Erkan",
+      "short_label": "Erkan",
+      "team_id": 2,
+      "position": "GK",
+      "shirt_number": 99
+    },
+    {
+      "id": 71,
+      "full_name": "Ayberk Karapo",
+      "display_name": "Ayberk",
+      "short_label": "Ayberk",
+      "team_id": 3,
+      "position": "DEF",
+      "shirt_number": 20
+    },
+    {
+      "id": 72,
+      "full_name": "Ali Yavuz Kol",
+      "display_name": "Ali",
+      "short_label": "Ali",
+      "team_id": 3,
+      "position": "MID",
+      "shirt_number": 11
+    },
+    {
+      "id": 75,
+      "full_name": "Adrian Dawid Benedyczak",
+      "display_name": "Benedyczak",
+      "short_label": "Benedyczak",
+      "team_id": 3,
+      "position": "FWD",
+      "shirt_number": 9
+    },
+    {
+      "id": 76,
+      "full_name": "Taylan Utku Aydın",
+      "display_name": "Taylan",
+      "short_label": "Taylan",
+      "team_id": 3,
+      "position": "DEF",
+      "shirt_number": 29
+    },
+    {
+      "id": 77,
+      "full_name": "Kerem Demirbay",
+      "display_name": "Kerem",
+      "short_label": "Kerem",
+      "team_id": 3,
+      "position": "MID",
+      "shirt_number": 26
+    },
+    {
+      "id": 78,
+      "full_name": "Marcus Albin John Rafferty",
+      "display_name": "Rafferty",
+      "short_label": "Rafferty",
+      "team_id": 3,
+      "position": "MID",
+      "shirt_number": 32
+    },
+    {
+      "id": 80,
+      "full_name": "Andreas Gianniotis",
+      "display_name": "Gianniotis",
+      "short_label": "Gianniotis",
+      "team_id": 3,
+      "position": "GK",
+      "shirt_number": 1
+    },
+    {
+      "id": 81,
+      "full_name": "Güven Yalçın",
+      "display_name": "Güven",
+      "short_label": "Güven",
+      "team_id": 3,
+      "position": "FWD",
+      "shirt_number": 19
+    },
+    {
+      "id": 82,
+      "full_name": "Yusuf Barası",
+      "display_name": "Barası",
+      "short_label": "Barası",
+      "team_id": 16,
+      "position": "FWD",
+      "shirt_number": 87
+    },
+    {
+      "id": 84,
+      "full_name": "Adem Arous",
+      "display_name": "Arous",
+      "short_label": "Arous",
+      "team_id": 3,
+      "position": "DEF",
+      "shirt_number": 4
+    },
+    {
+      "id": 85,
+      "full_name": "Emirhan Boz",
+      "display_name": "Emirhan",
+      "short_label": "Emirhan B.",
+      "team_id": 3,
+      "position": "MID",
+      "shirt_number": 15
+    },
+    {
+      "id": 86,
+      "full_name": "Andri Fannar Baldursson",
+      "display_name": "Baldursson",
+      "short_label": "Baldursson",
+      "team_id": 3,
+      "position": "MID",
+      "shirt_number": 16
+    },
+    {
+      "id": 88,
+      "full_name": "Jakob Vestergaard Jessen",
+      "display_name": "Jessen",
+      "short_label": "Jessen",
+      "team_id": 3,
+      "position": "DEF",
+      "shirt_number": 3
+    },
+    {
+      "id": 89,
+      "full_name": "Emirhan Yiğit",
+      "display_name": "Emirhan",
+      "short_label": "Emirhan Y.",
+      "team_id": 3,
+      "position": "MID",
+      "shirt_number": 99
+    },
+    {
+      "id": 92,
+      "full_name": "Haris Hajradinović",
+      "display_name": "Haris",
+      "short_label": "Haris",
+      "team_id": 3,
+      "position": "MID",
+      "shirt_number": 10
+    },
+    {
+      "id": 93,
+      "full_name": "Mecit Sercan Deniz",
+      "display_name": "Sercan",
+      "short_label": "Sercan",
+      "team_id": 3,
+      "position": "MID",
+      "shirt_number": 21
+    },
+    {
+      "id": 94,
+      "full_name": "Cláudio Winck Neto",
+      "display_name": "Winck",
+      "short_label": "Winck",
+      "team_id": 3,
+      "position": "DEF",
+      "shirt_number": 2
+    },
+    {
+      "id": 95,
+      "full_name": "Kamil Ahmet Çörekçi",
+      "display_name": "Kamil",
+      "short_label": "Kamil",
+      "team_id": 3,
+      "position": "DEF",
+      "shirt_number": 22
+    },
+    {
+      "id": 97,
+      "full_name": "Elson Mendes Da Silva",
+      "display_name": "Mendes",
+      "short_label": "Mendes",
+      "team_id": 3,
+      "position": "MID",
+      "shirt_number": 28
+    },
+    {
+      "id": 102,
+      "full_name": "Thiemoko Diarra",
+      "display_name": "Diarra",
+      "short_label": "Diarra",
+      "team_id": 3,
+      "position": "MID",
+      "shirt_number": 13
+    },
+    {
+      "id": 104,
+      "full_name": "Matei Cristian Ilie",
+      "display_name": "Ilie",
+      "short_label": "Ilie",
+      "team_id": 3,
+      "position": "DEF",
+      "shirt_number": 5
+    },
+    {
+      "id": 106,
+      "full_name": "Ali Emre Yanar",
+      "display_name": "Ali Emre",
+      "short_label": "Ali Emre",
+      "team_id": 3,
+      "position": "GK",
+      "shirt_number": 25
+    },
+    {
+      "id": 107,
+      "full_name": "Arda Özyar",
+      "display_name": "Arda",
+      "short_label": "Arda",
+      "team_id": 4,
+      "position": "FWD",
+      "shirt_number": 17
+    },
+    {
+      "id": 108,
+      "full_name": "Daniel Ebenezer Kwasi Agyei",
+      "display_name": "Agyei",
+      "short_label": "Agyei",
+      "team_id": 4,
+      "position": "MID",
+      "shirt_number": 7
+    },
+    {
+      "id": 109,
+      "full_name": "Tayfur Bingöl",
+      "display_name": "Tayfur",
+      "short_label": "Tayfur",
+      "team_id": 4,
+      "position": "MID",
+      "shirt_number": 27
+    },
+    {
+      "id": 110,
+      "full_name": "Haydar Karataş",
+      "display_name": "Haydar",
+      "short_label": "Haydar",
+      "team_id": 4,
+      "position": "MID",
+      "shirt_number": 16
+    },
+    {
+      "id": 111,
+      "full_name": "Emir Ortakaya",
+      "display_name": "Emir",
+      "short_label": "Emir",
+      "team_id": 4,
+      "position": "DEF",
+      "shirt_number": 6
+    },
+    {
+      "id": 112,
+      "full_name": "Muharrem Cinan",
+      "display_name": "Muharrem",
+      "short_label": "Muharrem",
+      "team_id": 4,
+      "position": "DEF",
+      "shirt_number": 3
+    },
+    {
+      "id": 113,
+      "full_name": "Uğur Kaan Yıldız",
+      "display_name": "Uğur",
+      "short_label": "Uğur",
+      "team_id": 4,
+      "position": "DEF",
+      "shirt_number": 35
+    },
+    {
+      "id": 116,
+      "full_name": "Aleksandar Jovanović",
+      "display_name": "Jovanovic",
+      "short_label": "Jovanovic",
+      "team_id": 4,
+      "position": "GK",
+      "shirt_number": 1
+    },
+    {
+      "id": 117,
+      "full_name": "Makana Nsimba Baku",
+      "display_name": "Baku",
+      "short_label": "Baku",
+      "team_id": 4,
+      "position": "MID",
+      "shirt_number": 8
+    },
+    {
+      "id": 118,
+      "full_name": "Bruno Petković",
+      "display_name": "Petkovic",
+      "short_label": "Petkovic",
+      "team_id": 4,
+      "position": "FWD",
+      "shirt_number": 9
+    },
+    {
+      "id": 119,
+      "full_name": "Metehan Altunbaş",
+      "display_name": "Metehan",
+      "short_label": "Metehan",
+      "team_id": 4,
+      "position": "FWD",
+      "shirt_number": 11
+    },
+    {
+      "id": 120,
+      "full_name": "Anfernee Jamal Dijksteel",
+      "display_name": "Dijksteel",
+      "short_label": "Dijksteel",
+      "team_id": 4,
+      "position": "DEF",
+      "shirt_number": 5
+    },
+    {
+      "id": 121,
+      "full_name": "Onurcan Piri",
+      "display_name": "Onurcan",
+      "short_label": "Onurcan",
+      "team_id": 4,
+      "position": "GK",
+      "shirt_number": 98
+    },
+    {
+      "id": 125,
+      "full_name": "Mahamadou Susoho Sissoho",
+      "display_name": "Susoho",
+      "short_label": "Susoho",
+      "team_id": 4,
+      "position": "MID",
+      "shirt_number": 19
+    },
+    {
+      "id": 126,
+      "full_name": "Banhie Xavier Tanguy Zoukrou",
+      "display_name": "Zoukrou",
+      "short_label": "Zoukrou",
+      "team_id": 4,
+      "position": "DEF",
+      "shirt_number": 4
+    },
+    {
+      "id": 127,
+      "full_name": "Rigoberto Manuel Rivas Vindel",
+      "display_name": "Rivas",
+      "short_label": "Rivas",
+      "team_id": 4,
+      "position": "MID",
+      "shirt_number": 11
+    },
+    {
+      "id": 130,
+      "full_name": "Serhat Öztaşdelen",
+      "display_name": "Serhat",
+      "short_label": "Serhat",
+      "team_id": 4,
+      "position": "GK",
+      "shirt_number": 80
+    },
+    {
+      "id": 131,
+      "full_name": "Manuel Luís da Silva Cafumana",
+      "display_name": "Show",
+      "short_label": "Show",
+      "team_id": 4,
+      "position": "MID",
+      "shirt_number": 15
+    },
+    {
+      "id": 132,
+      "full_name": "Massadio Haïdara",
+      "display_name": "Haïdara",
+      "short_label": "Haïdara",
+      "team_id": 4,
+      "position": "DEF",
+      "shirt_number": 20
+    },
+    {
+      "id": 134,
+      "full_name": "Kahraman Demirtaş",
+      "display_name": "Kahraman",
+      "short_label": "Kahraman",
+      "team_id": 5,
+      "position": "DEF",
+      "shirt_number": 5
+    },
+    {
+      "id": 135,
+      "full_name": "Mehmet Yeşil",
+      "display_name": "Mehmet",
+      "short_label": "Mehmet",
+      "team_id": 5,
+      "position": "DEF",
+      "shirt_number": 38
+    },
+    {
+      "id": 136,
+      "full_name": "Diaa Sabi'a",
+      "display_name": "Diaa Sabi'a",
+      "short_label": "Diaa Sabi'a",
+      "team_id": 5,
+      "position": "MID",
+      "shirt_number": 14
+    },
+    {
+      "id": 139,
+      "full_name": "Cengiz Umut Meraş",
+      "display_name": "Umut",
+      "short_label": "Umut",
+      "team_id": 5,
+      "position": "DEF",
+      "shirt_number": 26
+    },
+    {
+      "id": 144,
+      "full_name": "Mbaye Diagne",
+      "display_name": "Diagne",
+      "short_label": "Diagne",
+      "team_id": 5,
+      "position": "FWD",
+      "shirt_number": 9
+    },
+    {
+      "id": 145,
+      "full_name": "Mustafa Burak Bozan",
+      "display_name": "Burak",
+      "short_label": "Burak",
+      "team_id": 5,
+      "position": "GK",
+      "shirt_number": 22
+    },
+    {
+      "id": 148,
+      "full_name": "Gift Emmanuel Orban",
+      "display_name": "Orban",
+      "short_label": "Orban",
+      "team_id": 5,
+      "position": "FWD",
+      "shirt_number": 33
+    },
+    {
+      "id": 149,
+      "full_name": "Rayan Ny Aina Arnaldo Raveloson",
+      "display_name": "Rayan",
+      "short_label": "Rayan",
+      "team_id": 5,
+      "position": "MID",
+      "shirt_number": 24
+    },
+    {
+      "id": 151,
+      "full_name": "David Robert Bates",
+      "display_name": "Bates",
+      "short_label": "Bates",
+      "team_id": 5,
+      "position": "DEF",
+      "shirt_number": 34
+    },
+    {
+      "id": 152,
+      "full_name": "Ermal Krasniqi",
+      "display_name": "Krasniqi",
+      "short_label": "Krasniqi",
+      "team_id": 5,
+      "position": "MID",
+      "shirt_number": 7
+    },
+    {
+      "id": 154,
+      "full_name": "Amadou Cissé",
+      "display_name": "Cissé",
+      "short_label": "Cissé",
+      "team_id": 5,
+      "position": "DEF",
+      "shirt_number": 19
+    },
+    {
+      "id": 155,
+      "full_name": "Cem Üstündağ",
+      "display_name": "Cem",
+      "short_label": "Cem",
+      "team_id": 5,
+      "position": "MID",
+      "shirt_number": 6
+    },
+    {
+      "id": 157,
+      "full_name": "Furkan Soyalp",
+      "display_name": "Furkan",
+      "short_label": "Furkan",
+      "team_id": 5,
+      "position": "MID",
+      "shirt_number": 8
+    },
+    {
+      "id": 160,
+      "full_name": "Berk Kızıldemir",
+      "display_name": "Berk",
+      "short_label": "Berk",
+      "team_id": 5,
+      "position": "MID",
+      "shirt_number": 23
+    },
+    {
+      "id": 161,
+      "full_name": "Alban-Marc Lafont",
+      "display_name": "Lafont",
+      "short_label": "Lafont",
+      "team_id": 5,
+      "position": "GK",
+      "shirt_number": 1
+    },
+    {
+      "id": 162,
+      "full_name": "Lumbardh Dellova",
+      "display_name": "Dellova",
+      "short_label": "Dellova",
+      "team_id": 5,
+      "position": "DEF",
+      "shirt_number": 35
+    },
+    {
+      "id": 163,
+      "full_name": "Marco Asensio Willemsen",
+      "display_name": "Asensio",
+      "short_label": "Asensio",
+      "team_id": 6,
+      "position": "MID",
+      "shirt_number": 10
+    },
+    {
+      "id": 165,
+      "full_name": "Tarık Çetin",
+      "display_name": "Tarık",
+      "short_label": "Tarık",
+      "team_id": 6,
+      "position": "GK",
+      "shirt_number": 13
+    },
+    {
+      "id": 166,
+      "full_name": "Ederson Santana de Moraes",
+      "display_name": "Ederson",
+      "short_label": "Ederson",
+      "team_id": 6,
+      "position": "GK",
+      "shirt_number": 31
+    },
+    {
+      "id": 169,
+      "full_name": "Muhammed Kerem Aktürkoğlu",
+      "display_name": "Kerem",
+      "short_label": "Kerem",
+      "team_id": 6,
+      "position": "MID",
+      "shirt_number": 9
+    },
+    {
+      "id": 170,
+      "full_name": "Nélson Cabral Semedo",
+      "display_name": "Semedo",
+      "short_label": "Semedo",
+      "team_id": 6,
+      "position": "DEF",
+      "shirt_number": 27
+    },
+    {
+      "id": 171,
+      "full_name": "Vedat Muriqi",
+      "display_name": "Muriqi",
+      "short_label": "Muriqi",
+      "team_id": 6,
+      "position": "FWD",
+      "shirt_number": 19
+    },
+    {
+      "id": 172,
+      "full_name": "Milan Škriniar",
+      "display_name": "Škriniar",
+      "short_label": "Škriniar",
+      "team_id": 6,
+      "position": "DEF",
+      "shirt_number": 37
+    },
+    {
+      "id": 174,
+      "full_name": "Münir Levent Mercan",
+      "display_name": "Levent",
+      "short_label": "Levent",
+      "team_id": 6,
+      "position": "DEF",
+      "shirt_number": 22
+    },
+    {
+      "id": 175,
+      "full_name": "İsmail Yüksek",
+      "display_name": "İsmail",
+      "short_label": "İsmail",
+      "team_id": 6,
+      "position": "MID",
+      "shirt_number": 3
+    },
+    {
+      "id": 176,
+      "full_name": "Mason Will John Greenwood",
+      "display_name": "Greenwood",
+      "short_label": "Greenwood",
+      "team_id": 6,
+      "position": "MID",
+      "shirt_number": 11
+    },
+    {
+      "id": 178,
+      "full_name": "Oğuz Aydın",
+      "display_name": "Oğuz",
+      "short_label": "Oğuz",
+      "team_id": 6,
+      "position": "MID",
+      "shirt_number": 70
+    },
+    {
+      "id": 180,
+      "full_name": "Nathan Benjamin Aké",
+      "display_name": "Ake",
+      "short_label": "Ake",
+      "team_id": 6,
+      "position": "DEF",
+      "shirt_number": 15
+    },
+    {
+      "id": 181,
+      "full_name": "Yiğit Efe Demir",
+      "display_name": "Yiğit",
+      "short_label": "Yiğit",
+      "team_id": 6,
+      "position": "DEF",
+      "shirt_number": 14
+    },
+    {
+      "id": 182,
+      "full_name": "Archibald Norman Brown",
+      "display_name": "Brown",
+      "short_label": "Brown",
+      "team_id": 6,
+      "position": "DEF",
+      "shirt_number": 3
+    },
+    {
+      "id": 184,
+      "full_name": "Dorgeles Nene",
+      "display_name": "Nene",
+      "short_label": "Nene",
+      "team_id": 6,
+      "position": "MID",
+      "shirt_number": 45
+    },
+    {
+      "id": 185,
+      "full_name": "N'Golo Kanté",
+      "display_name": "Kanté",
+      "short_label": "Kanté",
+      "team_id": 6,
+      "position": "MID",
+      "shirt_number": 91
+    },
+    {
+      "id": 186,
+      "full_name": "Mattéo Elias Kenzo Guendouzi Olié",
+      "display_name": "Guendouzi",
+      "short_label": "Guendouzi",
+      "team_id": 6,
+      "position": "MID",
+      "shirt_number": 6
+    },
+    {
+      "id": 187,
+      "full_name": "Çağlar Söyüncü",
+      "display_name": "Çağlar",
+      "short_label": "Çağlar",
+      "team_id": 8,
+      "position": "DEF",
+      "shirt_number": 4
+    },
+    {
+      "id": 188,
+      "full_name": "Mert Müldür",
+      "display_name": "Mert",
+      "short_label": "Mert M.",
+      "team_id": 6,
+      "position": "DEF",
+      "shirt_number": 18
+    },
+    {
+      "id": 189,
+      "full_name": "Bartuğ Elmaz",
+      "display_name": "Bartuğ",
+      "short_label": "Bartuğ",
+      "team_id": 6,
+      "position": "MID",
+      "shirt_number": 28
+    },
+    {
+      "id": 190,
+      "full_name": "Fehmi Mert Günok",
+      "display_name": "Mert",
+      "short_label": "Mert G.",
+      "team_id": 6,
+      "position": "GK",
+      "shirt_number": 34
+    },
+    {
+      "id": 193,
+      "full_name": "Cengiz Ünder",
+      "display_name": "Cengiz",
+      "short_label": "Cengiz",
+      "team_id": 8,
+      "position": "MID",
+      "shirt_number": 23
+    },
+    {
+      "id": 194,
+      "full_name": "Ognjen Mimović",
+      "display_name": "Mimović",
+      "short_label": "Mimović",
+      "team_id": 6,
+      "position": "DEF",
+      "shirt_number": 77
+    },
+    {
+      "id": 195,
+      "full_name": "İrfan Can Eğribayat",
+      "display_name": "İrfan Can",
+      "short_label": "İrfan Can",
+      "team_id": 11,
+      "position": "GK",
+      "shirt_number": 1
+    },
+    {
+      "id": 199,
+      "full_name": "İrfan Can Kahveci",
+      "display_name": "İrfan Can",
+      "short_label": "İrfan Can",
+      "team_id": 6,
+      "position": "MID",
+      "shirt_number": 17
+    },
+    {
+      "id": 200,
+      "full_name": "Mert Hakan Yandaş",
+      "display_name": "Mert Hakan",
+      "short_label": "Mert Hakan",
+      "team_id": 6,
+      "position": "MID",
+      "shirt_number": 8
+    },
+    {
+      "id": 201,
+      "full_name": "Egemen Aydın",
+      "display_name": "Egemen",
+      "short_label": "Egemen",
+      "team_id": 7,
+      "position": "GK",
+      "shirt_number": 29
+    },
+    {
+      "id": 202,
+      "full_name": "Melih İbrahimoğlu",
+      "display_name": "Melih",
+      "short_label": "Melih",
+      "team_id": 7,
+      "position": "MID",
+      "shirt_number": 77
+    },
+    {
+      "id": 204,
+      "full_name": "Emir Bars",
+      "display_name": "Emir",
+      "short_label": "Emir",
+      "team_id": 7,
+      "position": "MID",
+      "shirt_number": 45
+    },
+    {
+      "id": 205,
+      "full_name": "Deniz Türüç",
+      "display_name": "Deniz",
+      "short_label": "Deniz T.",
+      "team_id": 7,
+      "position": "MID",
+      "shirt_number": 9
+    },
+    {
+      "id": 206,
+      "full_name": "Ebrima Colley",
+      "display_name": "Colley",
+      "short_label": "Colley",
+      "team_id": 7,
+      "position": "MID",
+      "shirt_number": 19
+    },
+    {
+      "id": 207,
+      "full_name": "Deniz Ertaş",
+      "display_name": "Deniz",
+      "short_label": "Deniz E.",
+      "team_id": 7,
+      "position": "GK",
+      "shirt_number": 1
+    },
+    {
+      "id": 210,
+      "full_name": "Jackson Muleka Kyanvubu",
+      "display_name": "Muleka",
+      "short_label": "Muleka",
+      "team_id": 7,
+      "position": "FWD",
+      "shirt_number": 40
+    },
+    {
+      "id": 211,
+      "full_name": "Yhoan Many Andzouana",
+      "display_name": "Andzouana",
+      "short_label": "Andzouana",
+      "team_id": 7,
+      "position": "DEF",
+      "shirt_number": 23
+    },
+    {
+      "id": 212,
+      "full_name": "Berkan İsmail Kutlu",
+      "display_name": "Berkan",
+      "short_label": "Berkan",
+      "team_id": 4,
+      "position": "MID",
+      "shirt_number": 10
+    },
+    {
+      "id": 213,
+      "full_name": "Marko Jevtović",
+      "display_name": "Jevtovic",
+      "short_label": "Jevtovic",
+      "team_id": 7,
+      "position": "MID",
+      "shirt_number": 8
+    },
+    {
+      "id": 214,
+      "full_name": "Uğurcan Yazğılı",
+      "display_name": "Uğurcan",
+      "short_label": "Uğurcan",
+      "team_id": 7,
+      "position": "DEF",
+      "shirt_number": 5
+    },
+    {
+      "id": 215,
+      "full_name": "Enis Bardhi",
+      "display_name": "Bardhi",
+      "short_label": "Bardhi",
+      "team_id": 7,
+      "position": "MID",
+      "shirt_number": 10
+    },
+    {
+      "id": 216,
+      "full_name": "Bahadır Han Güngördü",
+      "display_name": "Bahadır",
+      "short_label": "Bahadır",
+      "team_id": 7,
+      "position": "GK",
+      "shirt_number": 13
+    },
+    {
+      "id": 217,
+      "full_name": "Chidozie Collins Awaziem",
+      "display_name": "Awaziem",
+      "short_label": "Awaziem",
+      "team_id": 7,
+      "position": "DEF",
+      "shirt_number": 15
+    },
+    {
+      "id": 218,
+      "full_name": "Arif Boşluk",
+      "display_name": "Arif",
+      "short_label": "Arif",
+      "team_id": 7,
+      "position": "DEF",
+      "shirt_number": 3
+    },
+    {
+      "id": 219,
+      "full_name": "João Pedro do Nascimento da Mata",
+      "display_name": "Da Mata",
+      "short_label": "Da Mata",
+      "team_id": 7,
+      "position": "DEF",
+      "shirt_number": 41
+    },
+    {
+      "id": 220,
+      "full_name": "Diogo António Cupido Gonçalves",
+      "display_name": "Gonçalves",
+      "short_label": "Gonçalves",
+      "team_id": 7,
+      "position": "MID",
+      "shirt_number": 17
+    },
+    {
+      "id": 221,
+      "full_name": "Rayyan Baniya",
+      "display_name": "Baniya",
+      "short_label": "Baniya",
+      "team_id": 7,
+      "position": "DEF",
+      "shirt_number": 22
+    },
+    {
+      "id": 222,
+      "full_name": "Adil Demirbağ",
+      "display_name": "Adil",
+      "short_label": "Adil",
+      "team_id": 7,
+      "position": "DEF",
+      "shirt_number": 4
+    },
+    {
+      "id": 225,
+      "full_name": "Hüseyin Bulut",
+      "display_name": "Hüseyin",
+      "short_label": "Hüseyin",
+      "team_id": 8,
+      "position": "DEF",
+      "shirt_number": 55
+    },
+    {
+      "id": 226,
+      "full_name": "Ahmed Ildız",
+      "display_name": "Ahmed",
+      "short_label": "Ahmed",
+      "team_id": 8,
+      "position": "MID",
+      "shirt_number": 25
+    },
+    {
+      "id": 228,
+      "full_name": "Atakan Akkaynak",
+      "display_name": "Atakan",
+      "short_label": "Atakan",
+      "team_id": 8,
+      "position": "MID",
+      "shirt_number": 27
+    },
+    {
+      "id": 229,
+      "full_name": "Alfredo Kulembe Gomes Ribeiro",
+      "display_name": "Fredy",
+      "short_label": "Fredy",
+      "team_id": 8,
+      "position": "MID",
+      "shirt_number": 8
+    },
+    {
+      "id": 230,
+      "full_name": "Arif Şimşir",
+      "display_name": "Arif",
+      "short_label": "Arif",
+      "team_id": 8,
+      "position": "GK",
+      "shirt_number": 99
+    },
+    {
+      "id": 232,
+      "full_name": "Cemali Sertel",
+      "display_name": "Cemali",
+      "short_label": "Cemali",
+      "team_id": 8,
+      "position": "DEF",
+      "shirt_number": 24
+    },
+    {
+      "id": 234,
+      "full_name": "Marcos Felipe de Freitas Monteiro",
+      "display_name": "Felipe",
+      "short_label": "Felipe",
+      "team_id": 8,
+      "position": "GK",
+      "shirt_number": 1
+    },
+    {
+      "id": 235,
+      "full_name": "Gökhan Sazdağı",
+      "display_name": "Gökhan",
+      "short_label": "Gökhan",
+      "team_id": 8,
+      "position": "DEF",
+      "shirt_number": 2
+    },
+    {
+      "id": 236,
+      "full_name": "Emircan Gürlük",
+      "display_name": "Emircan",
+      "short_label": "Emircan",
+      "team_id": 8,
+      "position": "MID",
+      "shirt_number": 20
+    },
+    {
+      "id": 237,
+      "full_name": "Jesús Andrés Ramírez Díaz",
+      "display_name": "Ramirez",
+      "short_label": "Ramirez",
+      "team_id": 8,
+      "position": "FWD",
+      "shirt_number": 11
+    },
+    {
+      "id": 239,
+      "full_name": "Hrvoje Smolčić",
+      "display_name": "Smolcic",
+      "short_label": "Smolcic",
+      "team_id": 8,
+      "position": "DEF",
+      "shirt_number": 5
+    },
+    {
+      "id": 241,
+      "full_name": "Serdar Saatçı",
+      "display_name": "Serdar",
+      "short_label": "Serdar S.",
+      "team_id": 8,
+      "position": "DEF",
+      "shirt_number": 70
+    },
+    {
+      "id": 242,
+      "full_name": "Mame Baba Thiam",
+      "display_name": "Thiam",
+      "short_label": "Thiam",
+      "team_id": 8,
+      "position": "FWD",
+      "shirt_number": 9
+    },
+    {
+      "id": 244,
+      "full_name": "Erhan Erentürk",
+      "display_name": "Erhan",
+      "short_label": "Erhan",
+      "team_id": 8,
+      "position": "GK",
+      "shirt_number": 98
+    },
+    {
+      "id": 247,
+      "full_name": "Sebastian Andrei Borza",
+      "display_name": "Borza",
+      "short_label": "Borza",
+      "team_id": 8,
+      "position": "DEF",
+      "shirt_number": 3
+    },
+    {
+      "id": 248,
+      "full_name": "Ylber Ramadani",
+      "display_name": "Ramadani",
+      "short_label": "Ramadani",
+      "team_id": 8,
+      "position": "MID",
+      "shirt_number": 6
+    },
+    {
+      "id": 249,
+      "full_name": "Alexandre Manuel Penetra Correia",
+      "display_name": "Penetra",
+      "short_label": "Penetra",
+      "team_id": 8,
+      "position": "DEF",
+      "shirt_number": 4
+    },
+    {
+      "id": 250,
+      "full_name": "Arda Hilmi Şengül",
+      "display_name": "Arda",
+      "short_label": "Arda",
+      "team_id": 8,
+      "position": "DEF",
+      "shirt_number": 37
+    },
+    {
+      "id": 257,
+      "full_name": "Milot Rashica",
+      "display_name": "Rashica",
+      "short_label": "Rashica",
+      "team_id": 9,
+      "position": "MID",
+      "shirt_number": 7
+    },
+    {
+      "id": 258,
+      "full_name": "Kartal Kayra Yılmaz",
+      "display_name": "Kartal",
+      "short_label": "Kartal",
+      "team_id": 9,
+      "position": "MID",
+      "shirt_number": 8
+    },
+    {
+      "id": 259,
+      "full_name": "Rıdvan Yılmaz",
+      "display_name": "Rıdvan",
+      "short_label": "Rıdvan",
+      "team_id": 9,
+      "position": "DEF",
+      "shirt_number": 33
+    },
+    {
+      "id": 260,
+      "full_name": "Taylan Bulut",
+      "display_name": "Taylan",
+      "short_label": "Taylan",
+      "team_id": 9,
+      "position": "DEF",
+      "shirt_number": 22
+    },
+    {
+      "id": 261,
+      "full_name": "Badobre Emmanuel Elysee Djedje Agbadou",
+      "display_name": "Agbadou",
+      "short_label": "Agbadou",
+      "team_id": 9,
+      "position": "DEF",
+      "shirt_number": 12
+    },
+    {
+      "id": 263,
+      "full_name": "Doğan Alemdar",
+      "display_name": "Doğan",
+      "short_label": "Doğan",
+      "team_id": 9,
+      "position": "GK",
+      "shirt_number": 80
+    },
+    {
+      "id": 264,
+      "full_name": "Junior Olaïtan Ishola",
+      "display_name": "Olaitan",
+      "short_label": "Olaitan",
+      "team_id": 9,
+      "position": "MID",
+      "shirt_number": 15
+    },
+    {
+      "id": 266,
+      "full_name": "Mustafa Erhan Hekimoğlu",
+      "display_name": "Mustafa",
+      "short_label": "Mustafa",
+      "team_id": 9,
+      "position": "FWD",
+      "shirt_number": 23
+    },
+    {
+      "id": 268,
+      "full_name": "Semih Kılıçsoy",
+      "display_name": "Semih",
+      "short_label": "Semih",
+      "team_id": 9,
+      "position": "FWD",
+      "shirt_number": 90
+    },
+    {
+      "id": 269,
+      "full_name": "Onyinye Wilfred Ndidi",
+      "display_name": "Ndidi",
+      "short_label": "Ndidi",
+      "team_id": 9,
+      "position": "MID",
+      "shirt_number": 4
+    },
+    {
+      "id": 270,
+      "full_name": "Kassoum Ouattara",
+      "display_name": "Ouattara",
+      "short_label": "Ouattara",
+      "team_id": 9,
+      "position": "DEF",
+      "shirt_number": 11
+    },
+    {
+      "id": 271,
+      "full_name": "Tiago Emanuel Embaló Djaló",
+      "display_name": "Djaló",
+      "short_label": "Djaló",
+      "team_id": 9,
+      "position": "DEF",
+      "shirt_number": 35
+    },
+    {
+      "id": 272,
+      "full_name": "Emre Bilgin",
+      "display_name": "Emre",
+      "short_label": "Emre",
+      "team_id": 16,
+      "position": "GK",
+      "shirt_number": 99
+    },
+    {
+      "id": 273,
+      "full_name": "Leandro Trossard",
+      "display_name": "Trossard",
+      "short_label": "Trossard",
+      "team_id": 9,
+      "position": "MID",
+      "shirt_number": 19
+    },
+    {
+      "id": 275,
+      "full_name": "Hyeon-Gyu Oh",
+      "display_name": "Oh",
+      "short_label": "Oh",
+      "team_id": 9,
+      "position": "FWD",
+      "shirt_number": 9
+    },
+    {
+      "id": 277,
+      "full_name": "Michael Amir Murillo Bermúdez",
+      "display_name": "Murillo",
+      "short_label": "Murillo",
+      "team_id": 9,
+      "position": "DEF",
+      "shirt_number": 62
+    },
+    {
+      "id": 278,
+      "full_name": "İlhan Fakılı",
+      "display_name": "İlhan",
+      "short_label": "İlhan",
+      "team_id": 9,
+      "position": "MID",
+      "shirt_number": 29
+    },
+    {
+      "id": 279,
+      "full_name": "Václav Černý",
+      "display_name": "Cerny",
+      "short_label": "Cerny",
+      "team_id": 9,
+      "position": "MID",
+      "shirt_number": 18
+    },
+    {
+      "id": 280,
+      "full_name": "Alexander Nübel",
+      "display_name": "Nübel",
+      "short_label": "Nübel",
+      "team_id": 9,
+      "position": "GK",
+      "shirt_number": 1
+    },
+    {
+      "id": 281,
+      "full_name": "Orkun Kökçü",
+      "display_name": "Orkun",
+      "short_label": "Orkun",
+      "team_id": 9,
+      "position": "MID",
+      "shirt_number": 10
+    },
+    {
+      "id": 282,
+      "full_name": "Emirhan Topçu",
+      "display_name": "Emirhan",
+      "short_label": "Emirhan",
+      "team_id": 9,
+      "position": "DEF",
+      "shirt_number": 53
+    },
+    {
+      "id": 284,
+      "full_name": "Yasin Özcan",
+      "display_name": "Yasin",
+      "short_label": "Yasin",
+      "team_id": 9,
+      "position": "DEF",
+      "shirt_number": 58
+    },
+    {
+      "id": 285,
+      "full_name": "Salih Özcan",
+      "display_name": "Salih",
+      "short_label": "Salih",
+      "team_id": 9,
+      "position": "MID",
+      "shirt_number": 6
+    },
+    {
+      "id": 286,
+      "full_name": "Allan Godói Santos",
+      "display_name": "Godói",
+      "short_label": "Godói",
+      "team_id": 10,
+      "position": "DEF",
+      "shirt_number": 3
+    },
+    {
+      "id": 288,
+      "full_name": "Taha Altıkardeş",
+      "display_name": "Taha",
+      "short_label": "Taha",
+      "team_id": 10,
+      "position": "DEF",
+      "shirt_number": 4
+    },
+    {
+      "id": 289,
+      "full_name": "Alexis Antunes Gomez",
+      "display_name": "Antunes",
+      "short_label": "Antunes",
+      "team_id": 10,
+      "position": "MID",
+      "shirt_number": 8
+    },
+    {
+      "id": 290,
+      "full_name": "Luka Gugeshashvili",
+      "display_name": "Luka",
+      "short_label": "Luka",
+      "team_id": 10,
+      "position": "GK",
+      "shirt_number": 25
+    },
+    {
+      "id": 291,
+      "full_name": "Malcom Narcisse Bokélé Mputu",
+      "display_name": "Bokele",
+      "short_label": "Bokele",
+      "team_id": 10,
+      "position": "DEF",
+      "shirt_number": 26
+    },
+    {
+      "id": 292,
+      "full_name": "Ege Yıldırım",
+      "display_name": "Ege",
+      "short_label": "Ege",
+      "team_id": 10,
+      "position": "DEF",
+      "shirt_number": 13
+    },
+    {
+      "id": 294,
+      "full_name": "Ogün Bayrak",
+      "display_name": "Ogün",
+      "short_label": "Ogün",
+      "team_id": 10,
+      "position": "MID",
+      "shirt_number": 16
+    },
+    {
+      "id": 295,
+      "full_name": "Juan Santos da Silva",
+      "display_name": "Juan",
+      "short_label": "Juan",
+      "team_id": 10,
+      "position": "FWD",
+      "shirt_number": 9
+    },
+    {
+      "id": 298,
+      "full_name": "Gökdeniz Bayrakdar",
+      "display_name": "Gökdeniz",
+      "short_label": "Gökdeniz",
+      "team_id": 10,
+      "position": "FWD",
+      "shirt_number": 17
+    },
+    {
+      "id": 299,
+      "full_name": "Arda Okan Kurtulan",
+      "display_name": "Arda",
+      "short_label": "Arda K.",
+      "team_id": 10,
+      "position": "DEF",
+      "shirt_number": 2
+    },
+    {
+      "id": 300,
+      "full_name": "Novatus Dismas Miroshi",
+      "display_name": "Miroshi",
+      "short_label": "Miroshi",
+      "team_id": 10,
+      "position": "MID",
+      "shirt_number": 20
+    },
+    {
+      "id": 301,
+      "full_name": "Jonatan Noah Kemeseng Sonko Sundberg",
+      "display_name": "Sundberg",
+      "short_label": "Sundberg",
+      "team_id": 10,
+      "position": "DEF",
+      "shirt_number": 19
+    },
+    {
+      "id": 303,
+      "full_name": "Janderson de Carvalho Costa",
+      "display_name": "Janderson",
+      "short_label": "Janderson",
+      "team_id": 10,
+      "position": "FWD",
+      "shirt_number": 39
+    },
+    {
+      "id": 304,
+      "full_name": "Rhaldney Norberto Simião Gomes",
+      "display_name": "Rhaldney",
+      "short_label": "Rhaldney",
+      "team_id": 10,
+      "position": "MID",
+      "shirt_number": 77
+    },
+    {
+      "id": 305,
+      "full_name": "Furkan Bayır",
+      "display_name": "Furkan",
+      "short_label": "Furkan",
+      "team_id": 10,
+      "position": "DEF",
+      "shirt_number": 23
+    },
+    {
+      "id": 308,
+      "full_name": "Efkan Bekiroğlu",
+      "display_name": "Efkan",
+      "short_label": "Efkan",
+      "team_id": 10,
+      "position": "MID",
+      "shirt_number": 10
+    },
+    {
+      "id": 309,
+      "full_name": "Arda Özçimen",
+      "display_name": "Arda",
+      "short_label": "Arda Ö.",
+      "team_id": 10,
+      "position": "GK",
+      "shirt_number": 1
+    },
+    {
+      "id": 310,
+      "full_name": "André Henrique da Silva Martins",
+      "display_name": "Henrique",
+      "short_label": "Henrique",
+      "team_id": 10,
+      "position": "FWD",
+      "shirt_number": 7
+    },
+    {
+      "id": 312,
+      "full_name": "Mehmet Şamil Öztürk",
+      "display_name": "Şamil",
+      "short_label": "Şamil",
+      "team_id": 10,
+      "position": "GK",
+      "shirt_number": 33
+    },
+    {
+      "id": 313,
+      "full_name": "Alexandre Matos",
+      "display_name": "Matos",
+      "short_label": "Matos",
+      "team_id": 10,
+      "position": "MID",
+      "shirt_number": 6
+    },
+    {
+      "id": 314,
+      "full_name": "Sinclair Ntomuchukwu Armstrong",
+      "display_name": "Sinclair",
+      "short_label": "Sinclair",
+      "team_id": 10,
+      "position": "FWD",
+      "shirt_number": 27
+    },
+    {
+      "id": 317,
+      "full_name": "Gökhan Akkan",
+      "display_name": "Gökhan",
+      "short_label": "Gökhan",
+      "team_id": 11,
+      "position": "GK",
+      "shirt_number": 98
+    },
+    {
+      "id": 319,
+      "full_name": "Sékou Koïta",
+      "display_name": "Koïta",
+      "short_label": "Koïta",
+      "team_id": 11,
+      "position": "FWD",
+      "shirt_number": 9
+    },
+    {
+      "id": 322,
+      "full_name": "Muhammet Ensar Çavuşoğlu",
+      "display_name": "Ensar",
+      "short_label": "Ensar Ç.",
+      "team_id": 11,
+      "position": "DEF",
+      "shirt_number": 75
+    },
+    {
+      "id": 326,
+      "full_name": "Ousmane Diabate",
+      "display_name": "Diabate",
+      "short_label": "Diabate",
+      "team_id": 11,
+      "position": "MID",
+      "shirt_number": 37
+    },
+    {
+      "id": 328,
+      "full_name": "Dilhan Demir",
+      "display_name": "Dilhan",
+      "short_label": "Dilhan",
+      "team_id": 5,
+      "position": "MID",
+      "shirt_number": 12
+    },
+    {
+      "id": 330,
+      "full_name": "Oğulcan Ülgün",
+      "display_name": "Oğulcan",
+      "short_label": "Oğulcan",
+      "team_id": 11,
+      "position": "MID",
+      "shirt_number": 14
+    },
+    {
+      "id": 332,
+      "full_name": "Kévin Manuel Rodrigues",
+      "display_name": "Rodrigues",
+      "short_label": "Rodrigues",
+      "team_id": 11,
+      "position": "DEF",
+      "shirt_number": 3
+    },
+    {
+      "id": 335,
+      "full_name": "Zafer Göktuğ Erdem",
+      "display_name": "Göktuğ",
+      "short_label": "Göktuğ",
+      "team_id": 11,
+      "position": "MID",
+      "shirt_number": 43
+    },
+    {
+      "id": 336,
+      "full_name": "Thalisson Kelven da Silva",
+      "display_name": "Thalisson",
+      "short_label": "Thalisson",
+      "team_id": 11,
+      "position": "DEF",
+      "shirt_number": 4
+    },
+    {
+      "id": 338,
+      "full_name": "Pedro Miguel Almeida Lopes Pereira",
+      "display_name": "Pereira",
+      "short_label": "Pereira",
+      "team_id": 11,
+      "position": "DEF",
+      "shirt_number": 2
+    },
+    {
+      "id": 339,
+      "full_name": "Dimitrios Goutas",
+      "display_name": "Goutas",
+      "short_label": "Goutas",
+      "team_id": 11,
+      "position": "DEF",
+      "shirt_number": 5
+    },
+    {
+      "id": 341,
+      "full_name": "Furkan Ayaz Özcan",
+      "display_name": "Furkan",
+      "short_label": "Furkan",
+      "team_id": 11,
+      "position": "FWD",
+      "shirt_number": 60
+    },
+    {
+      "id": 342,
+      "full_name": "Fıratcan Üzüm",
+      "display_name": "Fıratcan",
+      "short_label": "Fıratcan",
+      "team_id": 11,
+      "position": "DEF",
+      "shirt_number": 35
+    },
+    {
+      "id": 344,
+      "full_name": "Abdurrahim Dursun",
+      "display_name": "Abdurrahim",
+      "short_label": "Abdurrahim",
+      "team_id": 11,
+      "position": "DEF",
+      "shirt_number": 33
+    },
+    {
+      "id": 345,
+      "full_name": "Adama Malouda Traoré",
+      "display_name": "Traoré",
+      "short_label": "Traoré",
+      "team_id": 11,
+      "position": "MID",
+      "shirt_number": 7
+    },
+    {
+      "id": 346,
+      "full_name": "Franco Daryl Tongya Heubang",
+      "display_name": "Tongya",
+      "short_label": "Tongya",
+      "team_id": 11,
+      "position": "MID",
+      "shirt_number": 8
+    },
+    {
+      "id": 347,
+      "full_name": "Berk Deniz Çukurcu",
+      "display_name": "Berk",
+      "short_label": "Berk",
+      "team_id": 11,
+      "position": "GK",
+      "shirt_number": 99
+    },
+    {
+      "id": 351,
+      "full_name": "Ibrahim Olawoyin Olasunkanmi",
+      "display_name": "Olawoyin",
+      "short_label": "Olawoyin",
+      "team_id": 12,
+      "position": "MID",
+      "shirt_number": 14
+    },
+    {
+      "id": 352,
+      "full_name": "Qazim Laçi",
+      "display_name": "Laçi",
+      "short_label": "Laçi",
+      "team_id": 12,
+      "position": "MID",
+      "shirt_number": 12
+    },
+    {
+      "id": 353,
+      "full_name": "Ali Sowe",
+      "display_name": "Ali Sowe",
+      "short_label": "Ali Sowe",
+      "team_id": 12,
+      "position": "FWD",
+      "shirt_number": 9
+    },
+    {
+      "id": 354,
+      "full_name": "Muhammet Taha Şahin",
+      "display_name": "Taha",
+      "short_label": "Taha",
+      "team_id": 12,
+      "position": "DEF",
+      "shirt_number": 21
+    },
+    {
+      "id": 355,
+      "full_name": "Seyfettin Anıl Yaşar",
+      "display_name": "Anıl",
+      "short_label": "Anıl",
+      "team_id": 16,
+      "position": "DEF",
+      "shirt_number": 4
+    },
+    {
+      "id": 356,
+      "full_name": "Mithat Pala",
+      "display_name": "Mithat",
+      "short_label": "Mithat",
+      "team_id": 12,
+      "position": "DEF",
+      "shirt_number": 2
+    },
+    {
+      "id": 358,
+      "full_name": "Yakup Ayan",
+      "display_name": "Yakup",
+      "short_label": "Yakup",
+      "team_id": 12,
+      "position": "DEF",
+      "shirt_number": 65
+    },
+    {
+      "id": 359,
+      "full_name": "Adedire Emmanuel Awokoya-Mebude",
+      "display_name": "Mebude",
+      "short_label": "Mebude",
+      "team_id": 12,
+      "position": "MID",
+      "shirt_number": 8
+    },
+    {
+      "id": 360,
+      "full_name": "Tayyip Talha Sanuç",
+      "display_name": "Tayyip Talha",
+      "short_label": "Tayyip Talha",
+      "team_id": 12,
+      "position": "DEF",
+      "shirt_number": 78
+    },
+    {
+      "id": 362,
+      "full_name": "Yahia Fofana",
+      "display_name": "Fofana",
+      "short_label": "Fofana",
+      "team_id": 12,
+      "position": "GK",
+      "shirt_number": 1
+    },
+    {
+      "id": 363,
+      "full_name": "Husniddin Aliqulov",
+      "display_name": "Alikulov",
+      "short_label": "Alikulov",
+      "team_id": 12,
+      "position": "DEF",
+      "shirt_number": 42
+    },
+    {
+      "id": 364,
+      "full_name": "Emrecan Bulut",
+      "display_name": "Emrecan",
+      "short_label": "Emrecan",
+      "team_id": 12,
+      "position": "MID",
+      "shirt_number": 30
+    },
+    {
+      "id": 365,
+      "full_name": "Modibo Sagnan",
+      "display_name": "Sagnan",
+      "short_label": "Sagnan",
+      "team_id": 12,
+      "position": "DEF",
+      "shirt_number": 6
+    },
+    {
+      "id": 367,
+      "full_name": "Attila Mocsi",
+      "display_name": "Mocsi",
+      "short_label": "Mocsi",
+      "team_id": 12,
+      "position": "DEF",
+      "shirt_number": 5
+    },
+    {
+      "id": 370,
+      "full_name": "Mihai Valentin Mihăilă",
+      "display_name": "Mihăilă",
+      "short_label": "Mihăilă",
+      "team_id": 12,
+      "position": "FWD",
+      "shirt_number": 17
+    },
+    {
+      "id": 371,
+      "full_name": "Dal Varešanović",
+      "display_name": "Varesanovic",
+      "short_label": "Varesanovic",
+      "team_id": 12,
+      "position": "MID",
+      "shirt_number": 10
+    },
+    {
+      "id": 373,
+      "full_name": "Taylan Antalyalı",
+      "display_name": "Taylan",
+      "short_label": "Taylan",
+      "team_id": 12,
+      "position": "MID",
+      "shirt_number": 30
+    },
+    {
+      "id": 375,
+      "full_name": "Efe Doğan",
+      "display_name": "Efe",
+      "short_label": "Efe",
+      "team_id": 12,
+      "position": "GK",
+      "shirt_number": 99
+    },
+    {
+      "id": 376,
+      "full_name": "Zafer Görgen",
+      "display_name": "Zafer",
+      "short_label": "Zafer",
+      "team_id": 12,
+      "position": "GK",
+      "shirt_number": 90
+    },
+    {
+      "id": 377,
+      "full_name": "Siaka Bakayoko",
+      "display_name": "Bakayoko",
+      "short_label": "Bakayoko",
+      "team_id": 12,
+      "position": "DEF",
+      "shirt_number": 25
+    },
+    {
+      "id": 378,
+      "full_name": "Ahmed Kutucu",
+      "display_name": "Ahmed",
+      "short_label": "Ahmed",
+      "team_id": 12,
+      "position": "MID",
+      "shirt_number": 11
+    },
+    {
+      "id": 379,
+      "full_name": "Zakaria Ariss",
+      "display_name": "Ariss",
+      "short_label": "Ariss",
+      "team_id": 12,
+      "position": "DEF",
+      "shirt_number": 33
+    },
+    {
+      "id": 380,
+      "full_name": "Muhammed Şengezer",
+      "display_name": "Muhammed",
+      "short_label": "Muhammed",
+      "team_id": 13,
+      "position": "GK",
+      "shirt_number": 16
+    },
+    {
+      "id": 381,
+      "full_name": "Jerome Osei Opoku",
+      "display_name": "Opoku",
+      "short_label": "Opoku",
+      "team_id": 13,
+      "position": "DEF",
+      "shirt_number": 3
+    },
+    {
+      "id": 382,
+      "full_name": "Abbosbek Fayzullayev",
+      "display_name": "Fayzullayev",
+      "short_label": "Fayzullayev",
+      "team_id": 13,
+      "position": "MID",
+      "shirt_number": 11
+    },
+    {
+      "id": 384,
+      "full_name": "Jakub Kałuziński",
+      "display_name": "Kaluzinski",
+      "short_label": "Kaluzinski",
+      "team_id": 13,
+      "position": "MID",
+      "shirt_number": 18
+    },
+    {
+      "id": 385,
+      "full_name": "Ivan Brnić",
+      "display_name": "Brnic",
+      "short_label": "Brnic",
+      "team_id": 13,
+      "position": "MID",
+      "shirt_number": 77
+    },
+    {
+      "id": 386,
+      "full_name": "Deniz Dilmen",
+      "display_name": "Deniz",
+      "short_label": "Deniz",
+      "team_id": 13,
+      "position": "GK",
+      "shirt_number": 98
+    },
+    {
+      "id": 387,
+      "full_name": "Umut Güneş",
+      "display_name": "Umut",
+      "short_label": "Umut G.",
+      "team_id": 13,
+      "position": "MID",
+      "shirt_number": 20
+    },
+    {
+      "id": 388,
+      "full_name": "Andreas Skov Olsen",
+      "display_name": "Olsen",
+      "short_label": "Olsen",
+      "team_id": 13,
+      "position": "MID",
+      "shirt_number": 70
+    },
+    {
+      "id": 389,
+      "full_name": "Berat Ayberk Özdemir",
+      "display_name": "Berat",
+      "short_label": "Berat",
+      "team_id": 8,
+      "position": "MID",
+      "shirt_number": 5
+    },
+    {
+      "id": 390,
+      "full_name": "Emin Bayram",
+      "display_name": "Emin",
+      "short_label": "Emin",
+      "team_id": 13,
+      "position": "DEF",
+      "shirt_number": 23
+    },
+    {
+      "id": 391,
+      "full_name": "Saba Kharebashvili",
+      "display_name": "Kharebashvili",
+      "short_label": "Kharebashvili",
+      "team_id": 13,
+      "position": "DEF",
+      "shirt_number": 38
+    },
+    {
+      "id": 393,
+      "full_name": "Volkan Babacan",
+      "display_name": "Volkan",
+      "short_label": "Volkan",
+      "team_id": 13,
+      "position": "GK",
+      "shirt_number": 1
+    },
+    {
+      "id": 394,
+      "full_name": "Onur Ergün",
+      "display_name": "Onur",
+      "short_label": "Onur E.",
+      "team_id": 13,
+      "position": "MID",
+      "shirt_number": 4
+    },
+    {
+      "id": 395,
+      "full_name": "Davie Selke",
+      "display_name": "Selke",
+      "short_label": "Selke",
+      "team_id": 13,
+      "position": "FWD",
+      "shirt_number": 9
+    },
+    {
+      "id": 396,
+      "full_name": "Ousseynou Ba",
+      "display_name": "Ba",
+      "short_label": "Ba",
+      "team_id": 13,
+      "position": "DEF",
+      "shirt_number": 27
+    },
+    {
+      "id": 397,
+      "full_name": "Hamza Güreler",
+      "display_name": "Hamza",
+      "short_label": "Hamza",
+      "team_id": 13,
+      "position": "DEF",
+      "shirt_number": 15
+    },
+    {
+      "id": 398,
+      "full_name": "Christopher Téa Domoraud Opéri",
+      "display_name": "Operi",
+      "short_label": "Operi",
+      "team_id": 13,
+      "position": "DEF",
+      "shirt_number": 21
+    },
+    {
+      "id": 400,
+      "full_name": "Ömer Ali Şahiner",
+      "display_name": "Ömer Ali",
+      "short_label": "Ömer Ali",
+      "team_id": 13,
+      "position": "DEF",
+      "shirt_number": 42
+    },
+    {
+      "id": 401,
+      "full_name": "Festy Oseiwe Ebosele",
+      "display_name": "Ebosele",
+      "short_label": "Ebosele",
+      "team_id": 2,
+      "position": "DEF",
+      "shirt_number": 2
+    },
+    {
+      "id": 402,
+      "full_name": "Michał Karbownik",
+      "display_name": "Karbownik",
+      "short_label": "Karbownik",
+      "team_id": 13,
+      "position": "DEF",
+      "shirt_number": 33
+    },
+    {
+      "id": 404,
+      "full_name": "Eldor Shomurodov",
+      "display_name": "Shomu",
+      "short_label": "Shomu",
+      "team_id": 13,
+      "position": "FWD",
+      "shirt_number": 14
+    },
+    {
+      "id": 407,
+      "full_name": "Olivier Michel Kemen",
+      "display_name": "Kemen",
+      "short_label": "Kemen",
+      "team_id": 13,
+      "position": "MID",
+      "shirt_number": 8
+    },
+    {
+      "id": 408,
+      "full_name": "Edin Višća",
+      "display_name": "Visca",
+      "short_label": "Visca",
+      "team_id": 13,
+      "position": "MID",
+      "shirt_number": 34
+    },
+    {
+      "id": 409,
+      "full_name": "Yusuf Sarı",
+      "display_name": "Yusuf",
+      "short_label": "Yusuf",
+      "team_id": 13,
+      "position": "MID",
+      "shirt_number": 7
+    },
+    {
+      "id": 410,
+      "full_name": "Berkay Özcan",
+      "display_name": "Berkay",
+      "short_label": "Berkay",
+      "team_id": 13,
+      "position": "MID",
+      "shirt_number": 19
+    },
+    {
+      "id": 411,
+      "full_name": "Onur Bulut",
+      "display_name": "Onur",
+      "short_label": "Onur B.",
+      "team_id": 13,
+      "position": "DEF",
+      "shirt_number": 6
+    },
+    {
+      "id": 412,
+      "full_name": "Bertuğ Özgür Yıldırım",
+      "display_name": "Bertuğ",
+      "short_label": "Bertuğ",
+      "team_id": 13,
+      "position": "FWD",
+      "shirt_number": 91
+    },
+    {
+      "id": 413,
+      "full_name": "Fidan Aliti",
+      "display_name": "Aliti",
+      "short_label": "Aliti",
+      "team_id": 14,
+      "position": "DEF",
+      "shirt_number": 5
+    },
+    {
+      "id": 415,
+      "full_name": "Meschack Elia Lina",
+      "display_name": "Elia",
+      "short_label": "Elia",
+      "team_id": 14,
+      "position": "FWD",
+      "shirt_number": 12
+    },
+    {
+      "id": 416,
+      "full_name": "Yusuf Özdemir",
+      "display_name": "Yusuf",
+      "short_label": "Yusuf",
+      "team_id": 14,
+      "position": "MID",
+      "shirt_number": 88
+    },
+    {
+      "id": 417,
+      "full_name": "Ui-Jo Hwang",
+      "display_name": "Hwang",
+      "short_label": "Hwang",
+      "team_id": 14,
+      "position": "FWD",
+      "shirt_number": 16
+    },
+    {
+      "id": 418,
+      "full_name": "Mert Furkan Bayram",
+      "display_name": "Mert",
+      "short_label": "Mert",
+      "team_id": 14,
+      "position": "GK",
+      "shirt_number": 99
+    },
+    {
+      "id": 419,
+      "full_name": "Paulo Victor de Mileo Vidotti",
+      "display_name": "Victor",
+      "short_label": "Victor",
+      "team_id": 14,
+      "position": "GK",
+      "shirt_number": 48
+    },
+    {
+      "id": 420,
+      "full_name": "António Simão Muanza",
+      "display_name": "Maestro",
+      "short_label": "Maestro",
+      "team_id": 14,
+      "position": "MID",
+      "shirt_number": 58
+    },
+    {
+      "id": 421,
+      "full_name": "Ianis Hagi",
+      "display_name": "Hagi",
+      "short_label": "Hagi",
+      "team_id": 14,
+      "position": "MID",
+      "shirt_number": 14
+    },
+    {
+      "id": 423,
+      "full_name": "Enes Keskin",
+      "display_name": "Enes",
+      "short_label": "Enes",
+      "team_id": 14,
+      "position": "MID",
+      "shirt_number": 8
+    },
+    {
+      "id": 425,
+      "full_name": "İzzet Çelik",
+      "display_name": "İzzet",
+      "short_label": "İzzet",
+      "team_id": 14,
+      "position": "MID",
+      "shirt_number": 6
+    },
+    {
+      "id": 426,
+      "full_name": "Fatih Aksoy",
+      "display_name": "Fatih",
+      "short_label": "Fatih",
+      "team_id": 14,
+      "position": "DEF",
+      "shirt_number": 20
+    },
+    {
+      "id": 427,
+      "full_name": "Florent Hadërgjonaj",
+      "display_name": "Hadërgjonaj",
+      "short_label": "Hadërgjonaj",
+      "team_id": 14,
+      "position": "DEF",
+      "shirt_number": 94
+    },
+    {
+      "id": 428,
+      "full_name": "Ümit Akdağ",
+      "display_name": "Ümit",
+      "short_label": "Ümit",
+      "team_id": 9,
+      "position": "DEF",
+      "shirt_number": 50
+    },
+    {
+      "id": 429,
+      "full_name": "Ruan Pereira Duarte",
+      "display_name": "Ruan",
+      "short_label": "Ruan",
+      "team_id": 14,
+      "position": "MID",
+      "shirt_number": 11
+    },
+    {
+      "id": 430,
+      "full_name": "İbrahim Kaya",
+      "display_name": "İbrahim",
+      "short_label": "İbrahim",
+      "team_id": 14,
+      "position": "FWD",
+      "shirt_number": 27
+    },
+    {
+      "id": 431,
+      "full_name": "Omar Ben Ali",
+      "display_name": "Omar",
+      "short_label": "Omar",
+      "team_id": 14,
+      "position": "FWD",
+      "shirt_number": 9
+    },
+    {
+      "id": 435,
+      "full_name": "Gaïus Abraham Jered Makouta",
+      "display_name": "Makouta",
+      "short_label": "Makouta",
+      "team_id": 14,
+      "position": "MID",
+      "shirt_number": 42
+    },
+    {
+      "id": 436,
+      "full_name": "Nuno Miguel Reis Lima",
+      "display_name": "Lima",
+      "short_label": "Lima",
+      "team_id": 14,
+      "position": "DEF",
+      "shirt_number": 3
+    },
+    {
+      "id": 437,
+      "full_name": "Arda Usluoğlu",
+      "display_name": "Arda",
+      "short_label": "Arda",
+      "team_id": 14,
+      "position": "FWD",
+      "shirt_number": 17
+    },
+    {
+      "id": 439,
+      "full_name": "Yunus Emre Çift",
+      "display_name": "Yunus",
+      "short_label": "Yunus",
+      "team_id": 15,
+      "position": "DEF",
+      "shirt_number": 82
+    },
+    {
+      "id": 443,
+      "full_name": "Samed Onur",
+      "display_name": "Samed",
+      "short_label": "Samed",
+      "team_id": 15,
+      "position": "MID",
+      "shirt_number": 27
+    },
+    {
+      "id": 446,
+      "full_name": "Fatih Kaya",
+      "display_name": "Fatih",
+      "short_label": "Fatih",
+      "team_id": 15,
+      "position": "FWD",
+      "shirt_number": 16
+    },
+    {
+      "id": 447,
+      "full_name": "Bilal Bayazıt",
+      "display_name": "Bilal",
+      "short_label": "Bilal",
+      "team_id": 15,
+      "position": "GK",
+      "shirt_number": 70
+    },
+    {
+      "id": 448,
+      "full_name": "Kouadou Jaurès Assoumou",
+      "display_name": "Assoumou",
+      "short_label": "Assoumou",
+      "team_id": 15,
+      "position": "MID",
+      "shirt_number": 21
+    },
+    {
+      "id": 453,
+      "full_name": "Tanguy Bemin Coulibaly",
+      "display_name": "Coulibaly",
+      "short_label": "Coulibaly",
+      "team_id": 15,
+      "position": "MID",
+      "shirt_number": 77
+    },
+    {
+      "id": 455,
+      "full_name": "Elliot William Watt",
+      "display_name": "Watt",
+      "short_label": "Watt",
+      "team_id": 15,
+      "position": "MID",
+      "shirt_number": 14
+    },
+    {
+      "id": 456,
+      "full_name": "Afonso Gamelas de Pinho Sousa",
+      "display_name": "Sousa",
+      "short_label": "Sousa",
+      "team_id": 15,
+      "position": "MID",
+      "shirt_number": 10
+    },
+    {
+      "id": 457,
+      "full_name": "Logi Tómasson",
+      "display_name": "Tómasson",
+      "short_label": "Tómasson",
+      "team_id": 15,
+      "position": "DEF",
+      "shirt_number": 3
+    },
+    {
+      "id": 458,
+      "full_name": "Enes Albak",
+      "display_name": "Enes",
+      "short_label": "Enes",
+      "team_id": 15,
+      "position": "DEF",
+      "shirt_number": 41
+    },
+    {
+      "id": 461,
+      "full_name": "Igor Drapiński",
+      "display_name": "Igor",
+      "short_label": "Igor",
+      "team_id": 15,
+      "position": "DEF",
+      "shirt_number": 92
+    },
+    {
+      "id": 462,
+      "full_name": "Celil Yüksel",
+      "display_name": "Celil",
+      "short_label": "Celil",
+      "team_id": 15,
+      "position": "MID",
+      "shirt_number": 12
+    },
+    {
+      "id": 463,
+      "full_name": "Yirigue Foungognan Sekongo",
+      "display_name": "Sekongo",
+      "short_label": "Sekongo",
+      "team_id": 15,
+      "position": "MID",
+      "shirt_number": 55
+    },
+    {
+      "id": 466,
+      "full_name": "Yalçın Kayan",
+      "display_name": "Yalçın",
+      "short_label": "Yalçın",
+      "team_id": 15,
+      "position": "MID",
+      "shirt_number": 61
+    },
+    {
+      "id": 467,
+      "full_name": "Emre Kılınç",
+      "display_name": "Emre",
+      "short_label": "Emre",
+      "team_id": 15,
+      "position": "MID",
+      "shirt_number": 13
+    },
+    {
+      "id": 470,
+      "full_name": "Okan Kocuk",
+      "display_name": "Okan",
+      "short_label": "Okan",
+      "team_id": 15,
+      "position": "GK",
+      "shirt_number": 1
+    },
+    {
+      "id": 471,
+      "full_name": "Elayis Tavşan",
+      "display_name": "Elayis",
+      "short_label": "Elayis",
+      "team_id": 15,
+      "position": "MID",
+      "shirt_number": 20
+    },
+    {
+      "id": 472,
+      "full_name": "Josafat Wooding Mendes",
+      "display_name": "Mendes",
+      "short_label": "Mendes",
+      "team_id": 15,
+      "position": "DEF",
+      "shirt_number": 2
+    },
+    {
+      "id": 474,
+      "full_name": "Saikuba Jarju",
+      "display_name": "Jarju",
+      "short_label": "Jarju",
+      "team_id": 15,
+      "position": "MID",
+      "shirt_number": 26
+    },
+    {
+      "id": 475,
+      "full_name": "Charles-André Raux-Yao",
+      "display_name": "Charles",
+      "short_label": "Charles",
+      "team_id": 16,
+      "position": "MID",
+      "shirt_number": 20
+    },
+    {
+      "id": 477,
+      "full_name": "Konrad Hubert Michalak",
+      "display_name": "Michalak",
+      "short_label": "Michalak",
+      "team_id": 16,
+      "position": "MID",
+      "shirt_number": 7
+    },
+    {
+      "id": 478,
+      "full_name": "Abdelhamid Sabiri",
+      "display_name": "Sabiri",
+      "short_label": "Sabiri",
+      "team_id": 16,
+      "position": "MID",
+      "shirt_number": 16
+    },
+    {
+      "id": 479,
+      "full_name": "Bilal Boutobba",
+      "display_name": "Boutobba",
+      "short_label": "Boutobba",
+      "team_id": 16,
+      "position": "MID",
+      "shirt_number": 98
+    },
+    {
+      "id": 481,
+      "full_name": "Chandrel Géraud Massanga Matondo",
+      "display_name": "Massanga",
+      "short_label": "Massanga",
+      "team_id": 16,
+      "position": "MID",
+      "shirt_number": 24
+    },
+    {
+      "id": 482,
+      "full_name": "Horațiu Alexandru Moldovan",
+      "display_name": "Moldovan",
+      "short_label": "Moldovan",
+      "team_id": 16,
+      "position": "GK",
+      "shirt_number": 1
+    },
+    {
+      "id": 483,
+      "full_name": "David José Soares Oliveira Furtado Costa",
+      "display_name": "Costa",
+      "short_label": "Costa",
+      "team_id": 16,
+      "position": "MID",
+      "shirt_number": 10
+    },
+    {
+      "id": 484,
+      "full_name": "Mete Kaan Demir",
+      "display_name": "Mete",
+      "short_label": "Mete",
+      "team_id": 16,
+      "position": "MID",
+      "shirt_number": 8
+    },
+    {
+      "id": 485,
+      "full_name": "Umut Keseci",
+      "display_name": "Umut",
+      "short_label": "Umut",
+      "team_id": 16,
+      "position": "GK",
+      "shirt_number": 99
+    },
+    {
+      "id": 486,
+      "full_name": "Lenny Jean-Pierre Pintor",
+      "display_name": "Pintor",
+      "short_label": "Pintor",
+      "team_id": 16,
+      "position": "MID",
+      "shirt_number": 18
+    },
+    {
+      "id": 489,
+      "full_name": "Jawad El Yamiq",
+      "display_name": "El Yamiq",
+      "short_label": "El Yamiq",
+      "team_id": 16,
+      "position": "DEF",
+      "shirt_number": 4
+    },
+    {
+      "id": 491,
+      "full_name": "Talha Ülvan",
+      "display_name": "Talha",
+      "short_label": "Talha",
+      "team_id": 16,
+      "position": "DEF",
+      "shirt_number": 22
+    },
+    {
+      "id": 492,
+      "full_name": "Abdou Khadre Sy",
+      "display_name": "Sy",
+      "short_label": "Sy",
+      "team_id": 16,
+      "position": "FWD",
+      "shirt_number": 13
+    },
+    {
+      "id": 493,
+      "full_name": "Zak Kennedy Jules",
+      "display_name": "Jules",
+      "short_label": "Jules",
+      "team_id": 16,
+      "position": "DEF",
+      "shirt_number": 5
+    },
+    {
+      "id": 495,
+      "full_name": "Ahmed Abdullahi",
+      "display_name": "Ahmed",
+      "short_label": "Ahmed",
+      "team_id": 16,
+      "position": "FWD",
+      "shirt_number": 9
+    },
+    {
+      "id": 498,
+      "full_name": "Arda Yavuz",
+      "display_name": "Arda",
+      "short_label": "Arda",
+      "team_id": 16,
+      "position": "DEF",
+      "shirt_number": 3
+    },
+    {
+      "id": 500,
+      "full_name": "Taşkın İlter",
+      "display_name": "Taşkın",
+      "short_label": "Taşkın",
+      "team_id": 16,
+      "position": "MID",
+      "shirt_number": 6
+    },
+    {
+      "id": 501,
+      "full_name": "Christ Otiniel Sadia",
+      "display_name": "Sadia",
+      "short_label": "Sadia",
+      "team_id": 16,
+      "position": "MID",
+      "shirt_number": 19
+    },
+    {
+      "id": 503,
+      "full_name": "Hamza Yiğit Akman",
+      "display_name": "Hamza",
+      "short_label": "Hamza",
+      "team_id": 16,
+      "position": "MID",
+      "shirt_number": 85
+    },
+    {
+      "id": 505,
+      "full_name": "Yunus Akgün",
+      "display_name": "Yunus",
+      "short_label": "Yunus",
+      "team_id": 17,
+      "position": "MID",
+      "shirt_number": 11
+    },
+    {
+      "id": 506,
+      "full_name": "Jankat Yılmaz",
+      "display_name": "Jankat",
+      "short_label": "Jankat",
+      "team_id": 17,
+      "position": "GK",
+      "shirt_number": 24
+    },
+    {
+      "id": 507,
+      "full_name": "Victor James Osimhen",
+      "display_name": "Osimhen",
+      "short_label": "Osimhen",
+      "team_id": 17,
+      "position": "FWD",
+      "shirt_number": 45
+    },
+    {
+      "id": 511,
+      "full_name": "Uğurcan Çakır",
+      "display_name": "Uğurcan",
+      "short_label": "Uğurcan",
+      "team_id": 17,
+      "position": "GK",
+      "shirt_number": 1
+    },
+    {
+      "id": 514,
+      "full_name": "Leroy Aziz Sané",
+      "display_name": "Sané",
+      "short_label": "Sané",
+      "team_id": 17,
+      "position": "MID",
+      "shirt_number": 10
+    },
+    {
+      "id": 515,
+      "full_name": "Lesley Chimuanya Ugochukwu",
+      "display_name": "Lesley",
+      "short_label": "Lesley",
+      "team_id": 17,
+      "position": "MID",
+      "shirt_number": 18
+    },
+    {
+      "id": 516,
+      "full_name": "Davinson Sánchez Mina",
+      "display_name": "Sánchez",
+      "short_label": "Sánchez",
+      "team_id": 17,
+      "position": "DEF",
+      "shirt_number": 6
+    },
+    {
+      "id": 517,
+      "full_name": "Kazımcan Karataş",
+      "display_name": "Kazımcan",
+      "short_label": "Kazımcan",
+      "team_id": 17,
+      "position": "DEF",
+      "shirt_number": 88
+    },
+    {
+      "id": 520,
+      "full_name": "Barış Alper Yılmaz",
+      "display_name": "Barış A.",
+      "short_label": "Barış A.",
+      "team_id": 17,
+      "position": "MID",
+      "shirt_number": 53
+    },
+    {
+      "id": 522,
+      "full_name": "Kaan Ayhan",
+      "display_name": "Kaan",
+      "short_label": "Kaan",
+      "team_id": 17,
+      "position": "DEF",
+      "shirt_number": 23
+    },
+    {
+      "id": 523,
+      "full_name": "Arda Ünyay",
+      "display_name": "Arda",
+      "short_label": "Arda",
+      "team_id": 17,
+      "position": "DEF",
+      "shirt_number": 91
+    },
+    {
+      "id": 525,
+      "full_name": "Mario René Junior Lemina",
+      "display_name": "Lemina",
+      "short_label": "Lemina",
+      "team_id": 17,
+      "position": "MID",
+      "shirt_number": 99
+    },
+    {
+      "id": 527,
+      "full_name": "Renato Sam-Na Nhaga",
+      "display_name": "Nhaga",
+      "short_label": "Nhaga",
+      "team_id": 17,
+      "position": "MID",
+      "shirt_number": 74
+    },
+    {
+      "id": 529,
+      "full_name": "Ismail Joshua Jakobs",
+      "display_name": "Jacobs",
+      "short_label": "Jacobs",
+      "team_id": 17,
+      "position": "DEF",
+      "shirt_number": 4
+    },
+    {
+      "id": 530,
+      "full_name": "İlkay Gündoğan",
+      "display_name": "İlkay",
+      "short_label": "İlkay",
+      "team_id": 17,
+      "position": "MID",
+      "shirt_number": 20
+    },
+    {
+      "id": 531,
+      "full_name": "Evren Eren Elmalı",
+      "display_name": "Eren",
+      "short_label": "Eren",
+      "team_id": 17,
+      "position": "DEF",
+      "shirt_number": 17
+    },
+    {
+      "id": 532,
+      "full_name": "Gabriel Davi Gomes Sara",
+      "display_name": "Sara",
+      "short_label": "Sara",
+      "team_id": 17,
+      "position": "MID",
+      "shirt_number": 8
+    },
+    {
+      "id": 533,
+      "full_name": "Abdülkerim Bardakcı",
+      "display_name": "Abdulkerim",
+      "short_label": "Abdulkerim",
+      "team_id": 17,
+      "position": "DEF",
+      "shirt_number": 42
+    },
+    {
+      "id": 535,
+      "full_name": "Can Armando Güner",
+      "display_name": "Can",
+      "short_label": "Can",
+      "team_id": 17,
+      "position": "MID",
+      "shirt_number": 27
+    },
+    {
+      "id": 536,
+      "full_name": "Halil İbrahim Dervişoğlu",
+      "display_name": "Halil",
+      "short_label": "Halil",
+      "team_id": 18,
+      "position": "FWD",
+      "shirt_number": 81
+    },
+    {
+      "id": 537,
+      "full_name": "Günay Güvenç",
+      "display_name": "Günay",
+      "short_label": "Günay",
+      "team_id": 17,
+      "position": "GK",
+      "shirt_number": 19
+    },
+    {
+      "id": 539,
+      "full_name": "Lucas Sebastián Torreira di Pascua",
+      "display_name": "Torreira",
+      "short_label": "Torreira",
+      "team_id": 17,
+      "position": "MID",
+      "shirt_number": 34
+    },
+    {
+      "id": 541,
+      "full_name": "Metehan Baltacı",
+      "display_name": "Metehan",
+      "short_label": "Metehan",
+      "team_id": 11,
+      "position": "DEF",
+      "shirt_number": 3
+    },
+    {
+      "id": 542,
+      "full_name": "Roland Sallai",
+      "display_name": "Sallai",
+      "short_label": "Sallai",
+      "team_id": 17,
+      "position": "DEF",
+      "shirt_number": 7
+    },
+    {
+      "id": 545,
+      "full_name": "Wilfried Stéphane Singo",
+      "display_name": "Singo",
+      "short_label": "Singo",
+      "team_id": 17,
+      "position": "DEF",
+      "shirt_number": 90
+    },
+    {
+      "id": 549,
+      "full_name": "Cemilhan Aslan",
+      "display_name": "Cemilhan",
+      "short_label": "Cemilhan",
+      "team_id": 18,
+      "position": "GK",
+      "shirt_number": 99
+    },
+    {
+      "id": 550,
+      "full_name": "Leo Myenty Janna Abena",
+      "display_name": "Abena",
+      "short_label": "Abena",
+      "team_id": 18,
+      "position": "DEF",
+      "shirt_number": 5
+    },
+    {
+      "id": 552,
+      "full_name": "İbrahim Kağan Alkış",
+      "display_name": "İbrahim",
+      "short_label": "İbrahim",
+      "team_id": 18,
+      "position": "GK",
+      "shirt_number": 98
+    },
+    {
+      "id": 553,
+      "full_name": "Trivante Vincent Stewart",
+      "display_name": "Stewart",
+      "short_label": "Stewart",
+      "team_id": 18,
+      "position": "FWD",
+      "shirt_number": 9
+    },
+    {
+      "id": 554,
+      "full_name": "Kacper Tobiasz",
+      "display_name": "Tobiasz",
+      "short_label": "Tobiasz",
+      "team_id": 18,
+      "position": "GK",
+      "shirt_number": 1
+    },
+    {
+      "id": 555,
+      "full_name": "Arda Kızıldağ",
+      "display_name": "Arda",
+      "short_label": "Arda",
+      "team_id": 18,
+      "position": "DEF",
+      "shirt_number": 20
+    },
+    {
+      "id": 557,
+      "full_name": "Ulrich Sidoine Meleke",
+      "display_name": "Meleke",
+      "short_label": "Meleke",
+      "team_id": 18,
+      "position": "MID",
+      "shirt_number": 6
+    },
+    {
+      "id": 559,
+      "full_name": "Victor Ntino-Emo Gidado",
+      "display_name": "Gidado",
+      "short_label": "Gidado",
+      "team_id": 18,
+      "position": "MID",
+      "shirt_number": 27
+    },
+    {
+      "id": 560,
+      "full_name": "Juninho Gracielo Bacuna",
+      "display_name": "Bacuna",
+      "short_label": "Bacuna",
+      "team_id": 18,
+      "position": "MID",
+      "shirt_number": 15
+    },
+    {
+      "id": 561,
+      "full_name": "Drissa Gui Camara",
+      "display_name": "Camara",
+      "short_label": "Camara",
+      "team_id": 18,
+      "position": "MID",
+      "shirt_number": 8
+    },
+    {
+      "id": 564,
+      "full_name": "Kerim Çalhanoğlu",
+      "display_name": "Kerim",
+      "short_label": "Kerim",
+      "team_id": 18,
+      "position": "DEF",
+      "shirt_number": 32
+    },
+    {
+      "id": 565,
+      "full_name": "Nazım Sangaré",
+      "display_name": "Sangaré",
+      "short_label": "Sangaré",
+      "team_id": 18,
+      "position": "DEF",
+      "shirt_number": 4
+    },
+    {
+      "id": 566,
+      "full_name": "Ali Osman Kalın",
+      "display_name": "Ali",
+      "short_label": "Ali",
+      "team_id": 18,
+      "position": "MID",
+      "shirt_number": 80
+    },
+    {
+      "id": 567,
+      "full_name": "Deian Cristian Sorescu",
+      "display_name": "Sorescu",
+      "short_label": "Sorescu",
+      "team_id": 18,
+      "position": "DEF",
+      "shirt_number": 2
+    },
+    {
+      "id": 568,
+      "full_name": "Alexandru Iulian Maxim",
+      "display_name": "Maxim",
+      "short_label": "Maxim",
+      "team_id": 18,
+      "position": "MID",
+      "shirt_number": 10
+    },
+    {
+      "id": 571,
+      "full_name": "Karamba Gassama",
+      "display_name": "Gassama",
+      "short_label": "Gassama",
+      "team_id": 18,
+      "position": "MID",
+      "shirt_number": 18
+    },
+    {
+      "id": 572,
+      "full_name": "Luis Jesús Pérez Maqueda",
+      "display_name": "Pérez",
+      "short_label": "Pérez",
+      "team_id": 18,
+      "position": "DEF",
+      "shirt_number": 22
+    },
+    {
+      "id": 573,
+      "full_name": "Kacper Szymon Kozłowski",
+      "display_name": "Kozlowski",
+      "short_label": "Kozlowski",
+      "team_id": 18,
+      "position": "MID",
+      "shirt_number": 12
+    },
+    {
+      "id": 575,
+      "full_name": "Fuat Bavuk",
+      "display_name": "Fuat",
+      "short_label": "Fuat",
+      "team_id": 18,
+      "position": "FWD",
+      "shirt_number": 75
+    },
+    {
+      "id": 576,
+      "full_name": "Ogün Özçiçek",
+      "display_name": "Ogün",
+      "short_label": "Ogün",
+      "team_id": 18,
+      "position": "MID",
+      "shirt_number": 36
+    },
+    {
+      "id": 577,
+      "full_name": "Mirza Cihan",
+      "display_name": "Mirza",
+      "short_label": "Mirza",
+      "team_id": 18,
+      "position": "MID",
+      "shirt_number": 7
+    },
+    {
+      "id": 578,
+      "full_name": "Serdar Dursun",
+      "display_name": "Serdar",
+      "short_label": "Serdar",
+      "team_id": 18,
+      "position": "FWD",
+      "shirt_number": 11
+    },
+    {
+      "id": 579,
+      "full_name": "Muhammet Akmelek",
+      "display_name": "Muhammet",
+      "short_label": "Muhammet",
+      "team_id": 18,
+      "position": "FWD",
+      "shirt_number": 23
+    },
+    {
+      "id": 583,
+      "full_name": "Salih Uçan",
+      "display_name": "Salih",
+      "short_label": "Salih",
+      "team_id": 11,
+      "position": "MID",
+      "shirt_number": null
+    },
+    {
+      "id": 585,
+      "full_name": "Markus Seehusen Karlsbakk",
+      "display_name": "Karlsbakk",
+      "short_label": "Karlsbakk",
+      "team_id": 8,
+      "position": "MID",
+      "shirt_number": null
+    },
+    {
+      "id": 586,
+      "full_name": "Yira Collins Sor",
+      "display_name": "Sor",
+      "short_label": "Sor",
+      "team_id": 5,
+      "position": "MID",
+      "shirt_number": null
+    },
+    {
+      "id": 590,
+      "full_name": "Romelu Menama Lukaku Bolingoli",
+      "display_name": "Lukaku",
+      "short_label": "Lukaku",
+      "team_id": 6,
+      "position": "FWD",
+      "shirt_number": null
+    },
+    {
+      "id": 593,
+      "full_name": "Dušan Vlahović",
+      "display_name": "Vlahović",
+      "short_label": "Vlahović",
+      "team_id": 9,
+      "position": "FWD",
+      "shirt_number": null
+    },
+    {
+      "id": 595,
+      "full_name": "Mohamed Khalil",
+      "display_name": "Khalil",
+      "short_label": "Khalil",
+      "team_id": 5,
+      "position": "MID",
+      "shirt_number": null
+    },
+    {
+      "id": 596,
+      "full_name": "Arouna Kigbafory Soro",
+      "display_name": "Soro",
+      "short_label": "Soro",
+      "team_id": 14,
+      "position": "MID",
+      "shirt_number": null
+    },
+    {
+      "id": 597,
+      "full_name": "Fuka-Arthur Masuaku Kawela",
+      "display_name": "Masuaku",
+      "short_label": "Masuaku",
+      "team_id": 7,
+      "position": "DEF",
+      "shirt_number": 26
+    },
+    {
+      "id": 599,
+      "full_name": "Baran Ali Gezek",
+      "display_name": "Baran",
+      "short_label": "Baran",
+      "team_id": 14,
+      "position": "MID",
+      "shirt_number": 55
+    },
+    {
+      "id": 600,
+      "full_name": "Samuel Leo Beat Ballet",
+      "display_name": "Ballet",
+      "short_label": "Ballet",
+      "team_id": 5,
+      "position": "MID",
+      "shirt_number": null
+    },
+    {
+      "id": 601,
+      "full_name": "Umut Erdem",
+      "display_name": "Umut",
+      "short_label": "Umut",
+      "team_id": 12,
+      "position": "DEF",
+      "shirt_number": null
+    },
+    {
+      "id": 608,
+      "full_name": "Alexandros Kyziridis",
+      "display_name": "Kyziridis",
+      "short_label": "Kyziridis",
+      "team_id": 8,
+      "position": "MID",
+      "shirt_number": null
+    },
+    {
+      "id": 611,
+      "full_name": "Mohamed Baba Diomandé",
+      "display_name": "Diomandé",
+      "short_label": "Diomandé",
+      "team_id": 8,
+      "position": "MID",
+      "shirt_number": null
+    },
+    {
+      "id": 613,
+      "full_name": "Gabriele Guarino",
+      "display_name": "Guarino",
+      "short_label": "Guarino",
+      "team_id": 15,
+      "position": "DEF",
+      "shirt_number": null
+    },
+    {
+      "id": 614,
+      "full_name": "Emirhan Yılmaz",
+      "display_name": "Emirhan",
+      "short_label": "Emirhan",
+      "team_id": 12,
+      "position": "MID",
+      "shirt_number": 47
+    },
+    {
+      "id": 617,
+      "full_name": "Rayan Lutin",
+      "display_name": "Lutin",
+      "short_label": "Lutin",
+      "team_id": 5,
+      "position": "MID",
+      "shirt_number": null
+    },
+    {
+      "id": 623,
+      "full_name": "Gyrano Emilio Kerk",
+      "display_name": "Kerk",
+      "short_label": "Kerk",
+      "team_id": 2,
+      "position": "FWD",
+      "shirt_number": null
+    },
+    {
+      "id": 624,
+      "full_name": "Gökhan Gül",
+      "display_name": "Gökhan",
+      "short_label": "Gökhan",
+      "team_id": 5,
+      "position": "MID",
+      "shirt_number": null
+    },
+    {
+      "id": 627,
+      "full_name": "Enis Destan",
+      "display_name": "Enis",
+      "short_label": "Enis",
+      "team_id": 7,
+      "position": "FWD",
+      "shirt_number": null
+    },
+    {
+      "id": 629,
+      "full_name": "Mücahit İbrahimoğlu",
+      "display_name": "Mücahit",
+      "short_label": "Mücahit",
+      "team_id": 7,
+      "position": "MID",
+      "shirt_number": 24
+    },
+    {
+      "id": 635,
+      "full_name": "Moussa Diakité",
+      "display_name": "Diakité",
+      "short_label": "Diakité",
+      "team_id": 12,
+      "position": "MID",
+      "shirt_number": null
+    },
+    {
+      "id": 679,
+      "full_name": "Rajmund Tóth",
+      "display_name": "Tóth",
+      "short_label": "Tóth",
+      "team_id": 7,
+      "position": "MID",
+      "shirt_number": 66
+    },
+    {
+      "id": 712,
+      "full_name": "Bekir Turaç Böke",
+      "display_name": "Bekir",
+      "short_label": "Bekir",
+      "team_id": 10,
+      "position": "FWD",
+      "shirt_number": null
+    },
+    {
+      "id": 745,
+      "full_name": "Gonçalo Santos Sousa",
+      "display_name": "Sousa",
+      "short_label": "Sousa",
+      "team_id": 4,
+      "position": "MID",
+      "shirt_number": null
+    },
+    {
+      "id": 746,
+      "full_name": "Miguel Felipe Nunes Cardoso",
+      "display_name": "Cardoso",
+      "short_label": "Cardoso",
+      "team_id": 2,
+      "position": "MID",
+      "shirt_number": null
+    },
+    {
+      "id": 778,
+      "full_name": "Elisha Owusu",
+      "display_name": "Owusu",
+      "short_label": "Owusu",
+      "team_id": 2,
+      "position": "MID",
+      "shirt_number": null
+    },
+    {
+      "id": 811,
+      "full_name": "Richard Akonnor",
+      "display_name": "Akonnor",
+      "short_label": "Akonnor",
+      "team_id": 10,
+      "position": "DEF",
+      "shirt_number": null
+    },
+    {
+      "id": 812,
+      "full_name": "Tiago Maria Antunes Gouveia",
+      "display_name": "Gouveia",
+      "short_label": "Gouveia",
+      "team_id": 11,
+      "position": "MID",
+      "shirt_number": null
+    },
+    {
+      "id": 813,
+      "full_name": "Cheikh Ahmet Tidiane Niasse",
+      "display_name": "Niasse",
+      "short_label": "Niasse",
+      "team_id": 11,
+      "position": "MID",
+      "shirt_number": null
+    },
+    {
+      "id": 844,
+      "full_name": "Misjonne Juniffer Naigelino Hansen",
+      "display_name": "Hansen",
+      "short_label": "Hansen",
+      "team_id": 18,
+      "position": "MID",
+      "shirt_number": null
+    },
+    {
+      "id": 877,
+      "full_name": "Aleksey Batrakov",
+      "display_name": "Batrakov",
+      "short_label": "Batrakov",
+      "team_id": 17,
+      "position": "MID",
+      "shirt_number": null
+    },
+    {
+      "id": 910,
+      "full_name": "Iván Cédric Bikoue Embolo",
+      "display_name": "Cedric",
+      "short_label": "Cedric",
+      "team_id": 14,
+      "position": "FWD",
+      "shirt_number": null
+    },
+    {
+      "id": 943,
+      "full_name": "Simone Giordano",
+      "display_name": "Giordano",
+      "short_label": "Giordano",
+      "team_id": 16,
+      "position": "DEF",
+      "shirt_number": 21
+    },
+    {
+      "id": 976,
+      "full_name": "Matej Maglica",
+      "display_name": "Maglica",
+      "short_label": "Maglica",
+      "team_id": 4,
+      "position": "DEF",
+      "shirt_number": null
+    },
+    {
+      "id": 977,
+      "full_name": "Paolo Fernandes Cantin",
+      "display_name": "Fernandes",
+      "short_label": "Fernandes",
+      "team_id": 14,
+      "position": "MID",
+      "shirt_number": null
+    },
+    {
+      "id": 1009,
+      "full_name": "Fábio Henrique Tavares",
+      "display_name": "Fabinho",
+      "short_label": "Fabinho",
+      "team_id": 1,
+      "position": "MID",
+      "shirt_number": null
+    },
+    {
+      "id": 1042,
+      "full_name": "Oskar Skovbjerg Øhlenschlæger",
+      "display_name": "Oskar",
+      "short_label": "Oskar",
+      "team_id": 15,
+      "position": "MID",
+      "shirt_number": null
+    },
+    {
+      "id": 1075,
+      "full_name": "Kevin Camron Mouanga",
+      "display_name": "Mouanga",
+      "short_label": "Mouanga",
+      "team_id": 3,
+      "position": "DEF",
+      "shirt_number": null
+    },
+    {
+      "id": 1108,
+      "full_name": "Ibrahim Yalatif Diabate",
+      "display_name": "Diabate",
+      "short_label": "Diabate",
+      "team_id": 2,
+      "position": "FWD",
+      "shirt_number": null
+    },
+    {
+      "id": 1109,
+      "full_name": "Albert Iustin Doicaru",
+      "display_name": "Doicaru",
+      "short_label": "Doicaru",
+      "team_id": 12,
+      "position": "MID",
+      "shirt_number": 53
+    },
+    {
+      "id": 1141,
+      "full_name": "Ernest Poku",
+      "display_name": "Poku",
+      "short_label": "Poku",
+      "team_id": 9,
+      "position": "MID",
+      "shirt_number": null
+    },
+    {
+      "id": 1174,
+      "full_name": "Yiğit Demir",
+      "display_name": "Yiğit",
+      "short_label": "Yiğit",
+      "team_id": 16,
+      "position": "DEF",
+      "shirt_number": null
+    },
+    {
+      "id": 1207,
+      "full_name": "Jean-Luc Mamadou Diarra Dompé",
+      "display_name": "Dompe",
+      "short_label": "Dompe",
+      "team_id": 7,
+      "position": "MID",
+      "shirt_number": null
+    },
+    {
+      "id": 1208,
+      "full_name": "Florian Ayé",
+      "display_name": "Aye",
+      "short_label": "Aye",
+      "team_id": 4,
+      "position": "FWD",
+      "shirt_number": null
+    },
+    {
+      "id": 1209,
+      "full_name": "Fabio Miretti",
+      "display_name": "Miretti",
+      "short_label": "Miretti",
+      "team_id": 9,
+      "position": "MID",
+      "shirt_number": null
+    },
+    {
+      "id": 1240,
+      "full_name": "Kojo Peprah Oppong",
+      "display_name": "Oppong",
+      "short_label": "Oppong",
+      "team_id": 6,
+      "position": "DEF",
+      "shirt_number": null
+    },
+    {
+      "id": 1306,
+      "full_name": "Rafael Alexandre da Conceição Leão",
+      "display_name": "Leao",
+      "short_label": "Leao",
+      "team_id": 17,
+      "position": "MID",
+      "shirt_number": null
+    },
+    {
+      "id": 1307,
+      "full_name": "Ermin Mahmić",
+      "display_name": "Mahmic",
+      "short_label": "Mahmic",
+      "team_id": 8,
+      "position": "MID",
+      "shirt_number": null
+    },
+    {
+      "id": 1372,
+      "full_name": "Mostafa Mohamed Ahmed Abdalla",
+      "display_name": "Mohamed",
+      "short_label": "Mohamed",
+      "team_id": 7,
+      "position": "FWD",
+      "shirt_number": null
+    },
+    {
+      "id": 1373,
+      "full_name": "Tobias Fjeld Gulliksen",
+      "display_name": "Gulliksen",
+      "short_label": "Gulliksen",
+      "team_id": 4,
+      "position": "MID",
+      "shirt_number": null
+    },
+    {
+      "id": 1405,
+      "full_name": "Deniz Daniel Gül",
+      "display_name": "Deniz",
+      "short_label": "Deniz",
+      "team_id": 17,
+      "position": "FWD",
+      "shirt_number": null
+    },
+    {
+      "id": 1406,
+      "full_name": "Youssoufa Mohamadu Moukoko",
+      "display_name": "Moukoko",
+      "short_label": "Moukoko",
+      "team_id": 8,
+      "position": "FWD",
+      "shirt_number": null
+    },
+    {
+      "id": 1438,
+      "full_name": "El Chadaille Bitshiabu",
+      "display_name": "Bitshiabu",
+      "short_label": "Bitshiabu",
+      "team_id": 17,
+      "position": "DEF",
+      "shirt_number": null
+    },
+    {
+      "id": 1471,
+      "full_name": "Franculino Gluda Djú",
+      "display_name": "Dju",
+      "short_label": "Dju",
+      "team_id": 1,
+      "position": "FWD",
+      "shirt_number": null
+    },
+    {
+      "id": 1504,
+      "full_name": "Victor Ikechukwu Jonathan Orakpo",
+      "display_name": "Orakpo",
+      "short_label": "Orakpo",
+      "team_id": 11,
+      "position": "FWD",
+      "shirt_number": null
+    },
+    {
+      "id": 1537,
+      "full_name": "Pedro Manuel Lobo Peixoto Mineiro Mendes",
+      "display_name": "Mendes",
+      "short_label": "Mendes",
+      "team_id": 11,
+      "position": "FWD",
+      "shirt_number": null
+    },
+    {
+      "id": 1538,
+      "full_name": "Can Bozdoğan",
+      "display_name": "Can",
+      "short_label": "Can",
+      "team_id": 12,
+      "position": "MID",
+      "shirt_number": null
+    },
+    {
+      "id": 1539,
+      "full_name": "Loubadhe Abakar Sylla",
+      "display_name": "Sylla",
+      "short_label": "Sylla",
+      "team_id": 18,
+      "position": "DEF",
+      "shirt_number": null
+    },
+    {
+      "id": 1540,
+      "full_name": "Ahmet Oğuz",
+      "display_name": "Ahmet",
+      "short_label": "Ahmet",
+      "team_id": 7,
+      "position": "DEF",
+      "shirt_number": null
+    },
+    {
+      "id": 1541,
+      "full_name": "Ömer Bayram",
+      "display_name": "Ömer",
+      "short_label": "Ömer",
+      "team_id": 3,
+      "position": "DEF",
+      "shirt_number": null
+    },
+    {
+      "id": 1542,
+      "full_name": "Faustino Adebola Rasheed Anjorin",
+      "display_name": "Anjorin",
+      "short_label": "Anjorin",
+      "team_id": 10,
+      "position": "MID",
+      "shirt_number": null
+    },
+    {
+      "id": 1543,
+      "full_name": "Jesurun Rak-Sakyi",
+      "display_name": "Sakyi",
+      "short_label": "Sakyi",
+      "team_id": 3,
+      "position": "MID",
+      "shirt_number": null
+    },
+    {
+      "id": 1544,
+      "full_name": "Gennaro Borrelli",
+      "display_name": "Borrelli",
+      "short_label": "Borrelli",
+      "team_id": 12,
+      "position": "FWD",
+      "shirt_number": null
+    },
+    {
+      "id": 1545,
+      "full_name": "Rafael Filipe Gonçalves Soares Luís",
+      "display_name": "Luis",
+      "short_label": "Luis",
+      "team_id": 11,
+      "position": "MID",
+      "shirt_number": null
+    },
+    {
+      "id": 1546,
+      "full_name": "Mehmet Ataberk Dadakdeniz",
+      "display_name": "Ataberk",
+      "short_label": "Ataberk",
+      "team_id": 18,
+      "position": "GK",
+      "shirt_number": null
+    },
+    {
+      "id": 1547,
+      "full_name": "Ali Habeşoğlu",
+      "display_name": "Ali",
+      "short_label": "Ali",
+      "team_id": 1,
+      "position": "FWD",
+      "shirt_number": null
+    },
+    {
+      "id": 1570,
+      "full_name": "Efe Sarıkaya",
+      "display_name": "Efe",
+      "short_label": "Efe",
+      "team_id": 18,
+      "position": "DEF",
+      "shirt_number": null
+    },
+    {
+      "id": 1571,
+      "full_name": "Lawrence Agyekum",
+      "display_name": "Agyekum",
+      "short_label": "Agyekum",
+      "team_id": 2,
+      "position": "MID",
+      "shirt_number": null
+    },
+    {
+      "id": 1572,
+      "full_name": "Emirhan Acar",
+      "display_name": "Emirhan",
+      "short_label": "Emirhan",
+      "team_id": 2,
+      "position": "MID",
+      "shirt_number": null
+    },
+    {
+      "id": 1573,
+      "full_name": "Strahinja Eraković",
+      "display_name": "Erakovic",
+      "short_label": "Erakovic",
+      "team_id": 15,
+      "position": "DEF",
+      "shirt_number": null
+    },
+    {
+      "id": 1603,
+      "full_name": "Mohamed Lamine Bayo",
+      "display_name": "Bayo",
+      "short_label": "Bayo",
+      "team_id": 15,
+      "position": "FWD",
+      "shirt_number": null
+    },
+    {
+      "id": 1604,
+      "full_name": "Ali Turap Bülbül",
+      "display_name": null,
+      "short_label": "Bülbül",
+      "team_id": 5,
+      "position": "DEF",
+      "shirt_number": null
+    },
+    {
+      "id": 1605,
+      "full_name": "Hamza Aydar",
+      "display_name": null,
+      "short_label": "Aydar",
+      "team_id": 11,
+      "position": "DEF",
+      "shirt_number": null
+    },
+    {
+      "id": 1606,
+      "full_name": "Prince Martor Jr.",
+      "display_name": null,
+      "short_label": "Martor",
+      "team_id": 11,
+      "position": "FWD",
+      "shirt_number": null
+    },
+    {
+      "id": 1607,
+      "full_name": "Miraç Acer",
+      "display_name": null,
+      "short_label": "Acer",
+      "team_id": 5,
+      "position": "DEF",
+      "shirt_number": null
+    },
+    {
+      "id": 1608,
+      "full_name": "Bedirhan Özyurt",
+      "display_name": null,
+      "short_label": "Özyurt",
+      "team_id": 14,
+      "position": "DEF",
+      "shirt_number": null
+    },
+    {
+      "id": 1609,
+      "full_name": "Sabahattin Destici",
+      "display_name": null,
+      "short_label": "Destici",
+      "team_id": 18,
+      "position": "DEF",
+      "shirt_number": null
+    },
+    {
+      "id": 1610,
+      "full_name": "Onur Öztonga",
+      "display_name": null,
+      "short_label": "Öztonga",
+      "team_id": 4,
+      "position": "DEF",
+      "shirt_number": null
+    }
+  ],
+  "fixtures": [
+    {
+      "match_id": 317847,
+      "home_team_id": 8,
+      "away_team_id": 12,
+      "home_goals": 2,
+      "away_goals": 1
+    },
+    {
+      "match_id": 317848,
+      "home_team_id": 2,
+      "away_team_id": 16,
+      "home_goals": 2,
+      "away_goals": 0
+    },
+    {
+      "match_id": 317849,
+      "home_team_id": 5,
+      "away_team_id": 7,
+      "home_goals": 1,
+      "away_goals": 0
+    },
+    {
+      "match_id": 317850,
+      "home_team_id": 11,
+      "away_team_id": 17,
+      "home_goals": 0,
+      "away_goals": 1
+    },
+    {
+      "match_id": 317851,
+      "home_team_id": 6,
+      "away_team_id": 14,
+      "home_goals": 3,
+      "away_goals": 0
+    },
+    {
+      "match_id": 317852,
+      "home_team_id": 3,
+      "away_team_id": 15,
+      "home_goals": 4,
+      "away_goals": 1
+    },
+    {
+      "match_id": 317853,
+      "home_team_id": 4,
+      "away_team_id": 10,
+      "home_goals": 1,
+      "away_goals": 2
+    },
+    {
+      "match_id": 317854,
+      "home_team_id": 13,
+      "away_team_id": 18,
+      "home_goals": 2,
+      "away_goals": 1
+    },
+    {
+      "match_id": 317855,
+      "home_team_id": 1,
+      "away_team_id": 9,
+      "home_goals": 2,
+      "away_goals": 0
+    }
+  ]
+}
