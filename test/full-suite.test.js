@@ -10,6 +10,7 @@ const jsTests=[
   'model/defensiveScenarioContract.test.js',
   'model/allPositionScoringContract.test.js',
   'model/mh8TffResultsProvenance.test.js',
+  'model/mh8OfficialFixtureIdentityContract.test.js',
   'model/mh8GoalEventStaging.test.js',
   'model/replayAudit.test.js',
   'model/publicReadCompatibility.test.js',
