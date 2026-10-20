@@ -19,7 +19,8 @@
       "candidate_fotmob_url": "https://www.fotmob.com/matches/rizespor-vs-corum-fk/tocmrs2",
       "full_player_events_verified": false,
       "goalkeeper_saves_verified": false,
-      "notes": "Url located on FotMob public match page; requires full-time page and player fact extraction, distinct from official TFF Fantasy points."
+      "notes": "Url located on FotMob public match page; requires full-time page and player fact extraction, distinct from official TFF Fantasy points.",
+      "official_tff_match_id": 317852
     },
     {
       "match_id": 317848,
@@ -30,7 +31,8 @@
       "candidate_fotmob_url": "https://www.fotmob.com/matches/eyupspor-vs-erzurumspor-fk/it2wppv",
       "full_player_events_verified": false,
       "goalkeeper_saves_verified": false,
-      "notes": "Url located on FotMob public match page; requires full-time page and player fact extraction, distinct from official TFF Fantasy points."
+      "notes": "Url located on FotMob public match page; requires full-time page and player fact extraction, distinct from official TFF Fantasy points.",
+      "official_tff_match_id": 317855
     },
     {
       "match_id": 317849,
@@ -41,7 +43,8 @@
       "candidate_fotmob_url": "https://www.fotmob.com/matches/konyaspor-vs-amed-sportif/2jdlf0i",
       "full_player_events_verified": false,
       "goalkeeper_saves_verified": false,
-      "notes": "Url located on FotMob public match page; requires full-time page and player fact extraction, distinct from official TFF Fantasy points."
+      "notes": "Url located on FotMob public match page; requires full-time page and player fact extraction, distinct from official TFF Fantasy points.",
+      "official_tff_match_id": 317850
     },
     {
       "match_id": 317850,
@@ -52,7 +55,8 @@
       "candidate_fotmob_url": "https://www.fotmob.com/matches/genclerbirligi-vs-galatasaray/28fr6c",
       "full_player_events_verified": false,
       "goalkeeper_saves_verified": false,
-      "notes": "Url located on FotMob public match page; requires full-time page and player fact extraction, distinct from official TFF Fantasy points."
+      "notes": "Url located on FotMob public match page; requires full-time page and player fact extraction, distinct from official TFF Fantasy points.",
+      "official_tff_match_id": 317851
     },
     {
       "match_id": 317851,
@@ -63,7 +67,8 @@
       "candidate_fotmob_url": "https://www.fotmob.com/matches/alanyaspor-vs-fenerbahce/1h8voa",
       "full_player_events_verified": false,
       "goalkeeper_saves_verified": false,
-      "notes": "Url located on FotMob public match page; requires full-time page and player fact extraction, distinct from official TFF Fantasy points."
+      "notes": "Url located on FotMob public match page; requires full-time page and player fact extraction, distinct from official TFF Fantasy points.",
+      "official_tff_match_id": 317853
     },
     {
       "match_id": 317852,
@@ -74,7 +79,8 @@
       "candidate_fotmob_url": "https://www.fotmob.com/matches/kasmpasa-vs-samsunspor/1q1egc",
       "full_player_events_verified": false,
       "goalkeeper_saves_verified": false,
-      "notes": "Url located on FotMob public match page; requires full-time page and player fact extraction, distinct from official TFF Fantasy points."
+      "notes": "Url located on FotMob public match page; requires full-time page and player fact extraction, distinct from official TFF Fantasy points.",
+      "official_tff_match_id": 317848
     },
     {
       "match_id": 317853,
@@ -85,7 +91,8 @@
       "candidate_fotmob_url": "https://www.fotmob.com/matches/kocaelispor-vs-goztepe/3mwq2",
       "full_player_events_verified": false,
       "goalkeeper_saves_verified": false,
-      "notes": "Url located on FotMob public match page; requires full-time page and player fact extraction, distinct from official TFF Fantasy points."
+      "notes": "Url located on FotMob public match page; requires full-time page and player fact extraction, distinct from official TFF Fantasy points.",
+      "official_tff_match_id": 317854
     },
     {
       "match_id": 317854,
@@ -96,7 +103,8 @@
       "candidate_fotmob_url": "https://www.fotmob.com/matches/basaksehir-vs-gaziantep-fk/arr8y",
       "full_player_events_verified": false,
       "goalkeeper_saves_verified": false,
-      "notes": "Url located on FotMob public match page; requires full-time page and player fact extraction, distinct from official TFF Fantasy points."
+      "notes": "Url located on FotMob public match page; requires full-time page and player fact extraction, distinct from official TFF Fantasy points.",
+      "official_tff_match_id": 317849
     },
     {
       "match_id": 317855,
@@ -107,7 +115,9 @@
       "candidate_fotmob_url": "https://www.fotmob.com/matches/trabzonspor-vs-besiktas/3adfo2",
       "full_player_events_verified": false,
       "goalkeeper_saves_verified": false,
-      "notes": "Url located on FotMob public match page; requires full-time page and player fact extraction, distinct from official TFF Fantasy points."
+      "notes": "Url located on FotMob public match page; requires full-time page and player fact extraction, distinct from official TFF Fantasy points.",
+      "official_tff_match_id": 317847
     }
-  ]
+  ],
+  "tff_match_id_contract": "match_id is the site's historical internal ID; official TFF macID is official_tff_match_id, verified by the TFF game-details link. Do not substitute directly or rewrite historical projections."
 }
