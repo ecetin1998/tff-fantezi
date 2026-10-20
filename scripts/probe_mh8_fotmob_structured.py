@@ -168,6 +168,20 @@ def summarize(match: dict, provider_id: int, data: dict) -> dict:
         "tff_bonus_verified": False,
         "final_fantasy_points_written": 0,
     }
+    # Bound the raw provider event schema preview to public, observed MH8
+    # matches. We need the ACTUAL card color and assist fields before scoring.
+    if match["match_id"] in (317850, 317851, 317853, 317854):
+        samples = []
+        for event_kind in ("Card", "Goal", "MissedPenalty"):
+            observed = [e for e in events if isinstance(e, dict)
+                        and e.get("type") == event_kind][:2]
+            for event in observed:
+                samples.append({
+                    "kind": event_kind,
+                    "field_names": sorted(event.keys()),
+                    "raw_preview": json.dumps(event, ensure_ascii=False)[:1350],
+                })
+        summary["source_event_schema_diagnostic"] = samples
     for side, team in zip(("home", "away"), lineup_teams):
         starters = team.get("starters") or []
         subs = team.get("subs") or []
@@ -315,6 +329,11 @@ def main():
         schema=(x.get("data") or {}).get("source_schema_diagnostic")
         if schema:
             print("  SOURCE_PLAYER_STAT_SCHEMA_DIAGNOSTIC "+json.dumps(schema,ensure_ascii=False))
+        event_schema=(x.get("data") or {}).get("source_event_schema_diagnostic")
+        if event_schema is not None:
+            print("  SOURCE_EVENT_SCHEMA_DIAGNOSTIC "+json.dumps({
+                "fixture_id":x["fixture_id"],"samples":event_schema
+            },ensure_ascii=False))
 
 
 if __name__ == "__main__":
