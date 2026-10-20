@@ -4,7 +4,7 @@ import {createRequire} from 'node:module'
 import {readFileSync} from 'node:fs'
 const require=createRequire(import.meta.url)
 const {inspectDefenderXa,inspectShots}=require('../model/defenderSourceQuality.js')
-const {replay}=require('../scripts/audit_mh9_defender_xa.cjs')
+const {replay}=require('../scripts/audit_mh9_defender_xa.js')
 const data=JSON.parse(readFileSync(new URL('../data/source-evidence/mh9-defender-xa-paired-input-20261021.json',import.meta.url)))
 test('immutable MH9 audit source: full 456-player/9-fixture snapshot with documented run',()=>{
   assert.equal(data.gameweek,9)
