@@ -34,7 +34,8 @@
           "assist_candidate_id": 608,
           "assist_candidate": "Alexandros Kyziridis"
         }
-      ]
+      ],
+      "official_tff_match_id": 317852
     },
     {
       "match_id": 317848,
@@ -61,7 +62,8 @@
           "assist_candidate_id": 63,
           "assist_candidate": "Mustafa Yumlu"
         }
-      ]
+      ],
+      "official_tff_match_id": 317855
     },
     {
       "match_id": 317849,
@@ -80,7 +82,8 @@
           "assist_candidate": "Dia Saba",
           "assist_candidate_id": null
         }
-      ]
+      ],
+      "official_tff_match_id": 317850
     },
     {
       "match_id": 317850,
@@ -119,7 +122,8 @@
             }
           ]
         }
-      ]
+      ],
+      "official_tff_match_id": 317851
     },
     {
       "match_id": 317851,
@@ -165,7 +169,8 @@
           ],
           "note": "Treat the saved shot and missed penalty as the same event, not a scored goal. Do not infer complete GK save tally."
         }
-      ]
+      ],
+      "official_tff_match_id": 317853
     },
     {
       "match_id": 317852,
@@ -214,7 +219,8 @@
           "assist_candidate_id": 77,
           "assist_candidate": "Kerem Demirbay"
         }
-      ]
+      ],
+      "official_tff_match_id": 317848
     },
     {
       "match_id": 317853,
@@ -247,7 +253,8 @@
           "kind": "penalty_goal",
           "minute": 82
         }
-      ]
+      ],
+      "official_tff_match_id": 317854
     },
     {
       "match_id": 317854,
@@ -279,7 +286,8 @@
           "assist_candidate_id": 404,
           "assist_candidate": "Eldor Shomurodov"
         }
-      ]
+      ],
+      "official_tff_match_id": 317849
     },
     {
       "match_id": 317855,
@@ -302,7 +310,8 @@
           "scorer": "Mohamed Salah",
           "minute": 71
         }
-      ]
+      ],
+      "official_tff_match_id": 317847
     }
   ],
   "controls": {
@@ -317,5 +326,6 @@
     "complete_assist_attribution": false,
     "ready_to_finalize_fantasy": false,
     "official_fantasy_app_resolved_goal_attribution": true
-  }
+  },
+  "tff_match_id_contract": "match_id is the site's historical internal ID; official TFF macID is official_tff_match_id, verified by the TFF game-details link. Do not substitute directly or rewrite historical projections."
 }
