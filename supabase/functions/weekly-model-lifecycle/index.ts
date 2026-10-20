@@ -382,7 +382,7 @@ async function prepare(sb:any,current:any,status:any,body:any={}){
     // source", not verified DNP. Never teach role/bench probabilities
     // that they are real zero-minute appearances.
     const trustedRows=rows.filter(x=>trustedMinute(x)!==null)
-    let durations=trustedRows.map(x=>clamp(1,90,n(x.minutes))).filter(x=>x>0)
+    let durations=trustedRows.map(x=>n(x.minutes)).filter(x=>x>0).map(x=>clamp(1,90,x))
     if(!durations.length)durations=(prior.durations||[]).map((x:any)=>clamp(1,90,n(x))).filter((x:number)=>x>0)
     if(!durations.length)durations=[p.position==="GK"?90:70]
     durations=durations.slice(0,5)
