@@ -269,6 +269,17 @@ def summarize(match: dict, provider_id: int, data: dict) -> dict:
         "provider_player_id":(ev.get("player") or {}).get("id") if isinstance(ev.get("player"),dict) else None,
         "provider_player_name":(ev.get("player") or {}).get("name") if isinstance(ev.get("player"),dict) else None,
         "is_home":ev.get("isHome"),"own_goal":ev.get("ownGoal"),
+        # Provider evidence candidates only, NOT official TFF Fantasy events.
+        # Missing/nonnumeric assist IDs remain unknown, not an invented assist.
+        "source_card_type":ev.get("card") if isinstance(ev.get("card"),str) else None,
+        "source_goal_assist_player_id":ev.get("assistPlayerId")
+            if type(ev.get("assistPlayerId")) is int else None,
+        "source_goal_assist_name":ev.get("assistStr")
+            if isinstance(ev.get("assistStr"),str) else None,
+        "source_goal_description_key":ev.get("goalDescriptionKey")
+            if isinstance(ev.get("goalDescriptionKey"),str) else None,
+        "source_missed_penalty_outcome":ev.get("missedPenaltyOutcome")
+            if isinstance(ev.get("missedPenaltyOutcome"),str) else None,
     } for ev in events if isinstance(ev,dict)]
     return summary
 
