@@ -10,6 +10,7 @@ on:
       - "scripts/reconcile_mh8_provider_players.py"
       - "scripts/audit_mh8_nonparticipants.py"
       - "scripts/stage_mh8_point_components.py"
+      - "scripts/calculate_mh8_independent_points.py"
       - "test/mh8_point_components_test.py"
       - "test/mh8_nonparticipants_test.py"
       - "scripts/stage_mh8_observed_player_metrics.py"
@@ -190,6 +191,33 @@ jobs:
             echo "- 286 played players with source-backed scoring components"
             echo "- Official bonus, clean sheets, conceded-goal timing and Fantasy totals remain UNVERIFIED"
           } >> "$GITHUB_STEP_SUMMARY"
+      - name: Independently calculate 456 match-week Fantasy score candidates
+        run: |
+          set -euo pipefail
+          python3 scripts/calculate_mh8_independent_points.py \
+            --observed "$RUNNER_TEMP/mh8-observed-player-metrics.json" \
+            --events "$RUNNER_TEMP/mh8-event-review.json" \
+            --structured "$RUNNER_TEMP/mh8-structured-source.json" \
+            --output "$RUNNER_TEMP/mh8-independent-calculated-points.json"
+          jq -e '.gameweek == 8 and .kind == "MH8_INDEPENDENT_CALCULATED_FANTASY_POINTS" and
+                 .is_official_tff_fantasy_point_export == false and
+                 .is_final_tff_fantasy == false and
+                 .can_advance_model_lifecycle_without_review == false and
+                 .played_with_explicit_minutes == 286 and
+                 .unplayed_inferred_not_official_minutes == 170 and
+                 .total_calculated_points == 803 and
+                 .total_bonus_points == 113 and
+                 (.rows | length) == 456 and
+                 ([.rows[] | select(.minutes == null)] | length) == 170' \
+            "$RUNNER_TEMP/mh8-independent-calculated-points.json"
+          {
+            echo
+            echo "### MH8 independent Fantasy calculation (NOT OFFICIAL TFF DATA)"
+            echo "- Calculated: 456/456 players; observed playing: 286"
+            echo "- Independent calculated points: 803 (113 source-based tied bonuses)"
+            echo "- 170 inferred nonplayers retain UNKNOWN minutes"
+            echo "- Official finalization and lifecycle: STILL BLOCKED"
+          } >> "$GITHUB_STEP_SUMMARY"
       - name: Archive source evidence and failures for review
         uses: actions/upload-artifact@v4
         if: always()
@@ -203,5 +231,6 @@ jobs:
             ${{ runner.temp }}/mh8-observed-player-metrics.json
             ${{ runner.temp }}/mh8-event-review.json
             ${{ runner.temp }}/mh8-nonfinal-scoring-components.json
+            ${{ runner.temp }}/mh8-independent-calculated-points.json
           if-no-files-found: warn
           retention-days: 14
