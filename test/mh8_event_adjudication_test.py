@@ -22,7 +22,8 @@ def fixtures():
         if idx == 0:
             raw_event = {"type": "Card", "provider_event_id": 10,
                          "provider_player_id": 700, "provider_player_name": "Observed",
-                         "time_str": 30, "own_goal": None}
+                         "time_str": 30, "own_goal": None,
+                         "source_card_color": "Yellow"}
         src["rows"].append({
             "fixture_id": mid, "status": "STRUCTURED_FIXTURE_CONFIRMED",
             "data": {"source_events": [raw_event]}})
@@ -44,11 +45,29 @@ class StageEventsTests(unittest.TestCase):
         self.assertEqual(report["tff_fantasy_points_written"], 0)
         self.assertFalse(report["ready_to_finalize"])
         card = report["events"][0]
-        self.assertIsNone(card["card_color"])
+        self.assertEqual(card["card_color"], "Yellow")
+        self.assertEqual(report["observed_card_color_count"], 1)
         self.assertIsNone(card["tff_fantasy_points"])
         self.assertIsNone(card["scout_player_id"])
         self.assertEqual(len(report["unmatched_event_identities"]), 1)
         self.assertNotEqual(card["internal_match_id"], card["official_tff_match_id"])
+
+    def test_source_assist_player_id_is_used_only_with_same_fixture_identity(self):
+        src, roster, curated = fixtures()
+        src["rows"][1]["data"]["source_events"][0]["source_assist_provider_id"] = 99999
+        report = stage(src, roster, curated)
+        goal = next(e for e in report["events"] if e["internal_match_id"] == 317848)
+        self.assertEqual(goal["source_assist_provider_id"], 99999)
+        self.assertIsNone(goal["scout_assist_player_id"])
+        self.assertEqual(report["source_assist_id_count"], 1)
+        roster["matches"][1]["observations"].append({
+            "provider_player_id": 99999, "scout_player_id": 4001})
+        report = stage(src, roster, curated)
+        goal = next(e for e in report["events"] if e["internal_match_id"] == 317848)
+        self.assertEqual(goal["scout_assist_player_id"], 4001)
+        self.assertEqual(report["source_assist_linked_count"], 1)
+        self.assertIsNone(goal["tff_fantasy_points"])
+        self.assertFalse(report["ready_to_finalize"])
 
     def test_source_goal_mismatch_rejected(self):
         src, roster, curated = fixtures()
