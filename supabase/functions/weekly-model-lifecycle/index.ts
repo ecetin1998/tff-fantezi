@@ -1,7 +1,7 @@
 import {createClient} from "https://esm.sh/@supabase/supabase-js@2"
 import {applyOfficialMinutesEvidence,firstRecordedRate,observedPer90} from "./externalRole.mjs"
 import {validFinalWeeklyPlayerRow} from "./closureSource.mjs"
-import {risingMinutesMomentum} from "./momentum.mjs"
+import {risingMinutesMomentum,trustedMinute} from "./momentum.mjs"
 
 const AUDIENCE="tff-fantezi-scout"
 const ISSUER="https://token.actions.githubusercontent.com"
@@ -378,12 +378,16 @@ async function prepare(sb:any,current:any,status:any,body:any={}){
     const id=Number(p.id),prior=priorMap.get(id)||{},s=statsMap.get(id)||{},r=roleMap.get(id)||{},av=avMap.get(id)
     if(!av)throw new Error("AVAILABILITY_MISSING_"+id)
     const rows=(recent.get(id)||[]).slice(0,5)
-    let durations=rows.map(x=>clamp(1,90,n(x.minutes))).filter(x=>x>0)
+    // Independently calculated MH8 0-minute entries can mean "not in
+    // source", not verified DNP. Never teach role/bench probabilities
+    // that they are real zero-minute appearances.
+    const trustedRows=rows.filter(x=>trustedMinute(x)!==null)
+    let durations=trustedRows.map(x=>clamp(1,90,n(x.minutes))).filter(x=>x>0)
     if(!durations.length)durations=(prior.durations||[]).map((x:any)=>clamp(1,90,n(x))).filter((x:number)=>x>0)
     if(!durations.length)durations=[p.position==="GK"?90:70]
     durations=durations.slice(0,5)
     let durationWeights=normalizedWeights(durations.length)
-    const recentMinuteRate=rows.length?clamp(0,1,avg(rows.slice(0,3).map(x=>n(x.minutes)/90))):n(prior.role_probability,n(r.predicted_xi_probability,.5))
+    const recentMinuteRate=trustedRows.length?clamp(0,1,avg(trustedRows.slice(0,3).map(x=>n(x.minutes)/90))):n(prior.role_probability,n(r.predicted_xi_probability,.5))
     let roleProb=clamp(.01,.995,.65*n(r.predicted_xi_probability,n(prior.role_probability,.5))+.35*recentMinuteRate)
     // Existing minute weighting already gives recent games credit. Add only
     // a small residual uplift for a *sustained*, independently evidenced rise.
@@ -433,7 +437,7 @@ async function prepare(sb:any,current:any,status:any,body:any={}){
       availability_source:"weekly-lifecycle",availability_probability:availability,
       top25_score:null,top25_rank:null,top25_model_version:null,confidence:projMap.get(id)?.confidence||"medium"
     })
-    const last2=rows.slice(0,2),prev2=rows.slice(2,4)
+    const last2=trustedRows.slice(0,2),prev2=trustedRows.slice(2,4)
     const last2Min=avg(last2.map(x=>n(x.minutes))),prev2Min=avg(prev2.map(x=>n(x.minutes)))
     const last2Xi=avg(last2.map(x=>clamp(0,1,n(x.minutes)/60))),prev2Xi=avg(prev2.map(x=>clamp(0,1,n(x.minutes)/60)))
     const d=last2Xi-prev2Xi
