@@ -4116,63 +4116,73 @@
       "home_team_id": 8,
       "away_team_id": 12,
       "home_goals": 2,
-      "away_goals": 1
+      "away_goals": 1,
+      "official_tff_match_id": 317852
     },
     {
       "match_id": 317848,
       "home_team_id": 2,
       "away_team_id": 16,
       "home_goals": 2,
-      "away_goals": 0
+      "away_goals": 0,
+      "official_tff_match_id": 317855
     },
     {
       "match_id": 317849,
       "home_team_id": 5,
       "away_team_id": 7,
       "home_goals": 1,
-      "away_goals": 0
+      "away_goals": 0,
+      "official_tff_match_id": 317850
     },
     {
       "match_id": 317850,
       "home_team_id": 11,
       "away_team_id": 17,
       "home_goals": 0,
-      "away_goals": 1
+      "away_goals": 1,
+      "official_tff_match_id": 317851
     },
     {
       "match_id": 317851,
       "home_team_id": 6,
       "away_team_id": 14,
       "home_goals": 3,
-      "away_goals": 0
+      "away_goals": 0,
+      "official_tff_match_id": 317853
     },
     {
       "match_id": 317852,
       "home_team_id": 3,
       "away_team_id": 15,
       "home_goals": 4,
-      "away_goals": 1
+      "away_goals": 1,
+      "official_tff_match_id": 317848
     },
     {
       "match_id": 317853,
       "home_team_id": 4,
       "away_team_id": 10,
       "home_goals": 1,
-      "away_goals": 2
+      "away_goals": 2,
+      "official_tff_match_id": 317854
     },
     {
       "match_id": 317854,
       "home_team_id": 13,
       "away_team_id": 18,
       "home_goals": 2,
-      "away_goals": 1
+      "away_goals": 1,
+      "official_tff_match_id": 317849
     },
     {
       "match_id": 317855,
       "home_team_id": 1,
       "away_team_id": 9,
       "home_goals": 2,
-      "away_goals": 0
+      "away_goals": 0,
+      "official_tff_match_id": 317847
     }
-  ]
+  ],
+  "tff_match_id_contract": "match_id is the site's historical internal ID; official TFF macID is official_tff_match_id, verified by the TFF game-details link. Do not substitute directly or rewrite historical projections."
 }
