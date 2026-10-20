@@ -1,4 +1,5 @@
 import {createClient} from "https://esm.sh/@supabase/supabase-js@2"
+import {mh8CalculatedAdvancedLagAccepted} from "./mh8AdvancedLag.mjs"
 
 const AUDIENCE="tff-fantezi-scout"
 const ISSUER="https://token.actions.githubusercontent.com"
@@ -118,13 +119,19 @@ Deno.serve(async(req:Request)=>{
         sb.from("scout_player_season_stats").select("player_id,through_gameweek,advanced_through_gameweek,minutes").eq("season","2026-27").eq("through_gameweek",gw),
         sb.from("scout_team_season_stats").select("team_id").eq("through_gameweek",gw),
         sb.from("scout_match_history").select("match_id,match_status,fantasy_closure").eq("season","2026-27").eq("gameweek",gw),
-        sb.from("scout_player_weekly_points").select("match_id,is_final").eq("gameweek",gw),
+        sb.from("scout_player_weekly_points").select("player_id,match_id,minutes,points,base_points,bonus_points,source_kind,is_final").eq("gameweek",gw),
         sb.from("scout_match_history").select("match_id,home_team_id,away_team_id").eq("season","2026-27").eq("gameweek",gw+1)
       ])
       for(const q of [playersQ,pstatsQ,tstatsQ,histQ,weeklyQ,targetQ])if(q.error)throw q.error
       const activeIds=new Set((playersQ.data||[]).map((x:any)=>Number(x.id)))
       const activeStats=(pstatsQ.data||[]).filter((x:any)=>activeIds.has(Number(x.player_id)))
       const advancedMissing=activeStats.filter((x:any)=>Number(x.minutes||0)>0&&Number(x.advanced_through_gameweek||0)<gw)
+      // MH8 only: independent, complete, owner-approved actuals permit an
+      // explicitly reported ONE-WEEK xG/xA lag. Never falsify advanced markers.
+      const acceptedLag=mh8CalculatedAdvancedLagAccepted({
+        gameweek:gw,activePlayers:playersQ.data||[],stats:activeStats,
+        teamStats:tstatsQ.data||[],matches:histQ.data||[],weekly:weeklyQ.data||[]
+      })
       const fixtureCount=(histQ.data||[]).length
       const finalMatches=new Set((weeklyQ.data||[]).filter((x:any)=>x.is_final).map((x:any)=>String(x.match_id))).size
       const targetTeams=new Set((targetQ.data||[]).flatMap((x:any)=>[Number(x.home_team_id),Number(x.away_team_id)]))
@@ -137,6 +144,7 @@ Deno.serve(async(req:Request)=>{
         closed_fixtures:(histQ.data||[]).filter((x:any)=>x.match_status==="Bitti"&&x.fantasy_closure==="KAPANDI").length,
         final_actual_matches:finalMatches,
         advanced_missing_played:advancedMissing.length,
+        approved_mh8_advanced_lag:acceptedLag,
         target_gameweek:gw+1,
         target_fixtures:(targetQ.data||[]).length,
         target_teams:targetTeams.size
@@ -144,7 +152,7 @@ Deno.serve(async(req:Request)=>{
       const coverageIssues=[
         activeStats.length!==activeIds.size?"player_stats":null,
         (tstatsQ.data||[]).length!==18?"team_stats":null,
-        advancedMissing.length?"advanced_stats":null,
+        advancedMissing.length&&!acceptedLag?"advanced_stats":null,
         fixtureCount>0&&coverage.closed_fixtures!==fixtureCount?"match_closure":null,
         fixtureCount>0&&finalMatches!==fixtureCount?"weekly_actuals":null,
         !(targetQ.data||[]).length||targetTeams.size!==18?"next_fixtures":null
@@ -163,21 +171,31 @@ Deno.serve(async(req:Request)=>{
       if(latestStats.error)throw latestStats.error
       const observedGw=Number(latestStats.data?.through_gameweek||0)
       if(!observedGw)return Response.json({ok:false,pass:false,current_gameweek:gw,error:"no season stats coverage"},{status:409})
-      const [participantsQ,statsQ]=await Promise.all([
+      const [participantsQ,statsQ,allWeeklyQ,teamsQ,matchesQ,activeQ]=await Promise.all([
         sb.from("scout_player_weekly_points").select("player_id,minutes").eq("gameweek",observedGw).gt("minutes",0),
-        sb.from("scout_player_season_stats").select("player_id,advanced_through_gameweek").eq("season","2026-27").eq("through_gameweek",observedGw)
+        sb.from("scout_player_season_stats").select("player_id,through_gameweek,advanced_through_gameweek").eq("season","2026-27").eq("through_gameweek",observedGw),
+        sb.from("scout_player_weekly_points").select("player_id,minutes,points,base_points,bonus_points,source_kind,is_final").eq("gameweek",observedGw),
+        sb.from("scout_team_season_stats").select("team_id").eq("through_gameweek",observedGw),
+        sb.from("scout_match_history").select("match_id,match_status,fantasy_closure").eq("season","2026-27").eq("gameweek",observedGw),
+        sb.from("scout_players").select("id").eq("active",true)
       ])
-      if(participantsQ.error)throw participantsQ.error
-      if(statsQ.error)throw statsQ.error
+      for(const q of [participantsQ,statsQ,allWeeklyQ,teamsQ,matchesQ,activeQ])if(q.error)throw q.error
+      const acceptedLag=mh8CalculatedAdvancedLagAccepted({
+        gameweek:observedGw,activePlayers:activeQ.data||[],
+        stats:statsQ.data||[],teamStats:teamsQ.data||[],
+        matches:matchesQ.data||[],weekly:allWeeklyQ.data||[]
+      })
       const participantIds=new Set((participantsQ.data||[]).map((x:any)=>Number(x.player_id)))
       const markers=new Map((statsQ.data||[]).map((x:any)=>[Number(x.player_id),Number(x.advanced_through_gameweek||0)]))
       const remaining=[...participantIds].filter((id:number)=>(markers.get(id)||0)<observedGw)
-      const pass=remaining.length===0
+      const pass=remaining.length===0 || acceptedLag
       return Response.json({
         ok:pass,pass,current_gameweek:gw,observed_gameweek:observedGw,
         played_players:participantIds.size,advanced_current:participantIds.size-remaining.length,
         stale_played_players:remaining.length,stale_player_ids:remaining.slice(0,30),
-        note:pass?`advanced data covers all MH${observedGw} participants`:`played-player advanced data must be ingested through MH${observedGw}`
+        approved_mh8_advanced_lag:acceptedLag,
+        advanced_data_through_gameweek:acceptedLag?7:observedGw,
+        note:acceptedLag?"MH8 calculated actuals accepted; xG/xA remain through MH7 (transparent one-week lag)" : pass?`advanced data covers all MH${observedGw} participants`:`played-player advanced data must be ingested through MH${observedGw}`
       },{status:pass?200:409})
     }
 
