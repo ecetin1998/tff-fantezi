@@ -28,7 +28,15 @@ def choose_player(observed: dict, team_roster: list[dict]):
         normalized(p.get("display_name") or ""),
     }]
     if len(exact)==1:
-        return exact[0], "exact_team_name"
+        candidate=exact[0]
+        # A one-word *display* alias is weak evidence when the registered
+        # full name contains more tokens. Require a matching shirt number.
+        # Actual one-word registered full names can still match exactly.
+        if len(raw_name.split())==1 and normalized(candidate.get("full_name") or "")!=raw_name:
+            if shirt is None or candidate.get("shirt_number") is None or str(shirt)!=str(candidate["shirt_number"]):
+                return None, "single_word_alias_without_verified_shirt"
+            return candidate, "single_word_display_alias_plus_shirt"
+        return candidate, "exact_team_name"
     if len(exact)>1:
         narrowed = [p for p in exact if str(p.get("shirt_number"))==str(shirt) and shirt is not None]
         if len(narrowed)==1:
