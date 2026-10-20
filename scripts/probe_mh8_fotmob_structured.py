@@ -269,6 +269,13 @@ def summarize(match: dict, provider_id: int, data: dict) -> dict:
         "provider_player_id":(ev.get("player") or {}).get("id") if isinstance(ev.get("player"),dict) else None,
         "provider_player_name":(ev.get("player") or {}).get("name") if isinstance(ev.get("player"),dict) else None,
         "is_home":ev.get("isHome"),"own_goal":ev.get("ownGoal"),
+        "source_card_color": (
+            ev.get("card") if ev.get("type") == "Card"
+            and isinstance(ev.get("card"), str) else None),
+        "source_assist_provider_id": (
+            ev.get("assistPlayerId") if ev.get("type") == "Goal"
+            and isinstance(ev.get("assistPlayerId"), int)
+            and not isinstance(ev.get("assistPlayerId"), bool) else None),
     } for ev in events if isinstance(ev,dict)]
     return summary
 
