@@ -17,6 +17,7 @@ from audit_mh8_fotmob_sources import normalized
 ROSTER = Path("data/source-evidence/gw8-scout-roster-identities-2026-10-20.json")
 OFFICIAL = Path("data/source-evidence/gw8-scout-to-official-tff-match-identities-2026-10-20.json")
 REVIEWED = Path("data/source-evidence/gw8-reviewed-player-identities-tff-2026-10-20.json")
+REVIEWED_PRIOR = Path("data/source-evidence/gw8-reviewed-player-identities-tff-prior-lineup-2026-10-20.json")
 
 
 def choose_player(observed: dict, team_roster: list[dict]):
@@ -106,10 +107,33 @@ def reconcile(source_report: dict, roster: dict,
                 raise ValueError("duplicate reviewed provider identity")
             if official_ids.get(key[0]) != int(proof["official_tff_match_id"]):
                 raise ValueError("reviewed alias official match differs from fixture crosswalk")
-            expected_url = ("https://www.tff.org/Default.aspx?macId="
-                            + str(proof["official_tff_match_id"]) + "&pageID=528")
-            if proof.get("official_lineup_url") != expected_url or not proof.get("official_lineup_name"):
-                raise ValueError("reviewed alias needs exact TFF fixture lineup provenance")
+            basis = proof.get("evidence_basis", "same_fixture_official_lineup")
+            if basis == "same_fixture_official_lineup":
+                expected_url = ("https://www.tff.org/Default.aspx?macId="
+                                + str(proof["official_tff_match_id"]) + "&pageID=528")
+                if proof.get("official_lineup_url") != expected_url or not proof.get("official_lineup_name"):
+                    raise ValueError("reviewed alias needs exact TFF fixture lineup provenance")
+            elif basis == "prior_official_lineup_and_current_registration":
+                # Current official match sheet may not yet be published. This
+                # proves PLAYER ID only from current-season TFF registration
+                # AND a different official TFF XI. It cannot verify this
+                # fixture's events, Fantasy points or end-of-week closure.
+                prior = proof.get("official_lineup_reference_match_id")
+                registration = proof.get("official_registration_id")
+                if (type(prior) is not int or type(registration) is not int
+                    or prior == int(proof["official_tff_match_id"])
+                    or prior <= 0 or registration <= 0):
+                    raise ValueError("invalid independent TFF identity references")
+                expected_lineup = f"https://www.tff.org/Default.aspx?macId={prior}&pageID=528"
+                expected_registration = f"https://www.tff.org/Default.aspx?kisiId={registration}&pageId=526"
+                if (proof.get("official_lineup_url") != expected_lineup
+                    or proof.get("official_registration_url") != expected_registration
+                    or str(proof.get("official_lineup_shirt_number")) != str(proof.get("provider_shirt_number"))
+                    or normalized(proof.get("official_lineup_name") or "")
+                       != normalized(proof.get("scout_full_name") or "")):
+                    raise ValueError("TFF registration / prior XI identity proof mismatch")
+            else:
+                raise ValueError("unknown identity evidence basis")
             reviewed_lookup[key] = proof
     output=[]
     for match in source_report["rows"]:
@@ -145,7 +169,11 @@ def reconcile(source_report: dict, roster: dict,
                                   if p["id"] == int(proof["scout_player_id"])]
                     if len(candidates) != 1 or candidates[0]["full_name"] != proof["scout_full_name"]:
                         raise ValueError("reviewed Scout identity no longer matches roster")
-                    player,method = candidates[0], "reviewed_official_tff_lineup"
+                    basis = proof.get("evidence_basis", "same_fixture_official_lineup")
+                    player = candidates[0]
+                    method = ("reviewed_tff_prior_lineup_registration"
+                              if basis == "prior_official_lineup_and_current_registration"
+                              else "reviewed_official_tff_lineup")
             metric=o.get("explicit_source_metrics") or {}
             # A nonempty metric record with no reported minutes does not
             # establish a played player. An explicit observed zero is valid,
@@ -190,10 +218,16 @@ def main():
     p.add_argument("--output",type=Path,required=True)
     p.add_argument("--official",type=Path,default=OFFICIAL)
     p.add_argument("--reviewed",type=Path,default=REVIEWED)
+    p.add_argument("--reviewed-prior",type=Path,default=REVIEWED_PRIOR)
     args=p.parse_args()
+    same_fixture=json.loads(args.reviewed.read_text(encoding="utf-8"))
+    prior=json.loads(args.reviewed_prior.read_text(encoding="utf-8"))
+    if same_fixture.get("gameweek") != 8 or prior.get("gameweek") != 8:
+        raise ValueError("TFF reviewed identity evidence must be MH8")
+    reviewed={**same_fixture, "entries":same_fixture["entries"] + prior["entries"]}
     x=reconcile(json.loads(args.input.read_text(encoding="utf-8")),
                 json.loads(args.roster.read_text(encoding="utf-8")),
-                json.loads(args.reviewed.read_text(encoding="utf-8")),
+                reviewed,
                 json.loads(args.official.read_text(encoding="utf-8")))
     args.output.write_text(json.dumps(x,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
     print(f"MH8 roster match: {x['matched_played']}/{x['sourced_played']} played players matched; "
