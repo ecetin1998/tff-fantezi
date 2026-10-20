@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { availabilityCompactNote } from '@/lib/availability'
 import {playerLabel} from '@/lib/playerPresentation'
 import {playerRoleLabel} from '@/lib/playerRole'
+import MultiSelectFilter from '@/components/MultiSelectFilter'
 
 const posLabel=p=>({GK:'KL',DEF:'DEF',MID:'OS',FWD:'FOR'}[p]||p||'—')
 const normalizeText=value=>String(value||'').toLocaleLowerCase('tr').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/ı/g,'i')
@@ -13,12 +14,12 @@ const num=(v,d=2)=>v===null||v===undefined?'—':Number(v).toFixed(d)
 
 export default function TeamRoster({players=[]}){
   const [q,setQ]=useState('')
-  const [pos,setPos]=useState('')
+  const [pos,setPos]=useState([])
 
   const rows=useMemo(()=>{
     const needle=normalizeText(q.trim())
     return players.filter(p=>{
-      const matchesPos=!pos||p.position===pos
+      const matchesPos=!pos.length||pos.includes(p.position)
       const haystack=normalizeText(`${p.full_name||''} ${p.display_name||''} ${p.short_label||''} ${posLabel(p.position)} ${p.position||''} ${playerRoleLabel(p)}`)
       return matchesPos&&(!needle||haystack.includes(needle))
     })
@@ -32,13 +33,9 @@ export default function TeamRoster({players=[]}){
         placeholder="Oyuncu ara..."
         aria-label="Takım oyuncularında ara"
       />
-      <select value={pos} onChange={e=>setPos(e.target.value)} aria-label="Mevkiye göre filtrele">
-        <option value="">Tüm mevkiler</option>
-        <option value="GK">KL</option>
-        <option value="DEF">DEF</option>
-        <option value="MID">OS</option>
-        <option value="FWD">FOR</option>
-      </select>
+      <MultiSelectFilter ariaLabel="Takım oyuncularında mevki filtresi" placeholder="Tüm mevkiler"
+        value={pos} onChange={setPos}
+        options={[{value:'GK',label:'KL'},{value:'DEF',label:'DEF'},{value:'MID',label:'OS'},{value:'FWD',label:'FOR'}]}/>
       <span className="team-roster-filter-count"><b>{rows.length}</b> / {players.length}</span>
     </div>
 

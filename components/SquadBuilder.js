@@ -7,6 +7,7 @@ import { availabilityCompactNote, availabilityIsIssue } from '@/lib/availability
 import {BUDGET,FORMATION_MAP,MAX_PLAYERS_PER_CLUB,SQUAD_LIMITS,SQUAD_SIZE,STARTING_GK,STARTING_XI_SIZE,TRANSFER_RULES} from '@/lib/rules'
 import {pitchPlayerLabel,playerLabel} from '@/lib/playerPresentation'
 import ManagerCardPicker from '@/components/ManagerCardPicker'
+import MultiSelectFilter from '@/components/MultiSelectFilter'
 import {ATTACK_FORMATIONS,MANAGER_CARDS,MANAGER_CARD_NONE,captainMultiplierForCard,managerCardInfo,normalizeManagerCard,squadLimitsForCard} from '@/lib/managerCards'
 import {scoreSquad} from '@/lib/squadScoring'
 const POS_ORDER={GK:0,DEF:1,MID:2,FWD:3}
@@ -138,8 +139,8 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
   const [captainId,setCaptainId]=useState(initialCaptainId)
   const isLocked=locked
   const [q,setQ]=useState('')
-  const [pos,setPos]=useState('')
-  const [team,setTeam]=useState('')
+  const [pos,setPos]=useState([])
+  const [team,setTeam]=useState([])
   const [sortKey,setSortKey]=useState('xfp')
   const [sortDir,setSortDir]=useState('desc')
   const [swapTarget,setSwapTarget]=useState(null)
@@ -262,8 +263,8 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
   const teams=useMemo(()=>[...new Set(players.map(p=>p.team).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'tr')),[players])
   const candidates=useMemo(()=>{
     let out=players.filter(p=>
-      (!pos||p.position===pos)&&
-      (!team||p.team===team)&&
+      (!pos.length||pos.includes(p.position))&&
+      (!team.length||team.includes(p.team))&&
       (!q||(`${p.full_name} ${p.short_label||''} ${p.team} ${p.projection?.opponent_name||''}`).toLocaleLowerCase('tr').includes(q.toLocaleLowerCase('tr')))
     )
     out=[...out].sort((a,b)=>{
@@ -546,7 +547,7 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
   }
 
   function chooseEmptySlot(position){
-    setPos(position)
+    setPos([position])
     setQ('')
     pickerRef.current?.scrollIntoView({behavior:'smooth',block:'start'})
   }
@@ -688,13 +689,11 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
         <div className="picker-filters">
           <input value={q} onChange={e=>setQ(e.target.value)} placeholder="Oyuncu veya takım ara..."/>
           <div className="picker-filter-center">
-            <select value={pos} onChange={e=>setPos(e.target.value)}>
-              <option value="">Tüm mevkiler</option>
-              <option value="GK">KL</option><option value="DEF">DEF</option><option value="MID">OS</option><option value="FWD">FOR</option>
-            </select>
-            <select value={team} onChange={e=>setTeam(e.target.value)}>
-              <option value="">Tüm takımlar</option>{teams.map(t=><option key={t}>{t}</option>)}
-            </select>
+            <MultiSelectFilter ariaLabel="Kadrom oyuncu havuzu mevki filtreleri" placeholder="Tüm mevkiler"
+              value={pos} onChange={setPos}
+              options={[{value:'GK',label:'KL'},{value:'DEF',label:'DEF'},{value:'MID',label:'OS'},{value:'FWD',label:'FOR'}]}/>
+            <MultiSelectFilter ariaLabel="Kadrom oyuncu havuzu takım filtreleri" placeholder="Tüm takımlar" searchable
+              value={team} onChange={setTeam} options={teams.map(t=>({value:t,label:t}))}/>
           </div>
         </div>
         {simulation?<div className={`player-simulation-panel ${simulation.error?'error':''}`}>

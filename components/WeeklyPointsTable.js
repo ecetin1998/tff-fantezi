@@ -4,9 +4,11 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useMemo, useState } from 'react'
 import { teamCssVars } from '@/lib/teamThemes'
 import {playerLabel} from '@/lib/playerPresentation'
+import MultiSelectFilter from '@/components/MultiSelectFilter'
 
 const posLabel=p=>({GK:'KL',DEF:'DEF',MID:'OS',FWD:'FOR'}[p]||p||'—')
 const PAGE_SIZE=100
+const asMulti=value=>Array.isArray(value)?value:String(value||'').split(',').filter(Boolean)
 const normalizeText=value=>String(value||'')
   .toLocaleLowerCase('tr')
   .normalize('NFD')
@@ -16,8 +18,8 @@ const normalizeText=value=>String(value||'')
 export default function WeeklyPointsTable({players,throughGameweek,finalThroughGameweek,initialFilters={}}){
   const router=useRouter()
   const [q,setQ]=useState(initialFilters.q||'')
-  const [team,setTeam]=useState(initialFilters.team||'')
-  const [pos,setPos]=useState(initialFilters.pos||'')
+  const [team,setTeam]=useState(()=>asMulti(initialFilters.team))
+  const [pos,setPos]=useState(()=>asMulti(initialFilters.pos))
   const [sort,setSort]=useState(initialFilters.sort||'total')
   const [weekSort,setWeekSort]=useState(()=>Math.max(1,Number(initialFilters.week||finalThroughGameweek||1)))
   const [dir,setDir]=useState(initialFilters.dir==='asc'?1:-1)
@@ -38,8 +40,8 @@ export default function WeeklyPointsTable({players,throughGameweek,finalThroughG
   const rows=useMemo(()=>{
     const needle=normalizeText(q.trim())
     const out=players.filter(p=>
-      (!team||p.team===team) &&
-      (!pos||p.position===pos) &&
+      (!team.length||team.includes(p.team)) &&
+      (!pos.length||pos.includes(p.position)) &&
       (!needle||normalizeText((p.full_name||'')+' '+(p.display_name||'')+' '+(p.short_label||'')+' '+p.team).includes(needle))
     ).map(p=>{
       const finalRows=(p.weekly||[]).filter(x=>x.is_final!==false)
@@ -79,7 +81,7 @@ export default function WeeklyPointsTable({players,throughGameweek,finalThroughG
   useEffect(()=>{
     const params=new URLSearchParams(window.location.search)
     const put=(key,value,defaultValue='')=>value&&value!==defaultValue?params.set(key,String(value)):params.delete(key)
-    put('q',q);put('team',team);put('pos',pos);put('sort',sort,'total')
+    put('q',q);put('team',team.join(','));put('pos',pos.join(','));put('sort',sort,'total')
     put('week',sort==='week'?weekSort:'','');put('dir',dir===1?'asc':'desc','desc');put('page',safePage,1)
     const next=params.toString()
     window.history.replaceState(null,'',window.location.pathname+(next?'?'+next:''))
@@ -94,12 +96,12 @@ export default function WeeklyPointsTable({players,throughGameweek,finalThroughG
   return <>
     <div className="filters weekly-filters simplified-weekly-filters">
       <input value={q} onChange={change(setQ)} placeholder="Oyuncu veya takım ara..." aria-label="Oyuncu ara"/>
-      <select value={team} onChange={change(setTeam)}>
-        <option value="">Tüm takımlar</option>{teams.map(t=><option key={t}>{t}</option>)}
-      </select>
-      <select value={pos} onChange={change(setPos)}>
-        <option value="">Tüm mevkiler</option><option value="GK">KL</option><option value="DEF">DEF</option><option value="MID">OS</option><option value="FWD">FOR</option>
-      </select>
+      <MultiSelectFilter ariaLabel="Fantasy puanı takım filtreleri" placeholder="Tüm takımlar" searchable
+        value={team} onChange={next=>{setTeam(next);setPage(1)}}
+        options={teams.map(t=>({value:t,label:t}))}/>
+      <MultiSelectFilter ariaLabel="Fantasy puanı mevki filtreleri" placeholder="Tüm mevkiler"
+        value={pos} onChange={next=>{setPos(next);setPage(1)}}
+        options={[{value:'GK',label:'KL'},{value:'DEF',label:'DEF'},{value:'MID',label:'OS'},{value:'FWD',label:'FOR'}]}/>
       <select className="weekly-sort-select" value={sort} onChange={e=>{setSort(e.target.value);setDir(-1);setPage(1)}}>
         <option value="total">Toplam puan</option><option value="avg">Maç ortalaması</option><option value="last3">Son 3 ortalaması</option><option value="six">6+ yüzdesi</option><option value="played">Oynanan maç</option><option value="week">Hafta puanı</option>
       </select>

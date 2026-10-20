@@ -7,9 +7,11 @@ import {availabilityCompactNote,availabilityIsIssue} from '@/lib/availability'
 import {fixtureBadge,playerLabel} from '@/lib/playerPresentation'
 import {playerRoleLabel} from '@/lib/playerRole'
 import AccessGate from '@/components/AccessGate'
+import MultiSelectFilter from '@/components/MultiSelectFilter'
 
 const posLabel=p=>({GK:'KL',DEF:'DEF',MID:'OS',FWD:'FOR'}[p]||p||'—')
 const PAGE_SIZE=50
+const asMulti=value=>Array.isArray(value)?value:String(value||'').split(',').filter(Boolean)
 const isAdvancedSort=key=>['p25','p90','six','xg','xa'].includes(key)
 
 export default function PlayersTable({players,total,page,pageCount,teams,filters,accessTier='visitor',staticPool=false,runId=null}){
@@ -33,7 +35,7 @@ export default function PlayersTable({players,total,page,pageCount,teams,filters
     if(!staticPool)return
     let cancelled=false
     const p=new URLSearchParams(window.location.search)
-    const next={q:p.get('q')||'',team:p.get('team')||'',pos:p.get('pos')||'',sort:p.get('sort')||'xfp',dir:p.get('dir')||'desc',page:Number(p.get('page')||1)}
+    const next={q:p.get('q')||'',team:asMulti(p.get('team')),pos:asMulti(p.get('pos')),sort:p.get('sort')||'xfp',dir:p.get('dir')||'desc',page:Number(p.get('page')||1)}
     setLocalFilters(next)
     setQ(next.q)
     setPool(players)
@@ -111,7 +113,7 @@ export default function PlayersTable({players,total,page,pageCount,teams,filters
   const navigate=useCallback(patch=>{
     const next={...(activeFilters||{}),...patch}
     const params=new URLSearchParams()
-    if(next.q)params.set('q',next.q);if(next.team)params.set('team',next.team);if(next.pos)params.set('pos',next.pos)
+    if(next.q)params.set('q',next.q);if(asMulti(next.team).length)params.set('team',asMulti(next.team).join(','));if(asMulti(next.pos).length)params.set('pos',asMulti(next.pos).join(','))
     if(next.sort&&next.sort!=='xfp')params.set('sort',next.sort);if(next.dir&&next.dir!=='desc')params.set('dir',next.dir);if(Number(next.page||1)>1)params.set('page',String(next.page))
     const query=params.toString()
     if(staticPool){setLocalFilters(next);window.history.replaceState(null,'','/players'+(query?'?'+query:''))}
@@ -144,7 +146,7 @@ export default function PlayersTable({players,total,page,pageCount,teams,filters
     const visible=availabilityIsIssue(a)||a.availability_type==='return'||a.expected_return_date||a.suspension_fixture
     return visible?availabilityCompactNote(a):''
   }
-  const localRows=useMemo(()=>{if(!staticPool)return players;const f=localFilters||{},needle=String(f.q||'').toLocaleLowerCase('tr');let rows=pool.filter(p=>(!f.team||p.team===f.team)&&(!f.pos||p.position===f.pos)&&(!needle||(`${p.full_name} ${p.team} ${p.projection?.opponent_name||''}`).toLocaleLowerCase('tr').includes(needle)));const val=(p,k)=>k==='name'?p.full_name:k==='team'?p.team:k==='pos'?p.position:k==='opp'?p.projection?.opponent_name:k==='price'?Number(p.price||0):k==='points'?Number(p.total_points||0):k==='xi'?Number(p.projection?.xi_probability||0):k==='minutes'?Number(p.projection?.x_minutes||0):k==='p25'?p.projection?.p25:k==='p90'?p.projection?.p90:k==='six'?p.projection?.six_plus_probability:k==='xg'?p.projection?.expected_goals:k==='xa'?p.projection?.expected_assists:k==='value'?Number(p.projection?.value_score||0):Number(p.projection?.xfp||0);const sortKey=isPro&&isAdvancedSort(f.sort)&&!overlayReady?'xfp':(f.sort||'xfp');rows=[...rows].sort((a,b)=>{const av=val(a,sortKey),bv=val(b,sortKey),an=av===null||av===undefined,bn=bv===null||bv===undefined;if(an!==bn)return an?1:-1;const cmp=typeof av==='string'?String(av).localeCompare(String(bv),'tr'):Number(av||0)-Number(bv||0);return (f.dir==='asc'?cmp:-cmp)||String(a.full_name||'').localeCompare(String(b.full_name||''),'tr')});return rows},[staticPool,players,pool,localFilters,isPro,overlayReady])
+  const localRows=useMemo(()=>{if(!staticPool)return players;const f=localFilters||{},needle=String(f.q||'').toLocaleLowerCase('tr');let rows=pool.filter(p=>(!asMulti(f.team).length||asMulti(f.team).includes(p.team))&&(!asMulti(f.pos).length||asMulti(f.pos).includes(p.position))&&(!needle||(`${p.full_name} ${p.team} ${p.projection?.opponent_name||''}`).toLocaleLowerCase('tr').includes(needle)));const val=(p,k)=>k==='name'?p.full_name:k==='team'?p.team:k==='pos'?p.position:k==='opp'?p.projection?.opponent_name:k==='price'?Number(p.price||0):k==='points'?Number(p.total_points||0):k==='xi'?Number(p.projection?.xi_probability||0):k==='minutes'?Number(p.projection?.x_minutes||0):k==='p25'?p.projection?.p25:k==='p90'?p.projection?.p90:k==='six'?p.projection?.six_plus_probability:k==='xg'?p.projection?.expected_goals:k==='xa'?p.projection?.expected_assists:k==='value'?Number(p.projection?.value_score||0):Number(p.projection?.xfp||0);const sortKey=isPro&&isAdvancedSort(f.sort)&&!overlayReady?'xfp':(f.sort||'xfp');rows=[...rows].sort((a,b)=>{const av=val(a,sortKey),bv=val(b,sortKey),an=av===null||av===undefined,bn=bv===null||bv===undefined;if(an!==bn)return an?1:-1;const cmp=typeof av==='string'?String(av).localeCompare(String(bv),'tr'):Number(av||0)-Number(bv||0);return (f.dir==='asc'?cmp:-cmp)||String(a.full_name||'').localeCompare(String(b.full_name||''),'tr')});return rows},[staticPool,players,pool,localFilters,isPro,overlayReady])
   const effectiveTotal=staticPool?localRows.length:total,effectivePage=staticPool?Math.max(1,Number(localFilters?.page||1)):page,effectivePageCount=staticPool?Math.max(1,Math.ceil(effectiveTotal/PAGE_SIZE)):pageCount
   const visiblePlayers=staticPool?(isVisitor?localRows.slice(0,15):localRows.slice((effectivePage-1)*PAGE_SIZE,effectivePage*PAGE_SIZE)):players
   const offset=(Math.max(1,Number(effectivePage||1))-1)*PAGE_SIZE
@@ -158,12 +160,12 @@ export default function PlayersTable({players,total,page,pageCount,teams,filters
     </div>:null}
     {!isVisitor?<div className="filters player-filters">
       <input value={q} onChange={e=>setQ(e.target.value)} placeholder="Oyuncu, takım veya rakip ara..." aria-label="Oyuncu ara"/>
-      <select value={activeFilters?.team||''} onChange={e=>navigate({team:e.target.value,page:1})}>
-        <option value="">Tüm takımlar</option>{(teams||[]).map(t=><option key={t}>{t}</option>)}
-      </select>
-      <select value={activeFilters?.pos||''} onChange={e=>navigate({pos:e.target.value,page:1})}>
-        <option value="">Tüm mevkiler</option><option value="GK">KL</option><option value="DEF">DEF</option><option value="MID">OS</option><option value="FWD">FOR</option>
-      </select>
+      <MultiSelectFilter ariaLabel="Takım filtreleri" placeholder="Tüm takımlar" searchable
+        options={(teams||[]).map(t=>({value:t,label:t}))}
+        value={asMulti(activeFilters?.team)} onChange={team=>navigate({team,page:1})}/>
+      <MultiSelectFilter ariaLabel="Mevki filtreleri" placeholder="Tüm mevkiler"
+        options={[{value:'GK',label:'KL'},{value:'DEF',label:'DEF'},{value:'MID',label:'OS'},{value:'FWD',label:'FOR'}]}
+        value={asMulti(activeFilters?.pos)} onChange={pos=>navigate({pos,page:1})}/>
       <select className="mobile-sort-select" value={activeFilters?.sort||'xfp'} disabled={proMetricsPending} aria-busy={proMetricsPending?'true':undefined} title={proMetricsPending?'Gelişmiş P90 ve 6+ verileri yükleniyor':undefined} onChange={e=>navigate({sort:e.target.value,dir:'desc',page:1})}>
         <option value="xfp">xFP'ye göre</option><option value="xi">İlk 11 ihtimaline göre</option><option value="minutes">Dakikaya göre</option>
         {isPro?<><option value="p90">P90'a göre</option><option value="six">6+ ihtimaline göre</option></>:null}

@@ -9,7 +9,7 @@
     "lint": "eslint .",
     "smoke": "bash scripts/smoke.sh",
     "test:runtime": "bash scripts/runtime-route-test.sh",
-    "test": "node --test test/full-suite.test.js test/gw7-source-evidence.test.js test/live-site-gameweek.test.js test/mh8-calculated-closure-source.test.mjs test/mh8-advanced-lag.test.mjs",
+    "test": "node --test test/full-suite.test.js test/gw7-source-evidence.test.js test/live-site-gameweek.test.js test/mh8-calculated-closure-source.test.mjs test/mh8-advanced-lag.test.mjs test/multiselect-filter-contract.test.mjs",
     "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
     "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
     "deploy:worker": "wrangler deploy",
