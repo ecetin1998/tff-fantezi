@@ -108,7 +108,7 @@ def build(reconciled: dict, roster: dict, official: dict) -> dict:
         "identity_review_queue":unmatched,
         "official_player_fantasy_points_written":0,
         "ready_to_close":False,
-        "remaining_gates":["10 player identity mismatches",
+        "remaining_gates":([f"{len(unmatched)} player identity mismatches"] if unmatched else []) + [
             "complete non-playing player zero-minute confirmation",
             "assists, own goals and disciplinary event adjudication",
             "official TFF Fantasy 3-3-2 bonus verification",
