@@ -76,5 +76,38 @@ class StageEventsTests(unittest.TestCase):
         self.assertEqual(saved[0]["keeper"], "Paulo Victor")
 
 
+    def test_provider_card_assist_fields_do_not_become_official_fantasy(self):
+        src, roster, curated = fixtures()
+        card = src["rows"][0]["data"]["source_events"][0]
+        card["source_card_type"] = "Yellow"
+        goal = src["rows"][1]["data"]["source_events"][0]
+        goal.update({"source_goal_assist_player_id":777,
+                     "source_goal_assist_name":"Assisting teammate",
+                     "source_goal_description_key":"regular"})
+        roster["matches"][1]["observations"].append({
+            "provider_player_id":777,"scout_player_id":991})
+        # Only source candidate values are extracted, not Fantasy card/assist bonuses.
+        report = stage(src,roster,curated)
+        card_record = next(x for x in report["events"] if x["kind"] == "Card")
+        self.assertEqual(card_record["provider_card_type"],"Yellow")
+        self.assertIsNone(card_record["card_color"])
+        goal_record = next(x for x in report["events"] if x["kind"] == "Goal")
+        self.assertEqual(goal_record["provider_goal_assist_player_id"],777)
+        self.assertEqual(goal_record["provider_goal_assist_scout_id"],991)
+        self.assertEqual(goal_record["provider_goal_assist_name"],"Assisting teammate")
+        self.assertIsNone(goal_record["tff_fantasy_points"])
+        self.assertEqual(report["provider_card_type_observations"],1)
+        self.assertEqual(report["provider_assist_id_observations"],1)
+        self.assertFalse(report["card_colors_verified"])
+        self.assertFalse(report["all_assists_verified"])
+        self.assertFalse(report["ready_to_finalize"])
+
+        goal.pop("source_goal_assist_player_id")
+        report_missing = stage(src,roster,curated)
+        actual = next(x for x in report_missing["events"] if x["kind"] == "Goal")
+        self.assertIsNone(actual["provider_goal_assist_scout_id"])
+        self.assertFalse(report_missing["all_assists_verified"])
+
+
 if __name__ == "__main__":
     unittest.main()
