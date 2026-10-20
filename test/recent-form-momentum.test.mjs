@@ -1,7 +1,7 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import {readFileSync} from 'node:fs'
-import {risingMinutesMomentum} from '../supabase/functions/weekly-model-lifecycle/momentum.mjs'
+import {risingMinutesMomentum,trustedMinute} from '../supabase/functions/weekly-model-lifecycle/momentum.mjs'
 
 const h=(gameweek,minutes,source_kind='fresh_closed_actual',is_final=true)=>({gameweek,minutes,source_kind,is_final})
 const week=(a,b,c,d)=>[h(8,a,'independently_calculated_source_events'),h(7,b),h(6,c),h(5,d)]
@@ -47,4 +47,15 @@ test('model does not double count rising form or use points as an xFP bonus',()=
   assert.match(worker,/baseline:clamp\(\.01,\.995,stableRole\+momentumBoost\)/)
   assert.doesNotMatch(worker,/rates\[0\]\s*\*=\s*1\+/)
   assert.doesNotMatch(worker,/rates\[3\]\s*\*=\s*1\+/)
+})
+
+test('base lineup and duration trend cannot learn fake zero-minute benching',()=>{
+  assert.equal(trustedMinute(h(8,0,'independently_calculated_source_events')),null)
+  assert.equal(trustedMinute(h(8,90,'independently_calculated_source_events')),90)
+  assert.equal(trustedMinute(h(7,0)),0)
+  assert.equal(trustedMinute(h(5,0,'legacy_final_weekly')),null)
+  const worker=readFileSync(new URL('../supabase/functions/weekly-model-lifecycle/index.ts',import.meta.url),'utf8')
+  assert.match(worker,/const trustedRows=rows\.filter\(x=>trustedMinute\(x\)!==null\)/)
+  assert.match(worker,/const recentMinuteRate=trustedRows\.length/)
+  assert.match(worker,/const last2=trustedRows\.slice/)
 })
