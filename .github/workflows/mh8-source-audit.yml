@@ -10,6 +10,8 @@ on:
       - "scripts/reconcile_mh8_provider_players.py"
       - "scripts/stage_mh8_observed_player_metrics.py"
       - "scripts/stage_mh8_event_adjudication.py"
+      - "scripts/stage_mh8_point_components.py"
+      - "test/mh8_point_components_test.py"
       - "test/mh8_event_adjudication_test.py"
       - "test/mh8_observed_player_staging_test.py"
       - "test/mh8_roster_reconciliation_test.py"
@@ -138,6 +140,26 @@ jobs:
               "$RUNNER_TEMP/mh8-event-review.json"
             echo "- Card colors, assists and Fantasy bonus: NOT verified"
           } >> "$GITHUB_STEP_SUMMARY"
+      - name: Test read-only TFF scoring component guard
+        run: python3 -m unittest discover -s test -p mh8_point_components_test.py -v
+      - name: Stage nonfinal partial MH8 point components
+        run: |
+          set -euo pipefail
+          python3 scripts/stage_mh8_point_components.py \
+            --observed "$RUNNER_TEMP/mh8-observed-player-metrics.json" \
+            --events "$RUNNER_TEMP/mh8-event-review.json" \
+            --output "$RUNNER_TEMP/mh8-nonfinal-scoring-components.json"
+          jq -e '.gameweek == 8 and .source_played_count == 286 and
+                 .official_points_written == 0 and .ready_to_close == false and
+                 ([.rows[].computed_total_fantasy_points] | all(. == null)) and
+                 ([.rows[].official_bonus_points] | all(. == null))' \
+            "$RUNNER_TEMP/mh8-nonfinal-scoring-components.json"
+          {
+            echo
+            echo "### MH8 incomplete Fantasy score components (not final)"
+            echo "- Source-linked player components: 286/286"
+            echo "- Bonus, full clean-sheet adjudication, official points: UNVERIFIED"
+          } >> "$GITHUB_STEP_SUMMARY"
       - name: Archive source evidence and failures for review
         uses: actions/upload-artifact@v4
         if: always()
@@ -149,5 +171,6 @@ jobs:
             ${{ runner.temp }}/mh8-scout-identity-audit.json
             ${{ runner.temp }}/mh8-observed-player-metrics.json
             ${{ runner.temp }}/mh8-event-review.json
+            ${{ runner.temp }}/mh8-nonfinal-scoring-components.json
           if-no-files-found: warn
           retention-days: 14
