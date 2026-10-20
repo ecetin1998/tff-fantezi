@@ -15,7 +15,7 @@ permissions:
 
 jobs:
   dispatch-existing-production:
-    if: startsWith(github.event.head_commit.message, 'chore(release): request MH9 production deploy')
+    if: "${{ startsWith(github.event.head_commit.message, 'chore(release)') }}"
     runs-on: ubuntu-latest
     timeout-minutes: 5
     env:
@@ -27,7 +27,7 @@ jobs:
         run: |
           set -euo pipefail
           test "$GITHUB_REF" = "refs/heads/main"
-          expected_parent="edc20bf2d57bdd08a95772773ac21f363ddf1668"
+          expected_parent="efd1fc6414dbf05cd20d18a2d704d647b4bee6d6"
           test "$(git rev-parse HEAD^)" = "$expected_parent" || {
             echo "One-time MH9 production release parent changed; refuse dispatch."
             exit 1
