@@ -1,0 +1,173 @@
+{
+  "kind": "MH9_DEFENDER_SOURCE_SHOT_REVIEW_ONLY",
+  "count": 15,
+  "source": "scout_player_season_stats current read-only snapshot, advanced through gameweek 7",
+  "status": "unverified_suspicious_source_mapping",
+  "observations": [
+    {
+      "player_id": 239,
+      "full_name": "Hrvoje Smolčić",
+      "primary_role": "CB",
+      "shots": 110,
+      "shots_on_target": 108,
+      "xg_total": 0.03,
+      "minutes": 697,
+      "advanced_source": "sahadan_match_actions_gw7_2026-10-13",
+      "advanced_through_gameweek": 7
+    },
+    {
+      "player_id": 53,
+      "full_name": "Amar Gërxhaliu",
+      "primary_role": "CB",
+      "shots": 92,
+      "shots_on_target": 0,
+      "xg_total": 0.05,
+      "minutes": 720,
+      "advanced_source": "sahadan_match_actions_gw7_2026-10-13",
+      "advanced_through_gameweek": 7
+    },
+    {
+      "player_id": 390,
+      "full_name": "Emin Bayram",
+      "primary_role": "CB",
+      "shots": 76,
+      "shots_on_target": 67,
+      "xg_total": 0.21,
+      "minutes": 686,
+      "advanced_source": "sahadan_match_actions_gw7_2026-10-13",
+      "advanced_through_gameweek": 7
+    },
+    {
+      "player_id": 261,
+      "full_name": "Badobre Emmanuel Elysee Djedje Agbadou",
+      "primary_role": "CB",
+      "shots": 70,
+      "shots_on_target": 67,
+      "xg_total": 0.05,
+      "minutes": 637,
+      "advanced_source": "sahadan_match_actions_gw7_2026-10-13",
+      "advanced_through_gameweek": 7
+    },
+    {
+      "player_id": 555,
+      "full_name": "Arda Kızıldağ",
+      "primary_role": "CB",
+      "shots": 65,
+      "shots_on_target": 57,
+      "xg_total": 0.06,
+      "minutes": 372,
+      "advanced_source": "sahadan_match_actions_gw7_2026-10-13",
+      "advanced_through_gameweek": 7
+    },
+    {
+      "player_id": 241,
+      "full_name": "Serdar Saatçı",
+      "primary_role": "CB",
+      "shots": 59,
+      "shots_on_target": 56,
+      "xg_total": 0,
+      "minutes": 226,
+      "advanced_source": "sahadan_match_actions_gw7_2026-10-13",
+      "advanced_through_gameweek": 7
+    },
+    {
+      "player_id": 172,
+      "full_name": "Milan Škriniar",
+      "primary_role": "CB",
+      "shots": 58,
+      "shots_on_target": 52,
+      "xg_total": 0.47000000000000003,
+      "minutes": 699,
+      "advanced_source": "sahadan_match_actions_gw7_2026-10-13",
+      "advanced_through_gameweek": 7
+    },
+    {
+      "player_id": 180,
+      "full_name": "Nathan Benjamin Aké",
+      "primary_role": "CB",
+      "shots": 56,
+      "shots_on_target": 55,
+      "xg_total": 0.11,
+      "minutes": 720,
+      "advanced_source": "sahadan_match_actions_gw7_2026-10-13",
+      "advanced_through_gameweek": 7
+    },
+    {
+      "player_id": 120,
+      "full_name": "Anfernee Jamal Dijksteel",
+      "primary_role": "CB",
+      "shots": 53,
+      "shots_on_target": 43,
+      "xg_total": 0.31000000000000005,
+      "minutes": 630,
+      "advanced_source": "sahadan_match_actions_gw7_2026-10-13",
+      "advanced_through_gameweek": 7
+    },
+    {
+      "player_id": 271,
+      "full_name": "Tiago Emanuel Embaló Djaló",
+      "primary_role": "CB",
+      "shots": 52,
+      "shots_on_target": 47,
+      "xg_total": 0.1,
+      "minutes": 330,
+      "advanced_source": "sahadan_match_actions_gw7_2026-10-13",
+      "advanced_through_gameweek": 7
+    },
+    {
+      "player_id": 550,
+      "full_name": "Leo Myenty Janna Abena",
+      "primary_role": "CB",
+      "shots": 48,
+      "shots_on_target": 44,
+      "xg_total": 0.21,
+      "minutes": 720,
+      "advanced_source": "sahadan_match_actions_gw7_2026-10-13",
+      "advanced_through_gameweek": 7
+    },
+    {
+      "player_id": 1075,
+      "full_name": "Kevin Camron Mouanga",
+      "primary_role": "CB",
+      "shots": 47,
+      "shots_on_target": 42,
+      "xg_total": 0,
+      "minutes": 274,
+      "advanced_source": "sahadan_match_actions_gw7_2026-10-13",
+      "advanced_through_gameweek": 7
+    },
+    {
+      "player_id": 104,
+      "full_name": "Matei Cristian Ilie",
+      "primary_role": "CB",
+      "shots": 46,
+      "shots_on_target": 38,
+      "xg_total": 0,
+      "minutes": 720,
+      "advanced_source": "sahadan_match_actions_gw7_2026-10-13",
+      "advanced_through_gameweek": 7
+    },
+    {
+      "player_id": 282,
+      "full_name": "Emirhan Topçu",
+      "primary_role": "CB",
+      "shots": 45,
+      "shots_on_target": 40,
+      "xg_total": 0.21,
+      "minutes": 461,
+      "advanced_source": "sahadan_match_actions_gw7_2026-10-13",
+      "advanced_through_gameweek": 7
+    },
+    {
+      "player_id": 367,
+      "full_name": "Attila Mocsi",
+      "primary_role": "CB",
+      "shots": 42,
+      "shots_on_target": 32,
+      "xg_total": 0.45000000000000007,
+      "minutes": 622,
+      "advanced_source": "sahadan_match_actions_gw7_2026-10-13",
+      "advanced_through_gameweek": 7
+    }
+  ]
+}
