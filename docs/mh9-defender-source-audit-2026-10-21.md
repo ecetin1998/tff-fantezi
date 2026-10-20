@@ -37,6 +37,18 @@ audit the advanced-source time window at:
   `xa_per90=0.22`, aligned 618 min => 0.0874 xA/90 by total.
   Provider per-90 source: `fotmob_xa_per90_web_2026-09-28`.
 
+Independent public-site cross-checks (these sites are not identical sources):
+- xgEdge reports Bokélé's six matches, **540 minutes** and 0.36 xA
+  (roughly 0.060 xA/90). This independently reinforces that the recorded
+  **0.29 xA/90** is out of scale with season totals, even though independent
+  event-based xA is not numerically identical to the database's 0.30 total.
+  Source: https://www.xg-edge.com/players/malcom-bokele
+- FotMob's dated Samsunspor xA/90 leaderboard reports Mendes at **0.22**,
+  supporting that the value itself existed in an earlier provider snapshot.
+  But it does not establish this rate has the same league-minute denominator
+  as the later 0.60 xA total / 618 aligned minutes.
+  Source: https://www.fotmob.com/en-GB/leagues/71/stats/season/42167/players/expected_assists_per_90/team/9750/samsunsporteams-players
+
 These are NOT guaranteed errors in the reported provider per-90:
 different source snapshots could cover different matches. Data needs upstream
 reconciliation. The side-by-side candidate uses an explicit **shadow only**
