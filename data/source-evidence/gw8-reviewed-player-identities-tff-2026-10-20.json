@@ -1,0 +1,105 @@
+{
+  "season": "2026-27",
+  "gameweek": 8,
+  "purpose": "STRICT SOURCE PLAYER-ID TO SCOUT ID RESOLUTION, NOT FANTASY POINT CONFIRMATION",
+  "reviewed_on": "2026-10-20",
+  "provenance": "Official TFF fixture lineup names and jersey numbers, cross-checked with observed FotMob provider player ID and local Scout roster ID. Missing/unpublished TFF lineups remain unresolved.",
+  "entries": [
+    {
+      "internal_match_id": 317849,
+      "official_tff_match_id": 317850,
+      "team_id": 5,
+      "provider_player_id": 289473,
+      "provider_name": "Dia Saba",
+      "provider_shirt_number": "91",
+      "scout_player_id": 136,
+      "scout_full_name": "Diaa Sabi'a",
+      "official_lineup_name": "DIAA SABI'A",
+      "official_lineup_url": "https://www.tff.org/Default.aspx?macId=317850&pageID=528"
+    },
+    {
+      "internal_match_id": 317850,
+      "official_tff_match_id": 317851,
+      "team_id": 11,
+      "provider_player_id": 815997,
+      "provider_name": "Thalisson",
+      "provider_shirt_number": "2",
+      "scout_player_id": 336,
+      "scout_full_name": "Thalisson Kelven da Silva",
+      "official_lineup_name": "THALISSON KELVEN DA SILVA",
+      "official_lineup_url": "https://www.tff.org/Default.aspx?macId=317851&pageID=528"
+    },
+    {
+      "internal_match_id": 317852,
+      "official_tff_match_id": 317848,
+      "team_id": 15,
+      "provider_player_id": 1436939,
+      "provider_name": "Oskar Öhlenschlaeger",
+      "provider_shirt_number": "19",
+      "scout_player_id": 1042,
+      "scout_full_name": "Oskar Skovbjerg Øhlenschlæger",
+      "official_lineup_name": "OSKAR SKOVBJERG OHLENSCHLAEGER",
+      "official_lineup_url": "https://www.tff.org/Default.aspx?macId=317848&pageID=528"
+    },
+    {
+      "internal_match_id": 317852,
+      "official_tff_match_id": 317848,
+      "team_id": 15,
+      "provider_player_id": 1666481,
+      "provider_name": "Anto Sekongo",
+      "provider_shirt_number": "42",
+      "scout_player_id": 463,
+      "scout_full_name": "Yirigue Foungognan Sekongo",
+      "official_lineup_name": "YIRIGUE FOUNGOGNAN SEKONGO",
+      "official_lineup_url": "https://www.tff.org/Default.aspx?macId=317848&pageID=528"
+    },
+    {
+      "internal_match_id": 317853,
+      "official_tff_match_id": 317854,
+      "team_id": 4,
+      "provider_player_id": 859042,
+      "provider_name": "Show",
+      "provider_shirt_number": "14",
+      "scout_player_id": 131,
+      "scout_full_name": "Manuel Luís da Silva Cafumana",
+      "official_lineup_name": "MANUEL LUIS DA SILVA CAFUMANA",
+      "official_lineup_url": "https://www.tff.org/Default.aspx?macId=317854&pageID=528"
+    },
+    {
+      "internal_match_id": 317853,
+      "official_tff_match_id": 317854,
+      "team_id": 10,
+      "provider_player_id": 1185467,
+      "provider_name": "Rhaldney",
+      "provider_shirt_number": "5",
+      "scout_player_id": 304,
+      "scout_full_name": "Rhaldney Norberto Simião Gomes",
+      "official_lineup_name": "RHALDNEY NORBERTO SIMIAO GOMES",
+      "official_lineup_url": "https://www.tff.org/Default.aspx?macId=317854&pageID=528"
+    },
+    {
+      "internal_match_id": 317853,
+      "official_tff_match_id": 317854,
+      "team_id": 10,
+      "provider_player_id": 1459652,
+      "provider_name": "André",
+      "provider_shirt_number": "7",
+      "scout_player_id": 310,
+      "scout_full_name": "André Henrique da Silva Martins",
+      "official_lineup_name": "ANDRE HENRIQUE DA SILVA MARTINS",
+      "official_lineup_url": "https://www.tff.org/Default.aspx?macId=317854&pageID=528"
+    },
+    {
+      "internal_match_id": 317853,
+      "official_tff_match_id": 317854,
+      "team_id": 10,
+      "provider_player_id": 983199,
+      "provider_name": "Tino Anjorin",
+      "provider_shirt_number": "18",
+      "scout_player_id": 1542,
+      "scout_full_name": "Faustino Adebola Rasheed Anjorin",
+      "official_lineup_name": "FAUSTINO ADEBOLA RASHEED ANJORIN",
+      "official_lineup_url": "https://www.tff.org/Default.aspx?macId=317854&pageID=528"
+    }
+  ]
+}
