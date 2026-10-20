@@ -9,6 +9,8 @@ on:
       - "scripts/probe_mh8_fotmob_structured.py"
       - "scripts/reconcile_mh8_provider_players.py"
       - "scripts/stage_mh8_observed_player_metrics.py"
+      - "scripts/stage_mh8_event_adjudication.py"
+      - "test/mh8_event_adjudication_test.py"
       - "test/mh8_observed_player_staging_test.py"
       - "test/mh8_roster_reconciliation_test.py"
       - "data/source-evidence/gw8-scout-roster-identities-2026-10-20.json"
@@ -111,6 +113,29 @@ jobs:
             jq -r '.metric_coverage | to_entries[] | "- \(.key): \(.value) explicitly sourced"' \
               "$RUNNER_TEMP/mh8-observed-player-metrics.json"
           } >> "$GITHUB_STEP_SUMMARY"
+      - name: Test MH8 nonfinal event staging contract
+        run: python3 -m unittest discover -s test -p mh8_event_adjudication_test.py -v
+      - name: Archive source-backed card and penalty review (nonfinal)
+        run: |
+          set -euo pipefail
+          python3 scripts/stage_mh8_event_adjudication.py \
+            --structured "$RUNNER_TEMP/mh8-structured-source.json" \
+            --identities "$RUNNER_TEMP/mh8-scout-identity-audit.json" \
+            --output "$RUNNER_TEMP/mh8-event-review.json"
+          jq -e '.gameweek == 8 and .fixtures_verified == 9 and
+                 .ready_to_finalize == false and .tff_fantasy_points_written == 0 and
+                 .event_counts.Goal == 23 and .event_counts.Card == 31 and
+                 .event_counts.MissedPenalty == 1 and .card_colors_verified == false' \
+            "$RUNNER_TEMP/mh8-event-review.json"
+          {
+            echo
+            echo "### Nonfinal match event review"
+            jq -r '"- Source events: \(.event_counts.Goal) goals, \(.event_counts.Card) cards, \(.event_counts.MissedPenalty) missed penalties"' \
+              "$RUNNER_TEMP/mh8-event-review.json"
+            jq -r '"- Player mapping requiring review: \(.unmatched_event_identities | length) event records"' \
+              "$RUNNER_TEMP/mh8-event-review.json"
+            echo "- Card colors, assists and Fantasy bonus: NOT verified"
+          } >> "$GITHUB_STEP_SUMMARY"
       - name: Archive source evidence and failures for review
         uses: actions/upload-artifact@v4
         if: always()
@@ -121,5 +146,6 @@ jobs:
             ${{ runner.temp }}/mh8-structured-source.json
             ${{ runner.temp }}/mh8-scout-identity-audit.json
             ${{ runner.temp }}/mh8-observed-player-metrics.json
+            ${{ runner.temp }}/mh8-event-review.json
           if-no-files-found: warn
           retention-days: 14
