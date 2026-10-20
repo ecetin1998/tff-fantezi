@@ -61,7 +61,20 @@ def stage(structured: dict, identities: dict, curated: dict) -> dict:
                 "scout_player_id": roster.get(str(pid)) if pid is not None else None,
                 "source_minute": event.get("time_str"),
                 "provider_own_goal": event.get("own_goal") if kind == "Goal" else None,
-                "card_color": None,  # This source export does NOT provide card color.
+                "card_color": None,  # Official TFF Fantasy adjudication is still missing.
+                "provider_card_type": event.get("source_card_type") if kind == "Card" else None,
+                "provider_goal_assist_player_id":
+                    event.get("source_goal_assist_player_id") if kind == "Goal" else None,
+                "provider_goal_assist_scout_id":
+                    (roster.get(str(event.get("source_goal_assist_player_id")))
+                     if kind == "Goal" and type(event.get("source_goal_assist_player_id")) is int
+                     else None),
+                "provider_goal_assist_name":
+                    event.get("source_goal_assist_name") if kind == "Goal" else None,
+                "provider_goal_description_key":
+                    event.get("source_goal_description_key") if kind == "Goal" else None,
+                "provider_missed_penalty_outcome":
+                    event.get("source_missed_penalty_outcome") if kind == "MissedPenalty" else None,
                 "tff_fantasy_points": None,
                 "is_final_tff_fantasy": False,
                 "requires_adjudication": True,
@@ -105,6 +118,8 @@ def stage(structured: dict, identities: dict, curated: dict) -> dict:
         "gameweek": 8,
         "fixtures_verified": 9,
         "event_counts": counts,
+        "provider_card_type_observations": sum(x["provider_card_type"] is not None for x in events),
+        "provider_assist_id_observations": sum(x["provider_goal_assist_player_id"] is not None for x in events),
         "events": events,
         "unmatched_event_identities": problems,
         "separate_official_fantasy_attributions": official_overrides,
