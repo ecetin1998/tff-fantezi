@@ -80,10 +80,23 @@ def stage(observed, events, roster):
                      "tff_app_own_goal_override_present":key in tff_own_goals,
                      "computed_total_fantasy_points":None,"official_bonus_points":None,
                      "is_final_tff_fantasy":False})
+    # Match aggregate source goals/assists to match-event evidence without
+    # calling either provider observation a TFF Fantasy final point.
+    provider_goals=sum(o["observed_metrics"]["goals"] for o in observed["matched_observations"]
+                       if "goals" in o["observed_metrics"])
+    provider_assists=sum(o["observed_metrics"]["assists"] for o in observed["matched_observations"]
+                         if "assists" in o["observed_metrics"])
+    ordinary_goals=sum(e.get("kind")=="Goal" and e.get("provider_own_goal") is not True
+                       for e in events["events"])
+    sourced_assists=sum(e.get("kind")=="Goal" and e.get("source_assist_provider_id") is not None
+                         for e in events["events"])
+    if provider_goals!=ordinary_goals or provider_assists!=sourced_assists:
+        raise ValueError("source player goals/assists disagree with match event totals")
     if len(rows)!=observed.get("matched_played") or observed.get("unmatched_played")!=0:
         raise ValueError("every played player identity must be linked")
     return {"gameweek":8,"kind":"NONFINAL_PARTIAL_TFF_SCORE_COMPONENT_AUDIT",
             "source_played_count":len(rows),"events_seen":len(events["events"]),
+            "ordinary_goals_reconciled":ordinary_goals,"assists_reconciled":sourced_assists,
             "official_points_written":0,"ready_to_close":False,
             "remaining_gates":["official player totals and tied 3-3-2 bonuses",
                                "clean sheets and conceded-goal timelines",
