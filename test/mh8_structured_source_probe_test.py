@@ -30,7 +30,7 @@ class SourceProbeTests(unittest.TestCase):
         lineup={"source":"provider","lineupType":"confirmed",
                 "homeTeam":{"name":"Home","starters":[footballer(i) for i in range(1,12)],"subs":[]},
                 "awayTeam":{"name":"Away","starters":[footballer(i) for i in range(12,23)],"subs":[]}}
-        detail={"content":{"lineup":lineup,"matchFacts":{"events":{"events":[{"type":"Goal"},{"type":"YellowCard"}]}},
+        detail={"content":{"lineup":lineup,"matchFacts":{"events":{"events":[{"type":"Goal","assistPlayerId":123,"assistStr":"Candidate Player","goalDescriptionKey":"regular"},{"type":"YellowCard","card":"Yellow"}]}},
                            "playerStats":{"homeTeam":{},"awayTeam":{}}}}
         s=probe.summarize(fixture,5795427,detail)
         self.assertTrue(s["lineup_complete"])
@@ -39,6 +39,10 @@ class SourceProbeTests(unittest.TestCase):
         self.assertEqual(s["player_stat_player_count"],2)
         self.assertEqual(len(s["source_events"]),2)
         self.assertEqual(s["source_events"][0]["type"],"Goal")
+        self.assertEqual(s["source_events"][0]["source_goal_assist_player_id"],123)
+        self.assertEqual(s["source_events"][0]["source_goal_assist_name"],"Candidate Player")
+        self.assertEqual(s["source_events"][1]["source_card_type"],"Yellow")
+        self.assertIsNone(s["source_events"][0]["source_missed_penalty_outcome"])
         self.assertIn("keeper_source_stat_evidence",s)
         self.assertEqual(s["complete_minutes_verified"],False)
         self.assertEqual(s["all_goalkeeper_saves_verified"],False)
