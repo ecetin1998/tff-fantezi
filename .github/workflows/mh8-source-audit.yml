@@ -8,6 +8,8 @@ on:
       - "scripts/audit_mh8_fotmob_sources.py"
       - "scripts/probe_mh8_fotmob_structured.py"
       - "scripts/reconcile_mh8_provider_players.py"
+      - "scripts/audit_mh8_nonparticipants.py"
+      - "test/mh8_nonparticipants_test.py"
       - "scripts/stage_mh8_observed_player_metrics.py"
       - "scripts/stage_mh8_event_adjudication.py"
       - "test/mh8_event_adjudication_test.py"
@@ -94,6 +96,34 @@ jobs:
             jq -r '.matches[] | "- Fixture \(.match_id): \(.matched_played)/\(.played_observed) linked"' \
               "$RUNNER_TEMP/mh8-scout-identity-audit.json"
           } >> "$GITHUB_STEP_SUMMARY"
+      - name: Test missing-minute and nonparticipant guards
+        run: python3 -m unittest discover -s test -p mh8_nonparticipants_test.py -v
+      - name: Stage source lineup participation gaps without zero-minute assumptions
+        run: |
+          set -euo pipefail
+          python3 scripts/audit_mh8_nonparticipants.py \
+            --identities "$RUNNER_TEMP/mh8-scout-identity-audit.json" \
+            --output "$RUNNER_TEMP/mh8-nonparticipant-coverage.json"
+          jq -e '.gameweek == 8 and .roster_count == 456 and
+                 .source_lineup_player_rows == 378 and
+                 .participation_counts.SOURCE_PLAYED_MINUTES == 286 and
+                 .participation_counts.LINEUP_LISTED_NO_MINUTES == 79 and
+                 .participation_counts.NOT_LINKED_TO_SOURCE_LINEUP == 91 and
+                 (.unresolved_source_bench_identities | length) == 13 and
+                 .confirmed_zero_minute_players == 0 and
+                 .official_fantasy_points_written == 0 and
+                 .ready_to_close == false and
+                 ([.rows[] | select(.source_participation != "SOURCE_PLAYED_MINUTES") | .observed_minutes] | all(. == null))' \
+            "$RUNNER_TEMP/mh8-nonparticipant-coverage.json"
+          {
+            echo
+            echo "### MH8 participation coverage is NONFINAL"
+            echo "- Explicit played source minutes: 286"
+            echo "- Lineup-listed but NO explicit minutes: 79"
+            echo "- Roster not linked to a source lineup: 91"
+            echo "- Unmatched unused source bench names: 13"
+            echo "- Officially verified zero-minute players: 0"
+          } >> "$GITHUB_STEP_SUMMARY"
       - name: Verify sourced metric staging contracts
         run: python3 -m unittest discover -s test -p mh8_observed_player_staging_test.py -v
       - name: Stage mapped MH8 player observations without Fantasy point writes
@@ -147,6 +177,7 @@ jobs:
             ${{ runner.temp }}/mh8-source-audit.json
             ${{ runner.temp }}/mh8-structured-source.json
             ${{ runner.temp }}/mh8-scout-identity-audit.json
+            ${{ runner.temp }}/mh8-nonparticipant-coverage.json
             ${{ runner.temp }}/mh8-observed-player-metrics.json
             ${{ runner.temp }}/mh8-event-review.json
           if-no-files-found: warn
