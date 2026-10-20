@@ -1,5 +1,6 @@
 import {createClient} from "https://esm.sh/@supabase/supabase-js@2"
 import {applyOfficialMinutesEvidence,firstRecordedRate,observedPer90} from "./externalRole.mjs"
+import {validFinalWeeklyPlayerRow} from "./closureSource.mjs"
 
 const AUDIENCE="tff-fantezi-scout"
 const ISSUER="https://token.actions.githubusercontent.com"
@@ -180,16 +181,9 @@ async function sourceStatus(sb:any,current:any){
   // One fabricated final point in each fixture can no longer advance MH9.
   const finalActiveRows=finalRows.filter((w:any)=>activeIds.has(Number(w.player_id)))
   const finalActiveIds=new Set(finalActiveRows.map((w:any)=>Number(w.player_id)))
-  const validFinalRows=finalActiveRows.every((w:any)=>
-    w.match_id!=null&&w.player_id!=null&&
-    w.minutes!=null&&w.points!=null&&w.base_points!=null&&w.bonus_points!=null&&
-    Number.isFinite(Number(w.minutes))&&Number(w.minutes)>=0&&
-    Number.isInteger(Number(w.points))&&
-    Number.isInteger(Number(w.base_points))&&
-    Number.isInteger(Number(w.bonus_points))&&
-    Number(w.points)===Number(w.base_points)+Number(w.bonus_points)&&
-    Number(w.bonus_points)>=0&&Number(w.bonus_points)<=3&&
-    String(w.source_kind)==="fresh_closed_actual")
+  // Distinct source lineage: MH8 owner-approved computed actuals remain
+  // labelled independently_calculated_source_events (not TFF official exports).
+  const validFinalRows=finalActiveRows.every((w:any)=>validFinalWeeklyPlayerRow(gw,w))
   const finalByMatch=new Map<string,Set<number>>()
   for(const row of finalActiveRows){
     const id=String(row.match_id)

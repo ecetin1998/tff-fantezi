@@ -233,11 +233,18 @@ assert.match(worker,/finalByMatch\.size===fixtureCount/,
   'every completed fixture needs source-closed player coverage')
 assert.match(worker,/\.every\(ids=>ids\.size>=22\)/,
   'each fixture must include both starting elevens at minimum')
-assert.match(worker,/String\(w\.source_kind\)==="fresh_closed_actual"/,
-  'probabilistic or provisional point rows may not become actual points')
-assert.match(worker,/Number\(w\.points\)===Number\(w\.base_points\)\+Number\(w\.bonus_points\)/,
-  'a final Fantasy score must reconcile its base points and award')
-assert.match(worker,/w\.minutes!=null&&w\.points!=null&&w\.base_points!=null&&w\.bonus_points!=null/,
-  'null data must not be silently coerced to zero by Number')
+assert.match(worker,/validFinalWeeklyPlayerRow\(gw,w\)/,
+  'full final-row validation cannot be bypassed')
+const closureContract=read('supabase/functions/weekly-model-lifecycle/closureSource.mjs')
+assert.match(closureContract,/sourceKind === "fresh_closed_actual"/,
+  'official final source support must stay intact')
+assert.match(closureContract,/Number\(gameweek\) === 8 && sourceKind === MH8_INDEPENDENT_SOURCE/,
+  'owner-approved calculated closure must stay scoped to MH8')
+assert.match(closureContract,/row\.is_final !== true/,
+  'provisional calculated points may not become official actuals')
+assert.match(closureContract,/minute == null \|\| points == null \|\| base == null \|\| bonus == null/,
+  'missing components must not coerce to zero')
+assert.match(closureContract,/p!==b\+bonusNum/,
+  'a final Fantasy score must reconcile base and bonus')
 assert.match(worker,/finalizedPlayerCoverage&&/,
   'new week advancement gate must enforce complete sourced player points')
