@@ -16,7 +16,8 @@
       "home_goals": 2,
       "away_goals": 1,
       "status": "Bitti",
-      "fantasy_closure": "PUAN KONTROLÜ BEKLENİYOR"
+      "fantasy_closure": "PUAN KONTROLÜ BEKLENİYOR",
+      "official_tff_match_id": 317852
     },
     {
       "match_id": 317848,
@@ -25,7 +26,8 @@
       "home_goals": 2,
       "away_goals": 0,
       "status": "Bitti",
-      "fantasy_closure": "PUAN KONTROLÜ BEKLENİYOR"
+      "fantasy_closure": "PUAN KONTROLÜ BEKLENİYOR",
+      "official_tff_match_id": 317855
     },
     {
       "match_id": 317849,
@@ -34,7 +36,8 @@
       "home_goals": 1,
       "away_goals": 0,
       "status": "Bitti",
-      "fantasy_closure": "PUAN KONTROLÜ BEKLENİYOR"
+      "fantasy_closure": "PUAN KONTROLÜ BEKLENİYOR",
+      "official_tff_match_id": 317850
     },
     {
       "match_id": 317850,
@@ -43,7 +46,8 @@
       "home_goals": 0,
       "away_goals": 1,
       "status": "Bitti",
-      "fantasy_closure": "PUAN KONTROLÜ BEKLENİYOR"
+      "fantasy_closure": "PUAN KONTROLÜ BEKLENİYOR",
+      "official_tff_match_id": 317851
     },
     {
       "match_id": 317851,
@@ -52,7 +56,8 @@
       "home_goals": 3,
       "away_goals": 0,
       "status": "Bitti",
-      "fantasy_closure": "PUAN KONTROLÜ BEKLENİYOR"
+      "fantasy_closure": "PUAN KONTROLÜ BEKLENİYOR",
+      "official_tff_match_id": 317853
     },
     {
       "match_id": 317852,
@@ -61,7 +66,8 @@
       "home_goals": 4,
       "away_goals": 1,
       "status": "Bitti",
-      "fantasy_closure": "PUAN KONTROLÜ BEKLENİYOR"
+      "fantasy_closure": "PUAN KONTROLÜ BEKLENİYOR",
+      "official_tff_match_id": 317848
     },
     {
       "match_id": 317853,
@@ -70,7 +76,8 @@
       "home_goals": 1,
       "away_goals": 2,
       "status": "Bitti",
-      "fantasy_closure": "PUAN KONTROLÜ BEKLENİYOR"
+      "fantasy_closure": "PUAN KONTROLÜ BEKLENİYOR",
+      "official_tff_match_id": 317854
     },
     {
       "match_id": 317854,
@@ -79,7 +86,8 @@
       "home_goals": 2,
       "away_goals": 1,
       "status": "Bitti",
-      "fantasy_closure": "PUAN KONTROLÜ BEKLENİYOR"
+      "fantasy_closure": "PUAN KONTROLÜ BEKLENİYOR",
+      "official_tff_match_id": 317849
     },
     {
       "match_id": 317855,
@@ -88,7 +96,8 @@
       "home_goals": 2,
       "away_goals": 0,
       "status": "Bitti",
-      "fantasy_closure": "PUAN KONTROLÜ BEKLENİYOR"
+      "fantasy_closure": "PUAN KONTROLÜ BEKLENİYOR",
+      "official_tff_match_id": 317847
     }
   ],
   "notes": [
@@ -96,5 +105,6 @@
     "Gençlerbirliği vs Galatasaray has conflicting scorer attribution between official club accounts (home club says goalkeeper own goal; away club says Deniz Gül). Never award player goal or own-goal points without reconciliation with the official match report.",
     "Do not set scout_player_weekly_points.is_final or scout_match_history.fantasy_closure=KAPANDI based on scores alone.",
     "The source-site page contains nine match details with corresponding internal match IDs 317847..317855."
-  ]
+  ],
+  "tff_match_id_contract": "match_id is the site's historical internal ID; official TFF macID is official_tff_match_id, verified by the TFF game-details link. Do not substitute directly or rewrite historical projections."
 }
