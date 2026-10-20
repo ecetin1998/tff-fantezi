@@ -61,7 +61,19 @@ def stage(structured: dict, identities: dict, curated: dict) -> dict:
                 "scout_player_id": roster.get(str(pid)) if pid is not None else None,
                 "source_minute": event.get("time_str"),
                 "provider_own_goal": event.get("own_goal") if kind == "Goal" else None,
-                "card_color": None,  # This source export does NOT provide card color.
+                # Preserve direct FotMob card colors, never infer missing colors.
+                "raw_source_card_color": (
+                    event.get("source_card_color") if kind == "Card" else None),
+                "card_color": (
+                    event.get("source_card_color") if kind == "Card"
+                    and event.get("source_card_color") in
+                    {"Yellow", "Red", "SecondYellow", "YellowRed"} else None),
+                "source_assist_provider_id": (
+                    event.get("source_assist_provider_id") if kind == "Goal" else None),
+                "scout_assist_player_id": (
+                    roster.get(str(event["source_assist_provider_id"]))
+                    if kind == "Goal" and event.get("source_assist_provider_id") is not None
+                    else None),
                 "tff_fantasy_points": None,
                 "is_final_tff_fantasy": False,
                 "requires_adjudication": True,
@@ -107,6 +119,22 @@ def stage(structured: dict, identities: dict, curated: dict) -> dict:
         "event_counts": counts,
         "events": events,
         "unmatched_event_identities": problems,
+        "observed_card_color_count": sum(x["card_color"] is not None
+                                         for x in events if x["kind"] == "Card"),
+        "source_assist_id_count": sum(
+            x["source_assist_provider_id"] is not None
+            for x in events if x["kind"] == "Goal"),
+        "source_assist_linked_count": sum(
+            x["scout_assist_player_id"] is not None
+            for x in events if x["kind"] == "Goal"),
+        "unknown_source_card_colors": [
+            {"internal_match_id": x["internal_match_id"],
+             "source_event_id": x["source_event_id"],
+             "raw_card": x["raw_source_card_color"]}
+            for x in events if x["kind"] == "Card"
+            and x["raw_source_card_color"] is not None
+            and x["card_color"] is None
+        ],
         "separate_official_fantasy_attributions": official_overrides,
         "tff_fantasy_points_written": 0,
         "card_colors_verified": False,
