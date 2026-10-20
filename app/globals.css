@@ -96,3 +96,7 @@ button,input,select,textarea{font:inherit}
  .team-roster-tools>.multi-filter{grid-column:auto}
 }
 @media(max-width:390px){.multi-filter-panel{width:calc(100vw - 44px);max-width:calc(100vw - 44px)}}
+
+/* Override broad legacy .filters input rules for genuine checkboxes/search in popovers. */
+.multi-filter .multi-filter-option input[type="checkbox"]{appearance:checkbox;width:17px;min-width:17px;height:17px;min-height:17px;max-height:17px;padding:0;border:0;border-radius:3px;box-shadow:none;flex:0 0 17px}
+.multi-filter .multi-filter-panel input.multi-filter-search{width:calc(100% - 20px);min-width:0;min-height:38px;font-size:13px;background:#f7faf9;color:#26384b}
