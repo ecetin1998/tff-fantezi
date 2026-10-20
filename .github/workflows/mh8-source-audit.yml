@@ -12,6 +12,7 @@ on:
       - "test/mh8_observed_player_staging_test.py"
       - "test/mh8_roster_reconciliation_test.py"
       - "data/source-evidence/gw8-scout-roster-identities-2026-10-20.json"
+      - "data/source-evidence/gw8-reviewed-player-identities-tff-2026-10-20.json"
       - "test/mh8_structured_source_probe_test.py"
       - "test/mh8_source_audit_test.py"
       - "data/source-evidence/gw8-fotmob-match-page-candidates-2026-10-20.json"
