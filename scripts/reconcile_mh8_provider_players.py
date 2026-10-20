@@ -28,12 +28,40 @@ def choose_player(observed: dict, team_roster: list[dict]):
         normalized(p.get("display_name") or ""),
     }]
     if len(exact)==1:
-        return exact[0], "exact_team_name"
+        candidate=exact[0]
+        # A one-word *display* alias is weak evidence when the registered
+        # full name contains more tokens. Require a matching shirt number.
+        # Actual one-word registered full names can still match exactly.
+        if len(raw_name.split())==1 and normalized(candidate.get("full_name") or "")!=raw_name:
+            if shirt is None or candidate.get("shirt_number") is None or str(shirt)!=str(candidate["shirt_number"]):
+                return None, "single_word_alias_without_verified_shirt"
+            return candidate, "single_word_display_alias_plus_shirt"
+        return candidate, "exact_team_name"
     if len(exact)>1:
         narrowed = [p for p in exact if str(p.get("shirt_number"))==str(shirt) and shirt is not None]
         if len(narrowed)==1:
             return narrowed[0], "exact_team_name_jersey_tiebreak"
         return None, "ambiguous_exact"
+
+    # Source names often omit middle/family-name suffixes used by the scout
+    # roster (e.g. Romelu Lukaku vs Romelu Menama Lukaku Bolingoli).
+    # Require at least TWO independently matching name tokens AND exactly
+    # one player within the SAME club. Never accept overlapping first names
+    # or guess an identity from an unrelated shirt number.
+    name_tokens=set(raw_name.split())
+    if len(name_tokens)>=2 and min(map(len,name_tokens))>=2:
+        token_matches=[
+            p for p in team_roster
+            if name_tokens.issubset(set(normalized(p.get("full_name") or "").split()))
+        ]
+        if len(token_matches)==1:
+            return token_matches[0], "unique_team_compound_name_tokens"
+        if len(token_matches)>1:
+            narrowed=[p for p in token_matches if shirt is not None
+                      and str(p.get("shirt_number"))==str(shirt)]
+            if len(narrowed)==1:
+                return narrowed[0], "unique_compound_tokens_and_jersey"
+            return None, "ambiguous_compound_name"
 
     # Do not match common first names or a guessed shirt number alone.
     # A source surname/compound surname can match uniquely only when both

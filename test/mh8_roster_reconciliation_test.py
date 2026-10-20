@@ -30,6 +30,25 @@ class ReconcileTests(unittest.TestCase):
         self.assertEqual(candidate["id"],195)
         self.assertEqual(why,"exact_team_name_jersey_tiebreak")
 
+    def test_unique_compound_name_without_middle_parts(self):
+        roster=[
+            {"id":590,"full_name":"Romelu Menama Lukaku Bolingoli",
+             "display_name":"Lukaku","shirt_number":None},
+            {"id":591,"full_name":"Rafael Alexandre da Conceição Leão",
+             "display_name":"Leao","shirt_number":27},
+        ]
+        matched,kind=m.choose_player({"player_name":"Romelu Lukaku","shirt_number":9},roster)
+        self.assertEqual(matched["id"],590)
+        self.assertEqual(kind,"unique_team_compound_name_tokens")
+        matched,kind=m.choose_player({"player_name":"Rafael Leão","shirt_number":27},roster)
+        self.assertEqual(matched["id"],591)
+        self.assertEqual(kind,"unique_team_compound_name_tokens")
+        matched,kind=m.choose_player({"player_name":"Lukaku","shirt_number":9},roster)
+        self.assertIsNone(matched,"one ambiguous single name must NOT auto-resolve")
+        roster.append({"id":592,"full_name":"Romelu A Lukaku","shirt_number":None})
+        matched,kind=m.choose_player({"player_name":"Romelu Lukaku","shirt_number":9},roster)
+        self.assertIsNone(matched,"duplicate names must fail closed")
+
     def test_missing_not_zero_and_no_automatic_fantasy_final(self):
         roster={"gameweek":8,"players":[
             {"id":100,"full_name":"Örnek Oyuncu","display_name":"Örnek Oyuncu",
