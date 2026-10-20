@@ -1,0 +1,90 @@
+{
+  "season": "2026-27",
+  "gameweek": 8,
+  "audited_on": "2026-10-20",
+  "source": "Each official TFF 'Detaylar' link from full-time schedule: https://www.tff.org/default.aspx?ftxtID=2966&pageID=600",
+  "warning": "Historically scout_match_history.match_id was treated as TFF macID although their per-fixture assignments are permuted in MH8. Preserve internal keys to avoid breaking model snapshots and historical references. Convert only at TFF ingestion boundary using this mapping.",
+  "matches": [
+    {
+      "internal_match_id": 317847,
+      "tff_match_id": 317852,
+      "home": "Çorum FK",
+      "away": "Rizespor",
+      "hg": 2,
+      "ag": 1,
+      "official_url": "https://www.tff.org/Default.aspx?macID=317852&pageID=29"
+    },
+    {
+      "internal_match_id": 317848,
+      "tff_match_id": 317855,
+      "home": "Erzurumspor",
+      "away": "Eyüpspor",
+      "hg": 2,
+      "ag": 0,
+      "official_url": "https://www.tff.org/Default.aspx?macID=317855&pageID=29"
+    },
+    {
+      "internal_match_id": 317849,
+      "tff_match_id": 317850,
+      "home": "Amed",
+      "away": "Konyaspor",
+      "hg": 1,
+      "ag": 0,
+      "official_url": "https://www.tff.org/Default.aspx?macID=317850&pageID=29"
+    },
+    {
+      "internal_match_id": 317850,
+      "tff_match_id": 317851,
+      "home": "Gençlerbirliği",
+      "away": "Galatasaray",
+      "hg": 0,
+      "ag": 1,
+      "official_url": "https://www.tff.org/Default.aspx?macID=317851&pageID=29"
+    },
+    {
+      "internal_match_id": 317851,
+      "tff_match_id": 317853,
+      "home": "Fenerbahçe",
+      "away": "Alanyaspor",
+      "hg": 3,
+      "ag": 0,
+      "official_url": "https://www.tff.org/Default.aspx?macID=317853&pageID=29"
+    },
+    {
+      "internal_match_id": 317852,
+      "tff_match_id": 317848,
+      "home": "Kasımpaşa",
+      "away": "Samsunspor",
+      "hg": 4,
+      "ag": 1,
+      "official_url": "https://www.tff.org/Default.aspx?macID=317848&pageID=29"
+    },
+    {
+      "internal_match_id": 317853,
+      "tff_match_id": 317854,
+      "home": "Kocaelispor",
+      "away": "Göztepe",
+      "hg": 1,
+      "ag": 2,
+      "official_url": "https://www.tff.org/Default.aspx?macID=317854&pageID=29"
+    },
+    {
+      "internal_match_id": 317854,
+      "tff_match_id": 317849,
+      "home": "Başakşehir",
+      "away": "Gaziantep",
+      "hg": 2,
+      "ag": 1,
+      "official_url": "https://www.tff.org/Default.aspx?macID=317849&pageID=29"
+    },
+    {
+      "internal_match_id": 317855,
+      "tff_match_id": 317847,
+      "home": "Trabzonspor",
+      "away": "Beşiktaş",
+      "hg": 2,
+      "ag": 0,
+      "official_url": "https://www.tff.org/Default.aspx?macID=317847&pageID=29"
+    }
+  ]
+}
