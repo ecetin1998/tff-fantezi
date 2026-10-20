@@ -128,5 +128,53 @@ class ReconcileTests(unittest.TestCase):
             m.reconcile(report,roster,reviewed,bad_official)
 
 
+    def test_independent_prior_tff_lineup_registration_links_two_source_ids_only(self):
+        from copy import deepcopy
+        root=Path(__file__).resolve().parents[1]/"data/source-evidence"
+        roster=json.loads(ROSTER.read_text(encoding="utf-8"))
+        official=json.loads((root/"gw8-scout-to-official-tff-match-identities-2026-10-20.json").read_text(encoding="utf-8"))
+        prior=json.loads((root/"gw8-reviewed-player-identities-tff-prior-lineup-2026-10-20.json").read_text(encoding="utf-8"))
+        self.assertEqual(len(prior["entries"]),2)
+        fixtures={f["match_id"]:f for f in roster["fixtures"]}
+        rows={f["match_id"]:{"fixture_id":f["match_id"],"status":"STRUCTURED_FIXTURE_CONFIRMED",
+              "data":{"observed_player_stat_components":[]}} for f in roster["fixtures"]}
+        for proof in prior["entries"]:
+            fixture=fixtures[proof["internal_match_id"]]
+            self.assertIn(proof["team_id"],(fixture["home_team_id"],fixture["away_team_id"]))
+            side="home" if fixture["home_team_id"]==proof["team_id"] else "away"
+            rows[proof["internal_match_id"]]["data"]["observed_player_stat_components"].append({
+                "side":side,"provider_id":proof["provider_player_id"],
+                "player_name":proof["provider_name"],
+                "shirt_number":proof["provider_shirt_number"],
+                "explicit_source_metrics":{},
+            })
+        report={"gameweek":8,"rows":[rows[k] for k in sorted(rows)]}
+        result=m.reconcile(report,roster,prior,official)
+        found={o["provider_player_id"]:o for match in result["matches"]
+               for o in match["observations"]}
+        for proof in prior["entries"]:
+            o=found[proof["provider_player_id"]]
+            self.assertEqual(o["scout_player_id"],proof["scout_player_id"])
+            self.assertEqual(o["mapping_method"],"reviewed_tff_prior_lineup_registration")
+            self.assertFalse(o["is_final_tff_fantasy"])
+        self.assertEqual(result["official_fantasy_points_written"],0)
+        self.assertFalse(result["safe_to_close_mh8"])
+
+        # Do not let a fabricated registration or jersey prove an identity.
+        tampered=deepcopy(prior)
+        tampered["entries"][0]["official_registration_url"]="https://www.tff.org/wrong"
+        with self.assertRaises(ValueError):
+            m.reconcile(report,roster,tampered,official)
+        tampered=deepcopy(prior)
+        tampered["entries"][1]["official_lineup_shirt_number"]="1"
+        with self.assertRaises(ValueError):
+            m.reconcile(report,roster,tampered,official)
+        # Without independently checked TFF identity proof, nickname stays unknown.
+        unmatched=m.reconcile(report,roster)
+        self.assertEqual(unmatched["unmatched_played"],0)
+        self.assertTrue(all(o["scout_player_id"] is None for fixture in unmatched["matches"]
+                            for o in fixture["observations"]))
+
+
 if __name__=="__main__":
     unittest.main()

@@ -1,0 +1,42 @@
+{
+  "season": "2026-27",
+  "gameweek": 8,
+  "reviewed_on": "2026-10-20",
+  "purpose": "Only link source IDs to known current-season TFF registered players. TFF macId 317847 lacks published lineup and therefore cannot establish current-match Fantasy scores or closure.",
+  "entries": [
+    {
+      "internal_match_id": 317855,
+      "official_tff_match_id": 317847,
+      "team_id": 1,
+      "provider_player_id": 359188,
+      "provider_name": "Fabinho",
+      "provider_shirt_number": "6",
+      "scout_player_id": 1009,
+      "scout_full_name": "Fábio Henrique Tavares",
+      "official_lineup_name": "FABIO HENRIQUE TAVARES",
+      "official_lineup_shirt_number": "6",
+      "evidence_basis": "prior_official_lineup_and_current_registration",
+      "official_lineup_reference_match_id": 317846,
+      "official_lineup_url": "https://www.tff.org/Default.aspx?macId=317846&pageID=528",
+      "official_registration_id": 2935737,
+      "official_registration_url": "https://www.tff.org/Default.aspx?kisiId=2935737&pageId=526"
+    },
+    {
+      "internal_match_id": 317855,
+      "official_tff_match_id": 317847,
+      "team_id": 1,
+      "provider_player_id": 1374500,
+      "provider_name": "Franculino",
+      "provider_shirt_number": "9",
+      "scout_player_id": 1471,
+      "scout_full_name": "Franculino Gluda Djú",
+      "official_lineup_name": "FRANCULINO GLUDA DJU",
+      "official_lineup_shirt_number": "9",
+      "evidence_basis": "prior_official_lineup_and_current_registration",
+      "official_lineup_reference_match_id": 317846,
+      "official_lineup_url": "https://www.tff.org/Default.aspx?macId=317846&pageID=528",
+      "official_registration_id": 2938221,
+      "official_registration_url": "https://www.tff.org/Default.aspx?kisiId=2938221&pageId=526"
+    }
+  ]
+}
