@@ -15,6 +15,8 @@ from pathlib import Path
 from audit_mh8_fotmob_sources import normalized
 
 ROSTER = Path("data/source-evidence/gw8-scout-roster-identities-2026-10-20.json")
+OFFICIAL = Path("data/source-evidence/gw8-scout-to-official-tff-match-identities-2026-10-20.json")
+REVIEWED = Path("data/source-evidence/gw8-reviewed-player-identities-tff-2026-10-20.json")
 
 
 def choose_player(observed: dict, team_roster: list[dict]):
@@ -76,7 +78,8 @@ def choose_player(observed: dict, team_roster: list[dict]):
     return None,"unresolved_identity"
 
 
-def reconcile(source_report: dict, roster: dict) -> dict:
+def reconcile(source_report: dict, roster: dict,
+              reviewed_aliases: dict | None = None, official: dict | None = None) -> dict:
     fixtures={int(m["match_id"]):m for m in roster.get("fixtures",[])}
     player_by_team=defaultdict(list)
     for p in roster["players"]:
@@ -85,6 +88,29 @@ def reconcile(source_report: dict, roster: dict) -> dict:
         raise ValueError("MH8 gameweek match required")
     if len(source_report.get("rows",[]))!=9 or len(fixtures)!=9:
         raise ValueError("All nine matches required before player reconciliation")
+    # Reviewed aliases are only accepted for the exact observed provider ID,
+    # fixture, team, name AND jersey, tied to the official TFF fixture crosswalk.
+    # Never generalize them into name-based auto-matching.
+    reviewed_lookup = {}
+    official_ids = {}
+    if reviewed_aliases is not None:
+        if reviewed_aliases.get("gameweek") != 8 or official is None or official.get("gameweek") != 8:
+            raise ValueError("reviewed identity proof requires MH8 official TFF crosswalk")
+        official_ids = {int(m["internal_match_id"]): int(m["tff_match_id"])
+                        for m in official["matches"]}
+        if len(official_ids) != 9:
+            raise ValueError("official fixture crosswalk is incomplete")
+        for proof in reviewed_aliases.get("entries", []):
+            key = (int(proof["internal_match_id"]), int(proof["provider_player_id"]))
+            if key in reviewed_lookup:
+                raise ValueError("duplicate reviewed provider identity")
+            if official_ids.get(key[0]) != int(proof["official_tff_match_id"]):
+                raise ValueError("reviewed alias official match differs from fixture crosswalk")
+            expected_url = ("https://www.tff.org/Default.aspx?macId="
+                            + str(proof["official_tff_match_id"]) + "&pageID=528")
+            if proof.get("official_lineup_url") != expected_url or not proof.get("official_lineup_name"):
+                raise ValueError("reviewed alias needs exact TFF fixture lineup provenance")
+            reviewed_lookup[key] = proof
     output=[]
     for match in source_report["rows"]:
         match_id=int(match["fixture_id"])
@@ -105,6 +131,21 @@ def reconcile(source_report: dict, roster: dict) -> dict:
                 raise ValueError("Bad source fixture side")
             team_id=int(fixture["home_team_id"] if side=="home" else fixture["away_team_id"])
             player,method=choose_player(o,player_by_team[team_id])
+            # Official TFF fixture lineup establishes the complete registered
+            # name and jersey when FotMob uses a nickname or older shirt number
+            # remains in the local roster. Missing proof stays unmatched.
+            if player is None:
+                proof = reviewed_lookup.get((match_id, o.get("provider_id")))
+                if proof is not None:
+                    if (int(proof["team_id"]) != team_id
+                        or normalized(proof["provider_name"]) != normalized(o.get("player_name") or "")
+                        or str(proof["provider_shirt_number"]) != str(o.get("shirt_number"))):
+                        raise ValueError("provider identity differs from reviewed TFF lineup proof")
+                    candidates = [p for p in player_by_team[team_id]
+                                  if p["id"] == int(proof["scout_player_id"])]
+                    if len(candidates) != 1 or candidates[0]["full_name"] != proof["scout_full_name"]:
+                        raise ValueError("reviewed Scout identity no longer matches roster")
+                    player,method = candidates[0], "reviewed_official_tff_lineup"
             metric=o.get("explicit_source_metrics") or {}
             # A nonempty metric record with no reported minutes does not
             # establish a played player. An explicit observed zero is valid,
@@ -147,9 +188,13 @@ def main():
     p.add_argument("--input",type=Path,required=True)
     p.add_argument("--roster",type=Path,default=ROSTER)
     p.add_argument("--output",type=Path,required=True)
+    p.add_argument("--official",type=Path,default=OFFICIAL)
+    p.add_argument("--reviewed",type=Path,default=REVIEWED)
     args=p.parse_args()
     x=reconcile(json.loads(args.input.read_text(encoding="utf-8")),
-                json.loads(args.roster.read_text(encoding="utf-8")))
+                json.loads(args.roster.read_text(encoding="utf-8")),
+                json.loads(args.reviewed.read_text(encoding="utf-8")),
+                json.loads(args.official.read_text(encoding="utf-8")))
     args.output.write_text(json.dumps(x,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
     print(f"MH8 roster match: {x['matched_played']}/{x['sourced_played']} played players matched; "
           f"{x['unmatched_played']} unmatched (0 official Fantasy points written)")
