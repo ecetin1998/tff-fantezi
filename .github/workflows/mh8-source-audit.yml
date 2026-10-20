@@ -9,6 +9,8 @@ on:
       - "scripts/probe_mh8_fotmob_structured.py"
       - "scripts/reconcile_mh8_provider_players.py"
       - "scripts/audit_mh8_nonparticipants.py"
+      - "scripts/stage_mh8_point_components.py"
+      - "test/mh8_point_components_test.py"
       - "test/mh8_nonparticipants_test.py"
       - "scripts/stage_mh8_observed_player_metrics.py"
       - "scripts/stage_mh8_event_adjudication.py"
@@ -168,6 +170,26 @@ jobs:
               "$RUNNER_TEMP/mh8-event-review.json"
             echo "- Card colors, assists and Fantasy bonus: NOT verified"
           } >> "$GITHUB_STEP_SUMMARY"
+      - name: Test TFF rule-based source scoring components without official totals
+        run: python3 -m unittest discover -s test -p mh8_point_components_test.py -v
+      - name: Stage read-only partial point components for all MH8 played players
+        run: |
+          set -euo pipefail
+          python3 scripts/stage_mh8_point_components.py \
+            --observed "$RUNNER_TEMP/mh8-observed-player-metrics.json" \
+            --events "$RUNNER_TEMP/mh8-event-review.json" \
+            --output "$RUNNER_TEMP/mh8-nonfinal-scoring-components.json"
+          jq -e '.gameweek == 8 and .source_played_count == 286 and
+                 .official_points_written == 0 and .ready_to_close == false and
+                 ([.rows[].computed_total_fantasy_points] | all(. == null)) and
+                 ([.rows[].official_bonus_points] | all(. == null))' \
+            "$RUNNER_TEMP/mh8-nonfinal-scoring-components.json"
+          {
+            echo
+            echo "### Scored partial TFF components are source observations, NOT official Fantasy totals"
+            echo "- 286 played players with source-backed scoring components"
+            echo "- Official bonus, clean sheets, conceded-goal timing and Fantasy totals remain UNVERIFIED"
+          } >> "$GITHUB_STEP_SUMMARY"
       - name: Archive source evidence and failures for review
         uses: actions/upload-artifact@v4
         if: always()
@@ -180,5 +202,6 @@ jobs:
             ${{ runner.temp }}/mh8-nonparticipant-coverage.json
             ${{ runner.temp }}/mh8-observed-player-metrics.json
             ${{ runner.temp }}/mh8-event-review.json
+            ${{ runner.temp }}/mh8-nonfinal-scoring-components.json
           if-no-files-found: warn
           retention-days: 14
