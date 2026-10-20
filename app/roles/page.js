@@ -12,7 +12,7 @@ const PAGE_SIZE=100
 const pct=v=>`${(Number(v||0)*100).toFixed(0)}%`
 const num=(v,d=0)=>Number(v||0).toFixed(d)
 const posLabel=p=>({GK:'KL',DEF:'DEF',MID:'OS',FWD:'FOR'}[p]||p||'—')
-const signalClass=s=>s==='ROL YÜKSELİYOR'?'up':s==='ROL DÜŞÜYOR'?'down':s==='DÖNÜŞ'?'return':s==='YOK'?'out':'stable'
+const signalClass=s=>s==='ÇIKIŞTA • SÜRE ARTIŞI'?'up':s==='ROL YÜKSELİYOR'?'up':s==='ROL DÜŞÜYOR'?'down':s==='DÖNÜŞ'?'return':s==='YOK'?'out':'stable'
 
 export async function renderRolesPage(page=1){
   const auth=await getAuthState()
@@ -30,10 +30,11 @@ export async function renderRolesPage(page=1){
   </>
   const roleData=await getRoleSignals()
   const {run,rows}=roleData
-  const order={'ROL YÜKSELİYOR':0,'DÖNÜŞ':1,'ROL DÜŞÜYOR':2,'YOK':3,'BELİRGİN DEĞİŞİM YOK':4}
+  const order={'ÇIKIŞTA • SÜRE ARTIŞI':0,'ROL YÜKSELİYOR':1,'DÖNÜŞ':2,'ROL DÜŞÜYOR':2,'YOK':3,'BELİRGİN DEĞİŞİM YOK':4}
   const sorted=[...rows].sort((a,b)=>(order[a.signal]??9)-(order[b.signal]??9)||Number(b.x_minutes)-Number(a.x_minutes))
   const changed=sorted.filter(r=>r.signal&&r.signal!=='BELİRGİN DEĞİŞİM YOK')
-  const rising=sorted.filter(r=>r.signal==='ROL YÜKSELİYOR'||r.signal==='DÖNÜŞ')
+  const rising=sorted.filter(r=>r.signal==='ÇIKIŞTA • SÜRE ARTIŞI'||r.signal==='ROL YÜKSELİYOR'||r.signal==='DÖNÜŞ')
+  const breakout=sorted.filter(r=>r.signal==='ÇIKIŞTA • SÜRE ARTIŞI')
   const falling=sorted.filter(r=>r.signal==='ROL DÜŞÜYOR'||r.signal==='YOK')
   const strongXI=sorted.filter(r=>Number(r.predicted_xi_probability||0)>=.75)
   const pageCount=Math.max(1,Math.ceil(sorted.length/PAGE_SIZE))
@@ -48,13 +49,13 @@ export async function renderRolesPage(page=1){
 
     <section className="role-summary-grid">
       <div className="card"><span>Rol değişimi</span><b>{changed.length}</b><small>dikkat gerektiren oyuncu</small></div>
-      <div className="card role-up"><span>Yükselen / dönüş</span><b>{rising.length}</b><small>dakika fırsatı artan</small></div>
+      <div className="card role-up"><span>Yükselen / dönüş</span><b>{rising.length}</b><small>{breakout.length} oyuncuda son maçlarda sürdürülebilir süre artışı</small></div>
       <div className="card role-down"><span>Düşen / yok</span><b>{falling.length}</b><small>dakika riski artan</small></div>
       <div className="card"><span>Güçlü İlk 11</span><b>{strongXI.length}</b><small>tahmini İlk 11 ≥ %75</small></div>
     </section>
 
     {safePage===1&&changed.length?<section className="card role-changes-card">
-      <div className="panel-head"><div><span className="eyebrow">ÖNE ÇIKAN DEĞİŞİMLER</span><h2>Rolü değişen oyuncular</h2></div><small>ilk 24 sinyal</small></div>
+      <div className="panel-head"><div><span className="eyebrow">ÖNE ÇIKAN DEĞİŞİMLER</span><h2>Çıkıştaki oyuncular ve rol değişimleri</h2></div><small>{breakout.length} çıkış sinyali • ilk 24 aday</small></div>
       <div className="role-change-grid">{changed.slice(0,24).map(r=>{
         const xiDelta=(Number(r.last2_xi_probability||0)-Number(r.previous2_xi_probability||0))*100
         const minDelta=Number(r.last2_minutes||0)-Number(r.previous2_minutes||0)
