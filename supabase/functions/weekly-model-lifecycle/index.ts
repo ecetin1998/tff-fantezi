@@ -2,6 +2,7 @@ import {createClient} from "https://esm.sh/@supabase/supabase-js@2"
 import {applyOfficialMinutesEvidence,firstRecordedRate,observedPer90} from "./externalRole.mjs"
 import {validFinalWeeklyPlayerRow} from "./closureSource.mjs"
 import {risingMinutesMomentum,trustedMinute} from "./momentum.mjs"
+import {reconcileDefenderXa} from "./defenderXa.mjs"
 
 const AUDIENCE="tff-fantezi-scout"
 const ISSUER="https://token.actions.githubusercontent.com"
@@ -409,7 +410,9 @@ async function prepare(sb:any,current:any,status:any,body:any={}){
     const xg90=per90(s.xg_total,minutes,n(priorRates[0]))
     const g90=per90(s.goals,minutes,n(priorRates[1]))
     const a90=per90(s.assists,minutes,n(priorRates[2]))
-    const xa90=firstRecordedRate(s.xa_per90,s.xa_model_per90,prior.effective_xa_per90,priorRates[3])
+    const xaRaw=firstRecordedRate(s.xa_per90,s.xa_model_per90,prior.effective_xa_per90,priorRates[3])
+    const xaReconcile=reconcileDefenderXa(s,p,rows.find(x=>Number(x.gameweek)===target-1),xaRaw)
+    const xa90=xaReconcile.rate
     const yc90=per90(s.yellow_cards,minutes,n(priorRates[4]))
     const rc90=per90(s.red_cards,minutes,n(priorRates[5]))
     const saves90=per90(s.saves,minutes,n(priorRates[6]))
@@ -423,7 +426,7 @@ async function prepare(sb:any,current:any,status:any,body:any={}){
       bench_weight:n(prior.bench_weight,1),durations,duration_weights:durationWeights,rates,
       data_confidence:prior.data_confidence||projMap.get(id)?.confidence||"medium",
       has_individual_prior:Boolean(prior.has_individual_prior),
-      source_note:key+(momentum.rising?" • momentum-v1 +"+momentum.role_uplift:"")+(officialShift.applied?" • resmî maç: "+event.match_ref:""),
+      source_note:key+(momentum.rising?" • momentum-v1 +"+momentum.role_uplift:"")+(xaReconcile.adjusted?" • defender-xa-source-window-v1 "+xaReconcile.source_minutes+"dk":"")+(officialShift.applied?" • resmî maç: "+event.match_ref:""),
       sub_role:p.primary_role||prior.sub_role||null,role_side:p.role_side||prior.role_side||null,
       effective_xa_per90:xa90
     })
@@ -624,7 +627,7 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
     stableRoleBenchmark===sourceBenchmark
       ?Promise.resolve({data:null,error:null})
       :sb.from("scout_replay_player_inputs").select("player_id,role_probability,durations,duration_weights,source_note").eq("gameweek",gw).eq("benchmark_version",stableRoleBenchmark).order("player_id"),
-    sb.from("scout_player_season_stats").select("player_id,xa_per90,xa_model_per90")
+    sb.from("scout_player_season_stats").select("player_id,through_gameweek,advanced_through_gameweek,minutes,xa_total,xa_per90,xa_model_per90,xa_source")
       .eq("season","2026-27").eq("through_gameweek",gw-1),
     sb.from("scout_player_weekly_points").select("player_id,gameweek,minutes,points,is_final,source_kind")
       .lt("gameweek",gw).eq("is_final",true).order("gameweek",{ascending:false}).limit(10000)
@@ -693,7 +696,13 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
     })
     const rates=(x.rates||[]).map(Number)
     const stats=sourceStatsMap.get(Number(x.player_id)) as any
-    if(stats)rates[3]=firstRecordedRate(stats.xa_per90,stats.xa_model_per90,rates[3])
+    // Use the same aligned source policy in weekly and intraday passes.
+    // Retain original stats fields; only the candidate rate is changed.
+    const rateRaw=stats?firstRecordedRate(stats.xa_per90,stats.xa_model_per90,rates[3]):rates[3]
+    const xaReconcile=reconcileDefenderXa(stats,player,
+      (weeklyMomentumRows.get(Number(x.player_id))||[]).find((w:any)=>Number(w.gameweek)===gw-1),
+      rateRaw)
+    rates[3]=xaReconcile.rate
     return {
       ...x,benchmark_version:benchmark,availability,rates,
       role_probability:adjusted.role,
@@ -701,6 +710,7 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
       duration_weights:adjusted.applied?adjusted.duration_weights:x.duration_weights,
       source_note:`intraday refresh from ${sourceBenchmark}; role baseline ${stableRoleBenchmark}; source ${latestSourceAt}`
         +(momentum.rising?` • momentum-v1 +${momentumBoost}`:"")
+        +(xaReconcile.adjusted?` • defender-xa-source-window-v1 ${xaReconcile.source_minutes}dk`:"")
         +(adjusted.applied?` • resmî maç: ${event.match_ref}`:"")
     }
   })
