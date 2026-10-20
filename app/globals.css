@@ -63,3 +63,36 @@
 html{font-family:var(--font-ui);text-size-adjust:100%;-webkit-text-size-adjust:100%}
 body,button,input,select,textarea{font-family:var(--font-ui)}
 button,input,select,textarea{font:inherit}
+
+
+/* Premium checkbox multi-filters, shared by player/team/weekly/availability/squad views. */
+.multi-filter{position:relative;min-width:0;width:100%;isolation:isolate}
+.multi-filter.is-open{z-index:90}
+.multi-filter-trigger{appearance:none;display:flex;align-items:center;justify-content:space-between;gap:9px;min-height:42px;padding:9px 12px;width:100%;max-width:100%;background:#fff;border:1px solid #dfe5ef;border-radius:11px;color:#3f4c65;text-align:left;font-size:13px;font-weight:700;line-height:1.3;box-shadow:0 2px 5px rgba(30,41,71,.025)}
+.multi-filter-trigger:hover,.multi-filter-trigger:focus-visible{border-color:#85cfc1;outline:none;box-shadow:0 0 0 3px rgba(17,150,128,.11)}
+.multi-filter.is-active-filter .multi-filter-trigger{background:#effbf6;color:#086852;border-color:#6ebdaa}
+.multi-filter-title{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;flex:1}
+.multi-filter-arrow{font-size:20px;color:#75869c;line-height:1;transform:translateY(-2px);transition:transform .14s ease}
+.multi-filter.is-open .multi-filter-arrow{transform:rotate(180deg) translateY(1px)}
+.multi-filter-panel{position:absolute;z-index:100;top:calc(100% + 7px);left:0;width:max(100%,235px);max-width:min(330px,calc(100vw - 30px));max-height:min(460px,70dvh);display:flex;flex-direction:column;overflow:hidden;border:1px solid #cfdcd8;border-radius:15px;background:#fff;color:#25374a;box-shadow:0 20px 52px rgba(20,37,45,.2)}
+.multi-filter-panel-top{display:flex;justify-content:space-between;align-items:center;gap:6px;padding:12px 12px 8px;color:#627187;font-size:11px;font-weight:700}
+.multi-filter-reset{border:none;background:transparent;color:#07826e;font-size:11px;font-weight:800;padding:4px 2px}
+.multi-filter-panel .multi-filter-search{margin:0 10px 8px;width:calc(100% - 20px);min-height:38px;padding:8px 10px;border:1px solid #d9e4e1;border-radius:9px;background:#f7faf9;color:#26384b;font-size:13px}
+.multi-filter-options{display:flex;flex-direction:column;overflow:auto;overscroll-behavior:contain;padding:2px 7px 7px;min-height:0;max-height:300px;scrollbar-width:thin}
+.multi-filter-option{display:flex;align-items:center;gap:10px;min-height:41px;padding:7px 9px;border-radius:9px;cursor:pointer;font-size:13px;font-weight:650;color:#34465d;line-height:1.25}
+.multi-filter-option:hover{background:#eef7f5}
+.multi-filter-option.selected{background:#e9f6ef;color:#076e55}
+.multi-filter-option input[type=checkbox]{appearance:auto;accent-color:#0c9975;flex:0 0 auto;width:17px;height:17px;min-height:17px;margin:0;padding:0;cursor:pointer}
+.multi-filter-empty{padding:14px 9px;color:#7c8796;font-size:12px}
+.multi-filter-footer{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:9px 11px;border-top:1px solid #e5edec;background:#f8faf9}
+.multi-filter-footer button{border:0;background:transparent;color:#196b5d;font-size:12px;font-weight:800;min-height:32px;padding:5px 8px;border-radius:8px}
+.multi-filter-footer .multi-filter-done{background:#117e69;color:white;padding:7px 15px}
+.multi-filter-footer button:focus-visible,.multi-filter-option:focus-within{outline:2px solid #60ad9a;outline-offset:1px}
+.player-filters>.multi-filter,.weekly-filters>.multi-filter,.availability-filters>.multi-filter,.team-analysis-filters>.multi-filter,.team-roster-tools>.multi-filter{align-self:stretch}
+.picker-filter-center>.multi-filter{flex:1 1 0;min-width:0}
+@media(max-width:760px){
+ .multi-filter-trigger{font-size:13px;min-height:44px;padding:9px 10px}
+ .multi-filter-panel{max-height:min(420px,60dvh)}
+ .team-roster-tools>.multi-filter{grid-column:auto}
+}
+@media(max-width:390px){.multi-filter-panel{width:calc(100vw - 44px);max-width:calc(100vw - 44px)}}
