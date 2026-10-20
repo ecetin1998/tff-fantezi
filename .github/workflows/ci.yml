@@ -48,6 +48,17 @@ jobs:
         run: python3 -m unittest discover -s test -p mh9_official_fixture_test.py -v
       - name: MH8 source-based scoring component safety tests
         run: python3 -m unittest discover -s test -p mh8_point_components_test.py -v
+      - name: MH9 Defender xA source audit — paired 50K shadow replay
+        # Diagnostic only. Never writes DB, promotes a run or changes official points.
+        run: |
+          mkdir -p artifacts
+          node scripts/audit_mh9_defender_xa.cjs --draws 50000 --seed 20261021 --out artifacts/mh9-defender-xa-50k.json
+      - name: Archive nonproduction 50K defender xA report
+        uses: actions/upload-artifact@v4
+        with:
+          name: mh9-defender-xa-50k-nonproduction
+          path: artifacts/mh9-defender-xa-50k.json
+          if-no-files-found: error
       - name: Build
         run: npm run build
       - name: Route runtime
