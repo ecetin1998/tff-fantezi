@@ -42,6 +42,8 @@ jobs:
         run: python3 -m unittest discover -s test -p mh8_roster_reconciliation_test.py -v
       - name: MH8 nonfinal event adjudication contract tests
         run: python3 -m unittest discover -s test -p mh8_event_adjudication_test.py -v
+      - name: MH8 guarded nonfinal point components tests
+        run: python3 -m unittest discover -s test -p mh8_point_components_test.py -v
       - name: Build
         run: npm run build
       - name: Route runtime
