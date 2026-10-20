@@ -623,7 +623,7 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
     sb.from("scout_replay_match_inputs").select("*").eq("gameweek",gw).eq("benchmark_version",sourceBenchmark).order("match_id"),
     stableRoleBenchmark===sourceBenchmark
       ?Promise.resolve({data:null,error:null})
-      :sb.from("scout_replay_player_inputs").select("player_id,role_probability,durations,duration_weights").eq("gameweek",gw).eq("benchmark_version",stableRoleBenchmark).order("player_id"),
+      :sb.from("scout_replay_player_inputs").select("player_id,role_probability,durations,duration_weights,source_note").eq("gameweek",gw).eq("benchmark_version",stableRoleBenchmark).order("player_id"),
     sb.from("scout_player_season_stats").select("player_id,xa_per90,xa_model_per90")
       .eq("season","2026-27").eq("through_gameweek",gw-1),
     sb.from("scout_player_weekly_points").select("player_id,gameweek,minutes,points,is_final,source_kind")
