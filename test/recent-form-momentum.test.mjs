@@ -24,7 +24,7 @@ test('no uplift for steady starters, single-game spike, recent nonparticipants',
 test('no uplift when unavailable, old samples, incomplete finality or synthetic zero',()=>{
   assert.equal(risingMinutesMomentum(week(90,90,10,10),9,.5).rising,false)
   assert.equal(risingMinutesMomentum(week(90,90,10,10),10).rising,false)
-  assert.equal(risingMinutesMomentum([h(8,90,false),h(7,90),h(6,10),h(5,10)],9).rising,false)
+  assert.equal(risingMinutesMomentum([h(8,null,'independently_calculated_source_events'),h(7,90),h(6,10),h(5,10)],9).rising,false)
   assert.equal(risingMinutesMomentum([h(8,90,'independently_calculated_source_events',false),h(7,90),h(6,10),h(5,10)],9).rising,false)
   // An MH8 inferred 0 minute is not verified evidence of a player being benched.
   assert.equal(risingMinutesMomentum([h(8,90,'independently_calculated_source_events'),h(7,90),h(6,0),h(5,0,'legacy_final_weekly')],9).prior_minutes,0)
