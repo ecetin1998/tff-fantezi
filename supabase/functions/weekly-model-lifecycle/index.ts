@@ -1,6 +1,8 @@
 import {createClient} from "https://esm.sh/@supabase/supabase-js@2"
 import {applyOfficialMinutesEvidence,firstRecordedRate,observedPer90} from "./externalRole.mjs"
 import {validFinalWeeklyPlayerRow} from "./closureSource.mjs"
+import {risingMinutesMomentum,trustedMinute} from "./momentum.mjs"
+import {reconcileDefenderXa} from "./defenderXa.mjs"
 
 const AUDIENCE="tff-fantezi-scout"
 const ISSUER="https://token.actions.githubusercontent.com"
@@ -299,7 +301,7 @@ async function prepare(sb:any,current:any,status:any,body:any={}){
     sb.from("scout_player_season_stats").select("*").eq("season","2026-27").eq("through_gameweek",Number(current.gameweek)),
     sb.from("scout_team_season_stats").select("*").eq("through_gameweek",Number(current.gameweek)),
     sb.from("scout_match_history").select("*").eq("season","2026-27").eq("gameweek",target).order("kickoff_at"),
-    sb.from("scout_player_weekly_points").select("player_id,gameweek,match_id,minutes,points,is_final").lt("gameweek",target).eq("is_final",true).order("gameweek",{ascending:false}).limit(10000),
+    sb.from("scout_player_weekly_points").select("player_id,gameweek,match_id,minutes,points,is_final,source_kind").lt("gameweek",target).eq("is_final",true).order("gameweek",{ascending:false}).limit(10000),
     sb.from("scout_replay_player_inputs").select("*").eq("gameweek",Number(current.gameweek)).eq("benchmark_version",priorBenchmark),
     sb.from("scout_teams").select("id,name"),
     sb.from("scout_player_projections").select("player_id,confidence,data_confidence").eq("run_id",current.id)
@@ -377,13 +379,21 @@ async function prepare(sb:any,current:any,status:any,body:any={}){
     const id=Number(p.id),prior=priorMap.get(id)||{},s=statsMap.get(id)||{},r=roleMap.get(id)||{},av=avMap.get(id)
     if(!av)throw new Error("AVAILABILITY_MISSING_"+id)
     const rows=(recent.get(id)||[]).slice(0,5)
-    let durations=rows.map(x=>clamp(1,90,n(x.minutes))).filter(x=>x>0)
+    // Independently calculated MH8 0-minute entries can mean "not in
+    // source", not verified DNP. Never teach role/bench probabilities
+    // that they are real zero-minute appearances.
+    const trustedRows=rows.filter(x=>trustedMinute(x)!==null)
+    let durations=trustedRows.map(x=>n(x.minutes)).filter(x=>x>0).map(x=>clamp(1,90,x))
     if(!durations.length)durations=(prior.durations||[]).map((x:any)=>clamp(1,90,n(x))).filter((x:number)=>x>0)
     if(!durations.length)durations=[p.position==="GK"?90:70]
     durations=durations.slice(0,5)
     let durationWeights=normalizedWeights(durations.length)
-    const recentMinuteRate=rows.length?clamp(0,1,avg(rows.slice(0,3).map(x=>n(x.minutes)/90))):n(prior.role_probability,n(r.predicted_xi_probability,.5))
+    const recentMinuteRate=trustedRows.length?clamp(0,1,avg(trustedRows.slice(0,3).map(x=>n(x.minutes)/90))):n(prior.role_probability,n(r.predicted_xi_probability,.5))
     let roleProb=clamp(.01,.995,.65*n(r.predicted_xi_probability,n(prior.role_probability,.5))+.35*recentMinuteRate)
+    // Existing minute weighting already gives recent games credit. Add only
+    // a small residual uplift for a *sustained*, independently evidenced rise.
+    const momentum=risingMinutesMomentum(rows,target,n(av.availability_probability,1))
+    if(momentum.rising)roleProb=clamp(.01,.995,roleProb+momentum.role_uplift)
     const event=official.latest.get(id)
     const officialShift=applyOfficialMinutesEvidence({
       baseline:roleProb,durations,durationWeights,
@@ -400,7 +410,9 @@ async function prepare(sb:any,current:any,status:any,body:any={}){
     const xg90=per90(s.xg_total,minutes,n(priorRates[0]))
     const g90=per90(s.goals,minutes,n(priorRates[1]))
     const a90=per90(s.assists,minutes,n(priorRates[2]))
-    const xa90=firstRecordedRate(s.xa_per90,s.xa_model_per90,prior.effective_xa_per90,priorRates[3])
+    const xaRaw=firstRecordedRate(s.xa_per90,s.xa_model_per90,prior.effective_xa_per90,priorRates[3])
+    const xaReconcile=reconcileDefenderXa(s,p,rows.find(x=>Number(x.gameweek)===target-1),xaRaw)
+    const xa90=xaReconcile.rate
     const yc90=per90(s.yellow_cards,minutes,n(priorRates[4]))
     const rc90=per90(s.red_cards,minutes,n(priorRates[5]))
     const saves90=per90(s.saves,minutes,n(priorRates[6]))
@@ -414,7 +426,7 @@ async function prepare(sb:any,current:any,status:any,body:any={}){
       bench_weight:n(prior.bench_weight,1),durations,duration_weights:durationWeights,rates,
       data_confidence:prior.data_confidence||projMap.get(id)?.confidence||"medium",
       has_individual_prior:Boolean(prior.has_individual_prior),
-      source_note:key+(officialShift.applied?" • resmî maç: "+event.match_ref:""),
+      source_note:key+(momentum.rising?" • momentum-v1 +"+momentum.role_uplift:"")+(xaReconcile.adjusted?" • defender-xa-source-window-v1 "+xaReconcile.source_minutes+"dk":"")+(officialShift.applied?" • resmî maç: "+event.match_ref:""),
       sub_role:p.primary_role||prior.sub_role||null,role_side:p.role_side||prior.role_side||null,
       effective_xa_per90:xa90
     })
@@ -428,13 +440,13 @@ async function prepare(sb:any,current:any,status:any,body:any={}){
       availability_source:"weekly-lifecycle",availability_probability:availability,
       top25_score:null,top25_rank:null,top25_model_version:null,confidence:projMap.get(id)?.confidence||"medium"
     })
-    const last2=rows.slice(0,2),prev2=rows.slice(2,4)
+    const last2=trustedRows.slice(0,2),prev2=trustedRows.slice(2,4)
     const last2Min=avg(last2.map(x=>n(x.minutes))),prev2Min=avg(prev2.map(x=>n(x.minutes)))
     const last2Xi=avg(last2.map(x=>clamp(0,1,n(x.minutes)/60))),prev2Xi=avg(prev2.map(x=>clamp(0,1,n(x.minutes)/60)))
     const d=last2Xi-prev2Xi
     const signal=officialShift.applied&&event.started&&Number(event.minutes)>=75
       ?"RESMÎ MAÇTA İLK 11":officialShift.applied&&event.squad_status==="unused"
-      ?"RESMÎ MAÇTA YEDEK":d>.20?"ROL YÜKSELİYOR":d<-.20?"ROL DÜŞÜYOR":"BELİRGİN DEĞİŞİM YOK"
+      ?"RESMÎ MAÇTA YEDEK":momentum.rising?momentum.signal:d>.20?"ROL YÜKSELİYOR":d<-.20?"ROL DÜŞÜYOR":"BELİRGİN DEĞİŞİM YOK"
     const goalWeight=Math.max(1e-6,.75*xg90+.25*g90)
     const assistWeight=Math.max(1e-6,.70*xa90+.30*a90)
     roleDraft.push({run_id:runId,player_id:id,last2_xi_probability:last2Xi,previous2_xi_probability:prev2Xi,last2_minutes:last2Min,previous2_minutes:prev2Min,signal,predicted_xi_probability:roleProb,x_minutes:0,availability_probability:availability,goalWeight,assistWeight,team_id:Number(p.team_id)})
@@ -609,16 +621,18 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
 
   const sourceBenchmark=String(latestMetaQ.data.benchmark_version)
   const stableRoleBenchmark=String(stableMetaQ.data?.benchmark_version||sourceBenchmark)
-  const [inputsQ,matchesQ,stableInputsQ,sourceStatsQ]=await Promise.all([
+  const [inputsQ,matchesQ,stableInputsQ,sourceStatsQ,weeklyRecentQ]=await Promise.all([
     sb.from("scout_replay_player_inputs").select("*").eq("gameweek",gw).eq("benchmark_version",sourceBenchmark).order("player_id"),
     sb.from("scout_replay_match_inputs").select("*").eq("gameweek",gw).eq("benchmark_version",sourceBenchmark).order("match_id"),
     stableRoleBenchmark===sourceBenchmark
       ?Promise.resolve({data:null,error:null})
-      :sb.from("scout_replay_player_inputs").select("player_id,role_probability,durations,duration_weights").eq("gameweek",gw).eq("benchmark_version",stableRoleBenchmark).order("player_id"),
-    sb.from("scout_player_season_stats").select("player_id,xa_per90,xa_model_per90")
-      .eq("season","2026-27").eq("through_gameweek",gw-1)
+      :sb.from("scout_replay_player_inputs").select("player_id,role_probability,durations,duration_weights,source_note").eq("gameweek",gw).eq("benchmark_version",stableRoleBenchmark).order("player_id"),
+    sb.from("scout_player_season_stats").select("player_id,through_gameweek,advanced_through_gameweek,minutes,xa_total,xa_per90,xa_model_per90,xa_source")
+      .eq("season","2026-27").eq("through_gameweek",gw-1),
+    sb.from("scout_player_weekly_points").select("player_id,gameweek,minutes,points,is_final,source_kind")
+      .lt("gameweek",gw).eq("is_final",true).order("gameweek",{ascending:false}).limit(10000)
   ])
-  for(const q of [inputsQ,matchesQ,stableInputsQ,sourceStatsQ])if(q.error)throw q.error
+  for(const q of [inputsQ,matchesQ,stableInputsQ,sourceStatsQ,weeklyRecentQ])if(q.error)throw q.error
   if(!(inputsQ.data||[]).length||!(matchesQ.data||[]).length)throw new Error("CURRENT_SIM_INPUT_COVERAGE_MISSING")
   const stableInputsMap=new Map(((stableInputsQ.data||inputsQ.data)||[]).map((x:any)=>[Number(x.player_id),x]))
   const stableRoleMap=new Map([...stableInputsMap.entries()].map(([id,x]:any)=>[id,n(x.role_probability,.5)]))
@@ -639,6 +653,12 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
       latest_source_at:latestSourceAt,deadline_at:new Date(deadline).toISOString(),
       min_interval_hours:minInterval,input_snapshot_hash:existing.data.input_snapshot_hash||null
     }
+  }
+  const weeklyMomentumRows=new Map<number,any[]>()
+  for(const w of weeklyRecentQ.data||[]){
+    const id=Number(w.player_id)
+    if(!weeklyMomentumRows.has(id))weeklyMomentumRows.set(id,[])
+    weeklyMomentumRows.get(id)!.push(w)
   }
   const sourceStatsMap=new Map((sourceStatsQ.data||[]).map((x:any)=>[Number(x.player_id),x]))
   const avMap=new Map((availabilityQ.data||[]).map((x:any)=>[Number(x.player_id),x]))
@@ -664,21 +684,33 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
     const stableInput=stableInputsMap.get(Number(x.player_id)) as any || x
     const event=official.latest.get(Number(x.player_id))
     const player=officialPlayers.get(Number(x.player_id))
+    const momentum=risingMinutesMomentum(weeklyMomentumRows.get(Number(x.player_id))||[],gw,availability)
+    // Never add the same rise twice: non-intraday inputs may already include it.
+    const momentumBoost=String(stableInput.source_note||"").includes("momentum-v1")
+      ?0:momentum.role_uplift
     const adjusted=applyOfficialMinutesEvidence({
-      baseline:stableRole,durations:stableInput.durations,durationWeights:stableInput.duration_weights,
+      baseline:clamp(.01,.995,stableRole+momentumBoost),durations:stableInput.durations,durationWeights:stableInput.duration_weights,
       fixtureKickoff:targetKickoffs.get(Number(x.club_id))||new Date(kickoff).toISOString(),evidence:event,
       sameSlotStarter:player&&event?official.directCompetitor(player,event):false,
       availability,
     })
     const rates=(x.rates||[]).map(Number)
     const stats=sourceStatsMap.get(Number(x.player_id)) as any
-    if(stats)rates[3]=firstRecordedRate(stats.xa_per90,stats.xa_model_per90,rates[3])
+    // Use the same aligned source policy in weekly and intraday passes.
+    // Retain original stats fields; only the candidate rate is changed.
+    const rateRaw=stats?firstRecordedRate(stats.xa_per90,stats.xa_model_per90,rates[3]):rates[3]
+    const xaReconcile=reconcileDefenderXa(stats,player,
+      (weeklyMomentumRows.get(Number(x.player_id))||[]).find((w:any)=>Number(w.gameweek)===gw-1),
+      rateRaw)
+    rates[3]=xaReconcile.rate
     return {
       ...x,benchmark_version:benchmark,availability,rates,
       role_probability:adjusted.role,
       durations:adjusted.applied?adjusted.durations:x.durations,
       duration_weights:adjusted.applied?adjusted.duration_weights:x.duration_weights,
       source_note:`intraday refresh from ${sourceBenchmark}; role baseline ${stableRoleBenchmark}; source ${latestSourceAt}`
+        +(momentum.rising?` • momentum-v1 +${momentumBoost}`:"")
+        +(xaReconcile.adjusted?` • defender-xa-source-window-v1 ${xaReconcile.source_minutes}dk`:"")
         +(adjusted.applied?` • resmî maç: ${event.match_ref}`:"")
     }
   })
@@ -719,8 +751,12 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
       signal:(()=>{
         const event=official.latest.get(Number(x.player_id))
         const used=event&&String(input?.source_note||"").includes(String(event.match_ref))
+        const momentum=risingMinutesMomentum(
+          weeklyMomentumRows.get(Number(x.player_id))||[],gw,
+          n(av?.availability_probability,1))
         return used&&event.started&&Number(event.minutes)>=75?"RESMÎ MAÇTA İLK 11"
-          :used&&event.squad_status==="unused"?"RESMÎ MAÇTA YEDEK":x.signal
+          :used&&event.squad_status==="unused"?"RESMÎ MAÇTA YEDEK"
+          :momentum.rising?momentum.signal:x.signal
       })(),
       availability_probability:clamp(0,1,n(av?.availability_probability,x.availability_probability)),
       team_goal_share:(()=>{const rates=(input?.rates||[]).map(Number);return Math.max(1e-6,.75*n(rates[0])+.25*n(rates[1]))})(),
