@@ -52,7 +52,7 @@ jobs:
         # Diagnostic only. Never writes DB, promotes a run or changes official points.
         run: |
           mkdir -p artifacts
-          node scripts/audit_mh9_defender_xa.cjs --draws 50000 --seed 20261021 --out artifacts/mh9-defender-xa-50k.json
+          node scripts/audit_mh9_defender_xa.js --draws 50000 --seed 20261021 --out artifacts/mh9-defender-xa-50k.json
       - name: Archive nonproduction 50K defender xA report
         uses: actions/upload-artifact@v4
         with:
