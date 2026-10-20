@@ -3,20 +3,21 @@ import { useMemo, useState } from 'react'
 import Link from 'next/link'
 import { availabilityDateLabel, availabilityReturnLabel, availabilityReason, availabilityStatusLabel } from '@/lib/availability'
 import {playerLabel} from '@/lib/playerPresentation'
+import MultiSelectFilter from '@/components/MultiSelectFilter'
 
 const posLabel=p=>({GK:'KL',DEF:'DEF',MID:'OS',FWD:'FOR'}[p]||p||'—')
 const fmtUpdate=value=>value?new Intl.DateTimeFormat('tr-TR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit',timeZone:'Europe/Istanbul'}).format(new Date(value)):'—'
 
 export default function AvailabilityTable({ rows, freshnessAt=null }){
-  const [team,setTeam]=useState('')
-  const [type,setType]=useState('')
+  const [team,setTeam]=useState([])
+  const [type,setType]=useState([])
   const [q,setQ]=useState('')
   const [sort,setSort]=useState({key:null,dir:'asc'})
 
   const teams=useMemo(()=>[...new Set((rows||[]).map(r=>r.team).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'tr')),[rows])
   const filtered=useMemo(()=>rows.filter(r=>
-    (!team||r.team===team) &&
-    (!type||(type==='risk' ? Number(r.availability_probability)>0&&Number(r.availability_probability)<1 : r.availability_type===type)) &&
+    (!team.length||team.includes(r.team)) &&
+    (!type.length||type.some(t=>t==='risk' ? Number(r.availability_probability)>0&&Number(r.availability_probability)<1 : r.availability_type===t)) &&
     (!q||(`${r.player?.full_name||''} ${r.player?.short_label||''} ${r.team||''} ${r.canonical_reason||''} ${r.suspension_fixture||''}`).toLocaleLowerCase('tr').includes(q.toLocaleLowerCase('tr')))
   ),[rows,team,type,q])
 
@@ -42,16 +43,12 @@ export default function AvailabilityTable({ rows, freshnessAt=null }){
 
     <div className="filters availability-filters">
       <input value={q} onChange={e=>setQ(e.target.value)} placeholder="Oyuncu, takım veya sakatlık ara..."/>
-      <select value={team} onChange={e=>setTeam(e.target.value)}>
-        <option value="">Tüm takımlar</option>
-        {teams.map(t=><option key={t} value={t}>{t}</option>)}
-      </select>
-      <select value={type} onChange={e=>setType(e.target.value)}>
-        <option value="">Tüm durumlar</option>
-        <option value="injuries">Sakatlık</option>
-        <option value="suspensions">Ceza</option>
-        <option value="risk">Riskli</option>
-      </select>
+      <MultiSelectFilter ariaLabel="Sakatlık ve ceza takım filtreleri" placeholder="Tüm takımlar" searchable
+        value={team} onChange={setTeam} options={teams.map(t=>({value:t,label:t}))}/>
+      <MultiSelectFilter ariaLabel="Sakatlık ve ceza durum filtreleri" placeholder="Tüm durumlar"
+        value={type} onChange={setType} options={[
+          {value:'injuries',label:'Sakatlık'},{value:'suspensions',label:'Ceza'},{value:'risk',label:'Riskli'}
+        ]}/>
     </div>
 
     <div className="table-summary availability-summary">
