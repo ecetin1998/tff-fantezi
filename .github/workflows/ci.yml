@@ -44,6 +44,8 @@ jobs:
         run: python3 -m unittest discover -s test -p mh8_event_adjudication_test.py -v
       - name: MH8 nonparticipant source coverage tests
         run: python3 -m unittest discover -s test -p mh8_nonparticipants_test.py -v
+      - name: MH9 official fixture crosswalk safety tests
+        run: python3 -m unittest discover -s test -p mh9_official_fixture_test.py -v
       - name: Build
         run: npm run build
       - name: Route runtime
