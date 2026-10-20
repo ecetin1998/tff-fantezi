@@ -1,0 +1,43 @@
+name: MH9 one-time authorized Cloudflare release request
+
+# Exactly one owner-authorized production release: only the merge that first
+# creates this file on main can request the existing manually dispatched
+# Cloudflare deployment. Normal production deploy policy is unchanged.
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/mh9-one-time-release.yml"
+
+permissions:
+  contents: read
+  actions: write
+
+jobs:
+  dispatch-existing-production:
+    if: startsWith(github.event.head_commit.message, 'chore(release): request MH9 production deploy')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fail closed unless this is the one approved MH9 release commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF" = "refs/heads/main"
+          expected_parent="edc20bf2d57bdd08a95772773ac21f363ddf1668"
+          test "$(git rev-parse HEAD^)" = "$expected_parent" || {
+            echo "One-time MH9 production release parent changed; refuse dispatch."
+            exit 1
+          }
+          test "$(gh api "repos/$GITHUB_REPOSITORY/commits/main" --jq .sha)" = "$GITHUB_SHA"
+          gh api "repos/$GITHUB_REPOSITORY/actions/workflows/cloudflare-deploy.yml" --jq '.state' | grep -qx active
+      - name: Request existing production deployment via approved workflow_dispatch
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh workflow run cloudflare-deploy.yml --ref main
+          echo "One-time MH9 production release dispatched for commit $GITHUB_SHA."
+          echo "Existing Cloudflare deployment independently checks live SHA, smoke, public API and MH9 pages."
