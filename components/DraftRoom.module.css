@@ -172,3 +172,12 @@
 .countdownUrgent{background:#fff1ef;border-color:#f4b0ab}
 .countdownUrgent strong{color:#b72b34}
 @media(max-width:660px){.timerGrid{grid-template-columns:1fr}.lobbyTimerPanel{padding:12px}.countdown{min-width:0;width:100%}}
+
+/* Archived-room lifecycle: keep destructive host action visually distinct. */
+.archiveDanger{border:1px solid #eebbc2!important;border-radius:10px;background:#fff4f5!important;color:#a92c3c!important;padding:10px 12px;font-weight:800;cursor:pointer;font-size:12px;min-height:40px}
+.archiveDanger:hover:not(:disabled){background:#ffe8ec!important}
+.archiveDanger:disabled{opacity:.48;cursor:not-allowed}
+.closedNotice{display:grid;justify-items:start;gap:8px;padding:20px;background:#fff5f5;border:1px solid #efcbd0;border-radius:14px;color:#733846}
+.closedNotice strong{font-size:17px}
+.closedNotice p{font-size:12px;color:#81606a;line-height:1.55;margin:0!important}
+@media(max-width:660px){.roomActions .archiveDanger{width:100%}}
