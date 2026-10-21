@@ -66,12 +66,13 @@ def collect(manifest,roster,official,reviewed,prior,reader=read_verified_fixture
         src=detail_by_match[match_id].get('content',{}).get('lineup') or {}
         by_id={}
         for side in ('homeTeam','awayTeam'):
+            formation=(src.get(side) or {}).get('formation')
             for starter in (src.get(side) or {}).get('starters') or []:
                 if not isinstance(starter,dict):
                     continue
                 pid=starter.get('id')
                 if isinstance(pid,(int,str)) and str(pid).isdigit():
-                    by_id[int(pid)]=starter
+                    by_id[int(pid)]={**starter,'_formation':formation}
         for provider_id,obs in proof.items():
             starter=by_id.get(provider_id)
             if starter is None:
@@ -82,7 +83,11 @@ def collect(manifest,roster,official,reviewed,prior,reader=read_verified_fixture
             placements.append({'player_id':int(obs['scout_player_id']),
               'match_id':match_id,'provider_position_id':starter.get('positionId'),
               'horizontal_x':x,'horizontal_y':y,
-              'source_position_short':starter.get('positionStringShort')})
+              'source_position_short':starter.get('positionStringShort'),
+              'formation':starter.get('_formation'),
+              'team_id':int(obs['team_id']),
+              'provider_player_id':provider_id,
+              'minutes':int(obs['source_metrics'].get('minutes_played') or 0)})
             position=explicit_role(starter)
             if position is None:
                 unknown[str(starter.get('positionStringShort') or
