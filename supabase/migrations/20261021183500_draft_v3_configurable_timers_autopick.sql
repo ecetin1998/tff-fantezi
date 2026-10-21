@@ -133,6 +133,7 @@ begin
  select * into rm from public.scout_draft_rooms where id=p_room_id for update;
  if not found or rm.status<>'drafting' or rm.draft_kind<>'classic' or rm.next_pick>rm.team_count*15
  then raise exception 'DRAFT_NOT_ACTIVE';end if;
+ if rm.rules_version>=3 and rm.classic_deadline is not null and clock_timestamp()>=rm.classic_deadline then raise exception 'PICK_TIME_EXPIRED';end if;
  r:=((rm.next_pick-1)/rm.team_count)+1;
  slot:=mod(rm.next_pick-1,rm.team_count)+1;
  if rm.mode='snake' and mod(r,2)=0 then slot:=rm.team_count+1-slot;end if;
@@ -400,6 +401,74 @@ begin
  update public.scout_draft_rooms set updated_at=clock_timestamp() where id=rm.id;
  return jsonb_build_object('ok',true,'amount',p_amount,'ends_at',
     (select ends_at from public.scout_draft_auction_lots where id=lot.id),'max_bid',max_bid);
+end $$;
+
+
+create or replace function public.scout_draft_auction_finish_bidding(p_room_id uuid)
+returns void language plpgsql security definer set search_path=public,pg_temp as $$
+declare rm public.scout_draft_rooms%rowtype;target integer;
+begin
+ if auth.uid() is null then raise exception 'AUTH_REQUIRED';end if;
+ select * into rm from public.scout_draft_rooms where id=p_room_id for update;
+ if not found or rm.host_user_id<>auth.uid() then raise exception 'HOST_ONLY';end if;
+ if rm.status<>'drafting' or rm.draft_kind<>'auction' or rm.rules_version<2
+   or rm.auction_phase<>'bidding' then raise exception 'AUCTION_NOT_ACTIVE';end if;
+ if exists(select 1 from public.scout_draft_auction_lots where room_id=rm.id and status='open')
+ then raise exception 'LOT_ALREADY_OPEN';end if;
+ if (select count(*) from public.scout_draft_auction_lots where room_id=rm.id)<rm.team_count
+ then raise exception 'WAIT_ONE_NOMINATION_ROUND';end if;
+ select t.draft_order into target from public.scout_draft_teams t
+ where t.room_id=rm.id and (select count(*) from public.scout_draft_picks p
+                             where p.room_id=rm.id and p.team_id=t.id)<15
+ order by t.draft_order limit 1;
+ if target is null then raise exception 'DRAFT_NOT_ACTIVE';end if;
+ update public.scout_draft_rooms set auction_phase='completion',
+ auction_nomination_index=target,updated_at=clock_timestamp() where id=rm.id;
+end $$;
+
+create or replace function public.scout_draft_auction_complete_pick(p_room_id uuid,p_player_id integer)
+returns integer language plpgsql security definer set search_path=public,pg_temp as $$
+declare rm public.scout_draft_rooms%rowtype;t public.scout_draft_teams%rowtype;
+ position_name text;position_count integer;position_cap integer;
+ filled integer;spent integer;next_seat integer;
+begin
+ if auth.uid() is null then raise exception 'AUTH_REQUIRED';end if;
+ select * into rm from public.scout_draft_rooms where id=p_room_id for update;
+ if not found or rm.status<>'drafting' or rm.rules_version<2 or rm.draft_kind<>'auction'
+    or rm.auction_phase<>'completion' then raise exception 'AUCTION_NOT_ACTIVE';end if;
+ select * into t from public.scout_draft_teams where room_id=rm.id
+ and draft_order=rm.auction_nomination_index;
+ if not found or t.user_id is distinct from auth.uid() then raise exception 'NOT_YOUR_TURN';end if;
+ select sp.position into position_name from public.scout_players sp
+ join public.scout_player_projections pr on pr.run_id=rm.model_run_id and pr.player_id=sp.id
+ where sp.id=p_player_id and sp.active and pr.xfp is not null
+ and coalesce(pr.availability_probability,1)>0;
+ if position_name is null then raise exception 'INVALID_PLAYER';end if;
+ if exists(select 1 from public.scout_draft_picks where room_id=rm.id and player_id=p_player_id)
+ then raise exception 'PLAYER_ALREADY_PICKED';end if;
+ select count(*),coalesce(sum(price),0) into filled,spent from public.scout_draft_picks
+ where room_id=rm.id and team_id=t.id;
+ if filled>=15 or spent+1>rm.auction_budget then raise exception 'BID_EXCEEDS_SAFE_BUDGET';end if;
+ select count(*) into position_count from public.scout_draft_picks p
+ join public.scout_players sp on sp.id=p.player_id
+ where p.room_id=rm.id and p.team_id=t.id and sp.position=position_name;
+ position_cap:=case position_name when 'GK' then 2 when 'DEF' then 5 when 'MID' then 5 else 3 end;
+ if position_count>=position_cap then raise exception 'POSITION_FULL';end if;
+ insert into public.scout_draft_picks(room_id,team_id,player_id,pick_number,price)
+ values(rm.id,t.id,p_player_id,rm.next_pick,1);
+ if rm.next_pick=rm.team_count*15 then
+   update public.scout_draft_rooms set next_pick=rm.next_pick+1,status='finished',
+   updated_at=clock_timestamp() where id=rm.id;
+ else
+   select next_t.draft_order into next_seat from public.scout_draft_teams next_t
+   where next_t.room_id=rm.id and (select count(*) from public.scout_draft_picks p
+     where p.room_id=rm.id and p.team_id=next_t.id)<15
+   order by mod(next_t.draft_order-rm.auction_nomination_index-1+rm.team_count,rm.team_count)
+   limit 1;
+   update public.scout_draft_rooms set next_pick=rm.next_pick+1,
+   auction_nomination_index=next_seat,updated_at=clock_timestamp() where id=rm.id;
+ end if;
+ return rm.next_pick;
 end $$;
 
 
