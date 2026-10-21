@@ -58,5 +58,6 @@ test('base lineup and duration trend cannot learn fake zero-minute benching',()=
   assert.match(worker,/const trustedRows=rows\.filter\(x=>trustedMinute\(x\)!==null\)/)
   assert.match(worker,/const recentMinuteRate=trustedRows\.length/)
   assert.match(worker,/select\("player_id,role_probability,durations,duration_weights,source_note"\)/)
-  assert.match(worker,/const last2=trustedRows\.slice/)
+  assert.match(worker,/roleTrendFromWeeklyEvidence\\(rows,target\\)/)
+  assert.doesNotMatch(worker,/const last2=trustedRows\\.slice/)
 })
