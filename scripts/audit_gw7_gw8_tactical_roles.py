@@ -50,8 +50,12 @@ def collect_gw7(*,reader=read_json,fetcher=fetch_html,pause=True):
         requested=expected['source_url']
         if not requested.startswith('https://www.fotmob.com/'):
             raise ValueError('untrusted historical match source')
-        canonical=re.sub(r'^https://www\\.fotmob\\.com/(?:tr|en-GB)/matches/',
-                         'https://www.fotmob.com/matches/',requested)
+        canonical=requested.replace('https://www.fotmob.com/tr/matches/',
+            'https://www.fotmob.com/matches/',1).replace(
+            'https://www.fotmob.com/en-GB/matches/',
+            'https://www.fotmob.com/matches/',1)
+        if not canonical.startswith('https://www.fotmob.com/matches/'):
+            raise ValueError('historical fixture URL is not an allowlisted FotMob match')
         html=fetcher(canonical)
         details=None
         for provider_id in candidates(html)[:3]:
