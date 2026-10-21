@@ -4,6 +4,7 @@ import {validFinalWeeklyPlayerRow} from "./closureSource.mjs"
 import {risingMinutesMomentum,trustedMinute} from "./momentum.mjs"
 import {reconcileDefenderXa} from "./defenderXa.mjs"
 import {fetchTrustedWeeklyEvidence} from "./weeklyEvidence.mjs"
+import {roleTrendFromWeeklyEvidence} from "./roleTrend.mjs"
 
 const AUDIENCE="tff-fantezi-scout"
 const ISSUER="https://token.actions.githubusercontent.com"
@@ -441,13 +442,10 @@ async function prepare(sb:any,current:any,status:any,body:any={}){
       availability_source:"weekly-lifecycle",availability_probability:availability,
       top25_score:null,top25_rank:null,top25_model_version:null,confidence:projMap.get(id)?.confidence||"medium"
     })
-    const last2=trustedRows.slice(0,2),prev2=trustedRows.slice(2,4)
-    const last2Min=avg(last2.map(x=>n(x.minutes))),prev2Min=avg(prev2.map(x=>n(x.minutes)))
-    const last2Xi=avg(last2.map(x=>clamp(0,1,n(x.minutes)/60))),prev2Xi=avg(prev2.map(x=>clamp(0,1,n(x.minutes)/60)))
-    const d=last2Xi-prev2Xi
+    const {last2Min,prev2Min,last2Xi,prev2Xi,trend:d}=roleTrendFromWeeklyEvidence(rows,target)
     const signal=officialShift.applied&&event.started&&Number(event.minutes)>=75
       ?"RESMÎ MAÇTA İLK 11":officialShift.applied&&event.squad_status==="unused"
-      ?"RESMÎ MAÇTA YEDEK":momentum.rising?momentum.signal:d>.20?"ROL YÜKSELİYOR":d<-.20?"ROL DÜŞÜYOR":"BELİRGİN DEĞİŞİM YOK"
+      ?"RESMÎ MAÇTA YEDEK":momentum.rising?momentum.signal:d!==null&&d>.20?"ROL YÜKSELİYOR":d!==null&&d<-.20?"ROL DÜŞÜYOR":"BELİRGİN DEĞİŞİM YOK"
     const goalWeight=Math.max(1e-6,.75*xg90+.25*g90)
     const assistWeight=Math.max(1e-6,.70*xa90+.30*a90)
     roleDraft.push({run_id:runId,player_id:id,last2_xi_probability:last2Xi,previous2_xi_probability:prev2Xi,last2_minutes:last2Min,previous2_minutes:prev2Min,signal,predicted_xi_probability:roleProb,x_minutes:0,availability_probability:availability,goalWeight,assistWeight,team_id:Number(p.team_id)})
