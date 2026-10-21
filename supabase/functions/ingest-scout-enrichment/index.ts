@@ -81,6 +81,90 @@ Deno.serve(async(req:Request)=>{
     const events=Array.isArray(body.events)?body.events:[]
     const sb=createClient(Deno.env.get("SUPABASE_URL")!,Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!)
 
+    if(body.mode==="verified_gw8_attack"){
+      // Explicitly sourced evidence only: never route this into season totals,
+      // historical Fantasy points, model predictions or the lossy weekly_delta importer.
+      if(season!=="2026-27"||throughGameweek!==8||
+         body.kind!=="READ_ONLY_VERIFIED_MH8_ADVANCED_ACTIONS"||
+         body.verified_fixtures!==9||body.matched_played!==286||
+         body.unmatched_played!==0||body.db_writes!==0||
+         body.fantasy_points_written!==0||
+         body.source!=="FotMob matchDetails full-time observed playerStats")
+        return Response.json({error:"UNVERIFIED_MH8_ATTACK_EVIDENCE"},{status:422})
+      const rawRows=Array.isArray(body.rows)?body.rows:[]
+      if(rawRows.length!==286)return Response.json({error:"MH8_ROW_COVERAGE_MISMATCH"},{status:422})
+      const [partsQ,playersQ,fixturesQ]=await Promise.all([
+        sb.from("scout_player_weekly_points")
+          .select("player_id,match_id,minutes,is_final").eq("gameweek",8).gt("minutes",0),
+        sb.from("scout_players").select("id,team_id").in("id",rawRows.map((r:any)=>r.scout_player_id)),
+        sb.from("scout_match_history")
+          .select("match_id,home_team_id,away_team_id,match_status,fantasy_closure")
+          .eq("season",season).eq("gameweek",8)
+      ])
+      for(const q of [partsQ,playersQ,fixturesQ])if(q.error)throw q.error
+      const participants=new Map((partsQ.data||[]).map((p:any)=>[Number(p.player_id),p]))
+      const roster=new Map((playersQ.data||[]).map((p:any)=>[Number(p.id),p]))
+      const fixtures=new Map((fixturesQ.data||[]).map((m:any)=>[Number(m.match_id),m]))
+      if(participants.size!==286||roster.size!==286||fixtures.size!==9)
+        return Response.json({error:"VERIFIED_SOURCE_ROSTER_OR_FIXTURE_COVERAGE_MISMATCH"},{status:409})
+      const observedColumns=["xg","xa","shots","shots_on_target","key_passes"]
+      const out:any[]=[],seen=new Set<number>(),observedCounts:Record<string,number>={}
+      for(const k of observedColumns)observedCounts[k]=0
+      const sourceMatches=new Set<number>()
+      for(const raw of rawRows){
+        const playerId=Number(raw.scout_player_id),matchId=Number(raw.match_id)
+        const teamId=Number(raw.team_id),providerId=Number(raw.provider_player_id)
+        const part=participants.get(playerId),player=roster.get(playerId),fixture=fixtures.get(matchId)
+        if(!Number.isSafeInteger(playerId)||!Number.isSafeInteger(matchId)||
+           !Number.isSafeInteger(teamId)||!Number.isSafeInteger(providerId)||providerId<=0||
+           Number(raw.gameweek)!==8||seen.has(playerId)||!part||!player||!fixture||
+           part.is_final!==true||Number(part.match_id)!==matchId||
+           Number(player.team_id)!==teamId||
+           ![Number(fixture.home_team_id),Number(fixture.away_team_id)].includes(teamId)||
+           fixture.match_status!=="Bitti"||fixture.fantasy_closure!=="KAPANDI")
+          return Response.json({error:"MH8_PLAYER_MATCH_IDENTITY_INVALID",player_id:playerId},{status:422})
+        seen.add(playerId);sourceMatches.add(matchId)
+        const observation:any={
+          season,gameweek:8,player_id:playerId,match_id:matchId,team_id:teamId,
+          provider_player_id:providerId,
+          source:"FotMob matchDetails MH8 explicit playerStats"
+        }
+        for(const key of observedColumns){
+          const value=raw[key]
+          if(value===null||value===undefined){observation[key]=null;continue}
+          if(typeof value!=="number"||!Number.isFinite(value)||value<0||
+             (key==="xg"||key==="xa"?value>8:!Number.isInteger(value)||value>35))
+            return Response.json({error:"INVALID_OBSERVED_ATTACK_METRIC",player_id:playerId,field:key},{status:422})
+          observation[key]=value
+          observedCounts[key]++
+        }
+        if(observation.shots!==null&&observation.shots_on_target!==null&&
+           observation.shots_on_target>observation.shots)
+          return Response.json({error:"OBSERVED_SHOT_COUNTS_CONFLICT",player_id:playerId},{status:422})
+        out.push(observation)
+      }
+      if(seen.size!==286||sourceMatches.size!==9||
+         observedColumns.some(k=>observedCounts[k]!==Number(body.metric_coverage?.[k])))
+        return Response.json({error:"SOURCE_METRIC_COVERAGE_CHECKSUM_FAILED",counts:observedCounts},{status:422})
+      const existingQ=await sb.from("scout_verified_weekly_attack").select("*")
+        .eq("season",season).eq("gameweek",8)
+      if(existingQ.error)throw existingQ.error
+      if((existingQ.data||[]).length){
+        const old=new Map((existingQ.data||[]).map((x:any)=>[Number(x.player_id),x]))
+        const identical=old.size===286&&out.every(r=>{
+          const x:any=old.get(r.player_id)
+          return x&&["match_id","team_id","provider_player_id",...observedColumns]
+            .every(k=>String(x[k]??"NULL")===String(r[k]??"NULL"))
+        })
+        if(!identical)return Response.json({error:"IMMUTABLE_MH8_SOURCE_CONFLICT"},{status:409})
+        return Response.json({ok:true,mode:"verified_gw8_attack",reused:true,matched:286,counts:observedCounts,no_fantasy_writes:true})
+      }
+      const ins=await sb.from("scout_verified_weekly_attack").insert(out)
+      if(ins.error)throw ins.error
+      return Response.json({ok:true,mode:"verified_gw8_attack",matched:286,source_match_count:9,
+        counts:observedCounts,no_fantasy_writes:true,season_totals_unchanged:true})
+    }
+
     if(body.mode==="weekly_delta"){
       const norm=(v:any)=>String(v||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/ı/g,"i").replace(/ş/g,"s").replace(/ğ/g,"g").replace(/ç/g,"c").replace(/ö/g,"o").replace(/ü/g,"u").replace(/[^a-z0-9]+/g," ").trim()
       const teamNorm=(v:any)=>norm(v).replace(/\b(fk|sk|caykur)\b/g,"").replace(/\s+/g," ").trim()
