@@ -74,7 +74,8 @@ create or replace function public.scout_draft_auction_bid(p_room_id uuid,p_amoun
 returns jsonb language plpgsql security definer set search_path=public,pg_temp as $$
 declare rm public.scout_draft_rooms%rowtype;
  t public.scout_draft_teams%rowtype;lot public.scout_draft_auction_lots%rowtype;
- pos text;count_all integer;count_pos integer;spent integer;max_bid integer;
+ pos text;count_all integer;count_pos integer;max_bid integer;max_position integer;
+ spent integer;
 begin
  if auth.uid() is null then raise exception 'AUTH_REQUIRED';end if;
  select * into rm from public.scout_draft_rooms where id=p_room_id for update;
@@ -90,8 +91,10 @@ begin
  from public.scout_draft_picks where room_id=rm.id and team_id=t.id;
  select count(*) into count_pos from public.scout_draft_picks p join public.scout_players sp on sp.id=p.player_id
  where p.room_id=rm.id and p.team_id=t.id and sp.position=pos;
- if count_all>=15 or count_pos>=case pos when 'GK' then 2 when 'DEF' then 5 when 'MID' then 5 else 3 end
- then raise exception 'POSITION_FULL';end if;
+ max_position:=case pos when 'GK' then 2 when 'DEF' then 5 when 'MID' then 5 else 3 end;
+ if count_all>=15 or count_pos>=max_position then
+   raise exception 'POSITION_FULL';
+ end if;
  -- Always retain >=1 credit for each remaining empty roster position.
  max_bid:=rm.auction_budget-spent-(14-count_all);
  if p_amount>max_bid then raise exception 'BID_EXCEEDS_SAFE_BUDGET';end if;
