@@ -24,7 +24,7 @@ test('single match xG/xA cannot overwhelm season prior',()=>{
 })
 test('MH9 candidate uses unchanged baseline (no double application of MH8 evidence)',()=>{
   const worker=readFileSync(new URL('../supabase/functions/weekly-model-lifecycle/index.ts',import.meta.url),'utf8')
-  assert.match(worker,/blendVerifiedAttackRate\(n\(stableInput\.rates\?\.\[0\]/)
+  assert.match(worker,/blendVerifiedAttackRate\(n\(stableRates\[0\]/)
   assert.match(worker,/attackEvidence\.get\(Number\(x\.player_id\)\)/)
   assert.match(worker,/mh8-attack-source-v1/)
 })

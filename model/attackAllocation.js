@@ -40,7 +40,11 @@ function attackWeights(player,matches=[]){
   const setPiecePrior=normalizedDefenderRole(player)==='CB'
     ?Math.max(0,Number(player.team_set_piece_xg_per_match||0))*Math.max(0,Math.min(.35,Number(player.heading_box_share ?? 0.08)))
     :0;
-  const adjustedXg=Math.max(xgRate*.45,xgRate-attenuation*excess/(2+exposure))+setPiecePrior;
+  // Source note marks xG already shrunk by the lifecycle; never double penalize.
+  const rareChanceCalibrated=String(player.source_note||"").includes("role-aware-attack-v1");
+  const adjustedXg=rareChanceCalibrated
+    ?xgRate+setPiecePrior
+    :Math.max(xgRate*.45,xgRate-attenuation*excess/(2+exposure))+setPiecePrior;
   return {
     goal:Math.max(1e-6,.75*adjustedXg+.25*goalRate),
     assist:Math.max(1e-6,.70*xaRate+.30*assistRate),

@@ -1,0 +1,38 @@
+name: GW7-GW8 paired tactical role evidence (read-only)
+on:
+  pull_request:
+    paths:
+      - scripts/audit_gw7_gw8_tactical_transitions.py
+      - scripts/audit_mh8_tactical_roles.py
+      - scripts/audit_gw7_tactical_layout.py
+      - test/gw7_gw8_tactical_transitions_test.py
+      - .github/workflows/gw7-gw8-tactical-paired-audit.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 27
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install source reader
+        run: python3 -m pip install --disable-pip-version-check beautifulsoup4
+      - name: Test two-week tactical geometric classification
+        run: python3 -m unittest discover -s test -p gw7_gw8_tactical_transitions_test.py -v
+      - name: Independently verify all 18 full-time fixtures and paired identities
+        run: |
+          python3 scripts/audit_gw7_gw8_tactical_transitions.py --output "$RUNNER_TEMP/paired-tactical-evidence.json"
+          jq -e '.kind == "SHADOW_GW7_GW8_TACTICAL_GEOMETRY_COMPARISON"
+            and .gw7_verified_fixtures == 9 and .gw8_verified_fixtures == 9
+            and .two_week_supported_roles > 0
+            and .db_writes == 0 and .fantasy_points_written == 0' "$RUNNER_TEMP/paired-tactical-evidence.json"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: gw7-gw8-paired-tactical-evidence
+          path: ${{ runner.temp }}/paired-tactical-evidence.json
+          if-no-files-found: ignore
