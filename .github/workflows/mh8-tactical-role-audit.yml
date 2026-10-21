@@ -1,0 +1,35 @@
+name: MH8 explicit tactical role audit (read-only)
+on:
+  pull_request:
+    paths:
+      - scripts/audit_mh8_tactical_roles.py
+      - test/mh8_tactical_role_test.py
+      - .github/workflows/mh8-tactical-role-audit.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install source reader
+        run: python3 -m pip install --disable-pip-version-check beautifulsoup4
+      - name: Test explicit role extraction
+        run: python3 -m unittest discover -s test -p mh8_tactical_role_test.py -v
+      - name: Audit verified MH8 lineups for all played players, without writes
+        run: |
+          python3 scripts/audit_mh8_tactical_roles.py --output "$RUNNER_TEMP/mh8-role-evidence.json"
+          jq -e '.kind == "READ_ONLY_VERIFIED_TACTICAL_ROLE_EVIDENCE" and
+            .verified_fixtures == 9 and .matched_played == 286 and
+            .db_writes == 0 and .fantasy_points_written == 0' "$RUNNER_TEMP/mh8-role-evidence.json"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mh8-verified-tactical-role-audit
+          path: ${{ runner.temp }}/mh8-role-evidence.json
+          if-no-files-found: ignore
