@@ -116,7 +116,7 @@ export default function DraftLiveStandings({roomId}){
        return bb-aa||Number(a.pick_number)-Number(b.pick_number)
       }).map(p=><div key={p.player_id} className={s.player}>
        <div><strong>{p.name}</strong><small>{P[p.position]||p.position} · {scoreText(p)}</small>
-         {data.scoring_rule==='lineup_xi_captain_cards'&&<small className={s.roleBadge}>{p.is_captain?'Kaptan · 2×':p.auto_sub?'Oyuna giren yedek':p.is_starter?'İlk 11':p.is_bench?'Yedek':'Kadro'}</small>}<small className={p.status==='verified'?s.ok:s.muted}>{statusLabel[p.status]||'Kontrol bekliyor'}</small></div>
+         {data.scoring_rule==='lineup_xi_captain_cards'&&<small className={s.roleBadge}>{p.is_captain?'Kaptan':p.auto_sub?'Oyuna giren yedek':p.is_starter?'İlk 11':p.is_bench?'Yedek':'Kadro'}</small>}<small className={p.status==='verified'?s.ok:s.muted}>{statusLabel[p.status]||'Kontrol bekliyor'}</small></div>
        <div className={s.playerPoints}>{p.points===null||p.points===undefined?<span className={s.pendingScore}>—</span>:<strong>{n(data.scoring_rule==='lineup_xi_captain_cards'?p.counted_points:p.points)}</strong>}{p.points!=null&&<small>{data.scoring_rule==='lineup_xi_captain_cards'?'takıma katkı':'puan'}</small>}</div>
       </div>)}
      </div>
