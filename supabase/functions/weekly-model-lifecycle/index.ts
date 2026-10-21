@@ -747,18 +747,27 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
     const {run_id:_,...rest}=x
     const av=avMap.get(Number(x.player_id))
     const input=refreshedInputs.get(Number(x.player_id)) as any
+    const history=weeklyMomentumRows.get(Number(x.player_id))||[]
+    const trend=roleTrendFromWeeklyEvidence(history,gw)
     return {
       ...rest,run_id:runId,
       predicted_xi_probability:n((refreshedInputs.get(Number(x.player_id)) as any)?.role_probability,x.predicted_xi_probability),
+      last2_xi_probability:trend.last2Xi,
+      previous2_xi_probability:trend.prev2Xi,
+      last2_minutes:trend.last2Min,
+      previous2_minutes:trend.prev2Min,
       signal:(()=>{
         const event=official.latest.get(Number(x.player_id))
         const used=event&&String(input?.source_note||"").includes(String(event.match_ref))
         const momentum=risingMinutesMomentum(
-          weeklyMomentumRows.get(Number(x.player_id))||[],gw,
+          history,gw,
           n(av?.availability_probability,1))
         return used&&event.started&&Number(event.minutes)>=75?"RESMÎ MAÇTA İLK 11"
           :used&&event.squad_status==="unused"?"RESMÎ MAÇTA YEDEK"
-          :momentum.rising?momentum.signal:x.signal
+          :momentum.rising?momentum.signal
+          :trend.trend!==null&&trend.trend>.20?"ROL YÜKSELİYOR"
+          :trend.trend!==null&&trend.trend<-.20?"ROL DÜŞÜYOR"
+          :"BELİRGİN DEĞİŞİM YOK"
       })(),
       availability_probability:clamp(0,1,n(av?.availability_probability,x.availability_probability)),
       team_goal_share:(()=>{const rates=(input?.rates||[]).map(Number);return Math.max(1e-6,.75*n(rates[0])+.25*n(rates[1]))})(),
