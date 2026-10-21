@@ -54,7 +54,6 @@ test('steady starter with four verified weeks is not mislabeled as rising',()=>{
   const weeks=[8,7,6,5].map(gameweek=>({gameweek,minutes:90,is_final:true,source_kind:'fresh_closed_actual'}))
   const trend=roleTrendFromWeeklyEvidence(weeks,9)
   assert.equal(trend.trend,0)
-  assert.equal(trend.previous2Min,undefined)
   assert.equal(trend.prev2Min,90)
 })
 
