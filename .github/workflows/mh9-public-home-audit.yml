@@ -31,12 +31,12 @@ jobs:
           print('Home bytes',len(body),'title_present','Veriyi oku.' in body,'Sorescu_present','Sorescu' in body)
           for found in list(re.finditer('Sorescu',body,re.I))[:5]:
               sample=body[max(0,found.start()-250):found.end()+500]
-              print('Sorescu snippet:',re.sub(r'\\s+',' ',sample)[:620])
-          numbers=set(re.findall(r'\\b6[.,](?:41|27|26|45|37)\\b',body))
+              print('Sorescu snippet:',re.sub(r'\s+',' ',sample)[:620])
+          numbers=set(re.findall(r'\b6[.,](?:41|27|26|45|37)\b',body))
           print('Important xFP strings:',sorted(numbers))
           if 'Sorescu' not in body:
               raise SystemExit('LIVE_HTML_MISSING_EXPECTED_PLAYER')
-          if not re.search(r'\\b6[.,]41\\b',body):
+          if not re.search(r'\b6[.,]41\b',body):
               raise SystemExit('LIVE_HTML_HAS_NO_NEW_SCORESCU_6_41_EXPECTED')
           print('LIVE_HOMEPAGE_NEW_MH9_SCORE_VISIBLE')
           PY
