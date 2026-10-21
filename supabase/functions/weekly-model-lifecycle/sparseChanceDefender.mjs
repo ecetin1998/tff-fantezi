@@ -3,10 +3,10 @@
 // In particular a single 0.57-xG chance in eight games is not assumed to
 // recur every match just because it dominates the player's season xG/90.
 const ROLE_PRIORS={
-  CB:{xg:.027,goals:.019,shots:.30,quality:.09,priorMatches:8},
-  FB:{xg:.022,goals:.017,shots:.50,quality:.07,priorMatches:6},
-  WB:{xg:.080,goals:.045,shots:.85,quality:.095,priorMatches:6},
-  DEF:{xg:.034,goals:.020,shots:.45,quality:.075,priorMatches:7},
+  CB:{xg:.027,goals:.040,shots:.30,quality:.09,priorMatches:8},
+  FB:{xg:.022,goals:.046,shots:.50,quality:.07,priorMatches:6},
+  WB:{xg:.080,goals:.080,shots:.85,quality:.095,priorMatches:6},
+  DEF:{xg:.034,goals:.040,shots:.45,quality:.075,priorMatches:7},
 }
 const finite=v=>typeof v==="number"&&Number.isFinite(v)
 const norm=v=>String(v||"").trim().toUpperCase().replace(/[ _-]+/g,"")
