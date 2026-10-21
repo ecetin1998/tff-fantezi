@@ -54,7 +54,7 @@ test('does not mistake missing observations for zero or overwrite the parent mod
     assert.equal(x.xgPer90,.2)
   }
   const worker=readFileSync(new URL('../supabase/functions/weekly-model-lifecycle/index.ts',import.meta.url),'utf8')
-  assert.match(worker,/sparseChanceDefenderRates\(/)
+  assert.match(worker,/calibrateAttackRates\(/)
   assert.match(worker,/sparse-defender-xg-v1/)
   assert.match(worker,/stableInput\.source_note/)
   assert.match(worker,/sourceStatsQ/)
