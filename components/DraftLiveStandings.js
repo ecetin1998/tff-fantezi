@@ -115,12 +115,13 @@ export default function DraftLiveStandings({roomId}){
        const aa=a.points==null?-100000:Number(a.points),bb=b.points==null?-100000:Number(b.points)
        return bb-aa||Number(a.pick_number)-Number(b.pick_number)
       }).map(p=><div key={p.player_id} className={s.player}>
-       <div><strong>{p.name}</strong><small>{P[p.position]||p.position} · {scoreText(p)}</small><small className={p.status==='verified'?s.ok:s.muted}>{statusLabel[p.status]||'Kontrol bekliyor'}</small></div>
-       <div className={s.playerPoints}>{p.points===null||p.points===undefined?<span className={s.pendingScore}>—</span>:<strong>{n(p.points)}</strong>}{p.points!=null&&<small>puan</small>}</div>
+       <div><strong>{p.name}</strong><small>{P[p.position]||p.position} · {scoreText(p)}</small>
+         {data.scoring_rule==='lineup_xi_captain_cards'&&<small className={s.roleBadge}>{p.is_captain?'Kaptan':p.auto_sub?'Oyuna giren yedek':p.is_starter?'İlk 11':p.is_bench?'Yedek':'Kadro'}</small>}<small className={p.status==='verified'?s.ok:s.muted}>{statusLabel[p.status]||'Kontrol bekliyor'}</small></div>
+       <div className={s.playerPoints}>{p.points===null||p.points===undefined?<span className={s.pendingScore}>—</span>:<strong>{n(data.scoring_rule==='lineup_xi_captain_cards'?p.counted_points:p.points)}</strong>}{p.points!=null&&<small>{data.scoring_rule==='lineup_xi_captain_cards'?'takıma katkı':'puan'}</small>}</div>
       </div>)}
      </div>
     </div>}
-    <p className={s.note}>Puanlar seçilen {data.scoring_rule==='all_15_players'?'15 kişilik kadronun tamamından':'kadrolardan'} sayılır. Draftın başladığı MH{data.draft_gameweek} haftasından itibaren birikir. Doğrulama bekleyen oyunculara geçici sıfır puan yazılmaz; maç sonrası resmi/teyit edilmiş kaynak kapanışı esas alınır.</p>
+    <p className={s.note}>Puanlar {data.scoring_rule==='all_15_players'?'eski odalarda 15 kişilik kadronun tamamından':'ilk 11, kaptan ve haftalık kart kurallarından'} sayılır. Draftın başladığı MH{data.draft_gameweek} haftasından itibaren birikir. Doğrulama bekleyen oyunculara geçici sıfır puan yazılmaz; maç sonrası resmi/teyit edilmiş kaynak kapanışı esas alınır.</p>
     <small className={s.updated}>Son sorgu: {data.updated_at?new Date(data.updated_at).toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit',second:'2-digit'}):'—'}</small>
   </>}
  </section>

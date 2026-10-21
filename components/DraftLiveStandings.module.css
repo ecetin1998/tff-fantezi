@@ -55,3 +55,5 @@
 .error{margin:0!important;padding:12px 14px;border-radius:10px;background:#fff1f2;color:#a22634;border:1px solid #f4c3c6;font-size:12px}
 @media(max-width:760px){.wrap{padding:15px}.players{grid-template-columns:1fr}.tableHead,.row{grid-template-columns:minmax(105px,1fr) 55px 58px 56px;gap:5px;padding-left:9px;padding-right:9px}.team{gap:5px}.place{min-width:18px;font-size:14px}.totalNum{font-size:16px}.tableHead{font-size:9px}.team strong{font-size:11px}.meta{font-size:11px}.toggle{width:100%}.toggle button{flex:1}.toolbar label{width:100%}.toolbar select{width:100%}}
 @media(prefers-reduced-motion:reduce){.progress span{transition:none}}
+
+.roleBadge{font-size:10px!important;color:#087f74!important;font-weight:850!important}
