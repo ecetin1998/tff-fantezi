@@ -7,6 +7,8 @@ import {fetchTrustedWeeklyEvidence} from "./weeklyEvidence.mjs"
 import {roleTrendFromWeeklyEvidence} from "./roleTrend.mjs"
 import {blendVerifiedAttackRate} from "./mh8Attack.mjs"
 import {sparseChanceDefenderRates} from "./sparseChanceDefender.mjs"
+import {calibrateAttackRates} from "./roleAwareAttackRates.mjs"
+import {currentTacticalRole} from "./recentTacticalRole.mjs"
 
 const AUDIENCE="tff-fantezi-scout"
 const ISSUER="https://token.actions.githubusercontent.com"
@@ -297,7 +299,7 @@ async function prepare(sb:any,current:any,status:any,body:any={}){
   }
 
   const [
-    playersQ,rolesQ,availabilityQ,statsQ,teamStatsQ,fixturesQ,weeklyQ,priorInputsQ,teamsQ,currentProjQ
+    playersQ,rolesQ,availabilityQ,statsQ,teamStatsQ,fixturesQ,weeklyQ,priorInputsQ,teamsQ,currentProjQ,tacticalQ
   ]=await Promise.all([
     sb.from("scout_players").select("id,full_name,team_id,position,price,primary_role,role_side,active").eq("active",true),
     sb.from("scout_role_signals").select("*").eq("run_id",current.id),
@@ -308,9 +310,13 @@ async function prepare(sb:any,current:any,status:any,body:any={}){
     fetchTrustedWeeklyEvidence(sb,target),
     sb.from("scout_replay_player_inputs").select("*").eq("gameweek",Number(current.gameweek)).eq("benchmark_version",priorBenchmark),
     sb.from("scout_teams").select("id,name"),
-    sb.from("scout_player_projections").select("player_id,confidence,data_confidence").eq("run_id",current.id)
+    sb.from("scout_player_projections").select("player_id,confidence,data_confidence").eq("run_id",current.id),
+    sb.from("scout_player_tactical_role_observations")
+      .select("player_id,gameweek,role,side,minutes,started,verified")
+      .eq("season","2026-27").gte("gameweek",Math.max(1,target-3)).lt("gameweek",target)
+      .eq("verified",true)
   ])
-  for(const q of [playersQ,rolesQ,availabilityQ,statsQ,teamStatsQ,fixturesQ,weeklyQ,priorInputsQ,teamsQ,currentProjQ])if(q.error)throw q.error
+  for(const q of [playersQ,rolesQ,availabilityQ,statsQ,teamStatsQ,fixturesQ,weeklyQ,priorInputsQ,teamsQ,currentProjQ,tacticalQ])if(q.error)throw q.error
   const players=playersQ.data||[]
   if((availabilityQ.data||[]).length<players.length)throw new Error("AVAILABILITY_COVERAGE_INCOMPLETE")
   if((teamStatsQ.data||[]).length!==18)throw new Error("TEAM_STATS_INCOMPLETE")
@@ -331,6 +337,12 @@ async function prepare(sb:any,current:any,status:any,body:any={}){
   const priorMap=new Map((priorInputsQ.data||[]).map((x:any)=>[Number(x.player_id),x]))
   const teamNames=new Map((teamsQ.data||[]).map((x:any)=>[Number(x.id),x.name]))
   const projMap=new Map((currentProjQ.data||[]).map((x:any)=>[Number(x.player_id),x]))
+  const tacticalEvidence=new Map<number,any[]>()
+  for(const obs of tacticalQ.data||[]){
+    const id=Number(obs.player_id)
+    if(!tacticalEvidence.has(id))tacticalEvidence.set(id,[])
+    tacticalEvidence.get(id)!.push(obs)
+  }
   const recent=new Map<number,any[]>()
   for(const w of weeklyQ.data||[]){
     const id=Number(w.player_id);if(!recent.has(id))recent.set(id,[]);recent.get(id)!.push(w)
@@ -409,6 +421,9 @@ async function prepare(sb:any,current:any,status:any,body:any={}){
       roleProb=officialShift.role;durations=officialShift.durations
       durationWeights=officialShift.duration_weights
     }
+    const tactical=currentTacticalRole({
+      baseRole:p.primary_role,baseSide:p.role_side,evidence:tacticalEvidence.get(id)||[],targetWeek:target
+    })
     const minutes=Math.max(0,n(s.minutes))
     const priorRates=(prior.rates||[]).map(Number)
     const xg90=per90(s.xg_total,minutes,n(priorRates[0]))
@@ -422,13 +437,15 @@ async function prepare(sb:any,current:any,status:any,body:any={}){
     const saves90=per90(s.saves,minutes,n(priorRates[6]))
     const shots90=per90(s.shots,minutes,n(priorRates[10]))
     const sot90=per90(s.shots_on_target,minutes,n(priorRates[11]))
-    const sparse=sparseChanceDefenderRates({
-      position:p.position,role:p.primary_role,xgPer90:xg90,goalsPer90:g90,
-      seasonMinutes:minutes,shots:s.shots==null?null:Number(s.shots),
-      advancedThroughGameweek:s.advanced_through_gameweek==null?null:Number(s.advanced_through_gameweek),
-      throughGameweek:Number(s.through_gameweek)
+    const calibrated=calibrateAttackRates({
+      position:p.position,role:tactical.role,seasonMinutes:minutes,
+      seasonWeek:s.through_gameweek==null?null:Number(s.through_gameweek),
+      advancedWeek:s.advanced_through_gameweek==null?null:Number(s.advanced_through_gameweek),
+      shots:s.shots==null?null:Number(s.shots),keyPasses:s.key_passes==null?null:Number(s.key_passes),
+      xgPer90:xg90,goalsPer90:g90,xaPer90:xa90,assistsPer90:a90
     })
-    const rates=[sparse.xgPer90,sparse.goalsPer90,a90,xa90,yc90,rc90,saves90,n(priorRates[7]),n(priorRates[8]),n(priorRates[9]),shots90,sot90]
+    const rates=[calibrated.xgPer90,calibrated.goalsPer90,a90,calibrated.xaPer90,
+      yc90,rc90,saves90,n(priorRates[7]),n(priorRates[8]),n(priorRates[9]),shots90,sot90]
     const availability=clamp(0,1,n(av.availability_probability,1))
     inputRows.push({
       gameweek:target,benchmark_version:benchmark,player_id:id,player_name:p.full_name,club_id:Number(p.team_id),
@@ -436,9 +453,9 @@ async function prepare(sb:any,current:any,status:any,body:any={}){
       bench_weight:n(prior.bench_weight,1),durations,duration_weights:durationWeights,rates,
       data_confidence:prior.data_confidence||projMap.get(id)?.confidence||"medium",
       has_individual_prior:Boolean(prior.has_individual_prior),
-      source_note:key+(sparse.applied?" • sparse-defender-xg-v1":"")+(momentum.rising?" • momentum-v1 +"+momentum.role_uplift:"")+(xaReconcile.adjusted?" • defender-xa-source-window-v1 "+xaReconcile.source_minutes+"dk":"")+(officialShift.applied?" • resmî maç: "+event.match_ref:""),
-      sub_role:p.primary_role||prior.sub_role||null,role_side:p.role_side||prior.role_side||null,
-      effective_xa_per90:xa90
+      source_note:key+(calibrated.applied?" • role-aware-attack-v1":"")+(tactical.changed?" • tactical-role-evidence-v1":"")+(momentum.rising?" • momentum-v1 +"+momentum.role_uplift:"")+(xaReconcile.adjusted?" • defender-xa-source-window-v1 "+xaReconcile.source_minutes+"dk":"")+(officialShift.applied?" • resmî maç: "+event.match_ref:""),
+      sub_role:tactical.role||prior.sub_role||null,role_side:tactical.side||prior.role_side||null,
+      effective_xa_per90:calibrated.xaPer90
     })
     const fx=teamFixtures.get(Number(p.team_id))||[]
     projectionRows.push({
@@ -454,8 +471,8 @@ async function prepare(sb:any,current:any,status:any,body:any={}){
     const signal=officialShift.applied&&event.started&&Number(event.minutes)>=75
       ?"RESMÎ MAÇTA İLK 11":officialShift.applied&&event.squad_status==="unused"
       ?"RESMÎ MAÇTA YEDEK":momentum.rising?momentum.signal:d!==null&&d>.20?"ROL YÜKSELİYOR":d!==null&&d<-.20?"ROL DÜŞÜYOR":"BELİRGİN DEĞİŞİM YOK"
-    const goalWeight=Math.max(1e-6,.75*sparse.xgPer90+.25*sparse.goalsPer90)
-    const assistWeight=Math.max(1e-6,.70*xa90+.30*a90)
+    const goalWeight=Math.max(1e-6,.75*calibrated.xgPer90+.25*calibrated.goalsPer90)
+    const assistWeight=Math.max(1e-6,.70*calibrated.xaPer90+.30*a90)
     roleDraft.push({run_id:runId,player_id:id,last2_xi_probability:last2Xi,previous2_xi_probability:prev2Xi,last2_minutes:last2Min,previous2_minutes:prev2Min,signal,predicted_xi_probability:roleProb,x_minutes:0,availability_probability:availability,goalWeight,assistWeight,team_id:Number(p.team_id)})
     if(!weightsByTeam.has(Number(p.team_id)))weightsByTeam.set(Number(p.team_id),[])
     weightsByTeam.get(Number(p.team_id))!.push({id,goal:goalWeight,assist:assistWeight,available:availability})
@@ -558,7 +575,7 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
       throw new Error("PRE_KICKOFF_BACKTEST_SNAPSHOT_REQUIRED")
   }
 
-  const [latestMetaQ,stableMetaQ,availabilityQ,rolesQ,goalConfigQ,playersUpdatedQ,currentProjectionQ,officialQ,playersQ,teamFixturesQ,attackSourceQ]=await Promise.all([
+  const [latestMetaQ,stableMetaQ,availabilityQ,rolesQ,goalConfigQ,playersUpdatedQ,currentProjectionQ,officialQ,playersQ,teamFixturesQ,attackSourceQ,tacticalQ]=await Promise.all([
     sb.from("scout_replay_input_meta").select("*").eq("gameweek",gw)
       .lt("created_at",new Date(kickoff).toISOString()).order("created_at",{ascending:false}).limit(1).maybeSingle(),
     sb.from("scout_replay_input_meta").select("benchmark_version").eq("gameweek",gw)
@@ -574,9 +591,13 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
     sb.from("scout_match_predictions").select("home_team_id,away_team_id,kickoff_at")
       .eq("run_id",current.id).order("kickoff_at",{ascending:true}),
     sb.from("scout_verified_weekly_attack").select("player_id,gameweek,xg,xa,observed_at")
-      .eq("season","2026-27").eq("gameweek",gw-1)
+      .eq("season","2026-27").eq("gameweek",gw-1),
+    sb.from("scout_player_tactical_role_observations")
+      .select("player_id,gameweek,role,side,minutes,started,verified")
+      .eq("season","2026-27").gte("gameweek",Math.max(1,gw-3)).lt("gameweek",gw)
+      .eq("verified",true)
   ])
-  for(const q of [latestMetaQ,stableMetaQ,availabilityQ,rolesQ,goalConfigQ,playersUpdatedQ,currentProjectionQ,officialQ,playersQ,teamFixturesQ,attackSourceQ])if(q.error)throw q.error
+  for(const q of [latestMetaQ,stableMetaQ,availabilityQ,rolesQ,goalConfigQ,playersUpdatedQ,currentProjectionQ,officialQ,playersQ,teamFixturesQ,attackSourceQ,tacticalQ])if(q.error)throw q.error
   if(!latestMetaQ.data)return {refresh_required:false,reason:"CURRENT_SIM_INPUT_META_MISSING"}
 
   const availabilityTimes=(availabilityQ.data||[])
@@ -641,7 +662,7 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
     stableRoleBenchmark===sourceBenchmark
       ?Promise.resolve({data:null,error:null})
       :sb.from("scout_replay_player_inputs").select("player_id,role_probability,durations,duration_weights,source_note,rates").eq("gameweek",gw).eq("benchmark_version",stableRoleBenchmark).order("player_id"),
-    sb.from("scout_player_season_stats").select("player_id,through_gameweek,advanced_through_gameweek,minutes,shots,goals,xg_total,xa_total,xa_per90,xa_model_per90,xa_source")
+    sb.from("scout_player_season_stats").select("player_id,through_gameweek,advanced_through_gameweek,minutes,shots,key_passes,goals,assists,xg_total,xa_total,xa_per90,xa_model_per90,xa_source")
       .eq("season","2026-27").eq("through_gameweek",gw-1),
     fetchTrustedWeeklyEvidence(sb,gw)
   ])
@@ -675,6 +696,12 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
   }
   const sourceStatsMap=new Map((sourceStatsQ.data||[]).map((x:any)=>[Number(x.player_id),x]))
   const attackEvidence=new Map((attackSourceQ.data||[]).map((x:any)=>[Number(x.player_id),x]))
+  const tacticalEvidence=new Map<number,any[]>()
+  for(const obs of tacticalQ.data||[]){
+    const id=Number(obs.player_id)
+    if(!tacticalEvidence.has(id))tacticalEvidence.set(id,[])
+    tacticalEvidence.get(id)!.push(obs)
+  }
   const avMap=new Map((availabilityQ.data||[]).map((x:any)=>[Number(x.player_id),x]))
   const roleMap=new Map((rolesQ.data||[]).map((x:any)=>[Number(x.player_id),x]))
   const projectionMap=new Map((currentProjectionQ.data||[]).map((x:any)=>[Number(x.player_id),x]))
