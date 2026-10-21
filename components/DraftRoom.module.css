@@ -154,3 +154,21 @@
  .sortBar{display:grid;grid-template-columns:minmax(0,1fr) auto}
  .sortBar label{min-width:0}
 }
+
+/* V3: time controls share the premium surface, accessible on mobile. */
+.timerGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;padding:2px 0}
+.timerSlider{display:grid;gap:7px;min-width:0;border:1px solid #e0e8ef;border-radius:13px;background:#f8fbfd;padding:14px!important;color:#334460!important}
+.timerSlider>span{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;font-size:12px}
+.timerSlider strong{color:#087f74;font-size:17px;white-space:nowrap}
+.timerSlider input[type=range]{appearance:auto;-webkit-appearance:auto;width:100%;height:30px;min-height:30px;margin:0;padding:0;border:0;box-shadow:none;outline-offset:4px;background:transparent;accent-color:#0a9184;cursor:pointer}
+.timerSlider small{color:#697a90;font-size:11px}
+.lobbyTimerPanel{display:grid;gap:11px;padding:15px;background:#f9fcfb;border:1px solid #ddeae6;border-radius:14px}
+.lobbyTimerPanel h3{margin:0;color:#263650}
+.lobbyTimerPanel .timerGrid{padding:0}
+.lobbyTimerPanel>button{justify-self:start}
+.countdown{min-width:135px;display:grid;gap:3px;align-content:center;text-align:center;padding:10px 14px;background:#edf9f5;border:1px solid #b6ded4;border-radius:12px}
+.countdown strong{font-size:clamp(23px,3vw,31px);line-height:1;color:#087f74;font-variant-numeric:tabular-nums}
+.countdown small{font-size:10px;color:#4d6777;line-height:1.25}
+.countdownUrgent{background:#fff1ef;border-color:#f4b0ab}
+.countdownUrgent strong{color:#b72b34}
+@media(max-width:660px){.timerGrid{grid-template-columns:1fr}.lobbyTimerPanel{padding:12px}.countdown{min-width:0;width:100%}}
