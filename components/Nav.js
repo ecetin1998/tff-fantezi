@@ -4,7 +4,7 @@ import NavAccountControls from '@/components/NavAccountControls'
 import GlobalPlayerSearch from '@/components/GlobalPlayerSearch'
 
 const primary=[['/','Ana Sayfa'],['/players','Oyuncu Analizi'],['/points','Fantezi Puanları'],['/matches','Maç Tahminleri'],['/squads','Kadro Önerileri']]
-const analysis=[['/teams','Takım Analizi'],['/availability','Sakatlık / Ceza Durumu'],['/roles','Rol & Dakika Takibi'],['/backtest','Model Performansı'],['/model-health','Model Sağlığı'],['/sss','SSS & Rehber']]
+const analysis=[['/teams','Takım Analizi'],['/availability','Sakatlık / Ceza Durumu'],['/roles','Rol & Dakika Takibi'],['/backtest','Model Performansı'],['/model-health','Model Sağlığı'],['/draft','Canlı Draft Odası'],['/sss','SSS & Rehber']]
 const bottom=[['/','home','Ana'],['/players','players','Oyuncular'],['/matches','matches','Maçlar'],['/squads','recommendations','Öneriler'],['/squad','squad','Kadrom']]
 
 export default function Nav(){
