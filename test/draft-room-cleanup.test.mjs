@@ -9,7 +9,7 @@ const css=readFileSync('components/DraftArchives.module.css','utf8')
 
 test('inactive unfinished rooms expire via a real 15-minute pg_cron job after 24h without a heartbeat',()=>{
  assert.match(sql,/check\(status in \('lobby','drafting','finished','cancelled','expired'\)\)/)
- assert.match(sql,/last_member_seen_at<clock_timestamp\(\)-interval '24 hours'/)
+ assert.match(sql,/last_member_seen_at\s*<\s*clock_timestamp\(\)-interval '24 hours'/)
  assert.match(sql,/where status in \('lobby','drafting'\)/)
  assert.match(sql,/cron\.schedule\('scout-draft-expire-inactive','\*\/15 \* \* \* \*'/)
  assert.match(sql,/create or replace function private\.scout_draft_expire_inactive\(\)/)
