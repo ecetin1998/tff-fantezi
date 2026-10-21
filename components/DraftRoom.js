@@ -197,7 +197,7 @@ export default function DraftRoom({initialRoom='',initialInvite=''}) {
  const seatBase=room?(room.next_pick-1)%room.team_count+1:1
  const seatNumber=room?(room.mode==='snake'&&round%2===0?room.team_count+1-seatBase:seatBase):1
  const current=room?.status==='drafting'&&!isAuction?teams.find(t=>Number(t.draft_order)===seatNumber):null
- const classicSecondsLeft=room?.draft_kind==='classic'&&Number(room?.rules_version||1)>=3&&room?.classic_deadline?Math.max(0,Math.ceil((Date.parse(room.classic_deadline)-Date.parse(room.server_time||room.updated_at)-(clock-serverSnapshot))/1000)):null
+ const classicSecondsLeft=room?.draft_kind==='classic'&&Number(room?.rules_version||1)>=3&&room?.classic_deadline?(clock>0&&serverSnapshot>0?Math.max(0,Math.ceil((Date.parse(room.classic_deadline)-Date.parse(room.server_time||room.updated_at)-(clock-serverSnapshot))/1000)):Number(room.classic_pick_seconds||30)):null
  const canPick=Boolean(current?.mine)&&room?.status==='drafting'&&!isAuction&&(classicSecondsLeft===null||classicSecondsLeft>0)
  const own=teams.find(t=>t.mine)
  const lot=room?.lot?.status==='open'?room.lot:null
