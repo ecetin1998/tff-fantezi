@@ -9,7 +9,7 @@ export default async function DraftPage({searchParams}){
   const [auth,params]=await Promise.all([getAuthState(),searchParams])
   if(!auth?.userId) return <section className="auth-wrap">
     <div className="card auth-card">
-      <span className="eyebrow">4 KİŞİLİK CANLI DRAFT</span>
+      <span className="eyebrow">2–8 KİŞİLİK CANLI DRAFT</span>
       <h1>Arkadaşlarınla aynı draft odasına gir.</h1>
       <p>Oda oluşturmak, davet koduyla katılmak ve seçim yapmak için ücretsiz üyelik yeterli.</p>
       <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
