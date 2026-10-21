@@ -532,14 +532,18 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
   // can evolve while the gameweek is in progress. Before ANY post-kickoff
   // recomputation, require the immutable pre-first-kickoff backtest snapshot.
   // Its snapshot table must never be updated by later rolling forecast runs.
-  const snapshotAllowed=now<kickoff
-  if(!snapshotAllowed){
-    const frozenQ=await sb.from("scout_backtest_weeks")
-      .select("run_id,snapshot_at,prediction_mode,status,prediction_count")
-      .eq("gameweek",gw).maybeSingle()
-    if(frozenQ.error)throw frozenQ.error
-    const frozen=frozenQ.data
-    if(!frozen?.run_id||frozen.prediction_mode!=="live_frozen"||
+  const frozenQ=await sb.from("scout_backtest_weeks")
+    .select("run_id,snapshot_at,prediction_mode,status,prediction_count")
+    .eq("gameweek",gw).maybeSingle()
+  if(frozenQ.error)throw frozenQ.error
+  const frozen=frozenQ.data
+  const hasFrozen=Boolean(frozen?.run_id)
+  // Once published, preserve the original pre-kickoff forecast forever.
+  // Later model improvements may refresh current public predictions, but must
+  // never overwrite the immutable baseline used for honest MH9 backtests.
+  const snapshotAllowed=now<kickoff&&!hasFrozen
+  if(hasFrozen||now>=kickoff){
+    if(!hasFrozen||frozen.prediction_mode!=="live_frozen"||
        !(new Date(frozen.snapshot_at).getTime()<kickoff)||
        Number(frozen.prediction_count||0)<1||
        !["open","closed"].includes(String(frozen.status||"")))
