@@ -53,7 +53,7 @@ for each row execute function public.scout_draft_capture_results();
 create or replace function public.scout_draft_create(p_names text[],p_mode text default 'snake')
 returns jsonb language plpgsql security definer set search_path=public,pg_temp as $$
 declare u uuid:=auth.uid(); rid uuid;code text;runid uuid;gw integer;i integer;n integer;
- alphabet constant text:='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+ alphabet constant text:='ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; random_uuid uuid;
 begin
  if u is null then raise exception 'AUTH_REQUIRED';end if;
  n:=coalesce(array_length(p_names,1),0);
@@ -68,8 +68,9 @@ begin
  rid:=gen_random_uuid();
  loop
    code:='';
+   random_uuid:=gen_random_uuid();
    for i in 1..8 loop
-     code:=code||substr(alphabet,1+(get_byte(gen_random_bytes(1),0)%length(alphabet)),1);
+     code:=code||substr(alphabet,1+mod(get_byte(decode(replace(random_uuid::text,'-',''),'hex'),i-1),length(alphabet)),1);
    end loop;
    exit when not exists(select 1 from public.scout_draft_rooms where invite_code=code);
  end loop;
