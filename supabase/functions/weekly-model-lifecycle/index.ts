@@ -5,6 +5,7 @@ import {risingMinutesMomentum,trustedMinute} from "./momentum.mjs"
 import {reconcileDefenderXa} from "./defenderXa.mjs"
 import {fetchTrustedWeeklyEvidence} from "./weeklyEvidence.mjs"
 import {roleTrendFromWeeklyEvidence} from "./roleTrend.mjs"
+import {blendVerifiedAttackRate} from "./mh8Attack.mjs"
 
 const AUDIENCE="tff-fantezi-scout"
 const ISSUER="https://token.actions.githubusercontent.com"
@@ -550,7 +551,7 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
       throw new Error("PRE_KICKOFF_BACKTEST_SNAPSHOT_REQUIRED")
   }
 
-  const [latestMetaQ,stableMetaQ,availabilityQ,rolesQ,goalConfigQ,playersUpdatedQ,currentProjectionQ,officialQ,playersQ,teamFixturesQ]=await Promise.all([
+  const [latestMetaQ,stableMetaQ,availabilityQ,rolesQ,goalConfigQ,playersUpdatedQ,currentProjectionQ,officialQ,playersQ,teamFixturesQ,attackSourceQ]=await Promise.all([
     sb.from("scout_replay_input_meta").select("*").eq("gameweek",gw)
       .lt("created_at",new Date(kickoff).toISOString()).order("created_at",{ascending:false}).limit(1).maybeSingle(),
     sb.from("scout_replay_input_meta").select("benchmark_version").eq("gameweek",gw)
@@ -564,9 +565,11 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
     officialEvidenceQuery(sb),
     sb.from("scout_players").select("id,team_id,position,primary_role").eq("active",true),
     sb.from("scout_match_predictions").select("home_team_id,away_team_id,kickoff_at")
-      .eq("run_id",current.id).order("kickoff_at",{ascending:true})
+      .eq("run_id",current.id).order("kickoff_at",{ascending:true}),
+    sb.from("scout_verified_weekly_attack").select("player_id,gameweek,xg,xa,observed_at")
+      .eq("season","2026-27").eq("gameweek",gw-1)
   ])
-  for(const q of [latestMetaQ,stableMetaQ,availabilityQ,rolesQ,goalConfigQ,playersUpdatedQ,currentProjectionQ,officialQ,playersQ,teamFixturesQ])if(q.error)throw q.error
+  for(const q of [latestMetaQ,stableMetaQ,availabilityQ,rolesQ,goalConfigQ,playersUpdatedQ,currentProjectionQ,officialQ,playersQ,teamFixturesQ,attackSourceQ])if(q.error)throw q.error
   if(!latestMetaQ.data)return {refresh_required:false,reason:"CURRENT_SIM_INPUT_META_MISSING"}
 
   const availabilityTimes=(availabilityQ.data||[])
@@ -596,9 +599,10 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
   const officialSourceLatest=(officialQ.data||[]).reduce(
     (stamp:any,e:any)=>newer(stamp,e.source_updated_at),null
   )
+  const attackObservedAt=(attackSourceQ.data||[]).reduce((stamp:any,e:any)=>newer(stamp,e.observed_at),null)
   const latestSourceAt=new Date(newer(
     availabilitySourceLatest,playersUpdatedQ.data?.updated_at,
-    current.source_updated_at,officialSourceLatest
+    current.source_updated_at,officialSourceLatest,attackObservedAt
   )).toISOString()
   const hoursUntilDeadline=Math.max(0,(deadline-now)/36e5)
   // During a live week, respond to real source changes no faster than every 2h.
@@ -663,6 +667,7 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
     weeklyMomentumRows.get(id)!.push(w)
   }
   const sourceStatsMap=new Map((sourceStatsQ.data||[]).map((x:any)=>[Number(x.player_id),x]))
+  const attackEvidence=new Map((attackSourceQ.data||[]).map((x:any)=>[Number(x.player_id),x]))
   const avMap=new Map((availabilityQ.data||[]).map((x:any)=>[Number(x.player_id),x]))
   const roleMap=new Map((rolesQ.data||[]).map((x:any)=>[Number(x.player_id),x]))
   const projectionMap=new Map((currentProjectionQ.data||[]).map((x:any)=>[Number(x.player_id),x]))
@@ -704,15 +709,27 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
     const xaReconcile=reconcileDefenderXa(stats,player,
       (weeklyMomentumRows.get(Number(x.player_id))||[]).find((w:any)=>Number(w.gameweek)===gw-1),
       rateRaw)
-    rates[3]=xaReconcile.rate
+    // MH8 is a single observed fixture, not a season snapshot. Mix only
+    // present numeric evidence into the non-intraday baseline with heavy
+    // shrinkage; missing xG/xA remains unknown and does not become zero.
+    const mh8=attackEvidence.get(Number(x.player_id)) as any
+    const history=(weeklyMomentumRows.get(Number(x.player_id))||[])
+      .find((w:any)=>Number(w.gameweek)===gw-1)
+    const observedMinutes=history?trustedMinute(history):null
+    const xgUpdate=blendVerifiedAttackRate(n(stableInput.rates?.[0],rates[0]),mh8?.xg,observedMinutes,"xg")
+    const xaUpdate=blendVerifiedAttackRate(xaReconcile.rate,mh8?.xa,observedMinutes,"xa")
+    rates[0]=xgUpdate.rate
+    rates[3]=xaUpdate.rate
     return {
       ...x,benchmark_version:benchmark,availability,rates,
       role_probability:adjusted.role,
+      effective_xa_per90:rates[3],
       durations:adjusted.applied?adjusted.durations:x.durations,
       duration_weights:adjusted.applied?adjusted.duration_weights:x.duration_weights,
       source_note:`intraday refresh from ${sourceBenchmark}; role baseline ${stableRoleBenchmark}; source ${latestSourceAt}`
         +(momentum.rising?` • momentum-v1 +${momentumBoost}`:"")
         +(xaReconcile.adjusted?` • defender-xa-source-window-v1 ${xaReconcile.source_minutes}dk`:"")
+        +(xgUpdate.applied||xaUpdate.applied?` • mh8-attack-source-v1 ${xgUpdate.applied?"xg":""}${xaUpdate.applied?"+xa":""}`:"")
         +(adjusted.applied?` • resmî maç: ${event.match_ref}`:"")
     }
   })
