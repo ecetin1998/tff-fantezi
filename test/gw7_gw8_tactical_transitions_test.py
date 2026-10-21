@@ -7,6 +7,8 @@ class Geometry(unittest.TestCase):
   self.assertEqual(safe_role({'x':.678,'y':.875,'formation':'4-1-4-1'}),('W','R','advanced_flank_layout'))
  def test_right_wingback_not_misclassified_as_winger(self):
   self.assertEqual(safe_role({'x':.613,'y':.875,'formation':'3-4-3'})[0],'WB')
+ def test_five_back_wide_player_is_wingback_not_fullback(self):
+  self.assertEqual(safe_role({'x':.357,'y':.875,'formation':'5-3-2'})[0],'WB')
  def test_defender_position_does_not_dictate_real_tactical_role(self):
   self.assertEqual(safe_role({'x':.292,'y':.875,'formation':'4-2-3-1'})[0],'FB')
  def test_center_field_unknown_without_explicit_evidence(self):
