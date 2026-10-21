@@ -4,6 +4,7 @@ import {readFileSync} from 'node:fs'
 
 const sql=readFileSync('supabase/migrations/20261021174500_draft_v2_archive_names_nomination.sql','utf8')
 const ui=readFileSync('components/DraftRoom.js','utf8')
+const archive=readFileSync('components/DraftArchives.js','utf8')
 
 test('eight-character invitations use an unambiguous alphabet; old codes remain usable',()=>{
  assert.match(sql,/alphabet constant text:='ABCDEFGHJKLMNPQRSTUVWXYZ23456789'/)
@@ -27,7 +28,7 @@ test('completed draft snapshots freeze picks and prices and history is member-on
  assert.match(sql,/'price',p\.price/)
  assert.match(sql,/scout_draft_my_rooms\(\)/)
  assert.match(sql,/t\.user_id=auth\.uid\(\)/)
- assert.match(ui,/Odalarım ve draft geçmişi/)
+ assert.match(archive,/Odalarım ve draft geçmişi/)
  assert.match(ui,/Sonuçları kopyala/)
 })
 
