@@ -84,3 +84,14 @@ test('published frozen MH9 snapshot is immutable even before the first kickoff',
   assert.match(worker,/if\(hasFrozen\|\|now>=kickoff\)/)
   assert.match(worker,/PRE_KICKOFF_BACKTEST_SNAPSHOT_REQUIRED/)
 })
+
+test('MH9 intraday refresh recalculates rise/fall, not inherited stale labels',()=>{
+  const worker=readFileSync(new URL('../supabase/functions/weekly-model-lifecycle/index.ts',import.meta.url),'utf8')
+  const idx=worker.indexOf('const roleBase=(rolesQ.data||[]).map')
+  const roleBlock=worker.slice(idx,worker.indexOf('const shareTotals=',idx))
+  assert.match(roleBlock,/roleTrendFromWeeklyEvidence\(history,gw\)/)
+  assert.match(roleBlock,/last2_minutes:trend.last2Min/)
+  assert.match(roleBlock,/previous2_minutes:trend.prev2Min/)
+  assert.match(roleBlock,/trend.trend!==null&&trend.trend>.20/)
+  assert.doesNotMatch(roleBlock,/:x.signal/)
+})
