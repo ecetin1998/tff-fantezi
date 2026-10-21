@@ -1,0 +1,91 @@
+name: MH9 role-aware 50K shadow QA (no promotion)
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/mh9-role-shadow-qa.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+  id-token: write
+concurrency:
+  group: mh9-role-shadow-qa
+  cancel-in-progress: false
+jobs:
+  shadow:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      FUNCTIONS_URL: https://nnoagjayvrwyjtizhnfz.supabase.co/functions/v1
+      OIDC_AUDIENCE: tff-fantezi-scout
+      MODEL_CANDIDATE_SHA: 0e749a1abf02676caac54fc1d03c9fdb290d606e
+    steps:
+      - uses: actions/checkout@v4
+      - name: Mint GitHub OIDC token
+        id: oidc
+        shell: bash
+        run: |
+          set -euo pipefail
+          response="$(curl --fail --silent --show-error -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=${OIDC_AUDIENCE}")"
+          token="$(printf '%s' "$response" | jq -er '.value')"
+          echo "::add-mask::$token"
+          echo "token=$token" >> "$GITHUB_OUTPUT"
+      - name: Prepare *non-current* MH9 candidate from current source
+        id: candidate
+        env:
+          OIDC_TOKEN: ${{ steps.oidc.outputs.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          result="$(jq -n --arg sha "$MODEL_CANDIDATE_SHA" '{action:"prepare_current",code_sha:$sha}' | curl --fail-with-body --silent --show-error --max-time 240 -H "Authorization: Bearer $OIDC_TOKEN" -H "Content-Type: application/json" --data-binary @- "$FUNCTIONS_URL/weekly-model-lifecycle")"
+          echo "$result" | jq .
+          test "$(echo "$result" | jq -r '.refresh_required // false')" = "true"
+          echo "run=$(echo "$result" | jq -er '.run_id')" >> "$GITHUB_OUTPUT"
+          echo "gw=$(echo "$result" | jq -er '.gameweek')" >> "$GITHUB_OUTPUT"
+          echo "benchmark=$(echo "$result" | jq -er '.benchmark')" >> "$GITHUB_OUTPUT"
+          echo "parent=$(echo "$result" | jq -er '.parent_run_id')" >> "$GITHUB_OUTPUT"
+      - name: Generate paired 50K Monte Carlo, never promote
+        env:
+          OIDC_TOKEN: ${{ steps.oidc.outputs.token }}
+          RUN_ID: ${{ steps.candidate.outputs.run }}
+          GW: ${{ steps.candidate.outputs.gw }}
+          BENCHMARK: ${{ steps.candidate.outputs.benchmark }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          common=(-H "Authorization: Bearer $OIDC_TOKEN")
+          curl --fail-with-body --silent --show-error --max-time 240 "${common[@]}" "$FUNCTIONS_URL/run-live-sim-chunk?mode=reset&gw=$GW&run=$RUN_ID&benchmark=$BENCHMARK" | jq -e '.ok == true and .policy_version == "gk-sot-penalty-matched-v1"'
+          for part in $(seq 0 24); do
+            seed=$((2026000000 + GW * 100000 + part * 2000 + 1))
+            curl --fail-with-body --silent --show-error --max-time 240 --retry 5 --retry-delay 2 --retry-all-errors "${common[@]}" "$FUNCTIONS_URL/run-live-sim-chunk?gw=$GW&run=$RUN_ID&benchmark=$BENCHMARK&draws=2000&seed=$seed" | jq -e -c '.ok == true and .policy_version == "gk-sot-penalty-matched-v1"'
+            sleep 1
+          done
+          curl --fail-with-body --silent --show-error --max-time 240 --retry 5 --retry-delay 2 --retry-all-errors "${common[@]}" "$FUNCTIONS_URL/run-live-sim-chunk?mode=finalize&gw=$GW&run=$RUN_ID&benchmark=$BENCHMARK" | jq -e -c '.ok == true and .policy_version == "gk-sot-penalty-matched-v1"'
+      - name: Optimize both candidate squads in staging only
+        env:
+          OIDC_TOKEN: ${{ steps.oidc.outputs.token }}
+          RUN_ID: ${{ steps.candidate.outputs.run }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          for mode in recommended alternative; do
+            curl --fail-with-body --silent --show-error --max-time 300 --retry 4 --retry-delay 2 --retry-all-errors -H "Authorization: Bearer $OIDC_TOKEN" "$FUNCTIONS_URL/run-staging-optimizer?mode=$mode&run=$RUN_ID" | jq .
+          done
+      - name: Record all existing model QA gates without release
+        env:
+          OIDC_TOKEN: ${{ steps.oidc.outputs.token }}
+          RUN_ID: ${{ steps.candidate.outputs.run }}
+          PARENT_RUN_ID: ${{ steps.candidate.outputs.parent }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          for stage in qa integrity bugfix; do
+            jq -n --arg run "$RUN_ID" --arg stage "$stage" '{stage:$stage,run_id:$run}' | curl --fail-with-body --silent --show-error -H "Authorization: Bearer $OIDC_TOKEN" -H "Content-Type: application/json" --data-binary @- "$FUNCTIONS_URL/model-refresh-control" | jq .
+          done
+          jq -n --arg run "$RUN_ID" --arg parent "$PARENT_RUN_ID" '{stage:"model_gate",run_id:$run,parent_run_id:$parent}' | curl --fail-with-body --silent --show-error -H "Authorization: Bearer $OIDC_TOKEN" -H "Content-Type: application/json" --data-binary @- "$FUNCTIONS_URL/model-refresh-control" | jq .
+          {
+            echo "### Non-promoted role-aware MH9 candidate"
+            echo "Candidate: $RUN_ID"
+            echo "Parent live run: $PARENT_RUN_ID"
+            echo "No snapshot, promotion, historical scoring, user-squad or frontend writes"
+          } >> "$GITHUB_STEP_SUMMARY"
