@@ -199,17 +199,36 @@ def main():
     parser.add_argument('--output',type=Path,required=True)
     args=parser.parse_args()
     mh8,placements=mh8_audit()
-    # Further GW7 reconciliation is diagnostic; no DB writes are permitted.
+    candidates=[]
+    for p in placements:
+        pos=layout_role({'horizontalLayout':{'x':p['horizontal_x'],
+          'y':p['horizontal_y']}},team_defenders=None)
+        if not pos:
+            continue
+        candidates.append({
+            'player_id':p['player_id'],'match_id':p['match_id'],
+            'position_id':p['provider_position_id'],
+            'layout_x':p['horizontal_x'],'layout_y':p['horizontal_y'],
+            'candidate_role':pos['role'],'candidate_side':pos['side'],
+            'evidence_status':'CANDIDATE_ONLY_UNCONFIRMED_BY_SECOND_MATCH',
+            'source':'FotMob verified MH8 formation layout'
+        })
     output={'kind':'READ_ONLY_TACTICAL_GEOMETRY_DIAGNOSTIC',
             'season':'2026-27','gameweek':8,'played_mh8':mh8['matched_played'],
             'mh8_layout_coverage':mh8['source_layout_coverage'],
-            'provider_position_ids':Counter(str(p['provider_position_id']) for p in placements),
+            'candidate_formation_slots':len(candidates),
+            'candidates':candidates,
+            'provider_position_ids':dict(Counter(str(p['provider_position_id']) for p in placements)),
             'missing_role_labels':mh8['unknown_explicit_role_labels'],
             'db_writes':0,'role_changes_written':0,
             'created_at':datetime.now(timezone.utc).isoformat()}
-    args.output.write_text(json.dumps(output,indent=2,default=dict)+'\n',encoding='utf-8')
+    args.output.write_text(json.dumps(output,indent=2)+'\n',encoding='utf-8')
     print('MH8 GEOMETRY DIAGNOSTIC verified layouts',output['mh8_layout_coverage'],
-          'out of',len(placements),'DB writes 0',flush=True)
+          'out of',len(placements),'candidate roles',len(candidates),'DB writes 0',flush=True)
+    print('MH8 CANDIDATE ROLE COUNTS',json.dumps(dict(Counter(
+        f"{p['candidate_role']}:{p['candidate_side']}" for p in candidates)),ensure_ascii=False),flush=True)
+    print('MH8 ROLE CASES',json.dumps([p for p in candidates if p['player_id'] in
+       {567,299,429,427,94,426,493,542}],ensure_ascii=False),flush=True)
 
 if __name__=='__main__':
     main()
