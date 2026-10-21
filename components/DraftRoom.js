@@ -239,8 +239,17 @@ export default function DraftRoom({initialRoom='',initialInvite=''}) {
     <p>{isAuction?'Açık artırma: Oyuncular model xFP sırasına göre açılır. Herkes aynı oyuncuya teklif verir.':'İkinci tur: '+(room.mode==='snake'?[...teams].reverse():teams).map(t=>t.team_name).join(' → ')}</p>
     {room.is_host?<button className={s.primary} disabled={busy||teams.some(t=>!t.occupied)} onClick={()=>action(async()=>{await call('scout_draft_start',{p_room_id:id});await refresh()})}>Draftı başlat →</button>:<p>Yönetici kurayı tamamlayınca seçimler başlayacak.</p>}
    </div>}
-   {room.status!=='lobby'&&<div className={s.turn}><div><small>{room.status==='finished'?String(totalPicks)+'/'+String(totalPicks)+' TAMAMLANDI':isAuction?'AÇIK ARTIRMA · '+picked.length+'/'+totalPicks+' oyuncu':'TUR '+round+' · SEÇİM '+room.next_pick+'/'+totalPicks}</small><h2>{room.status==='finished'?'Draft tamamlandı!':isAuction?'Teklif zamanı':current?.team_name+' seçiyor'}</h2><p>{isAuction?'Oyuncuya tüm menajerler teklif verebilir. Her yeni teklif +5 saniye.':canPick?'Sıra sende. Havuzdan oyuncu seç.':'Seçimler tüm ekranlara otomatik yansır.'}</p></div>
+   {room.status!=='lobby'&&<div className={s.turn}><div><small>{room.status==='finished'?String(totalPicks)+'/'+String(totalPicks)+' TAMAMLANDI':isAuction?'AÇIK ARTIRMA · '+picked.length+'/'+totalPicks+' oyuncu':'TUR '+round+' · SEÇİM '+room.next_pick+'/'+totalPicks}</small><h2>{room.status==='finished'?'Draft tamamlandı!':inCompletion?(nominator?.team_name||'Sıradaki takım')+' kadrosunu tamamlıyor':isAuction?lot?'Teklif zamanı':(nominator?.team_name||'Sıradaki takım')+' oyuncu gösterecek':current?.team_name+' seçiyor'}</h2><p>{inCompletion?'1 kredi sabit fiyatla sıradaki takım eksik oyuncularını seçiyor.':isAuction?'Oyuncular sırayla aday gösterilir; geçerli teklifler süreye +5 sn ekler.':canPick?'Sıra sende. Havuzdan oyuncu seç.':'Seçimler tüm ekranlara otomatik yansır.'}</p></div>
     {room.is_host&&!isAuction&&<button className={s.secondary} disabled={busy||room.next_pick<=1} onClick={()=>action(async()=>{await call('scout_draft_undo',{p_room_id:id});await refresh()})}>↶ Son seçimi geri al</button>}</div>}
+   {room.status==='finished'&&<div className={s.panel}>
+    <small className={s.eyebrow}>DRAFT ARŞİVİ · KAYITLI SONUÇ</small><h2>Draft sonuçları saklandı</h2>
+    <p>Takım kadroları, seçim sıraları ve açık artırma fiyatları bu odada saklı. Odalarım bölümünden daha sonra tekrar açabilirsin.</p>
+    <button className={s.secondary} onClick={()=>action(async()=>{
+     const saved=room.results_snapshot||{gameweek:room.gameweek,teams:teams.map(t=>({team_name:t.team_name,players:t.selections}))}
+     const resultText=['MH'+room.gameweek+' DRAFT SONUÇLARI',...saved.teams.map(t=>t.team_name+'\n'+(t.players||[]).map(p=>(p.name||p.player_name)+' · '+P[p.position]+' · '+F(p.xfp)+' xFP'+(isAuction?' · '+p.price+' kredi':'')).join('\n'))].join('\n\n')
+     await navigator.clipboard.writeText(resultText);setMessage('Draft sonuçları kopyalandı.')
+    })}>↗ Sonuçları kopyala</button>
+   </div>}
    <div className={s.heading}><h2>{room.team_count} takımın kadrosu</h2><span>{picked.length}/{totalPicks}</span></div>
    <div className={s.progress}><i style={{width:(picked.length/totalPicks*100)+'%'}}/></div>
    <div className={s.board}>{teams.map(t=><div key={t.id} className={s.card+(current?.id===t.id?' '+s.active:'')}>
@@ -249,6 +258,13 @@ export default function DraftRoom({initialRoom='',initialInvite=''}) {
     <div className={s.totals}><span>Toplam xFP <b>{F(t.total)}</b></span><span>İlk 11 <b>{t.xi===null?'—':F(t.xi)}</b></span>{isAuction&&<span>Bütçe <b>{t.budget}/100</b></span>}</div>
     <div className={s.roster}>{t.selections.length?t.selections.map((p,i)=><div key={i}><span>{i+1}. {p.name}</span><small>{P[p.position]} · {F(p.xfp)}{isAuction?' · '+(picked.find(x=>Number(x.player_id)===Number(p.id))?.price||0)+' kredi':''}</small></div>):<p>Oyuncu seçilmedi.</p>}</div>
    </div>)}</div>
+   {room.status==='drafting'&&isAuction&&versionTwo&&!lot&&<div className={s.panel}>
+    <small className={s.eyebrow}>{inCompletion?'KADRO TAMAMLAMA · 1 KREDİ':'OYUNCU ADAY GÖSTERME'}</small>
+    <h2>{inCompletion?'Eksik kadrolar tamamlanıyor':(nominator?.team_name||'Sıradaki takım')+' oyuncu aday gösterecek'}</h2>
+    <p>{inCompletion?'Sırayla herkes eksik pozisyonlarına 1 kredi ödeyerek oyuncu seçecek.':canNominate?'Alttaki havuzdan bir oyuncu seç veya en yüksek xFP oyuncusunu otomatik göster.':'Sıradaki menajerin oyuncu göstermesi bekleniyor.'}</p>
+    {canNominate&&<button className={s.secondary} disabled={busy} onClick={()=>action(async()=>{await call('scout_draft_auction_nominate',{p_room_id:id,p_player_id:null});await refresh()})}>En yüksek xFP oyuncusunu göster →</button>}
+    {room.is_host&&!inCompletion&&<button className={s.secondary} disabled={busy} onClick={()=>action(async()=>{await call('scout_draft_auction_finish_bidding',{p_room_id:id});await refresh()})}>Kadroları tamamlama aşamasına geç (1 kredi) →</button>}
+   </div>}
    {room.status==='drafting'&&isAuction&&<div className={s.panel}>
     <small className={s.eyebrow}>CANLI AÇIK ARTIRMA · 100 KREDİ</small>
     {lot?<div className={s.auctionGrid}>
@@ -272,7 +288,7 @@ export default function DraftRoom({initialRoom='',initialInvite=''}) {
       </div>
     </div>:<p>Yeni oyuncu hazırlanıyor. İlk oyuncu otomatik açılır.</p>}
    </div>}
-   {room.status==='drafting'&&!isAuction&&<div className={s.poolLayout}><div className={s.panel}>
+   {room.status==='drafting'&&(!isAuction||versionTwo&&!lot)&&<div className={s.poolLayout}><div className={s.panel}>
     <div className={s.heading}><h2>Oyuncu havuzu</h2><span>{available.length} müsait</span></div>
     <div className={s.filters}><input placeholder="Oyuncu veya takım ara" value={search} onChange={e=>{setSearch(e.target.value);setAll(false)}}/><select value={pos} onChange={e=>setPos(e.target.value)}><option value="ALL">Tüm mevkiler</option>{Object.keys(P).map(p=><option value={p} key={p}>{P[p]}</option>)}</select><select value={club} onChange={e=>setClub(e.target.value)}><option value="ALL">Tüm takımlar</option>{clubs.map(c=><option key={c} value={c}>{c}</option>)}</select></div>
     <div className={s.pool}>{(all?filtered:filtered.slice(0,35)).map(p=><button key={p.id} disabled={!canPick||busy} className={s.player+(selected===p.id?' '+s.chosen:'')} onClick={()=>setSelected(p.id)}><Item p={p}/><strong>{F(p.xfp)}</strong></button>)}</div>
