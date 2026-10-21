@@ -76,3 +76,11 @@ test('a verified minutes breakout remains visible',()=>{
   assert.ok(trend.trend>0.2)
   assert.equal(trend.prev2Min,30)
 })
+
+test('published frozen MH9 snapshot is immutable even before the first kickoff',()=>{
+  const worker=readFileSync(new URL('../supabase/functions/weekly-model-lifecycle/index.ts',import.meta.url),'utf8')
+  assert.match(worker,/const hasFrozen=Boolean\(frozen\?\.run_id\)/)
+  assert.match(worker,/const snapshotAllowed=now<kickoff&&!hasFrozen/)
+  assert.match(worker,/if\(hasFrozen\|\|now>=kickoff\)/)
+  assert.match(worker,/PRE_KICKOFF_BACKTEST_SNAPSHOT_REQUIRED/)
+})
