@@ -2,11 +2,10 @@
 // Recorded goals, shots, xG and historical Fantasy points are never modified.
 // In particular a single 0.57-xG chance in eight games is not assumed to
 // recur every match just because it dominates the player's season xG/90.
+// Initially limit the correction to centre-backs. The historical role
+// backtest does not justify discounting attacking fullbacks/wingbacks.
 const ROLE_PRIORS={
   CB:{xg:.027,goals:.040,shots:.30,quality:.09,priorMatches:8},
-  FB:{xg:.022,goals:.046,shots:.50,quality:.07,priorMatches:6},
-  WB:{xg:.080,goals:.080,shots:.85,quality:.095,priorMatches:6},
-  DEF:{xg:.034,goals:.040,shots:.45,quality:.075,priorMatches:7},
 }
 const finite=v=>typeof v==="number"&&Number.isFinite(v)
 const norm=v=>String(v||"").trim().toUpperCase().replace(/[ _-]+/g,"")
@@ -15,8 +14,8 @@ export function sparseChanceDefenderRates({
   advancedThroughGameweek,throughGameweek
 }={}){
   const original={xgPer90,goalsPer90,applied:false,shotEvidenceTrusted:false,reason:"not_defender"}
-  if(position!=="DEF")return original
-  const key=norm(role),prior=ROLE_PRIORS[key]||ROLE_PRIORS.DEF
+  if(position!=="DEF"||norm(role)!=="CB")return original
+  const prior=ROLE_PRIORS.CB
   if(!finite(xgPer90)||xgPer90<0||!finite(goalsPer90)||goalsPer90<0||
      !finite(seasonMinutes)||seasonMinutes<=0)
     return {...original,reason:"insufficient_season_evidence"}
