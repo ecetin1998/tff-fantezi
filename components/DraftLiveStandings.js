@@ -55,7 +55,7 @@ export default function DraftLiveStandings({roomId}){
   const items=[...(data?.teams||[])]
   const field=view==='week'?'week_points':'total_points'
   items.sort((a,b)=>(Number(b[field]||0)-Number(a[field]||0))||
-   Number(b.verified_players||0)-Number(a.verified_players||0)||
+   (view==='week'?Number(b.total_points||0)-Number(a.total_points||0):Number(b.week_points||0)-Number(a.week_points||0))||
    Number(a.draft_order)-Number(b.draft_order))
   return items
  },[data,view])
