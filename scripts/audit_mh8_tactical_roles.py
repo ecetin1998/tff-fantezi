@@ -128,6 +128,12 @@ def main():
     sample_ids={567,94,427,299,429,426,493,542}
     print('SOURCE LAYOUT COVERAGE '+str(report['source_layout_coverage'])+'/'+str(len(report['raw_verified_starter_positions'])),flush=True)
     print('POSITION SAMPLE '+json.dumps([p for p in report['raw_verified_starter_positions'] if p['player_id'] in sample_ids],ensure_ascii=False),flush=True)
+    positions=Counter((p['provider_position_id'],p['horizontal_x'],p['horizontal_y'])
+      for p in report['raw_verified_starter_positions'])
+    print('SOURCE FORMATION SLOT DISTRIBUTION '+json.dumps([
+      {'position_id':position_id,'x':x,'y':y,'count':count}
+      for (position_id,x,y),count in positions.most_common(65)
+    ],ensure_ascii=False),flush=True)
     counts=Counter((r['role'],r['side']) for r in report['rows'])
     print('ROLE COUNTS '+json.dumps({str(k):v for k,v in counts.items()},
           ensure_ascii=False),flush=True)
