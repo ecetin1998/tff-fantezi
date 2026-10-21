@@ -26,7 +26,7 @@ test('draft start week is preserved, snapshots and source scores do not mutate',
  assert.match(sql,/pts\.gameweek between rm\.gameweek and max_week/)
  assert.match(sql,/generate_series\(rm\.gameweek,max_week\)/)
  assert.match(sql,/'scoring_rule','all_15_players'/)
- assert.match(sql,/join public\.scout_draft_picks pk/)
+ assert.match(sql,/from public\.scout_draft_picks pk/)
  assert.doesNotMatch(sql,/\bupdate public\.scout_draft_picks\b|\binsert into public\.scout_player_weekly_points\b/)
 })
 test('standings UI highlights verified pending separately from legitimate zero points',()=>{
