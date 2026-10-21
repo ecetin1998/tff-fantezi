@@ -104,5 +104,6 @@ def main():
     print('KEY PLAYERS '+json.dumps([x for x in output['paired_candidates']
       if x['player_id'] in highlight],ensure_ascii=False),flush=True)
     print('ALL ROLE CANDIDATE IDS '+json.dumps([x['player_id'] for x in output['paired_candidates']]),flush=True)
+    print('ALL ROLE PAIRS '+json.dumps([[x['player_id'],x['model_role_candidate'],x['side'],x['fantasy_position']] for x in output['paired_candidates']]),flush=True)
 
 if __name__=='__main__':main()
