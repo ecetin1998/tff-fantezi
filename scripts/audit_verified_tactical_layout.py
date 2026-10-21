@@ -197,8 +197,15 @@ def mh8_audit(reader=read_verified_fixture):
 def main():
     parser=argparse.ArgumentParser()
     parser.add_argument('--output',type=Path,required=True)
+    parser.add_argument('--mh8-source',type=Path)
     args=parser.parse_args()
-    mh8,placements=mh8_audit()
+    if args.mh8_source:
+        mh8=load(args.mh8_source)
+        placements=mh8['raw_verified_starter_positions']
+        if mh8.get('kind')!='READ_ONLY_VERIFIED_TACTICAL_ROLE_EVIDENCE':
+            raise ValueError('MH8 source is not independently verified')
+    else:
+        mh8,placements=mh8_audit()
     candidates=[]
     for p in placements:
         pos=layout_role({'horizontalLayout':{'x':p['horizontal_x'],
