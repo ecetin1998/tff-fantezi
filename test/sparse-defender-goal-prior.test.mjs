@@ -55,7 +55,7 @@ test('does not mistake missing observations for zero or overwrite the parent mod
   }
   const worker=readFileSync(new URL('../supabase/functions/weekly-model-lifecycle/index.ts',import.meta.url),'utf8')
   assert.match(worker,/calibrateAttackRates\(/)
-  assert.match(worker,/sparse-defender-xg-v1/)
+  assert.match(worker,/role-aware-attack-v1/)
   assert.match(worker,/stableInput\.source_note/)
   assert.match(worker,/sourceStatsQ/)
   assert.match(worker,/sourceStatsMap/)
