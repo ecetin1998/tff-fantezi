@@ -208,26 +208,31 @@ export default function DraftRoom({initialRoom='',initialInvite=''}) {
   {message&&<div className={s.success} role="status">{message}</div>}
   {!id&&<div className={s.columns}>
    <div className={s.panel}><small className={s.eyebrow}>YENİ ODA</small><h2>Draft odası oluştur</h2><p>İlk takım senin olacak; diğer menajerler davet koduyla kendi takımlarına katılır.</p>
-    <label>Katılımcı sayısı<select value={teamCount} onChange={e=>{
-      const n=Number(e.target.value);setTeamCount(n)
-      setNames(prev=>Array.from({length:n},(_,i)=>prev[i]||('Takım '+(i+1))))
-    }}>{Array.from({length:7},(_,i)=>i+2).map(n=><option value={n} key={n}>{n} kişi</option>)}</select></label>
-    {names.map((n,i)=><label key={i}>Takım {i+1}<input maxLength={40} value={n} onChange={e=>setNames(old=>old.map((v,j)=>i===j?e.target.value:v))}/></label>)}
-    <label>Draft biçimi<select value={mode} onChange={e=>setMode(e.target.value)}><option value="snake">Klasik · Snake</option><option value="linear">Klasik · Normal</option><option value="auction">Açık Artırma · 100 kredi / 15 sn / teklif +5 sn</option></select></label>{mode==='auction'&&<p>Her takımın 100 kredisi var. En yüksek teklif oyuncuyu alır; kalan 15 kişilik kadroyu bitirecek minimum bütçe korunur.</p>}
-    <button className={s.primary} disabled={busy} onClick={()=>action(async()=>{const r=await call('scout_draft_create',{p_names:names,p_mode:mode});openRoom(r.room_id);setMessage('Oda oluşturuldu.')})}>Oda oluştur →</button>
+    <label>Katılımcı sayısı<select value={teamCount} onChange={e=>setTeamCount(Number(e.target.value))}>{Array.from({length:7},(_,i)=>i+2).map(n=><option value={n} key={n}>{n} kişi</option>)}</select></label>
+    <label>Senin takım adın<input maxLength={40} placeholder="Örn. Bilanço" value={myName} onChange={e=>setMyName(e.target.value)}/></label>
+    <p>Diğer menajerler davet koduyla katılırken kendi takım isimlerini kendileri belirler.</p>
+    <label>Draft biçimi<select value={mode} onChange={e=>setMode(e.target.value)}><option value="snake">Klasik · Snake</option><option value="linear">Klasik · Normal</option><option value="auction">Açık Artırma · 100 kredi / 15 sn / teklif +5 sn</option></select></label>{mode==='auction'&&<p>Her takım 100 krediyle başlar. Sırayla oyuncu aday gösterilir; eksik kadrolar 1 krediyle tamamlanabilir.</p>}
+    <button className={s.primary} disabled={busy||!myName.trim()} onClick={()=>action(async()=>{const names=Array.from({length:teamCount},(_,i)=>i===0?myName.trim():'Takım '+(i+1));const r=await call('scout_draft_create',{p_names:names,p_mode:mode});openRoom(r.room_id);setMessage('Oda oluşturuldu.')})}>Oda oluştur →</button>
    </div>
    <div className={s.panel}><small className={s.eyebrow}>KATILIM</small><h2>Davet kodun var mı?</h2><p>Arkadaşının kodunu girip boş takımlardan birini seç.</p>
-    <label>Davet kodu<input maxLength={12} placeholder="ÖRN. 8A1B3F22CD10" value={code} onChange={e=>{setCode(e.target.value.toUpperCase());setLobby(null)}}/></label>
-    <button className={s.secondary} disabled={busy||code.length!==12} onClick={()=>action(async()=>setLobby(await call('scout_draft_lobby',{p_code:code})))}>Odayı bul</button>
-    {lobby&&<div className={s.seats}>{lobby.teams.map(t=><button className={s.seat} key={t.team_index} disabled={busy||t.occupied||lobby.status!=='lobby'} onClick={()=>action(async()=>openRoom(await call('scout_draft_join',{p_code:code,p_team_index:t.team_index})))}><strong>{t.name}</strong><span>{t.occupied?'Dolu':'Katıl →'}</span></button>)}</div>}
+    <label>Davet kodu<input maxLength={12} autoCapitalize="characters" placeholder="Örn. AX7K9M2P" value={code} onChange={e=>{setCode(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g,''));setLobby(null)}}/></label>
+    <button className={s.secondary} disabled={busy||![8,12].includes(code.length)} onClick={()=>action(async()=>setLobby(await call('scout_draft_lobby',{p_code:code})))}>Odayı bul</button>
+    {lobby&&<><div className={s.seats}>{lobby.teams.map(t=><div className={s.seat} key={t.team_index}><strong>{t.occupied?t.name:'Boş takım'}</strong><span>{t.occupied?'Katıldı':'Katılınabilir'}</span></div>)}</div>
+    <label>Senin takım adın<input maxLength={40} placeholder="Kendi takım adını yaz" value={joinName} onChange={e=>setJoinName(e.target.value)}/></label>
+    <button className={s.primary} disabled={busy||lobby.status!=='lobby'||!joinName.trim()||lobby.teams.every(t=>t.occupied)} onClick={()=>action(async()=>openRoom(await call('scout_draft_join_named',{p_code:code,p_team_name:joinName.trim()})))}>Kendi adımla katıl →</button></>}
    </div>
+  </div>}
+  {!id&&<div className={s.panel}><div className={s.heading}><h2>Odalarım ve draft geçmişi</h2><span>{archives.length} oda</span></div>
+   {archives.length?<div className={s.archiveList}>{archives.map(r=><button key={r.id} className={s.archiveItem} onClick={()=>openRoom(r.id)}><span><strong>{r.team_name}</strong><small>MH{r.gameweek} · {r.team_count} takım · {r.draft_kind==='auction'?'Açık artırma':r.mode==='snake'?'Snake':'Normal'} · {new Date(r.created_at).toLocaleDateString('tr-TR')}</small></span><span>{r.status==='finished'?'Tamamlandı ✓':r.status==='drafting'?'Devam ediyor':'Lobi'} · {r.picked}/{r.team_count*15} →</span></button>)}</div>:<p>Henüz katıldığın bir draft odası yok. İlk odanı oluştur!</p>}
   </div>}
   {id&&!room&&<div className={s.panel}>Odaya bağlanılıyor... <button className={s.secondary} onClick={()=>{setId('');window.history.pushState({},'','/draft')}}>Geri dön</button></div>}
   {room&&<>
    <div className={s.roomBar}><div><small>DAVET KODU</small><strong>{room.code}</strong><span>{room.status==='lobby'?'Lobi':room.status==='finished'?'Tamamlandı':'Canlı draft'}</span></div>
-    <button className={s.secondary} onClick={()=>action(async()=>{await navigator.clipboard.writeText(window.location.origin+'/draft?join='+room.code);setMessage('Davet bağlantısı kopyalandı.')})}>↗ Daveti kopyala</button></div>
+    <div className={s.roomActions}><button className={s.secondary} onClick={()=>{setId('');setRoom(null);setPool([]);window.history.pushState({},'','/draft')}}>← Odalarım</button>
+    <button className={s.secondary} onClick={()=>action(async()=>{await navigator.clipboard.writeText(window.location.origin+'/draft?join='+room.code);setMessage('Davet bağlantısı kopyalandı.')})}>↗ Daveti kopyala</button></div></div>
    {room.status==='lobby'&&<div className={s.panel}>
     <div className={s.heading}><h2>Kura ve seçim sistemi</h2><span>{teams.filter(t=>t.occupied).length}/{room.team_count} hazır</span></div>
+    <div className={s.renameBox}><label>Takım adını değiştir<input maxLength={40} placeholder={own?.team_name||'Takımın'} value={renameName} onChange={e=>setRenameName(e.target.value)}/></label><button className={s.secondary} disabled={busy||!renameName.trim()} onClick={()=>action(async()=>{await call('scout_draft_rename',{p_room_id:id,p_team_name:renameName.trim()});setRenameName('');await refresh()})}>Kaydet</button></div>
     <div className={s.tools}><label>Draft biçimi<select disabled={!room.is_host||busy} value={isAuction?'auction':room.mode} onChange={e=>action(async()=>{await call('scout_draft_config',{p_room_id:id,p_mode:e.target.value,p_shuffle:false});await refresh()})}><option value="snake">Klasik · Snake</option><option value="linear">Klasik · Normal</option><option value="auction">Açık Artırma · 100 kredi</option></select></label>
     {room.is_host&&<button className={s.secondary} disabled={busy} onClick={()=>action(async()=>{await call('scout_draft_config',{p_room_id:id,p_mode:isAuction?'auction':room.mode,p_shuffle:true});await refresh()})}>⇄ Kura çek</button>}</div>
     <div className={s.seats}>{teams.map(t=><div className={s.seat} key={t.id}><small>#{t.draft_order}</small><strong>{t.team_name}</strong><span>{t.mine?'SEN':t.occupied?'Katıldı':'Boş'}</span></div>)}</div>
