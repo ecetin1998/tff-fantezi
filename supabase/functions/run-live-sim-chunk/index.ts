@@ -110,7 +110,7 @@ function allocationFor(p,a,gameweek){
   const freshness=age===0?1:age===1?.5:0;
   // Forecast xG already receives a reliability shrink from the MH9 lifecycle.
   // An older single-shot excess adjustment must not discount the same chance twice.
-  const priorCalibrated=String(p.source_note||"").includes("sparse-defender-xg-v1");
+  const priorCalibrated=String(p.source_note||"").includes("role-aware-attack-v1");
   const excess=priorCalibrated?0:a?num(a[key])*freshness:0;
   const exposure=a?num(a.exposure):0;
   const observed=a?num(a.observed_matches):0;
