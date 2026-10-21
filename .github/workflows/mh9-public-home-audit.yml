@@ -1,0 +1,44 @@
+name: MH9 public home xFP smoke (read only)
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/mh9-public-home-audit.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  public_live:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Read live page and independently inspect rendered top xFP
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --silent --show-error --fail-with-body --location --max-time 45 --retry 3 --retry-delay 3 --retry-all-errors \
+            -H "Cache-Control: no-cache" \
+            -D "$RUNNER_TEMP/headers.txt" \
+            -o "$RUNNER_TEMP/home.html" \
+            "https://fanteziligrehberi.com/"
+          python3 - <<'PY'
+          from pathlib import Path
+          import html, re
+          body=html.unescape(Path(__import__('os').environ['RUNNER_TEMP'],'home.html').read_text(errors='replace'))
+          print('Home bytes',len(body),'title_present','Veriyi oku.' in body,'Sorescu_present','Sorescu' in body)
+          for found in list(re.finditer('Sorescu',body,re.I))[:5]:
+              sample=body[max(0,found.start()-250):found.end()+500]
+              print('Sorescu snippet:',re.sub(r'\\s+',' ',sample)[:620])
+          numbers=set(re.findall(r'\\b6[.,](?:41|27|26|45|37)\\b',body))
+          print('Important xFP strings:',sorted(numbers))
+          if 'Sorescu' not in body:
+              raise SystemExit('LIVE_HTML_MISSING_EXPECTED_PLAYER')
+          if not re.search(r'\\b6[.,]41\\b',body):
+              raise SystemExit('LIVE_HTML_HAS_NO_NEW_SCORESCU_6_41_EXPECTED')
+          print('LIVE_HOMEPAGE_NEW_MH9_SCORE_VISIBLE')
+          PY
+          echo "Relevant cache headers:"
+          grep -Ei '^(HTTP/|age:|cache-control:|cf-cache-status:|content-type:|server:)' "$RUNNER_TEMP/headers.txt" || true
