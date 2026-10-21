@@ -58,7 +58,7 @@ def collect(manifest,roster,official,reviewed,prior,reader=read_verified_fixture
     if (identities['source_fixtures']!=9 or identities['sourced_played']!=286 or
         identities['matched_played']!=286 or identities['unmatched_played']!=0):
         raise ValueError('incomplete official player identity alignment')
-    out,unknown=[],Counter()
+    out,unknown,placements=[],Counter(),[]
     for match in identities['matches']:
         match_id=int(match['match_id'])
         proof={int(o['provider_player_id']):o for o in match['observations']
@@ -76,6 +76,13 @@ def collect(manifest,roster,official,reviewed,prior,reader=read_verified_fixture
             starter=by_id.get(provider_id)
             if starter is None:
                 continue # substitute minutes are not evidence of a starting role
+            layout=starter.get('horizontalLayout') or {}
+            x=layout.get('x') if isinstance(layout,dict) else None
+            y=layout.get('y') if isinstance(layout,dict) else None
+            placements.append({'player_id':int(obs['scout_player_id']),
+              'match_id':match_id,'provider_position_id':starter.get('positionId'),
+              'horizontal_x':x,'horizontal_y':y,
+              'source_position_short':starter.get('positionStringShort')})
             position=explicit_role(starter)
             if position is None:
                 unknown[str(starter.get('positionStringShort') or
@@ -100,6 +107,8 @@ def collect(manifest,roster,official,reviewed,prior,reader=read_verified_fixture
         'season':'2026-27','gameweek':8,'kind':'READ_ONLY_VERIFIED_TACTICAL_ROLE_EVIDENCE',
         'matched_played':286,'verified_fixtures':9,'verified_position_observations':len(out),
         'unknown_explicit_role_labels':dict(unknown),
+        'source_layout_coverage':sum(isinstance(p['horizontal_x'],(int,float)) and isinstance(p['horizontal_y'],(int,float)) for p in placements),
+        'raw_verified_starter_positions':placements,
         'created_at_utc':datetime.now(timezone.utc).isoformat(),
         'db_writes':0,'fantasy_points_written':0,'rows':out
     }
@@ -116,6 +125,9 @@ def main():
           flush=True)
     print('UNKNOWN POSITION LABELS '+json.dumps(report['unknown_explicit_role_labels'],
           ensure_ascii=False),flush=True)
+    sample_ids={567,94,427,299,429,426,493,542}
+    print('SOURCE LAYOUT COVERAGE '+str(report['source_layout_coverage'])+'/'+str(len(report['raw_verified_starter_positions'])),flush=True)
+    print('POSITION SAMPLE '+json.dumps([p for p in report['raw_verified_starter_positions'] if p['player_id'] in sample_ids],ensure_ascii=False),flush=True)
     counts=Counter((r['role'],r['side']) for r in report['rows'])
     print('ROLE COUNTS '+json.dumps({str(k):v for k,v in counts.items()},
           ensure_ascii=False),flush=True)
