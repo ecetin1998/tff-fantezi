@@ -9,7 +9,7 @@ const F=x=>Number(x||0).toLocaleString('tr-TR',{minimumFractionDigits:2,maximumF
 const errors={
  AUTH_REQUIRED:'Giriş yapman gerekiyor.',ROOM_ACCESS_DENIED:'Bu odaya davet koduyla katılmalısın.',
  ROOM_NOT_FOUND:'Oda bulunamadı.',INVALID_TEAM_COUNT:'Katılımcı sayısı 2–8 olmalı.',
- INVALID_TEAM_NAMES:'Takım adları boş veya aynı olamaz.',DRAFT_ALREADY_STARTED:'Bu draft başladı.',
+ INVALID_TEAM_NAMES:'Takım adları boş veya aynı olamaz.',TEAM_NAME_TAKEN:'Bu takım adı alınmış.',ROOM_FULL:'Bu oda dolu.',LOT_ALREADY_OPEN:'Önce mevcut oyuncunun süresi dolmalı.',WAIT_ONE_NOMINATION_ROUND:'Önce her takım en az bir oyuncu aday göstermeli.',NO_ELIGIBLE_CANDIDATE:'Uygun oyuncu bulunamadı.',DRAFT_ALREADY_STARTED:'Bu draft başladı.',
  ALREADY_JOINED:'Bu odaya zaten katıldın.',SEAT_TAKEN:'Bu takım dolu.',
  HOST_ONLY:'Bu işlemi sadece yönetici yapabilir.',WAIT_FOR_ALL_PLAYERS:'Tüm katılımcılar katılmadan draft başlayamaz.',
  DRAFT_NOT_ACTIVE:'Draft aktif değil.',NOT_YOUR_TURN:'Henüz senin sıran değil.',
@@ -41,14 +41,21 @@ function xiScore(rows){
   }
  return Number.isFinite(best)?best:null
 }
-function Item({p}){return <div className={s.pText}><strong>{p.name||p.player_name}</strong><small>{p.team} · {P[p.position]} · {p.role||'—'}</small><small>xDak {Math.round(Number(p.x_minutes||0))} · İlk 11 %{Math.round(100*Number(p.xi_probability||0))} · Risk: {risk(p)}</small></div>}
+function Item({p,sort='xfp'}){const metric=sort==='xi'?'İlk 11 %'+Math.round(Number(p.xi_probability||0)*100):sort==='minutes'?'xDak '+Math.round(Number(p.x_minutes||0)):sort==='points'?'Toplam '+Number(p.total_points||0):sort==='price'?'Fiyat '+F(p.price):sort==='value'?'F/P '+F(p.value_score):sort==='p90'?'P90 '+F(p.p90):sort==='six'?'6+ %'+Math.round(Number(p.six_plus_probability||0)*100):null;return <div className={s.pText}><strong>{p.name||p.player_name}</strong><small>{p.team} · {P[p.position]} · {p.role||'—'}</small><small>xDak {Math.round(Number(p.x_minutes||0))} · İlk 11 %{Math.round(100*Number(p.xi_probability||0))} · Risk: {risk(p)}</small>{metric&&<small className={s.sortMetric}>{metric}</small>}</div>}
 
 export default function DraftRoom({initialRoom='',initialInvite=''}) {
  const client=useMemo(()=>createClient(),[])
  const [id,setId]=useState(initialRoom)
  const [room,setRoom]=useState(null)
  const [pool,setPool]=useState([])
- const [names,setNames]=useState(['bilanço','Serhat','OHE','HASTEAM'])
+ const [myName,setMyName]=useState('')
+ const [joinName,setJoinName]=useState('')
+ const [renameName,setRenameName]=useState('')
+ const [archives,setArchives]=useState([])
+ const [sort,setSort]=useState('xfp')
+ const [sortDirection,setSortDirection]=useState('desc')
+ const [proOverlayReady,setProOverlayReady]=useState(false)
+ const [isPro,setIsPro]=useState(false)
  const [teamCount,setTeamCount]=useState(4)
  const [mode,setMode]=useState('snake')
  const [bidAmount,setBidAmount]=useState(1)
@@ -110,6 +117,34 @@ export default function DraftRoom({initialRoom='',initialInvite=''}) {
   const timer=setInterval(()=>{void settle()},1500)
   return()=>{alive=false;clearInterval(timer)}
  },[id,room?.draft_kind,room?.status,call,refresh])
+ useEffect(()=>{
+  if(id)return
+  let live=true
+  call('scout_draft_my_rooms').then(data=>{if(live)setArchives(Array.isArray(data)?data:[])}).catch(()=>{})
+  return()=>{live=false}
+ },[id,call])
+ useEffect(()=>{
+  if(!id||!room?.run_id)return
+  let live=true
+  setIsPro(false);setProOverlayReady(false)
+  const load=async()=>{
+   try{
+    const resp=await fetch('/api/access',{cache:'no-store'})
+    if(!resp.ok)return
+    const access=await resp.json()
+    if(!live||access.plan!=='pro')return
+    const overlayResponse=await fetch('/api/pro-player-overlay?run_id='+encodeURIComponent(room.run_id),{cache:'no-store'})
+    if(!overlayResponse.ok)return
+    const overlay=await overlayResponse.json()
+    if(!live||overlay.run_id!==room.run_id||!Array.isArray(overlay.rows))return
+    const extra=new Map(overlay.rows.map(x=>[Number(x.player_id),x]))
+    setPool(prev=>prev.map(player=>{const more=extra.get(Number(player.id));return more?{...player,p90:more.p90,six_plus_probability:more.six_plus_probability}:player}))
+    setIsPro(true);setProOverlayReady(true)
+   }catch{/* Keep public sorting choices when protected analytics are unavailable. */}
+  }
+  void load()
+  return()=>{live=false}
+ },[id,room?.run_id])
  const action=async fn=>{
   setBusy(true);setProblem('');setMessage('')
   try{await fn()}catch(e){setProblem(errorText(e))}
@@ -138,13 +173,28 @@ export default function DraftRoom({initialRoom='',initialInvite=''}) {
  own.count[lot.position]<CAPS[lot.position]&&own.selections.length<15&&
  lot.leader_team_id!==own.id&&Number(bidAmount)>Number(lot.current_bid||0)&&Number(bidAmount)<=safeMax)
 
+ const versionTwo=Number(room?.rules_version||1)>=2
+ const inCompletion=Boolean(isAuction&&versionTwo&&room?.auction_phase==='completion')
+ const nominator=teams.find(t=>Number(t.draft_order)===Number(room?.nomination_index))
+ const canNominate=Boolean(isAuction&&versionTwo&&room?.status==='drafting'&&!inCompletion&&!lot&&nominator?.mine)
+ const canComplete=Boolean(inCompletion&&room?.status==='drafting'&&nominator?.mine)
+ const canChoose=canPick||canNominate||canComplete
+ const sortValue=(p,k)=>k==='xi'?p.xi_probability:k==='minutes'?p.x_minutes:k==='p90'?p.p90:k==='six'?p.six_plus_probability:k==='points'?p.total_points:k==='value'?p.value_score:k==='price'?p.price:p.xfp
+ const activeSort=(sort==='p90'||sort==='six')&&!proOverlayReady?'xfp':sort
+ const sortPlayers=(a,b)=>{
+  const av=sortValue(a,activeSort),bv=sortValue(b,activeSort)
+  if(av==null&&bv!=null)return 1
+  if(bv==null&&av!=null)return -1
+  const diff=Number(av||0)-Number(bv||0)
+  return (sortDirection==='asc'?diff:-diff)||Number(b.xfp||0)-Number(a.xfp||0)||String(a.name).localeCompare(String(b.name),'tr')
+ }
  const available=pool.filter(p=>!pickedIds.has(Number(p.id)))
  const fits=p=>!current||current.count[p.position]<CAPS[p.position]
  const clubs=[...new Set(pool.map(p=>p.team))].sort((a,b)=>a.localeCompare(b,'tr'))
  const filtered=available.filter(fits).filter(p=>pos==='ALL'||p.position===pos)
    .filter(p=>club==='ALL'||p.team===club)
    .filter(p=>(p.name+' '+p.team).toLocaleLowerCase('tr-TR').includes(search.toLocaleLowerCase('tr-TR')))
-   .sort((a,b)=>Number(b.xfp)-Number(a.xfp))
+   .sort(sortPlayers)
  const options=available.filter(fits)
  const main=[...options].sort((a,b)=>{
   const rank=p=>Number(p.xfp)+Number(p.xi_probability||0)*.25+({FWD:.45,MID:.25,DEF:.08,GK:-.3}[p.position]||0)-(risk(p)==='Yüksek'?.4:0)
