@@ -1,0 +1,51 @@
+import test from 'node:test'
+import assert from 'node:assert/strict'
+import {readFileSync} from 'node:fs'
+
+const sql=readFileSync('supabase/migrations/20261021183500_draft_v3_configurable_timers_autopick.sql','utf8')
+const ui=readFileSync('components/DraftRoom.js','utf8')
+const css=readFileSync('components/DraftRoom.module.css','utf8')
+
+test('V3 keeps older rooms unchanged, configurable legal server ranges',()=>{
+ assert.match(sql,/rules_version in \(1,2,3\)/)
+ assert.match(sql,/end,n,3\);/)
+ assert.match(sql,/auction_open_seconds between 10 and 20/)
+ assert.match(sql,/auction_extension_seconds between 1 and 5/)
+ assert.match(sql,/classic_pick_seconds between 15 and 90/)
+ assert.match(sql,/rm\.status<>'lobby' or rm\.rules_version<3/)
+ assert.match(sql,/rm\.host_user_id<>auth\.uid\(\)/)
+})
+test('server settlement locks room, enforces deadline and uses roster cap and frozen xFP',()=>{
+ assert.match(sql,/create or replace function public\.scout_draft_classic_advance/)
+ assert.match(sql,/from public\.scout_draft_rooms where id=p_room_id for update/)
+ assert.match(sql,/clock_timestamp\(\)<rm\.classic_deadline/)
+ assert.match(sql,/rm\.mode='snake' and mod\(round_num,2\)=0/)
+ assert.match(sql,/not exists\(select 1 from public\.scout_draft_picks picked/)
+ assert.match(sql,/roster_player\.position=sp\.position/)
+ assert.match(sql,/case sp\.position when 'GK' then 2 when 'DEF' then 5 when 'MID' then 5 else 3 end/)
+ assert.match(sql,/pr\.run_id=rm\.model_run_id/)
+ assert.match(sql,/order by pr\.xfp desc/)
+ assert.match(sql,/status=case when rm\.next_pick=rm\.team_count\*15 then 'finished' else 'drafting' end/)
+ assert.match(sql,/rm\.classic_pick_seconds\*interval '1 second'/)
+ assert.match(sql,/PICK_TIME_EXPIRED/)
+ assert.match(sql,/classic_deadline=case when rm\.rules_version>=3/)
+})
+test('auction settings affect real server expiration but preserve V2 compatibility',()=>{
+ assert.match(sql,/clock_timestamp\(\)\+rm\.auction_open_seconds\*interval '1 second'/)
+ assert.match(sql,/rm\.auction_extension_seconds\*interval '1 second'/)
+ assert.match(sql,/if rm\.rules_version>=2 then/)
+ assert.match(sql,/rm\.rules_version<2/)
+ assert.match(sql,/scout_draft_auction_finish_bidding/)
+ assert.match(sql,/scout_draft_auction_complete_pick/)
+})
+test('configurable accessible sliders and a classic countdown appear in lobby',()=>{
+ assert.match(ui,/min="10" max="20" step="1"/)
+ assert.match(ui,/min="1" max="5" step="1"/)
+ assert.match(ui,/min="15" max="90" step="5"/)
+ assert.match(ui,/scout_draft_config_timers/)
+ assert.match(ui,/scout_draft_classic_advance/)
+ assert.match(ui,/classicSecondsLeft/)
+ assert.match(ui,/Süreleri kaydet/)
+ assert.match(css,/\.classicClock/)
+ assert.match(css,/\.timerSlider/)
+})
