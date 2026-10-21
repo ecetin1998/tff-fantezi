@@ -31,8 +31,10 @@ def safe_role(row):
     if side and x>=.66:
         return 'W',side,'advanced_flank_layout'
     # Full backs in the defensive starting line, verified by formation.
-    if side and .23<=x<=.415 and backs in (4,5):
-        return 'FB',side,'back_line_flank_layout'
+    if side and .23<=x<=.415 and backs==4:
+        return 'FB',side,'back_four_flank_layout'
+    if side and .23<=x<=.415 and backs==5:
+        return 'WB',side,'back_five_wingback_layout'
     # Wingbacks in 3-CB formations, not categorically all wide midfielders.
     if side and .435<=x<.66 and backs in (3,5):
         return 'WB',side,'wingback_layout'
