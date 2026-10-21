@@ -6,6 +6,7 @@ import {reconcileDefenderXa} from "./defenderXa.mjs"
 import {fetchTrustedWeeklyEvidence} from "./weeklyEvidence.mjs"
 import {roleTrendFromWeeklyEvidence} from "./roleTrend.mjs"
 import {blendVerifiedAttackRate} from "./mh8Attack.mjs"
+import {sparseChanceDefenderRates} from "./sparseChanceDefender.mjs"
 
 const AUDIENCE="tff-fantezi-scout"
 const ISSUER="https://token.actions.githubusercontent.com"
@@ -421,7 +422,13 @@ async function prepare(sb:any,current:any,status:any,body:any={}){
     const saves90=per90(s.saves,minutes,n(priorRates[6]))
     const shots90=per90(s.shots,minutes,n(priorRates[10]))
     const sot90=per90(s.shots_on_target,minutes,n(priorRates[11]))
-    const rates=[xg90,g90,a90,xa90,yc90,rc90,saves90,n(priorRates[7]),n(priorRates[8]),n(priorRates[9]),shots90,sot90]
+    const sparse=sparseChanceDefenderRates({
+      position:p.position,role:p.primary_role,xgPer90:xg90,goalsPer90:g90,
+      seasonMinutes:minutes,shots:s.shots==null?null:Number(s.shots),
+      advancedThroughGameweek:s.advanced_through_gameweek==null?null:Number(s.advanced_through_gameweek),
+      throughGameweek:Number(s.through_gameweek)
+    })
+    const rates=[sparse.xgPer90,sparse.goalsPer90,a90,xa90,yc90,rc90,saves90,n(priorRates[7]),n(priorRates[8]),n(priorRates[9]),shots90,sot90]
     const availability=clamp(0,1,n(av.availability_probability,1))
     inputRows.push({
       gameweek:target,benchmark_version:benchmark,player_id:id,player_name:p.full_name,club_id:Number(p.team_id),
@@ -429,7 +436,7 @@ async function prepare(sb:any,current:any,status:any,body:any={}){
       bench_weight:n(prior.bench_weight,1),durations,duration_weights:durationWeights,rates,
       data_confidence:prior.data_confidence||projMap.get(id)?.confidence||"medium",
       has_individual_prior:Boolean(prior.has_individual_prior),
-      source_note:key+(momentum.rising?" • momentum-v1 +"+momentum.role_uplift:"")+(xaReconcile.adjusted?" • defender-xa-source-window-v1 "+xaReconcile.source_minutes+"dk":"")+(officialShift.applied?" • resmî maç: "+event.match_ref:""),
+      source_note:key+(sparse.applied?" • sparse-defender-xg-v1":"")+(momentum.rising?" • momentum-v1 +"+momentum.role_uplift:"")+(xaReconcile.adjusted?" • defender-xa-source-window-v1 "+xaReconcile.source_minutes+"dk":"")+(officialShift.applied?" • resmî maç: "+event.match_ref:""),
       sub_role:p.primary_role||prior.sub_role||null,role_side:p.role_side||prior.role_side||null,
       effective_xa_per90:xa90
     })
@@ -447,7 +454,7 @@ async function prepare(sb:any,current:any,status:any,body:any={}){
     const signal=officialShift.applied&&event.started&&Number(event.minutes)>=75
       ?"RESMÎ MAÇTA İLK 11":officialShift.applied&&event.squad_status==="unused"
       ?"RESMÎ MAÇTA YEDEK":momentum.rising?momentum.signal:d!==null&&d>.20?"ROL YÜKSELİYOR":d!==null&&d<-.20?"ROL DÜŞÜYOR":"BELİRGİN DEĞİŞİM YOK"
-    const goalWeight=Math.max(1e-6,.75*xg90+.25*g90)
+    const goalWeight=Math.max(1e-6,.75*sparse.xgPer90+.25*sparse.goalsPer90)
     const assistWeight=Math.max(1e-6,.70*xa90+.30*a90)
     roleDraft.push({run_id:runId,player_id:id,last2_xi_probability:last2Xi,previous2_xi_probability:prev2Xi,last2_minutes:last2Min,previous2_minutes:prev2Min,signal,predicted_xi_probability:roleProb,x_minutes:0,availability_probability:availability,goalWeight,assistWeight,team_id:Number(p.team_id)})
     if(!weightsByTeam.has(Number(p.team_id)))weightsByTeam.set(Number(p.team_id),[])
@@ -633,8 +640,8 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
     sb.from("scout_replay_match_inputs").select("*").eq("gameweek",gw).eq("benchmark_version",sourceBenchmark).order("match_id"),
     stableRoleBenchmark===sourceBenchmark
       ?Promise.resolve({data:null,error:null})
-      :sb.from("scout_replay_player_inputs").select("player_id,role_probability,durations,duration_weights,source_note").eq("gameweek",gw).eq("benchmark_version",stableRoleBenchmark).order("player_id"),
-    sb.from("scout_player_season_stats").select("player_id,through_gameweek,advanced_through_gameweek,minutes,xa_total,xa_per90,xa_model_per90,xa_source")
+      :sb.from("scout_replay_player_inputs").select("player_id,role_probability,durations,duration_weights,source_note,rates").eq("gameweek",gw).eq("benchmark_version",stableRoleBenchmark).order("player_id"),
+    sb.from("scout_player_season_stats").select("player_id,through_gameweek,advanced_through_gameweek,minutes,shots,goals,xg_total,xa_total,xa_per90,xa_model_per90,xa_source")
       .eq("season","2026-27").eq("through_gameweek",gw-1),
     fetchTrustedWeeklyEvidence(sb,gw)
   ])
@@ -702,6 +709,7 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
       availability,
     })
     const rates=(x.rates||[]).map(Number)
+    const stableRates=Array.isArray(stableInput.rates)?stableInput.rates.map(Number):rates
     const stats=sourceStatsMap.get(Number(x.player_id)) as any
     // Use the same aligned source policy in weekly and intraday passes.
     // Retain original stats fields; only the candidate rate is changed.
@@ -717,9 +725,22 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
     const history=(weeklyMomentumRows.get(Number(x.player_id))||[])
       .find((w:any)=>Number(w.gameweek)===gw-1)
     const observedMinutes=history?trustedMinute(history):null
-    const xgUpdate=blendVerifiedAttackRate(n(stableInput.rates?.[0],rates[0]),mh8?.xg,observedMinutes,"xg")
+    const xgUpdate=blendVerifiedAttackRate(n(stableRates[0],rates[0]),mh8?.xg,observedMinutes,"xg")
     const xaUpdate=blendVerifiedAttackRate(xaReconcile.rate,mh8?.xa,observedMinutes,"xa")
-    rates[0]=xgUpdate.rate
+    // Always anchor to the stable, non-intraday input. Otherwise a second
+    // refresh recursively discounts the same historical xG again.
+    const sparse=String(stableInput.source_note||"").includes("sparse-defender-xg-v1")
+      ?{xgPer90:xgUpdate.rate,goalsPer90:n(stableRates[1],rates[1]),applied:false}
+      :sparseChanceDefenderRates({
+        position:player?.position||x.position,role:player?.primary_role||x.sub_role,
+        xgPer90:xgUpdate.rate,goalsPer90:n(stableRates[1],rates[1]),
+        seasonMinutes:stats?.minutes==null?null:Number(stats.minutes),
+        shots:stats?.shots==null?null:Number(stats.shots),
+        advancedThroughGameweek:stats?.advanced_through_gameweek==null?null:Number(stats.advanced_through_gameweek),
+        throughGameweek:stats?.through_gameweek==null?null:Number(stats.through_gameweek)
+      })
+    rates[0]=sparse.xgPer90
+    rates[1]=sparse.goalsPer90
     rates[3]=xaUpdate.rate
     return {
       ...x,benchmark_version:benchmark,availability,rates,
@@ -731,6 +752,7 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
         +(momentum.rising?` • momentum-v1 +${momentumBoost}`:"")
         +(xaReconcile.adjusted?` • defender-xa-source-window-v1 ${xaReconcile.source_minutes}dk`:"")
         +(xgUpdate.applied||xaUpdate.applied?` • mh8-attack-source-v1 ${xgUpdate.applied?"xg":""}${xaUpdate.applied?"+xa":""}`:"")
+        +(sparse.applied||String(stableInput.source_note||"").includes("sparse-defender-xg-v1")?` • sparse-defender-xg-v1`:"")
         +(adjusted.applied?` • resmî maç: ${event.match_ref}`:"")
     }
   })
