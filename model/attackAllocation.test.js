@@ -32,3 +32,12 @@ console.log('Attack allocation checks passed');
   assert.ok(withPrior.adjustedXg>without.adjustedXg,'CB set-piece prior should lift forecast xG');
   assert.ok(withPrior.setPiecePrior>0,'set-piece prior breakdown must be logged');
 }
+
+{
+  const evidence=[{id:426,mins:90,shots:1,xg:.57}]
+  const newCB={id:426,pos:'DEF',sub_role:'CB',rates:[.0668,0,0,.04],source_note:'weekly-auto • sparse-defender-xg-v1'}
+  const result=attackWeights(newCB,evidence)
+  assert.equal(result.adjustedXg,newCB.rates[0],
+    'already-shrunk scoring input must not be penalized a second time')
+  assert.ok(result.adjustedXg>0,'a rare scorer is still allowed to score')
+}
