@@ -3,6 +3,7 @@ import {applyOfficialMinutesEvidence,firstRecordedRate,observedPer90} from "./ex
 import {validFinalWeeklyPlayerRow} from "./closureSource.mjs"
 import {risingMinutesMomentum,trustedMinute} from "./momentum.mjs"
 import {reconcileDefenderXa} from "./defenderXa.mjs"
+import {fetchTrustedWeeklyEvidence} from "./weeklyEvidence.mjs"
 
 const AUDIENCE="tff-fantezi-scout"
 const ISSUER="https://token.actions.githubusercontent.com"
@@ -301,7 +302,7 @@ async function prepare(sb:any,current:any,status:any,body:any={}){
     sb.from("scout_player_season_stats").select("*").eq("season","2026-27").eq("through_gameweek",Number(current.gameweek)),
     sb.from("scout_team_season_stats").select("*").eq("through_gameweek",Number(current.gameweek)),
     sb.from("scout_match_history").select("*").eq("season","2026-27").eq("gameweek",target).order("kickoff_at"),
-    sb.from("scout_player_weekly_points").select("player_id,gameweek,match_id,minutes,points,is_final,source_kind").lt("gameweek",target).eq("is_final",true).order("gameweek",{ascending:false}).limit(10000),
+    fetchTrustedWeeklyEvidence(sb,target),
     sb.from("scout_replay_player_inputs").select("*").eq("gameweek",Number(current.gameweek)).eq("benchmark_version",priorBenchmark),
     sb.from("scout_teams").select("id,name"),
     sb.from("scout_player_projections").select("player_id,confidence,data_confidence").eq("run_id",current.id)
@@ -629,8 +630,7 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
       :sb.from("scout_replay_player_inputs").select("player_id,role_probability,durations,duration_weights,source_note").eq("gameweek",gw).eq("benchmark_version",stableRoleBenchmark).order("player_id"),
     sb.from("scout_player_season_stats").select("player_id,through_gameweek,advanced_through_gameweek,minutes,xa_total,xa_per90,xa_model_per90,xa_source")
       .eq("season","2026-27").eq("through_gameweek",gw-1),
-    sb.from("scout_player_weekly_points").select("player_id,gameweek,minutes,points,is_final,source_kind")
-      .lt("gameweek",gw).eq("is_final",true).order("gameweek",{ascending:false}).limit(10000)
+    fetchTrustedWeeklyEvidence(sb,gw)
   ])
   for(const q of [inputsQ,matchesQ,stableInputsQ,sourceStatsQ,weeklyRecentQ])if(q.error)throw q.error
   if(!(inputsQ.data||[]).length||!(matchesQ.data||[]).length)throw new Error("CURRENT_SIM_INPUT_COVERAGE_MISSING")
