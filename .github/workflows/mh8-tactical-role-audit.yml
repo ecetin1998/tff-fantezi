@@ -27,9 +27,17 @@ jobs:
           jq -e '.kind == "READ_ONLY_VERIFIED_TACTICAL_ROLE_EVIDENCE" and
             .verified_fixtures == 9 and .matched_played == 286 and
             .db_writes == 0 and .fantasy_points_written == 0' "$RUNNER_TEMP/mh8-role-evidence.json"
+      - name: Derive candidate tactical roles from verified formation geometry (no DB writes)
+        run: |
+          python3 scripts/audit_verified_tactical_layout.py --output "$RUNNER_TEMP/mh8-role-geometry.json"
+          jq -e '.kind == "READ_ONLY_TACTICAL_GEOMETRY_DIAGNOSTIC" and
+            .mh8_layout_coverage == 198 and .db_writes == 0 and
+            .role_changes_written == 0' "$RUNNER_TEMP/mh8-role-geometry.json"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: mh8-verified-tactical-role-audit
-          path: ${{ runner.temp }}/mh8-role-evidence.json
+          path: |
+            ${{ runner.temp }}/mh8-role-evidence.json
+            ${{ runner.temp }}/mh8-role-geometry.json
           if-no-files-found: ignore
