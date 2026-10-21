@@ -22,14 +22,24 @@ const sums=rows=>rows.reduce((sum,p)=>sum+Number(p.xfp||0),0)
 const positionCounts=rows=>Object.fromEntries(Object.keys(CAPS).map(pos=>[pos,rows.filter(p=>p.position===pos).length]))
 function xiScore(rows){
  if(rows.length<11)return null
- let best=-1
- for(let mask=0;mask<(1<<rows.length);mask++){
-  let cnt=0,tot=0
-  const c={GK:0,DEF:0,MID:0,FWD:0}
-  for(let i=0;i<rows.length;i++)if(mask&(1<<i)){cnt++;tot+=Number(rows[i].xfp||0);c[rows[i].position]++}
-  if(cnt===11&&c.GK===1&&c.DEF>=3&&c.DEF<=5&&c.MID>=2&&c.MID<=5&&c.FWD>=1&&c.FWD<=3)best=Math.max(best,tot)
- }
- return best<0?null:best
+ // Sorting each position once gives the exact max-XI for every allowed 1-GK formation.
+ // Avoid a 2^15 subset scan at every countdown tick in eight-manager rooms.
+ const byPos=Object.fromEntries(Object.keys(CAPS).map(pos=>[pos,rows
+   .filter(p=>p.position===pos)
+   .map(p=>Number(p.xfp||0))
+   .sort((a,b)=>b-a)]))
+ const sumTop=(pos,n)=>byPos[pos].slice(0,n).reduce((a,b)=>a+b,0)
+ if(!byPos.GK.length)return null
+ let best=-Infinity
+ for(let defenders=3;defenders<=5;defenders++)
+  for(let mids=2;mids<=5;mids++){
+   const forwards=10-defenders-mids
+   if(forwards<1||forwards>3||byPos.DEF.length<defenders||
+      byPos.MID.length<mids||byPos.FWD.length<forwards)continue
+   const score=sumTop('GK',1)+sumTop('DEF',defenders)+sumTop('MID',mids)+sumTop('FWD',forwards)
+   best=Math.max(best,score)
+  }
+ return Number.isFinite(best)?best:null
 }
 function Item({p}){return <div className={s.pText}><strong>{p.name||p.player_name}</strong><small>{p.team} · {P[p.position]} · {p.role||'—'}</small><small>xDak {Math.round(Number(p.x_minutes||0))} · İlk 11 %{Math.round(100*Number(p.xi_probability||0))} · Risk: {risk(p)}</small></div>}
 
