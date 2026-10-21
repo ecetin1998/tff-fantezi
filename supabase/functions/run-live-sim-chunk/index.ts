@@ -108,7 +108,10 @@ function allocationFor(p,a,gameweek){
   // half strength. Never reuse older or future evidence as current match data.
   const age=a?gameweek-1-num(a.through_gameweek):-1;
   const freshness=age===0?1:age===1?.5:0;
-  const excess=a?num(a[key])*freshness:0;
+  // Forecast xG already receives a reliability shrink from the MH9 lifecycle.
+  // An older single-shot excess adjustment must not discount the same chance twice.
+  const priorCalibrated=String(p.source_note||"").includes("sparse-defender-xg-v1");
+  const excess=priorCalibrated?0:a?num(a[key])*freshness:0;
   const exposure=a?num(a.exposure):0;
   const observed=a?num(a.observed_matches):0;
   const attenuation=observed>=5?.55:.85;
@@ -201,7 +204,7 @@ Deno.serve(async(req)=>{
       id:Number(x.player_id),club:Number(x.club_id),pos:String(x.position),
       avail:num(x.availability,1),role:num(x.role_probability),benchw:num(x.bench_weight),
       durations:(x.durations||[]).map(Number),duration_weights:(x.duration_weights||[]).map(Number),
-      rates:(x.rates||[]).map(Number),sub_role:x.sub_role||null
+      rates:(x.rates||[]).map(Number),sub_role:x.sub_role||null,source_note:x.source_note||""
     }));
     const M=P.length;
     const matches=(mq.data||[]).map(x=>({
