@@ -145,3 +145,53 @@ revoke all on function public.scout_draft_lineup_state(uuid) from public,anon;
 revoke all on function public.scout_draft_save_lineup(uuid,integer,integer[],integer[],integer,text,boolean) from public,anon;
 grant execute on function public.scout_draft_lineup_state(uuid) to authenticated;
 grant execute on function public.scout_draft_save_lineup(uuid,integer,integer[],integer[],integer,text,boolean) to authenticated;
+
+-- Expose the feature flag to authorized draft members through the existing room RPC.
+create or replace function public.scout_draft_state(p_room_id uuid)
+returns jsonb language plpgsql security definer set search_path=public,pg_temp as $$
+declare rm public.scout_draft_rooms%rowtype;seats jsonb;picks jsonb;lot jsonb;
+begin
+ if auth.uid() is null then raise exception 'AUTH_REQUIRED';end if;
+ select * into rm from public.scout_draft_rooms where id=p_room_id;
+ if not found then raise exception 'ROOM_NOT_FOUND';end if;
+ if not exists(select 1 from public.scout_draft_teams where room_id=p_room_id and user_id=auth.uid()) then raise exception 'ROOM_ACCESS_DENIED';end if;
+ select coalesce(jsonb_agg(jsonb_build_object(
+ 'id',t.id,'team_index',t.team_index,'draft_order',t.draft_order,
+ 'team_name',t.team_name,'occupied',t.user_id is not null,'mine',t.user_id=auth.uid(),
+ 'spent',coalesce((select sum(p.price) from public.scout_draft_picks p where p.room_id=rm.id and p.team_id=t.id),0),
+ 'budget',rm.auction_budget-coalesce((select sum(p.price) from public.scout_draft_picks p where p.room_id=rm.id and p.team_id=t.id),0)
+ ) order by t.draft_order),'[]'::jsonb)
+ into seats from public.scout_draft_teams t where t.room_id=p_room_id;
+ select coalesce(jsonb_agg(jsonb_build_object(
+ 'pick_number',p.pick_number,'team_id',p.team_id,'player_id',p.player_id,
+ 'player_name',sp.full_name,'position',sp.position,'xfp',pr.xfp,'price',p.price,'auto_selected',p.auto_selected
+ ) order by p.pick_number),'[]'::jsonb)
+ into picks
+ from public.scout_draft_picks p
+ join public.scout_players sp on sp.id=p.player_id
+ join public.scout_player_projections pr on pr.run_id=rm.model_run_id and pr.player_id=p.player_id
+ where p.room_id=p_room_id;
+ select jsonb_build_object('id',l.id,'lot_number',l.lot_number,'player_id',l.player_id,
+ 'player_name',sp.full_name,'team',st.name,'position',sp.position,'xfp',pr.xfp,
+ 'status',l.status,'current_bid',l.current_bid,'leader_team_id',l.leader_team_id,
+ 'ends_at',l.ends_at,'server_time',clock_timestamp(),
+ 'bid_count',(select count(*) from public.scout_draft_auction_bids b where b.lot_id=l.id))
+ into lot from public.scout_draft_auction_lots l
+ join public.scout_players sp on sp.id=l.player_id
+ join public.scout_teams st on st.id=sp.team_id
+ join public.scout_player_projections pr on pr.player_id=l.player_id and pr.run_id=rm.model_run_id
+ where l.room_id=rm.id order by l.lot_number desc limit 1;
+ return jsonb_build_object('id',rm.id,'code',rm.invite_code,'gameweek',rm.gameweek,
+ 'run_id',rm.model_run_id,'mode',rm.mode,'draft_kind',rm.draft_kind,'team_count',rm.team_count,
+ 'auction_budget',rm.auction_budget,'status',rm.status,'next_pick',rm.next_pick,
+ 'auction_bid_seconds',rm.auction_bid_seconds,'auction_extension_seconds',rm.auction_extension_seconds,
+ 'classic_pick_seconds',rm.classic_pick_seconds,'turn_ends_at',case when rm.turn_started_at is not null and rm.status='drafting' and rm.draft_kind='classic' and rm.rules_version=2 then rm.turn_started_at+rm.classic_pick_seconds*interval '1 second' else null end,
+ 'server_time',clock_timestamp(),
+ 'rules_version',rm.rules_version,'lineup_required',rm.lineup_required,
+ 'league_active_at',rm.league_active_at,'auction_phase',rm.auction_phase,
+ 'nomination_index',rm.auction_nomination_index,'completed_at',rm.completed_at,
+ 'results_snapshot',case when rm.status='finished' then rm.results_snapshot else null end,
+ 'updated_at',rm.updated_at,'is_host',rm.host_user_id=auth.uid(),'teams',seats,'picks',picks,
+ 'lot',case when rm.draft_kind='auction' then lot else null end);
+end $$;
+
