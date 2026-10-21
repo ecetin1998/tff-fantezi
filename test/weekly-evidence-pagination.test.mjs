@@ -47,3 +47,33 @@ test('worker uses fully paginated evidence for weekly rollover and intraday refr
   assert.match(worker,/fetchTrustedWeeklyEvidence\(sb,gw\)/)
   assert.doesNotMatch(worker,/scout_player_weekly_points"\)\.select\([^\n]+\.limit\(10000\)/)
 })
+
+import {roleTrendFromWeeklyEvidence} from '../supabase/functions/weekly-model-lifecycle/roleTrend.mjs'
+
+test('steady starter with four verified weeks is not mislabeled as rising',()=>{
+  const weeks=[8,7,6,5].map(gameweek=>({gameweek,minutes:90,is_final:true,source_kind:'fresh_closed_actual'}))
+  const trend=roleTrendFromWeeklyEvidence(weeks,9)
+  assert.equal(trend.trend,0)
+  assert.equal(trend.previous2Min,undefined)
+  assert.equal(trend.prev2Min,90)
+})
+
+test('unknown calendar weeks never turn into a fake zero-minute role baseline',()=>{
+  const weeks=[
+    {gameweek:8,minutes:90,is_final:true,source_kind:'independently_calculated_source_events'},
+    {gameweek:7,minutes:90,is_final:true,source_kind:'fresh_closed_actual'},
+    {gameweek:6,minutes:null,is_final:true,source_kind:'legacy_final_weekly'},
+    {gameweek:5,minutes:0,is_final:true,source_kind:'legacy_final_weekly'},
+  ]
+  const trend=roleTrendFromWeeklyEvidence(weeks,9)
+  assert.equal(trend.trend,null)
+  assert.equal(trend.prev2Min,0)
+  assert.equal(trend.last2Min,90)
+})
+
+test('a verified minutes breakout remains visible',()=>{
+  const weeks=[8,7,6,5].map((gameweek,i)=>({gameweek,minutes:i<2?90:30,is_final:true,source_kind:'fresh_closed_actual'}))
+  const trend=roleTrendFromWeeklyEvidence(weeks,9)
+  assert.ok(trend.trend>0.2)
+  assert.equal(trend.prev2Min,30)
+})
