@@ -312,7 +312,7 @@ async function prepare(sb:any,current:any,status:any,body:any={}){
     sb.from("scout_teams").select("id,name"),
     sb.from("scout_player_projections").select("player_id,confidence,data_confidence").eq("run_id",current.id),
     sb.from("scout_player_tactical_role_observations")
-      .select("player_id,gameweek,role,side,minutes,started,verified")
+      .select("player_id,gameweek,role,side,minutes,started,verified,observed_at")
       .eq("season","2026-27").gte("gameweek",Math.max(1,target-3)).lt("gameweek",target)
       .eq("verified",true)
   ])
@@ -587,13 +587,13 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
     sb.from("scout_players").select("updated_at").eq("active",true).order("updated_at",{ascending:false}).limit(1).maybeSingle(),
     sb.from("scout_player_projections").select("player_id,opponent_name,venue,confidence,data_confidence").eq("run_id",current.id),
     officialEvidenceQuery(sb),
-    sb.from("scout_players").select("id,team_id,position,primary_role").eq("active",true),
+    sb.from("scout_players").select("id,team_id,position,primary_role,role_side").eq("active",true),
     sb.from("scout_match_predictions").select("home_team_id,away_team_id,kickoff_at")
       .eq("run_id",current.id).order("kickoff_at",{ascending:true}),
     sb.from("scout_verified_weekly_attack").select("player_id,gameweek,xg,xa,observed_at")
       .eq("season","2026-27").eq("gameweek",gw-1),
     sb.from("scout_player_tactical_role_observations")
-      .select("player_id,gameweek,role,side,minutes,started,verified")
+      .select("player_id,gameweek,role,side,minutes,started,verified,observed_at")
       .eq("season","2026-27").gte("gameweek",Math.max(1,gw-3)).lt("gameweek",gw)
       .eq("verified",true)
   ])
@@ -628,9 +628,10 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
     (stamp:any,e:any)=>newer(stamp,e.source_updated_at),null
   )
   const attackObservedAt=(attackSourceQ.data||[]).reduce((stamp:any,e:any)=>newer(stamp,e.observed_at),null)
+  const roleObservedAt=(tacticalQ.data||[]).reduce((stamp:any,e:any)=>newer(stamp,e.observed_at),null)
   const latestSourceAt=new Date(newer(
     availabilitySourceLatest,playersUpdatedQ.data?.updated_at,
-    current.source_updated_at,officialSourceLatest,attackObservedAt
+    current.source_updated_at,officialSourceLatest,attackObservedAt,roleObservedAt
   )).toISOString()
   const hoursUntilDeadline=Math.max(0,(deadline-now)/36e5)
   // During a live week, respond to real source changes no faster than every 2h.
@@ -725,6 +726,10 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
     const stableInput=stableInputsMap.get(Number(x.player_id)) as any || x
     const event=official.latest.get(Number(x.player_id))
     const player=officialPlayers.get(Number(x.player_id))
+    const tactical=currentTacticalRole({
+      baseRole:player?.primary_role||x.sub_role,baseSide:player?.role_side||x.role_side,
+      evidence:tacticalEvidence.get(Number(x.player_id))||[],targetWeek:gw
+    })
     const momentum=risingMinutesMomentum(weeklyMomentumRows.get(Number(x.player_id))||[],gw,availability)
     // Never add the same rise twice: non-intraday inputs may already include it.
     const momentumBoost=String(stableInput.source_note||"").includes("momentum-v1")
@@ -756,21 +761,27 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
     const xaUpdate=blendVerifiedAttackRate(xaReconcile.rate,mh8?.xa,observedMinutes,"xa")
     // Always anchor to the stable, non-intraday input. Otherwise a second
     // refresh recursively discounts the same historical xG again.
-    const sparse=String(stableInput.source_note||"").includes("sparse-defender-xg-v1")
-      ?{xgPer90:xgUpdate.rate,goalsPer90:n(stableRates[1],rates[1]),applied:false}
-      :sparseChanceDefenderRates({
-        position:player?.position||x.position,role:player?.primary_role||x.sub_role,
-        xgPer90:xgUpdate.rate,goalsPer90:n(stableRates[1],rates[1]),
+    // Forecast priors are always grounded in the untouched stable baseline;
+    // MH8 observations can refresh rates but must not compound an earlier shrink.
+    const alreadyCalibrated=String(stableInput.source_note||"").includes("role-aware-attack-v1")
+    const calibrated=alreadyCalibrated
+      ?{xgPer90:xgUpdate.rate,goalsPer90:n(stableRates[1],rates[1]),xaPer90:xaUpdate.rate,applied:false}
+      :calibrateAttackRates({
+        position:player?.position||x.position,role:tactical.role,
         seasonMinutes:stats?.minutes==null?null:Number(stats.minutes),
+        seasonWeek:stats?.through_gameweek==null?null:Number(stats.through_gameweek),
+        advancedWeek:stats?.advanced_through_gameweek==null?null:Number(stats.advanced_through_gameweek),
         shots:stats?.shots==null?null:Number(stats.shots),
-        advancedThroughGameweek:stats?.advanced_through_gameweek==null?null:Number(stats.advanced_through_gameweek),
-        throughGameweek:stats?.through_gameweek==null?null:Number(stats.through_gameweek)
+        keyPasses:stats?.key_passes==null?null:Number(stats.key_passes),
+        xgPer90:xgUpdate.rate,goalsPer90:n(stableRates[1],rates[1]),
+        xaPer90:xaUpdate.rate,assistsPer90:n(stableRates[2],rates[2])
       })
-    rates[0]=sparse.xgPer90
-    rates[1]=sparse.goalsPer90
-    rates[3]=xaUpdate.rate
+    rates[0]=calibrated.xgPer90
+    rates[1]=calibrated.goalsPer90
+    rates[3]=calibrated.xaPer90
     return {
       ...x,benchmark_version:benchmark,availability,rates,
+      sub_role:tactical.role||x.sub_role,role_side:tactical.side||x.role_side,
       role_probability:adjusted.role,
       effective_xa_per90:rates[3],
       durations:adjusted.applied?adjusted.durations:x.durations,
@@ -779,7 +790,8 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
         +(momentum.rising?` • momentum-v1 +${momentumBoost}`:"")
         +(xaReconcile.adjusted?` • defender-xa-source-window-v1 ${xaReconcile.source_minutes}dk`:"")
         +(xgUpdate.applied||xaUpdate.applied?` • mh8-attack-source-v1 ${xgUpdate.applied?"xg":""}${xaUpdate.applied?"+xa":""}`:"")
-        +(sparse.applied||String(stableInput.source_note||"").includes("sparse-defender-xg-v1")?` • sparse-defender-xg-v1`:"")
+        +(calibrated.applied||alreadyCalibrated?` • role-aware-attack-v1`:"")
+        +(tactical.changed?` • tactical-role-evidence-v1`:"")
         +(adjusted.applied?` • resmî maç: ${event.match_ref}`:"")
     }
   })
