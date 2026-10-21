@@ -53,11 +53,14 @@ begin
  on l.room_id=rm.id and l.team_id=t.id and l.gameweek=chosen_week
  where t.room_id=rm.id;
  select jsonb_build_object('starters',l.starters,'bench',l.bench,
-   'captain',l.captain_player_id,'card',l.manager_card,
-   'ready',l.ready,'saved_at',l.saved_at,'formation',l.formation)
+   'captain',l.captain_player_id,
+   'card',case when l.gameweek=chosen_week then l.manager_card else 'none' end,
+   'ready',case when l.gameweek=chosen_week then l.ready else false end,
+   'saved_at',l.saved_at,'formation',l.formation,'based_on_gameweek',l.gameweek)
  into my_lineup
  from public.scout_draft_lineups l
- where l.room_id=rm.id and l.team_id=mine.id and l.gameweek=chosen_week;
+ where l.room_id=rm.id and l.team_id=mine.id and l.gameweek<=chosen_week
+ order by l.gameweek desc limit 1;
  select count(*)=count(*) filter(where l.ready is true) into all_ready
  from public.scout_draft_teams t
  left join public.scout_draft_lineups l on l.room_id=rm.id and l.team_id=t.id
