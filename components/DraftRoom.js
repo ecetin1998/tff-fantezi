@@ -3,6 +3,7 @@ import {useCallback,useEffect,useMemo,useState} from 'react'
 import {createClient} from '@/lib/supabase/client'
 import s from './DraftRoom.module.css'
 import DraftLiveStandings from './DraftLiveStandings'
+import DraftArchives from './DraftArchives'
 import DraftLineupSetup from './DraftLineupSetup'
 
 const CAPS={GK:2,DEF:5,MID:5,FWD:3}
@@ -55,7 +56,6 @@ export default function DraftRoom({initialRoom='',initialInvite=''}) {
  const [myName,setMyName]=useState('')
  const [joinName,setJoinName]=useState('')
  const [renameName,setRenameName]=useState('')
- const [archives,setArchives]=useState([])
  const [sort,setSort]=useState('xfp')
  const [sortDirection,setSortDirection]=useState('desc')
  const [proOverlayReady,setProOverlayReady]=useState(false)
@@ -132,11 +132,19 @@ export default function DraftRoom({initialRoom='',initialInvite=''}) {
   return()=>{alive=false;clearInterval(timer)}
  },[id,room?.draft_kind,room?.status,call,refresh])
  useEffect(()=>{
-  if(id)return
-  let live=true
-  call('scout_draft_my_rooms').then(data=>{if(live)setArchives(Array.isArray(data)?data:[])}).catch(()=>{})
-  return()=>{live=false}
- },[id,call])
+  if(!id||!['lobby','drafting'].includes(room?.status))return
+  let active=true
+  const heartbeat=async()=>{
+   if(document.visibilityState==='hidden')return
+   try{
+    const data=await call('scout_draft_heartbeat',{p_room_id:id})
+    if(active&&data?.active===false)await refresh(id)
+   }catch(e){if(active)setProblem(errorText(e))}
+  }
+  void heartbeat()
+  const timer=setInterval(()=>{void heartbeat()},60000)
+  return()=>{active=false;clearInterval(timer)}
+ },[id,room?.status,call,refresh])
  useEffect(()=>{
   if(!id||!room?.run_id)return
   let live=true
@@ -278,9 +286,7 @@ export default function DraftRoom({initialRoom='',initialInvite=''}) {
     <button className={s.primary} disabled={busy||lobby.status!=='lobby'||!joinName.trim()||lobby.teams.every(t=>t.occupied)} onClick={()=>action(async()=>openRoom(await call('scout_draft_join_named',{p_code:code,p_team_name:joinName.trim()})))}>Kendi adımla katıl →</button></>}
    </div>
   </div>}
-  {!id&&<div className={s.panel}><div className={s.heading}><h2>Odalarım ve draft geçmişi</h2><span>{archives.length} oda</span></div>
-   {archives.length?<div className={s.archiveList}>{archives.map(r=><button key={r.id} className={s.archiveItem} onClick={()=>openRoom(r.id)}><span><strong>{r.team_name}</strong><small>MH{r.gameweek} · {r.team_count} takım · {r.draft_kind==='auction'?'Açık artırma':r.mode==='snake'?'Snake':'Normal'} · {new Date(r.created_at).toLocaleDateString('tr-TR')}</small></span><span>{r.status==='finished'?'Tamamlandı ✓':r.status==='drafting'?'Devam ediyor':'Lobi'} · {r.picked}/{r.team_count*15} →</span></button>)}</div>:<p>Henüz katıldığın bir draft odası yok. İlk odanı oluştur!</p>}
-  </div>}
+  {!id&&<DraftArchives onOpen={openRoom}/>}
   {id&&!room&&<div className={s.panel}>Odaya bağlanılıyor... <button className={s.secondary} onClick={()=>{setId('');window.history.pushState({},'','/draft')}}>Geri dön</button></div>}
   {room&&<>
    <div className={s.roomBar}><div><small>DAVET KODU</small><strong>{room.code}</strong><span>{room.status==='lobby'?'Lobi':room.status==='finished'?'Tamamlandı':'Canlı draft'}</span></div>
