@@ -709,6 +709,7 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
     const xaReconcile=reconcileDefenderXa(stats,player,
       (weeklyMomentumRows.get(Number(x.player_id))||[]).find((w:any)=>Number(w.gameweek)===gw-1),
       rateRaw)
+    rates[3]=xaReconcile.rate // safeguard existing defender source reconciliation
     // MH8 is a single observed fixture, not a season snapshot. Mix only
     // present numeric evidence into the non-intraday baseline with heavy
     // shrinkage; missing xG/xA remains unknown and does not become zero.
