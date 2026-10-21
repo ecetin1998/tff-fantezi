@@ -1,0 +1,24 @@
+name: One-time user-authorized Cloudflare release
+# One-shot dispatcher. Existing production workflow remains manual-only.
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/release-cloudflare-once-20261022.yml"
+permissions:
+  contents: read
+  actions: write
+jobs:
+  dispatch-manual-production:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Dispatch existing workflow_dispatch production deploy
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "${{ github.ref }}" = "refs/heads/main"
+          gh workflow run cloudflare-deploy.yml --ref main
+          echo "Production Cloudflare workflow dispatched explicitly for requested model release." >> "$GITHUB_STEP_SUMMARY"
