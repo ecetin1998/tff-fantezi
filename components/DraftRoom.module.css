@@ -154,3 +154,18 @@
  .sortBar{display:grid;grid-template-columns:minmax(0,1fr) auto}
  .sortBar label{min-width:0}
 }
+
+/* V3 timer settings: accessible touch sliders and bright on-page countdown. */
+.timerSettings{display:grid;gap:15px;padding:15px;background:#f6fafb;border:1px solid #e1eceb;border-radius:13px}
+.timerSlider{display:grid!important;gap:9px!important;color:#3b4b66;font-size:12px;font-weight:750}
+.timerSlider>span{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.timerSlider strong{display:inline-flex;padding:5px 10px;background:#e4f5f1;color:#087e74;border:1px solid #cae8e2;border-radius:9px;font-size:14px}
+.timerSlider input[type="range"]{appearance:auto;accent-color:#0b8e82;cursor:pointer;width:100%;height:25px!important;min-height:25px!important;padding:0!important;background:transparent!important;border:0!important;box-shadow:none!important;touch-action:pan-y}
+.timerSlider input[type="range"]:disabled{opacity:.55;cursor:not-allowed}
+.timerSlider small{color:#728097;font-size:11px}
+.timerLobby{display:grid;gap:11px;padding:13px;background:#fbfcfe;border:1px solid #e2eaf2;border-radius:13px}
+.timerLobby>.secondary,.timerLobby>button{justify-self:start}
+.classicClock{display:grid;min-width:100px;gap:3px;padding:10px 14px;border-radius:12px;background:#eaf8f3;border:1px solid #bbddd1;text-align:center}
+.classicClock small{font-size:10px;letter-spacing:.08em;color:#507b71}
+.classicClock strong{font-size:25px;font-variant-numeric:tabular-nums;color:#087d72}
+@media(max-width:660px){.timerSettings{padding:12px}.classicClock{align-self:stretch;min-width:0}.timerLobby>.secondary,.timerLobby>button{width:100%}}
