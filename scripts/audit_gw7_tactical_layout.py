@@ -8,7 +8,19 @@ from pathlib import Path
 from collections import Counter,defaultdict
 from datetime import datetime,timezone
 import argparse
+from urllib.parse import urlparse
 from extract_mh8_fotmob_advanced import read_verified_fixture
+def canonical_fotmob_match_url(value):
+    """Normalize only trusted FotMob language prefixes; never alter slug/id."""
+    source=urlparse(value)
+    if source.scheme!='https' or source.hostname!='www.fotmob.com':
+        raise ValueError('untrusted FotMob match host')
+    marker='/matches/'
+    if marker not in source.path:raise ValueError('not a FotMob match path')
+    tail=source.path.split(marker,1)[1]
+    if not tail or '/' not in tail:raise ValueError('invalid match slug')
+    return 'https://www.fotmob.com/matches/'+tail
+
 from reconcile_mh8_provider_players import ROSTER,choose_player
 
 STARTERS=Path('data/source-evidence/gw7-fotmob-starting-xi-2026-10-12.json')
@@ -38,7 +50,7 @@ def audit(source,roster,reader=read_verified_fixture):
         record=dict(match,
             home_team=hname,away_team=aname,
             home_goals=hgoals,away_goals=agoals,
-            candidate_fotmob_url=match['source_url'])
+            candidate_fotmob_url=canonical_fotmob_match_url(match['source_url']))
         try:
             report,details=reader(record)
         except Exception as exc:
