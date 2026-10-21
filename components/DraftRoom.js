@@ -3,6 +3,7 @@ import {useCallback,useEffect,useMemo,useState} from 'react'
 import {createClient} from '@/lib/supabase/client'
 import s from './DraftRoom.module.css'
 import DraftLiveStandings from './DraftLiveStandings'
+import DraftLineupSetup from './DraftLineupSetup'
 
 const CAPS={GK:2,DEF:5,MID:5,FWD:3}
 const P={GK:'KL',DEF:'DEF',MID:'OS',FWD:'FOR'}
@@ -48,6 +49,8 @@ export default function DraftRoom({initialRoom='',initialInvite=''}) {
  const client=useMemo(()=>createClient(),[])
  const [id,setId]=useState(initialRoom)
  const [room,setRoom]=useState(null)
+ const [leagueActive,setLeagueActive]=useState(false)
+ const onLeagueActive=useCallback(()=>setLeagueActive(true),[])
  const [pool,setPool]=useState([])
  const [myName,setMyName]=useState('')
  const [joinName,setJoinName]=useState('')
@@ -76,7 +79,7 @@ export default function DraftRoom({initialRoom='',initialInvite=''}) {
  const [selected,setSelected]=useState(null)
  const [all,setAll]=useState(false)
  const openRoom=roomId=>{
-  setId(roomId);setRoom(null);setPool([]);setProRows(null);setProOverlayReady(false);setLobby(null);setSelected(null)
+  setId(roomId);setRoom(null);setLeagueActive(false);setPool([]);setProRows(null);setProOverlayReady(false);setLobby(null);setSelected(null)
   window.history.pushState({},'','/draft?room='+encodeURIComponent(roomId))
  }
  const call=useCallback(async(name,args)=>{
@@ -302,7 +305,8 @@ export default function DraftRoom({initialRoom='',initialInvite=''}) {
    {room.status!=='lobby'&&<div className={s.turn}><div><small>{room.status==='finished'?String(totalPicks)+'/'+String(totalPicks)+' TAMAMLANDI':isAuction?'AÇIK ARTIRMA · '+picked.length+'/'+totalPicks+' oyuncu':'TUR '+round+' · SEÇİM '+room.next_pick+'/'+totalPicks}</small><h2>{room.status==='finished'?'Draft tamamlandı!':inCompletion?(nominator?.team_name||'Sıradaki takım')+' kadrosunu tamamlıyor':isAuction?lot?'Teklif zamanı':(nominator?.team_name||'Sıradaki takım')+' oyuncu gösterecek':current?.team_name+' seçiyor'}</h2><p>{inCompletion?'1 kredi sabit fiyatla sıradaki takım eksik oyuncularını seçiyor.':isAuction?'Oyuncular sırayla aday gösterilir; geçerli teklifler süreye +'+(room.auction_extension_seconds??5)+' sn ekler.':canPick?'Sıra sende. Havuzdan oyuncu seç.':'Seçimler tüm ekranlara otomatik yansır.'}</p></div>
     {!isAuction&&room.status==='drafting'&&classicSecondsLeft!==null&&<div className={s.countdown+(classicSecondsLeft<=10?' '+s.countdownUrgent:'')}><strong>{classicSecondsLeft} sn</strong><small>Seçim süresi · bitince otomatik xFP</small></div>}
     {room.is_host&&!isAuction&&<button className={s.secondary} disabled={busy||room.next_pick<=1} onClick={()=>action(async()=>{await call('scout_draft_undo',{p_room_id:id});await refresh()})}>↶ Son seçimi geri al</button>}</div>}
-   {room.status==='finished'&&<DraftLiveStandings roomId={id}/>}
+   {room.status==='finished'&&room.lineup_required&&<DraftLineupSetup roomId={id} picks={picked} pool={pool} myTeamId={own?.id} onLeagueActive={onLeagueActive}/>}
+   {room.status==='finished'&&(!room.lineup_required||leagueActive||Boolean(room.league_active_at))&&<DraftLiveStandings roomId={id}/>}
    {room.status==='finished'&&<div className={s.panel}>
      <small className={s.eyebrow}>KAYITLI DRAFT SONUÇLARI</small><h2>Draft sonuçları arşivlendi</h2>
      <p>Takımlar, oyuncular, seçim sırası ve açık artırma fiyatları bu odada saklanır. Odalarım bölümünden tekrar açabilirsin.</p>
