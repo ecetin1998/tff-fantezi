@@ -6,7 +6,6 @@ import {reconcileDefenderXa} from "./defenderXa.mjs"
 import {fetchTrustedWeeklyEvidence} from "./weeklyEvidence.mjs"
 import {roleTrendFromWeeklyEvidence} from "./roleTrend.mjs"
 import {blendVerifiedAttackRate} from "./mh8Attack.mjs"
-import {sparseChanceDefenderRates} from "./sparseChanceDefender.mjs"
 import {calibrateAttackRates} from "./roleAwareAttackRates.mjs"
 import {currentTacticalRole} from "./recentTacticalRole.mjs"
 
