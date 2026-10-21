@@ -1,0 +1,51 @@
+name: MH8 advanced source evidence (read-only)
+
+# This experiment only runs on its review branch; it cannot mutate the DB or
+# the historical Fantasy ledger. Merging does not trigger production imports.
+on:
+  push:
+    branches:
+      - feat/mh8-verified-advanced-source
+    paths:
+      - scripts/extract_mh8_fotmob_advanced.py
+      - test/mh8_advanced_source_test.py
+      - .github/workflows/mh8-advanced-evidence.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  source_audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install source reader
+        run: python3 -m pip install --disable-pip-version-check beautifulsoup4
+      - name: Unit-test source evidence and identity guards
+        run: python3 -m unittest discover -s test -p mh8_advanced_source_test.py -v
+      - name: Verify nine MH8 matches and source-player advanced fields
+        run: |
+          set -euo pipefail
+          python3 scripts/extract_mh8_fotmob_advanced.py --output mh8-advanced-evidence.json
+          jq -e '.gameweek == 8 and .verified_fixtures == 9 and
+            .matched_played == 286 and .unmatched_played == 0 and
+            .metric_coverage.xg >= 100 and .metric_coverage.xa >= 100 and
+            .metric_coverage.shots >= 100 and .db_writes == 0 and
+            .fantasy_points_written == 0 and (.rows | length) == 286' mh8-advanced-evidence.json
+          {
+            echo "## Verified MH8 advanced match actions (read only)"
+            jq -r '"- Explicitly observed player rows: \(.matched_played)"' mh8-advanced-evidence.json
+            jq -r '.metric_coverage | to_entries[] | "- \(.key): \(.value)/286 explicit source values"' mh8-advanced-evidence.json
+            echo "- Historical Fantasy totals and live MH9 unchanged"
+          } >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mh8-verified-advanced-evidence
+          path: mh8-advanced-evidence.json
+          if-no-files-found: ignore
