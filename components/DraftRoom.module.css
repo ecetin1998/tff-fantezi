@@ -103,3 +103,54 @@
 .page .checkout b{color:#263853}
 .page .suggestions h3{color:#334560}
 @media(prefers-reduced-motion:reduce){.page .primary,.page .secondary{transition:none}}
+
+/* Multiplayer draft V2: consistent responsive sorting, naming, and archived rooms. */
+.archiveList{display:grid;gap:8px}
+.archiveItem{display:flex;justify-content:space-between;gap:16px;align-items:center;text-align:left;width:100%;border:1px solid #e0e9f1;border-radius:12px;background:#f8fafc;color:#30425e;padding:13px 14px}
+.archiveItem:hover{background:#edf8f5;border-color:#a8d6ca}
+.archiveItem>span:first-child{display:grid;gap:5px;min-width:0}
+.archiveItem strong{font-size:14px;color:#1e304a;overflow-wrap:anywhere}
+.archiveItem small{color:#63758e;font-size:11px}
+.archiveItem>span:last-child{color:#087f74;font-size:12px;font-weight:800;text-align:right;flex:0 0 auto}
+.roomActions{display:flex;gap:8px;flex-wrap:wrap}
+.renameBox{display:flex;gap:10px;align-items:end;flex-wrap:wrap}
+.renameBox label{flex:1;min-width:200px}
+.renameBox button{flex:0 0 auto}
+.sortBar{display:flex;align-items:end;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.sortBar label{display:grid;gap:5px;min-width:230px;max-width:100%;flex:1;font-weight:800}
+.sortBar select{width:100%;background:#f9fbfe;color:#24324c;border:1px solid #dbe3ef;padding:9px 12px;border-radius:10px;min-height:43px}
+.sortBar select:focus-visible{outline:2px solid #0b8e82;outline-offset:2px}
+.sortMetric{color:#087f74!important;font-weight:900!important}
+@media(max-width:660px){
+ .archiveItem{align-items:flex-start;flex-direction:column;gap:8px}
+ .archiveItem>span:last-child{text-align:left}
+ .sortBar label{min-width:0}
+ .roomActions{width:100%}
+ .roomActions button{flex:1}
+}
+
+/* V2: room archive, self-naming and sortable player selection. */
+.archiveList{display:grid;gap:9px;max-height:450px;overflow:auto}
+.archiveItem{display:flex;justify-content:space-between;align-items:center;gap:16px;width:100%;padding:13px 15px;text-align:left;background:#f8fafc;color:#263753;border:1px solid #e0e7ef;border-radius:12px}
+.archiveItem:hover:not(:disabled){background:#eef8f5;border-color:#a8d5ca}
+.archiveItem>span:first-child{display:grid;gap:5px;min-width:0}
+.archiveItem strong{font-size:14px;word-break:break-word}
+.archiveItem small{font-size:11px;line-height:1.5;color:#667891}
+.archiveItem>span:last-child{font-size:12px;font-weight:750;white-space:nowrap;color:#087e72}
+.roomActions{display:flex;gap:8px;flex-wrap:wrap}
+.renameBox{display:flex;align-items:end;gap:10px}
+.renameBox label{flex:1;min-width:0}
+.renameBox button{flex:0 0 auto}
+.sortBar{display:flex;align-items:end;justify-content:space-between;gap:10px;margin:11px 0 7px;flex-wrap:wrap}
+.sortBar label{display:grid;gap:5px;min-width:min(260px,100%);flex:1;font-weight:800;font-size:12px;color:#52637e}
+.sortBar select{min-height:43px;min-width:0;width:100%;padding:10px 12px;color:#273854;background:#fff;border:1px solid #dbe3ef;border-radius:10px}
+.sortBar select:focus-visible{outline:2px solid #0b8e82;outline-offset:2px}
+.sortBar button{white-space:nowrap}
+.sortMetric{display:inline-flex!important;align-self:flex-start;padding:3px 8px;background:#e6f6f1;border-radius:7px;color:#087f74!important;font-size:10px;font-weight:800}
+@media(max-width:660px){
+ .archiveItem{flex-direction:column;align-items:stretch;gap:9px}
+ .archiveItem>span:last-child{white-space:normal}
+ .renameBox{flex-direction:column;align-items:stretch}
+ .sortBar{display:grid;grid-template-columns:minmax(0,1fr) auto}
+ .sortBar label{min-width:0}
+}
