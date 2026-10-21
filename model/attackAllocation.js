@@ -41,7 +41,7 @@ function attackWeights(player,matches=[]){
     ?Math.max(0,Number(player.team_set_piece_xg_per_match||0))*Math.max(0,Math.min(.35,Number(player.heading_box_share ?? 0.08)))
     :0;
   // Source note marks xG already shrunk by the lifecycle; never double penalize.
-  const rareChanceCalibrated=String(player.source_note||"").includes("sparse-defender-xg-v1");
+  const rareChanceCalibrated=String(player.source_note||"").includes("role-aware-attack-v1");
   const adjustedXg=rareChanceCalibrated
     ?xgRate+setPiecePrior
     :Math.max(xgRate*.45,xgRate-attenuation*excess/(2+exposure))+setPiecePrior;
