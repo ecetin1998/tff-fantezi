@@ -12,7 +12,7 @@ const errors={
  INVALID_TEAM_NAMES:'Takım adları boş veya aynı olamaz.',TEAM_NAME_TAKEN:'Bu takım adı alınmış.',ROOM_FULL:'Bu oda dolu.',LOT_ALREADY_OPEN:'Önce mevcut oyuncunun süresi dolmalı.',WAIT_ONE_NOMINATION_ROUND:'Önce her takım en az bir oyuncu aday göstermeli.',NO_ELIGIBLE_CANDIDATE:'Uygun oyuncu bulunamadı.',DRAFT_ALREADY_STARTED:'Bu draft başladı.',
  ALREADY_JOINED:'Bu odaya zaten katıldın.',SEAT_TAKEN:'Bu takım dolu.',
  HOST_ONLY:'Bu işlemi sadece yönetici yapabilir.',WAIT_FOR_ALL_PLAYERS:'Tüm katılımcılar katılmadan draft başlayamaz.',
- DRAFT_NOT_ACTIVE:'Draft aktif değil.',NOT_YOUR_TURN:'Henüz senin sıran değil.',
+ DRAFT_NOT_ACTIVE:'Draft aktif değil.',NOT_YOUR_TURN:'Henüz senin sıran değil.',TURN_EXPIRED:'Seçim süresi doldu, otomatik seçim yapılıyor.',INVALID_TIMER_SETTINGS:'Süre ayarları geçersiz.',
  INVALID_PLAYER:'Bu oyuncu seçilemiyor.',POSITION_FULL:'Bu mevkide kontenjan dolu.',
  PLAYER_ALREADY_PICKED:'Oyuncu zaten seçilmiş.',NOTHING_TO_UNDO:'Geri alınacak seçim yok.', AUCTION_UNDO_UNSUPPORTED:'Açık artırmada geçmiş satışlar geri alınamaz.',AUCTION_NOT_ACTIVE:'Açık artırma aktif değil.', AUCTION_EXPIRED:'Oyuncunun teklif süresi doldu.',ALREADY_LEADING:'Zaten en yüksek teklif sende.',BID_TOO_LOW:'Daha yüksek teklif gir.',BID_EXCEEDS_SAFE_BUDGET:'Bütçe sınırı: kalan kadro yerlerine en az 1 kredi ayırmalısın.'
 }
@@ -59,6 +59,8 @@ export default function DraftRoom({initialRoom='',initialInvite=''}) {
  const [isPro,setIsPro]=useState(false)
  const [teamCount,setTeamCount]=useState(4)
  const [mode,setMode]=useState('snake')
+ const [timerSettings,setTimerSettings]=useState({auction:15,extension:5,classic:60})
+ const [syncedTimerRoom,setSyncedTimerRoom]=useState('')
  const [bidAmount,setBidAmount]=useState(1)
  const [serverSnapshot,setServerSnapshot]=useState(0)
  const [clock,setClock]=useState(0)
@@ -83,9 +85,16 @@ export default function DraftRoom({initialRoom='',initialInvite=''}) {
  },[client])
  const refresh=useCallback(async(roomId=id)=>{
   if(!roomId)return
-  try{const next=await call('scout_draft_state',{p_room_id:roomId});setRoom(next);setServerSnapshot(Date.now());setProblem('')}
+  try{
+   const next=await call('scout_draft_state',{p_room_id:roomId})
+   if(next?.id&&next?.status==='lobby'&&next.id!==syncedTimerRoom){
+    setTimerSettings({auction:Number(next.auction_bid_seconds??15),extension:Number(next.auction_extension_seconds??5),classic:Number(next.classic_pick_seconds??60)})
+    setSyncedTimerRoom(next.id)
+   }
+   setRoom(next);setServerSnapshot(Date.now());setProblem('')
+  }
   catch(e){setProblem(errorText(e))}
- },[id,call])
+ },[id,call,syncedTimerRoom])
  useEffect(()=>{
   if(!id)return
   void refresh(id)
@@ -146,6 +155,22 @@ export default function DraftRoom({initialRoom='',initialInvite=''}) {
   void load()
   return()=>{live=false}
  },[id,room?.run_id])
+ useEffect(()=>{
+  if(!id||room?.draft_kind!=='classic'||Number(room?.rules_version||1)<2||room?.status!=='drafting')return
+  let active=true,working=false
+  const advance=async()=>{
+   if(working)return
+   working=true
+   try{
+    const result=await call('scout_draft_classic_advance',{p_room_id:id})
+    if(active&&result?.advanced)await refresh(id)
+   }catch(e){if(active)setProblem(errorText(e))}
+   finally{working=false}
+  }
+  void advance()
+  const timer=setInterval(()=>{void advance()},2000)
+  return()=>{active=false;clearInterval(timer)}
+ },[id,room?.draft_kind,room?.rules_version,room?.status,call,refresh])
  const action=async fn=>{
   setBusy(true);setProblem('');setMessage('')
   try{await fn()}catch(e){setProblem(errorText(e))}
@@ -166,7 +191,10 @@ export default function DraftRoom({initialRoom='',initialInvite=''}) {
  const seatBase=room?(room.next_pick-1)%room.team_count+1:1
  const seatNumber=room?(room.mode==='snake'&&round%2===0?room.team_count+1-seatBase:seatBase):1
  const current=room?.status==='drafting'&&!isAuction?teams.find(t=>Number(t.draft_order)===seatNumber):null
- const canPick=Boolean(current?.mine)&&room?.status==='drafting'&&!isAuction
+ const classicSecondsLeft=room?.turn_ends_at&&serverSnapshot&&clock
+  ?Math.max(0,Math.ceil((Date.parse(room.turn_ends_at)-Date.parse(room.server_time)-(clock-serverSnapshot))/1000))
+  :null
+ const canPick=Boolean(current?.mine)&&room?.status==='drafting'&&!isAuction&&(classicSecondsLeft===null||classicSecondsLeft>0)
  const own=teams.find(t=>t.mine)
  const lot=room?.lot?.status==='open'?room.lot:null
  const secondsLeft=lot?Math.max(0,Math.ceil((Date.parse(lot.ends_at)-Date.parse(lot.server_time)-(clock-serverSnapshot))/1000)):0
