@@ -158,7 +158,7 @@ export default function DraftRoom({initialRoom='',initialInvite=''}) {
    </div>
    <div className={s.panel}><small className={s.eyebrow}>KATILIM</small><h2>Davet kodun var mı?</h2><p>Arkadaşının kodunu girip boş takımlardan birini seç.</p>
     <label>Davet kodu<input maxLength={12} placeholder="ÖRN. 8A1B3F22CD10" value={code} onChange={e=>{setCode(e.target.value.toUpperCase());setLobby(null)}}/></label>
-    <button className={s.secondary} disabled={busy||code.length<8} onClick={()=>action(async()=>setLobby(await call('scout_draft_lobby',{p_code:code})))}>Odayı bul</button>
+    <button className={s.secondary} disabled={busy||code.length!==12} onClick={()=>action(async()=>setLobby(await call('scout_draft_lobby',{p_code:code})))}>Odayı bul</button>
     {lobby&&<div className={s.seats}>{lobby.teams.map(t=><button className={s.seat} key={t.team_index} disabled={busy||t.occupied||lobby.status!=='lobby'} onClick={()=>action(async()=>openRoom(await call('scout_draft_join',{p_code:code,p_team_index:t.team_index})))}><strong>{t.name}</strong><span>{t.occupied?'Dolu':'Katıl →'}</span></button>)}</div>}
    </div>
   </div>}
