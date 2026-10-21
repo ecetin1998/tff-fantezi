@@ -38,7 +38,7 @@ test('standings UI highlights verified pending separately from legitimate zero p
  assert.match(ui,/SEN/)
  assert.match(ui,/MH\{selected\}/)
  assert.match(ui,/scout_draft_live_standings/)
- assert.match(room,/room\.status==='finished'&&<DraftLiveStandings roomId=\{id\}\/>/)
+ assert.match(room,/room\.status==='finished'&&\(!room\.lineup_required\|\|leagueActive\|\|Boolean\(room\.league_active_at\)\)&&<DraftLiveStandings roomId=\{id\}\/>/)
  assert.match(css,/\.leaderboard/)
  assert.match(css,/\.players/)
 })
