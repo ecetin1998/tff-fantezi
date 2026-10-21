@@ -6,7 +6,7 @@ AUDIT, not Fantasy scoring, not heat-map/average on-field positions, and never
 self-promotes player role records without a separate verified ingestion gate.
 """
 from __future__ import annotations
-import argparse,json,time
+import argparse,json,time,re
 from collections import Counter
 from pathlib import Path
 from datetime import datetime, timezone
@@ -44,7 +44,15 @@ def collect_gw7(*,reader=read_json,fetcher=fetch_html,pause=True):
         score=scores[mid];squad=squads[mid]
         wanted={'home_team':score['home'],'away_team':score['away'],
                 'home_goals':int(score['goals'][0]),'away_goals':int(score['goals'][1])}
-        html=fetcher(expected['source_url'])
+        # The MH8 reader intentionally accepts canonical /matches/ URLs only.
+        # Historical GW7 manifests contain /tr/matches/ and /en-GB/matches/.
+        # Normalize only that known FotMob locale prefix, never the hostname.
+        requested=expected['source_url']
+        if not requested.startswith('https://www.fotmob.com/'):
+            raise ValueError('untrusted historical match source')
+        canonical=re.sub(r'^https://www\\.fotmob\\.com/(?:tr|en-GB)/matches/',
+                         'https://www.fotmob.com/matches/',requested)
+        html=fetcher(canonical)
         details=None
         for provider_id in candidates(html)[:3]:
             candidate=reader(provider_id)
