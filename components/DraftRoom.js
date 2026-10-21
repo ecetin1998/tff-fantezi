@@ -55,6 +55,7 @@ export default function DraftRoom({initialRoom='',initialInvite=''}) {
  const [sort,setSort]=useState('xfp')
  const [sortDirection,setSortDirection]=useState('desc')
  const [proOverlayReady,setProOverlayReady]=useState(false)
+ const [proRows,setProRows]=useState(null)
  const [isPro,setIsPro]=useState(false)
  const [teamCount,setTeamCount]=useState(4)
  const [mode,setMode]=useState('snake')
@@ -72,7 +73,7 @@ export default function DraftRoom({initialRoom='',initialInvite=''}) {
  const [selected,setSelected]=useState(null)
  const [all,setAll]=useState(false)
  const openRoom=roomId=>{
-  setId(roomId);setRoom(null);setPool([]);setLobby(null);setSelected(null)
+  setId(roomId);setRoom(null);setPool([]);setProRows(null);setProOverlayReady(false);setLobby(null);setSelected(null)
   window.history.pushState({},'','/draft?room='+encodeURIComponent(roomId))
  }
  const call=useCallback(async(name,args)=>{
@@ -126,7 +127,7 @@ export default function DraftRoom({initialRoom='',initialInvite=''}) {
  useEffect(()=>{
   if(!id||!room?.run_id)return
   let live=true
-  setIsPro(false);setProOverlayReady(false)
+  setIsPro(false);setProOverlayReady(false);setProRows(null)
   const load=async()=>{
    try{
     const resp=await fetch('/api/access',{cache:'no-store'})
@@ -138,7 +139,7 @@ export default function DraftRoom({initialRoom='',initialInvite=''}) {
     const overlay=await overlayResponse.json()
     if(!live||overlay.run_id!==room.run_id||!Array.isArray(overlay.rows))return
     const extra=new Map(overlay.rows.map(x=>[Number(x.player_id),x]))
-    setPool(prev=>prev.map(player=>{const more=extra.get(Number(player.id));return more?{...player,p90:more.p90,six_plus_probability:more.six_plus_probability}:player}))
+    setProRows(extra)
     setIsPro(true);setProOverlayReady(true)
    }catch{/* Keep public sorting choices when protected analytics are unavailable. */}
   }
@@ -153,7 +154,8 @@ export default function DraftRoom({initialRoom='',initialInvite=''}) {
  const teamList=room?.teams||[]
  const picked=room?.picks||[]
  const pickedIds=new Set(picked.map(p=>Number(p.player_id)))
- const lookup=new Map(pool.map(p=>[Number(p.id),p]))
+ const playerPool=useMemo(()=>proRows?pool.map(p=>{const extra=proRows.get(Number(p.id));return extra?{...p,p90:extra.p90,six_plus_probability:extra.six_plus_probability}:p}):pool,[pool,proRows])
+ const lookup=new Map(playerPool.map(p=>[Number(p.id),p]))
  const teams=teamList.map(t=>{
    const selections=picked.filter(p=>p.team_id===t.id).map(p=>lookup.get(Number(p.player_id))||{name:p.player_name,position:p.position,xfp:p.xfp})
    return {...t,selections,count:positionCounts(selections),total:sums(selections),xi:xiScore(selections)}
@@ -188,9 +190,9 @@ export default function DraftRoom({initialRoom='',initialInvite=''}) {
   const diff=Number(av||0)-Number(bv||0)
   return (sortDirection==='asc'?diff:-diff)||Number(b.xfp||0)-Number(a.xfp||0)||String(a.name).localeCompare(String(b.name),'tr')
  }
- const available=pool.filter(p=>!pickedIds.has(Number(p.id)))
+ const available=playerPool.filter(p=>!pickedIds.has(Number(p.id)))
  const fits=p=>canComplete?Boolean(own?.count[p.position]<CAPS[p.position]):!current||current.count[p.position]<CAPS[p.position]
- const clubs=[...new Set(pool.map(p=>p.team))].sort((a,b)=>a.localeCompare(b,'tr'))
+ const clubs=[...new Set(playerPool.map(p=>p.team))].sort((a,b)=>a.localeCompare(b,'tr'))
  const filtered=available.filter(fits).filter(p=>pos==='ALL'||p.position===pos)
    .filter(p=>club==='ALL'||p.team===club)
    .filter(p=>(p.name+' '+p.team).toLocaleLowerCase('tr-TR').includes(search.toLocaleLowerCase('tr-TR')))
