@@ -3,6 +3,8 @@ import {applyOfficialMinutesEvidence,firstRecordedRate,observedPer90} from "./ex
 import {validFinalWeeklyPlayerRow} from "./closureSource.mjs"
 import {risingMinutesMomentum,trustedMinute} from "./momentum.mjs"
 import {reconcileDefenderXa} from "./defenderXa.mjs"
+import {fetchTrustedWeeklyEvidence} from "./weeklyEvidence.mjs"
+import {roleTrendFromWeeklyEvidence} from "./roleTrend.mjs"
 
 const AUDIENCE="tff-fantezi-scout"
 const ISSUER="https://token.actions.githubusercontent.com"
@@ -301,7 +303,7 @@ async function prepare(sb:any,current:any,status:any,body:any={}){
     sb.from("scout_player_season_stats").select("*").eq("season","2026-27").eq("through_gameweek",Number(current.gameweek)),
     sb.from("scout_team_season_stats").select("*").eq("through_gameweek",Number(current.gameweek)),
     sb.from("scout_match_history").select("*").eq("season","2026-27").eq("gameweek",target).order("kickoff_at"),
-    sb.from("scout_player_weekly_points").select("player_id,gameweek,match_id,minutes,points,is_final,source_kind").lt("gameweek",target).eq("is_final",true).order("gameweek",{ascending:false}).limit(10000),
+    fetchTrustedWeeklyEvidence(sb,target),
     sb.from("scout_replay_player_inputs").select("*").eq("gameweek",Number(current.gameweek)).eq("benchmark_version",priorBenchmark),
     sb.from("scout_teams").select("id,name"),
     sb.from("scout_player_projections").select("player_id,confidence,data_confidence").eq("run_id",current.id)
@@ -440,13 +442,10 @@ async function prepare(sb:any,current:any,status:any,body:any={}){
       availability_source:"weekly-lifecycle",availability_probability:availability,
       top25_score:null,top25_rank:null,top25_model_version:null,confidence:projMap.get(id)?.confidence||"medium"
     })
-    const last2=trustedRows.slice(0,2),prev2=trustedRows.slice(2,4)
-    const last2Min=avg(last2.map(x=>n(x.minutes))),prev2Min=avg(prev2.map(x=>n(x.minutes)))
-    const last2Xi=avg(last2.map(x=>clamp(0,1,n(x.minutes)/60))),prev2Xi=avg(prev2.map(x=>clamp(0,1,n(x.minutes)/60)))
-    const d=last2Xi-prev2Xi
+    const {last2Min,prev2Min,last2Xi,prev2Xi,trend:d}=roleTrendFromWeeklyEvidence(rows,target)
     const signal=officialShift.applied&&event.started&&Number(event.minutes)>=75
       ?"RESMÎ MAÇTA İLK 11":officialShift.applied&&event.squad_status==="unused"
-      ?"RESMÎ MAÇTA YEDEK":momentum.rising?momentum.signal:d>.20?"ROL YÜKSELİYOR":d<-.20?"ROL DÜŞÜYOR":"BELİRGİN DEĞİŞİM YOK"
+      ?"RESMÎ MAÇTA YEDEK":momentum.rising?momentum.signal:d!==null&&d>.20?"ROL YÜKSELİYOR":d!==null&&d<-.20?"ROL DÜŞÜYOR":"BELİRGİN DEĞİŞİM YOK"
     const goalWeight=Math.max(1e-6,.75*xg90+.25*g90)
     const assistWeight=Math.max(1e-6,.70*xa90+.30*a90)
     roleDraft.push({run_id:runId,player_id:id,last2_xi_probability:last2Xi,previous2_xi_probability:prev2Xi,last2_minutes:last2Min,previous2_minutes:prev2Min,signal,predicted_xi_probability:roleProb,x_minutes:0,availability_probability:availability,goalWeight,assistWeight,team_id:Number(p.team_id)})
@@ -533,14 +532,18 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
   // can evolve while the gameweek is in progress. Before ANY post-kickoff
   // recomputation, require the immutable pre-first-kickoff backtest snapshot.
   // Its snapshot table must never be updated by later rolling forecast runs.
-  const snapshotAllowed=now<kickoff
-  if(!snapshotAllowed){
-    const frozenQ=await sb.from("scout_backtest_weeks")
-      .select("run_id,snapshot_at,prediction_mode,status,prediction_count")
-      .eq("gameweek",gw).maybeSingle()
-    if(frozenQ.error)throw frozenQ.error
-    const frozen=frozenQ.data
-    if(!frozen?.run_id||frozen.prediction_mode!=="live_frozen"||
+  const frozenQ=await sb.from("scout_backtest_weeks")
+    .select("run_id,snapshot_at,prediction_mode,status,prediction_count")
+    .eq("gameweek",gw).maybeSingle()
+  if(frozenQ.error)throw frozenQ.error
+  const frozen=frozenQ.data
+  const hasFrozen=Boolean(frozen?.run_id)
+  // Once published, preserve the original pre-kickoff forecast forever.
+  // Later model improvements may refresh current public predictions, but must
+  // never overwrite the immutable baseline used for honest MH9 backtests.
+  const snapshotAllowed=now<kickoff&&!hasFrozen
+  if(hasFrozen||now>=kickoff){
+    if(!hasFrozen||frozen.prediction_mode!=="live_frozen"||
        !(new Date(frozen.snapshot_at).getTime()<kickoff)||
        Number(frozen.prediction_count||0)<1||
        !["open","closed"].includes(String(frozen.status||"")))
@@ -629,8 +632,7 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
       :sb.from("scout_replay_player_inputs").select("player_id,role_probability,durations,duration_weights,source_note").eq("gameweek",gw).eq("benchmark_version",stableRoleBenchmark).order("player_id"),
     sb.from("scout_player_season_stats").select("player_id,through_gameweek,advanced_through_gameweek,minutes,xa_total,xa_per90,xa_model_per90,xa_source")
       .eq("season","2026-27").eq("through_gameweek",gw-1),
-    sb.from("scout_player_weekly_points").select("player_id,gameweek,minutes,points,is_final,source_kind")
-      .lt("gameweek",gw).eq("is_final",true).order("gameweek",{ascending:false}).limit(10000)
+    fetchTrustedWeeklyEvidence(sb,gw)
   ])
   for(const q of [inputsQ,matchesQ,stableInputsQ,sourceStatsQ,weeklyRecentQ])if(q.error)throw q.error
   if(!(inputsQ.data||[]).length||!(matchesQ.data||[]).length)throw new Error("CURRENT_SIM_INPUT_COVERAGE_MISSING")
@@ -745,18 +747,27 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
     const {run_id:_,...rest}=x
     const av=avMap.get(Number(x.player_id))
     const input=refreshedInputs.get(Number(x.player_id)) as any
+    const history=weeklyMomentumRows.get(Number(x.player_id))||[]
+    const trend=roleTrendFromWeeklyEvidence(history,gw)
     return {
       ...rest,run_id:runId,
       predicted_xi_probability:n((refreshedInputs.get(Number(x.player_id)) as any)?.role_probability,x.predicted_xi_probability),
+      last2_xi_probability:trend.last2Xi,
+      previous2_xi_probability:trend.prev2Xi,
+      last2_minutes:trend.last2Min,
+      previous2_minutes:trend.prev2Min,
       signal:(()=>{
         const event=official.latest.get(Number(x.player_id))
         const used=event&&String(input?.source_note||"").includes(String(event.match_ref))
         const momentum=risingMinutesMomentum(
-          weeklyMomentumRows.get(Number(x.player_id))||[],gw,
+          history,gw,
           n(av?.availability_probability,1))
         return used&&event.started&&Number(event.minutes)>=75?"RESMÎ MAÇTA İLK 11"
           :used&&event.squad_status==="unused"?"RESMÎ MAÇTA YEDEK"
-          :momentum.rising?momentum.signal:x.signal
+          :momentum.rising?momentum.signal
+          :trend.trend!==null&&trend.trend>.20?"ROL YÜKSELİYOR"
+          :trend.trend!==null&&trend.trend<-.20?"ROL DÜŞÜYOR"
+          :"BELİRGİN DEĞİŞİM YOK"
       })(),
       availability_probability:clamp(0,1,n(av?.availability_probability,x.availability_probability)),
       team_goal_share:(()=>{const rates=(input?.rates||[]).map(Number);return Math.max(1e-6,.75*n(rates[0])+.25*n(rates[1]))})(),
