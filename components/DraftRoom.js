@@ -189,7 +189,7 @@ export default function DraftRoom({initialRoom='',initialInvite=''}) {
   return (sortDirection==='asc'?diff:-diff)||Number(b.xfp||0)-Number(a.xfp||0)||String(a.name).localeCompare(String(b.name),'tr')
  }
  const available=pool.filter(p=>!pickedIds.has(Number(p.id)))
- const fits=p=>!current||current.count[p.position]<CAPS[p.position]
+ const fits=p=>canComplete?Boolean(own?.count[p.position]<CAPS[p.position]):!current||current.count[p.position]<CAPS[p.position]
  const clubs=[...new Set(pool.map(p=>p.team))].sort((a,b)=>a.localeCompare(b,'tr'))
  const filtered=available.filter(fits).filter(p=>pos==='ALL'||p.position===pos)
    .filter(p=>club==='ALL'||p.team===club)
