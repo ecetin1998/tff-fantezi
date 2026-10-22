@@ -45,7 +45,7 @@ function xiScore(rows){
   }
  return Number.isFinite(best)?best:null
 }
-function Item({p,sort='xfp'}){const metric=sort==='xi'?'İlk 11 %'+Math.round(Number(p.xi_probability||0)*100):sort==='minutes'?'xDak '+Math.round(Number(p.x_minutes||0)):sort==='points'?'Toplam '+Number(p.total_points||0):sort==='price'?'Fiyat '+F(p.price):sort==='value'?'F/P '+F(p.value_score):sort==='p90'?'P90 '+F(p.p90):sort==='six'?'6+ %'+Math.round(Number(p.six_plus_probability||0)*100):null;return <div className={s.pText}><strong>{p.name||p.player_name}</strong><small>{p.team} · {P[p.position]} · {p.role||'—'}</small><small>xDak {Math.round(Number(p.x_minutes||0))} · İlk 11 %{Math.round(100*Number(p.xi_probability||0))} · Risk: {risk(p)}</small>{metric&&<small className={s.sortMetric}>{metric}</small>}</div>}
+function Item({p,sort='xfp'}){const metric=sort==='xi'?'İlk 11 %'+Math.round(Number(p.xi_probability||0)*100):sort==='minutes'?'xDak '+Math.round(Number(p.x_minutes||0)):sort==='points'?'Toplam '+Number(p.total_points||0):sort==='price'?'Fiyat '+F(p.price):sort==='value'?'F/P '+F(p.value_score):sort==='p90'?'P90 '+F(p.p90):sort==='six'?'6+ %'+Math.round(Number(p.six_plus_probability||0)*100):null;return <div className={s.pText}><strong>{p.name||p.player_name}</strong><small>{p.team} · {P[p.position]} · {p.fixture_opponent&&p.fixture_venue?`vs ${p.fixture_opponent} (${p.fixture_venue})`:'Fikstür bekleniyor'}</small><small>xDak {Math.round(Number(p.x_minutes||0))} · İlk 11 %{Math.round(100*Number(p.xi_probability||0))} · Risk: {risk(p)}</small>{metric&&<small className={s.sortMetric}>{metric}</small>}</div>}
 
 export default function DraftRoom({initialRoom='',initialInvite=''}) {
  const client=useMemo(()=>createClient(),[])
