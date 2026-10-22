@@ -57,3 +57,8 @@
 @media(prefers-reduced-motion:reduce){.progress span{transition:none}}
 
 .roleBadge{font-size:10px!important;color:#087f74!important;font-weight:850!important}
+
+/* A newly created draft is a one-matchweek tournament; no duplicate season totals. */
+.singleWeek .tableHead,.singleWeek .row{grid-template-columns:minmax(145px,1fr) minmax(90px,.38fr) minmax(70px,.38fr)}
+.singleWeekLabel{margin:0!important;padding:10px 13px;border:1px solid #d1e6de;border-radius:10px;background:#eaf7f1;color:#0c806d;font-size:12px;font-weight:800}
+@media(max-width:760px){.singleWeek .tableHead,.singleWeek .row{grid-template-columns:minmax(110px,1fr) 66px 61px}}
