@@ -4,7 +4,7 @@ import {createClient} from '@/lib/supabase/client'
 import s from './DraftArchives.module.css'
 
 const label=room=>room.status==='finished'?'Tamamlandı ✓':room.status==='drafting'?'Devam ediyor':room.status==='lobby'?'Lobi':room.status==='expired'?'Süresi doldu':'İptal edildi'
-const mode=room=>room.draft_kind==='auction'?'Açık artırma':room.mode==='snake'?'Snake':'Normal'
+const mode=room=>(room.opponent_mode==='computer'?'🤖 Bilgisayara karşı · ':'👥 Arkadaşlara karşı · ')+(room.draft_kind==='auction'?'Açık artırma':room.mode==='snake'?'Snake':'Normal')
 export default function DraftArchives({onOpen}){
  const client=useMemo(()=>createClient(),[])
  const [items,setItems]=useState([])

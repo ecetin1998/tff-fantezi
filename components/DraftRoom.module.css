@@ -181,3 +181,14 @@
 .closedNotice strong{font-size:17px}
 .closedNotice p{font-size:12px;color:#81606a;line-height:1.55;margin:0!important}
 @media(max-width:660px){.roomActions .archiveDanger{width:100%}}
+
+/* Opponent mode is explicit instead of implicitly relying on invitation occupancy. */
+.opponentSwitch{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin:15px 0 17px}
+.opponentSwitch button{display:grid;gap:7px;text-align:left;align-content:center;min-height:89px;padding:15px;border:1px solid #dbe6e9;border-radius:14px;background:#f7f9fc;color:#32435e;transition:border-color .15s,background .15s,box-shadow .15s}
+.opponentSwitch button:hover{border-color:#95c7bd}
+.opponentSwitch button span{font-size:14px;font-weight:850;color:#273b51}
+.opponentSwitch button small{font-size:10px;line-height:1.5;color:#728599}
+.opponentSwitch button.opponentActive{background:#e9f7f2;border-color:#0a8e7d;box-shadow:inset 0 0 0 1px #0a8e7d}
+.opponentSwitch button.opponentActive span{color:#087c6f}
+@media(max-width:580px){.opponentSwitch{grid-template-columns:1fr}.opponentSwitch button{min-height:70px;padding:12px 14px}}
+@media(prefers-reduced-motion:reduce){.opponentSwitch button{transition:none}}
