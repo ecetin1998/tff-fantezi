@@ -1,0 +1,47 @@
+name: One-time provision D1 tag cache (no plan upgrade)
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/provision-d1-tag-cache-20261022.yml
+permissions:
+  contents: read
+jobs:
+  provision:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    env:
+      CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CF_ACCOUNT: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      DB_NAME: tff-fantezi-next-tag-cache
+    steps:
+      - name: Provision dedicated Cloudflare D1 with idempotent lookup
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$CF_TOKEN" && test -n "$CF_ACCOUNT"
+          api="https://api.cloudflare.com/client/v4/accounts/$CF_ACCOUNT/d1/database"
+          response="$(curl --fail-with-body -sS --max-time 40 -H "Authorization: Bearer $CF_TOKEN" "$api?per_page=100")"
+          echo "$response" | jq -e '.success == true' >/dev/null
+          existing="$(printf '%s' "$response" | jq -r --arg name "$DB_NAME" '[.result[]|select(.name==$name)]|if length==0 then "" else .[0].uuid end')"
+          if [[ -n "$existing" ]]; then
+            db_id="$existing"
+            echo 'Reusing dedicated D1 database (no duplicate).'
+          else
+            result="$(curl --fail-with-body -sS --max-time 40 -X POST \
+              -H "Authorization: Bearer $CF_TOKEN" -H "Content-Type: application/json" \
+              -d "$(jq -n --arg name "$DB_NAME" '{name:$name}')" "$api")"
+            echo "$result" | jq -e '.success == true' >/dev/null
+            db_id="$(printf '%s' "$result" | jq -er '.result.uuid')"
+            echo 'Created dedicated D1 tag cache database.'
+          fi
+          [[ "$db_id" =~ ^[0-9a-fA-F-]{36}$ ]]
+          # Database UUID is a public binding identifier, not a credential.
+          echo "Database name: $DB_NAME"
+          echo "D1 binding ID: $db_id"
+          echo "Bind as NEXT_TAG_CACHE_D1; keep the existing DO queue and R2 bucket."
+          {
+            echo "D1 tag-cache database: $DB_NAME"
+            echo "ID: $db_id"
+            echo "No billing plan mutation and no production worker change."
+          } >> "$GITHUB_STEP_SUMMARY"
