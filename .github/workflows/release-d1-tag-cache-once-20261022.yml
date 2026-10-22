@@ -1,0 +1,22 @@
+name: One-time approved D1 production rollout
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/release-d1-tag-cache-once-20261022.yml
+permissions:
+  contents: read
+  actions: write
+jobs:
+  approved-dispatch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Dispatch existing manually-controlled Cloudflare production workflow
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          test "${{ github.ref }}" = "refs/heads/main"
+          gh workflow run cloudflare-deploy.yml --ref main
+          echo "User-approved D1 tag-cache rollout dispatched; no plan upgrade." >> "$GITHUB_STEP_SUMMARY"
