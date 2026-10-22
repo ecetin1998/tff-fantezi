@@ -14,6 +14,31 @@ jobs:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
     steps:
+      - name: Check Workers subscription and available D1 databases (read-only)
+        shell: bash
+        run: |
+          set -euo pipefail
+          for endpoint in subscriptions d1/database; do
+            response="$(curl --silent --show-error --max-time 25 \
+              -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+              "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/$endpoint")"
+            case "$endpoint" in
+              subscriptions)
+                if [[ "$(echo "$response" | jq -r '.success // false')" == "true" ]]; then
+                  echo "$response" | jq -r '.result[]? | select((.rate_plan.id // .rate_plan.public_name // .product // .name // "") | ascii_downcase | contains("worker")) | "Workers subscription: " + (.rate_plan.id // .rate_plan.public_name // .product // "unknown") + " / " + (.state // .status // "unknown")'
+                else
+                  echo "Subscription query not permitted by deploy token; billing plan unconfirmed."
+                fi
+                ;;
+              d1/database)
+                if [[ "$(echo "$response" | jq -r '.success // false')" == "true" ]]; then
+                  echo "$response" | jq -r '"D1 databases available: " + ((.result|length)|tostring)'
+                else
+                  echo "D1 inventory not available with current deploy token."
+                fi
+                ;;
+            esac
+          done
       - name: Read account's October 22 Durable Objects usage by namespace
         shell: bash
         run: |
