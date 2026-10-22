@@ -56,3 +56,16 @@
 .primary:disabled{opacity:.55;cursor:not-allowed}
 @media(max-width:820px){.columns,.config{grid-template-columns:1fr}.wrap{padding:15px}}
 @media(max-width:480px){.cardGrid{grid-template-columns:1fr}.footer .primary{width:100%}}
+
+/* After a manager presses Ready, show the entire room's confirmation state. */
+.readyTeams{display:grid;gap:10px;border:1px solid #cde6db;border-radius:13px;background:#f1faf6;padding:14px}
+.readySummary{display:grid;gap:5px;color:#126e60;font-size:12px}
+.readySummary>strong{font-size:13px}
+.readySummary>span{font-size:11px;color:#597e74;line-height:1.5}
+.readyList{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.readyTeam{display:flex;align-items:center;justify-content:space-between;gap:8px;background:#fff;border:1px solid #e1ebe6;padding:10px;border-radius:10px;min-width:0}
+.readyTeam strong{font-size:11px;color:#30475a;overflow-wrap:anywhere}
+.readyTeam span{font-size:10px;white-space:nowrap;font-weight:800}
+.readyDone{color:#07806b}
+.readyWaiting{color:#a4744c}
+@media(max-width:570px){.readyList{grid-template-columns:1fr}}
