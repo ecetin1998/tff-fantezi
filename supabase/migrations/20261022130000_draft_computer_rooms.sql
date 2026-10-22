@@ -174,7 +174,7 @@ begin
 end $$;
 -- Legacy seat-index invitation RPC must also reject private bot seats.
 create or replace function public.scout_draft_join(p_code text,p_team_index integer)
-returns uuid language plpgsql security definer set search_path=public,pg_temp as $
+returns uuid language plpgsql security definer set search_path=public,pg_temp as $$
 declare v_user uuid:=auth.uid();v_room public.scout_draft_rooms%rowtype;v_team public.scout_draft_teams%rowtype;
 begin
  if v_user is null then raise exception 'AUTH_REQUIRED';end if;
@@ -192,7 +192,7 @@ begin
  update public.scout_draft_teams set user_id=v_user where id=v_team.id;
  update public.scout_draft_rooms set updated_at=now() where id=v_room.id;
  return v_room.id;
-end $;
+end $$;
 
 revoke all on function public.scout_draft_create_vs_bot(text,text,integer) from public,anon;
 grant execute on function public.scout_draft_create_vs_bot(text,text,integer) to authenticated;
