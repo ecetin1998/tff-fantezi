@@ -172,5 +172,27 @@ begin
  join public.scout_draft_hidden_rooms h on h.room_id=r.id and h.user_id=auth.uid();
  return result;
 end $$;
+-- Legacy seat-index invitation RPC must also reject private bot seats.
+create or replace function public.scout_draft_join(p_code text,p_team_index integer)
+returns uuid language plpgsql security definer set search_path=public,pg_temp as $
+declare v_user uuid:=auth.uid();v_room public.scout_draft_rooms%rowtype;v_team public.scout_draft_teams%rowtype;
+begin
+ if v_user is null then raise exception 'AUTH_REQUIRED';end if;
+ if p_team_index not between 1 and 4 then raise exception 'INVALID_SEAT';end if;
+ select * into v_room from public.scout_draft_rooms where invite_code=upper(btrim(p_code)) for update;
+ if not found then raise exception 'ROOM_NOT_FOUND';end if;
+ if v_room.opponent_mode='computer' then raise exception 'BOT_ROOM_PRIVATE';end if;
+ if v_room.status<>'lobby' then raise exception 'DRAFT_ALREADY_STARTED';end if;
+ if exists(select 1 from public.scout_draft_teams where room_id=v_room.id and user_id=v_user) then
+   raise exception 'ALREADY_JOINED';
+ end if;
+ select * into v_team from public.scout_draft_teams
+ where room_id=v_room.id and team_index=p_team_index for update;
+ if not found or v_team.user_id is not null then raise exception 'SEAT_TAKEN';end if;
+ update public.scout_draft_teams set user_id=v_user where id=v_team.id;
+ update public.scout_draft_rooms set updated_at=now() where id=v_room.id;
+ return v_room.id;
+end $;
+
 revoke all on function public.scout_draft_create_vs_bot(text,text,integer) from public,anon;
 grant execute on function public.scout_draft_create_vs_bot(text,text,integer) to authenticated;
