@@ -1,0 +1,71 @@
+name: Post-D1 cache usage audit (read only)
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/audit-post-d1-cache-live-20261022.yml
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    env:
+      CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CF_ACCOUNT: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - name: Compare live D1 and Durable Objects usage counters
+        shell: bash
+        run: |
+          set -euo pipefail
+          query='query($accountTag:string!){viewer{accounts(filter:{accountTag:$accountTag}){
+            durableObjectsInvocationsAdaptiveGroups(limit:2000,filter:{date_geq:"2026-10-22",date_leq:"2026-10-22"}){
+              dimensions{name scriptName} sum{requests}
+            }
+            d1AnalyticsAdaptiveGroups(limit:100,filter:{date_geq:"2026-10-22",date_leq:"2026-10-22",databaseId:"a3437c8c-d671-48c4-a431-c8a807b5dc35"}){
+              dimensions{databaseId} sum{readQueries writeQueries rowsRead rowsWritten}
+            }
+          }}}'
+          payload="$(jq -n --arg q "$query" --arg acct "$CF_ACCOUNT" '{query:$q,variables:{accountTag:$acct}}')"
+          snapshot(){
+            curl --fail-with-body -sS --max-time 35 \
+              -H "Authorization: Bearer $CF_TOKEN" -H 'Content-Type: application/json' \
+              --data "$payload" https://api.cloudflare.com/client/v4/graphql
+          }
+          summarize(){
+            jq -er '
+              if (.errors|length)>0 then error(.errors[0].message)
+              else
+                {tag_soft:( [.data.viewer.accounts[].durableObjectsInvocationsAdaptiveGroups[]|
+                  select(.dimensions.name|startswith("tag-soft;"))|.sum.requests] | add // 0),
+                 queue:( [.data.viewer.accounts[].durableObjectsInvocationsAdaptiveGroups[]|
+                  select(.dimensions.name|startswith("revalidate-"))|.sum.requests] | add // 0),
+                 d1_reads:( [.data.viewer.accounts[].d1AnalyticsAdaptiveGroups[].sum.readQueries] | add // 0),
+                 d1_writes:( [.data.viewer.accounts[].d1AnalyticsAdaptiveGroups[].sum.writeQueries] | add // 0),
+                 d1_rows_read:( [.data.viewer.accounts[].d1AnalyticsAdaptiveGroups[].sum.rowsRead] | add // 0),
+                 d1_rows_written:( [.data.viewer.accounts[].d1AnalyticsAdaptiveGroups[].sum.rowsWritten] | add // 0)}
+              end'
+          }
+          baseline="$(snapshot | summarize)"
+          echo "Baseline UTC daily counters: $(echo "$baseline" | jq -c .)"
+          for path in / /players /matches /teams /squads /roles /backtest /pricing /sss; do
+            curl --fail-with-body -sS --max-time 25 -o /dev/null "https://fanteziligrehberi.com$path"
+          done
+          sleep 50
+          after="$(snapshot | summarize)"
+          echo "After live traffic UTC daily counters: $(echo "$after" | jq -c .)"
+          jq -n --argjson before "$baseline" --argjson after "$after" \
+            '{tag_soft_delta:($after.tag_soft-$before.tag_soft),
+              d1_read_query_delta:($after.d1_reads-$before.d1_reads),
+              d1_write_query_delta:($after.d1_writes-$before.d1_writes),
+              d1_rows_read_delta:($after.d1_rows_read-$before.d1_rows_read),
+              d1_rows_written_delta:($after.d1_rows_written-$before.d1_rows_written)}' |
+            tee "$RUNNER_TEMP/d1-cache-delta.json"
+          {
+            echo '### Tag-cache backend post-deployment (2026-10-22 UTC)'
+            echo 'Only aggregated counters; samples can lag behind live traffic.'
+            echo '~~~json'
+            cat "$RUNNER_TEMP/d1-cache-delta.json"
+            echo '~~~'
+            echo 'No plan changes; remote site requests only.'
+          } >> "$GITHUB_STEP_SUMMARY"
