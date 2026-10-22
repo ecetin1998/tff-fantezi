@@ -55,8 +55,22 @@ jobs:
           set -euo pipefail
           # Fail safely before deployment if R2 is not enabled/provisioned.
           npx wrangler r2 bucket info tff-fantezi-isr-cache
+      - name: Verify D1 tag-cache database
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx wrangler d1 info tff-fantezi-next-tag-cache
       - name: Deploy
         run: npm run deploy
+      - name: Verify D1 tag revalidations table
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx wrangler d1 execute tff-fantezi-next-tag-cache --remote \
+            --command "SELECT name FROM sqlite_master WHERE type='table' AND name='revalidations';" \
+            > "$RUNNER_TEMP/d1-revalidations-check.log"
+          grep -Fq 'revalidations' "$RUNNER_TEMP/d1-revalidations-check.log"
+          echo "D1 tag revalidations schema initialized."
       - name: Verify deployed commit
         shell: bash
         run: |
