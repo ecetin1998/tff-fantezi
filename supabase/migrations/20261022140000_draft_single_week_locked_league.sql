@@ -1,11 +1,21 @@
 -- Draft tournaments are single-matchweek competitions with a final, frozen XI.
 -- Keep older rooms exactly as before (including historical score views).
 -- No new games are scheduled and no current model/lifecycle data is mutated.
-alter table public.scout_draft_rooms
- add column if not exists single_week_only boolean not null default true;
--- Existing rooms predate the one-week contract; do not rewrite their existing
--- fantasy score history or allow historical data to be silently truncated.
-update public.scout_draft_rooms set single_week_only=false;
+-- Backfill only on FIRST application; a retry must not turn any new
+-- one-week tournaments back into legacy multiweek rooms.
+do $once$
+begin
+ if not exists (
+   select 1 from information_schema.columns
+   where table_schema='public' and table_name='scout_draft_rooms'
+     and column_name='single_week_only'
+ ) then
+   alter table public.scout_draft_rooms
+    add column if not exists single_week_only boolean not null default true;
+   -- Existing rooms predate the one-week contract: preserve their old reports.
+   update public.scout_draft_rooms set single_week_only=false;
+ end if;
+end $once$;
 
 -- Member-only room state: project fixed matchweek and post-ready mode.
 create or replace function public.scout_draft_state(p_room_id uuid)
