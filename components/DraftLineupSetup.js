@@ -139,8 +139,14 @@ export default function DraftLineupSetup({roomId,picks=[],pool=[],myTeamId,onLea
     <span>Diziliş <b className={formation.valid?s.formationOk:s.formationBad}>{formation.label}</b></span>
     <span>Kadro son tarihi <b>{status.deadline_at?new Date(status.deadline_at).toLocaleString('tr-TR',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}):'Henüz belirlenmedi'}</b></span>
    </div>
-   {!status.league_active&&<p className={s.explainer}>Her menajer kadrosunu kaydedip hazır olduğunda puan durumu açılacak. Onaylamayanlar: {(status.teams||[]).filter(t=>!t.ready).map(t=>t.name).join(', ')||'Yok'}</p>}
-   {status.league_active&&<p className={s.explainer}>Lig başladı. Her maç haftasında yeni kadronu son tarihe kadar güncelleyebilirsin; değişiklik yapmazsan son onaylı ilk 11'in korunur.</p>}
+   {!status.league_active&&<div className={s.readyTeams}>
+    <div className={s.readySummary}><strong>Kadro onay durumu · {readyCount}/{teamCount} hazır</strong><span>Herkes onayladığında kadrolar kilitlenir ve canlı puan durumu açılır.</span></div>
+    <div className={s.readyList}>{(status.teams||[]).map(t=><div className={s.readyTeam} key={t.team_id}>
+     <strong>{t.is_bot?'🤖 ':''}{t.name}{t.mine?' · SEN':''}</strong>
+     <span className={t.ready?s.readyDone:s.readyWaiting}>{t.ready?'✓ Hazır':'Kaydetmesi bekleniyor'}</span>
+    </div>)}</div>
+   </div>}
+   {status.league_active&&<p className={s.explainer}>Herkes hazır. Bu tek haftalık yarışmanın kadroları kilitlendi; canlı puan tablosu açılıyor.</p>}
    {selected&&<p className={s.help}>Değiştirmek için başka bir futbolcuya dokun. Mevki dağılımı kaydetme sırasında kontrol edilir.</p>}
    <div className={s.columns}>
     <div className={s.side}><div className={s.sideHead}><h3>İlk 11</h3><span>{starters.length} oyuncu</span></div>
@@ -164,7 +170,7 @@ export default function DraftLineupSetup({roomId,picks=[],pool=[],myTeamId,onLea
       {starters.map(id=><option key={id} value={id}>{playerById.get(id)?.name||'Oyuncu'}</option>)}
      </select>
     </label>
-    <div className={s.cards}><h3>Menajer kartı</h3><p>Özel kartlar aynı draft ligi içerisinde yalnızca bir hafta kullanılabilir.</p>
+    <div className={s.cards}><h3>Menajer kartı</h3><p>Seçeceğin kart yalnızca bu draftın MH{status.gameweek} puanına uygulanır.</p>
      <div className={s.cardGrid}>{offered.map(item=><button type="button" disabled={locked} aria-pressed={card===item.id} key={item.id} className={s.card+(card===item.id?' '+s.cardActive:'')} onClick={()=>{setCard(item.id);setDirty(true)}}>
       <strong>{item.label}</strong><small>{item.id==='none'?'Standart puanlama':item.id==='bench_boost'?'Dört yedeğin puanı da sayılır':'Kaptan puanı '+item.captainMultiplier+' kat'}</small>
      </button>)}</div>
@@ -173,8 +179,8 @@ export default function DraftLineupSetup({roomId,picks=[],pool=[],myTeamId,onLea
    </div>
    {!valid&&roster.length===15&&<p className={s.error}>Diziliş veya yedek kaleci geçersiz. Bir kaleci yedekte olmalı; ilk 11 oyun kurallarındaki dizilişlerden birini karşılamalı.</p>}
    {roster.length!==15&&<p className={s.info}>Draft oyuncuları yükleniyor ({roster.length}/15)…</p>}
-   <div className={s.footer}><span>{locked?'Bu haftanın kadro son tarihi geçti.':saved?'Kadron onaylandı. Değiştirirsen yeniden kaydedebilirsin.':dirty?'Kaydedilmemiş değişiklikler var.':'Kadronu kontrol edip hazır olabilirsin.'}</span>
-    <button type="button" disabled={!valid||locked||loading} className={s.primary} onClick={()=>void save()}>{loading?'Kaydediliyor…':saved?'Kadroyu Yeniden Kaydet':'Kadroyu Kaydet ve Hazırım'}</button>
+   <div className={s.footer}><span>{locked?'Bu haftanın kadro son tarihi geçti.':saved?'Hazırsın! Diğer menajerlerin onayı bekleniyor.':dirty?'Kaydedilmemiş değişiklikler var.':'Kadronu kontrol edip hazır olabilirsin.'}</span>
+    <button type="button" disabled={!valid||locked||loading||saved} className={s.primary} onClick={()=>void save()}>{loading?'Kaydediliyor…':saved?'Hazırım ✓':'Kadroyu Kaydet ve Hazırım'}</button>
    </div>
   </>}
  </section>

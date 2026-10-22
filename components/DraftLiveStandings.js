@@ -59,6 +59,7 @@ export default function DraftLiveStandings({roomId}){
    Number(a.draft_order)-Number(b.draft_order))
   return items
  },[data,view])
+ const onlyThisWeek=data?.single_week_only===true
  const selected=data?.selected_gameweek||week
  const weekProgress=data?.weeks?.find(w=>Number(w.gameweek)===Number(selected))
  const verifiedWeek=teams.reduce((v,t)=>v+Number(t.verified_players||0),0)
@@ -82,7 +83,7 @@ export default function DraftLiveStandings({roomId}){
   </div>
   {error&&<p className={s.error} role="alert">Puan durumu yüklenemedi: {error}</p>}
   {!data?<div className={s.loading}>Doğrulanan oyuncu puanları yükleniyor…</div>:<>
-    <div className={s.toolbar}>
+    {!onlyThisWeek?<div className={s.toolbar}>
      <label>Maç haftası
       <select value={Number(selected)} disabled={loading} onChange={e=>void changeWeek(Number(e.target.value))}>
        {(data.weeks||[]).map(w=><option key={w.gameweek} value={w.gameweek}>MH{w.gameweek}</option>)}
@@ -92,19 +93,19 @@ export default function DraftLiveStandings({roomId}){
       <button type="button" aria-pressed={view==='total'} className={view==='total'?s.selected:''} onClick={()=>setView('total')}>Genel sıralama</button>
       <button type="button" aria-pressed={view==='week'} className={view==='week'?s.selected:''} onClick={()=>setView('week')}>Bu hafta</button>
      </div>
-    </div>
+    </div>:<p className={s.singleWeekLabel}>Bu draft yalnızca MH{selected} için geçerlidir · Haftalık puan sıralaması</p>}
     <div className={s.meta}>
      <span><strong>MH{selected}</strong> · {weekProgress?.verified_matches||0}/{weekProgress?.matches||0} maçın fantasy puanları kapandı</span>
      <span>{verifiedWeek}/{teams.reduce((a,b)=>a+Number(b.player_count||0),0)} oyuncu puanı doğrulandı</span>
     </div>
     {(weekProgress?.matches||0)>0&&<div className={s.progress} title="Puanı kapanan maçlar"><span style={{width:100*Number(weekProgress.verified_matches||0)/Number(weekProgress.matches)+'%'}}/></div>}
     {!verifiedWeek&&<p className={s.pending}>MH{selected} için henüz doğrulanmış oyuncu puanı yok. Maçlar bitip kontrol tamamlanınca tablo otomatik güncellenecek.</p>}
-    <div className={s.leaderboard}>
-     <div className={s.tableHead}><span>Takım</span><span>MH{selected}</span><span>Toplam</span><span>Kontrol</span></div>
+    <div className={s.leaderboard+(onlyThisWeek?' '+s.singleWeek:'')}>
+     <div className={s.tableHead}><span>Takım</span><span>{onlyThisWeek?'Puan':'MH'+selected}</span>{!onlyThisWeek&&<span>Toplam</span>}<span>Kontrol</span></div>
      {teams.map((t,i)=><button type="button" key={t.team_id} className={s.row+(t.team_id===selectedTeam?.team_id?' '+s.rowActive:'')} onClick={()=>setOpenTeam(t.team_id)}>
       <span className={s.team}><b className={s.place}>{i+1}.</b><span><strong>{t.team_name}{t.mine?' · SEN':''}</strong><small>{t.player_count}/15 oyuncu</small></span></span>
       <strong className={s.weekNum}>{n(t.week_points)}{!Number(t.verified_players)&&<small>bekliyor</small>}</strong>
-      <strong className={s.totalNum}>{n(t.total_points)}</strong>
+      {!onlyThisWeek&&<strong className={s.totalNum}>{n(t.total_points)}</strong>}
       <span className={s.verifiedCount}>{t.verified_players}/{t.player_count}</span>
      </button>)}
     </div>
@@ -121,7 +122,7 @@ export default function DraftLiveStandings({roomId}){
       </div>)}
      </div>
     </div>}
-    <p className={s.note}>Puanlar {data.scoring_rule==='all_15_players'?'eski odalarda 15 kişilik kadronun tamamından':'ilk 11, kaptan ve haftalık kart kurallarından'} sayılır. Draftın başladığı MH{data.draft_gameweek} haftasından itibaren birikir. Doğrulama bekleyen oyunculara geçici sıfır puan yazılmaz; maç sonrası resmi/teyit edilmiş kaynak kapanışı esas alınır.</p>
+    <p className={s.note}>Puanlar {data.scoring_rule==='all_15_players'?'eski odalarda 15 kişilik kadronun tamamından':'ilk 11, kaptan ve seçilen kart kurallarından'} sayılır. {onlyThisWeek?'Bu yarışma sadece MH'+data.draft_gameweek+' içindir; sonraki haftalara taşınmaz.':'Arşivlenen eski odalarda başlangıç haftasından itibaren birikir.'} Doğrulama bekleyen oyunculara geçici sıfır puan yazılmaz; maç sonrası teyit edilen sonuçlar esas alınır.</p>
     <small className={s.updated}>Son sorgu: {data.updated_at?new Date(data.updated_at).toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit',second:'2-digit'}):'—'}</small>
   </>}
  </section>

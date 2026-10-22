@@ -5,6 +5,7 @@ import s from './DraftRoom.module.css'
 import DraftLiveStandings from './DraftLiveStandings'
 import DraftArchives from './DraftArchives'
 import DraftLineupSetup from './DraftLineupSetup'
+import DraftLeagueLineups from './DraftLeagueLineups'
 
 const CAPS={GK:2,DEF:5,MID:5,FWD:3}
 const P={GK:'KL',DEF:'DEF',MID:'OS',FWD:'FOR'}
@@ -270,6 +271,8 @@ export default function DraftRoom({initialRoom='',initialInvite=''}) {
    .filter(p=>(p.name+' '+p.team).toLocaleLowerCase('tr-TR').includes(search.toLocaleLowerCase('tr-TR')))
    .sort(sortPlayers)
  const options=available.filter(fits)
+ const rosterPhase=room?.status==='finished'&&Boolean(room?.lineup_required)
+ const leagueReady=Boolean(rosterPhase&&(leagueActive||room?.league_active_at))
  const main=[...options].sort((a,b)=>{
   const rank=p=>Number(p.xfp)+Number(p.xi_probability||0)*.25+({FWD:.45,MID:.25,DEF:.08,GK:-.3}[p.position]||0)-(risk(p)==='Yüksek'?.4:0)
   return rank(b)-rank(a)
@@ -327,6 +330,10 @@ export default function DraftRoom({initialRoom='',initialInvite=''}) {
     {['lobby','drafting'].includes(room.status)&&<button className={s.secondary} onClick={()=>action(async()=>{await navigator.clipboard.writeText(window.location.origin+'/draft?join='+room.code);setMessage('Davet bağlantısı kopyalandı.')})}>↗ Daveti kopyala</button>}
     {room.is_host&&['lobby','drafting'].includes(room.status)&&<button className={s.archiveDanger} disabled={busy} onClick={()=>{if(!window.confirm('Yarım kalan draft tüm katılımcılar için kapatılacak. Devam edilsin mi?'))return;void action(async()=>{await call('scout_draft_cancel_room',{p_room_id:id});setId('');setRoom(null);window.history.pushState({},'','/draft');setMessage('Oda iptal edildi.')})}}>Odayı iptal et</button>}</div></div>
    {['expired','cancelled'].includes(room.status)&&<div className={s.closedNotice} role="status"><strong>{room.status==='expired'?'Odanın süresi doldu':'Oda iptal edildi'}</strong><p>Draft tamamlanmadan kapandığı için bu odada yeni işlem yapılamaz. Geçmiş seçimler silinmedi.</p><button className={s.secondary} onClick={()=>{setId('');setRoom(null);window.history.pushState({},'','/draft')}}>Odalarıma dön</button></div>}
+   {rosterPhase&&(!leagueReady
+     ?<DraftLineupSetup roomId={id} picks={picked} pool={pool} myTeamId={own?.id} onLeagueActive={onLeagueActive}/>
+     :<><DraftLeagueLineups roomId={id} picks={picked}/><DraftLiveStandings roomId={id}/></>)}
+   {!rosterPhase&&<>
    {room.status==='lobby'&&<div className={s.panel}>
     <div className={s.heading}><h2>Kura ve seçim sistemi</h2><span>{teams.filter(t=>t.occupied).length}/{room.team_count} hazır</span></div>
     <div className={s.renameBox}><label>Takım adını değiştir<input maxLength={40} placeholder={own?.team_name||'Takımın'} value={renameName} onChange={e=>setRenameName(e.target.value)}/></label><button className={s.secondary} disabled={busy||!renameName.trim()} onClick={()=>action(async()=>{await call('scout_draft_rename',{p_room_id:id,p_team_name:renameName.trim()});setRenameName('');await refresh()})}>Kaydet</button></div>
@@ -346,8 +353,7 @@ export default function DraftRoom({initialRoom='',initialInvite=''}) {
    {['drafting','finished'].includes(room.status)&&<div className={s.turn}><div><small>{room.status==='finished'?String(totalPicks)+'/'+String(totalPicks)+' TAMAMLANDI':isAuction?'AÇIK ARTIRMA · '+picked.length+'/'+totalPicks+' oyuncu':'TUR '+round+' · SEÇİM '+room.next_pick+'/'+totalPicks}</small><h2>{room.status==='finished'?'Draft tamamlandı!':inCompletion?(nominator?.team_name||'Sıradaki takım')+' kadrosunu tamamlıyor':isAuction?lot?'Teklif zamanı':(nominator?.team_name||'Sıradaki takım')+' oyuncu gösterecek':current?.team_name+' seçiyor'}</h2><p>{inCompletion?'1 kredi sabit fiyatla sıradaki takım eksik oyuncularını seçiyor.':isAuction?'Oyuncular sırayla aday gösterilir; geçerli teklifler süreye +'+(room.auction_extension_seconds??5)+' sn ekler.':canPick?'Sıra sende. Havuzdan oyuncu seç.':room.opponent_mode==='computer'?'Bilgisayar rakipleri otomatik seçim yapar.':'Seçimler tüm ekranlara otomatik yansır.'}</p></div>
     {!isAuction&&room.status==='drafting'&&classicSecondsLeft!==null&&<div className={s.countdown+(classicSecondsLeft<=10?' '+s.countdownUrgent:'')}><strong>{classicSecondsLeft} sn</strong><small>Seçim süresi · bitince otomatik xFP</small></div>}
     {room.is_host&&!isAuction&&<button className={s.secondary} disabled={busy||room.next_pick<=1} onClick={()=>action(async()=>{await call('scout_draft_undo',{p_room_id:id});await refresh()})}>↶ Son seçimi geri al</button>}</div>}
-   {room.status==='finished'&&room.lineup_required&&<DraftLineupSetup roomId={id} picks={picked} pool={pool} myTeamId={own?.id} onLeagueActive={onLeagueActive}/>}
-   {room.status==='finished'&&(!room.lineup_required||leagueActive||Boolean(room.league_active_at))&&<DraftLiveStandings roomId={id}/>}
+   {room.status==='finished'&&!room.lineup_required&&<DraftLiveStandings roomId={id}/>}
    {room.status==='finished'&&<div className={s.panel}>
      <small className={s.eyebrow}>KAYITLI DRAFT SONUÇLARI</small><h2>Draft sonuçları arşivlendi</h2>
      <p>Takımlar, oyuncular, seçim sırası ve açık artırma fiyatları bu odada saklanır. Odalarım bölümünden tekrar açabilirsin.</p>
@@ -409,6 +415,7 @@ export default function DraftRoom({initialRoom='',initialInvite=''}) {
    </div></div>}
    <div className={s.panel}><div className={s.heading}><h2>Seçim geçmişi</h2><span>{picked.length} seçim</span></div><div className={s.history}>{[...picked].reverse().map(p=><div key={p.pick_number}><strong>#{p.pick_number}</strong><span>{p.player_name}</span><small>{teams.find(t=>t.id===p.team_id)?.team_name} · {P[p.position]}{p.auto_selected?' · Otomatik':''}</small><b>{F(p.xfp)}</b></div>)}</div></div>
    <p className={s.note}>Oda oluşturulduğu anda model koşusu sabitlenir. Seçimler üç saniyede bir senkronize edilir. Mevcut site modeli ve kadroların değişmez.</p>
+   </>}
   </>}
  </section>
 }
