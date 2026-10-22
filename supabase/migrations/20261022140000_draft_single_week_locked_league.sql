@@ -78,7 +78,7 @@ begin
  end if;
  select deadline_at into deadline from public.scout_gameweeks where gameweek=chosen_week;
  select coalesce(jsonb_agg(jsonb_build_object(
- 'team_id',t.id,'name',t.team_name,'mine',t.id=mine.id,
+ 'team_id',t.id,'name',t.team_name,'mine',t.id=mine.id,'is_bot',t.is_bot,
  'ready',coalesce(l.ready,false),
  'formation',case when rm.league_active_at is not null then l.formation else null end,
  'starters',case when rm.league_active_at is not null then l.starters else null end,
