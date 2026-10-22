@@ -1,0 +1,47 @@
+name: Cloudflare DO usage read-only audit
+on:
+  push:
+    branches: [main]
+    paths: [".github/workflows/cloudflare-do-readonly-audit-20261022.yml"]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  durable-objects-by-namespace:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - name: Read account's October 22 Durable Objects usage by namespace
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$CLOUDFLARE_API_TOKEN"
+          test -n "$CLOUDFLARE_ACCOUNT_ID"
+          query='query($accountTag: string!) { viewer { accounts(filter:{accountTag:$accountTag}) { durableObjectsInvocationsAdaptiveGroups(limit:2000, filter:{date_geq:"2026-10-22", date_leq:"2026-10-22"}) { dimensions { name scriptName namespaceId } sum { requests } } } } }'
+          payload="$(jq -n --arg q "$query" --arg acct "$CLOUDFLARE_ACCOUNT_ID" '{query:$q,variables:{accountTag:$acct}}')"
+          response="$(curl --fail-with-body --silent --show-error --max-time 35 \
+            -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+            -H 'Content-Type: application/json' \
+            --data "$payload" https://api.cloudflare.com/client/v4/graphql)"
+          # Print only errors and aggregated script/class, never account ID,
+          # auth headers, namespace identifiers, instance IDs or raw API payload.
+          if [[ "$(echo "$response" | jq -r '.errors|length // 0')" != "0" ]]; then
+            echo "$response" | jq -r '.errors[]?.message' | head -c 1600
+            exit 1
+          fi
+          echo "$response" | jq -e '.data.viewer.accounts | length > 0' >/dev/null
+          echo '## DO requests by script / class, UTC date 2026-10-22' >> "$GITHUB_STEP_SUMMARY"
+          echo "$response" | jq -r '
+            [.data.viewer.accounts[].durableObjectsInvocationsAdaptiveGroups[] |
+            {name:(.dimensions.name // "unknown"), script:(.dimensions.scriptName // "unknown"),requests:(.sum.requests // 0)}] |
+            group_by(.name,.script) |
+            map({name:.[0].name,script:.[0].script,requests:(map(.requests)|add)}) |
+            sort_by(-.requests) |
+            .[] | [.script,.name,(.requests|tostring)] | @tsv' |
+            while IFS=$'\t' read -r script classname requests; do
+              printf '%s / %s: %s requests\n' "$script" "$classname" "$requests"
+              printf -- '- %s / %s: %s requests\n' "$script" "$classname" "$requests" >> "$GITHUB_STEP_SUMMARY"
+            done
