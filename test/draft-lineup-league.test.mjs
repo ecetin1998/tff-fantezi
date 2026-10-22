@@ -14,8 +14,8 @@ test('new lineup storage preserves older draft rooms and gates a live league beh
  assert.match(schema,/rm\.status<>'finished'/)
  assert.match(schema,/count\(\*\)=count\(\*\) filter\(where l\.ready is true\)/)
  assert.match(schema,/update public\.scout_draft_rooms set league_active_at=clock_timestamp\(\)/)
- assert.match(room,/room\.lineup_required&&<DraftLineupSetup/)
- assert.match(room,/leagueActive\|\|Boolean\(room\.league_active_at\)/)
+ assert.match(room,/rosterPhase&&\(!leagueReady/)
+ assert.match(room,/leagueActive\|\|room\?\.league_active_at/)
 })
 test('lineup saving enforces authenticated ownership, original drafted roster, GK bench and captain',()=>{
  assert.match(schema,/if auth\.uid\(\) is null then raise exception 'AUTH_REQUIRED'/)
