@@ -1,0 +1,33 @@
+name: Verify signed cache invalidation (one-time)
+on:
+  push:
+    branches: [main]
+    paths: [".github/workflows/verify-oidc-cache-and-availability-once-20261023.yml"]
+permissions:
+  contents: read
+  actions: write
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+    steps:
+      - name: Ensure unsigned requests remain unauthorized
+        shell: bash
+        run: |
+          set -euo pipefail
+          status="$(curl --silent --show-error --max-time 30 \
+            -X POST -H 'Cache-Control: no-store' \
+            -o "$RUNNER_TEMP/unauthorized.json" \
+            -w '%{http_code}' https://fanteziligrehberi.com/api/revalidate)"
+          test "$status" = 401
+          jq -e '.ok == false' "$RUNNER_TEMP/unauthorized.json"
+          echo 'PASS: unsigned cache invalidation is blocked (HTTP 401).' >> "$GITHUB_STEP_SUMMARY"
+      - name: Dispatch existing availability workflow for second OIDC integration test
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh workflow run availability-refresh.yml --repo "$GH_REPO" --ref main
+          echo 'Availability workflow dispatched; signed cache refresh must succeed.' >> "$GITHUB_STEP_SUMMARY"
