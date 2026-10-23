@@ -131,3 +131,11 @@ test('unauthorized HTTP POST never reaches tag or page invalidation',async()=>{
  assert.deepEqual(calls[0],['tag','scout-run','max'])
  assert.equal(calls.filter(entry=>entry[0]==='path').length,13)
 })
+
+test('manual cache-only dispatch never refreshes availability or rebuilds the 50K model',()=>{
+ const workflow=readFileSync(new URL('../.github/workflows/availability-refresh.yml',import.meta.url),'utf8')
+ assert.match(workflow,/workflow_dispatch:\s*\n\s*inputs:\s*\n\s*cache_only:/)
+ assert.match(workflow,/Refresh injuries and suspensions\s*\n\s*if: inputs\.cache_only != true/)
+ assert.match(workflow,/Rebuild model when availability changed\s*\n\s*if: steps\.refresh\.outputs\.changed != '0' && inputs\.cache_only != true/)
+ assert.match(workflow,/Revalidate application cache with signed GitHub OIDC\s*\n\s*if: success\(\)/)
+})
