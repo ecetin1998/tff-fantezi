@@ -1,0 +1,28 @@
+name: One-time signed cache-only production verification
+# One-time authorized dispatcher for the existing, allowlisted availability workflow.
+# Does not deploy, refresh model inputs, run simulations, or expand OIDC trust.
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/oidc-cache-only-smoke-once-20261023.yml"
+
+permissions:
+  contents: read
+  actions: write
+
+jobs:
+  dispatch-safe-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Launch existing OIDC cache-only verification
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF" = refs/heads/main
+          gh workflow run availability-refresh.yml --repo "$GH_REPO" --ref main -f cache_only=true
+          echo 'Dispatched cache-only OIDC verification; no model refresh was requested.' >> "$GITHUB_STEP_SUMMARY"
