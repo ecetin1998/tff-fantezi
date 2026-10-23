@@ -63,5 +63,5 @@ test('cross-team identities never match by one common first name or surname',()=
  assert.equal(crossTeamIdentitySupported('Muhammed Hasan Yıldırım','Muhammed Şengezer'),false);
  assert.equal(crossTeamIdentitySupported('Jayden Oosterwolde','Jayden Quinn Oosterwolde'),true);
  assert.equal(crossTeamIdentitySupported('Fousseni Diabaté','Fousseni Diabaté'),true);
- assert.equal(crossTeamIdentitySupported('Youssouf Fofana',''],false);
+ assert.equal(crossTeamIdentitySupported('Youssouf Fofana',''),false);
 });
