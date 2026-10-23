@@ -1,6 +1,7 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import {generateKeyPairSync,sign} from 'node:crypto'
+import {generateKeyPairSync,sign,timingSafeEqual} from 'node:crypto'
+import {runInNewContext} from 'node:vm'
 import {readFileSync} from 'node:fs'
 import {verifyRevalidateGithubOidc} from '../lib/revalidateGithubOidc.js'
 
@@ -28,8 +29,8 @@ const check=(t,opts={})=>verifyRevalidateGithubOidc(t,{fetchJwks,nowSec:now,...o
 test('exact signed schedule workflow token is accepted',async()=>{
  assert.equal(await check(jwt(validClaims)),true)
 })
-test('signed availability workflow is accepted for push, schedule, and dispatch',async()=>{
- for(const event_name of ['push','schedule','workflow_dispatch']){
+test('signed availability workflow is accepted for schedule and dispatch only',async()=>{
+ for(const event_name of ['schedule','workflow_dispatch']){
   const claims={...validClaims,event_name,
    workflow_ref:'ecetin1998/tff-fantezi/.github/workflows/availability-refresh.yml@refs/heads/main'}
   assert.equal(await check(jwt(claims)),true)
@@ -78,4 +79,55 @@ test('route and both GitHub workflows use signed token; legacy manual secret sta
   assert.match(wf,/paths_revalidated >= 10/)
   assert.doesNotMatch(wf,/SCOUT_REVALIDATE_SECRET/)
  }
+})
+
+test('workflow-specific events are enforced even for valid signed JWTs',async()=>{
+ const availability='ecetin1998/tff-fantezi/.github/workflows/availability-refresh.yml@refs/heads/main'
+ assert.equal(await check(jwt({...validClaims,event_name:'push'})),true)
+ assert.equal(await check(jwt({...validClaims,workflow_ref:availability,event_name:'push'})),false)
+ assert.equal(await check(jwt({...validClaims,workflow_ref:availability,event_name:'workflow_dispatch'})),true)
+})
+test('expiry is strict and timestamps cannot be coerced or stretched',async()=>{
+ for(const patch of [
+  {exp:now},{exp:now-1},{nbf:now+1},
+  {iat:String(now-5)},{exp:String(now+240)},
+  {exp:now+601},{iat:now-590,exp:now+20},
+  {exp:now-5,iat:now-5},{nbf:now+240}
+ ]){
+  assert.equal(await check(jwt({...validClaims,...patch})),false,JSON.stringify(patch))
+ }
+})
+test('wrong RSA signing key with a recognized key ID fails closed',async()=>{
+ const impostor=generateKeyPairSync('rsa',{modulusLength:2048}).privateKey
+ const token=jwt(validClaims),parts=token.split('.')
+ const forged=parts[0]+'.'+parts[1]+'.'+sign('RSA-SHA256',Buffer.from(parts[0]+'.'+parts[1]),impostor).toString('base64url')
+ assert.equal(await check(forged),false)
+})
+test('unauthorized HTTP POST never reaches tag or page invalidation',async()=>{
+ const route=readFileSync(new URL('../app/api/revalidate/route.js',import.meta.url),'utf8')
+ const compiled=route.replace(/^import .*\n/gm,'')
+   .replace('export const dynamic=','const dynamic=')
+   .replace('export async function POST','async function POST')+'\nPOST'
+ const calls=[]
+ const POST=runInNewContext(compiled,{
+  process:{env:{}},Buffer,Response,timingSafeEqual,
+  verifyRevalidateGithubOidc:async token=>token==='verified-jwt',
+  revalidateTag:(...args)=>calls.push(['tag',...args]),
+  revalidatePath:(...args)=>calls.push(['path',...args])
+ })
+ for(const headers of [
+  {},{'authorization':'Bearer invalid'},
+  {'x-revalidate-secret':'not-configured'},
+  {'authorization':'Basic invalid'}
+ ]){
+  const response=await POST({headers:new Headers(headers)})
+  assert.equal(response.status,401)
+  assert.deepEqual(await response.json(),{ok:false})
+ }
+ assert.equal(calls.length,0)
+ const response=await POST({headers:new Headers({'authorization':'Bearer verified-jwt'})})
+ assert.equal(response.status,200)
+ assert.deepEqual(await response.json(),{ok:true,tag:'scout-run',paths_revalidated:13})
+ assert.deepEqual(calls[0],['tag','scout-run','max'])
+ assert.equal(calls.filter(entry=>entry[0]==='path').length,13)
 })
