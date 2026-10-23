@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {assessAvailabilityCoverage} from '../supabase/functions/refresh-availability/coverage.mjs';
+import {assessAvailabilityCoverage,crossTeamIdentitySupported} from '../supabase/functions/refresh-availability/coverage.mjs';
 
 const mismatch=(source_player,scoreInactive,scoreActive=.3,other=.2)=>({
   source_team:'Kasımpaşa',source_player,team_id:3,reason_unmatched:'player',
@@ -55,4 +55,13 @@ test('availability source refuses to turn ambiguous previously injured active pl
  assert.match(source,/uncertainTeams/);
  assert.match(source,/scout_availability/);
  assert.match(source,/source_ignored_inactive/);
+});
+
+test('cross-team identities never match by one common first name or surname',()=>{
+ assert.equal(crossTeamIdentitySupported('Ibrahim Sabra','İbrahim Kaya'),false);
+ assert.equal(crossTeamIdentitySupported('Fousseni Diabaté','Ousmane Diabate'),false);
+ assert.equal(crossTeamIdentitySupported('Muhammed Hasan Yıldırım','Muhammed Şengezer'),false);
+ assert.equal(crossTeamIdentitySupported('Jayden Oosterwolde','Jayden Quinn Oosterwolde'),true);
+ assert.equal(crossTeamIdentitySupported('Fousseni Diabaté','Fousseni Diabaté'),true);
+ assert.equal(crossTeamIdentitySupported('Youssouf Fofana',''],false);
 });
