@@ -13,7 +13,7 @@ Bu dosya audit round 2 sonundaki **canlı** durumu gösterir.
 - [x] Subscription browser write yetkileri kaldırıldı.
 - [x] Squad ve squad-member tablolarında owner-only RLS doğrulandı.
 - [x] Pro-interest yalnız own SELECT + INSERT; UPDATE/DELETE kaldırıldı.
-- [ ] Availability provenance/internal kolonlarını kapatan post-deploy migration hazır; mevcut canlı `main` uyumluluk köprüsü nedeniyle production deploy tamamlanana kadar bilinçli olarak bekliyor.
+- [x] Availability provenance/internal kolonlarını kapatan post-deploy migration production'da uygulandı.
 - [x] Promote/replay write RPC'leri browser rollerinden kapatıldı.
 - [x] `scout_promote_run` QA + data-integrity + backtest release gate zorunluluğu ile harden edildi.
 - [x] Release gate production'a yazıldı ve MH7 idempotent promote doğrulaması PASS.
@@ -25,7 +25,7 @@ Bu dosya audit round 2 sonundaki **canlı** durumu gösterir.
 - [x] Public 404 davranışı oyuncu/takım detaylarında düzeltildi.
 - [x] PR CI: lint + test + build.
 - [x] `package-lock.json`, Dependabot, env örneği ve .gitignore eklendi.
-- [x] Server/API hataları Vercel Function Logs ile uyumlu yapılandırılmış JSON olarak loglanıyor.
+- [x] Server/API hataları Cloudflare Workers observability ile uyumlu yapılandırılmış JSON olarak loglanıyor.
 - [x] Model simulator testleri: 990 dakika, 11 starter, own-goal/asist, kart ve quantile edge-case.
 - [x] Optimizer testleri: kaptan metriği, formasyon, kadro kuralları ve yedek değeri.
 - [x] MH1–MH6 50K walk-forward replay ve MH7 paired-delta kanıtı kaydedildi.
@@ -108,24 +108,17 @@ Bağlı GitHub App repository-admin mutation iznine sahip değil; branch-protect
 
 Eski QA/audit/model-gate dalları main ile 0 ahead / 0 diff durumunda; connector branch-delete aksiyonu sunmadığı için fiziksel silme yapılmadı.
 
-## Canlı `main` uyumluluk köprüsü
+## Canlı `main` uyumluluk köprüsü (kapandı)
 
-Audit migration'ları production DB'ye Vercel deploy'dan önce uygulandığı için eski canlı `main` build'inin `SELECT *` sorguları `scout_model_runs`, `scout_availability` ve `scout_learning_log` üzerinde izin hatasına düşüyordu. Canlı siteyi yeniden bağlamak için yalnız bu eski sorguların ihtiyaç duyduğu eksik SELECT kolonları geçici olarak geri açıldı (`20260926223700_live_main_read_compat.sql`).
+Eski `main` build'inin `SELECT *` sorguları için açılan geçici uyumluluk köprüsü (`20260926223700_live_main_read_compat.sql`) kapatıldı. Post-deploy daraltma migration'ları production'da uygulandı (2026-09-27): `post_deploy_restrict_sensitive_public_columns`, `post_deploy_squad_write_lockdown`, `post_deploy_public_data_quality_lockdown`, `post_deploy_backend_lockdown`.
 
-Audit branch production'a deploy olduktan sonra **hemen** sırasıyla `20260927101100_post_deploy_restrict_sensitive_public_columns.sql` ve `20260927101200_post_deploy_squad_write_lockdown.sql` uygulanmalı. Yeni branch explicit safe-column sorguları ve RPC-only squad write yolunu kullanıyor.
+## Hosting
 
-## Vercel — kalan deploy blocker'ı
+Production Vercel'den Cloudflare Workers + OpenNext'e taşındı (`fanteziligrehberi.com`, worker `tff-fantezi`). Deploy ve smoke adımları `docs/deploy-runbook.md` içindedir; Vercel'e bağlı eski doğrulama listesi artık geçerli değildir.
 
-PR Preview deployment şu anda Vercel tarafından **build-rate-limit** ile engelleniyor.
+## Supabase advisor — bilinçli kabul edilenler
 
-Bu nedenle sadece Vercel'e bağlı son doğrulamalar bekliyor:
-
-- Preview deployment oluşması
-- public route smoke testi
-- 404 smoke
-- API response size
-- `x-vercel-cache` / ikinci istek cache davranışı
-- keyed summary payload
-- Vercel env/firewall/observability panel kontrolü
-
-Pre-deploy DB hazırlığı production'da tamamlandı ve rollback'li authenticated test PASS: ilk/ikinci squad save idempotent, tek aktif kadro, 15 member, 3/kulüp limiti ve Pro waitlist first/repeat insert. Learning-summary trigger da rollback testinde PASS. Deploy sonrası yalnız iki daraltma migrationı uygulanacaktır.
+- `security_definer_view` (5 `v_*_public` view): base tablolarda anon'a tablo SELECT'i yok; view'lar yalnız güvenli kolonları dışarı açan kontrollü kapıdır. `security_invoker` yapmak base tabloya anon kolon grant'i gerektirir ve aynı yüzeyi açar.
+- `rls_enabled_no_policy` (draft ve internal tablolar): erişim yalnız `auth.uid()` kontrollü `SECURITY DEFINER` RPC'lerden geçer; policy olmaması browser'dan direkt erişimi kapatır.
+- `authenticated_security_definer_function_executable` (draft/pro RPC'ler): tasarım gereği; hepsi gövdesinde `auth.uid()` kullanır (2026-10-23 kontrolü). `scout_public_model_health` bilinçli olarak anon'a açık public sağlık özetidir.
+- `auth_leaked_password_protection`: Free planda native toggle yok; uygulama-level HIBP kontrolü ile telafi ediliyor.
