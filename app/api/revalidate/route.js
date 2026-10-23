@@ -1,5 +1,6 @@
 import {revalidateTag,revalidatePath} from 'next/cache'
 import {timingSafeEqual} from 'node:crypto'
+import {verifyRevalidateGithubOidc} from '@/lib/revalidateGithubOidc'
 
 export const dynamic='force-dynamic'
 
@@ -12,7 +13,13 @@ function equalSecret(expected,supplied){
 export async function POST(request){
   const expected=String(process.env.SCOUT_REVALIDATE_SECRET||'')
   const supplied=String(request.headers.get('x-revalidate-secret')||'')
-  if(!equalSecret(expected,supplied))return Response.json({ok:false},{status:401})
+  const legacyAuthenticated=equalSecret(expected,supplied)
+  const auth=request.headers.get('authorization')||''
+  const signedToken=auth.startsWith('Bearer ')?auth.slice(7):''
+  const oidcAuthenticated=!legacyAuthenticated&&signedToken
+    ?await verifyRevalidateGithubOidc(signedToken):false
+  if(!legacyAuthenticated&&!oidcAuthenticated)
+    return Response.json({ok:false},{status:401})
   revalidateTag('scout-run','max')
   // Tag invalidation alone does not clear all Cloudflare/OpenNext R2 HTML.
   // A new live MH must invalidate rendered route snapshots too.
