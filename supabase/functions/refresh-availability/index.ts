@@ -1,5 +1,5 @@
 import {createClient} from "https://esm.sh/@supabase/supabase-js@2"
-import {assessAvailabilityCoverage} from "./coverage.mjs"
+import {assessAvailabilityCoverage,crossTeamIdentitySupported} from "./coverage.mjs"
 
 const AUDIENCE="tff-fantezi-scout"
 const ISSUER="https://token.actions.githubusercontent.com"
@@ -240,7 +240,8 @@ Deno.serve(async(req:Request)=>{
           .sort((a:any,b:any)=>b.score-a.score)[0]
         const elsewhereBest=(playersQ.data||[])
           .filter((p:any)=>Number(p.team_id)!==teamId)
-          .map((p:any)=>({p,score:scorePlayer(p)}))
+          .map((p:any)=>({p,score:crossTeamIdentitySupported(row.source_player,p.full_name)
+            ?nameScore(row.source_player,p.full_name):0}))
           .sort((a:any,b:any)=>b.score-a.score)[0]
         unmatched.push({...row,team_id:teamId,reason_unmatched:"player",
           best:best?{name:best.p.full_name,score:Number(best.score.toFixed(3))}:null,
