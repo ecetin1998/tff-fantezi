@@ -1,4 +1,5 @@
 import {createClient} from "https://esm.sh/@supabase/supabase-js@2"
+import {assessAvailabilityCoverage} from "./coverage.mjs"
 
 const AUDIENCE="tff-fantezi-scout"
 const ISSUER="https://token.actions.githubusercontent.com"
@@ -188,13 +189,14 @@ Deno.serve(async(req:Request)=>{
     const runQ=await sb.from("scout_model_runs").select("id,gameweek").eq("is_current",true).eq("status","ready").limit(1).single()
     if(runQ.error)throw runQ.error
     const runId=runQ.data.id
-    const [playersQ,teamsQ,predictedFixturesQ,fixturesQ]=await Promise.all([
+    const [playersQ,teamsQ,predictedFixturesQ,fixturesQ,inactivePlayersQ]=await Promise.all([
       sb.from("scout_players").select("id,full_name,display_name,short_label,team_id").eq("active",true),
       sb.from("scout_teams").select("id,name"),
       sb.from("scout_match_predictions").select("match_id,home_team_id,away_team_id,kickoff_at").eq("run_id",runId).order("kickoff_at",{ascending:true}),
       sb.from("fixtures").select("id,home_team_id,away_team_id,match_date").eq("gameweek",Number(runQ.data.gameweek)).order("match_date",{ascending:true}),
+      sb.from("scout_players").select("id,full_name,display_name,short_label,team_id").eq("active",false),
     ])
-    for(const q of [playersQ,teamsQ,predictedFixturesQ,fixturesQ])if(q.error)throw q.error
+    for(const q of [playersQ,teamsQ,predictedFixturesQ,fixturesQ,inactivePlayersQ])if(q.error)throw q.error
     const teams=new Map<number,string>((teamsQ.data||[]).map((t:any)=>[Number(t.id),String(t.name)]))
     const teamBySource=new Map<string,number>()
     for(const row of parsed){
@@ -225,12 +227,49 @@ Deno.serve(async(req:Request)=>{
       })).sort((a:any,b:any)=>b.score-a.score)
       const best=ranked[0],second=ranked[1]
       if(!best||best.score<.72||(second&&best.score<.9&&best.score-second.score<.04)){
-        unmatched.push({...row,reason_unmatched:"player",best:best?{name:best.p.full_name,score:Number(best.score.toFixed(3))}:null})
+        // The injury feed lists non-Fantasy and inactive squad members too.
+        // Compare against inactive players separately, not as candidates for
+        // a live projection (which would silently re-add obsolete players).
+        const scorePlayer=(p:any)=>Math.max(
+          nameScore(row.source_player,p.full_name),
+          nameScore(row.source_player,p.display_name||""),
+          nameScore(row.source_player,p.short_label||""))
+        const inactiveBest=(inactivePlayersQ.data||[])
+          .filter((p:any)=>Number(p.team_id)===teamId)
+          .map((p:any)=>({p,score:scorePlayer(p)}))
+          .sort((a:any,b:any)=>b.score-a.score)[0]
+        const elsewhereBest=(playersQ.data||[])
+          .filter((p:any)=>Number(p.team_id)!==teamId)
+          .map((p:any)=>({p,score:scorePlayer(p)}))
+          .sort((a:any,b:any)=>b.score-a.score)[0]
+        unmatched.push({...row,team_id:teamId,reason_unmatched:"player",
+          best:best?{name:best.p.full_name,score:Number(best.score.toFixed(3))}:null,
+          inactive_best:inactiveBest?{name:inactiveBest.p.full_name,score:Number(inactiveBest.score.toFixed(3))}:null,
+          active_elsewhere_best:elsewhereBest?{name:elsewhereBest.p.full_name,score:Number(elsewhereBest.score.toFixed(3))}:null})
         continue
       }
       matched.push({...row,player_id:Number(best.p.id),team_id:teamId,match_score:best.score})
     }
-    if(unmatched.length>6)return Response.json({error:"too many unmatched availability rows",matched:matched.length,unmatched},{status:409})
+    const coverage=assessAvailabilityCoverage({
+      parsedCount:parsed.length,matchedCount:matched.length,unmatched
+    })
+    if(!coverage.accepted)return Response.json({
+      error:"availability source matching needs roster review",
+      parsed:parsed.length,matched:matched.length,
+      critical:coverage.critical,ignored:coverage.ignored,
+      unmatched,
+    },{status:409})
+    // If an otherwise acceptable source still has a possibly misnamed active
+    // player, preserve previously flagged injuries in the affected team.
+    const uncertainTeams=new Set<number>(coverage.critical
+      .map((row:any)=>Number(row.team_id)).filter((id:number)=>Number.isSafeInteger(id)))
+    const activePlayerTeam=new Map<number,number>((playersQ.data||[])
+      .map((p:any)=>[Number(p.id),Number(p.team_id)]))
+    if(coverage.ignored.length)console.warn(JSON.stringify({
+      event:"availability_out_of_roster_ignored",
+      inactive:coverage.skippedInactive,unlisted:coverage.skippedUnlisted,
+      names:coverage.ignored.map((row:any)=>row.source_player)
+    }))
 
     const currentQ=await sb.from("scout_availability").select("*").eq("run_id",runId)
     if(currentQ.error)throw currentQ.error
@@ -264,7 +303,15 @@ Deno.serve(async(req:Request)=>{
 
     for(const old of current.values()){
       if(next.has(Number(old.player_id)))continue
-      next.set(Number(old.player_id),{
+      const oldId=Number(old.player_id)
+      if(uncertainTeams.has(activePlayerTeam.get(oldId)!) &&
+          old.availability_type!=="baseline"){
+        // Unknown source alias: leave pre-existing injury intact rather than
+        // assert recovery merely because an exact name did not match.
+        next.set(oldId,{...old})
+        continue
+      }
+      next.set(oldId,{
         ...old,
         availability_type:"baseline",
         availability_probability:1,
@@ -328,7 +375,9 @@ Deno.serve(async(req:Request)=>{
 
     return Response.json({
       ok:true,run_id:runId,source_updated_at:sourceUpdated,checked_at:now,
-      parsed:parsed.length,matched:matched.length,unmatched,changed,
+      parsed:parsed.length,matched:matched.length,
+      unmatched:coverage.critical,source_ignored_inactive:coverage.skippedInactive,
+      source_unlisted:coverage.skippedUnlisted,source_coverage:coverage.coverage,changed,
       injuries:rows.filter((r:any)=>r.availability_type==="injuries").length,
       suspensions:rows.filter((r:any)=>r.availability_type==="suspensions").length,
       baselines:rows.filter((r:any)=>r.availability_type==="baseline").length,
