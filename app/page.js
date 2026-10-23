@@ -6,6 +6,11 @@ import {playerLabel} from '@/lib/playerPresentation'
 
 // Do not cache a timestamp-dependent freshness badge in ISR/KV.
 export const dynamic='force-dynamic'
+export const metadata={
+  title:{absolute:'Fantezi Lig Rehberi — Süper Lig Fantezi Kadro Önerisi, Kaptan ve Oyuncu Analizi'},
+  description:'Süper Lig Fantezi Lig için her maç haftası güncellenen kadro önerisi, kaptan adayları, oyuncu xFP tahminleri, maç olasılıkları ve sakatlık-ceza listesi.',
+  alternates:{canonical:'/'},
+}
 
 export default async function Home(){
   const overview=await getHomeOverview()
@@ -54,7 +59,7 @@ export default async function Home(){
           <span className="eyebrow">SÜPER LİG FANTEZİ ANALİZ PLATFORMU</span>
           <span className="home-live-pill">MH{run?.gameweek||'—'} • {simulationLabel} simülasyon</span>
         </div>
-        <h1>Veriyi oku.<br/><span>Kararı sen ver.</span></h1>
+        <h1>Süper Lig Fantezi Lig Rehberi<br/><span>Veriyi oku, kararı sen ver.</span></h1>
         <p>Oyuncu rolü, dakika ihtimali, maç modeli ve puan dağılımını tek bir karar ekranında birleştiriyoruz. Tek bir “doğru kadro” yerine, nedenini görebildiğin daha güçlü seçimler yap.</p>
         <div className="home-intro-actions">
           <Link href="/players" className="cta">Oyuncuları incele</Link>
@@ -91,6 +96,30 @@ export default async function Home(){
     </section>
 
 
+
+    <section className="home-feature-section">
+      <div className="home-section-head">
+        <div><span className="eyebrow">MH{run?.gameweek||'—'} HIZLI BAKIŞ</span><h2>Bu hafta fantezi lig kadrosu için ne yapmalı?</h2></div>
+        <p>{best?<>MH{run?.gameweek} için modelin en yüksek beklenen puanlı oyuncusu {playerLabel(best)} ({best.team}). Kaptan adaylarını, önerilen kadroyu ve maç olasılıklarını aşağıdan incele.</>:'Kaptan adaylarını, önerilen kadroyu ve maç olasılıklarını aşağıdan incele.'}</p>
+      </div>
+      <div className="home-feature-grid">
+        <Link href="/squads" className="card home-feature-card">
+          <span className="home-feature-no">01</span>
+          <div><b>MH{run?.gameweek||'—'} kadro önerisi</b><p>Modelin dengeli Önerilen Kadro’su ve tavanı yüksek Agresif 11; ilk 11, yedek sırası ve kaptanıyla.</p></div>
+          <strong>Kadro önerileri <i>→</i></strong>
+        </Link>
+        <Link href="/players" className="card home-feature-card">
+          <span className="home-feature-no">02</span>
+          <div><b>MH{run?.gameweek||'—'} kaptan adayları</b><p>xFP, ilk 11 ihtimali ve beklenen dakikaya göre haftanın en güçlü kaptan seçeneklerini sırala.</p></div>
+          <strong>Oyuncu analizi <i>→</i></strong>
+        </Link>
+        <Link href="/availability" className="card home-feature-card">
+          <span className="home-feature-no">03</span>
+          <div><b>Sakatlık ve ceza listesi</b><p>Sakat, cezalı ve dönüş yapan oyuncuları transfer yapmadan önce kontrol et.</p></div>
+          <strong>Uygunluk durumu <i>→</i></strong>
+        </Link>
+      </div>
+    </section>
 
     <section className="card home-model-guide">
       <div className="home-guide-copy">

@@ -1,19 +1,51 @@
 import Link from 'next/link'
+import JsonLd from '@/components/JsonLd'
+import {BUDGET,SQUAD_LIMITS,MAX_PLAYERS_PER_CLUB,FORMATIONS,SCORING,TRANSFER_RULES} from '@/lib/rules'
+
+const siteUrl=process.env.NEXT_PUBLIC_SITE_URL||'https://fanteziligrehberi.com'
 
 export const metadata={
-  title:'Süper Lig Fantezi SSS ve Rehber',
-  description:'Fantezi Lig Rehberi nasıl kullanılır? xFP, xDakika, P25/P90, 6+ ihtimali, xG, xA, takım analizi, fantezi puanları ve kadro önerileri için güncel rehber.',
+  title:'Fantezi Lig Nasıl Oynanır? Puanlama, Kaptan ve Kadro Kuralları (SSS)',
+  description:'Süper Lig Fantezi Lig kuralları: 100m bütçe, 15 kişilik kadro, takım başına oyuncu sınırı, puanlama sistemi, kaptan, transfer ve menajer kartları. xFP, xDakika ve P90 terimleri de açıklamalı.',
   keywords:[
-    'Süper Lig fantezi','Süper Lig fantezi futbol','fantezi futbol Türkiye','xFP nedir',
-    'fantezi puanları','kadro önerisi','xDakika','ilk 11 ihtimali','xG xA','fantezi futbol rehberi'
+    'fantezi lig nasıl oynanır','fantezi lig puanlama','süper lig fantezi lig kuralları','fantezi lig kaptan',
+    'Süper Lig fantezi','fantezi futbol Türkiye','xFP nedir','kadro önerisi','fantezi lig transfer','fantezi futbol rehberi'
   ],
   alternates:{canonical:'/sss'},
   openGraph:{
-    title:'Süper Lig Fantezi SSS ve Rehber',
-    description:'Fantezi Lig Rehberi menüleri, fantezi futbol terimleri, xFP ve model metrikleri için güncel açıklamalı rehber.',
+    title:'Fantezi Lig Nasıl Oynanır? Puanlama ve Kurallar',
+    description:'Süper Lig Fantezi Lig kuralları, puanlama sistemi, kaptan ve transfer soruları ile xFP ve model terimleri için güncel rehber.',
     url:'/sss',
   },
 }
+
+const POS_LABEL={GK:'KL',DEF:'DEF',MID:'OS',FWD:'FOR'}
+const byPosition=table=>Object.entries(table).filter(([,v])=>v!==0).map(([pos,v])=>`${POS_LABEL[pos]} ${v>0?'+':''}${v}`).join(' • ')
+const squadLabel=Object.entries(SQUAD_LIMITS).map(([pos,n])=>`${n} ${POS_LABEL[pos]}`).join(', ')
+const signed=n=>(n>0?'+':'')+n
+
+const scoringRows=[
+  ['Maça çıkma',`${signed(SCORING.appearance)} puan; 60 dakikayı geçerse ${signed(SCORING.appearance_60)} puan daha.`],
+  ['Gol',`${byPosition(SCORING.goal)}. Gol puanı oyuncunun fantezi mevkisine göre değişir.`],
+  ['Asist',`${signed(SCORING.assist)} puan, tüm mevkilerde aynı.`],
+  ['Gol yememe',`${byPosition(SCORING.clean_sheet)}.`],
+  ['Yenilen gol',`Her 2 yenilen gol için ${byPosition(SCORING.conceded_per_2)}.`],
+  ['Kurtarış',`KL için her 3 kurtarışta ${signed(SCORING.saves_per_3)} puan.`],
+  ['Penaltı',`Penaltı kurtarma ${signed(SCORING.penalty_save)}, penaltı kaçırma ${SCORING.penalty_miss} puan.`],
+  ['Kartlar ve kendi kalesine gol',`Sarı kart ${SCORING.yellow}, kırmızı kart ${SCORING.red}, kendi kalesine gol ${SCORING.own_goal} puan.`],
+  ['Bonus',`Maçın en yüksek temel puanlı oyuncularına sırasıyla ${SCORING.bonus.map(signed).join(' / ')} bonus puan.`],
+]
+
+const ruleFaqs=[
+  ['Süper Lig Fantezi Lig nasıl oynanır?', `${BUDGET}m bütçeyle ${squadLabel} olmak üzere 15 kişilik bir kadro kurarsın. Her maç haftası bu kadrodan izin verilen bir dizilişle ilk 11’ini ve 4 sıralı yedeğini seçer, bir kaptan belirlersin. Oyuncuların gerçek maçlardaki dakika, gol, asist, gol yememe, kurtarış ve kart gibi olaylarından fantezi puanı toplanır; haftalık toplam puanın kadronun skorudur.`],
+  ['Bir takımdan en fazla kaç oyuncu alabilirim?', `Aynı Süper Lig takımından kadrona en fazla ${MAX_PLAYERS_PER_CLUB} oyuncu alabilirsin. Benim Kadrom ekranı bu sınırı aşan seçimleri kaydetmez.`],
+  ['Fantezi Lig’de hangi dizilişler kullanılabilir?', `İlk 11 her zaman 1 kaleciyle kurulur. İzin verilen dizilişler: ${FORMATIONS.join(', ')}.`],
+  ['Fantezi Lig puanlama sistemi nasıl çalışır?', scoringRows.map(([k,v])=>`${k}: ${v}`).join(' ')],
+  ['Kaptanın puanı nasıl hesaplanır?', 'Kaptanın o haftaki fantezi puanı 2 katı sayılır. Tripleks Kaptan kartıyla 3, Dört Dörtlük Kaptan kartıyla 4 katı sayılır.'],
+  ['Bu hafta kaptan olarak kimi seçmeliyim?', 'Önce yüksek xFP’li, ilk 11 ihtimali ve beklenen dakikası güçlü oyuncuları ele; rakip eşleşmesini ve ev sahibi/deplasman durumunu kontrol et. Güvenli kaptan için dakika güveni, tavan arayan bir seçim için P90 ve 6+ ihtimali daha önemlidir. Oyuncu Analizi’ni xFP’ye göre sıralamak en hızlı başlangıçtır.'],
+  ['Haftalık kaç ücretsiz transfer hakkım var?', `Her hafta ${TRANSFER_RULES.free_per_week} ücretsiz transfer hakkın olur; kullanmadığın haklar en fazla ${TRANSFER_RULES.max_banked}’ye kadar birikir. Ücretsiz hakkın üstündeki her transfer ${TRANSFER_RULES.hit_cost} puan düşürür.`],
+  ['Yedek oyuncular ne zaman puan alır?', 'İlk 11’indeki bir oyuncu maçta süre almazsa, yedek sırana göre geçerli dizilişi bozmayan ilk yedek onun yerine sayılır. Kadro Önerileri ve Benim Kadrom bu beklenen yedek katkısını hesaba katar. Tüm Takım Sahaya kartında ise yedeklerin puanı da doğrudan toplama eklenir.'],
+]
 
 const quickStart=[
   ['1','Adayları bul','Oyuncu Analizi’nde xFP, İlk 11, xDakika ve tavan metrikleriyle oyuncu havuzunu daralt.'],
@@ -92,26 +124,68 @@ function MenuCard({item,index}){
   </Link>
 }
 
+const faqJsonLd={
+  '@context':'https://schema.org',
+  '@graph':[
+    {'@type':'FAQPage',mainEntity:[...ruleFaqs,...faqs].map(([question,answer])=>({'@type':'Question',name:question,acceptedAnswer:{'@type':'Answer',text:answer}}))},
+    {'@type':'BreadcrumbList',itemListElement:[
+      {'@type':'ListItem',position:1,name:'Ana Sayfa',item:siteUrl},
+      {'@type':'ListItem',position:2,name:'SSS & Rehber',item:siteUrl+'/sss'},
+    ]},
+  ],
+}
+
+function FaqItem({question,answer,index,open}){
+  return <details className="faq-item" open={open}>
+    <summary><span><small>{String(index+1).padStart(2,'0')}</small>{question}</span><i aria-hidden="true">+</i></summary>
+    <div><p>{answer}</p></div>
+  </details>
+}
+
 export default function FAQPage(){
   return <div className="faq-page">
+    <JsonLd data={faqJsonLd}/>
     <nav className="faq-breadcrumb" aria-label="Sayfa yolu"><Link href="/">Ana Sayfa</Link><span>›</span><b>SSS & Rehber</b></nav>
 
     <section className="faq-hero">
       <div className="faq-hero-copy">
         <span className="eyebrow">SSS & FANTEZİ FUTBOL REHBERİ</span>
-        <h1>Fantezi Lig Rehberi’ni doğru okumak için tek rehber.</h1>
-        <p>Oyuncu Analizi’nden Takım Analizi’ne, xFP’den P90’a ve Agresif 11’e kadar sitedeki karar ekranlarını ve model terimlerini güncel haliyle açıklar.</p>
+        <h1>Süper Lig Fantezi Lig nasıl oynanır? Kurallar, puanlama ve SSS</h1>
+        <p>Kadro, bütçe, kaptan, transfer ve puanlama kurallarından xFP’ye, P90’a ve Agresif 11’e kadar Fantezi Lig Rehberi’ni doğru okumak için tek rehber.</p>
         <div className="faq-hero-meta">
-          <span><b>{menuItems.length}</b> analiz ekranı</span>
+          <span><b>{ruleFaqs.length}</b> kural sorusu</span>
           <span><b>{glossary.length}</b> terim</span>
-          <span><b>{faqs.length}</b> soru-cevap</span>
+          <span><b>{faqs.length}</b> model sorusu</span>
         </div>
       </div>
       <div className="faq-hero-links" aria-label="Rehber bölümleri">
-        <a href="#hizli-basla"><span>01</span><b>Hızlı başla</b></a>
-        <a href="#menu-rehberi"><span>02</span><b>Menü rehberi</b></a>
+        <a href="#kurallar"><span>01</span><b>Oyun kuralları</b></a>
+        <a href="#hizli-basla"><span>02</span><b>Hızlı başla</b></a>
         <a href="#terimler"><span>03</span><b>Terimler</b></a>
         <a href="#sorular"><span>04</span><b>SSS</b></a>
+      </div>
+    </section>
+
+    <section id="kurallar" className="faq-section">
+      <div className="faq-section-head">
+        <div><span className="eyebrow">OYUN KURALLARI</span><h2>Fantezi Lig kuralları ve sık sorulanlar</h2></div>
+        <p>Kurallar sitedeki modelin kullandığı kural setinden gelir; resmî oyunda değişiklik olursa oyunun kendi kural sayfası geçerlidir.</p>
+      </div>
+      <div className="faq-list">
+        {ruleFaqs.map(([question,answer],index)=><FaqItem key={question} question={question} answer={answer} index={index} open={index<2}/>)}
+      </div>
+    </section>
+
+    <section id="puanlama" className="faq-section faq-glossary-section">
+      <div className="faq-section-head">
+        <div><span className="eyebrow">PUANLAMA</span><h2>Fantezi Lig puan tablosu</h2></div>
+        <p>KL • DEF • OS • FOR mevkilerine göre puanlar</p>
+      </div>
+      <div className="faq-glossary-grid">
+        {scoringRows.map(([event,description])=><article key={event}>
+          <h3>{event}</h3>
+          <p>{description}</p>
+        </article>)}
       </div>
     </section>
 
@@ -154,10 +228,7 @@ export default function FAQPage(){
         <p>{faqs.length} güncel açıklama</p>
       </div>
       <div className="faq-list">
-        {faqs.map(([question,answer],index)=><details className="faq-item" key={question} open={index<2}>
-          <summary><span><small>{String(index+1).padStart(2,'0')}</small>{question}</span><i aria-hidden="true">+</i></summary>
-          <div><p>{answer}</p></div>
-        </details>)}
+        {faqs.map(([question,answer],index)=><FaqItem key={question} question={question} answer={answer} index={index} open={false}/>)}
       </div>
     </section>
 
