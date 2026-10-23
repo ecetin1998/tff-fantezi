@@ -7,8 +7,8 @@ import {playerLabel} from '@/lib/playerPresentation'
 // Do not cache a timestamp-dependent freshness badge in ISR/KV.
 export const dynamic='force-dynamic'
 export const metadata={
-  title:{absolute:'Fantezi Lig Rehberi — Süper Lig Fantezi Kadro Önerisi, Kaptan ve Oyuncu Analizi'},
-  description:'Süper Lig Fantezi Lig için her maç haftası güncellenen kadro önerisi, kaptan adayları, oyuncu xFP tahminleri, maç olasılıkları ve sakatlık-ceza listesi.',
+  title:{absolute:'Fantezi Lig Rehberi — Fantezi Lig Kadro Önerisi, Kaptan ve Oyuncu Analizi'},
+  description:'Fantezi Lig için her maç haftası güncellenen kadro önerisi, kaptan adayları, oyuncu xFP tahminleri, maç olasılıkları ve sakatlık-ceza listesi.',
   alternates:{canonical:'/'},
 }
 
@@ -59,7 +59,7 @@ export default async function Home(){
           <span className="eyebrow">SÜPER LİG FANTEZİ ANALİZ PLATFORMU</span>
           <span className="home-live-pill">MH{run?.gameweek||'—'} • {simulationLabel} simülasyon</span>
         </div>
-        <h1>Süper Lig Fantezi Lig Rehberi<br/><span>Veriyi oku, kararı sen ver.</span></h1>
+        <h1>Fantezi Lig Rehberi<br/><span>Veriyi oku, kararı sen ver.</span></h1>
         <p>Oyuncu rolü, dakika ihtimali, maç modeli ve puan dağılımını tek bir karar ekranında birleştiriyoruz. Tek bir “doğru kadro” yerine, nedenini görebildiğin daha güçlü seçimler yap.</p>
         <div className="home-intro-actions">
           <Link href="/players" className="cta">Oyuncuları incele</Link>
