@@ -1,0 +1,23 @@
+name: Approved OIDC cache revalidation production rollout
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/release-oidc-revalidation-once-20261023.yml"
+permissions:
+  contents: read
+  actions: write
+jobs:
+  dispatch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Dispatch existing manual-only Cloudflare deployment
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "${{ github.ref }}" = "refs/heads/main"
+          gh workflow run cloudflare-deploy.yml --ref main
+          echo "Authorized cache revalidation release dispatched on main." >> "$GITHUB_STEP_SUMMARY"
