@@ -9,8 +9,8 @@ const score = x => typeof x?.score==="number" && Number.isFinite(x.score)?x.scor
 // or single-token display_name to trigger a roster transfer lockout.
 export function crossTeamIdentitySupported(sourceName,targetFullName){
   const tokens=value=>String(value||"").normalize("NFD")
-    .replace(/[\\u0300-\\u036f]/g,"").toLowerCase().replace(/ı/g,"i")
-    .replace(/[^a-z0-9]+/g," ").trim().split(/\\s+/).filter(Boolean);
+    .replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/ı/g,"i")
+    .replace(/[^a-z0-9]+/g," ").trim().split(/\s+/).filter(Boolean);
   const a=tokens(sourceName),b=tokens(targetFullName);
   if(!a.length||!b.length)return false;
   if(a.join(" ")===b.join(" "))return true;
