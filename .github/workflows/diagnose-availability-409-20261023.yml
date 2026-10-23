@@ -20,5 +20,5 @@ jobs:
           echo "::add-mask::$token"
           status="$(curl --silent --show-error --max-time 45 -o "$RUNNER_TEMP/availability.json" -w '%{http_code}' -H "Authorization: Bearer $token" 'https://nnoagjayvrwyjtizhnfz.supabase.co/functions/v1/refresh-availability')"
           echo "Availability HTTP status: $status"
-          jq -c '{error,parsed,matched,unmatched_count:(.unmatched|length),unmatched:(.unmatched//[]|map({source_team,source_player,reason_unmatched,best}))}' "$RUNNER_TEMP/availability.json"
+          jq -c '{error,parsed,matched,ignored:(.ignored//[]|map({source_player,review_reason,inactive_best,best})),critical:(.critical//[]|map({source_player,review_reason,inactive_best,best,active_elsewhere_best})),unmatched_count:(.unmatched|length)}' "$RUNNER_TEMP/availability.json"
           test "$status" = 409 -o "$status" = 200
