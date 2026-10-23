@@ -6,15 +6,15 @@ const siteUrl=process.env.NEXT_PUBLIC_SITE_URL||'https://fanteziligrehberi.com'
 
 export const metadata={
   title:'Fantezi Lig Nasıl Oynanır? Puanlama, Kaptan ve Kadro Kuralları (SSS)',
-  description:'Süper Lig Fantezi Lig kuralları: 100m bütçe, 15 kişilik kadro, takım başına oyuncu sınırı, puanlama sistemi, kaptan, transfer ve menajer kartları. xFP, xDakika ve P90 terimleri de açıklamalı.',
+  description:'Fantezi Lig kuralları: 100m bütçe, 15 kişilik kadro, takım başına oyuncu sınırı, puanlama sistemi, kaptan, transfer ve menajer kartları. xFP, xDakika ve P90 terimleri de açıklamalı.',
   keywords:[
-    'fantezi lig nasıl oynanır','fantezi lig puanlama','süper lig fantezi lig kuralları','fantezi lig kaptan',
+    'fantezi lig nasıl oynanır','fantezi lig puanlama','fantezi lig kaptan',
     'Süper Lig fantezi','fantezi futbol Türkiye','xFP nedir','kadro önerisi','fantezi lig transfer','fantezi futbol rehberi'
   ],
   alternates:{canonical:'/sss'},
   openGraph:{
     title:'Fantezi Lig Nasıl Oynanır? Puanlama ve Kurallar',
-    description:'Süper Lig Fantezi Lig kuralları, puanlama sistemi, kaptan ve transfer soruları ile xFP ve model terimleri için güncel rehber.',
+    description:'Fantezi Lig kuralları, puanlama sistemi, kaptan ve transfer soruları ile xFP ve model terimleri için güncel rehber.',
     url:'/sss',
   },
 }
@@ -37,7 +37,7 @@ const scoringRows=[
 ]
 
 const ruleFaqs=[
-  ['Süper Lig Fantezi Lig nasıl oynanır?', `${BUDGET}m bütçeyle ${squadLabel} olmak üzere 15 kişilik bir kadro kurarsın. Her maç haftası bu kadrodan izin verilen bir dizilişle ilk 11’ini ve 4 sıralı yedeğini seçer, bir kaptan belirlersin. Oyuncuların gerçek maçlardaki dakika, gol, asist, gol yememe, kurtarış ve kart gibi olaylarından fantezi puanı toplanır; haftalık toplam puanın kadronun skorudur.`],
+  ['Fantezi Lig nasıl oynanır?', `${BUDGET}m bütçeyle ${squadLabel} olmak üzere 15 kişilik bir kadro kurarsın. Her maç haftası bu kadrodan izin verilen bir dizilişle ilk 11’ini ve 4 sıralı yedeğini seçer, bir kaptan belirlersin. Oyuncuların gerçek maçlardaki dakika, gol, asist, gol yememe, kurtarış ve kart gibi olaylarından fantezi puanı toplanır; haftalık toplam puanın kadronun skorudur.`],
   ['Bir takımdan en fazla kaç oyuncu alabilirim?', `Aynı Süper Lig takımından kadrona en fazla ${MAX_PLAYERS_PER_CLUB} oyuncu alabilirsin. Benim Kadrom ekranı bu sınırı aşan seçimleri kaydetmez.`],
   ['Fantezi Lig’de hangi dizilişler kullanılabilir?', `İlk 11 her zaman 1 kaleciyle kurulur. İzin verilen dizilişler: ${FORMATIONS.join(', ')}.`],
   ['Fantezi Lig puanlama sistemi nasıl çalışır?', scoringRows.map(([k,v])=>`${k}: ${v}`).join(' ')],
@@ -150,7 +150,7 @@ export default function FAQPage(){
     <section className="faq-hero">
       <div className="faq-hero-copy">
         <span className="eyebrow">SSS & FANTEZİ FUTBOL REHBERİ</span>
-        <h1>Süper Lig Fantezi Lig nasıl oynanır? Kurallar, puanlama ve SSS</h1>
+        <h1>Fantezi Lig nasıl oynanır? Kurallar, puanlama ve SSS</h1>
         <p>Kadro, bütçe, kaptan, transfer ve puanlama kurallarından xFP’ye, P90’a ve Agresif 11’e kadar Fantezi Lig Rehberi’ni doğru okumak için tek rehber.</p>
         <div className="faq-hero-meta">
           <span><b>{ruleFaqs.length}</b> kural sorusu</span>

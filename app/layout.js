@@ -12,7 +12,7 @@ const siteUrl=process.env.NEXT_PUBLIC_SITE_URL||'https://fanteziligrehberi.com'
 export const metadata={
   metadataBase:new URL(siteUrl),
   title:{default:'Fantezi Lig Rehberi — Süper Lig Fantezi',template:'%s | Fantezi Lig Rehberi'},
-  description:'Süper Lig Fantezi Lig için haftalık kadro önerisi, kaptan adayları, oyuncu xFP tahminleri, maç olasılıkları ve sakatlık-ceza takibi.',
+  description:'Fantezi Lig için haftalık kadro önerisi, kaptan adayları, oyuncu xFP tahminleri, maç olasılıkları ve sakatlık-ceza takibi.',
   openGraph:{
     type:'website',
     locale:'tr_TR',
@@ -32,7 +32,7 @@ const siteJsonLd={
   '@context':'https://schema.org',
   '@graph':[
     {'@type':'WebSite','@id':siteUrl+'/#website',url:siteUrl,name:'Fantezi Lig Rehberi',inLanguage:'tr-TR',
-      description:'Süper Lig Fantezi Lig için bağımsız oyuncu, maç ve kadro analiz platformu.',publisher:{'@id':siteUrl+'/#organization'}},
+      description:'Fantezi Lig için bağımsız oyuncu, maç ve kadro analiz platformu.',publisher:{'@id':siteUrl+'/#organization'}},
     {'@type':'Organization','@id':siteUrl+'/#organization',name:'Fantezi Lig Rehberi',url:siteUrl,logo:siteUrl+'/icon.svg'},
   ],
 }
