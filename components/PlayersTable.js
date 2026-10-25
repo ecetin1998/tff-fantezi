@@ -177,7 +177,7 @@ export default function PlayersTable({players,total,page,pageCount,teams,filters
     {isPro&&!overlayReady&&!overlayError?<div className="table-summary" role="status" aria-live="polite">Gelişmiş P90 ve 6+ puan verileri yükleniyor...</div>:null}
     {isPro&&overlayError?<div className="alert error" role="alert">Gelişmiş P90 ve 6+ istatistikleri yüklenemedi.{overlayRequestId?' Hata kodu: '+overlayRequestId:''} <button type="button" onClick={()=>setOverlayRetry(n=>n+1)}>Yeniden dene</button></div>:null}
     <div className="projection-legend">
-      Karar metrikleri: <b>İlk 11</b> + <b>xDakika</b> oynama ihtimalini, <b>xFP</b> ortalama beklentiyi, <b>Tipik puan</b> en sık üç sonucun ağırlıklı ortalamasının en yakın tam sayıya yuvarlanmış hâlidir; <b>Medyan</b> ayrı bir ölçüdür.
+      Karar metrikleri: <b>İlk 11</b> + <b>xDakika</b> oynama ihtimalini, <b>xFP</b> ortalama beklentiyi, <b>Tipik puan</b> en sık üç sonucun ağırlıklı ortalamasının en yakın tam sayıya yuvarlanmış hâlidir.
       {isPro?<span> <b>P25/P90</b>, <b>6+</b>, <b>xG</b> ve <b>xA</b> Gelişmiş üyelik dağılım/üretim katmanlarıdır.</span>:<span> Puan dağılımı, 6+ ihtimali ve xG/xA detayları Gelişmiş üyelikte açılır.</span>}
     </div>
     {!isVisitor&&!isPro?<AccessGate
@@ -200,7 +200,7 @@ export default function PlayersTable({players,total,page,pageCount,teams,filters
           <div className="mobile-player-metrics">
             <div><span>İlk 11</span><b>{pct(p.projection?.xi_probability)}</b></div>
             <div><span>xDakika</span><b>{num(p.projection?.x_minutes,0)}</b></div>
-            <div title="Tipik: en sık üç puanın sıklık ağırlıklı ortalamasının yuvarlanmış hâli. Medyan ayrı hesaplanır."><span>Tipik puan</span><b>{p.projection?.top3_weighted_avg==null?'—':Math.round(Number(p.projection.top3_weighted_avg))}</b><small>{p.projection?.median_points==null?'':'Medyan '+Math.round(Number(p.projection.median_points))+' • '}{p.projection?.top3_coverage==null?'':pct(p.projection.top3_coverage)+' kapsam'}</small></div>
+            <div><span>Tipik puan</span><b>{p.projection?.top3_weighted_avg==null?'—':Math.round(Number(p.projection.top3_weighted_avg))}</b></div>
             {isPro?<><div><span>6+ puan</span><b>{overlayReady?pct(p.projection?.six_plus_probability):overlayError?'—':'…'}</b></div><div><span>P90</span><b>{overlayReady?num(p.projection?.p90,1):overlayError?'—':'…'}</b></div></>:<>
               <div><span>F/P</span><b>{num(p.projection?.value_score)}</b></div>
               <div><span>Toplam</span><b>{num(p.total_points,0)}</b></div>
@@ -217,7 +217,7 @@ export default function PlayersTable({players,total,page,pageCount,teams,filters
         <td className="rank-col">#{offset+i+1}</td>
         <td><Link className="player-link team-player-link" href={'/players/'+p.id}><i className="club-dot"/><b>{playerLabel(p)}</b></Link>{fixtureBadge(p.projection)?<small className="cell-note">{fixtureBadge(p.projection)}</small>:null}{playerNote(p)?<small className="cell-note">{playerNote(p)}</small>:null}</td>
         <td><Link className="team-table-link" href={'/teams/'+p.team_id}>{p.team}</Link></td><td><span className={'pos '+p.position}>{posLabel(p.position)}</span>{playerRoleLabel(p)?<small className="cell-note">{playerRoleLabel(p)}</small>:null}</td><td>{p.projection?.opponent_name||'—'}</td><td>{p.projection?.venue==='HOME'?'Ev':p.projection?.venue==='AWAY'?'Dep':'—'}</td>
-        <td>{num(p.price,1)}m</td><td><b>{num(p.total_points,0)}</b></td><td>{pct(p.projection?.xi_probability)}</td><td>{num(p.projection?.x_minutes,0)}</td><td><b>{num(p.projection?.xfp)}</b></td><td title="Tipik puan: en sık 3 sonucun ağırlıklı ortalaması, en yakın tam sayıya yuvarlanır."><b>{p.projection?.top3_weighted_avg==null?'—':Math.round(Number(p.projection.top3_weighted_avg))}</b><small className="cell-note">{p.projection?.median_points==null?'':'Medyan '+Math.round(Number(p.projection.median_points))+' • '}{p.projection?.top3_coverage==null?'':pct(p.projection.top3_coverage)}</small></td>
+        <td>{num(p.price,1)}m</td><td><b>{num(p.total_points,0)}</b></td><td>{pct(p.projection?.xi_probability)}</td><td>{num(p.projection?.x_minutes,0)}</td><td><b>{num(p.projection?.xfp)}</b></td><td><b>{p.projection?.top3_weighted_avg==null?'—':Math.round(Number(p.projection.top3_weighted_avg))}</b></td>
         {isPro?<><td>{overlayReady?num(p.projection?.p25,1):overlayError?'—':'…'}</td><td>{overlayReady?num(p.projection?.p90,1):overlayError?'—':'…'}</td><td>{overlayReady?pct(p.projection?.six_plus_probability):overlayError?'—':'…'}</td><td>{overlayReady?num(p.projection?.expected_goals):overlayError?'—':'…'}</td><td>{overlayReady?num(p.projection?.expected_assists):overlayError?'—':'…'}</td></>:null}<td>{num(p.projection?.value_score)}</td>
       </tr>)}</tbody></table></div>
     </>}
