@@ -143,8 +143,9 @@ jobs:
           OIDC_TOKEN: ${{ steps.oidc.outputs.token }}
         run: |
           set -euo pipefail
-          response="$(jq -n --arg sha "$GITHUB_SHA" '{action:"prepare_current",code_sha:$sha}' |             curl --fail --show-error --silent --max-time 240               -H "Authorization: Bearer $OIDC_TOKEN"               -H "Content-Type: application/json"               --data-binary @- "$FUNCTIONS_URL/weekly-model-lifecycle")"
+          response="$(jq -n --arg sha "$GITHUB_SHA" '{action:"prepare_current",code_sha:$sha}' |             curl --show-error --silent --max-time 240               -H "Authorization: Bearer $OIDC_TOKEN"               -H "Content-Type: application/json"               --data-binary @- "$FUNCTIONS_URL/weekly-model-lifecycle")"
           echo "$response" | jq .
+          test "$(printf '%s' "$response" | jq -r '.ok // false')" = "true"
           echo "refresh=$(printf '%s' "$response" | jq -r '.refresh_required // false')" >> "$GITHUB_OUTPUT"
           echo "snapshot=$(printf '%s' "$response" | jq -r '.snapshot_allowed // false')" >> "$GITHUB_OUTPUT"
           echo "run_id=$(printf '%s' "$response" | jq -r '.run_id // empty')" >> "$GITHUB_OUTPUT"
