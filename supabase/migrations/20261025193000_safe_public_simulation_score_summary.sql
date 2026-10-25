@@ -156,7 +156,7 @@ from (
  from public.v_current_player_cards
 ) c
 left join public.scout_player_score_summary summary
- on mode.run_id=c.run_id and mode.player_id=c.player_id;
+ on summary.run_id=c.run_id and summary.player_id=c.player_id;
 revoke all on table public.v_current_player_cards_public from public, anon, authenticated;
 grant select on table public.v_current_player_cards_public to anon, authenticated;
 comment on view public.v_current_player_cards_public is
