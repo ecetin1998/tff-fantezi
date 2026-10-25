@@ -26,6 +26,8 @@ Frozen original pre-kickoff match-lambda inputs were compared to retrospective p
 | Goal RMSE | 1.12237 | 1.09916 |
 | Poisson NLL on mean only | 1.43171 | 1.41390 |
 | Clean sheet Brier, Poisson comparison | 0.22048 | 0.21650 |
+| **NB2 NLL (current production distribution)** | **1.44121** | **1.42687** |
+| **NB2 clean sheet Brier** | **0.21521** | **0.21160** |
 
 **Limitations:** this small historical comparison of team mean lambdas is NOT a measured improvement in NB2 50K Fantasy xFP, punt/squad optimization, captain accuracy, or region-specific player outcomes. Production already uses NB2; actual longitudinal scoring must be monitored prospectively. The draft recent player-activity PR #365 is intentionally not activated (MH8 xG MAE mildly worsened).
 
