@@ -124,3 +124,12 @@ test("signed audit resolves current live intraday benchmark without accidental e
  assert.match(code,/noteBenchmark\.startsWith\("weekly-auto-mh"\)/)
  assert.doesNotMatch(code,/noteBenchmark\)\?noteBenchmark/)
 })
+
+test("intraday match predictions get run ID only after declaration",()=>{
+ const code=readFileSync(new URL("../supabase/functions/weekly-model-lifecycle/index.ts",import.meta.url),"utf8")
+ const afterCurrent=code.slice(code.indexOf("async function prepareCurrentRefresh("))
+ const declare=afterCurrent.indexOf("const runId=crypto.randomUUID()")
+ const uses=afterCurrent.indexOf("const matchPredictions=(teamFixturesQ.data||[])")
+ assert.ok(declare>=0&&uses>declare)
+ assert.equal((afterCurrent.match(/const runId=crypto\.randomUUID\(\)/g)||[]).length,1)
+})
