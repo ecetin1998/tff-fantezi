@@ -970,7 +970,7 @@ Deno.serve(async(req:Request)=>{
       const gw=Number(run.gameweek)
       const noteBenchmark=String((run.notes||"").split(" • ")[1]||"").trim()
       let benchmark=String(body.benchmark||
-        (/^(weekly-auto-mh|intraday-mh)\\d+-/.test(noteBenchmark)?noteBenchmark:"")).trim()
+        ((noteBenchmark.startsWith("weekly-auto-mh")||noteBenchmark.startsWith("intraday-mh"))?noteBenchmark:"")).trim()
       // Weekly candidate notes contain a lifecycle key + human prose,
       // not the replay benchmark; resolve metadata instead of guessing.
       if(!benchmark){
