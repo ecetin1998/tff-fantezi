@@ -10,8 +10,10 @@ export function recentTeamForm({teamId,gameweek,matches=[]}={}){
   const rows=[]
   for(const m of matches||[]){
     const wk=Number(m.gameweek),home=Number(m.home_team_id)===id,away=Number(m.away_team_id)===id
-    if(!(wk<gw&&wk>=1&&(home!==away))||m.match_status!=="Bitti"||
-       m.fantasy_closure!=="KAPANDI")continue
+    // An official full-time scoreboard is independent of the TFF Fantasy
+    // points/bonus closure state. Never discard old completed match scores
+    // just because Fantasy scoring is still marked "Kontrol bekliyor".
+    if(!(wk<gw&&wk>=1&&(home!==away))||m.match_status!=="Bitti")continue
     const gf=Number(home?m.home_goals:m.away_goals),ga=Number(home?m.away_goals:m.home_goals)
     if(!Number.isInteger(gf)||!Number.isInteger(ga)||gf<0||ga<0||gf>15||ga>15)continue
     rows.push({wk,gf,ga})
