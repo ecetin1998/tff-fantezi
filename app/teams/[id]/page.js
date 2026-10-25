@@ -8,11 +8,9 @@ import {playerLabel} from '@/lib/playerPresentation'
 
 export const revalidate=300
 export const dynamic='force-dynamic'
-export async function generateStaticParams(){
-  const {teams}=await getTeamFixturesOverview()
-  const ids=[...new Set((teams||[]).map(t=>Number(t.id)).filter(Boolean))]
-  return ids.map(id=>({id:String(id)}))
-}
+// All team detail pages are dynamic. Never fetch Supabase during Next build.
+export const dynamicParams=true
+export async function generateStaticParams(){ return [] }
 export async function generateMetadata({params}){
   const {id}=await params
   const data=await getTeamDetail(id)
