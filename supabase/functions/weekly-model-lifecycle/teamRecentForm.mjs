@@ -97,3 +97,53 @@ export function auditMatchAllocation({
   return {pass:failures.length===0,failures:[...new Set(failures)],warnings,
     gameweek,teams:teams.size,players:playerInputs.length,matches:matchInputs.length}
 }
+
+export function auditRealizedModel({
+  matchInputs=[],matchPredictions=[],playerInputs=[],playerProjections=[],
+  alpha=0,ownFraction=.031,simulationCount=0
+}={}){
+  const failures=[],warnings=[]
+  if(matchPredictions.length!==matchInputs.length)failures.push("MATCH_PREDICTION_COVERAGE")
+  const predictions=new Map(matchPredictions.map(x=>[Number(x.match_id),x]))
+  const nb2=Number.isFinite(alpha)&&alpha>0
+  const cleanSheet=(lambda)=>nb2
+    ?Math.pow(1+alpha*lambda,-1/alpha):Math.exp(-lambda)
+  for(const m of matchInputs){
+    const p=predictions.get(Number(m.match_id))
+    if(!p){failures.push("MATCH_PREDICTION_MISSING");continue}
+    const home=Number(m.home_lambda),away=Number(m.away_lambda)
+    if(!Number.isFinite(home)||!Number.isFinite(away)||home<.2||away<.2)
+      failures.push("INVALID_LAMBDA")
+    // UI probabilities must use the SAME NB2 distribution as 50K
+    // for an enabled goal distribution; not an accidental Poisson fallback.
+    if(Math.abs(Number(p.home_cs_probability)-cleanSheet(away))>.015||
+       Math.abs(Number(p.away_cs_probability)-cleanSheet(home))>.015)
+      failures.push("CS_DISTRIBUTION_DISAGREEMENT")
+    if(Math.abs(Number(p.home_xg)-home)>.015||
+       Math.abs(Number(p.away_xg)-away)>.015)
+      failures.push("XG_LAMBDA_DISAGREEMENT")
+  }
+  if(simulationCount>=50000&&playerProjections.length){
+    const teams=new Map()
+    for(const p of playerInputs){
+      const id=Number(p.player_id),club=Number(p.club_id)
+      teams.set(id,club)
+    }
+    const sum=new Map()
+    for(const p of playerProjections){
+      const club=teams.get(Number(p.player_id)),x=Number(p.expected_goals)
+      if(!club||!Number.isFinite(x)||x<0){failures.push("INVALID_PLAYER_EXPECTED_GOALS");continue}
+      sum.set(club,(sum.get(club)||0)+x)
+    }
+    for(const m of matchInputs){
+      for(const [team,lambda] of [[Number(m.home_team_id),Number(m.home_lambda)],[Number(m.away_team_id),Number(m.away_lambda)]]){
+        const expected=Number(lambda)*(1-ownFraction),actual=sum.get(team)
+        if(!Number.isFinite(actual)||!Number.isFinite(expected)||Math.abs(actual-expected)>.09)
+          failures.push("TEAM_GOALS_NOT_DISTRIBUTED_"+team)
+      }
+    }
+  }else warnings.push("NO_FINALIZED_50K_PLAYER_GOALS")
+  return {pass:failures.length===0,failures:[...new Set(failures)],
+    warnings,distribution:nb2?"NB2":"Poisson",matches:matchInputs.length,
+    xfp_players:playerProjections.length}
+}
