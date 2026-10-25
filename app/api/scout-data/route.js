@@ -54,12 +54,12 @@ function squad(data){
   return {
     recommendation:data?.recommendation?{
       variant:data.recommendation.variant,budget:data.recommendation.budget,
-      xi_xfp:data.recommendation.xi_xfp,formation:data.recommendation.formation
+      xi_xfp:data.recommendation.xi_xfp,xi_typical_sum:(data.members||[]).filter(m=>m.squad_slot==='XI').reduce((s,m)=>s+Number(m.top3_weighted_avg||0),0),formation:data.recommendation.formation
     }:null,
     members:(data?.members||[]).map(m=>({
       player_id:m.player_id,squad_slot:m.squad_slot,is_captain:m.is_captain,bench_order:m.bench_order,
       player:m.player?{id:m.player.id,full_name:m.player.full_name,display_name:m.player.display_name,short_label:m.player.short_label,position:m.player.position,price:m.player.price}:null,
-      team:m.team,p90:m.p90
+      team:m.team,p90:m.p90,top3_weighted_avg:m.top3_weighted_avg,top3_coverage:m.top3_coverage,top3_outcomes:m.top3_outcomes
     }))
   }
 }
