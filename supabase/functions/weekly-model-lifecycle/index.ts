@@ -814,6 +814,7 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
         +(adjusted.applied?` • resmî maç: ${event.match_ref}`:"")
     }
   })
+  const runId=crypto.randomUUID()
   const anchoredMatchInputs=new Map(((stableMatchesQ.data||matchesQ.data)||[]).map((x:any)=>[Number(x.match_id),x]))
   // Anchored non-intraday match lambdas prevent the same form boost
   // compounding on hourly/current-gameweek refreshes.
@@ -846,7 +847,6 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
   const meta={...latestMetaQ.data,benchmark_version:benchmark,created_at:new Date().toISOString(),source_note:`intraday refresh from ${sourceBenchmark}; source ${latestSourceAt}`}
   delete (meta as any).id
 
-  const runId=crypto.randomUUID()
   const runInsert=await sb.from("scout_model_runs").insert({
     id:runId,gameweek:gw,model_version:current.model_version,generated_at:new Date().toISOString(),
     source_updated_at:latestSourceAt,source_cutoff:latestSourceAt,simulation_count:0,status:"building",is_current:false,
