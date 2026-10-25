@@ -48,6 +48,18 @@ test("no actual verified playing minutes, no update; riskless GK remains unchang
   assert.equal(zero.xgPer90,.3)
   assert.equal(zero.xaPer90,.2)
 })
+test("missing xA does not block valid xG form and missing xG does not block valid xA",()=>{
+  const xgOnly=form({xaPer90:null})
+  assert.ok(xgOnly.xgPer90>.3)
+  assert.equal(xgOnly.xaPer90,null)
+  const xaOnly=form({
+    xgPer90:null,
+    advanced:advanced(2,2).map(x=>({...x,key_passes:5})),
+    verified:verified(2,5)
+  })
+  assert.equal(xaOnly.xgPer90,null)
+  assert.ok(xaOnly.xaPer90>.2)
+})
 test("key-pass activity tunes xA independently of xG",()=>{
   const p=form({advanced:advanced(2,2).map(x=>({...x,key_passes:5})),verified:verified(2,5)})
   assert.ok(p.xaPer90>.2)
