@@ -43,6 +43,15 @@ jobs:
             jq -r '.metric_coverage | to_entries[] | "- \(.key): \(.value)/286 explicit source values"' mh8-advanced-evidence.json
             echo "- Historical Fantasy totals and live MH9 unchanged"
           } >> "$GITHUB_STEP_SUMMARY"
+      - name: Emit reviewable source coverage and explicitly observed on-target shots
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "MH8_METRIC_COVERAGE=$(jq -c '.metric_coverage' mh8-advanced-evidence.json)"
+          # These are ONLY explicit observed playerStats, never assumed zeros.
+          echo "MH8_EXPLICIT_SOT=$(jq -c '[.rows[] | select(.shots_on_target != null) | [.scout_player_id,.shots_on_target]] | sort_by(.[0])' mh8-advanced-evidence.json)"
+          echo "MH8_XA_MISSING_WITH_PASSES=$(jq -c '[.rows[] | select(.key_passes > 0 and .xa == null) | {scout_player_id,match_id,key_passes}]' mh8-advanced-evidence.json)"
+          echo "MH8_XG_MISSING_WITH_SHOTS=$(jq -c '[.rows[] | select(.shots > 0 and .xg == null) | {scout_player_id,match_id,shots}]' mh8-advanced-evidence.json)"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
