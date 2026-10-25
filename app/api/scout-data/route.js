@@ -35,7 +35,9 @@ function playerRow(p){
     projection:p.projection?{
       opponent_name:p.projection.opponent_name,venue:p.projection.venue,
       xi_probability:p.projection.xi_probability,x_minutes:p.projection.x_minutes,
-      xfp:p.projection.xfp,value_score:p.projection.value_score,
+      xfp:p.projection.xfp,mode_points:p.projection.mode_points??null,mode_probability:p.projection.mode_probability??null,
+      median_points:p.projection.median_points??null,top3_weighted_avg:p.projection.top3_weighted_avg??null,
+      top3_coverage:p.projection.top3_coverage??null,top3_outcomes:p.projection.top3_outcomes??null,value_score:p.projection.value_score,
       availability_probability:p.projection.availability_probability
     }:null,
     availability:p.availability?{

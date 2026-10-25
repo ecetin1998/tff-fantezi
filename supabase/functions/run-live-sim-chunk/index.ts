@@ -169,6 +169,13 @@ Deno.serve(async(req)=>{
         p_run_id:RUN_ID,p_gameweek:GAMEWEEK,p_benchmark:BENCHMARK
       });
       if(finalized.error)throw finalized.error;
+      const modal=await sb.rpc("scout_apply_modal_predictions",{
+        p_run_id:RUN_ID,p_gameweek:GAMEWEEK,p_benchmark:BENCHMARK
+      });
+      if(modal.error)throw modal.error;
+      if(Number(modal.data)!==expectedPlayers){
+        throw new Error("MODE_HISTOGRAM_COVERAGE_FAILED: "+modal.data+"/"+expectedPlayers);
+      }
       const goalConfig=await sb.from("scout_goal_distribution_config")
         .select("version,distribution,alpha_used,gate_passed")
         .eq("active",true).order("created_at",{ascending:false}).limit(1).maybeSingle();
@@ -181,7 +188,7 @@ Deno.serve(async(req)=>{
         if(prediction.error)throw prediction.error;
         matchDistribution="NB2";
       }
-      return Response.json({ok:true,mode:"finalize",run_id:RUN_ID,gameweek:GAMEWEEK,benchmark:BENCHMARK,draws:minDraws,result:finalized.data,match_distribution:matchDistribution,policy_version:SCORER_POLICY_VERSION});
+      return Response.json({ok:true,mode:"finalize",run_id:RUN_ID,gameweek:GAMEWEEK,benchmark:BENCHMARK,draws:minDraws,result:finalized.data,modal_players:Number(modal.data),match_distribution:matchDistribution,policy_version:SCORER_POLICY_VERSION});
     }
 
     const [pq,mq,metaq,aq,rulesq,goalDistQ]=await Promise.all([
