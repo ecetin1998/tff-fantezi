@@ -13,15 +13,15 @@ ALTER TABLE public.scout_squad_members
   ADD COLUMN IF NOT EXISTS top3_coverage numeric NULL,
   ADD COLUMN IF NOT EXISTS top3_score_distribution jsonb NULL;
 
-DO $
+DO $modal_guard$
 BEGIN
  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname='scout_projection_mode_bounds') THEN
   ALTER TABLE public.scout_player_projections ADD CONSTRAINT scout_projection_mode_bounds
     CHECK ((mode_points IS NULL AND mode_probability IS NULL) OR
       (mode_points BETWEEN -40 AND 215 AND mode_probability BETWEEN 0 AND 1));
  END IF;
-END $;
-DO $
+END $modal_guard$;
+DO $modal_guard$
 BEGIN
  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname='scout_projection_top3_bounds') THEN
   ALTER TABLE public.scout_player_projections ADD CONSTRAINT scout_projection_top3_bounds
@@ -30,7 +30,7 @@ BEGIN
             AND jsonb_typeof(top3_score_distribution) = 'array'
             AND jsonb_array_length(top3_score_distribution) = 3));
  END IF;
-END $;
+END $modal_guard$;
 
 CREATE OR REPLACE FUNCTION public.scout_finalize_modal_projection(
   p_run_id uuid, p_gameweek integer, p_benchmark text
