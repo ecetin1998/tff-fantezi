@@ -8,7 +8,7 @@ import {roleTrendFromWeeklyEvidence} from "./roleTrend.mjs"
 import {blendVerifiedAttackRate} from "./mh8Attack.mjs"
 import {calibrateAttackRates} from "./roleAwareAttackRates.mjs"
 import {currentTacticalRole} from "./recentTacticalRole.mjs"
-import {applyTeamMatchForm,auditMatchAllocation} from "./teamRecentForm.mjs"
+import {applyTeamMatchForm,auditMatchAllocation,auditRealizedModel} from "./teamRecentForm.mjs"
 
 const AUDIENCE="tff-fantezi-scout"
 const ISSUER="https://token.actions.githubusercontent.com"
@@ -960,6 +960,62 @@ Deno.serve(async(req:Request)=>{
     const current=currentQ.data
     const status=await sourceStatus(sb,current)
 
+    if(action==="audit_run"){
+      // Always inspect actual replay inputs + probabilities, never a stale
+      // dashboard cache; this is read only and safe during active MH.
+      const runId=String(body.run_id||current.id)
+      const runQ=await sb.from("scout_model_runs").select("*").eq("id",runId).single()
+      if(runQ.error)throw runQ.error
+      const run=runQ.data
+      const gw=Number(run.gameweek)
+      const benchmark=String(body.benchmark||
+        (run.notes||"").split(" • ")[1]||"").trim()
+      if(!benchmark)return Response.json({ok:false,error:"AUDIT_BENCHMARK_MISSING"},{status:409})
+      const [players,matches,fixtures,shares,projections,matchPreds,goalConfig,meta,teamStats,tactical]=await Promise.all([
+        sb.from("scout_replay_player_inputs").select("player_id,club_id,position,rates,availability").eq("gameweek",gw).eq("benchmark_version",benchmark),
+        sb.from("scout_replay_match_inputs").select("match_id,home_team_id,away_team_id,home_lambda,away_lambda").eq("gameweek",gw).eq("benchmark_version",benchmark),
+        sb.from("scout_match_history").select("match_id,home_team_id,away_team_id").eq("season","2026-27").eq("gameweek",gw),
+        sb.from("scout_role_signals").select("player_id,team_goal_share,team_assist_share").eq("run_id",runId),
+        sb.from("scout_player_projections").select("player_id,expected_goals").eq("run_id",runId),
+        sb.from("scout_match_predictions").select("match_id,home_xg,away_xg,home_cs_probability,away_cs_probability").eq("run_id",runId),
+        sb.from("scout_goal_distribution_config").select("alpha_used,distribution,gate_passed").eq("active",true).order("created_at",{ascending:false}).limit(1).maybeSingle(),
+        sb.from("scout_replay_input_meta").select("own_goal_fraction").eq("gameweek",gw).eq("benchmark_version",benchmark).maybeSingle(),
+        sb.from("scout_team_season_stats").select("team_id,through_gameweek,advanced_matches,matches_played").eq("through_gameweek",gw-1),
+        sb.from("scout_team_tactical_profiles").select("team_id,through_gameweek,coverage,event_shot_sample,conceded_channel_sample_actions").eq("season","2026-27")
+      ])
+      for(const q of [players,matches,fixtures,shares,projections,matchPreds,goalConfig,meta,teamStats,tactical])if(q.error)throw q.error
+      const prep=auditMatchAllocation({
+        gameweek:gw,fixtures:fixtures.data||[],matchInputs:matches.data||[],
+        playerInputs:players.data||[],roleShares:shares.data||[]
+      })
+      const dist=goalConfig.data
+      const alpha=dist?.gate_passed&&String(dist.distribution).toUpperCase()==="NB2"
+        ?Number(dist.alpha_used):0
+      const realized=auditRealizedModel({
+        matchInputs:matches.data||[],matchPredictions:matchPreds.data||[],
+        playerInputs:players.data||[],playerProjections:projections.data||[],
+        alpha,ownFraction:n(meta.data?.own_goal_fraction,.031),
+        simulationCount:Number(run.simulation_count)
+      })
+      const teamAdvanced=teamStats.data||[]
+      const weakZones=(tactical.data||[]).filter((x:any)=>
+        Number(x.event_shot_sample||0)<30||String(x.coverage)!=="event_verified")
+      const warnings=[
+        ...(teamAdvanced.length!==18?["TEAM_SEASON_STATS_INCOMPLETE"]:[]),
+        ...(teamAdvanced.some((x:any)=>Number(x.advanced_matches)<Number(x.matches_played))?
+          ["TEAM_ADVANCED_XG_LAGS_GOAL_FORM"]:[]),
+        ...(weakZones.length?["INFERRED_WEAK_ZONE_NOT_SAFE_FOR_MULTIPLIERS"]:[]),
+        ...prep.warnings,...realized.warnings
+      ]
+      const pass=prep.pass&&realized.pass&&teamAdvanced.length===18
+      return Response.json({
+        ok:pass,pass,run_id:runId,gameweek:gw,benchmark,
+        allocation:prep,distribution:realized,warnings,
+        team_advanced_rows:teamAdvanced.length,
+        inferred_weak_zones:weakZones.length,
+        no_writes:true
+      },{status:pass?200:409})
+    }
     if(action==="status")return Response.json({ok:true,...status})
     if(action==="close_backtest"){
       if(!status.complete_current)return Response.json({ok:false,error:"current gameweek not fully closed",...status},{status:409})
