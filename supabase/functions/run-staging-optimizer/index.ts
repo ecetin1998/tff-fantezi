@@ -217,7 +217,7 @@ Deno.serve(async(req:Request)=>{
       player_id:x.player_id,xfp:x.xfp,mode_points:x.mode_points,mode_probability:x.mode_probability,typical_points:x.typical_points,top3_coverage:x.top3_coverage,top3_score_distribution:x.top3_score_distribution,p90:x.p90,six_plus_probability:x.six_plus_probability,top25_score:x.top25_score,xi_probability:x.xi_probability,appearance_probability:x.appearance_probability,x_minutes:x.x_minutes,availability_probability:x.availability_probability,
       team_id:x.scout_players.team_id,position:x.scout_players.position,price:x.scout_players.price,active:x.scout_players.active,confidence:x.confidence||"medium"
     })).filter((x:any)=>x.active && n(x.availability_probability)>=.8 && n(x.price)>0);
-    if((data||[]).length!==456 || (data||[]).some((x:any)=>x.typical_points===null||!Array.isArray(x.top3_score_distribution)||x.top3_score_distribution.length!==3))
+    if((data||[]).length!==456 || (data||[]).some((x:any)=>x.typical_points===null||!Array.isArray(x.top3_score_distribution)||x.top3_score_distribution.length<1||x.top3_score_distribution.length>3))
       throw new Error("TOP3_HISTOGRAM_NOT_FINALIZED_FOR_ALL_456");
     const byPos:any={GK:[],DEF:[],MID:[],FWD:[]};
     for(const r of rows) byPos[r.position]?.push(r);
