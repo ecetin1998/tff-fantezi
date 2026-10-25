@@ -129,7 +129,7 @@ jobs:
           OIDC_TOKEN: ${{ steps.oidc.outputs.token }}
         run: |
           set -euo pipefail
-          response="$(curl --fail-with-body --silent --show-error --max-time 90 \
+          response="$(curl --silent --show-error --max-time 90 \
             -H "Authorization: Bearer $OIDC_TOKEN" -H "Content-Type: application/json" \
             --data '{"action":"audit_run"}' "$FUNCTIONS_URL/weekly-model-lifecycle")"
           echo "$response" | jq .
@@ -182,7 +182,7 @@ jobs:
           set -euo pipefail
           jq -n --arg run "$RUN_ID" --arg bench "$BENCHMARK" \
             '{action:"audit_run",run_id:$run,benchmark:$bench}' | \
-            curl --fail-with-body --silent --show-error --max-time 90 \
+            curl --silent --show-error --max-time 90 \
               -H "Authorization: Bearer $OIDC_TOKEN" -H "Content-Type: application/json" \
               --data-binary @- "$FUNCTIONS_URL/weekly-model-lifecycle" | \
             jq -e '.pass == true and .allocation.pass == true and .distribution.pass == true and .no_writes == true'
@@ -313,7 +313,7 @@ jobs:
           set -euo pipefail
           jq -n --arg run "$RUN_ID" --arg bench "$BENCHMARK" \
             '{action:"audit_run",run_id:$run,benchmark:$bench}' | \
-            curl --fail-with-body --silent --show-error --max-time 90 \
+            curl --silent --show-error --max-time 90 \
               -H "Authorization: Bearer $OIDC_TOKEN" -H "Content-Type: application/json" \
               --data-binary @- "$FUNCTIONS_URL/weekly-model-lifecycle" | \
             jq -e '.pass == true and .allocation.pass == true and .distribution.pass == true and .no_writes == true'

@@ -117,3 +117,10 @@ test("signed model lifecycle exposes current/read-only QA route",()=>{
  assert.match(code,/auditRealizedModel\(/)
  assert.match(code,/no_writes:true/)
 })
+
+test("signed audit resolves current live intraday benchmark without accidental escaped regex",()=>{
+ const code=readFileSync(new URL("../supabase/functions/weekly-model-lifecycle/index.ts",import.meta.url),"utf8")
+ assert.match(code,/noteBenchmark\.startsWith\("intraday-mh"\)/)
+ assert.match(code,/noteBenchmark\.startsWith\("weekly-auto-mh"\)/)
+ assert.doesNotMatch(code,/noteBenchmark\)\?noteBenchmark/)
+})
