@@ -67,31 +67,6 @@ import { optimizeBenchForAutosubs } from "../_shared/autosub.ts";
 
 
 function n(v:any){const x=Number(v);return Number.isFinite(x)?x:0}
-const AGGRESSIVE_XFP_FLOOR=.965;
-const AGGRESSIVE_MIN_OVERLAP=7;
-const AGGRESSIVE_MAX_OVERLAP=9;
-
-function metricScale(rows:any[]){
-  const maxXfp=Math.max(1e-9,...rows.map(r=>n(r.xfp)));
-  const maxP90=Math.max(1e-9,...rows.map(r=>n(r.p90)));
-  const top25=rows.map(r=>n(r.top25_score));
-  const minTop25=Math.min(...top25),maxTop25=Math.max(...top25);
-  return {maxXfp,maxP90,minTop25,maxTop25};
-}
-function normalizedTop25(row:any,scale:any){
-  const span=Math.max(1e-9,scale.maxTop25-scale.minTop25);
-  return Math.max(0,Math.min(1,(n(row.top25_score)-scale.minTop25)/span));
-}
-function aggressiveScore(row:any,scale:any,captain=false){
-  const xfp=Math.max(0,n(row.xfp))/scale.maxXfp;
-  const p90=Math.max(0,n(row.p90))/scale.maxP90;
-  const six=Math.max(0,Math.min(1,n(row.six_plus_probability)));
-  const top25=normalizedTop25(row,scale);
-  return captain
-    ? .30*xfp+.45*p90+.15*six+.10*top25
-    : .60*xfp+.20*p90+.10*six+.10*top25;
-}
-
 function xiBounds(formations:string[]){
   const rows=formations.map(f=>{
     const [DEF,MID,FWD]=String(f).split("-").map(Number);
