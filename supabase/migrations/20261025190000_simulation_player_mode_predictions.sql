@@ -83,7 +83,7 @@ from (
   player_id, full_name, display_name, short_label, shirt_number, team_id, team_name, team_slug,
   "position", price, active, total_points, opponent_name, venue,
   xi_probability, appearance_probability, over60_probability, x_minutes,
-  core_xfp, x_bonus, xfp, value_score, expected_goals, expected_assists,
+  core_xfp, x_bonus, xfp, value_score,
   projection_availability_probability, confidence,
   availability_type, availability_probability, canonical_reason, checked_at,
   suspension_end, injury_date, expected_return_date, suspension_fixture,
