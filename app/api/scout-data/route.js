@@ -53,13 +53,14 @@ function squad(data){
     recommendation:data?.recommendation?{
       variant:data.recommendation.variant,budget:data.recommendation.budget,
       xi_xfp:data.recommendation.xi_xfp,
-      xi_mode_sum:(data.members||[]).filter(m=>m.squad_slot==='XI').reduce((v,m)=>v+Number(m.mode_points||0),0),
+      xi_typical_sum:(data.members||[]).filter(m=>m.squad_slot==='XI').reduce((v,m)=>v+Number(m.typical_points||0),0),
       formation:data.recommendation.formation
     }:null,
     members:(data?.members||[]).map(m=>({
       player_id:m.player_id,squad_slot:m.squad_slot,is_captain:m.is_captain,bench_order:m.bench_order,
       player:m.player?{id:m.player.id,full_name:m.player.full_name,display_name:m.player.display_name,short_label:m.player.short_label,position:m.player.position,price:m.player.price}:null,
-      team:m.team,p90:m.p90,mode_points:m.mode_points,mode_probability:m.mode_probability
+      team:m.team,p90:m.p90,mode_points:m.mode_points,mode_probability:m.mode_probability,
+      typical_points:m.typical_points,top3_coverage:m.top3_coverage,top3_score_distribution:m.top3_score_distribution
     }))
   }
 }
