@@ -87,3 +87,12 @@ test("typical card shows weighted top-three, not a single mode disguised as typi
   // Team's modal total is NOT mathematically equal to sum of player top-three typical scores;
   // copy explicitly says the sum of individual conditional typical scores.
 })
+
+test("typical scores round to nearest whole number only for display, not optimizer scoring",()=>{
+  assert.equal(Math.round(5.29),5)
+  assert.equal(Math.round(5.50),6)
+  assert.equal(Math.round(-1.4),-1)
+  assert.match(pitch,/Math\.round\(Number\(m\.typical_points\|\|0\)\)/)
+  assert.match(cards,/Math\.round\(data\.members\.filter/)
+  assert.match(optimizer,/n\(r\.typical_points\)\+\.00001\*n\(r\.xfp\)/)
+})
