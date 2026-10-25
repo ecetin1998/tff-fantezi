@@ -75,3 +75,42 @@ export function recentAttackForm({
     applied:Math.abs(nextXg-xgPer90)>1e-8||Math.abs(nextXa-xaPer90)>1e-8,
     reason:"source_gated_last3_activity",shots,keyPasses}
 }
+
+/**
+ * Pagination is required: three weeks can exceed PostgREST's 1,000-row cap.
+ * Any upstream failure fails closed; never silently truncate the signal pool.
+ */
+export async function fetchRecentAttackEvidence(sb,targetWeek){
+  const fromWeek=Math.max(1,Number(targetWeek)-3)
+  async function read(table,columns){
+    const rows=[]
+    for(let start=0;start<10000;start+=500){
+      const q=await sb.from(table).select(columns).eq("season","2026-27")
+        .gte("gameweek",fromWeek).lt("gameweek",Number(targetWeek))
+        .order("gameweek",{ascending:false}).order("player_id",{ascending:true})
+        .range(start,start+499)
+      if(q.error)return {data:null,error:q.error}
+      const batch=q.data||[]
+      rows.push(...batch)
+      if(batch.length<500)return {data:rows,error:null}
+    }
+    return {data:null,error:new Error("RECENT_ATTACK_PAGINATION_LIMIT")}
+  }
+  const [advanced,verified]=await Promise.all([
+    read("scout_player_advanced_weekly","player_id,gameweek,shots,key_passes,source"),
+    read("scout_verified_weekly_attack","player_id,gameweek,shots,key_passes,source")
+  ])
+  return advanced.error||verified.error
+    ?{data:null,error:advanced.error||verified.error}
+    :{data:{advanced:advanced.data,verified:verified.data},error:null}
+}
+
+export function groupRecentAttack(rows=[]){
+  const byPlayer=new Map()
+  for(const row of rows||[]){
+    const id=Number(row.player_id)
+    if(!byPlayer.has(id))byPlayer.set(id,[])
+    byPlayer.get(id).push(row)
+  }
+  return byPlayer
+}
