@@ -62,7 +62,9 @@ export default function SquadPitchView({
           <small>{m.team}</small>
           <div className="pitch-player-tags">
             <span>{Number(m.player?.price||0).toFixed(1)}m</span>
-            <strong>{Number(m.xfp||0).toFixed(1)} xFP</strong>
+            {variant==='alternative'&&scoreLabel.includes('Mod')
+              ?<strong title={`En sık görülen puan · %${(100*Number(m.mode_probability||0)).toFixed(1)} olasılık`}>{m.mode_points??'—'} mod</strong>
+              :<strong>{Number(m.xfp||0).toFixed(1)} xFP</strong>}
           </div>
           {m.is_captain?<em className="readonly-captain">K</em>:null}
         </Link>)}
@@ -78,7 +80,7 @@ export default function SquadPitchView({
         {bench.map((m,i)=><Link href={'/players/'+m.player_id} className="my-bench-player readonly-bench-player" key={m.player_id}>
           <span className="bench-order">{i+1}</span>
           <span className={`fantasy-shirt mini ${m.player?.position}`} style={teamCssVars(m.team)}><i>{posLabel[m.player?.position]||m.player?.position||'—'}</i></span>
-          <span className="bench-copy"><b>{playerLabel(m.player)}</b><small>{m.team||'—'} • {posLabel[m.player?.position]||m.player?.position} • {Number(m.player?.price||0).toFixed(1)}m • {Number(m.xfp||0).toFixed(1)} xFP</small></span>
+          <span className="bench-copy"><b>{playerLabel(m.player)}</b><small>{m.team||'—'} • {posLabel[m.player?.position]||m.player?.position} • {Number(m.player?.price||0).toFixed(1)}m • {variant==='alternative'&&scoreLabel.includes('Mod')?`${m.mode_points??'—'} mod (%${(100*Number(m.mode_probability||0)).toFixed(0)})`:`${Number(m.xfp||0).toFixed(1)} xFP`}</small></span>
         </Link>)}
       </div>
     </div>:null}
