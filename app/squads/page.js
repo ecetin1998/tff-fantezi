@@ -29,7 +29,7 @@ export default async function Squads(){
 
     <div className="squad-tabs-note">
       <span>● Önerilen: dengeli maksimum beklenen puan • risk dağıtımı için aynı takımın KL+DEF oyuncularından ilk 11’de en fazla 2 kişi</span>
-      <span>◇ Agresif 11: xFP'yi koruyup tavanı artırır • Önerilen İlk 11'den 2-4 oyuncu farklı • kaptan tavan odaklı</span>
+      <span>◇ Tipik Puan 11: Her oyuncunun en sık aldığı 3 farklı puanın görülme sayısına göre ağırlıklı ortalaması en yüksek XI • eşitliklerde xFP</span>
     </div>
 
     {auth.tier==='visitor'?<>
@@ -63,7 +63,7 @@ export default async function Squads(){
       <AccessGate
         tier="pro"
         eyebrow="GELİŞMİŞ • MENAJER KARTLARI"
-        title="Menajer kartı optimizasyonunu ve Agresif 11'i aç."
+        title="Menajer kartlarını ve Tipik Puan 11 karşılaştırmasını aç."
         description="Gelişmiş üyelikte seçtiğin menajer kartına göre kadro, diziliş, kaptan ve bütçe yeniden hesaplanır."
       />
     </div>}
