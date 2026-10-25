@@ -10,7 +10,7 @@ export async function fetchTrustedWeeklyEvidence(sb, targetWeek) {
   const rows=[]
   for(let offset=0;offset<maxRows;offset+=pageSize){
     const page=await sb.from("scout_player_weekly_points")
-      .select("player_id,gameweek,match_id,minutes,points,is_final,source_kind")
+      .select("player_id,gameweek,match_id,minutes,points,is_final,source_kind,source_updated_at")
       .gte("gameweek",Math.max(1,Number(targetWeek)-5))
       .lt("gameweek",Number(targetWeek))
       .eq("is_final",true)
