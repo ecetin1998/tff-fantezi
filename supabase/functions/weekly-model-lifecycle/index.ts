@@ -458,7 +458,7 @@ async function prepare(sb:any,current:any,status:any,body:any={}){
     })
     const trustedAdvanced=Number(s.advanced_through_gameweek)>=target-2
     const form=recentAttackForm({
-      position:p.position,targetWeek:target,weekly:rows,
+      position:p.position,targetWeek:target,cutoffAt:targetKickoff,weekly:rows,
       advanced:recentAdvanced.get(id)||[],verified:recentVerified.get(id)||[],
       seasonShotsPer90:trustedAdvanced?shots90:null,
       seasonKeyPassesPer90:trustedAdvanced&&minutes>0&&s.key_passes!=null
@@ -816,7 +816,7 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
     const form=String(stableInput.source_note||"").includes("recent-attack-form-v2")
       ?{xgPer90:calibrated.xgPer90,xaPer90:calibrated.xaPer90,applied:false}
       :recentAttackForm({
-        position:player?.position||x.position,targetWeek:gw,
+        position:player?.position||x.position,targetWeek:gw,cutoffAt:kickoff,
         weekly:weeklyMomentumRows.get(Number(x.player_id))||[],
         advanced:recentAdvanced.get(Number(x.player_id))||[],
         verified:recentVerified.get(Number(x.player_id))||[],
