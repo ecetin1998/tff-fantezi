@@ -123,6 +123,18 @@ jobs:
           echo "current_gw=$(printf '%s' "$response" | jq -r '.current_gameweek')" >> "$GITHUB_OUTPUT"
           echo "target_gw=$(printf '%s' "$response" | jq -r '.target_gameweek')" >> "$GITHUB_OUTPUT"
 
+      - name: Audit current match strengths, NB2 clean sheets and player allocations
+        shell: bash
+        env:
+          OIDC_TOKEN: ${{ steps.oidc.outputs.token }}
+        run: |
+          set -euo pipefail
+          response="$(curl --fail-with-body --silent --show-error --max-time 90 \
+            -H "Authorization: Bearer $OIDC_TOKEN" -H "Content-Type: application/json" \
+            --data '{"action":"audit_run"}' "$FUNCTIONS_URL/weekly-model-lifecycle")"
+          echo "$response" | jq .
+          echo "$response" | jq -e '.pass == true and .allocation.pass == true and .distribution.pass == true and .no_writes == true'
+
       - name: Prepare current-MH refresh when inputs changed
         if: steps.status.outputs.ready != 'true'
         id: current_refresh
@@ -158,6 +170,22 @@ jobs:
             sleep 1
           done
           curl --fail --show-error --silent --max-time 240 --retry 5 --retry-delay 2 --retry-all-errors --retry-max-time 120 "${common[@]}"             "$FUNCTIONS_URL/run-live-sim-chunk?mode=finalize&gw=$GAMEWEEK&run=$RUN_ID&benchmark=$BENCHMARK" | jq -e -c 'if .ok == true and .policy_version == "gk-sot-penalty-matched-v1" then . else error("MODEL_SCORER_POLICY_MISMATCH") end'
+
+      - name: Audit refreshed current MH after finalized 50K
+        if: steps.status.outputs.ready != 'true' && steps.current_refresh.outputs.refresh == 'true'
+        shell: bash
+        env:
+          OIDC_TOKEN: ${{ steps.oidc.outputs.token }}
+          RUN_ID: ${{ steps.current_refresh.outputs.run_id }}
+          BENCHMARK: ${{ steps.current_refresh.outputs.benchmark }}
+        run: |
+          set -euo pipefail
+          jq -n --arg run "$RUN_ID" --arg bench "$BENCHMARK" \
+            '{action:"audit_run",run_id:$run,benchmark:$bench}' | \
+            curl --fail-with-body --silent --show-error --max-time 90 \
+              -H "Authorization: Bearer $OIDC_TOKEN" -H "Content-Type: application/json" \
+              --data-binary @- "$FUNCTIONS_URL/weekly-model-lifecycle" | \
+            jq -e '.pass == true and .allocation.pass == true and .distribution.pass == true and .no_writes == true'
 
       - name: Optimize current-MH recommended squad
         if: steps.status.outputs.ready != 'true' && steps.current_refresh.outputs.refresh == 'true'
@@ -273,6 +301,22 @@ jobs:
             sleep 1
           done
           curl --fail --show-error --silent --max-time 240 --retry 5 --retry-delay 2 --retry-all-errors --retry-max-time 120 "${common[@]}"             "$FUNCTIONS_URL/run-live-sim-chunk?mode=finalize&gw=$GAMEWEEK&run=$RUN_ID&benchmark=$BENCHMARK" | jq -e -c 'if .ok == true and .policy_version == "gk-sot-penalty-matched-v1" then . else error("MODEL_SCORER_POLICY_MISMATCH") end'
+
+      - name: Audit candidate MH after finalized 50K
+        if: steps.status.outputs.ready == 'true'
+        shell: bash
+        env:
+          OIDC_TOKEN: ${{ steps.oidc.outputs.token }}
+          RUN_ID: ${{ steps.prepare.outputs.run_id }}
+          BENCHMARK: ${{ steps.prepare.outputs.benchmark }}
+        run: |
+          set -euo pipefail
+          jq -n --arg run "$RUN_ID" --arg bench "$BENCHMARK" \
+            '{action:"audit_run",run_id:$run,benchmark:$bench}' | \
+            curl --fail-with-body --silent --show-error --max-time 90 \
+              -H "Authorization: Bearer $OIDC_TOKEN" -H "Content-Type: application/json" \
+              --data-binary @- "$FUNCTIONS_URL/weekly-model-lifecycle" | \
+            jq -e '.pass == true and .allocation.pass == true and .distribution.pass == true and .no_writes == true'
 
       - name: Optimize recommended squad
         if: steps.status.outputs.ready == 'true'
