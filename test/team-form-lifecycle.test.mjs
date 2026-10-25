@@ -124,3 +124,14 @@ test("signed audit resolves current live intraday benchmark without accidental e
  assert.match(code,/noteBenchmark\.startsWith\("weekly-auto-mh"\)/)
  assert.doesNotMatch(code,/noteBenchmark\)\?noteBenchmark/)
 })
+
+test("intraday candidate run ID is initialized before creating match-prediction rows",()=>{
+ const code=readFileSync(new URL("../supabase/functions/weekly-model-lifecycle/index.ts",import.meta.url),"utf8")
+ const pos=code.indexOf("async function prepareCurrentRefresh")
+ const own=code.slice(pos)
+ const define=own.indexOf("const runId=crypto.randomUUID()")
+ const map=own.indexOf("const matchPredictions=(teamFixturesQ.data||[]).map")
+ const insert=own.indexOf("const runInsert=await")
+ assert.ok(define>=0&&map>define&&insert>map)
+ assert.equal(own.match(/const runId=crypto\.randomUUID\(\)/g)?.length,1)
+})
