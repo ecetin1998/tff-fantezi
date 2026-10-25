@@ -2,19 +2,35 @@
 -- Unknown historical runs remain NULL until their histogram is safely finalized.
 ALTER TABLE public.scout_player_projections
   ADD COLUMN IF NOT EXISTS mode_points integer NULL,
-  ADD COLUMN IF NOT EXISTS mode_probability numeric NULL;
+  ADD COLUMN IF NOT EXISTS mode_probability numeric NULL,
+  ADD COLUMN IF NOT EXISTS typical_points numeric NULL,
+  ADD COLUMN IF NOT EXISTS top3_coverage numeric NULL,
+  ADD COLUMN IF NOT EXISTS top3_score_distribution jsonb NULL;
 ALTER TABLE public.scout_squad_members
   ADD COLUMN IF NOT EXISTS mode_points integer NULL,
-  ADD COLUMN IF NOT EXISTS mode_probability numeric NULL;
+  ADD COLUMN IF NOT EXISTS mode_probability numeric NULL,
+  ADD COLUMN IF NOT EXISTS typical_points numeric NULL,
+  ADD COLUMN IF NOT EXISTS top3_coverage numeric NULL,
+  ADD COLUMN IF NOT EXISTS top3_score_distribution jsonb NULL;
 
-DO $$
+DO $
 BEGIN
  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname='scout_projection_mode_bounds') THEN
   ALTER TABLE public.scout_player_projections ADD CONSTRAINT scout_projection_mode_bounds
     CHECK ((mode_points IS NULL AND mode_probability IS NULL) OR
       (mode_points BETWEEN -40 AND 215 AND mode_probability BETWEEN 0 AND 1));
  END IF;
-END $$;
+END $;
+DO $
+BEGIN
+ IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname='scout_projection_top3_bounds') THEN
+  ALTER TABLE public.scout_player_projections ADD CONSTRAINT scout_projection_top3_bounds
+    CHECK ((typical_points IS NULL AND top3_coverage IS NULL AND top3_score_distribution IS NULL)
+        OR (typical_points BETWEEN -40 AND 215 AND top3_coverage > 0 AND top3_coverage <= 1
+            AND jsonb_typeof(top3_score_distribution) = 'array'
+            AND jsonb_array_length(top3_score_distribution) = 3));
+ END IF;
+END $;
 
 CREATE OR REPLACE FUNCTION public.scout_finalize_modal_projection(
   p_run_id uuid, p_gameweek integer, p_benchmark text
@@ -48,14 +64,32 @@ BEGIN
    ON a.player_id=p.player_id AND a.gameweek=p_gameweek AND a.benchmark_version=p_benchmark
  CROSS JOIN LATERAL jsonb_array_elements_text(a.hist) WITH ORDINALITY AS bin(value,index)
  WHERE p.run_id=p_run_id
+ ), top3 AS (
+ SELECT player_id,
+   max(points) FILTER(WHERE rn=1) AS mode_points,
+   max(frequency) FILTER(WHERE rn=1) AS mode_frequency,
+   max(draws) AS draws,
+   sum(points::numeric * frequency)/nullif(sum(frequency),0) AS typical_points,
+   sum(frequency)::numeric / max(draws) AS coverage,
+   jsonb_agg(
+     jsonb_build_object('points',points,'probability',frequency::numeric / draws)
+     ORDER BY rn
+   ) AS scenarios
+ FROM ranked WHERE rn<=3 AND frequency>0
+ GROUP BY player_id
+ HAVING count(*)=3
  )
  UPDATE public.scout_player_projections p
- SET mode_points = r.points, mode_probability = r.frequency::numeric / r.draws
- FROM ranked r
- WHERE p.run_id=p_run_id AND p.player_id=r.player_id AND r.rn=1;
+ SET mode_points=t.mode_points,
+     mode_probability=t.mode_frequency::numeric/t.draws,
+     typical_points=round(t.typical_points,4),
+     top3_coverage=round(t.coverage,5),
+     top3_score_distribution=t.scenarios
+ FROM top3 t
+ WHERE p.run_id=p_run_id AND p.player_id=t.player_id;
  GET DIAGNOSTICS updated_rows=ROW_COUNT;
  IF updated_rows <> expected_rows THEN
-   RAISE EXCEPTION 'Incomplete mode projection update: % of %',updated_rows,expected_rows;
+   RAISE EXCEPTION 'Incomplete top-three projection update: % of %',updated_rows,expected_rows;
  END IF;
  RETURN updated_rows;
 END;
