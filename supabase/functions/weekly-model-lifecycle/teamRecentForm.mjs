@@ -10,8 +10,11 @@ export function recentTeamForm({teamId,gameweek,matches=[]}={}){
   const rows=[]
   for(const m of matches||[]){
     const wk=Number(m.gameweek),home=Number(m.home_team_id)===id,away=Number(m.away_team_id)===id
-    if(!(wk<gw&&wk>=1&&(home!==away))||m.match_status!=="Bitti"||
-       m.fantasy_closure!=="KAPANDI")continue
+    // Team score form uses independently finished match RESULTS, not
+    // Fantasy-point ledger closure. MH1–5 match results are final while
+    // fantasy_closure can still say "Kontrol bekliyor"; treating that as
+    // unfinished suppressed all team-form adjustments in production.
+    if(!(wk<gw&&wk>=1&&(home!==away))||m.match_status!=="Bitti")continue
     const gf=Number(home?m.home_goals:m.away_goals),ga=Number(home?m.away_goals:m.home_goals)
     if(!Number.isInteger(gf)||!Number.isInteger(ga)||gf<0||ga<0||gf>15||ga>15)continue
     rows.push({wk,gf,ga})
