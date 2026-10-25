@@ -60,6 +60,8 @@ test("modal columns are kept null before exact 50K finalize",()=>{
   assert.match(sql,/sum\(points::numeric \* frequency\)\/nullif\(sum\(frequency\),0\)/)
   assert.match(sql,/jsonb_agg\(/)
   assert.match(sql,/top3_coverage/)
+  assert.match(sql,/jsonb_array_length\(top3_score_distribution\) BETWEEN 1 AND 3/)
+  assert.match(sql,/HAVING count\(\*\) BETWEEN 1 AND 3/)
   assert.match(sql,/a\.draws=50000/)
   assert.match(sql,/jsonb_array_length\(a\.hist\)=256/)
   assert.match(sql,/bin\.index-41/)
@@ -81,7 +83,7 @@ test("typical card shows weighted top-three, not a single mode disguised as typi
   assert.match(pitch,/top3_score_distribution/)
   assert.match(pitch,/typical_points/)
   assert.match(cards,/İlk 11 Tipik Puan toplamı/)
-  assert.match(cards,/MOD 11/)
+  assert.match(cards,/TİPİK PUAN 11/)
   const total=[2,1,0,2,2,1,1,2,0,2,1].reduce((a,b)=>a+b,0)
   assert.equal(total,14)
   // Team's modal total is NOT mathematically equal to sum of player top-three typical scores;
