@@ -968,10 +968,11 @@ Deno.serve(async(req:Request)=>{
       if(runQ.error)throw runQ.error
       const run=runQ.data
       const gw=Number(run.gameweek)
+      const noteBenchmark=String((run.notes||"").split(" • ")[1]||"").trim()
       let benchmark=String(body.benchmark||
-        (run.notes||"").split(" • ")[1]||"").trim()
-      // Weekly candidate notes contain a lifecycle key, not the replay
-      // benchmark; resolve its metadata instead of guessing a new ref.
+        (/^(weekly-auto-mh|intraday-mh)\\d+-/.test(noteBenchmark)?noteBenchmark:"")).trim()
+      // Weekly candidate notes contain a lifecycle key + human prose,
+      // not the replay benchmark; resolve metadata instead of guessing.
       if(!benchmark){
         const lifecycleKey=String(run.notes||"").split(" • ")[0]
         const metaRef=await sb.from("scout_replay_input_meta")
