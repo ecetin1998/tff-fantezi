@@ -32,7 +32,11 @@ test("do not use current/future week or incomplete, unverified fixtures",()=>{
     recentTeamForm({teamId:1,gameweek:9,matches:future}),
     recentTeamForm({teamId:1,gameweek:9,matches:historical})
   )
-  const bad=historical.map(x=>x.gameweek===8?{...x,fantasy_closure:"BEKLİYOR"}:x)
+  // Fantasy point closure does not invalidate independently finalized
+  // match scores. Earlier GW1–5 were final scores with Fantasy review pending.
+  const awaitingFantasy=historical.map(x=>x.gameweek<=5?{...x,fantasy_closure:"Kontrol bekliyor"}:x)
+  assert.equal(recentTeamForm({teamId:1,gameweek:9,matches:awaitingFantasy}).ready,true)
+  const bad=historical.map(x=>x.gameweek===8?{...x,match_status:"Devam ediyor"}:x)
   assert.equal(recentTeamForm({teamId:1,gameweek:9,matches:bad}).ready,false)
   const noData=applyTeamMatchForm({baselineHome:1.5,baselineAway:1.1,homeTeamId:1,awayTeamId:3,gameweek:9,matches:historical})
   assert.equal(noData.applied,false)
