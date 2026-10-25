@@ -968,8 +968,19 @@ Deno.serve(async(req:Request)=>{
       if(runQ.error)throw runQ.error
       const run=runQ.data
       const gw=Number(run.gameweek)
-      const benchmark=String(body.benchmark||
+      let benchmark=String(body.benchmark||
         (run.notes||"").split(" • ")[1]||"").trim()
+      // Weekly candidate notes contain a lifecycle key, not the replay
+      // benchmark; resolve its metadata instead of guessing a new ref.
+      if(!benchmark){
+        const lifecycleKey=String(run.notes||"").split(" • ")[0]
+        const metaRef=await sb.from("scout_replay_input_meta")
+          .select("benchmark_version").eq("gameweek",gw)
+          .ilike("source_note","%"+lifecycleKey+"%")
+          .order("created_at",{ascending:false}).limit(1).maybeSingle()
+        if(metaRef.error)throw metaRef.error
+        benchmark=String(metaRef.data?.benchmark_version||"")
+      }
       if(!benchmark)return Response.json({ok:false,error:"AUDIT_BENCHMARK_MISSING"},{status:409})
       const [players,matches,fixtures,shares,projections,matchPreds,goalConfig,meta,teamStats,tactical]=await Promise.all([
         sb.from("scout_replay_player_inputs").select("player_id,club_id,position,rates,availability").eq("gameweek",gw).eq("benchmark_version",benchmark),
