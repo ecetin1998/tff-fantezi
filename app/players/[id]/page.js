@@ -99,6 +99,7 @@ export default async function PlayerPage({ params }){
 
   const decisionMetrics=[
     {label:'xFP',value:num(p?.xfp),note:`MH${run?.gameweek||'—'} beklenen`,emphasis:true},
+    ...(p?.mode_points!==null&&p?.mode_points!==undefined?[{label:'En sık puan',value:String(p.mode_points),note:`50K'da ${pct(p?.mode_probability)} kez` }]:[]),
     {label:'İlk 11',value:pct(p?.xi_probability),note:'başlama ihtimali'},
     {label:'xDakika',value:num(p?.x_minutes,0),note:'beklenen süre'},
     {label:'F/P',value:num(p?.value_score),note:'fiyat verimliliği'},
@@ -110,7 +111,8 @@ export default async function PlayerPage({ params }){
 
   const scenarioMetrics=[
     {label:'Temkinli',value:num(p?.p25,1),note:'alt çeyrek'},
-    {label:'Beklenti',value:num(p?.xfp,1),note:'ortalama senaryo',emphasis:true},
+    {label:'Beklenti',value:num(p?.xfp,1),note:'50K ortalaması',emphasis:true},
+    ...(p?.mode_points!==null&&p?.mode_points!==undefined?[{label:'En sık',value:String(p.mode_points),note:`${pct(p?.mode_probability)} olasılıkla`}]:[]),
     {label:'İyi senaryo',value:num(p?.p75,1),note:'üst çeyreğe giriş'},
     {label:'Tavan',value:num(p?.p90,1),note:'üst %10'},
   ]
@@ -215,7 +217,7 @@ export default async function PlayerPage({ params }){
         <div className="player-detail-section-head">
           <div><span className="eyebrow">PUAN ARALIĞI</span><h2>Olası sonuç dağılımı</h2></div>
         </div>
-        <p className="projection-explainer">Tek bir puana takılmak yerine olası sonuç aralığını birlikte oku.</p>
+        <p className="projection-explainer">xFP tüm simülasyonların ortalamasıdır; en sık puan ise tek bir sonucun kaç kez gerçekleştiğini gösterir. En sık puan kesin tahmin değildir.</p>
         <MetricGrid items={scenarioMetrics} className="scenario-metrics"/>
         {!isGK?<div className="player-attacking-expectation">
           <div><span>Beklenen gol</span><b>{num(p?.expected_goals)}</b></div>
