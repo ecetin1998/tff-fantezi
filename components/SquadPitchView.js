@@ -70,7 +70,7 @@ export default function SquadPitchView({
           <div className="pitch-player-tags">
             <span>{Number(m.player?.price||0).toFixed(1)}m</span>
             {variant==='alternative'&&scoreLabel.includes('Tipik')
-              ?<strong title={typicalScenarios(m)}>{Number(m.typical_points||0).toFixed(2)} tipik</strong>
+              ?<strong title={typicalScenarios(m)}>{Math.round(Number(m.typical_points||0))} tipik</strong>
               :<strong>{Number(m.xfp||0).toFixed(1)} xFP</strong>}
           </div>
           {m.is_captain?<em className="readonly-captain">K</em>:null}
@@ -87,7 +87,7 @@ export default function SquadPitchView({
         {bench.map((m,i)=><Link href={'/players/'+m.player_id} className="my-bench-player readonly-bench-player" key={m.player_id} title={variant==='alternative'&&scoreLabel.includes('Tipik')?typicalScenarios(m):undefined}>
           <span className="bench-order">{i+1}</span>
           <span className={`fantasy-shirt mini ${m.player?.position}`} style={teamCssVars(m.team)}><i>{posLabel[m.player?.position]||m.player?.position||'—'}</i></span>
-          <span className="bench-copy"><b>{playerLabel(m.player)}</b><small>{m.team||'—'} • {posLabel[m.player?.position]||m.player?.position} • {Number(m.player?.price||0).toFixed(1)}m • {variant==='alternative'&&scoreLabel.includes('Tipik')?`${Number(m.typical_points||0).toFixed(2)} tipik puan`:`${Number(m.xfp||0).toFixed(1)} xFP`}</small></span>
+          <span className="bench-copy"><b>{playerLabel(m.player)}</b><small>{m.team||'—'} • {posLabel[m.player?.position]||m.player?.position} • {Number(m.player?.price||0).toFixed(1)}m • {variant==='alternative'&&scoreLabel.includes('Tipik')?`${Math.round(Number(m.typical_points||0))} tipik puan`:`${Number(m.xfp||0).toFixed(1)} xFP`}</small></span>
         </Link>)}
       </div>
     </div>:null}
