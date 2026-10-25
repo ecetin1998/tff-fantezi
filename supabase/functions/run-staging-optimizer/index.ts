@@ -130,9 +130,9 @@ function buildModel(rows:any[],variant:string,rules:any,reference:any=null){
   }
 
   const variables:any={},ints:any={};
-  // Mod is the primary optimization target, xFP only breaks ties.
-  // A one-point mod improvement dominates any plausible 15-player xFP tie.
-  const modalObjective=(r:any)=>n(r.mode_points)+.001*n(r.xfp);
+  // Frequency-weighted top-three outcome score: primary lineup objective.
+  // The tiny xFP coefficient only resolves practically identical scores.
+  const modalObjective=(r:any)=>n(r.typical_points)+.00001*n(r.xfp);
   for(const r of rows){
     const id=Number(r.player_id),pos=String(r.position),team=Number(r.team_id);
     const price=n(r.price),xfp=n(r.xfp);
@@ -210,22 +210,22 @@ Deno.serve(async(req:Request)=>{
     const rules=rulesRes.data?.rules;
     if(!rules)throw new Error("GAME_RULES_MISSING");
     const {data,error}=await sb.from("scout_player_projections")
-      .select("player_id,xfp,mode_points,mode_probability,p90,six_plus_probability,top25_score,xi_probability,appearance_probability,x_minutes,availability_probability,confidence,scout_players!inner(team_id,position,price,active)")
+      .select("player_id,xfp,mode_points,mode_probability,typical_points,top3_coverage,top3_score_distribution,p90,six_plus_probability,top25_score,xi_probability,appearance_probability,x_minutes,availability_probability,confidence,scout_players!inner(team_id,position,price,active)")
       .eq("run_id",RUN);
     if(error)throw error;
     const rows=(data||[]).map((x:any)=>({
-      player_id:x.player_id,xfp:x.xfp,mode_points:x.mode_points,mode_probability:x.mode_probability,p90:x.p90,six_plus_probability:x.six_plus_probability,top25_score:x.top25_score,xi_probability:x.xi_probability,appearance_probability:x.appearance_probability,x_minutes:x.x_minutes,availability_probability:x.availability_probability,
+      player_id:x.player_id,xfp:x.xfp,mode_points:x.mode_points,mode_probability:x.mode_probability,typical_points:x.typical_points,top3_coverage:x.top3_coverage,top3_score_distribution:x.top3_score_distribution,p90:x.p90,six_plus_probability:x.six_plus_probability,top25_score:x.top25_score,xi_probability:x.xi_probability,appearance_probability:x.appearance_probability,x_minutes:x.x_minutes,availability_probability:x.availability_probability,
       team_id:x.scout_players.team_id,position:x.scout_players.position,price:x.scout_players.price,active:x.scout_players.active,confidence:x.confidence||"medium"
     })).filter((x:any)=>x.active && n(x.availability_probability)>=.8 && n(x.price)>0);
-    if((data||[]).length!==456 || (data||[]).some((x:any)=>x.mode_points===null||x.mode_probability===null))
-      throw new Error("MODE_HISTOGRAM_NOT_FINALIZED_FOR_ALL_456");
+    if((data||[]).length!==456 || (data||[]).some((x:any)=>x.typical_points===null||!Array.isArray(x.top3_score_distribution)||x.top3_score_distribution.length!==3))
+      throw new Error("TOP3_HISTOGRAM_NOT_FINALIZED_FOR_ALL_456");
     const byPos:any={GK:[],DEF:[],MID:[],FWD:[]};
     for(const r of rows) byPos[r.position]?.push(r);
     const keep=new Set<number>();
     for(const pos of Object.keys(byPos)){
       const arr=byPos[pos];
       [...arr].sort((a,b)=>n(b.xfp)-n(a.xfp)).slice(0,35).forEach(x=>keep.add(Number(x.player_id)));
-      [...arr].sort((a,b)=>n(b.mode_points)-n(a.mode_points)||n(b.xfp)-n(a.xfp)).slice(0,45).forEach(x=>keep.add(Number(x.player_id)));
+      [...arr].sort((a,b)=>n(b.typical_points)-n(a.typical_points)||n(b.xfp)-n(a.xfp)).slice(0,45).forEach(x=>keep.add(Number(x.player_id)));
       [...arr].sort((a,b)=>n(b.p90)-n(a.p90)||n(b.xfp)-n(a.xfp)).slice(0,35).forEach(x=>keep.add(Number(x.player_id)));
       [...arr].sort((a,b)=>n(b.top25_score)-n(a.top25_score)||n(b.six_plus_probability)-n(a.six_plus_probability)).slice(0,30).forEach(x=>keep.add(Number(x.player_id)));
       [...arr].sort((a,b)=>n(a.price)-n(b.price)||n(b.xfp)-n(a.xfp)).slice(0,30).forEach(x=>keep.add(Number(x.player_id)));
@@ -257,27 +257,27 @@ Deno.serve(async(req:Request)=>{
       const xiXfp=xiRows.reduce((s:number,r:any)=>s+n(r.xfp),0);
       const cap=byId.get(sol.captain);
       const formation=sol.formation;
-      const objective=variant==="recommended"?"xi_primary_exact_autosub_secondary_v1":"xi_sum_of_individual_modes_primary_xfp_tiebreak_v1";
-      const xiMode=xiRows.reduce((sum:number,r:any)=>sum+n(r.mode_points),0);
+      const objective=variant==="recommended"?"xi_primary_exact_autosub_secondary_v1":"xi_sum_of_top3_typical_points_primary_xfp_tiebreak_v1";
+      const xiTypical=xiRows.reduce((sum:number,r:any)=>sum+n(r.typical_points),0);
       const sims=Number(runMeta.data.simulation_count||0).toLocaleString("tr-TR");
       const autosubLabel=Number(sol.autosubEv||0).toFixed(2);
       const status=variant==="recommended"
         ? `OPTIMAL • availability-integrated • bütçe ≤${Number(rules.budget)}m • ${sims} sim • autosub EV +${autosubLabel}`
-        : `OPTIMAL • Mod 11 • bireysel en sık puan toplamı ${xiMode} • eşitliklerde xFP • bütçe ≤${Number(rules.budget)}m • ${sims} sim • autosub EV +${autosubLabel}`;
+        : `OPTIMAL • Tipik Puan 11 • en sık üç puanın sıklık ağırlıklı toplamı ${xiTypical.toFixed(2)} • eşitliklerde xFP • bütçe ≤${Number(rules.budget)}m • ${sims} sim • autosub EV +${autosubLabel}`;
       recs.push({id,run_id:RUN,variant,budget,xi_xfp:xiXfp,captain_xfp:xiXfp+n(cap.xfp),formation,objective,status});
       const posOrder:any={GK:0,DEF:1,MID:2,FWD:3};
       const xis=[...sol.xi].sort((a:number,b:number)=>posOrder[byId.get(a).position]-posOrder[byId.get(b).position]||n(byId.get(b).xfp)-n(byId.get(a).xfp));
       const bns=[...sol.bench];
       const members:any[]=[];
       xis.forEach((pid:number,idx:number)=>{
-        const r=byId.get(pid);members.push({recommendation_id:id,player_id:pid,squad_slot:"XI",sort_order:idx+1,is_captain:pid===sol.captain,xfp:n(r.xfp),mode_points:n(r.mode_points),mode_probability:n(r.mode_probability),xi_contribution:n(r.xfp)*(pid===sol.captain?2:1)});
+        const r=byId.get(pid);members.push({recommendation_id:id,player_id:pid,squad_slot:"XI",sort_order:idx+1,is_captain:pid===sol.captain,xfp:n(r.xfp),mode_points:n(r.mode_points),mode_probability:n(r.mode_probability),typical_points:n(r.typical_points),top3_coverage:n(r.top3_coverage),top3_score_distribution:r.top3_score_distribution,xi_contribution:n(r.xfp)*(pid===sol.captain?2:1)});
       });
       bns.forEach((pid:number,idx:number)=>{
-        const r=byId.get(pid);members.push({recommendation_id:id,player_id:pid,squad_slot:"BENCH",sort_order:idx+1,is_captain:false,xfp:n(r.xfp),mode_points:n(r.mode_points),mode_probability:n(r.mode_probability),xi_contribution:0});
+        const r=byId.get(pid);members.push({recommendation_id:id,player_id:pid,squad_slot:"BENCH",sort_order:idx+1,is_captain:false,xfp:n(r.xfp),mode_points:n(r.mode_points),mode_probability:n(r.mode_probability),typical_points:n(r.typical_points),top3_coverage:n(r.top3_coverage),top3_score_distribution:r.top3_score_distribution,xi_contribution:0});
       });
       const ir=await sb.from("scout_squad_recommendations").insert(recs[recs.length-1]);if(ir.error)throw ir.error;
       const im=await sb.from("scout_squad_members").insert(members);if(im.error)throw im.error;
     }
-    return Response.json({ok:true,run:RUN,mode,players:rows.length,pool:pool.length,xi:sol.xi,bench:sol.bench,captain:sol.captain,xi_mode_sum:sol.xi.reduce((v:number,pid:number)=>v+n(byId.get(pid)?.mode_points),0),autosub_ev:sol.autosubEv});
+    return Response.json({ok:true,run:RUN,mode,players:rows.length,pool:pool.length,xi:sol.xi,bench:sol.bench,captain:sol.captain,xi_typical_sum:sol.xi.reduce((v:number,pid:number)=>v+n(byId.get(pid)?.typical_points),0),autosub_ev:sol.autosubEv});
   }catch(e:any){return Response.json({error:String(e?.message||e)},{status:500})}
 });
