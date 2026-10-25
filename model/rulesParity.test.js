@@ -26,9 +26,11 @@ assert.doesNotMatch(optimizerTs,/budgetPenaltyPerM|spendReward|benchValue|\.08\*
 assert.match(optimizerPy,/AGGRESSIVE_XFP_FLOOR=0\.965/)
 assert.match(optimizerPy,/AGGRESSIVE_MIN_OVERLAP=7/)
 assert.match(optimizerPy,/AGGRESSIVE_MAX_OVERLAP=9/)
-assert.match(optimizerTs,/AGGRESSIVE_XFP_FLOOR=\.965/)
-assert.match(optimizerTs,/AGGRESSIVE_MIN_OVERLAP=7/)
-assert.match(optimizerTs,/AGGRESSIVE_MAX_OVERLAP=9/)
+// Python replay optimizer still supports historical aggressive objective;
+ // the live *alternative* XI now deliberately optimizes top-three typical score.
+assert.match(optimizerTs,/xi_top3_weighted_typical_primary_xfp_tiebreak_v1/)
+assert.match(optimizerTs,/TOP3_50K_COVERAGE_INCOMPLETE/)
+assert.doesNotMatch(optimizerTs,/AGGRESSIVE_MIN_OVERLAP|aggressiveOverlap/)
 assert.match(optimizerPy,/\* 1e-4/)
 assert.match(optimizerTs,/cheapBench=\.0001\*price/)
 
