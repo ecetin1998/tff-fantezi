@@ -72,7 +72,13 @@ GRANT EXECUTE ON FUNCTION public.scout_apply_modal_predictions(uuid,integer,text
 create or replace view public.v_current_player_cards_public
 with (security_invoker = true)
 as
-select
+select c.*,
+  case when c.xfp is not null and abs(c.xfp::numeric - mode.xfp) < 0.005
+    then mode.mode_points else null end as mode_points,
+  case when c.xfp is not null and abs(c.xfp::numeric - mode.xfp) < 0.005
+    then mode.mode_probability else null end as mode_probability
+from (
+ select
   run_id, gameweek, generated_at, source_updated_at, simulation_count, run_status, is_current,
   player_id, full_name, display_name, short_label, shirt_number, team_id, team_name, team_slug,
   "position", price, active, total_points, opponent_name, venue,
@@ -81,18 +87,12 @@ select
   projection_availability_probability, confidence,
   availability_type, availability_probability, canonical_reason, checked_at,
   suspension_end, injury_date, expected_return_date, suspension_fixture,
-  primary_role, role_side, role_source, role_confidence,
-  case when c.xfp is not null and abs(c.xfp::numeric-p.xfp) < 0.005
-    then p.mode_points else null end as mode_points,
-  case when c.xfp is not null and abs(c.xfp::numeric-p.xfp) < 0.005
-    then p.mode_probability else null end as mode_probability
-from public.v_current_player_cards c
-left join public.scout_player_projections p
- on p.run_id=c.run_id and p.player_id=c.player_id;
-
+  primary_role, role_side, role_source, role_confidence
+ from public.v_current_player_cards
+) c
+left join public.scout_player_projections mode
+ on mode.run_id=c.run_id and mode.player_id=c.player_id;
 revoke all on table public.v_current_player_cards_public from public, anon, authenticated;
 grant select on table public.v_current_player_cards_public to anon, authenticated;
-
 comment on view public.v_current_player_cards_public is
-  'Public player-card API surface. Excludes percentile/ceiling, Top-25, role-signal and advanced attacking metrics.';
-
+  'Public player cards, appending score mode and probability from 50K histograms. Excludes raw histogram and Pro-only statistics.';
