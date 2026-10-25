@@ -12,12 +12,20 @@ const finitePositive=v=>typeof v==="number"&&Number.isFinite(v)&&v>=0
 const safeCount=(v,max)=>Number.isInteger(v)&&v>=0&&v<=max?v:null
 const clamp=(a,b,x)=>Math.max(a,Math.min(b,x))
 
-function recentSignal({weekly=[],advanced=[],verified=[],targetWeek,metric,seasonRate}={}){
+function recentSignal({weekly=[],advanced=[],verified=[],targetWeek,metric,seasonRate,cutoffAt}={}){
   if(!Number.isInteger(targetWeek)||targetWeek<4||!finitePositive(seasonRate)||seasonRate<.05)
     return {factor:1,reason:"insufficient_season_baseline",weeks:[]}
-  const byWeek=new Map((weekly||[]).map(x=>[Number(x.gameweek),x]))
-  const advancedByWeek=new Map((advanced||[]).map(x=>[Number(x.gameweek),x]))
-  const verifiedByWeek=new Map((verified||[]).map(x=>[Number(x.gameweek),x]))
+  const cutoff=cutoffAt?new Date(cutoffAt).getTime():null
+  if(cutoffAt&&!Number.isFinite(cutoff))
+    return {factor:1,reason:"invalid_source_cutoff",weeks:[]}
+  const sourceAvailable=(stamp)=>cutoff===null||
+    (Boolean(stamp)&&Number.isFinite(new Date(stamp).getTime())&&new Date(stamp).getTime()<cutoff)
+  const byWeek=new Map((weekly||[]).filter(x=>sourceAvailable(x.source_updated_at))
+    .map(x=>[Number(x.gameweek),x]))
+  const advancedByWeek=new Map((advanced||[]).filter(x=>sourceAvailable(x.source_updated_at))
+    .map(x=>[Number(x.gameweek),x]))
+  const verifiedByWeek=new Map((verified||[]).filter(x=>sourceAvailable(x.observed_at))
+    .map(x=>[Number(x.gameweek),x]))
   const evidence=[]
   for(let offset=1;offset<=3;offset++){
     const week=targetWeek-offset
@@ -58,7 +66,7 @@ function recentSignal({weekly=[],advanced=[],verified=[],targetWeek,metric,seaso
 }
 
 export function recentAttackForm({
-  position,weekly=[],advanced=[],verified=[],targetWeek,
+  position,weekly=[],advanced=[],verified=[],targetWeek,cutoffAt=null,
   seasonShotsPer90=null,seasonKeyPassesPer90=null,
   xgPer90,xaPer90
 }={}){
@@ -68,10 +76,10 @@ export function recentAttackForm({
     return original
   const validXg=finitePositive(xgPer90),validXa=finitePositive(xaPer90)
   const shots=validXg
-    ?recentSignal({weekly,advanced,verified,targetWeek,metric:"shots",seasonRate:seasonShotsPer90})
+    ?recentSignal({weekly,advanced,verified,targetWeek,metric:"shots",seasonRate:seasonShotsPer90,cutoffAt})
     :{factor:1,reason:"missing_xg_source"}
   const keyPasses=validXa
-    ?recentSignal({weekly,advanced,verified,targetWeek,metric:"key_passes",seasonRate:seasonKeyPassesPer90})
+    ?recentSignal({weekly,advanced,verified,targetWeek,metric:"key_passes",seasonRate:seasonKeyPassesPer90,cutoffAt})
     :{factor:1,reason:"missing_xa_source"}
   const nextXg=validXg?Math.max(0,xgPer90*shots.factor):xgPer90
   const nextXa=validXa?Math.max(0,xaPer90*keyPasses.factor):xaPer90
@@ -101,8 +109,8 @@ export async function fetchRecentAttackEvidence(sb,targetWeek){
     return {data:null,error:new Error("RECENT_ATTACK_PAGINATION_LIMIT")}
   }
   const [advanced,verified]=await Promise.all([
-    read("scout_player_advanced_weekly","player_id,gameweek,shots,key_passes,source"),
-    read("scout_verified_weekly_attack","player_id,gameweek,shots,key_passes,source")
+    read("scout_player_advanced_weekly","player_id,gameweek,shots,key_passes,source,source_updated_at"),
+    read("scout_verified_weekly_attack","player_id,gameweek,shots,key_passes,source,observed_at")
   ])
   return advanced.error||verified.error
     ?{data:null,error:advanced.error||verified.error}
