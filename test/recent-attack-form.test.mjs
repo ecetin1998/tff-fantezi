@@ -127,3 +127,28 @@ test("stable benchmark already carrying version 2 marker must not be multiplied 
   assert.match(code,/applyTeamMatchForm\(/)
   assert.match(code,/auditRealizedModel\(/)
 })
+
+test("source event timestamps must strictly precede target kickoff",()=>{
+  const cutoffAt="2026-10-23T18:00:00Z"
+  const timedWeekly=weekly.map(x=>({...x,source_updated_at:"2026-10-21T12:00:00Z"}))
+  const timedAdvanced=advanced(4,4).map(x=>({...x,source_updated_at:"2026-10-20T12:00:00Z"}))
+  const timedVerified=verified(4).map(x=>({...x,observed_at:"2026-10-20T12:00:00Z"}))
+  const good=form({weekly:timedWeekly,advanced:timedAdvanced,verified:timedVerified,cutoffAt})
+  assert.ok(good.xgPer90>.3)
+  const after=form({weekly:timedWeekly,advanced:timedAdvanced,
+    verified:timedVerified.map(x=>({...x,observed_at:"2026-10-23T18:01:00Z"})),cutoffAt})
+  assert.equal(after.xgPer90,.3)
+  const noDate=form({weekly:timedWeekly,advanced:timedAdvanced,
+    verified:verified(4),cutoffAt})
+  assert.equal(noDate.xgPer90,.3)
+  const invalidCutoff=form({weekly:timedWeekly,advanced:timedAdvanced,
+    verified:timedVerified,cutoffAt:"not-a-timestamp"})
+  assert.equal(invalidCutoff.xgPer90,.3)
+})
+test("weekly and intraday inputs carry earliest target kickoff as timestamp cutoff",()=>{
+  const code=readFileSync(new URL("../supabase/functions/weekly-model-lifecycle/index.ts",import.meta.url),"utf8")
+  assert.match(code,/cutoffAt:targetKickoff/)
+  assert.match(code,/cutoffAt:kickoff/)
+  const weeklySource=readFileSync(new URL("../supabase/functions/weekly-model-lifecycle/weeklyEvidence.mjs",import.meta.url),"utf8")
+  assert.match(weeklySource,/source_kind,source_updated_at/)
+})
