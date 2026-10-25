@@ -833,6 +833,7 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
         (alreadyForm||factor.applied?" • verified-team-form-v1":"")}
   })
   const computedMatches=new Map(matchInputs.map((m:any)=>[Number(m.match_id),m]))
+  const runId=crypto.randomUUID()
   const matchPredictions=(teamFixturesQ.data||[]).map((m:any)=>{
     const input=computedMatches.get(Number(m.match_id)) as any
     if(!input)throw new Error("MATCH_PREDICTION_INPUT_NOT_FOUND_"+m.match_id)
@@ -846,7 +847,6 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
   const meta={...latestMetaQ.data,benchmark_version:benchmark,created_at:new Date().toISOString(),source_note:`intraday refresh from ${sourceBenchmark}; source ${latestSourceAt}`}
   delete (meta as any).id
 
-  const runId=crypto.randomUUID()
   const runInsert=await sb.from("scout_model_runs").insert({
     id:runId,gameweek:gw,model_version:current.model_version,generated_at:new Date().toISOString(),
     source_updated_at:latestSourceAt,source_cutoff:latestSourceAt,simulation_count:0,status:"building",is_current:false,
