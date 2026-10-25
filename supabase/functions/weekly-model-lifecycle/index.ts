@@ -8,6 +8,7 @@ import {roleTrendFromWeeklyEvidence} from "./roleTrend.mjs"
 import {blendVerifiedAttackRate} from "./mh8Attack.mjs"
 import {calibrateAttackRates} from "./roleAwareAttackRates.mjs"
 import {currentTacticalRole} from "./recentTacticalRole.mjs"
+import {applyTeamMatchForm,auditMatchAllocation} from "./teamRecentForm.mjs"
 
 const AUDIENCE="tff-fantezi-scout"
 const ISSUER="https://token.actions.githubusercontent.com"
@@ -298,7 +299,7 @@ async function prepare(sb:any,current:any,status:any,body:any={}){
   }
 
   const [
-    playersQ,rolesQ,availabilityQ,statsQ,teamStatsQ,fixturesQ,weeklyQ,priorInputsQ,teamsQ,currentProjQ,tacticalQ
+    playersQ,rolesQ,availabilityQ,statsQ,teamStatsQ,fixturesQ,weeklyQ,priorInputsQ,teamsQ,currentProjQ,tacticalQ,teamHistoryQ
   ]=await Promise.all([
     sb.from("scout_players").select("id,full_name,team_id,position,price,primary_role,role_side,active").eq("active",true),
     sb.from("scout_role_signals").select("*").eq("run_id",current.id),
@@ -313,9 +314,11 @@ async function prepare(sb:any,current:any,status:any,body:any={}){
     sb.from("scout_player_tactical_role_observations")
       .select("player_id,gameweek,role,side,minutes,started,verified,observed_at")
       .eq("season","2026-27").gte("gameweek",Math.max(1,target-3)).lt("gameweek",target)
-      .eq("verified",true)
+      .eq("verified",true),
+    sb.from("scout_match_history").select("gameweek,home_team_id,away_team_id,home_goals,away_goals,match_status,fantasy_closure")
+      .eq("season","2026-27").gte("gameweek",Math.max(1,target-8)).lt("gameweek",target)
   ])
-  for(const q of [playersQ,rolesQ,availabilityQ,statsQ,teamStatsQ,fixturesQ,weeklyQ,priorInputsQ,teamsQ,currentProjQ,tacticalQ])if(q.error)throw q.error
+  for(const q of [playersQ,rolesQ,availabilityQ,statsQ,teamStatsQ,fixturesQ,weeklyQ,priorInputsQ,teamsQ,currentProjQ,tacticalQ,teamHistoryQ])if(q.error)throw q.error
   const players=playersQ.data||[]
   if((availabilityQ.data||[]).length<players.length)throw new Error("AVAILABILITY_COVERAGE_INCOMPLETE")
   if((teamStatsQ.data||[]).length!==18)throw new Error("TEAM_STATS_INCOMPLETE")
@@ -352,11 +355,17 @@ async function prepare(sb:any,current:any,status:any,body:any={}){
   for(const fx of fixturesQ.data||[]){
     const hs=teamStats.get(Number(fx.home_team_id)),as=teamStats.get(Number(fx.away_team_id))
     if(!hs||!as)throw new Error("TEAM_STATS_MISSING_FOR_FIXTURE_"+fx.match_id)
-    const hl=matchupLambda(hs,as,true),al=matchupLambda(as,hs,false),prob=matchPrediction(hl,al)
+    const baselineHome=matchupLambda(hs,as,true),baselineAway=matchupLambda(as,hs,false)
+    const teamForm=applyTeamMatchForm({
+      baselineHome,baselineAway,homeTeamId:Number(fx.home_team_id),
+      awayTeamId:Number(fx.away_team_id),gameweek:target,matches:teamHistoryQ.data||[]
+    })
+    const hl=teamForm.homeLambda,al=teamForm.awayLambda,prob=matchPrediction(hl,al)
     matchInputs.push({
       gameweek:target,benchmark_version:benchmark,match_id:Number(fx.match_id),
       home_team_id:Number(fx.home_team_id),away_team_id:Number(fx.away_team_id),
-      home_lambda:hl,away_lambda:al,source_note:key+" • team xG/xGA + observed finishing/conceding blend"
+      home_lambda:hl,away_lambda:al,source_note:key+" • team xG/xGA + observed finishing/conceding blend"+
+        (teamForm.applied?" • verified-team-form-v1":"")
     })
     matchPredictions.push({
       run_id:runId,match_id:Number(fx.match_id),gameweek:target,kickoff_at:fx.kickoff_at,
@@ -491,6 +500,11 @@ async function prepare(sb:any,current:any,status:any,body:any={}){
     return {...row,team_goal_share:me?me.goal/goalSum:0,team_assist_share:me?me.assist/assistSum:0}
   })
 
+  const preparationQA=auditMatchAllocation({
+    gameweek:target,fixtures:fixturesQ.data||[],matchInputs,
+    playerInputs:inputRows,roleShares:roleRows
+  })
+  if(!preparationQA.pass)throw new Error("TEAM_PLAYER_PREP_QA_FAILED: "+preparationQA.failures.join(","))
   const meta={
     gameweek:target,benchmark_version:benchmark,
     temperature:n(priorMetaQ.data.temperature,1.7),assist_fraction:n(priorMetaQ.data.assist_fraction,.67),
@@ -574,7 +588,7 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
       throw new Error("PRE_KICKOFF_BACKTEST_SNAPSHOT_REQUIRED")
   }
 
-  const [latestMetaQ,stableMetaQ,availabilityQ,rolesQ,goalConfigQ,playersUpdatedQ,currentProjectionQ,officialQ,playersQ,teamFixturesQ,attackSourceQ,tacticalQ]=await Promise.all([
+  const [latestMetaQ,stableMetaQ,availabilityQ,rolesQ,goalConfigQ,playersUpdatedQ,currentProjectionQ,officialQ,playersQ,teamFixturesQ,attackSourceQ,tacticalQ,teamHistoryQ]=await Promise.all([
     sb.from("scout_replay_input_meta").select("*").eq("gameweek",gw)
       .lt("created_at",new Date(kickoff).toISOString()).order("created_at",{ascending:false}).limit(1).maybeSingle(),
     sb.from("scout_replay_input_meta").select("benchmark_version").eq("gameweek",gw)
@@ -587,16 +601,18 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
     sb.from("scout_player_projections").select("player_id,opponent_name,venue,confidence,data_confidence").eq("run_id",current.id),
     officialEvidenceQuery(sb),
     sb.from("scout_players").select("id,team_id,position,primary_role,role_side").eq("active",true),
-    sb.from("scout_match_predictions").select("home_team_id,away_team_id,kickoff_at")
+    sb.from("scout_match_predictions").select("*")
       .eq("run_id",current.id).order("kickoff_at",{ascending:true}),
     sb.from("scout_verified_weekly_attack").select("player_id,gameweek,xg,xa,observed_at")
       .eq("season","2026-27").eq("gameweek",gw-1),
     sb.from("scout_player_tactical_role_observations")
       .select("player_id,gameweek,role,side,minutes,started,verified,observed_at")
       .eq("season","2026-27").gte("gameweek",Math.max(1,gw-3)).lt("gameweek",gw)
-      .eq("verified",true)
+      .eq("verified",true),
+    sb.from("scout_match_history").select("gameweek,home_team_id,away_team_id,home_goals,away_goals,match_status,fantasy_closure")
+      .eq("season","2026-27").gte("gameweek",Math.max(1,gw-8)).lt("gameweek",gw)
   ])
-  for(const q of [latestMetaQ,stableMetaQ,availabilityQ,rolesQ,goalConfigQ,playersUpdatedQ,currentProjectionQ,officialQ,playersQ,teamFixturesQ,attackSourceQ,tacticalQ])if(q.error)throw q.error
+  for(const q of [latestMetaQ,stableMetaQ,availabilityQ,rolesQ,goalConfigQ,playersUpdatedQ,currentProjectionQ,officialQ,playersQ,teamFixturesQ,attackSourceQ,tacticalQ,teamHistoryQ])if(q.error)throw q.error
   if(!latestMetaQ.data)return {refresh_required:false,reason:"CURRENT_SIM_INPUT_META_MISSING"}
 
   const availabilityTimes=(availabilityQ.data||[])
@@ -656,7 +672,7 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
 
   const sourceBenchmark=String(latestMetaQ.data.benchmark_version)
   const stableRoleBenchmark=String(stableMetaQ.data?.benchmark_version||sourceBenchmark)
-  const [inputsQ,matchesQ,stableInputsQ,sourceStatsQ,weeklyRecentQ]=await Promise.all([
+  const [inputsQ,matchesQ,stableInputsQ,sourceStatsQ,weeklyRecentQ,stableMatchesQ]=await Promise.all([
     sb.from("scout_replay_player_inputs").select("*").eq("gameweek",gw).eq("benchmark_version",sourceBenchmark).order("player_id"),
     sb.from("scout_replay_match_inputs").select("*").eq("gameweek",gw).eq("benchmark_version",sourceBenchmark).order("match_id"),
     stableRoleBenchmark===sourceBenchmark
@@ -664,9 +680,13 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
       :sb.from("scout_replay_player_inputs").select("player_id,role_probability,durations,duration_weights,source_note,rates").eq("gameweek",gw).eq("benchmark_version",stableRoleBenchmark).order("player_id"),
     sb.from("scout_player_season_stats").select("player_id,through_gameweek,advanced_through_gameweek,minutes,shots,key_passes,goals,assists,xg_total,xa_total,xa_per90,xa_model_per90,xa_source")
       .eq("season","2026-27").eq("through_gameweek",gw-1),
-    fetchTrustedWeeklyEvidence(sb,gw)
+    fetchTrustedWeeklyEvidence(sb,gw),
+    stableRoleBenchmark===sourceBenchmark
+      ?Promise.resolve({data:null,error:null})
+      :sb.from("scout_replay_match_inputs").select("*")
+        .eq("gameweek",gw).eq("benchmark_version",stableRoleBenchmark).order("match_id")
   ])
-  for(const q of [inputsQ,matchesQ,stableInputsQ,sourceStatsQ,weeklyRecentQ])if(q.error)throw q.error
+  for(const q of [inputsQ,matchesQ,stableInputsQ,sourceStatsQ,weeklyRecentQ,stableMatchesQ])if(q.error)throw q.error
   if(!(inputsQ.data||[]).length||!(matchesQ.data||[]).length)throw new Error("CURRENT_SIM_INPUT_COVERAGE_MISSING")
   const stableInputsMap=new Map(((stableInputsQ.data||inputsQ.data)||[]).map((x:any)=>[Number(x.player_id),x]))
   const stableRoleMap=new Map([...stableInputsMap.entries()].map(([id,x]:any)=>[id,n(x.role_probability,.5)]))
@@ -794,7 +814,35 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
         +(adjusted.applied?` • resmî maç: ${event.match_ref}`:"")
     }
   })
-  const matchInputs=(matchesQ.data||[]).map((x:any)=>({...x,benchmark_version:benchmark,source_note:`intraday refresh from ${sourceBenchmark}`}))
+  const anchoredMatchInputs=new Map(((stableMatchesQ.data||matchesQ.data)||[]).map((x:any)=>[Number(x.match_id),x]))
+  // Anchored non-intraday match lambdas prevent the same form boost
+  // compounding on hourly/current-gameweek refreshes.
+  const matchInputs=(matchesQ.data||[]).map((x:any)=>{
+    const stable=anchoredMatchInputs.get(Number(x.match_id)) as any || x
+    const alreadyForm=String(stable.source_note||"").includes("verified-team-form-v1")
+    const factor=alreadyForm
+      ?{homeLambda:Number(stable.home_lambda),awayLambda:Number(stable.away_lambda),applied:false}
+      :applyTeamMatchForm({
+        baselineHome:Number(stable.home_lambda),baselineAway:Number(stable.away_lambda),
+        homeTeamId:Number(x.home_team_id),awayTeamId:Number(x.away_team_id),
+        gameweek:gw,matches:teamHistoryQ.data||[]
+      })
+    return {...x,benchmark_version:benchmark,
+      home_lambda:factor.homeLambda,away_lambda:factor.awayLambda,
+      source_note:`intraday refresh from ${stableRoleBenchmark}`+
+        (alreadyForm||factor.applied?" • verified-team-form-v1":"")}
+  })
+  const computedMatches=new Map(matchInputs.map((m:any)=>[Number(m.match_id),m]))
+  const matchPredictions=(teamFixturesQ.data||[]).map((m:any)=>{
+    const input=computedMatches.get(Number(m.match_id)) as any
+    if(!input)throw new Error("MATCH_PREDICTION_INPUT_NOT_FOUND_"+m.match_id)
+    const {run_id:_,...prior}=m
+    return {...prior,run_id:runId,
+      home_xg:input.home_lambda,away_xg:input.away_lambda,
+      ...matchPrediction(Number(input.home_lambda),Number(input.away_lambda)),
+      method:"weekly-auto-team-form-v1",
+      model_note:"Kaynaklı son üç maç gol atma/yeme formu + sezon xG/xGA (ölçülü düzeltme)."}
+  })
   const meta={...latestMetaQ.data,benchmark_version:benchmark,created_at:new Date().toISOString(),source_note:`intraday refresh from ${sourceBenchmark}; source ${latestSourceAt}`}
   delete (meta as any).id
 
@@ -872,9 +920,16 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
     }
   })
 
+  const intradayQA=auditMatchAllocation({
+    gameweek:gw,fixtures:teamFixturesQ.data||[],matchInputs,
+    playerInputs:inputRows,roleShares:roleRows
+  })
+  if(!intradayQA.pass)throw new Error("INTRADAY_TEAM_PLAYER_QA_FAILED: "+intradayQA.failures.join(","))
   for(const [table,rows] of [
     ["scout_replay_input_meta",[meta]],["scout_replay_match_inputs",matchInputs],["scout_replay_player_inputs",inputRows],
-    ["scout_availability",availabilityRows],["scout_player_projections",projectionRows],["scout_role_signals",roleRows]
+    ["scout_match_predictions",matchPredictions],
+    ["scout_availability",availabilityRows],["scout_player_projections",projectionRows],
+    ["scout_role_signals",roleRows]
   ] as any[]){
     const ins=await sb.from(table).insert(rows)
     if(ins.error)throw new Error(table+": "+ins.error.message)
