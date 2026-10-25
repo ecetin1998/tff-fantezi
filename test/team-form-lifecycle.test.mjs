@@ -32,7 +32,7 @@ test("do not use current/future week or incomplete, unverified fixtures",()=>{
     recentTeamForm({teamId:1,gameweek:9,matches:future}),
     recentTeamForm({teamId:1,gameweek:9,matches:historical})
   )
-  const bad=historical.map(x=>x.gameweek===8?{...x,fantasy_closure:"BEKLİYOR"}:x)
+  const bad=historical.map(x=>x.gameweek===8?{...x,match_status:"Devam ediyor"}:x)
   assert.equal(recentTeamForm({teamId:1,gameweek:9,matches:bad}).ready,false)
   const noData=applyTeamMatchForm({baselineHome:1.5,baselineAway:1.1,homeTeamId:1,awayTeamId:3,gameweek:9,matches:historical})
   assert.equal(noData.applied,false)
@@ -134,4 +134,12 @@ test("intraday candidate run ID is initialized before creating match-prediction 
  const insert=own.indexOf("const runInsert=await")
  assert.ok(define>=0&&map>define&&insert>map)
  assert.equal(own.match(/const runId=crypto\.randomUUID\(\)/g)?.length,1)
+})
+
+test("closed official score contributes to team form even if historical Fantasy points remain pending",()=>{
+ const oldFantasy=historical.map(x=>x.gameweek<=5?{...x,fantasy_closure:"Kontrol bekliyor"}:x)
+ const expected=recentTeamForm({teamId:1,gameweek:9,matches:historical})
+ const actual=recentTeamForm({teamId:1,gameweek:9,matches:oldFantasy})
+ assert.deepEqual(actual,expected)
+ assert.equal(actual.ready,true)
 })
