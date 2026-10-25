@@ -23,7 +23,7 @@ function SquadCard({data,title,variant,cardActive=false,loading=false}){
       gameweek={data.run?.gameweek}
       budget={data.recommendation?.budget}
       xiXfp={!cardActive&&variant==='alternative'
-        ?data.members.filter(m=>m.squad_slot==='XI').reduce((sum,m)=>sum+Number(m.typical_points||0),0)
+        ?Math.round(data.members.filter(m=>m.squad_slot==='XI').reduce((sum,m)=>sum+Number(m.typical_points||0),0))
         :cardXfp(data)}
       variant={variant}
       scoreLabel={!cardActive&&variant==='alternative'
