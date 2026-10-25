@@ -44,7 +44,7 @@ export default function SquadPitchView({
       </div>
       <div className="readonly-squad-head-right">
         {budget!==undefined&&budget!==null?<span><small>Harcanan</small><b>{Number(budget).toFixed(1)}m • {unlimitedBudget?'Bütçe sınırı yok':`Kalan ${Math.max(0,Number(budgetLimit||100)-Number(budget)).toFixed(1)}m`}</b></span>:null}
-        {xiXfp!==undefined&&xiXfp!==null?<span><small>{scoreLabel}</small><b>{Number(xiXfp).toFixed(2)}</b></span>:null}
+        {xiXfp!==undefined&&xiXfp!==null?<span><small>{scoreLabel}</small><b>{variant==='alternative'&&scoreLabel.includes('Tipik')?Math.round(Number(xiXfp)):Number(xiXfp).toFixed(2)}</b></span>:null}
         {actionHref?<Link className="pill" href={actionHref}>{actionLabel}</Link>:null}
       </div>
       <span className="formation-summary-pill"><small>Taktik</small><b>{formation}</b></span>
