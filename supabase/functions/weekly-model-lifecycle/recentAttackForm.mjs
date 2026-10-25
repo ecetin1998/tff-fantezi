@@ -64,15 +64,19 @@ export function recentAttackForm({
 }={}){
   const original={xgPer90,xaPer90,applied:false,reason:"not_applicable",
     shots:{factor:1},keyPasses:{factor:1}}
-  if(position==="GK"||!["DEF","MID","FWD"].includes(position)||
-     !finitePositive(xgPer90)||!finitePositive(xaPer90))
+  if(position==="GK"||!["DEF","MID","FWD"].includes(position))
     return original
-  const shots=recentSignal({weekly,advanced,verified,targetWeek,metric:"shots",seasonRate:seasonShotsPer90})
-  const keyPasses=recentSignal({weekly,advanced,verified,targetWeek,metric:"key_passes",seasonRate:seasonKeyPassesPer90})
-  const nextXg=Math.max(0,xgPer90*shots.factor)
-  const nextXa=Math.max(0,xaPer90*keyPasses.factor)
+  const validXg=finitePositive(xgPer90),validXa=finitePositive(xaPer90)
+  const shots=validXg
+    ?recentSignal({weekly,advanced,verified,targetWeek,metric:"shots",seasonRate:seasonShotsPer90})
+    :{factor:1,reason:"missing_xg_source"}
+  const keyPasses=validXa
+    ?recentSignal({weekly,advanced,verified,targetWeek,metric:"key_passes",seasonRate:seasonKeyPassesPer90})
+    :{factor:1,reason:"missing_xa_source"}
+  const nextXg=validXg?Math.max(0,xgPer90*shots.factor):xgPer90
+  const nextXa=validXa?Math.max(0,xaPer90*keyPasses.factor):xaPer90
   return {xgPer90:nextXg,xaPer90:nextXa,
-    applied:Math.abs(nextXg-xgPer90)>1e-8||Math.abs(nextXa-xaPer90)>1e-8,
+    applied:(validXg&&Math.abs(nextXg-xgPer90)>1e-8)||(validXa&&Math.abs(nextXa-xaPer90)>1e-8),
     reason:"source_gated_last3_activity",shots,keyPasses}
 }
 
