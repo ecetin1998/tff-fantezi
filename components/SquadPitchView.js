@@ -8,6 +8,10 @@ function displayName(player){ return pitchPlayerLabel(player) }
 function shirtMark(player,team=''){
   return player?.shirt_number ?? ''
 }
+function scenarioTip(member){
+  const outcomes=Array.isArray(member?.top3_outcomes)?member.top3_outcomes:[]
+  return outcomes.length?outcomes.map(x=>`${x.points} puan %${(Number(x.probability||0)*100).toFixed(1)}`).join(' · '):'Henüz senaryo kaydı yok'
+}
 
 export default function SquadPitchView({
   members=[],
@@ -37,7 +41,7 @@ export default function SquadPitchView({
       </div>
       <div className="readonly-squad-head-right">
         {budget!==undefined&&budget!==null?<span><small>Harcanan</small><b>{Number(budget).toFixed(1)}m • {unlimitedBudget?'Bütçe sınırı yok':`Kalan ${Math.max(0,Number(budgetLimit||100)-Number(budget)).toFixed(1)}m`}</b></span>:null}
-        {xiXfp!==undefined&&xiXfp!==null?<span><small>{scoreLabel}</small><b>{Number(xiXfp).toFixed(2)}</b></span>:null}
+        {xiXfp!==undefined&&xiXfp!==null?<span><small>{scoreLabel}</small><b>{scoreLabel.includes('Tipik')?Math.round(Number(xiXfp)):Number(xiXfp).toFixed(2)}</b></span>:null}
         {actionHref?<Link className="pill" href={actionHref}>{actionLabel}</Link>:null}
       </div>
       <span className="formation-summary-pill"><small>Taktik</small><b>{formation}</b></span>
@@ -62,7 +66,9 @@ export default function SquadPitchView({
           <small>{m.team}</small>
           <div className="pitch-player-tags">
             <span>{Number(m.player?.price||0).toFixed(1)}m</span>
-            <strong>{Number(m.xfp||0).toFixed(1)} xFP</strong>
+            {variant==='alternative'&&scoreLabel.includes('Tipik')?
+              <strong title={scenarioTip(m)}>{Math.round(Number(m.top3_weighted_avg||0))} tipik</strong>
+              :<strong>{Number(m.xfp||0).toFixed(1)} xFP</strong>}
           </div>
           {m.is_captain?<em className="readonly-captain">K</em>:null}
         </Link>)}
@@ -75,10 +81,10 @@ export default function SquadPitchView({
         <span>15 kişilik kadro</span>
       </div>
       <div className="my-bench-row readonly-bench-row">
-        {bench.map((m,i)=><Link href={'/players/'+m.player_id} className="my-bench-player readonly-bench-player" key={m.player_id}>
+        {bench.map((m,i)=><Link href={'/players/'+m.player_id} className="my-bench-player readonly-bench-player" key={m.player_id} title={variant==='alternative'&&scoreLabel.includes('Tipik')?scenarioTip(m):undefined}>
           <span className="bench-order">{i+1}</span>
           <span className={`fantasy-shirt mini ${m.player?.position}`} style={teamCssVars(m.team)}><i>{posLabel[m.player?.position]||m.player?.position||'—'}</i></span>
-          <span className="bench-copy"><b>{playerLabel(m.player)}</b><small>{m.team||'—'} • {posLabel[m.player?.position]||m.player?.position} • {Number(m.player?.price||0).toFixed(1)}m • {Number(m.xfp||0).toFixed(1)} xFP</small></span>
+          <span className="bench-copy"><b>{playerLabel(m.player)}</b><small>{m.team||'—'} • {posLabel[m.player?.position]||m.player?.position} • {Number(m.player?.price||0).toFixed(1)}m • {variant==='alternative'&&scoreLabel.includes('Tipik')?`${Math.round(Number(m.top3_weighted_avg||0))} tipik puan`:`${Number(m.xfp||0).toFixed(1)} xFP`}</small></span>
         </Link>)}
       </div>
     </div>:null}
