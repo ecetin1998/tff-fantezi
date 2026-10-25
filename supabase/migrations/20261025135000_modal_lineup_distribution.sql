@@ -28,7 +28,7 @@ BEGIN
     CHECK ((typical_points IS NULL AND top3_coverage IS NULL AND top3_score_distribution IS NULL)
         OR (typical_points BETWEEN -40 AND 215 AND top3_coverage > 0 AND top3_coverage <= 1
             AND jsonb_typeof(top3_score_distribution) = 'array'
-            AND jsonb_array_length(top3_score_distribution) = 3));
+            AND jsonb_array_length(top3_score_distribution) BETWEEN 1 AND 3));
  END IF;
 END $modal_guard$;
 
@@ -77,7 +77,7 @@ BEGIN
    ) AS scenarios
  FROM ranked WHERE rn<=3 AND frequency>0
  GROUP BY player_id
- HAVING count(*)=3
+ HAVING count(*) BETWEEN 1 AND 3
  )
  UPDATE public.scout_player_projections p
  SET mode_points=t.mode_points,
