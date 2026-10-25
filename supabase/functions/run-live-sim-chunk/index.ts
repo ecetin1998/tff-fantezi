@@ -169,6 +169,15 @@ Deno.serve(async(req)=>{
         p_run_id:RUN_ID,p_gameweek:GAMEWEEK,p_benchmark:BENCHMARK
       });
       if(finalized.error)throw finalized.error;
+      // The 256-bin per-player Fantasy scoring histogram is produced by
+      // the exact same completed 50K run as xFP. Persist a deterministic
+      // most-frequent integer score (ties: closest to xFP, then lower).
+      // Fail closed before optimization if any histogram is missing.
+      const modes=await sb.rpc("scout_finalize_modal_projection",{
+        p_run_id:RUN_ID,p_gameweek:GAMEWEEK,p_benchmark:BENCHMARK
+      });
+      if(modes.error)throw modes.error;
+      if(Number(modes.data)!==expectedPlayers)throw new Error("MODAL_SCORE_COVERAGE_INCOMPLETE");
       const goalConfig=await sb.from("scout_goal_distribution_config")
         .select("version,distribution,alpha_used,gate_passed")
         .eq("active",true).order("created_at",{ascending:false}).limit(1).maybeSingle();
