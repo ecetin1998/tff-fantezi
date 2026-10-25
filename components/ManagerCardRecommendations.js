@@ -22,9 +22,13 @@ function SquadCard({data,title,variant,cardActive=false,loading=false}){
       title={title}
       gameweek={data.run?.gameweek}
       budget={data.recommendation?.budget}
-      xiXfp={cardXfp(data)}
+      xiXfp={!cardActive&&variant==='alternative'
+        ?data.members.filter(m=>m.squad_slot==='XI').reduce((sum,m)=>sum+Number(m.mode_points||0),0)
+        :cardXfp(data)}
       variant={variant}
-      scoreLabel={cardActive?'Kartlı hafta xFP':'İlk 11 xFP'}
+      scoreLabel={!cardActive&&variant==='alternative'
+        ?'İlk 11 mod toplamı'
+        :cardActive?'Kartlı hafta xFP':'İlk 11 xFP'}
       budgetLimit={data.recommendation?.budget_limit??100}
       unlimitedBudget={Boolean(data.recommendation?.unlimited_budget)}
       showBench
@@ -133,7 +137,7 @@ export default function ManagerCardRecommendations({baseRecommended,baseAlternat
     {error?<div className="manager-card-error">{error}</div>:null}
     <div className="unified-squad-list">
       <SquadCard data={active?.recommended} title={managerCard===MANAGER_CARD_NONE?'ÖNERİLEN KADRO':`ÖNERİLEN • ${cardInfo.shortLabel}`} variant="recommended" cardActive={managerCard!==MANAGER_CARD_NONE}/>
-      <SquadCard data={active?.alternative} title={managerCard===MANAGER_CARD_NONE?'AGRESİF 11':`AGRESİF • ${cardInfo.shortLabel}`} variant="alternative" cardActive={managerCard!==MANAGER_CARD_NONE} loading={managerCard!==MANAGER_CARD_NONE&&loadingSelected&&!active?.alternative}/>
+      <SquadCard data={active?.alternative} title={managerCard===MANAGER_CARD_NONE?'MOD 11':`AGRESİF • ${cardInfo.shortLabel}`} variant="alternative" cardActive={managerCard!==MANAGER_CARD_NONE} loading={managerCard!==MANAGER_CARD_NONE&&loadingSelected&&!active?.alternative}/>
     </div>
   </>
 }
