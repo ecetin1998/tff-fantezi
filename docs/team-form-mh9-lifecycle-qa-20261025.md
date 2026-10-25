@@ -9,7 +9,7 @@
 
 ## Bounded verified team form
 
-- Use only independently **closed** completed matches **prior to target gameweek**; no current or future results.
+- Use only TFF-scoreboard **final** completed matches **prior to target gameweek**; no current or future results. Official full-time team scores do **not** require the separate Fantasy player points/bonus closure. In MH1–5 the recorded score is `Bitti` while historical Fantasy closure remains `Kontrol bekliyor`; those team results are valid team-form observations.
 - Need >=5 earlier games with 3 consecutive last-gameweek records, otherwise **no form adjustment**.
 - For scoring and concession separately, calculate (last 3 mean + 1) / (preweek season mean + 1), clamped to 0.70–1.30 to reduce rare-game instability.
 - Update the two match lambdas conservatively via exponent **0.2** times average log scoring/conceding ratio. Keep original season xG/xGA baseline, home/away, player tactical roles and registration.
@@ -42,3 +42,6 @@ Frozen original pre-kickoff match-lambda inputs were compared to retrospective p
 ## Controlled deployment
 
 Production Edge function must be updated with `teamRecentForm.mjs` before merging this PR because the GitHub Actions workflow starts calling its new `audit_run` endpoint on merge. Verify new CI, signed OIDC runtime QA, 50K candidate model QA, publication, and live readback. Do not label deploy complete on code merge alone.
+
+### Release check / MH9 source coverage
+At MH9, all **18 clubs have eight finished official match scores** through MH8, including 3/3 immediately previous GW6–8 fixtures. This was verified directly in production. The initial implementation incorrectly demanded `fantasy_closure='KAPANDI'` for team score form and consequently passed all tests but applied no form adjustment (all 456 new xFP unchanged). The corrected model uses the **official match result state** only and leaves Fantasy point closure and official scoring data untouched.
