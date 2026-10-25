@@ -1,7 +1,7 @@
 import test from "node:test"
 import assert from "node:assert/strict"
 import {readFileSync} from "node:fs"
-import {applyTeamMatchForm,recentTeamForm,auditMatchAllocation} from "../supabase/functions/weekly-model-lifecycle/teamRecentForm.mjs"
+import {applyTeamMatchForm,recentTeamForm,auditMatchAllocation,auditRealizedModel} from "../supabase/functions/weekly-model-lifecycle/teamRecentForm.mjs"
 
 const historical=[]
 for(let week=1;week<=8;week++){
@@ -78,4 +78,42 @@ test("lifecycle checks form from verified historical weeks and never fakes side 
   assert.match(code,/stableMatchesQ/)
   assert.match(code,/\["scout_match_predictions",matchPredictions\]/)
   assert.doesNotMatch(code,/inferred_conceded_left_share/)
+})
+
+test("live NB2 clean sheet probabilities agree with goal distribution, not Poisson",()=>{
+ const data=fixtureData(),alpha=.168374169796264
+ const cs=l=>Math.pow(1+alpha*l,-1/alpha)
+ const actual=data.matchInputs.map(m=>({
+   match_id:m.match_id,home_xg:m.home_lambda,away_xg:m.away_lambda,
+   home_cs_probability:cs(m.away_lambda),away_cs_probability:cs(m.home_lambda)
+ }))
+ const positive=auditRealizedModel({matchInputs:data.matchInputs,matchPredictions:actual,playerInputs:data.playerInputs,alpha})
+ assert.equal(positive.pass,true)
+ assert.equal(positive.distribution,"NB2")
+ const poisson=actual.map(x=>({...x,home_cs_probability:Math.exp(-1.2),away_cs_probability:Math.exp(-1.4)}))
+ assert.equal(auditRealizedModel({matchInputs:data.matchInputs,matchPredictions:poisson,playerInputs:data.playerInputs,alpha}).pass,false)
+})
+test("expected goals reconcile with team lambdas minus own-goal frequency",()=>{
+ const data=fixtureData(),alpha=.168374169796264
+ const cs=l=>Math.pow(1+alpha*l,-1/alpha)
+ const matchPredictions=data.matchInputs.map(m=>({match_id:m.match_id,home_xg:m.home_lambda,away_xg:m.away_lambda,
+  home_cs_probability:cs(m.away_lambda),away_cs_probability:cs(m.home_lambda)}))
+ const n=new Map()
+ for(const x of data.playerInputs)n.set(x.club_id,(n.get(x.club_id)||0)+1)
+ const playerProjections=data.playerInputs.map(x=>{
+  const lambda=x.club_id%2?1.4:1.2
+  return {player_id:x.player_id,expected_goals:lambda*(1-.031)/n.get(x.club_id)}
+ })
+ const good=auditRealizedModel({matchInputs:data.matchInputs,matchPredictions,
+   playerInputs:data.playerInputs,playerProjections,alpha,simulationCount:50000})
+ assert.equal(good.pass,true,good.failures.join(","))
+ playerProjections[0].expected_goals+=.2
+ assert.equal(auditRealizedModel({matchInputs:data.matchInputs,matchPredictions,
+   playerInputs:data.playerInputs,playerProjections,alpha,simulationCount:50000}).pass,false)
+})
+test("signed model lifecycle exposes current/read-only QA route",()=>{
+ const code=readFileSync(new URL("../supabase/functions/weekly-model-lifecycle/index.ts",import.meta.url),"utf8")
+ assert.match(code,/if\(action==="audit_run"\)/)
+ assert.match(code,/auditRealizedModel\(/)
+ assert.match(code,/no_writes:true/)
 })
