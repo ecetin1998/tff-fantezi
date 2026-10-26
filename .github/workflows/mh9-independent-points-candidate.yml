@@ -9,7 +9,7 @@ on:
       - ".github/workflows/mh9-independent-points-candidate.yml"
   workflow_dispatch:
 permissions:
-  contents: read
+  contents: write
   actions: read
 jobs:
   calculate:
@@ -66,6 +66,19 @@ jobs:
             jq -r '"- Calculated points: \(.total_points), tie-aware bonus: \(.total_bonus_points)"' "$RUNNER_TEMP/mh9-owner-approved-independent-finalization-candidate.json"
             echo "- NOT TFF official export. Backtest/production DB untouched."
           } >> "$GITHUB_STEP_SUMMARY"
+      - name: Preserve 456-player candidate JSON in isolated audit branch
+        run: |
+          set -euo pipefail
+          mkdir -p data/source-evidence
+          cp "$RUNNER_TEMP/mh9-owner-approved-independent-finalization-candidate.json" \
+             data/source-evidence/gw9-independent-calculated-points-candidate.json
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/source-evidence/gw9-independent-calculated-points-candidate.json
+          if ! git diff --cached --quiet; then
+            git commit -m "data(mh9): snapshot calculated nonofficial points candidate after full source QA"
+            git push origin HEAD:feat/mh9-independent-score-mh10-safe-candidate-20261027
+          fi
       - uses: actions/upload-artifact@v4
         if: always()
         with:
