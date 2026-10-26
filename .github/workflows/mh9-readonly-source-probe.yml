@@ -9,6 +9,8 @@ on:
       - "data/source-evidence/gw9-fotmob-match-page-candidates-2026-10-27.json"
       - "data/source-evidence/gw9-scout-roster-identities-2026-10-27.json"
       - "scripts/reconcile_mh9_provider_players.py"
+      - "scripts/extract_mh9_fotmob_advanced.py"
+      - "test/mh9_advanced_source_evidence_test.py"
       - "test/mh9_source_identity_reconciliation_test.py"
       - "data/source-evidence/gw9-reviewed-mh8-provider-player-crosswalk-2026-10-27.json"
       - "data/source-evidence/gw9-scout-roster-identities-2026-10-27.json"
@@ -90,6 +92,26 @@ jobs:
             jq -r '"- Source goal events: \(.source_goal_events), own goals: \(.source_own_goal_events), card events: \(.source_card_events)"' "$RUNNER_TEMP/mh9-player-identity-evidence.json"
             jq -r '.unmatched_players[] | "- UNMATCHED fixture \(.match_id): \(.name), provider \(.provider_id), club \(.team_id), reason \(.reason)"' "$RUNNER_TEMP/mh9-player-identity-evidence.json"
           } >> "$GITHUB_STEP_SUMMARY"
+      - name: Test MH9 advanced source absence and identity gates
+        run: python3 -m unittest discover -s test -p 'mh9_advanced_source_evidence_test.py' -v
+      - name: Extract MH9 advanced attacking source metrics (nonfinal)
+        run: |
+          set -euo pipefail
+          python3 scripts/extract_mh9_fotmob_advanced.py \
+            --source "$RUNNER_TEMP/mh9-source-probe.json" \
+            --reconciliation "$RUNNER_TEMP/mh9-source-player-reconciliation.json" \
+            --output "$RUNNER_TEMP/mh9-advanced-attacking-source.json"
+          jq -e '.gameweek == 9 and .fixture_count == 9 and .roster_size == 456 and
+                 .database_writes == 0 and .official_fantasy_points_written == 0 and
+                 .safe_to_close_gameweek == false and .safe_to_promote_mh10 == false' \
+            "$RUNNER_TEMP/mh9-advanced-attacking-source.json"
+          {
+            echo
+            echo "### MH9 advanced attack evidence (NONFINAL)"
+            jq -r '"- Verified source-matched players: \(.matched_played), unresolved: \(.unmatched_played)"' "$RUNNER_TEMP/mh9-advanced-attacking-source.json"
+            jq -r '.coverage | to_entries[] | "- \(.key): \(.value) explicitly observed"' "$RUNNER_TEMP/mh9-advanced-attacking-source.json"
+            echo "- Missing values are null; Fantasy scores and model unchanged."
+          } >> "$GITHUB_STEP_SUMMARY"
       - name: Retain full provider evidence for identity reconciliation
         if: always()
         uses: actions/upload-artifact@v4
@@ -98,5 +120,6 @@ jobs:
           path: |
             ${{ runner.temp }}/mh9-source-probe.json
             ${{ runner.temp }}/mh9-source-player-reconciliation.json
+            ${{ runner.temp }}/mh9-advanced-attacking-source.json
           if-no-files-found: warn
           retention-days: 14
