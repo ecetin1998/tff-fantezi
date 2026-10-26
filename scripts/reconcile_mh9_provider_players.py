@@ -17,9 +17,19 @@ from reconcile_mh8_provider_players import choose_player
 
 ROSTER = Path("data/source-evidence/gw9-scout-roster-identities-2026-10-27.json")
 EXPECTED_IDS = set(range(317856, 317865))
+REVIEWED = Path("data/source-evidence/gw9-reviewed-mh8-provider-player-crosswalk-2026-10-27.json")
 
 
-def reconcile(report: dict, roster: dict) -> dict:
+def reconcile(report: dict, roster: dict, reviewed: dict | None = None) -> dict:
+    proofs = {}
+    if reviewed is not None:
+        if reviewed.get("gameweek") != 9 or reviewed.get("kind") != "SCOUT_MH8_FOTMOB_PROVIDER_ID_CROSSWALK_PROOFS":
+            raise ValueError("Invalid approved MH8 provider identity evidence")
+        for row in reviewed.get("entries", []):
+            provider_id = row.get("provider_player_id")
+            if provider_id in proofs or row.get("prior_verified_gameweek") != 8 or not row.get("prior_source"):
+                raise ValueError("Incomplete or repeated MH8 provider ID proof")
+            proofs[provider_id] = row
     if report.get("gameweek") != 9 or roster.get("gameweek") != 9:
         raise ValueError("MH9 source and Scout roster must both be gameweek 9")
     players = roster.get("players", [])
@@ -64,6 +74,14 @@ def reconcile(report: dict, roster: dict) -> dict:
                 raise ValueError("Duplicated or invalid provider player ID")
             seen_provider.add((mid, pid))
             scout, method = choose_player(o, by_team[team_id])
+            proof = proofs.get(pid)
+            if scout is None and proof is not None:
+                matches = [p for p in by_team[team_id] if p["id"] == proof["scout_player_id"]]
+                if (len(matches) != 1 or proof["team_id"] != team_id
+                    or proof["mh9_match_id"] != mid or proof["mh9_provider_name"] != o.get("player_name")
+                    or matches[0]["full_name"] != proof["scout_full_name"]):
+                    raise ValueError(f"MH8 verified provider ID proof conflicts with MH9 fixture for {pid}")
+                scout, method = matches[0], "previous_week_verified_provider_id_same_team"
             minutes = (o.get("explicit_source_metrics") or {}).get("minutes_played")
             explicit_minutes = isinstance(minutes, int) and not isinstance(minutes, bool) and minutes > 0
             if scout is not None and scout["id"] in matched_ids:
@@ -129,10 +147,12 @@ def main() -> None:
     cli = argparse.ArgumentParser()
     cli.add_argument("--input", required=True, type=Path)
     cli.add_argument("--roster", type=Path, default=ROSTER)
+    cli.add_argument("--reviewed", type=Path, default=REVIEWED)
     cli.add_argument("--output", required=True, type=Path)
     args = cli.parse_args()
     data = reconcile(json.loads(args.input.read_text(encoding="utf-8")),
-                     json.loads(args.roster.read_text(encoding="utf-8")))
+                     json.loads(args.roster.read_text(encoding="utf-8")),
+                     json.loads(args.reviewed.read_text(encoding="utf-8")))
     args.output.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print(f"MH9 verified source identity candidates: {data['matched_played']}/{data['explicit_minutes_count']}"
           f"; unmatched={data['unmatched_played']}; observed saves={data['source_saves_count']}"
