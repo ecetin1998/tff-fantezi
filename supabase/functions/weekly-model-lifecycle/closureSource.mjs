@@ -22,7 +22,7 @@ export function validFinalWeeklyPlayerRow(gameweek, row) {
   const mins = Number(minute), p = Number(points), b = Number(base), bonusNum = Number(bonus);
   if (!Number.isFinite(mins) || mins < 0 ||
       !Number.isInteger(p) || !Number.isInteger(b) || !Number.isInteger(bonusNum) ||
-      bonusNum < 0 || bonusNum > 3 || p !== b + bonusNum)
+      bonusNum < 0 || bonusNum > 3 || p!==b+bonusNum)
     return false;
   // Unplayed 0s are accepted only after documented exhaustive substitution QA.
   if (mins === 0 && p !== 0 && row.source_kind === MH8_INDEPENDENT_SOURCE)
