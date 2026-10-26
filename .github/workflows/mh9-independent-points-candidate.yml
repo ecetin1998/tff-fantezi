@@ -1,0 +1,52 @@
+name: MH9 independent points candidate (read-only)
+on:
+  push:
+    branches:
+      - feat/mh9-independent-score-mh10-safe-candidate-20261027
+    paths:
+      - "scripts/calculate_mh9_independent_points.py"
+      - ".github/workflows/mh9-independent-points-candidate.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  calculate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Retrieve already source-verified MH9 audit inputs
+        uses: actions/download-artifact@v4
+        with:
+          name: mh9-readonly-fotmob-source-candidates
+          run-id: 40408428093
+          github-token: ${{ github.token }}
+          path: ${{ runner.temp }}/mh9evidence
+      - name: Independently calculate MH9 points without zero-filling
+        run: |
+          set -euo pipefail
+          python3 scripts/calculate_mh9_independent_points.py \
+            --source "$RUNNER_TEMP/mh9evidence/mh9-source-probe.json" \
+            --identity "$RUNNER_TEMP/mh9evidence/mh9-source-player-reconciliation.json" \
+            --advanced "$RUNNER_TEMP/mh9evidence/mh9-advanced-attacking-source.json" \
+            --output "$RUNNER_TEMP/mh9-independent-calculated-candidates.json"
+          jq -e '.gameweek == 9 and .active_players == 456 and
+            .source_observed_played == 282 and .unknown_nonparticipant_status == 174 and
+            .is_fantasy_final == false and .can_close_gameweek == false and
+            .can_promote_mh10 == false and .db_writes == 0' \
+            "$RUNNER_TEMP/mh9-independent-calculated-candidates.json"
+          {
+            echo "### MH9 independently calculated score candidates — NOT official/NOT final"
+            jq -r '"- Calculated played points: \(.calculated_played_points_total); bonus: \(.calculated_played_bonus_total)"' "$RUNNER_TEMP/mh9-independent-calculated-candidates.json"
+            jq -r '"- Sourced appeared: \(.source_observed_played)/456; unknown without confirmed appearance: \(.unknown_nonparticipant_status)"' "$RUNNER_TEMP/mh9-independent-calculated-candidates.json"
+            jq -r '.match_reports[] | "- TFF \(.match_id): \(.players_observed_registered) source players, base top 3 \(.top3_base_distinct), tie bonuses \(.bonus_total)"' "$RUNNER_TEMP/mh9-independent-calculated-candidates.json"
+            echo "- DB writes: 0. Frozen MH9 benchmark/production and user teams remain untouched."
+          } >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mh9-independently-calculated-nonfinal
+          path: ${{ runner.temp }}/mh9-independent-calculated-candidates.json
+          retention-days: 14
+          if-no-files-found: warn
