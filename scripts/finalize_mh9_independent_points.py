@@ -74,7 +74,7 @@ def finalize(scores: dict, source: dict, identities: dict, roster: dict) -> dict
     team_names={}
     for m in roster["fixtures"]:
         for side in ("home","away"):
-            team_names[m[f"{side}_team_id"]]=m[f"{side}_team"]
+            team_names[m[f"{side}_team_id"]]=m.get(f"{side}_team",m.get(f"{side}_team_name"))
     for row in scores["rows"]:
         player=members.get(row["player_id"])
         if player is None or player["team_id"] != row["team_id"] or player["position"] != row["position"]:
