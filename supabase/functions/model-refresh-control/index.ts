@@ -307,6 +307,28 @@ Deno.serve(async(req:Request)=>{
     }
 
     if(stage==="promote"){
+      // Stop late in-week refreshes from being promoted after all real football
+      // results are final. New-GW candidates are unaffected by this guard.
+      const [candidateQ,activeQ]=await Promise.all([
+        sb.from("scout_model_runs").select("gameweek,is_current").eq("id",runId).single(),
+        sb.from("scout_model_runs").select("gameweek").eq("is_current",true).single()
+      ])
+      if(candidateQ.error)throw candidateQ.error
+      if(activeQ.error)throw activeQ.error
+      const candidateWeek=Number(candidateQ.data.gameweek)
+      if(candidateWeek===Number(activeQ.data.gameweek)&&!candidateQ.data.is_current){
+        const finalQ=await sb.from("scout_match_history")
+          .select("match_id,match_status,home_goals,away_goals")
+          .eq("season","2026-27").eq("gameweek",candidateWeek)
+        if(finalQ.error)throw finalQ.error
+        if((finalQ.data||[]).length===9&&
+           (finalQ.data||[]).every((m:any)=>m.match_status==="Bitti"&&
+             m.home_goals!==null&&m.away_goals!==null))
+          return Response.json({
+            ok:false,reason:"ALL_FOOTBALL_RESULTS_FINAL_AWAITING_FANTASY_ACTUALS",
+            gameweek:candidateWeek,promotion_blocked:true
+          },{status:409})
+      }
       const q=await sb.rpc("scout_promote_run",{p_run_id:runId})
       if(q.error)throw q.error
       return Response.json({ok:true,result:q.data})
