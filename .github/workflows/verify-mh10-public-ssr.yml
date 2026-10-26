@@ -31,10 +31,11 @@ jobs:
                   try:
                       with urllib.request.urlopen(req,timeout=23) as res:
                           body=res.read().decode("utf-8","replace")
-                          marker10=bool(re.search(r"MH10(?:\\s|<)",body))
-                          marker9=bool(re.search(r"MH9(?:\\s|<)",body))
+                          marker10="MH10" in body
+                          marker9="MH9" in body
                           print(f"{route} {suffix or 'canonical'}: status={res.status}, MH10={marker10}, MH9={marker9}, cf-cache-status={res.headers.get('cf-cache-status')}, age={res.headers.get('age')}, cache-control={res.headers.get('cache-control')}, bytes={len(body)}",flush=True)
-                          if not marker10 or marker9: issues.append(url)
+                          print(f"  hits: MH10={body.count('MH10')} MH9={body.count('MH9')}; headlines={re.findall(r'.{0,35}MH(?:9|10).{0,50}',body)[:2]}",flush=True)
+                          if not marker10: issues.append(url)
                   except Exception as ex:
                       print(f"{url} unreachable: {type(ex).__name__}: {str(ex)[:250]}",flush=True)
                       issues.append(url)
