@@ -1,0 +1,58 @@
+name: MH9 FotMob source intake (read only)
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/mh9-readonly-source-probe.yml"
+      - "scripts/probe_mh9_fotmob_sources.py"
+      - "test/mh9_readonly_source_probe_test.py"
+      - "data/source-evidence/gw9-fotmob-match-page-candidates-2026-10-27.json"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: mh9-readonly-probe-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install source-page HTML parser
+        run: python3 -m pip install --disable-pip-version-check 'beautifulsoup4==4.14.2'
+      - name: Unit tests (nonfinal, unknown never zero)
+        run: python3 -m unittest discover -s test -p 'mh9_readonly_source_probe_test.py' -v
+      - name: Validate official fixture manifest without network
+        run: python3 scripts/probe_mh9_fotmob_sources.py --offline-check
+      - name: Inspect nine FotMob provider matches without DB access
+        run: |
+          set -euo pipefail
+          python3 scripts/probe_mh9_fotmob_sources.py --output "$RUNNER_TEMP/mh9-source-probe.json"
+          jq -e '.gameweek == 9 and .fixture_count == 9 and
+                 .db_writes == 0 and .official_fantasy_points_written == 0 and
+                 .safe_to_close_gameweek == false and .safe_to_promote_mh10 == false' \
+            "$RUNNER_TEMP/mh9-source-probe.json"
+          {
+            echo "### MH9 source observation coverage — NOT Fantasy finalization"
+            echo
+            jq -r '"- Structured and source-matched matches: \\(.structured_fixtures)/9"' "$RUNNER_TEMP/mh9-source-probe.json"
+            jq -r '.rows[] | "- TFF \\(.fixture_id): \\(.status); confirmed lineup: \\(.source_details.lineup_complete // false); explicit minutes: \\(.source_details.explicit_minutes_count // 0); GK saves: \\(.source_details.explicit_keeper_save_count // 0)"' "$RUNNER_TEMP/mh9-source-probe.json"
+            echo
+            echo "- Missing source values are UNKNOWN, never player zero-point facts."
+            echo "- Supabase writes: **0**. MH9 close / MH10 publication: **BLOCKED**."
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Retain full provider evidence for identity reconciliation
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mh9-readonly-fotmob-source-candidates
+          path: ${{ runner.temp }}/mh9-source-probe.json
+          if-no-files-found: warn
+          retention-days: 14
