@@ -42,8 +42,8 @@ jobs:
                                   if tag=="h1":self.capture=False
                           parser=VisibleHTML();parser.feed(body)
                           heads=parser.headings
-                          marker10=any(re.search(r"MH\\s*10",h) for h in heads)
-                          marker9=any(re.search(r"MH\\s*9",h) for h in heads)
+                          marker10=any("MH10" in h for h in heads)
+                          marker9=any("MH9" in h for h in heads)
                           print(f"  visible_h1={heads[:5]}",flush=True)
                           print(f"{route} {suffix or 'canonical'}: status={res.status}, MH10={marker10}, MH9={marker9}, cf-cache-status={res.headers.get('cf-cache-status')}, age={res.headers.get('age')}, cache-control={res.headers.get('cache-control')}, bytes={len(body)}",flush=True)
                           print(f"  raw MH match snippets={re.findall(r'.{0,35}MH.{0,55}',body)[:2]}",flush=True)
