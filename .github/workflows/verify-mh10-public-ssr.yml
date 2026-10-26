@@ -1,0 +1,43 @@
+name: Verify MH10 public SSR (read only)
+on:
+  push:
+    branches:
+      - audit/mh10-public-route-freshness-20261027
+    paths:
+      - .github/workflows/verify-mh10-public-ssr.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - name: Inspect public SSR with and without cache busting
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import re, urllib.request, urllib.error
+          from datetime import datetime, timezone
+          base="https://fanteziligrehberi.com"
+          paths=("/squads","/players","/matches")
+          issues=[]
+          for route in paths:
+              for suffix in ("","?audit_mh10=20261027_0134"):
+                  url=base+route+suffix
+                  req=urllib.request.Request(url,headers={
+                      "User-Agent":"Mozilla/5.0 (compatible; MH10-Release-Audit/1.0)",
+                      "Cache-Control":"no-cache","Pragma":"no-cache"})
+                  try:
+                      with urllib.request.urlopen(req,timeout=23) as res:
+                          body=res.read().decode("utf-8","replace")
+                          marker10=bool(re.search(r"MH10(?:\\s|<)",body))
+                          marker9=bool(re.search(r"MH9(?:\\s|<)",body))
+                          print(f"{route} {suffix or 'canonical'}: status={res.status}, MH10={marker10}, MH9={marker9}, cf-cache-status={res.headers.get('cf-cache-status')}, age={res.headers.get('age')}, cache-control={res.headers.get('cache-control')}, bytes={len(body)}",flush=True)
+                          if not marker10 or marker9: issues.append(url)
+                  except Exception as ex:
+                      print(f"{url} unreachable: {type(ex).__name__}: {str(ex)[:250]}",flush=True)
+                      issues.append(url)
+          print(f"Public MH10 route audit: {'PASS' if not issues else 'FAIL'}; issues={len(issues)}; UTC={datetime.now(timezone.utc).isoformat()}")
+          if issues: raise SystemExit(1)
+          PY
