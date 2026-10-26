@@ -91,7 +91,7 @@ function MenuIcon({ href }){
   return <svg {...common}><circle cx="12" cy="12" r="8.5"/><path d="M8 12h8"/></svg>
 }
 
-function MenuRow({ href,label,onClick,active=false,prefetch }){
+function MenuRow({ href,label,onClick,active=false }){
   return <Link prefetch={false} onClick={(event)=>{onClick?.(event);navigateMobileDocument(event,href)}} className={active?'active mobile-menu-row':'mobile-menu-row'} href={href}>
     <span className="mobile-menu-row-icon"><MenuIcon href={href}/></span>
     <span>{label}</span>
