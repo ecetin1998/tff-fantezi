@@ -9,7 +9,7 @@ permissions:
 jobs:
   inspect:
     runs-on: ubuntu-latest
-    timeout-minutes: 9
+    timeout-minutes: 14
     steps:
       - name: Probe routes, errors, durations and cache
         run: |
@@ -60,6 +60,34 @@ jobs:
                 except Exception as e:result={'path':path,'error':repr(e),'page_errors':errors[:12],'network_failures':issues[:12]}
                 print('BROWSER '+json.dumps(result,ensure_ascii=False),flush=True)
                 await page.close()
+              await browser.close()
+          asyncio.run(main())
+          PY
+      - name: Install Safari/WebKit test browser
+        run: python3 -m playwright install --with-deps webkit
+      - name: Check iPhone Safari page paint and navigation
+        run: |
+          python3 - <<'PY'
+          import asyncio,json
+          from playwright.async_api import async_playwright
+          async def main():
+            async with async_playwright() as p:
+              browser=await p.webkit.launch(headless=True)
+              context=await browser.new_context(viewport={'width':390,'height':844},device_scale_factor=3,
+                is_mobile=True,has_touch=True,user_agent='Mozilla/5.0 (iPhone; CPU iPhone OS 18_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.6 Mobile/15E148 Safari/604.1')
+              page=await context.new_page();errors=[];failed=[]
+              page.on('pageerror',lambda e:errors.append(str(e)[:600]))
+              page.on('console',lambda x: errors.append(x.text[:300]) if x.type=='error' else None)
+              page.on('requestfailed',lambda r:failed.append(r.url+' '+str(r.failure)) if len(failed)<20 else None)
+              for path in ['/','/players','/squads','/matches']:
+                try:
+                  r=await page.goto('https://fanteziligrehberi.com'+path,wait_until='domcontentloaded',timeout=29000)
+                  await page.wait_for_timeout(2500)
+                  h1=await page.locator('h1').all_inner_texts()
+                  vis=await page.evaluate('''() => ({innerWidth,screenWidth:screen.width,readyState:document.readyState,bodyH:document.body.scrollHeight,bodyText:document.body.innerText.length,mainDisplay:getComputedStyle(document.querySelector("main")||document.body).display})''')
+                  print('SAFARI '+json.dumps({'path':path,'http':r.status if r else None,'h1':h1,'metrics':vis,'errors':errors[-8:],'failed':failed[-8:]},ensure_ascii=False),flush=True)
+                except Exception as e:
+                  print('SAFARI '+json.dumps({'path':path,'error':repr(e),'errors':errors[-8:],'failed':failed[-8:]},ensure_ascii=False),flush=True)
               await browser.close()
           asyncio.run(main())
           PY
