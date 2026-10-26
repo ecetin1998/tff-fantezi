@@ -9,6 +9,9 @@ on:
       - "data/source-evidence/gw9-fotmob-match-page-candidates-2026-10-27.json"
       - "data/source-evidence/gw9-scout-roster-identities-2026-10-27.json"
       - "scripts/reconcile_mh9_provider_players.py"
+      - "test/mh9_source_identity_reconciliation_test.py"
+      - "data/source-evidence/gw9-scout-roster-identities-2026-10-27.json"
+      - "scripts/reconcile_mh9_provider_players.py"
   workflow_dispatch:
 
 permissions:
@@ -67,6 +70,24 @@ jobs:
             jq -r '"- Players with explicit minutes: \(.explicit_minutes_count); source matched: \(.matched_played), identity gaps: \(.unmatched_played)"' "$RUNNER_TEMP/mh9-source-player-reconciliation.json"
             jq -r '"- Keeper save observations: \(.source_saves_count); goals: \(.source_goal_events), own-goal source flags: \(.source_own_goal_events), cards: \(.source_card_events)"' "$RUNNER_TEMP/mh9-source-player-reconciliation.json"
             echo "- This is not a TFF Fantasy point export; no zero-fill and no model/DB writes."
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Verify source-to-456-player identity matching
+        run: |
+          set -euo pipefail
+          python3 -m unittest discover -s test -p 'mh9_source_identity_reconciliation_test.py' -v
+          python3 scripts/reconcile_mh9_provider_players.py \
+            --input "$RUNNER_TEMP/mh9-source-probe.json" \
+            --output "$RUNNER_TEMP/mh9-player-identity-evidence.json"
+          jq -e '.gameweek == 9 and .roster_size == 456 and .fixtures == 9 and
+                 .official_fantasy_points_written == 0 and .db_writes == 0 and
+                 .safe_to_close_gameweek == false and .safe_to_promote_mh10 == false' \
+            "$RUNNER_TEMP/mh9-player-identity-evidence.json"
+          {
+            echo
+            echo "### Source-to-Scout player mapping (NONFINAL)"
+            jq -r '"- Played players mapped: \(.matched_played)/\(.explicit_minutes_count); unmatched: \(.unmatched_played)"' "$RUNNER_TEMP/mh9-player-identity-evidence.json"
+            jq -r '"- Source goal events: \(.source_goal_events), own goals: \(.source_own_goal_events), card events: \(.source_card_events)"' "$RUNNER_TEMP/mh9-player-identity-evidence.json"
+            jq -r '.unmatched_players[] | "- UNMATCHED fixture \(.match_id): \(.name), provider \(.provider_id), club \(.team_id), reason \(.reason)"' "$RUNNER_TEMP/mh9-player-identity-evidence.json"
           } >> "$GITHUB_STEP_SUMMARY"
       - name: Retain full provider evidence for identity reconciliation
         if: always()
