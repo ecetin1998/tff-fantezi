@@ -5,6 +5,7 @@ on:
       - feat/mh9-independent-score-mh10-safe-candidate-20261027
     paths:
       - "scripts/calculate_mh9_independent_points.py"
+      - "scripts/finalize_mh9_independent_points.py"
       - ".github/workflows/mh9-independent-points-candidate.yml"
   workflow_dispatch:
 permissions:
@@ -43,10 +44,34 @@ jobs:
             jq -r '.match_reports[] | "- TFF \(.match_id): \(.players_observed_registered) source players, base top 3 \(.top3_base_distinct), tie bonuses \(.bonus_total)"' "$RUNNER_TEMP/mh9-independent-calculated-candidates.json"
             echo "- DB writes: 0. Frozen MH9 benchmark/production and user teams remain untouched."
           } >> "$GITHUB_STEP_SUMMARY"
+      - name: Validate inferred nonappearances against all 198 starters and 86 substitutions
+        run: |
+          set -euo pipefail
+          python3 scripts/finalize_mh9_independent_points.py \
+            --scores "$RUNNER_TEMP/mh9-independent-calculated-candidates.json" \
+            --source "$RUNNER_TEMP/mh9evidence/mh9-source-probe.json" \
+            --identity "$RUNNER_TEMP/mh9evidence/mh9-source-player-reconciliation.json" \
+            --roster "data/source-evidence/gw9-scout-roster-identities-2026-10-27.json" \
+            --output "$RUNNER_TEMP/mh9-owner-approved-independent-finalization-candidate.json"
+          jq -e '.matches == 9 and .active_players == 456 and
+            .explicit_minutes_played == 282 and
+            .source_verified_zero_by_exhaustive_substitutions == 174 and
+            .all_source_provenance_consistent == true and .db_writes == 0 and
+            .can_publish_official_points == false and (.rows | length) == 456' \
+            "$RUNNER_TEMP/mh9-owner-approved-independent-finalization-candidate.json"
+          {
+            echo
+            echo "### MH9 owner-approved independent Fantasy closure candidate"
+            jq -r '"- Players: \(.active_players), supported zero appearances: \(.source_verified_zero_by_exhaustive_substitutions)"' "$RUNNER_TEMP/mh9-owner-approved-independent-finalization-candidate.json"
+            jq -r '"- Calculated points: \(.total_points), tie-aware bonus: \(.total_bonus_points)"' "$RUNNER_TEMP/mh9-owner-approved-independent-finalization-candidate.json"
+            echo "- NOT TFF official export. Backtest/production DB untouched."
+          } >> "$GITHUB_STEP_SUMMARY"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: mh9-independently-calculated-nonfinal
-          path: ${{ runner.temp }}/mh9-independent-calculated-candidates.json
+          path: |
+            ${{ runner.temp }}/mh9-independent-calculated-candidates.json
+            ${{ runner.temp }}/mh9-owner-approved-independent-finalization-candidate.json
           retention-days: 14
           if-no-files-found: warn
