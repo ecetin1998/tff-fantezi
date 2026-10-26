@@ -125,7 +125,8 @@ Deno.serve(async(req:Request)=>{
       for(const q of [playersQ,pstatsQ,tstatsQ,histQ,weeklyQ,targetQ])if(q.error)throw q.error
       const activeIds=new Set((playersQ.data||[]).map((x:any)=>Number(x.id)))
       const activeStats=(pstatsQ.data||[]).filter((x:any)=>activeIds.has(Number(x.player_id)))
-      const advancedMissing=activeStats.filter((x:any)=>Number(x.minutes||0)>0&&Number(x.advanced_through_gameweek||0)<gw)
+      const playedCurrentIds=new Set((weeklyQ.data||[]).filter((x:any)=>Number(x.minutes||0)>0).map((x:any)=>Number(x.player_id)))
+      const advancedMissing=activeStats.filter((x:any)=>playedCurrentIds.has(Number(x.player_id))&&Number(x.advanced_through_gameweek||0)<gw)
       // MH8 only: independent, complete, owner-approved actuals permit an
       // explicitly reported ONE-WEEK xG/xA lag. Never falsify advanced markers.
       const acceptedLag=mh8CalculatedAdvancedLagAccepted({
