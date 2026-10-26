@@ -10,6 +10,21 @@ const visibleAnalysis=(items,email)=>items.filter(([href])=>!adminOnlyPaths.has(
 
 const matches=(path,href)=>href==='/' ? path==='/' : path===href || path.startsWith(href+'/')
 
+// On iPhone Safari, dynamic RSC transitions can leave a textless loading
+// skeleton visible while a prefetched request completes. A regular document
+// navigation retains the existing screen until the new HTML is available.
+function navigateMobileDocument(event,href){
+  if(event.defaultPrevented||event.button!==0||event.metaKey||event.ctrlKey||event.shiftKey||event.altKey)return
+  const target=new URL(href,window.location.origin)
+  if(target.pathname===window.location.pathname&&target.search===window.location.search){
+    event.preventDefault()
+    return
+  }
+  event.preventDefault()
+  window.location.assign(target.pathname+target.search+target.hash)
+}
+
+
 export function DesktopNavLinks({ primary, analysis }){
   const path=usePathname()
   const [open,setOpen]=useState(false)
@@ -76,8 +91,8 @@ function MenuIcon({ href }){
   return <svg {...common}><circle cx="12" cy="12" r="8.5"/><path d="M8 12h8"/></svg>
 }
 
-function MenuRow({ href,label,onClick,active=false,prefetch }){
-  return <Link prefetch={prefetch} onClick={onClick} className={active?'active mobile-menu-row':'mobile-menu-row'} href={href}>
+function MenuRow({ href,label,onClick,active=false }){
+  return <Link prefetch={false} onClick={(event)=>{onClick?.(event);navigateMobileDocument(event,href)}} className={active?'active mobile-menu-row':'mobile-menu-row'} href={href}>
     <span className="mobile-menu-row-icon"><MenuIcon href={href}/></span>
     <span>{label}</span>
   </Link>
@@ -172,7 +187,7 @@ export function MobileBottomNav({ items }){
   const path=usePathname()
   return <nav className="mobile-bottom-nav" aria-label="Mobil ana navigasyon">
     {items.map(([href,icon,label])=>
-      <Link className={matches(path,href)?'active':''} href={href} key={href}>
+      <Link prefetch={false} onClick={(event)=>navigateMobileDocument(event,href)} className={matches(path,href)?'active':''} href={href} key={href}>
         <span className="bottom-nav-icon"><BottomNavIcon name={icon}/></span>
         <b>{label}</b>
       </Link>
