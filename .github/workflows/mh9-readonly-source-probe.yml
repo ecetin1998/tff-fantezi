@@ -1,0 +1,125 @@
+name: MH9 FotMob source intake (read only)
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/mh9-readonly-source-probe.yml"
+      - "scripts/probe_mh9_fotmob_sources.py"
+      - "test/mh9_readonly_source_probe_test.py"
+      - "data/source-evidence/gw9-fotmob-match-page-candidates-2026-10-27.json"
+      - "data/source-evidence/gw9-scout-roster-identities-2026-10-27.json"
+      - "scripts/reconcile_mh9_provider_players.py"
+      - "scripts/extract_mh9_fotmob_advanced.py"
+      - "test/mh9_advanced_source_evidence_test.py"
+      - "test/mh9_source_identity_reconciliation_test.py"
+      - "data/source-evidence/gw9-reviewed-mh8-provider-player-crosswalk-2026-10-27.json"
+      - "data/source-evidence/gw9-scout-roster-identities-2026-10-27.json"
+      - "scripts/reconcile_mh9_provider_players.py"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: mh9-readonly-probe-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install source-page HTML parser
+        run: python3 -m pip install --disable-pip-version-check 'beautifulsoup4==4.14.2'
+      - name: Unit tests (nonfinal, unknown never zero)
+        run: python3 -m unittest discover -s test -p 'mh9_readonly_source_probe_test.py' -v
+      - name: Validate official fixture manifest without network
+        run: python3 scripts/probe_mh9_fotmob_sources.py --offline-check
+      - name: Inspect nine FotMob provider matches without DB access
+        run: |
+          set -euo pipefail
+          python3 scripts/probe_mh9_fotmob_sources.py --output "$RUNNER_TEMP/mh9-source-probe.json"
+          jq -e '.gameweek == 9 and .fixture_count == 9 and
+                 .db_writes == 0 and .official_fantasy_points_written == 0 and
+                 .safe_to_close_gameweek == false and .safe_to_promote_mh10 == false' \
+            "$RUNNER_TEMP/mh9-source-probe.json"
+          {
+            echo "### MH9 source observation coverage — NOT Fantasy finalization"
+            echo
+            jq -r '"- Structured and source-matched matches: \(.structured_fixtures)/9"' "$RUNNER_TEMP/mh9-source-probe.json"
+            jq -r '.rows[] | "- TFF \(.fixture_id): \(.status); confirmed lineup: \(.source_details.lineup_complete // false); explicit minutes: \(.source_details.explicit_minutes_count // 0); GK saves: \(.source_details.explicit_keeper_save_count // 0)"' "$RUNNER_TEMP/mh9-source-probe.json"
+            echo
+            echo "- Missing source values are UNKNOWN, never player zero-point facts."
+            echo "- Supabase writes: **0**. MH9 close / MH10 publication: **BLOCKED**."
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Reconcile source-observed MH9 players against live roster snapshot
+        run: |
+          set -euo pipefail
+          python3 scripts/reconcile_mh9_provider_players.py \
+            --input "$RUNNER_TEMP/mh9-source-probe.json" \
+            --output "$RUNNER_TEMP/mh9-source-player-reconciliation.json"
+          jq -e '.gameweek == 9 and .roster_size == 456 and .fixtures == 9 and
+                 .db_writes == 0 and .official_fantasy_points_written == 0 and
+                 .missing_player_values_are_zero == false and
+                 .safe_to_close_gameweek == false and .safe_to_promote_mh10 == false' \
+             "$RUNNER_TEMP/mh9-source-player-reconciliation.json"
+          {
+            echo
+            echo "### MH9 FotMob-to-Scout player observations (NONFINAL)"
+            jq -r '"- Players with explicit minutes: \(.explicit_minutes_count); source matched: \(.matched_played), identity gaps: \(.unmatched_played)"' "$RUNNER_TEMP/mh9-source-player-reconciliation.json"
+            jq -r '"- Keeper save observations: \(.source_saves_count); goals: \(.source_goal_events), own-goal source flags: \(.source_own_goal_events), cards: \(.source_card_events)"' "$RUNNER_TEMP/mh9-source-player-reconciliation.json"
+            echo "- This is not a TFF Fantasy point export; no zero-fill and no model/DB writes."
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Verify source-to-456-player identity matching
+        run: |
+          set -euo pipefail
+          python3 -m unittest discover -s test -p 'mh9_source_identity_reconciliation_test.py' -v
+          python3 scripts/reconcile_mh9_provider_players.py \
+            --input "$RUNNER_TEMP/mh9-source-probe.json" \
+            --output "$RUNNER_TEMP/mh9-player-identity-evidence.json"
+          jq -e '.gameweek == 9 and .roster_size == 456 and .fixtures == 9 and
+                 .official_fantasy_points_written == 0 and .db_writes == 0 and
+                 .safe_to_close_gameweek == false and .safe_to_promote_mh10 == false' \
+            "$RUNNER_TEMP/mh9-player-identity-evidence.json"
+          {
+            echo
+            echo "### Source-to-Scout player mapping (NONFINAL)"
+            jq -r '"- Played players mapped: \(.matched_played)/\(.explicit_minutes_count); unmatched: \(.unmatched_played)"' "$RUNNER_TEMP/mh9-player-identity-evidence.json"
+            jq -r '"- Source goal events: \(.source_goal_events), own goals: \(.source_own_goal_events), card events: \(.source_card_events)"' "$RUNNER_TEMP/mh9-player-identity-evidence.json"
+            jq -r '.unmatched_players[] | "- UNMATCHED fixture \(.match_id): \(.name), provider \(.provider_id), club \(.team_id), reason \(.reason)"' "$RUNNER_TEMP/mh9-player-identity-evidence.json"
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Test MH9 advanced source absence and identity gates
+        run: python3 -m unittest discover -s test -p 'mh9_advanced_source_evidence_test.py' -v
+      - name: Extract MH9 advanced attacking source metrics (nonfinal)
+        run: |
+          set -euo pipefail
+          python3 scripts/extract_mh9_fotmob_advanced.py \
+            --source "$RUNNER_TEMP/mh9-source-probe.json" \
+            --reconciliation "$RUNNER_TEMP/mh9-source-player-reconciliation.json" \
+            --output "$RUNNER_TEMP/mh9-advanced-attacking-source.json"
+          jq -e '.gameweek == 9 and .fixture_count == 9 and .roster_size == 456 and
+                 .database_writes == 0 and .official_fantasy_points_written == 0 and
+                 .safe_to_close_gameweek == false and .safe_to_promote_mh10 == false' \
+            "$RUNNER_TEMP/mh9-advanced-attacking-source.json"
+          {
+            echo
+            echo "### MH9 advanced attack evidence (NONFINAL)"
+            jq -r '"- Verified source-matched players: \(.matched_played), unresolved: \(.unmatched_played)"' "$RUNNER_TEMP/mh9-advanced-attacking-source.json"
+            jq -r '.coverage | to_entries[] | "- \(.key): \(.value) explicitly observed"' "$RUNNER_TEMP/mh9-advanced-attacking-source.json"
+            echo "- Missing values are null; Fantasy scores and model unchanged."
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Retain full provider evidence for identity reconciliation
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mh9-readonly-fotmob-source-candidates
+          path: |
+            ${{ runner.temp }}/mh9-source-probe.json
+            ${{ runner.temp }}/mh9-source-player-reconciliation.json
+            ${{ runner.temp }}/mh9-advanced-attacking-source.json
+          if-no-files-found: warn
+          retention-days: 14

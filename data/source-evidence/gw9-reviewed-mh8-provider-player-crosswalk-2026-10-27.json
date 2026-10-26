@@ -1,0 +1,108 @@
+{
+  "season": "2026-27",
+  "gameweek": 9,
+  "kind": "SCOUT_MH8_FOTMOB_PROVIDER_ID_CROSSWALK_PROOFS",
+  "as_of": "2026-10-27",
+  "note": "Existing MH8 scout_verified_weekly_attack contains explicitly verified player_id <-> FotMob provider_player_id mappings. Only use with exact same team_id, current Scout full_name and MH9 observed provider name + match ID. Not evidence of MH9 Fantasy totals.",
+  "entries": [
+    {
+      "provider_player_id": 289473,
+      "mh9_match_id": 317864,
+      "mh9_provider_name": "Dia Saba",
+      "team_id": 5,
+      "scout_player_id": 136,
+      "scout_full_name": "Diaa Sabi'a",
+      "prior_verified_gameweek": 8,
+      "prior_verified_match_id": 317849,
+      "prior_source": "FotMob matchDetails MH8 explicit playerStats"
+    },
+    {
+      "provider_player_id": 359188,
+      "mh9_match_id": 317859,
+      "mh9_provider_name": "Fabinho",
+      "team_id": 1,
+      "scout_player_id": 1009,
+      "scout_full_name": "Fábio Henrique Tavares",
+      "prior_verified_gameweek": 8,
+      "prior_verified_match_id": 317855,
+      "prior_source": "FotMob matchDetails MH8 explicit playerStats"
+    },
+    {
+      "provider_player_id": 815997,
+      "mh9_match_id": 317861,
+      "mh9_provider_name": "Thalisson",
+      "team_id": 11,
+      "scout_player_id": 336,
+      "scout_full_name": "Thalisson Kelven da Silva",
+      "prior_verified_gameweek": 8,
+      "prior_verified_match_id": 317850,
+      "prior_source": "FotMob matchDetails MH8 explicit playerStats"
+    },
+    {
+      "provider_player_id": 859042,
+      "mh9_match_id": 317858,
+      "mh9_provider_name": "Show",
+      "team_id": 4,
+      "scout_player_id": 131,
+      "scout_full_name": "Manuel Luís da Silva Cafumana",
+      "prior_verified_gameweek": 8,
+      "prior_verified_match_id": 317853,
+      "prior_source": "FotMob matchDetails MH8 explicit playerStats"
+    },
+    {
+      "provider_player_id": 983199,
+      "mh9_match_id": 317860,
+      "mh9_provider_name": "Tino Anjorin",
+      "team_id": 10,
+      "scout_player_id": 1542,
+      "scout_full_name": "Faustino Adebola Rasheed Anjorin",
+      "prior_verified_gameweek": 8,
+      "prior_verified_match_id": 317853,
+      "prior_source": "FotMob matchDetails MH8 explicit playerStats"
+    },
+    {
+      "provider_player_id": 1185467,
+      "mh9_match_id": 317860,
+      "mh9_provider_name": "Rhaldney",
+      "team_id": 10,
+      "scout_player_id": 304,
+      "scout_full_name": "Rhaldney Norberto Simião Gomes",
+      "prior_verified_gameweek": 8,
+      "prior_verified_match_id": 317853,
+      "prior_source": "FotMob matchDetails MH8 explicit playerStats"
+    },
+    {
+      "provider_player_id": 1374500,
+      "mh9_match_id": 317859,
+      "mh9_provider_name": "Franculino",
+      "team_id": 1,
+      "scout_player_id": 1471,
+      "scout_full_name": "Franculino Gluda Djú",
+      "prior_verified_gameweek": 8,
+      "prior_verified_match_id": 317855,
+      "prior_source": "FotMob matchDetails MH8 explicit playerStats"
+    },
+    {
+      "provider_player_id": 1459652,
+      "mh9_match_id": 317860,
+      "mh9_provider_name": "André",
+      "team_id": 10,
+      "scout_player_id": 310,
+      "scout_full_name": "André Henrique da Silva Martins",
+      "prior_verified_gameweek": 8,
+      "prior_verified_match_id": 317853,
+      "prior_source": "FotMob matchDetails MH8 explicit playerStats"
+    },
+    {
+      "provider_player_id": 1666481,
+      "mh9_match_id": 317864,
+      "mh9_provider_name": "Anto Sekongo",
+      "team_id": 15,
+      "scout_player_id": 463,
+      "scout_full_name": "Yirigue Foungognan Sekongo",
+      "prior_verified_gameweek": 8,
+      "prior_verified_match_id": 317852,
+      "prior_source": "FotMob matchDetails MH8 explicit playerStats"
+    }
+  ]
+}
