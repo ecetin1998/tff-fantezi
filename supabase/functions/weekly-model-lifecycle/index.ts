@@ -578,6 +578,19 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
       source_closure_required:true,next_gameweek:gw+1
     }
   }
+  // A completed set of sourced football results ends the forecasting window,
+  // even if kickoff+3h has not elapsed. Fantasy actuals remain a separate gate.
+  const finishedQ=await sb.from("scout_match_history")
+    .select("match_id,match_status,home_goals,away_goals")
+    .eq("season","2026-27").eq("gameweek",gw)
+  if(finishedQ.error)throw finishedQ.error
+  if((finishedQ.data||[]).length===9&&
+     (finishedQ.data||[]).every((m:any)=>m.match_status==="Bitti"&&
+       m.home_goals!==null&&m.away_goals!==null)){
+    return {refresh_required:false,
+      reason:"ALL_FOOTBALL_RESULTS_FINAL_AWAITING_FANTASY_ACTUALS",
+      gameweek:gw,source_closure_required:true,next_gameweek:gw+1}
+  }
   const deadline=kickoff-36e5
   // Squad editing remains locked at the official deadline, but forecast *views*
   // can evolve while the gameweek is in progress. Before ANY post-kickoff
