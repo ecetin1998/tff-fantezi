@@ -31,10 +31,22 @@ jobs:
                   try:
                       with urllib.request.urlopen(req,timeout=23) as res:
                           body=res.read().decode("utf-8","replace")
-                          marker10="MH10" in body
-                          marker9="MH9" in body
+                          from html.parser import HTMLParser
+                          class VisibleHTML(HTMLParser):
+                              def __init__(self): super().__init__(); self.headings=[];self.capture=False
+                              def handle_starttag(self,tag,attrs):
+                                  if tag=="h1": self.capture=True;self.headings.append("")
+                              def handle_data(self,data):
+                                  if self.capture and self.headings:self.headings[-1]+=data
+                              def handle_endtag(self,tag):
+                                  if tag=="h1":self.capture=False
+                          parser=VisibleHTML();parser.feed(body)
+                          heads=parser.headings
+                          marker10=any(re.search(r"MH\\s*10",h) for h in heads)
+                          marker9=any(re.search(r"MH\\s*9",h) for h in heads)
+                          print(f"  visible_h1={heads[:5]}",flush=True)
                           print(f"{route} {suffix or 'canonical'}: status={res.status}, MH10={marker10}, MH9={marker9}, cf-cache-status={res.headers.get('cf-cache-status')}, age={res.headers.get('age')}, cache-control={res.headers.get('cache-control')}, bytes={len(body)}",flush=True)
-                          print(f"  hits: MH10={body.count('MH10')} MH9={body.count('MH9')}; headlines={re.findall(r'.{0,35}MH(?:9|10).{0,50}',body)[:2]}",flush=True)
+                          print(f"  raw MH match snippets={re.findall(r'.{0,35}MH.{0,55}',body)[:2]}",flush=True)
                           if not marker10: issues.append(url)
                   except Exception as ex:
                       print(f"{url} unreachable: {type(ex).__name__}: {str(ex)[:250]}",flush=True)
