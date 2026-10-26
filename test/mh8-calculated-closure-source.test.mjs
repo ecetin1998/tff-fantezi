@@ -8,13 +8,15 @@ const candidate={
   source_kind:"independently_calculated_source_events",
 };
 
-test("MH8 independently computed totals allowed only after explicit finality",()=>{
+test("MH8/MH9 independently computed totals allowed only after explicit finality",()=>{
   assert.equal(acceptedFinalSource(8,candidate.source_kind),true);
   assert.equal(acceptedFinalSource(7,candidate.source_kind),false);
-  assert.equal(acceptedFinalSource(9,candidate.source_kind),false);
+  assert.equal(acceptedFinalSource(9,candidate.source_kind),true);
+  assert.equal(acceptedFinalSource(10,candidate.source_kind),false);
   assert.equal(validFinalWeeklyPlayerRow(8,candidate),true);
   assert.equal(validFinalWeeklyPlayerRow(8,{...candidate,is_final:false}),false);
-  assert.equal(validFinalWeeklyPlayerRow(9,candidate),false);
+  assert.equal(validFinalWeeklyPlayerRow(9,candidate),true);
+  assert.equal(validFinalWeeklyPlayerRow(10,candidate),false);
   assert.equal(validFinalWeeklyPlayerRow(8,{...candidate,source_kind:"unknown"}),false);
 });
 
