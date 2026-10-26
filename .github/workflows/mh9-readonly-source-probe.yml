@@ -10,6 +10,7 @@ on:
       - "data/source-evidence/gw9-scout-roster-identities-2026-10-27.json"
       - "scripts/reconcile_mh9_provider_players.py"
       - "test/mh9_source_identity_reconciliation_test.py"
+      - "data/source-evidence/gw9-reviewed-mh8-provider-player-crosswalk-2026-10-27.json"
       - "data/source-evidence/gw9-scout-roster-identities-2026-10-27.json"
       - "scripts/reconcile_mh9_provider_players.py"
   workflow_dispatch:
