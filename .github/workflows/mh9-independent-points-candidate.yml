@@ -74,7 +74,9 @@ jobs:
              data/source-evidence/gw9-independent-calculated-points-candidate.json
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/source-evidence/gw9-independent-calculated-points-candidate.json
+          cp "$RUNNER_TEMP/mh9evidence/mh9-advanced-attacking-source.json" \
+             data/source-evidence/gw9-verified-fotmob-attack-partial.json
+          git add data/source-evidence/gw9-independent-calculated-points-candidate.json data/source-evidence/gw9-verified-fotmob-attack-partial.json
           if ! git diff --cached --quiet; then
             git commit -m "data(mh9): snapshot calculated nonofficial points candidate after full source QA"
             git push origin HEAD:feat/mh9-independent-score-mh10-safe-candidate-20261027
