@@ -1,5 +1,5 @@
 /**
- * Only 2026-27 MH8 may advance from explicitly owner-approved INDEPENDENT
+ * Only 2026-27 MH8/MH9 may advance from explicitly owner-approved INDEPENDENT
  * calculated actuals. Never relabel calculated points as official TFF exports.
  *
  * This does not itself close games or mark rows final; caller must enforce
@@ -9,7 +9,7 @@ export const MH8_INDEPENDENT_SOURCE = "independently_calculated_source_events";
 
 export function acceptedFinalSource(gameweek, sourceKind) {
   if (sourceKind === "fresh_closed_actual") return true;
-  return Number(gameweek) === 8 && sourceKind === MH8_INDEPENDENT_SOURCE;
+  return [8, 9].includes(Number(gameweek)) && sourceKind === MH8_INDEPENDENT_SOURCE;
 }
 
 export function validFinalWeeklyPlayerRow(gameweek, row) {
