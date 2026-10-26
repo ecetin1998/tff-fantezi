@@ -11,10 +11,12 @@ const candidate={
 test("MH8 independently computed totals allowed only after explicit finality",()=>{
   assert.equal(acceptedFinalSource(8,candidate.source_kind),true);
   assert.equal(acceptedFinalSource(7,candidate.source_kind),false);
-  assert.equal(acceptedFinalSource(9,candidate.source_kind),false);
+  assert.equal(acceptedFinalSource(9,candidate.source_kind),true);
+  assert.equal(acceptedFinalSource(10,candidate.source_kind),false);
   assert.equal(validFinalWeeklyPlayerRow(8,candidate),true);
   assert.equal(validFinalWeeklyPlayerRow(8,{...candidate,is_final:false}),false);
-  assert.equal(validFinalWeeklyPlayerRow(9,candidate),false);
+  assert.equal(validFinalWeeklyPlayerRow(9,candidate),true);
+  assert.equal(validFinalWeeklyPlayerRow(10,candidate),false);
   assert.equal(validFinalWeeklyPlayerRow(8,{...candidate,source_kind:"unknown"}),false);
 });
 
@@ -44,4 +46,13 @@ test("inferred zero-minute players cannot get synthetic positive points",()=>{
   assert.equal(validFinalWeeklyPlayerRow(8,{
     ...candidate,minutes:0,base_points:1,bonus_points:0,points:1
   }),false);
+});
+
+test("MH9 owner-approved independently scored row cannot masquerade as official or have unsupported zero-minute totals", () => {
+  const mh9={...candidate,gameweek:9,match_id:317856,player_id:216};
+  assert.equal(validFinalWeeklyPlayerRow(9,mh9),true);
+  assert.equal(validFinalWeeklyPlayerRow(9,{...mh9,is_final:false}),false);
+  assert.equal(validFinalWeeklyPlayerRow(9,{...mh9,minutes:0,points:1,base_points:1,bonus_points:0}),false);
+  assert.equal(validFinalWeeklyPlayerRow(9,{...mh9,minutes:0,points:0,base_points:0,bonus_points:0}),true);
+  assert.equal(acceptedFinalSource(10,mh9.source_kind),false);
 });
