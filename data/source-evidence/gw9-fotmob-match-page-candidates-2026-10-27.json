@@ -1,0 +1,124 @@
+{
+  "season": "2026-27",
+  "gameweek": 9,
+  "as_of": "2026-10-27",
+  "kind": "MH9_READ_ONLY_SOURCE_CANDIDATES",
+  "status": "URLS_LOCATED_STRUCTURED_PROBE_PENDING",
+  "source_roles": [
+    "Official TFF match ID and score provenance from scout_match_history/scout_match_external_ids; confirmed against public TFF and match report",
+    "FotMob public match pages are candidate source for lineups and individual events; a full-time structured source requires independent identity checks",
+    "Official TFF Fantasy ledger, not FotMob's fantasyScore, controls final weekly points and bonuses"
+  ],
+  "matches": [
+    {
+      "match_id": 317856,
+      "official_tff_match_id": 317856,
+      "home_team": "Gaziantep",
+      "away_team": "Erzurumspor",
+      "home_goals": 1,
+      "away_goals": 3,
+      "official_tff_url": "https://www.tff.org/Default.aspx?macId=317856&pageID=29",
+      "candidate_fotmob_url": "https://www.fotmob.com/matches/gaziantep-fk-vs-erzurumspor-fk/iq8snzj",
+      "verified_player_stats": false,
+      "verified_fantasy_points": false
+    },
+    {
+      "match_id": 317857,
+      "official_tff_match_id": 317857,
+      "home_team": "Eyüpspor",
+      "away_team": "Kasımpaşa",
+      "home_goals": 0,
+      "away_goals": 1,
+      "official_tff_url": "https://www.tff.org/Default.aspx?macId=317857&pageID=29",
+      "candidate_fotmob_url": "https://www.fotmob.com/matches/eyupspor-vs-kasmpasa/q4akq",
+      "verified_player_stats": false,
+      "verified_fantasy_points": false
+    },
+    {
+      "match_id": 317858,
+      "official_tff_match_id": 317858,
+      "home_team": "Alanyaspor",
+      "away_team": "Kocaelispor",
+      "home_goals": 1,
+      "away_goals": 2,
+      "official_tff_url": "https://www.tff.org/Default.aspx?macId=317858&pageID=29",
+      "candidate_fotmob_url": "https://www.fotmob.com/matches/kocaelispor-vs-alanyaspor/bmdyq",
+      "verified_player_stats": false,
+      "verified_fantasy_points": false
+    },
+    {
+      "match_id": 317859,
+      "official_tff_match_id": 317859,
+      "home_team": "Rizespor",
+      "away_team": "Trabzonspor",
+      "home_goals": 3,
+      "away_goals": 4,
+      "official_tff_url": "https://www.tff.org/Default.aspx?macId=317859&pageID=29",
+      "candidate_fotmob_url": "https://www.fotmob.com/matches/rizespor-vs-trabzonspor/16aj0h",
+      "verified_player_stats": false,
+      "verified_fantasy_points": false
+    },
+    {
+      "match_id": 317860,
+      "official_tff_match_id": 317860,
+      "home_team": "Göztepe",
+      "away_team": "Çorum FK",
+      "home_goals": 2,
+      "away_goals": 0,
+      "official_tff_url": "https://www.tff.org/Default.aspx?macId=317860&pageID=29",
+      "candidate_fotmob_url": "https://www.fotmob.com/matches/goztepe-vs-corum-fk/tmx2psa",
+      "verified_player_stats": false,
+      "verified_fantasy_points": false
+    },
+    {
+      "match_id": 317861,
+      "official_tff_match_id": 317861,
+      "home_team": "Konyaspor",
+      "away_team": "Gençlerbirliği",
+      "home_goals": 2,
+      "away_goals": 0,
+      "official_tff_url": "https://www.tff.org/Default.aspx?macId=317861&pageID=29",
+      "candidate_fotmob_url": "https://www.fotmob.com/matches/genclerbirligi-vs-konyaspor/28ah03",
+      "verified_player_stats": false,
+      "verified_fantasy_points": false
+    },
+    {
+      "match_id": 317862,
+      "official_tff_match_id": 317862,
+      "home_team": "Galatasaray",
+      "away_team": "Fenerbahçe",
+      "home_goals": 2,
+      "away_goals": 1,
+      "official_tff_url": "https://www.tff.org/Default.aspx?macId=317862&pageID=29",
+      "candidate_fotmob_url": "https://www.fotmob.com/matches/galatasaray-vs-fenerbahce/2hfnrt",
+      "verified_player_stats": false,
+      "verified_fantasy_points": false
+    },
+    {
+      "match_id": 317863,
+      "official_tff_match_id": 317863,
+      "home_team": "Beşiktaş",
+      "away_team": "Başakşehir",
+      "home_goals": 2,
+      "away_goals": 0,
+      "official_tff_url": "https://www.tff.org/Default.aspx?macId=317863&pageID=29",
+      "candidate_fotmob_url": "https://www.fotmob.com/matches/basaksehir-vs-besiktas/17qnqq",
+      "verified_player_stats": false,
+      "verified_fantasy_points": false
+    },
+    {
+      "match_id": 317864,
+      "official_tff_match_id": 317864,
+      "home_team": "Samsunspor",
+      "away_team": "Amed",
+      "home_goals": 1,
+      "away_goals": 2,
+      "official_tff_url": "https://www.tff.org/Default.aspx?macId=317864&pageID=29",
+      "candidate_fotmob_url": "https://www.fotmob.com/matches/samsunspor-vs-amed-sportif/2lcioqi",
+      "verified_player_stats": false,
+      "verified_fantasy_points": false
+    }
+  ],
+  "missing_policy": "Unknown player stats remain null. This manifest is not evidence that a player did not play.",
+  "release_policy": "No database writes, no model promotion, no finalization without independent reconciliation and 456-player QA."
+}
