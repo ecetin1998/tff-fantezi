@@ -102,13 +102,15 @@ jobs:
               c=await b.new_context(viewport={'width':390,'height':844},is_mobile=True,has_touch=True,user_agent='Mozilla/5.0 (iPhone; CPU iPhone OS 18_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.6 Mobile/15E148 Safari/604.1')
               page=await c.new_page();errors=[]
               page.on('pageerror',lambda e:errors.append(str(e)[:700]))
+              page.on('requestfailed',lambda r:errors.append('FAILED '+r.url[:170]+' '+str(r.failure)) if len(errors)<22 else None)
+              page.on('response',lambda r:errors.append('HTTP '+str(r.status)+' '+r.url[:180]) if r.status>=400 and len(errors)<22 else None)
               await page.goto('https://fanteziligrehberi.com/',wait_until='domcontentloaded',timeout=32000)
               await page.wait_for_timeout(1200)
-              for to in ['/players','/','/matches','/','/squads','/']:
+              for to in ['/players','/','/squads','/']:
                 try:
                   await page.locator('a[href="'+to+'"]').first.evaluate('(a)=>a.click()')
                   await page.wait_for_url('**'+to,timeout=18000,wait_until='domcontentloaded')
-                  await page.wait_for_timeout(950)
+                  await page.wait_for_timeout(7200)
                   info={'target':to,'actual':page.url,'h1':await page.locator('h1').all_inner_texts(),'main_chars':len(await page.locator('main').inner_text()),'is_blank':len(await page.locator('main').inner_text())<50,'errors':errors[-3:]}
                 except Exception as e:info={'target':to,'error':str(e)[:450],'url':page.url,'errors':errors[-3:]}
                 print('SPA '+json.dumps(info,ensure_ascii=False),flush=True)
