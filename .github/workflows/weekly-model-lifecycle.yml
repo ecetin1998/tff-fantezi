@@ -142,6 +142,9 @@ jobs:
           fi
 
       - name: Audit current match strengths, NB2 clean sheets and player allocations
+        # A fully CLOSED MH9 must be evaluated by its frozen actuals and MH10 candidate QA,
+        # not an obsolete in-week pre-kickoff projection audit.
+        if: steps.status.outputs.ready != 'true'
         shell: bash
         env:
           OIDC_TOKEN: ${{ steps.oidc.outputs.token }}
