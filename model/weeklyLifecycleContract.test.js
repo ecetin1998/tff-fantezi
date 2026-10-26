@@ -238,8 +238,8 @@ assert.match(worker,/validFinalWeeklyPlayerRow\(gw,w\)/,
 const closureContract=read('supabase/functions/weekly-model-lifecycle/closureSource.mjs')
 assert.match(closureContract,/sourceKind === "fresh_closed_actual"/,
   'official final source support must stay intact')
-assert.match(closureContract,/Number\(gameweek\) === 8 && sourceKind === MH8_INDEPENDENT_SOURCE/,
-  'owner-approved calculated closure must stay scoped to MH8')
+assert.match(closureContract,/\[8, 9\]\.includes\(Number\(gameweek\)\) && sourceKind === MH8_INDEPENDENT_SOURCE/,
+  'owner-approved calculated closure must stay scoped to independently sourced MH8/MH9; later weeks remain official-only')
 assert.match(closureContract,/row\.is_final !== true/,
   'provisional calculated points may not become official actuals')
 assert.match(closureContract,/minute == null \|\| points == null \|\| base == null \|\| bonus == null/,
