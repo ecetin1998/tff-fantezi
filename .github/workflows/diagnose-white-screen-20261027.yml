@@ -1,0 +1,73 @@
+name: Diagnose production white screen (read only)
+on:
+  push:
+    branches: [audit/white-screen-20261027]
+    paths: [.github/workflows/diagnose-white-screen-20261027.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 9
+    steps:
+      - name: Probe routes, errors, durations and cache
+        run: |
+          python3 - <<'PY'
+          import concurrent.futures, time, urllib.request, urllib.error, re, json
+          host='https://fanteziligrehberi.com'
+          paths=['/','/','/?mh10whiteaudit=20261027','/players','/squads','/matches','/teams','/points','/availability','/api/health','/api/scout-data?section=matches']
+          def probe(path):
+            req=urllib.request.Request(host+path,headers={'User-Agent':'Mozilla/5.0 Chrome/125.0','Cache-Control':'no-cache','Accept':'text/html,*/*'})
+            start=time.monotonic()
+            try:
+              with urllib.request.urlopen(req,timeout=23) as r:
+                b=r.read(1600000);s=b.decode('utf-8','replace')
+                headers=r.headers
+                d={'route':path,'http':r.status,'duration_s':round(time.monotonic()-start,2),'bytes':len(b),'cf_cache':headers.get('CF-Cache-Status'),'server':headers.get('server'),'cf_ray':headers.get('cf-ray'),'etag':headers.get('etag'),'content_type':headers.get('content-type'),'mh10':('MH<!-- -->10' in s or 'MH10' in s),'mh9':('MH<!-- -->9' in s or 'MH9' in s),'next_error':bool(re.search('NEXT_NOT_FOUND|Application error|Digest:|Internal Server Error|1102|Worker exceeded',s,re.I)),'scripts':len(re.findall(r'<script[^>]+src=',s))}
+                if path=='/api/health':d['body']=s[:500]
+                if path=='/api/scout-data?section=matches':d['body']=s[:300]
+                return d
+            except Exception as ex:
+                return {'route':path,'duration_s':round(time.monotonic()-start,2),'error_type':type(ex).__name__,'error':str(ex)[:300]}
+          with concurrent.futures.ThreadPoolExecutor(max_workers=5) as pool:
+            for d in pool.map(probe,paths):print('PROBE '+json.dumps(d,ensure_ascii=False),flush=True)
+          PY
+      - name: Install headless browser diagnostic tooling
+        run: |
+          python3 -m pip install --quiet playwright==1.58.0
+          which google-chrome || which chromium || true
+      - name: Capture headless browser crash, failed scripts and page screenshots
+        run: |
+          mkdir -p "$RUNNER_TEMP/white-screen"
+          python3 - <<'PY'
+          import asyncio,os,json
+          from playwright.async_api import async_playwright
+          async def main():
+            async with async_playwright() as p:
+              browser=await p.chromium.launch(channel='chrome',headless=True,args=['--no-sandbox','--disable-gpu'])
+              for path in ['/','/players','/squads','/matches']:
+                page=await browser.new_page(viewport={'width':390,'height':844},device_scale_factor=1)
+                issues=[];errors=[]
+                page.on('pageerror',lambda e:errors.append(str(e)[:450]))
+                page.on('console',lambda m: errors.append('console '+m.text[:350]) if m.type=='error' else None)
+                page.on('requestfailed',lambda r:issues.append(r.url.split('?')[0]+' '+str(r.failure)) if len(issues)<25 else None)
+                try:
+                  res=await page.goto('https://fanteziligrehberi.com'+path,wait_until='domcontentloaded',timeout=23000)
+                  await page.wait_for_timeout(2200)
+                  result={'path':path,'status':res.status if res else None,'title':await page.title(),'h1':await page.locator('h1').all_inner_texts(),'body_chars':len(await page.locator('body').inner_text()),'html_background':await page.locator('body').evaluate('(e)=>getComputedStyle(e).backgroundColor'),'page_errors':errors[:12],'network_failures':issues[:12]}
+                  await page.screenshot(path=os.path.join(os.environ['RUNNER_TEMP'],'white-screen','route-'+(path.strip('/') or 'home')+'.png'),full_page=False)
+                except Exception as e:result={'path':path,'error':repr(e),'page_errors':errors[:12],'network_failures':issues[:12]}
+                print('BROWSER '+json.dumps(result,ensure_ascii=False),flush=True)
+                await page.close()
+              await browser.close()
+          asyncio.run(main())
+          PY
+      - name: Save diagnostic screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: white-screen-diagnostic-20261027
+          path: ${{ runner.temp }}/white-screen/
+          if-no-files-found: ignore
+          retention-days: 3
