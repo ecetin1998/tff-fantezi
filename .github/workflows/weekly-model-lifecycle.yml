@@ -122,6 +122,24 @@ jobs:
           echo "ready=$(printf '%s' "$response" | jq -r '.ready_to_advance // false')" >> "$GITHUB_OUTPUT"
           echo "current_gw=$(printf '%s' "$response" | jq -r '.current_gameweek')" >> "$GITHUB_OUTPUT"
           echo "target_gw=$(printf '%s' "$response" | jq -r '.target_gameweek')" >> "$GITHUB_OUTPUT"
+          # A successful workflow is NOT proof that the Fantasy week closed.
+          # Report the actual signed source-closure gate every time it runs.
+          current_gw="$(printf '%s' "$response" | jq -r '.current_gameweek')"
+          target_gw="$(printf '%s' "$response" | jq -r '.target_gameweek')"
+          ready="$(printf '%s' "$response" | jq -r '.ready_to_advance // false')"
+          {
+            echo "### MH${current_gw} → MH${target_gw}: resmî kapanış durumu"
+            printf '%s\n' "$response" | jq -r '"- Sonuçlanan ve Fantasy puanları kapanan maç: \(.closed_matches)/\(.fixture_count)"'
+            printf '%s\n' "$response" | jq -r '"- Doğrulanmış oyuncu gerçekleşen puanları: \(.finalized_active_players)/\(.active_players)"'
+            printf '%s\n' "$response" | jq -r '"- Güncel takım sezon istatistikleri: \(.team_stats_current)/18"'
+            printf '%s\n' "$response" | jq -r '"- Güncel oyuncu sezon istatistikleri: \(.player_stats_current)/\(.active_players)"'
+            printf '%s\n' "$response" | jq -r '"- Sonraki hafta fikstürü: \(.target_fixture_count) maç, \(.target_team_count) takım"'
+            echo "- Otomatik kaynak bağlantısı: ${{ steps.ingest.outputs.configured }}"
+            echo "- Geçiş için kaynak onayı: ${ready}"
+          } >> "$GITHUB_STEP_SUMMARY"
+          if [[ "$ready" != "true" ]]; then
+            echo "::warning title=MH${current_gw} kaynak kapanışı eksik::MH${target_gw} 50K/yayın başlatılmayacak. Skorlar tek başına yeterli değil; 456 doğrulanmış Fantasy puanı ve hafta sonu sezon istatistikleri gerekli. Upstream configured=${{ steps.ingest.outputs.configured }}."
+          fi
 
       - name: Audit current match strengths, NB2 clean sheets and player allocations
         shell: bash
