@@ -9,7 +9,7 @@ import {blendVerifiedAttackRate} from "./mh8Attack.mjs"
 import {calibrateAttackRates} from "./roleAwareAttackRates.mjs"
 import {recentAttackForm,fetchRecentAttackEvidence,groupRecentAttack} from "./recentAttackForm.mjs"
 import {currentTacticalRole} from "./recentTacticalRole.mjs"
-import {applyTeamMatchForm,recalibrateAnchoredMatchForm,auditMatchAllocation,auditRealizedModel} from "./teamRecentForm.mjs"
+import {applyTeamMatchForm,recalibrateAnchoredMatchForm,forecastTeamAttackShares,auditMatchAllocation,auditRealizedModel} from "./teamRecentForm.mjs"
 
 const AUDIENCE="tff-fantezi-scout"
 const ISSUER="https://token.actions.githubusercontent.com"
@@ -465,8 +465,13 @@ async function prepare(sb:any,current:any,status:any,body:any={}){
         ?90*n(s.key_passes)/minutes:null,
       xgPer90:calibrated.xgPer90,xaPer90:calibrated.xaPer90
     })
+    // Key passes per 90 are evidence, not realised assists. An unaligned source
+    // is explicitly unknown (-1) and must never be treated as zero creation.
+    const keyPass90=minutes>=360&&s.key_passes!=null&&
+      Number(s.through_gameweek)===Number(s.advanced_through_gameweek)
+      ?90*Number(s.key_passes)/minutes:-1
     const rates=[form.xgPer90,calibrated.goalsPer90,a90,form.xaPer90,
-      yc90,rc90,saves90,n(priorRates[7]),n(priorRates[8]),n(priorRates[9]),shots90,sot90]
+      yc90,rc90,saves90,n(priorRates[7]),n(priorRates[8]),n(priorRates[9]),shots90,sot90,keyPass90]
     const availability=clamp(0,1,n(av.availability_probability,1))
     inputRows.push({
       gameweek:target,benchmark_version:benchmark,player_id:id,player_name:p.full_name,club_id:Number(p.team_id),
@@ -492,8 +497,7 @@ async function prepare(sb:any,current:any,status:any,body:any={}){
     const signal=officialShift.applied&&event.started&&Number(event.minutes)>=75
       ?"RESMÎ MAÇTA İLK 11":officialShift.applied&&event.squad_status==="unused"
       ?"RESMÎ MAÇTA YEDEK":momentum.rising?momentum.signal:d!==null&&d>.20?"ROL YÜKSELİYOR":d!==null&&d<-.20?"ROL DÜŞÜYOR":"BELİRGİN DEĞİŞİM YOK"
-    const goalWeight=Math.max(1e-6,.75*form.xgPer90+.25*calibrated.goalsPer90)
-    const assistWeight=Math.max(1e-6,.70*form.xaPer90+.30*a90)
+    const {goalWeight,assistWeight}=forecastTeamAttackShares({position:p.position,role:tactical.role,rates})
     roleDraft.push({run_id:runId,player_id:id,last2_xi_probability:last2Xi,previous2_xi_probability:prev2Xi,last2_minutes:last2Min,previous2_minutes:prev2Min,signal,predicted_xi_probability:roleProb,x_minutes:0,availability_probability:availability,goalWeight,assistWeight,team_id:Number(p.team_id)})
     if(!weightsByTeam.has(Number(p.team_id)))weightsByTeam.set(Number(p.team_id),[])
     weightsByTeam.get(Number(p.team_id))!.push({id,goal:goalWeight,assist:assistWeight,available:availability})
@@ -841,6 +845,10 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
     rates[0]=form.xgPer90
     rates[1]=calibrated.goalsPer90
     rates[3]=form.xaPer90
+    // Same aligned source policy for the current-week reforecast.
+    rates[12]=seasonMins>=360&&stats?.key_passes!=null&&
+      Number(stats.through_gameweek)===Number(stats.advanced_through_gameweek)
+      ?90*Number(stats.key_passes)/seasonMins:-1
     return {
       ...x,benchmark_version:benchmark,availability,rates,
       sub_role:tactical.role||x.sub_role,role_side:tactical.side||x.role_side,
@@ -938,8 +946,8 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
           :"BELİRGİN DEĞİŞİM YOK"
       })(),
       availability_probability:clamp(0,1,n(av?.availability_probability,x.availability_probability)),
-      team_goal_share:(()=>{const rates=(input?.rates||[]).map(Number);return Math.max(1e-6,.75*n(rates[0])+.25*n(rates[1]))})(),
-      team_assist_share:(()=>{const rates=(input?.rates||[]).map(Number);return Math.max(1e-6,.70*n(rates[3])+.30*n(rates[2]))})(),
+      team_goal_share:forecastTeamAttackShares({position:input?.position,role:input?.sub_role,rates:input?.rates||[]}).goalWeight,
+      team_assist_share:forecastTeamAttackShares({position:input?.position,role:input?.sub_role,rates:input?.rates||[]}).assistWeight,
       team_id:teamByPlayer.get(Number(x.player_id))
     }
   })
