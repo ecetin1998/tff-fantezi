@@ -102,6 +102,25 @@ function normalizedRole(p){
   if(["FB","FULLBACK","LB","RB","BEK"].includes(raw))return "FB";
   return p.pos==="DEF"?"DEF":p.pos;
 }
+// Forecast-only opportunity reliability for DEF; official goal, assist,
+// clean-sheet and bonus points are never reweighted. Missing key passes = -1.
+function defenderOpportunityRates(p,adjustedXg){
+  const rates=p.rates||[],role=normalizedRole(p);
+  const baseXa=Math.max(0,num(rates[3]));
+  if(p.pos!=="DEF")return {xg:adjustedXg,xa:baseXa};
+  let xg=Math.max(0,adjustedXg),xa=baseXa;
+  const shots=Number(rates[10]);
+  if(role!=="CB"&&Number.isFinite(shots)&&shots>=.1&&shots<=3.5){
+    const perShot=role==="WB"?.12:role==="FB"?.095:.105;
+    xg=Math.min(xg,Math.max(xg*.55,shots*perShot+.012));
+  }
+  const keyPasses=Number(rates[12]);
+  if(Number.isFinite(keyPasses)&&keyPasses>=.15&&keyPasses<=7){
+    const perPass=role==="WB"?.105:role==="FB"?.09:role==="CB"?.075:.09;
+    xa=Math.min(xa,Math.max(xa*.60,keyPasses*perPass+.008));
+  }
+  return {xg,xa};
+}
 function allocationFor(p,a,gameweek){
   const role=normalizedRole(p);
   const key=role==="CB"?"excess_cb":role==="FB"?"excess_fb":role==="WB"?"excess_wb":
@@ -120,9 +139,11 @@ function allocationFor(p,a,gameweek){
   const rates=p.rates||[];
   const xgRate=num(rates[0]),goalRate=num(rates[1]),assistRate=num(rates[2]),xaRate=num(rates[3]);
   const adjustedXg=Math.max(xgRate*.45,xgRate-attenuation*excess/(2+exposure));
+  const forecast=defenderOpportunityRates(p,adjustedXg);
+  const defender=p.pos==="DEF";
   return {
-    goal:Math.max(1e-6,.75*adjustedXg+.25*goalRate),
-    assist:Math.max(1e-6,.70*xaRate+.30*assistRate)
+    goal:Math.max(1e-6,defender?.92*forecast.xg+.08*goalRate:.75*adjustedXg+.25*goalRate),
+    assist:Math.max(1e-6,defender?.90*forecast.xa+.10*assistRate:.70*xaRate+.30*assistRate)
   };
 }
 function makeHist(){return Array(256).fill(0)}
