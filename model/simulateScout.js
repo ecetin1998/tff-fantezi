@@ -57,9 +57,11 @@ function matchKey(match,index){
 }
 
 function goalkeeperSaveRate(per90Saves){
-  // Opponent goal expectation drives shot volume; the keeper's historical
-  // save volume only makes a bounded skill adjustment to the conversion rate.
-  return Math.max(.55,Math.min(.82,.68+.025*(Number(per90Saves||0)-3)));
+  // Opponent attacking xG drives opportunities; past save counts are noisy
+  // (they reflect earlier opponents), so shrink the keeper-specific modifier.
+  // A high-save keeper must not receive a second large form bonus when the
+  // opposing forward is already projected to score in the shared fixture.
+  return Math.max(.60,Math.min(.75,.66+.015*(Number(per90Saves||0)-3)));
 }
 
 function expectedKeeperSaves(opponentGoalLambda,per90Saves,exposure=1){
