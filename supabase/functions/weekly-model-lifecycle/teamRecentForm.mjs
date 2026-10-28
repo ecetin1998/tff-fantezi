@@ -50,6 +50,30 @@ export function applyTeamMatchForm({
     applied:Math.abs(homeLambda-baselineHome)>1e-8||Math.abs(awayLambda-baselineAway)>1e-8,
     home,away,reason:"verified_last3_gf_ga_shrunk"}
 }
+// Current-MH refreshes inherit a frozen WEEKLY source benchmark. If that source
+// was computed with the v1 log-form weights, update its match lambda by the
+// ratio v2/v1. Never apply v2 on top of v1 or reapply it on every hourly run.
+// Team-history lookup remains strictly prior to the predicted gameweek.
+export function recalibrateAnchoredMatchForm({
+  stableHome,stableAway,sourceNote="",homeTeamId,awayTeamId,gameweek,matches=[]
+}={}){
+  const home=recentTeamForm({teamId:homeTeamId,gameweek,matches})
+  const away=recentTeamForm({teamId:awayTeamId,gameweek,matches})
+  const source=String(sourceNote||"")
+  const valid=finite(stableHome)&&finite(stableAway)&&stableHome>0&&stableAway>0
+  if(!valid)return {homeLambda:stableHome,awayLambda:stableAway,applied:false,version:"invalid"}
+  if(source.includes("verified-team-form-v2"))
+    return {homeLambda:stableHome,awayLambda:stableAway,applied:false,version:"v2"}
+  if(!source.includes("verified-team-form-v1"))
+    return applyTeamMatchForm({baselineHome:stableHome,baselineAway:stableAway,homeTeamId,awayTeamId,gameweek,matches})
+  if(!home.ready||!away.ready)
+    return {homeLambda:stableHome,awayLambda:stableAway,applied:false,version:"v1_missing_evidence"}
+  const v1=(att,def)=>Math.exp(.10*Math.log(att.gfRatio)+.10*Math.log(def.gaRatio))
+  const v2=(att,def)=>Math.exp(.14*Math.log(att.gfRatio)+.18*Math.log(def.gaRatio))
+  const homeLambda=clamp(.2,4,stableHome*v2(home,away)/v1(home,away))
+  const awayLambda=clamp(.2,4,stableAway*v2(away,home)/v1(away,home))
+  return {homeLambda,awayLambda,applied:true,version:"v2",home,away}
+}
 export function auditMatchAllocation({
   gameweek,fixtures=[],matchInputs=[],playerInputs=[],roleShares=[]
 }={}){
