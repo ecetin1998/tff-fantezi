@@ -9,7 +9,7 @@ import {blendVerifiedAttackRate} from "./mh8Attack.mjs"
 import {calibrateAttackRates} from "./roleAwareAttackRates.mjs"
 import {recentAttackForm,fetchRecentAttackEvidence,groupRecentAttack} from "./recentAttackForm.mjs"
 import {currentTacticalRole} from "./recentTacticalRole.mjs"
-import {applyTeamMatchForm,auditMatchAllocation,auditRealizedModel} from "./teamRecentForm.mjs"
+import {applyTeamMatchForm,recalibrateAnchoredMatchForm,auditMatchAllocation,auditRealizedModel} from "./teamRecentForm.mjs"
 
 const AUDIENCE="tff-fantezi-scout"
 const ISSUER="https://token.actions.githubusercontent.com"
@@ -369,7 +369,7 @@ async function prepare(sb:any,current:any,status:any,body:any={}){
       gameweek:target,benchmark_version:benchmark,match_id:Number(fx.match_id),
       home_team_id:Number(fx.home_team_id),away_team_id:Number(fx.away_team_id),
       home_lambda:hl,away_lambda:al,source_note:key+" • team xG/xGA + observed finishing/conceding blend"+
-        (teamForm.applied?" • verified-team-form-v1":"")
+        (teamForm.applied?" • verified-team-form-v2":"")
     })
     matchPredictions.push({
       run_id:runId,match_id:Number(fx.match_id),gameweek:target,kickoff_at:fx.kickoff_at,
@@ -864,18 +864,16 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
   // compounding on hourly/current-gameweek refreshes.
   const matchInputs=(matchesQ.data||[]).map((x:any)=>{
     const stable=anchoredMatchInputs.get(Number(x.match_id)) as any || x
-    const alreadyForm=String(stable.source_note||"").includes("verified-team-form-v1")
-    const factor=alreadyForm
-      ?{homeLambda:Number(stable.home_lambda),awayLambda:Number(stable.away_lambda),applied:false}
-      :applyTeamMatchForm({
-        baselineHome:Number(stable.home_lambda),baselineAway:Number(stable.away_lambda),
-        homeTeamId:Number(x.home_team_id),awayTeamId:Number(x.away_team_id),
-        gameweek:gw,matches:teamHistoryQ.data||[]
-      })
+    const factor=recalibrateAnchoredMatchForm({
+      stableHome:Number(stable.home_lambda),stableAway:Number(stable.away_lambda),
+      sourceNote:stable.source_note,
+      homeTeamId:Number(x.home_team_id),awayTeamId:Number(x.away_team_id),
+      gameweek:gw,matches:teamHistoryQ.data||[]
+    })
     return {...x,benchmark_version:benchmark,
       home_lambda:factor.homeLambda,away_lambda:factor.awayLambda,
       source_note:`intraday refresh from ${stableRoleBenchmark}`+
-        (alreadyForm||factor.applied?" • verified-team-form-v1":"")}
+        (factor.version==="v2"||factor.applied?" • verified-team-form-v2":"")}
   })
   const computedMatches=new Map(matchInputs.map((m:any)=>[Number(m.match_id),m]))
   const matchPredictions=(teamFixturesQ.data||[]).map((m:any)=>{
@@ -885,7 +883,7 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
     return {...prior,run_id:runId,
       home_xg:input.home_lambda,away_xg:input.away_lambda,
       ...matchPrediction(Number(input.home_lambda),Number(input.away_lambda)),
-      method:"weekly-auto-team-form-v1",
+      method:"weekly-auto-team-form-v2",
       model_note:"Kaynaklı son üç maç gol atma/yeme formu + sezon xG/xGA (ölçülü düzeltme)."}
   })
   const meta={...latestMetaQ.data,benchmark_version:benchmark,created_at:new Date().toISOString(),source_note:`intraday refresh from ${sourceBenchmark}; source ${latestSourceAt}`}

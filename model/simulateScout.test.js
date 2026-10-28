@@ -105,6 +105,18 @@ function zeroEventInput(doubleWeek=false){
   const weak=expectedKeeperSaves(.65,3.2,1);
   const strong=expectedKeeperSaves(2.0,3.2,1);
   assert(strong>weak,'keeper save expectation must increase with opponent attacking pressure');
+  // Last saves reflect previous opposition as well as ability. They should not
+  // create an independent large bonus for a goalkeeper opposing a hot striker.
+  const averageKeeper=expectedKeeperSaves(1.6,3,1);
+  const hotKeeper=expectedKeeperSaves(1.6,6,1);
+  assert(hotKeeper>averageKeeper,'legitimate keeper form still contributes a little');
+  assert(hotKeeper-averageKeeper<.9,'past saves cannot dominate opponent-based shot volume');
+  assert(hotKeeper<4.2,'a high historical save rate must be shrunk toward the league prior');
+  const fs=require('node:fs');
+  for(const edge of ['supabase/functions/run-live-sim-chunk/index.ts','supabase/functions/run-enrichment-replay-chunk/index.ts']){
+    assert.match(fs.readFileSync(edge,'utf8'),/\.66\+\.015\*\(num\(per90Saves\)-3\)/,
+      edge+' must match the local simulation goalkeeper calibration');
+  }
 }
 
 {

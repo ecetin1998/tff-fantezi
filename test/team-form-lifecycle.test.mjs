@@ -1,7 +1,7 @@
 import test from "node:test"
 import assert from "node:assert/strict"
 import {readFileSync} from "node:fs"
-import {applyTeamMatchForm,recentTeamForm,auditMatchAllocation,auditRealizedModel} from "../supabase/functions/weekly-model-lifecycle/teamRecentForm.mjs"
+import {applyTeamMatchForm,recalibrateAnchoredMatchForm,recentTeamForm,auditMatchAllocation,auditRealizedModel} from "../supabase/functions/weekly-model-lifecycle/teamRecentForm.mjs"
 
 const historical=[]
 for(let week=1;week<=8;week++){
@@ -25,6 +25,42 @@ test("recent scoring/conceding last three + season shrink affects only goal envi
   assert.ok(future.homeLambda/1.5<=1.07)
   assert.ok(future.awayLambda/1.1>=.93)
   assert.ok(Math.exp(-future.awayLambda)>Math.exp(-1.1))
+})
+test("opponent defensive form carries more weight than last-three finishing",()=>{
+  const homeMatches=Array.from({length:8},(_,i)=>({gameweek:i+1,home_team_id:1,away_team_id:2,home_goals:i>=5?3:1,away_goals:1,match_status:"Bitti"}))
+  const favourable=applyTeamMatchForm({baselineHome:1.5,baselineAway:1.5,homeTeamId:1,awayTeamId:2,gameweek:9,matches:homeMatches})
+  assert.ok(favourable.applied)
+  const attackingForm=favourable.home.gfRatio,defensiveForm=favourable.away.gaRatio
+  assert.ok(attackingForm>1&&defensiveForm>1)
+  assert.ok(Math.abs(favourable.homeLambda/1.5-Math.pow(attackingForm,.14)*Math.pow(defensiveForm,.18))<1e-10)
+  // Opponent defensive weakness is more important than equally sized attacking hot streak.
+  assert.ok(Math.pow(1.2,.18)>Math.pow(1.2,.14))
+  // Even when both form signals spike, the goal lambda remains anchored to season xG/xGA.
+  assert.ok(Math.pow(1.3,.14+.18)<1.09)
+})
+test("MH10 anchored v1 lambdas are reweighted once into v2, without double counting",()=>{
+  const oldForm=recentTeamForm({teamId:1,gameweek:9,matches:historical})
+  const oldOpp=recentTeamForm({teamId:2,gameweek:9,matches:historical})
+  const oldEffect=(a,d)=>Math.pow(a.gfRatio,.10)*Math.pow(d.gaRatio,.10)
+  const v1Home=1.5*oldEffect(oldForm,oldOpp),v1Away=1.1*oldEffect(oldOpp,oldForm)
+  const revised=recalibrateAnchoredMatchForm({
+    stableHome:v1Home,stableAway:v1Away,sourceNote:"weekly-auto • verified-team-form-v1",
+    homeTeamId:1,awayTeamId:2,gameweek:9,matches:historical
+  })
+  const direct=applyTeamMatchForm({baselineHome:1.5,baselineAway:1.1,
+    homeTeamId:1,awayTeamId:2,gameweek:9,matches:historical})
+  assert.equal(revised.version,"v2")
+  assert.ok(Math.abs(revised.homeLambda-direct.homeLambda)<1e-10)
+  assert.ok(Math.abs(revised.awayLambda-direct.awayLambda)<1e-10)
+  const repeated=recalibrateAnchoredMatchForm({
+    stableHome:revised.homeLambda,stableAway:revised.awayLambda,
+    sourceNote:"intraday • verified-team-form-v2",homeTeamId:1,awayTeamId:2,
+    gameweek:9,matches:historical
+  })
+  assert.equal(repeated.version,"v2")
+  assert.equal(repeated.homeLambda,revised.homeLambda)
+  assert.equal(repeated.awayLambda,revised.awayLambda)
+  assert.equal(repeated.applied,false)
 })
 test("do not use current/future week or incomplete, unverified fixtures",()=>{
   const future=[...historical,{...historical[7],gameweek:9,home_goals:8,away_goals:8}]
