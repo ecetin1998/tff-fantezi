@@ -102,6 +102,41 @@ function normalizedRole(p){
   if(["FB","FULLBACK","LB","RB","BEK"].includes(raw))return "FB";
   return p.pos==="DEF"?"DEF":p.pos;
 }
+// Forecast-only: repeated observed opportunities, not a hot streak of goals
+// and assists, determine how much DEF can claim of the team's goal events.
+// The team match score/clean-sheet process and official scoring are unchanged.
+const quality={
+  CB:{shot:.095,keyPass:.055},
+  FB:{shot:.090,keyPass:.070},
+  WB:{shot:.090,keyPass:.075},
+  DEF:{shot:.090,keyPass:.070},
+}
+const safe=(v)=>Number.isFinite(Number(v))?Math.max(0,Number(v)):0
+const norm=(r)=>["CB","FB","WB"].includes(String(r||"").toUpperCase())?String(r).toUpperCase():"DEF"
+
+function credibleAttackWeights(position,role,rates=[],forecastXg=null){
+  const xg=forecastXg===null?safe(rates[0]):safe(forecastXg)
+  const goals=safe(rates[1]),assists=safe(rates[2]),xa=safe(rates[3])
+  if(position!=="DEF")
+    return {goal:Math.max(1e-6,.75*xg+.25*goals),
+      assist:Math.max(1e-6,.70*xa+.30*assists),adjustedXg:xg,adjustedXa:xa}
+  const prior=quality[norm(role)]
+  // rates[12] and [13] are ONLY aligned season-to-date key passes and
+  // shots per 90. -1 means unknown/stale; absence NEVER implies 0.
+  const shots=Number(rates[13]),keys=Number(rates[12])
+  const validShots=Number.isFinite(shots)&&shots>=0
+  const validKeys=Number.isFinite(keys)&&keys>=0
+  const adjustedXg=validShots
+    ?Math.min(xg,Math.max(.50*xg,1.25*prior.shot*shots+.012)):xg
+  const adjustedXa=validKeys
+    ?Math.min(xa,Math.max(.55*xa,.90*prior.keyPass*keys+.020)):xa
+  // Defender goals/assists are rare, noisy season samples. Weight actual
+  // finishing only 10%; verified chance creation gets the remaining 90%.
+  return {goal:Math.max(1e-6,.90*adjustedXg+.10*goals),
+    assist:Math.max(1e-6,.90*adjustedXa+.10*assists),
+    adjustedXg,adjustedXa,validShots,validKeys}
+}
+
 function allocationFor(p,a,gameweek){
   const role=normalizedRole(p);
   const key=role==="CB"?"excess_cb":role==="FB"?"excess_fb":role==="WB"?"excess_wb":
@@ -118,12 +153,9 @@ function allocationFor(p,a,gameweek){
   const observed=a?num(a.observed_matches):0;
   const attenuation=observed>=5?.55:.85;
   const rates=p.rates||[];
-  const xgRate=num(rates[0]),goalRate=num(rates[1]),assistRate=num(rates[2]),xaRate=num(rates[3]);
+  const xgRate=num(rates[0]);
   const adjustedXg=Math.max(xgRate*.45,xgRate-attenuation*excess/(2+exposure));
-  return {
-    goal:Math.max(1e-6,.75*adjustedXg+.25*goalRate),
-    assist:Math.max(1e-6,.70*xaRate+.30*assistRate)
-  };
+  return credibleAttackWeights(p.pos,role,rates,adjustedXg);
 }
 function makeHist(){return Array(256).fill(0)}
 function addHist(hist,score){
