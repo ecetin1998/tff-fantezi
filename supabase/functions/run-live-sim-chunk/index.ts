@@ -38,7 +38,9 @@ async function authorized(req){
 }
 function num(x,d=0){const n=Number(x);return Number.isFinite(n)?n:d}
 function cardPoints(yellow,red,scoring){return red?num(scoring.red,-3):yellow?num(scoring.yellow,-1):0}
-function goalkeeperSaveRate(per90Saves){return Math.max(.55,Math.min(.82,.68+.025*(num(per90Saves)-3)))}
+// Goal pressure is already represented by the shared score. Historical saves
+// affect shot-conversion only weakly; do not reward past fixture volume twice.
+function goalkeeperSaveRate(per90Saves){return Math.max(.60,Math.min(.75,.66+.015*(num(per90Saves)-3)))}
 function expectedKeeperSaves(opponentGoalLambda,per90Saves,exposure=1){
   const saveRate=goalkeeperSaveRate(per90Saves);
   const goalLambda=Math.max(0,num(opponentGoalLambda));
