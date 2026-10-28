@@ -1,7 +1,7 @@
 import test from "node:test"
 import assert from "node:assert/strict"
 import {readFileSync} from "node:fs"
-import {applyTeamMatchForm,recalibrateAnchoredMatchForm,recentTeamForm,auditMatchAllocation,auditRealizedModel} from "../supabase/functions/weekly-model-lifecycle/teamRecentForm.mjs"
+import {applyTeamMatchForm,recalibrateAnchoredMatchForm,forecastTeamAttackShares,recentTeamForm,auditMatchAllocation,auditRealizedModel} from "../supabase/functions/weekly-model-lifecycle/teamRecentForm.mjs"
 
 const historical=[]
 for(let week=1;week<=8;week++){
@@ -175,3 +175,21 @@ test("intraday candidate run ID is initialized before creating match-prediction 
  assert.ok(define>=0&&map>define&&insert>map)
  assert.equal(own.match(/const runId=crypto\.randomUUID\(\)/g)?.length,1)
 })
+
+test("role shares match opportunity-adjusted striker and defender weights",()=>{
+ const defender={position:"DEF",role:"WB",rates:[.0974,.1433,.2866,.1136,0,0,0,0,0,0,.4299,.14,.86]}
+ const adjusted=forecastTeamAttackShares(defender)
+ assert.ok(adjusted.goalWeight<.72*(.75*.0974+.25*.1433))
+ assert.ok(adjusted.assistWeight<.78*(.70*.1136+.30*.2866))
+ const proven=forecastTeamAttackShares({position:"DEF",role:"WB",
+   rates:[.003,0,.222,.192,0,0,0,0,0,0,0,0,2.56]})
+ assert.ok(proven.assistWeight>.18)
+ const forward=forecastTeamAttackShares({position:"FWD",role:"ST",rates:[.25,.3,.1,.09]})
+ assert.equal(forward.goalWeight,.75*.25+.25*.3)
+ assert.equal(forward.assistWeight,.70*.09+.30*.1)
+ const lifecycle=readFileSync(new URL("../supabase/functions/weekly-model-lifecycle/index.ts",import.meta.url),"utf8")
+ const edge=readFileSync(new URL("../supabase/functions/run-live-sim-chunk/index.ts",import.meta.url),"utf8")
+ assert.match(lifecycle,/rates\[12\]=seasonMins>=360/)
+ assert.match(edge,/const forecast=defenderOpportunityRates\(p,adjustedXg\)/)
+ assert.match(edge,/defender\?\.92\*forecast\.xg\+\.08\*goalRate/)
+});
