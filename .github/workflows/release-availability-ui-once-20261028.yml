@@ -1,0 +1,33 @@
+name: One-time authorized suspension card production release
+# Explicit one-time production dispatch requested on 2026-10-28.
+# Standard production workflow remains workflow_dispatch-only.
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/release-availability-ui-once-20261028.yml"
+
+permissions:
+  contents: read
+  actions: write
+
+jobs:
+  dispatch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check PR 390 is merged before release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          test "${{ github.ref }}" = "refs/heads/main"
+          test "$(gh pr view 390 --json mergedAt --jq '.mergedAt != null')" = "true"
+      - name: Dispatch established production workflow
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          gh workflow run cloudflare-deploy.yml --ref main
+          echo "Explicit production deployment dispatched for PR #390." >> "$GITHUB_STEP_SUMMARY"
