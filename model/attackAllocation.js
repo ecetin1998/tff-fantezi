@@ -22,6 +22,41 @@ function singleShotCap(player={}){
   return .42;
 }
 
+// Forecast-only: repeated observed opportunities, not a hot streak of goals
+// and assists, determine how much DEF can claim of the team's goal events.
+// The team match score/clean-sheet process and official scoring are unchanged.
+const quality={
+  CB:{shot:.095,keyPass:.055},
+  FB:{shot:.090,keyPass:.070},
+  WB:{shot:.090,keyPass:.075},
+  DEF:{shot:.090,keyPass:.070},
+}
+const safe=(v)=>Number.isFinite(Number(v))?Math.max(0,Number(v)):0
+const norm=(r)=>["CB","FB","WB"].includes(String(r||"").toUpperCase())?String(r).toUpperCase():"DEF"
+
+function credibleAttackWeights(position,role,rates=[],forecastXg=null){
+  const xg=forecastXg===null?safe(rates[0]):safe(forecastXg)
+  const goals=safe(rates[1]),assists=safe(rates[2]),xa=safe(rates[3])
+  if(position!=="DEF")
+    return {goal:Math.max(1e-6,.75*xg+.25*goals),
+      assist:Math.max(1e-6,.70*xa+.30*assists),adjustedXg:xg,adjustedXa:xa}
+  const prior=quality[norm(role)]
+  // rates[12] and [13] are ONLY aligned season-to-date key passes and
+  // shots per 90. -1 means unknown/stale; absence NEVER implies 0.
+  const shots=Number(rates[13]),keys=Number(rates[12])
+  const validShots=Number.isFinite(shots)&&shots>=0
+  const validKeys=Number.isFinite(keys)&&keys>=0
+  const adjustedXg=validShots
+    ?Math.min(xg,Math.max(.50*xg,1.25*prior.shot*shots+.012)):xg
+  const adjustedXa=validKeys
+    ?Math.min(xa,Math.max(.55*xa,.90*prior.keyPass*keys+.020)):xa
+  // Defender goals/assists are rare, noisy season samples. Weight actual
+  // finishing only 10%; verified chance creation gets the remaining 90%.
+  return {goal:Math.max(1e-6,.90*adjustedXg+.10*goals),
+    assist:Math.max(1e-6,.90*adjustedXa+.10*assists),
+    adjustedXg,adjustedXa,validShots,validKeys}
+}
+
 function attackWeights(player,matches=[]){
   const rates=player.rates||[];
   const observed=matches.filter(m=>Number(m.id)===Number(player.id)&&Number(m.mins)>0);
@@ -35,8 +70,7 @@ function attackWeights(player,matches=[]){
     excess+=Math.max(0,xg-cap);
   }
   const attenuation=observed.length>=5?.55:.85;
-  const xgRate=Number(rates[0]||0),goalRate=Number(rates[1]||0);
-  const assistRate=Number(rates[2]||0),xaRate=Number(rates[3]||0);
+  const xgRate=Number(rates[0]||0);
   const setPiecePrior=normalizedDefenderRole(player)==='CB'
     ?Math.max(0,Number(player.team_set_piece_xg_per_match||0))*Math.max(0,Math.min(.35,Number(player.heading_box_share ?? 0.08)))
     :0;
@@ -45,10 +79,12 @@ function attackWeights(player,matches=[]){
   const adjustedXg=rareChanceCalibrated
     ?xgRate+setPiecePrior
     :Math.max(xgRate*.45,xgRate-attenuation*excess/(2+exposure))+setPiecePrior;
+  const expected=credibleAttackWeights(player.pos,normalizedDefenderRole(player),rates,adjustedXg);
   return {
-    goal:Math.max(1e-6,.75*adjustedXg+.25*goalRate),
-    assist:Math.max(1e-6,.70*xaRate+.30*assistRate),
-    adjustedXg,
+    goal:expected.goal,
+    assist:expected.assist,
+    adjustedXg:expected.adjustedXg,
+    adjustedXa:expected.adjustedXa,
     singleShotExcess:excess,
     singleShotCap:cap,
     subRole:normalizedDefenderRole(player),
@@ -56,4 +92,4 @@ function attackWeights(player,matches=[]){
   };
 }
 
-module.exports={attackWeights,singleShotCap,normalizedDefenderRole};
+module.exports={attackWeights,singleShotCap,normalizedDefenderRole,credibleAttackWeights};
