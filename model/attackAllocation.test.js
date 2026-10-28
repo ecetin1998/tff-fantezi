@@ -12,7 +12,7 @@ assert.equal(single[0].xg,0.57,'the recorded event remains intact');
 
 const creator=attackWeights({...base,id:427,rates:[0.02,0,0.05,0.18]},[]);
 assert(creator.assist>short.assist,'xA-led creator keeps a larger assist allocation');
-assert.equal(creator.assist,0.70*0.18+0.30*0.05,'rates[3] is xA and rates[2] is realized assists');
+assert.equal(creator.assist,0.90*0.18+0.10*0.05,'defender creation follows repeatable xA rather than noisy converted assists');
 
 const cb={...base,sub_role:'CB'};
 const fb={...base,sub_role:'RB'};
@@ -40,4 +40,23 @@ console.log('Attack allocation checks passed');
   assert.equal(result.adjustedXg,newCB.rates[0],
     'already-shrunk scoring input must not be penalized a second time')
   assert.ok(result.adjustedXg>0,'a rare scorer is still allowed to score')
+}
+
+{
+  const inflated={id:48,pos:'DEF',sub_role:'WB',source_note:'role-aware-attack-v1',
+    rates:[.0974,.1433,.2866,.1136,0,0,0,0,0,0,.4299,.14,.86]};
+  const result=attackWeights(inflated,[]);
+  const previousGoal=.75*.0974+.25*.1433,previousAssist=.70*.1136+.30*.2866;
+  assert(result.goal<previousGoal*.72,'limited-shot defender goal allocation regresses meaningfully');
+  assert(result.assist<previousAssist*.78,'two realised assists must not override six key passes');
+  assert(result.forecastXg<.07,'one or two exceptional chance events are not a weekly expectation');
+  const proven={id:427,pos:'DEF',sub_role:'WB',rates:[.003,0,.222,.192,0,0,0,0,0,0,0,0,2.56]};
+  const creator=attackWeights(proven,[]);
+  assert.equal(creator.forecastXa,.192,'frequent key-pass creators keep their sourced xA');
+  const unknown={...inflated,rates:inflated.rates.slice(0,12)};
+  assert.equal(attackWeights(unknown,[]).forecastXa,.1136,'missing key-pass coverage is UNKNOWN, not a zero');
+  const striker={...inflated,pos:'FWD',sub_role:'ST'};
+  const attack=attackWeights(striker,[]);
+  assert.equal(attack.goal,.75*.0974+.25*.1433,'scorers retain their original conversion mix');
+  assert.equal(attack.assist,.70*.1136+.30*.2866,'attackers retain validated creation policy');
 }
