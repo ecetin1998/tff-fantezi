@@ -65,3 +65,15 @@ test('cross-team identities never match by one common first name or surname',()=
  assert.equal(crossTeamIdentitySupported('Fousseni Diabaté','Fousseni Diabaté'),true);
  assert.equal(crossTeamIdentitySupported('Youssouf Fofana',''),false);
 });
+
+test('availability cards describe the missed suspension fixture, never a return date',()=>{
+ const table=readFileSync(new URL('../components/AvailabilityTable.js',import.meta.url),'utf8');
+ const labels=readFileSync(new URL('../lib/availability.js',import.meta.url),'utf8');
+ assert.match(table,/Kaçıracağı ilk maç/);
+ assert.match(table,/Dönüş \/ kaçıracağı maç/);
+ assert.match(table,/availability_type==='injuries'\?r\.injury_date:null/);
+ assert.match(table,/eventDate\(r\)\?<span>/);
+ assert.doesNotMatch(table,/<small>Beklenen dönüş<\/small><b>\{returnLabel\(r\)/);
+ assert.match(labels,/Kaçıracağı ilk maç/);
+ assert.doesNotMatch(labels,/Ceza tarihi/);
+});
