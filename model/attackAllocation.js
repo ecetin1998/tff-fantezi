@@ -22,6 +22,30 @@ function singleShotCap(player={}){
   return .42;
 }
 
+// Forecast-only: realised defender goals/assists are high-variance in short samples.
+// Repeated shots and key passes support genuine attacking fullbacks, but one
+// high-quality chance or a couple of converted assists must not dominate shares.
+// rates[12] is *trusted season key passes per 90*, or -1 when unavailable.
+// Preserve the sourced rates themselves; adjust only match scorer allocation.
+function defenderOpportunityRates(player,adjustedXg){
+  const rates=player.rates||[];
+  const role=normalizedDefenderRole(player);
+  const baseXa=Math.max(0,Number(rates[3])||0);
+  if(player.pos!=='DEF')return {xg:adjustedXg,xa:baseXa};
+  let xg=Math.max(0,adjustedXg),xa=baseXa;
+  const shots=Number(rates[10]);
+  if(role!=='CB'&&Number.isFinite(shots)&&shots>=.1&&shots<=3.5){
+    const perShot=role==='WB'?.12:role==='FB'?.095:.105;
+    xg=Math.min(xg,Math.max(xg*.55,shots*perShot+.012));
+  }
+  const keyPasses=Number(rates[12]);
+  if(Number.isFinite(keyPasses)&&keyPasses>=.15&&keyPasses<=7){
+    const perPass=role==='WB'?.105:role==='FB'?.09:role==='CB'?.075:.09;
+    xa=Math.min(xa,Math.max(xa*.60,keyPasses*perPass+.008));
+  }
+  return {xg,xa};
+}
+
 function attackWeights(player,matches=[]){
   const rates=player.rates||[];
   const observed=matches.filter(m=>Number(m.id)===Number(player.id)&&Number(m.mins)>0);
@@ -45,9 +69,12 @@ function attackWeights(player,matches=[]){
   const adjustedXg=rareChanceCalibrated
     ?xgRate+setPiecePrior
     :Math.max(xgRate*.45,xgRate-attenuation*excess/(2+exposure))+setPiecePrior;
+  const forecast=defenderOpportunityRates(player,adjustedXg);
+  const defender=player.pos==='DEF';
   return {
-    goal:Math.max(1e-6,.75*adjustedXg+.25*goalRate),
-    assist:Math.max(1e-6,.70*xaRate+.30*assistRate),
+    goal:Math.max(1e-6,defender?.92*forecast.xg+.08*goalRate:.75*adjustedXg+.25*goalRate),
+    assist:Math.max(1e-6,defender?.90*forecast.xa+.10*assistRate:.70*xaRate+.30*assistRate),
+    forecastXg:forecast.xg,forecastXa:forecast.xa,
     adjustedXg,
     singleShotExcess:excess,
     singleShotCap:cap,
@@ -56,4 +83,4 @@ function attackWeights(player,matches=[]){
   };
 }
 
-module.exports={attackWeights,singleShotCap,normalizedDefenderRole};
+module.exports={attackWeights,defenderOpportunityRates,singleShotCap,normalizedDefenderRole};
