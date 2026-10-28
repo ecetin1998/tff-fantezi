@@ -21,9 +21,17 @@ export default function AvailabilityTable({ rows, freshnessAt=null }){
     (!q||(`${r.player?.full_name||''} ${r.player?.short_label||''} ${r.team||''} ${r.canonical_reason||''} ${r.suspension_fixture||''}`).toLocaleLowerCase('tr').includes(q.toLocaleLowerCase('tr')))
   ),[rows,team,type,q])
 
-  const eventDate=r=>r.availability_type==='suspensions'?r.suspension_end:r.injury_date
+  // suspension_end is the END of a ban, not the date of the incident.
+  const eventDate=r=>r.availability_type==='injuries'?r.injury_date:null
   const returnLabel=r=>r.availability_type==='suspensions'?(r.suspension_fixture||''):availabilityReturnLabel(r)
-  const sortValue=(r,key)=>key==='event'?String(eventDate(r)||''):String(r.expected_return_date||r.suspension_end||'')
+  const sortValue=(r,key)=>{
+    if(key==='event')return String(eventDate(r)||'')
+    if(r.availability_type==='suspensions'){
+      const match=String(r.suspension_fixture||'').match(/^(\d{2})\.(\d{2})\.(\d{4})/)
+      return match?`${match[3]}-${match[2]}-${match[1]}`:''
+    }
+    return String(r.expected_return_date||'')
+  }
   if(sort.key)filtered.sort((a,b)=>{const av=sortValue(a,sort.key),bv=sortValue(b,sort.key); if(!av)return 1;if(!bv)return -1;const n=av.localeCompare(bv);return sort.dir==='asc'?n:-n})
   const toggleSort=key=>setSort(s=>s.key===key?{key,dir:s.dir==='asc'?'desc':'asc'}:{key,dir:'asc'})
   const arrow=key=>sort.key===key?(sort.dir==='asc'?' ↑':' ↓'):' ↕'
@@ -36,7 +44,7 @@ export default function AvailabilityTable({ rows, freshnessAt=null }){
   return <>
     <section className="availability-overview-grid">
       <div className="card"><span>Sakatlık</span><b>{injuryCount}</b><small>takip edilen oyuncu</small></div>
-      <div className="card"><span>Ceza</span><b>{suspensionCount}</b><small>maç cezası kaydı</small></div>
+      <div className="card"><span>Ceza</span><b>{suspensionCount}</b><small>cezalı oyuncu</small></div>
       <div className="card"><span>Riskli</span><b>{riskCount}</b><small>oynama ihtimali düşmüş oyuncu</small></div>
       <div className="card availability-updated-card"><span>Son veri kontrolü</span><b>{latestCheckedAt?fmtUpdate(latestCheckedAt).split(' ')[1]:'—'}</b><small>{latestCheckedAt?fmtUpdate(latestCheckedAt).split(' ')[0]:'veri zamanı yok'}</small></div>
     </section>
@@ -59,7 +67,7 @@ export default function AvailabilityTable({ rows, freshnessAt=null }){
     <div className="card table-wrap availability-table-wrap"><table className="availability-table-v2">
       <thead><tr>
         <th>#</th><th>Oyuncu</th><th>Takım</th><th>Mevki</th><th>Durum</th><th>Oynama %</th>
-        <th>Detay</th><th><button type="button" style={{appearance:'none',border:0,background:'transparent',padding:0,margin:0,font:'inherit',fontWeight:'inherit',color:'inherit',textAlign:'left',cursor:'pointer'}} onClick={()=>toggleSort('event')}>Sakatlık / ceza zamanı{arrow('event')}</button></th><th><button type="button" style={{appearance:'none',border:0,background:'transparent',padding:0,margin:0,font:'inherit',fontWeight:'inherit',color:'inherit',textAlign:'left',cursor:'pointer'}} onClick={()=>toggleSort('return')}>Beklenen dönüş{arrow('return')}</button></th>
+        <th>Detay</th><th><button type="button" style={{appearance:'none',border:0,background:'transparent',padding:0,margin:0,font:'inherit',fontWeight:'inherit',color:'inherit',textAlign:'left',cursor:'pointer'}} onClick={()=>toggleSort('event')}>Sakatlık tarihi{arrow('event')}</button></th><th><button type="button" style={{appearance:'none',border:0,background:'transparent',padding:0,margin:0,font:'inherit',fontWeight:'inherit',color:'inherit',textAlign:'left',cursor:'pointer'}} onClick={()=>toggleSort('return')}>Dönüş / kaçıracağı maç{arrow('return')}</button></th>
       </tr></thead>
       <tbody>{filtered.map((r,i)=>{
         return <tr key={`${r.player_id}-${i}`}>
@@ -85,7 +93,9 @@ export default function AvailabilityTable({ rows, freshnessAt=null }){
           </div>
           <p>{note||'Detay yok'}</p>
           <div className="availability-mobile-meta">
-            <span><small>Oynama</small><b>{(Number(r.availability_probability??1)*100).toFixed(0)}%</b></span><span><small>Sakatlık / ceza</small><b>{availabilityDateLabel(eventDate(r))||'—'}</b></span><span><small>Beklenen dönüş</small><b>{returnLabel(r)||'—'}</b></span>
+            <span><small>Oynama</small><b>{(Number(r.availability_probability??1)*100).toFixed(0)}%</b></span>
+            {eventDate(r)?<span><small>Sakatlık tarihi</small><b>{availabilityDateLabel(eventDate(r))}</b></span>:null}
+            {returnLabel(r)?<span><small>{r.availability_type==='suspensions'?'Kaçıracağı ilk maç':'Beklenen dönüş'}</small><b>{returnLabel(r)}</b></span>:null}
           </div>
         </Link>
       })}
