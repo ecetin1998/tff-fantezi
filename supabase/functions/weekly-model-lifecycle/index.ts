@@ -954,8 +954,8 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
           :"BELİRGİN DEĞİŞİM YOK"
       })(),
       availability_probability:clamp(0,1,n(av?.availability_probability,x.availability_probability)),
-      team_goal_share:credibleAttackWeights(x.position,input?.sub_role,input?.rates||[]).goal,
-      team_assist_share:credibleAttackWeights(x.position,input?.sub_role,input?.rates||[]).assist,
+      team_goal_share:credibleAttackWeights(input?.position,input?.sub_role,input?.rates||[]).goal,
+      team_assist_share:credibleAttackWeights(input?.position,input?.sub_role,input?.rates||[]).assist,
       team_id:teamByPlayer.get(Number(x.player_id))
     }
   })
