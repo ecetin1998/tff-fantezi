@@ -12,7 +12,7 @@ assert.equal(single[0].xg,0.57,'the recorded event remains intact');
 
 const creator=attackWeights({...base,id:427,rates:[0.02,0,0.05,0.18]},[]);
 assert(creator.assist>short.assist,'xA-led creator keeps a larger assist allocation');
-assert.equal(creator.assist,0.70*0.18+0.30*0.05,'rates[3] is xA and rates[2] is realized assists');
+assert.equal(creator.assist,0.90*0.18+0.10*0.05,'DEF creators use reliable xA with only 10% prior assists');
 
 const cb={...base,sub_role:'CB'};
 const fb={...base,sub_role:'RB'};
