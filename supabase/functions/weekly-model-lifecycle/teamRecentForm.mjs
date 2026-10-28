@@ -74,6 +74,35 @@ export function recalibrateAnchoredMatchForm({
   const awayLambda=clamp(.2,4,stableAway*v2(away,home)/v1(away,home))
   return {homeLambda,awayLambda,applied:true,version:"v2",home,away}
 }
+// UI role shares and the 50K scorer must use the same forecast-only
+// opportunity reliability. This function never edits actual shots/xG/points.
+export function forecastTeamAttackShares({position,role,rates=[]}={}){
+  const n=(v)=>Number.isFinite(Number(v))?Math.max(0,Number(v)):0
+  const xgRate=n(rates[0]),goalRate=n(rates[1]),assistRate=n(rates[2]),xaRate=n(rates[3])
+  if(position!=="DEF")return {
+    goalWeight:Math.max(1e-6,.75*xgRate+.25*goalRate),
+    assistWeight:Math.max(1e-6,.70*xaRate+.30*assistRate)
+  }
+  const sub=String(role||"DEF").toUpperCase().replace(/[ _-]+/g,"")
+  const which=["CB","CENTREBACK","CENTERBACK","STOPER"].includes(sub)?"CB":
+    ["WB","WINGBACK","LWB","RWB","KANATBEK"].includes(sub)?"WB":
+    ["FB","FULLBACK","LB","RB","BEK"].includes(sub)?"FB":"DEF"
+  let xg=xgRate,xa=xaRate
+  const shots=Number(rates[10])
+  if(which!=="CB"&&Number.isFinite(shots)&&shots>=.1&&shots<=3.5){
+    const perShot=which==="WB"?.12:which==="FB"?.095:.105
+    xg=Math.min(xg,Math.max(xg*.55,shots*perShot+.012))
+  }
+  const keyPasses=Number(rates[12])
+  if(Number.isFinite(keyPasses)&&keyPasses>=.15&&keyPasses<=7){
+    const perPass=which==="WB"?.105:which==="FB"?.09:which==="CB"?.075:.09
+    xa=Math.min(xa,Math.max(xa*.60,keyPasses*perPass+.008))
+  }
+  return {
+    goalWeight:Math.max(1e-6,.92*xg+.08*goalRate),
+    assistWeight:Math.max(1e-6,.90*xa+.10*assistRate)
+  }
+}
 export function auditMatchAllocation({
   gameweek,fixtures=[],matchInputs=[],playerInputs=[],roleShares=[]
 }={}){
