@@ -69,3 +69,23 @@
 .readyDone{color:#07806b}
 .readyWaiting{color:#a4744c}
 @media(max-width:570px){.readyList{grid-template-columns:1fr}}
+
+
+/* Draft-only formation advisor: xFP-ranked cards using already-drafted players. */
+.formationSection{display:grid;gap:13px;padding:15px;border:1px solid #d5e8e4;border-radius:15px;background:linear-gradient(145deg,#f5fcf9,#f4f6fb)}
+.formationHeading{display:flex;align-items:start;justify-content:space-between;flex-wrap:wrap;gap:12px}
+.formationHeading h3{margin:0 0 5px!important;font-size:16px!important;color:#23445a}
+.formationHeading p{margin:0!important;font-size:11px!important;line-height:1.5;color:#6a8090;max-width:510px}
+.formationHeading>span{border-radius:20px;background:#def4eb;color:#078172;padding:6px 10px;font-size:11px;font-weight:850;white-space:nowrap}
+.formationGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.formationOption{min-width:0;min-height:97px;position:relative;display:grid;justify-items:center;align-content:center;gap:6px;border:1px solid #dce3eb;border-radius:13px;background:#f8faff;box-shadow:0 2px 5px rgba(31,52,69,.025);color:#2d415c;padding:12px 10px;cursor:pointer;text-align:center}
+.formationOption>strong{font-size:13px;letter-spacing:.02em;color:#30475a}
+.formationOption>.formationPoints{font-size:20px;font-weight:900;line-height:1;color:#233b57;font-variant-numeric:tabular-nums}
+.formationPoints small{font-size:10px;font-weight:650;color:#5f7387}
+.formationOption>small{font-size:10px;color:#8290a3}
+.formationOption:hover:not(:disabled){border-color:#96cfc0;background:#eff9f6}
+.formationSelected{background:#e8f8f3!important;border-color:#0c9987!important;box-shadow:inset 0 0 0 1px #0c9987,0 3px 9px rgba(15,133,112,.08)}
+.formationSelected>.formationPoints{color:#078674}
+.formationRecommended{position:absolute;top:0;right:0;padding:3px 6px;background:#068b7a;border-radius:0 12px 0 7px;color:#fff;font-size:8px;font-weight:900;letter-spacing:.06em}
+.formationOption:disabled{cursor:not-allowed;opacity:.55}
+@media(max-width:540px){.formationSection{padding:11px}.formationOption{padding:13px 6px;min-height:90px}.formationOption>.formationPoints{font-size:19px}}
