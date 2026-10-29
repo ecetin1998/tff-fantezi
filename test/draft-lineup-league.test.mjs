@@ -36,7 +36,7 @@ test('manager cards are explicit, single-use and unworkable draft-specific optio
  assert.match(schema,/triple_captain/)
  assert.match(schema,/quad_captain/)
  assert.match(schema,/bench_boost/)
- assert.match(editor,/Hücum kartı farklı draft kadrosu gerektirdiği/)
+ assert.match(editor,/Hücum kartının 2 KL \/ 3 DEF \/ 5 OS \/ 5 FOR kadrosu/)
  assert.match(editor,/Limitsiz Bütçe/)
  assert.match(editor,/Kaptan/)
 })
