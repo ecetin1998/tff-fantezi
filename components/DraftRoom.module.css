@@ -192,3 +192,9 @@
 .opponentSwitch button.opponentActive span{color:#087c6f}
 @media(max-width:580px){.opponentSwitch{grid-template-columns:1fr}.opponentSwitch button{min-height:70px;padding:12px 14px}}
 @media(prefers-reduced-motion:reduce){.opponentSwitch button{transition:none}}
+
+
+.clubRule{display:grid;gap:4px;margin:9px 0 11px;background:#eef8f4;border:1px solid #cfebdf;border-radius:10px;padding:10px 12px}
+.clubRule strong{color:#137f70;font-size:11px}
+.clubRule span{color:#647c81;font-size:10px;line-height:1.5;overflow-wrap:anywhere}
+.auctionClubWarning{background:#fff1ee;color:#a4433d;border:1px solid #f3d2c7;border-radius:10px;padding:9px;font-size:12px}
