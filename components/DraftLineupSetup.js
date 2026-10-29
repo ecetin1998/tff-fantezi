@@ -3,29 +3,20 @@ import {useEffect,useMemo,useState,useCallback} from 'react'
 import {createClient} from '@/lib/supabase/client'
 import {FORMATION_MAP} from '@/lib/rules'
 import {MANAGER_CARDS} from '@/lib/managerCards'
+import {draftFormationOptions,draftProjectedPoints} from '@/lib/draftLineupForecast'
 import s from './DraftLineupSetup.module.css'
 
 const positions={GK:'KL',DEF:'DEF',MID:'OS',FWD:'FOR'}
-const offered=MANAGER_CARDS.filter(c=>['none','triple_captain','quad_captain','bench_boost'].includes(c.id))
+const offered=MANAGER_CARDS
+const supportedCards=new Set(['none','triple_captain','quad_captain','bench_boost'])
+const formatXfp=value=>Number(value||0).toLocaleString('tr-TR',{minimumFractionDigits:1,maximumFractionDigits:1})
 const xfp=p=>Number(p.xfp||0)
 function initialFormation(players){
- let best=null
- for(const [key,formation] of Object.entries(FORMATION_MAP)){
-  const starters=[]
-  for(const [position,count] of Object.entries({GK:1,...formation}))
-   starters.push(...players.filter(p=>p.position===position).sort((a,b)=>xfp(b)-xfp(a)).slice(0,count))
-  if(starters.length!==11)continue
-  const value=starters.reduce((a,p)=>a+xfp(p),0)
-  if(!best||value>best.value)best={key,value,starters}
- }
- const starters=best?.starters||[]
- const ids=new Set(starters.map(p=>Number(p.id)))
- const bench=players.filter(p=>!ids.has(Number(p.id)))
- return {starters:starters.map(p=>Number(p.id)),bench:[
-  ...bench.filter(p=>p.position==='GK'),
-  ...bench.filter(p=>p.position!=='GK').sort((a,b)=>xfp(b)-xfp(a))
- ].map(p=>Number(p.id)),captain:Number([...starters].filter(p=>p.position!=='GK').sort((a,b)=>xfp(b)-xfp(a))[0]?.id||starters[0]?.id||0),card:'none'}
+ const best=draftFormationOptions(players,FORMATION_MAP)[0]
+ return best?{starters:best.starters,bench:best.bench,captain:best.captain,card:'none'}
+  :{starters:[],bench:[],captain:0,card:'none'}
 }
+
 export default function DraftLineupSetup({roomId,picks=[],pool=[],myTeamId,onLeagueActive}){
  const client=useMemo(()=>createClient(),[])
  const [status,setStatus]=useState(null)
@@ -48,6 +39,7 @@ export default function DraftLineupSetup({roomId,picks=[],pool=[],myTeamId,onLea
   }))
  },[picks,pool,myTeamId])
  const playerById=useMemo(()=>new Map(roster.map(p=>[p.id,p])),[roster])
+ const formationOptions=useMemo(()=>draftFormationOptions(roster,FORMATION_MAP),[roster])
  const refresh=useCallback(async()=>{
   const {data,error:rpcError}=await client.rpc('scout_draft_lineup_state',{p_room_id:roomId})
   if(rpcError)throw rpcError
@@ -83,6 +75,17 @@ export default function DraftLineupSetup({roomId,picks=[],pool=[],myTeamId,onLea
  const valid=roster.length===15&&starters.length===11&&bench.length===4&&
   new Set(allIds).size===15&&allIds.every(id=>playerById.has(id))&&
   formation.valid&&playerById.get(bench[0])?.position==='GK'&&starters.includes(Number(captain))
+ const projected=draftProjectedPoints(starters,bench,captain,card,playerById)
+ const baseline=draftProjectedPoints(starters,bench,captain,'none',playerById)
+ const selectFormation=option=>{
+  if(locked)return
+  setStarters([...option.starters])
+  setBench([...option.bench])
+  setCaptain(option.captain)
+  setSelected(null)
+  setDirty(true)
+  setInfo('Bu dizilişin en yüksek tahmini puanlı ilk 11’i yerleştirildi. Futbolcuları kendin değiştirebilirsin.')
+ }
  const readyCount=(status?.teams||[]).filter(t=>t.ready).length
  const teamCount=status?.teams?.length||0
  const locked=!status?.can_edit
@@ -148,6 +151,56 @@ export default function DraftLineupSetup({roomId,picks=[],pool=[],myTeamId,onLea
    </div>}
    {status.league_active&&<p className={s.explainer}>Herkes hazır. Bu tek haftalık yarışmanın kadroları kilitlendi; canlı puan tablosu açılıyor.</p>}
    {selected&&<p className={s.help}>Değiştirmek için başka bir futbolcuya dokun. Mevki dağılımı kaydetme sırasında kontrol edilir.</p>}
+   <div className={s.forecastSummary}>
+    <div><small>SEÇİLİ KADRO · MH{status.gameweek}</small><strong>{formatXfp(projected)} xFP</strong>
+    <span>İlk 11, kaptan ve seçilen kart dahil tahmini toplam</span></div>
+    <div><small>MENAJER KARTI ETKİSİ</small><strong>{projected-baseline>=0?'+':''}{formatXfp(projected-baseline)} xFP</strong>
+    <span>Standart kaptan 2× puanlamasına göre fark</span></div>
+   </div>
+   <div className={s.config}>
+    <label>Kaptan
+     <select disabled={locked} value={captain} onChange={e=>{setCaptain(Number(e.target.value));setDirty(true)}}>
+      {starters.map(id=><option key={id} value={id}>{playerById.get(id)?.name||'Oyuncu'}</option>)}
+     </select>
+     <small className={s.helpText}>Kaptan, normalde 2×; seçilen karta göre 3× veya 4× puan getirir.</small>
+    </label>
+    <div className={s.cards}>
+     <h3>Menajer kartı seç</h3>
+     <p>Kartların bu 15 oyuncuya göre tahmini katkısını karşılaştır. Seçimini kadroyla birlikte kaydet.</p>
+     <div className={s.cardGrid}>{offered.map(item=>{
+      const supported=supportedCards.has(item.id)
+      const estimate=supported?draftProjectedPoints(starters,bench,captain,item.id,playerById):null
+      const delta=estimate===null?null:estimate-baseline
+      return <button type="button" key={item.id} disabled={locked||!supported}
+       title={!supported?(item.id==='attack'?'Hücum için farklı pozisyon dağılımıyla yeniden 15 oyuncu seçilmesi gerekir.':'Limitsiz Bütçe draft tamamlandıktan sonra oyuncu seçimini değiştirmez.'):item.description}
+       aria-pressed={card===item.id}
+       className={s.card+(card===item.id?' '+s.cardActive:'')+(!supported?' '+s.cardDisabled:'')}
+       onClick={()=>{setCard(item.id);setDirty(true)}}>
+       <strong>{item.shortLabel}</strong>
+       {supported?<b>{formatXfp(estimate)} xFP</b>:<b>Bu draftta yok</b>}
+       <small>{item.id==='none'?'Kaptan 2× · Standart kurallar':item.id==='triple_captain'?'Kaptan 3×':item.id==='quad_captain'?'Kaptan 4×':item.id==='bench_boost'?'15 oyuncu puanda':item.id==='attack'?'2 KL / 3 DEF / 5 OS / 5 FOR':'Bütçe sınırı yok'}</small>
+       {supported?<em className={delta>0?s.deltaPositive:s.deltaNeutral}>{delta>0?'+':''}{formatXfp(delta)} xFP</em>:<em className={s.unavailable}>Seçilemez</em>}
+      </button>
+     })}</div>
+     <p className={s.cardFoot}>Hücum kartının 2 KL / 3 DEF / 5 OS / 5 FOR kadrosu bu 15 kişilik draft dağılımına uymuyor; Limitsiz Bütçe de seçimler bittiği için avantaj sağlamıyor.</p>
+    </div>
+   </div>
+   <div className={s.formationPanel}>
+    <div className={s.formationIntro}>
+     <h3>İlk 11 dizilişini seç</h3>
+     <p>Her diziliş için en yüksek tahmini puan veren ilk 11 ve kaptan hesaplanır. Seçtikten sonra oyuncuları istediğin gibi değiştirebilirsin.</p>
+    </div>
+    <div className={s.formationGrid}>
+     {formationOptions.map((option,index)=><button type="button" key={option.formation}
+      disabled={locked} aria-pressed={formation.label===option.formation}
+      className={s.formationOption+(formation.label===option.formation?' '+s.formationSelected:'')}
+      onClick={()=>selectFormation(option)}>
+      <span>{option.formation}{index===0&&<b>ÖNERİ</b>}</span>
+      <strong>{formatXfp(draftProjectedPoints(option.starters,option.bench,option.captain,card,playerById))} <small>xFP</small></strong>
+      <small>{formation.label===option.formation?'Seçili diziliş':'Kadroya uygula'}</small>
+     </button>)}
+    </div>
+   </div>
    <div className={s.columns}>
     <div className={s.side}><div className={s.sideHead}><h3>İlk 11</h3><span>{starters.length} oyuncu</span></div>
      <div className={s.players}>{starters.map((id,i)=>{const p=playerById.get(id);return <button key={id} type="button" disabled={locked} aria-pressed={selected?.id===id} className={s.player+(selected?.id===id?' '+s.picked:'')} onClick={()=>choose(id,'starter')}>
@@ -162,19 +215,6 @@ export default function DraftLineupSetup({roomId,picks=[],pool=[],myTeamId,onLea
        </button>
        {i>0&&<div className={s.benchButtons}><button type="button" disabled={locked||i===1} title="Yukarı" onClick={()=>swapBench(i,-1)}>↑</button><button type="button" disabled={locked||i===3} title="Aşağı" onClick={()=>swapBench(i,1)}>↓</button></div>}
       </div>})}</div>
-    </div>
-   </div>
-   <div className={s.config}>
-    <label>Kaptan
-     <select disabled={locked} value={captain} onChange={e=>{setCaptain(Number(e.target.value));setDirty(true)}}>
-      {starters.map(id=><option key={id} value={id}>{playerById.get(id)?.name||'Oyuncu'}</option>)}
-     </select>
-    </label>
-    <div className={s.cards}><h3>Menajer kartı</h3><p>Seçeceğin kart yalnızca bu draftın MH{status.gameweek} puanına uygulanır.</p>
-     <div className={s.cardGrid}>{offered.map(item=><button type="button" disabled={locked} aria-pressed={card===item.id} key={item.id} className={s.card+(card===item.id?' '+s.cardActive:'')} onClick={()=>{setCard(item.id);setDirty(true)}}>
-      <strong>{item.label}</strong><small>{item.id==='none'?'Standart puanlama':item.id==='bench_boost'?'Dört yedeğin puanı da sayılır':'Kaptan puanı '+item.captainMultiplier+' kat'}</small>
-     </button>)}</div>
-     <p className={s.cardFoot}>Hücum kartı farklı draft kadrosu gerektirdiği, Limitsiz Bütçe ise draft bittikten sonra puanı değiştirmediği için bu sabit 15 oyunculu ligde kullanılmaz.</p>
     </div>
    </div>
    {!valid&&roster.length===15&&<p className={s.error}>Diziliş veya yedek kaleci geçersiz. Bir kaleci yedekte olmalı; ilk 11 oyun kurallarındaki dizilişlerden birini karşılamalı.</p>}
