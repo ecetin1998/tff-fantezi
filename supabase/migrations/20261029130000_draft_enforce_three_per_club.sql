@@ -93,7 +93,7 @@ begin
    status=case when rm.next_pick=rm.team_count*15 then 'finished' else 'drafting' end,
    updated_at=clock_timestamp() where id=rm.id;
  return jsonb_build_object('advanced',true,'player_id',candidate,'pick_number',rm.next_pick);
-end $function$
+end $function$;
 
 
 -- scout_draft_bot_advance
@@ -311,7 +311,7 @@ begin
    updated_at=clock_timestamp() where id=rm.id;
  return jsonb_build_object('advanced',true,'kind','bid','team_id',bot.id,
   'amount',v_bid,'player_id',lot.player_id);
-end $function$
+end $function$;
 
 
 -- scout_draft_auction_nominate
@@ -365,7 +365,7 @@ begin
  values(rm.id,num,candidate,clock_timestamp()+rm.auction_bid_seconds*interval '1 second');
  update public.scout_draft_rooms set updated_at=clock_timestamp() where id=rm.id;
  return jsonb_build_object('ok',true,'lot_number',num,'player_id',candidate);
-end $function$
+end $function$;
 
 
 -- scout_draft_auction_advance
@@ -477,7 +477,7 @@ begin
  values(rm.id,num,candidate,clock_timestamp()+interval '15 seconds');
  update public.scout_draft_rooms set updated_at=clock_timestamp() where id=rm.id;
  return jsonb_build_object('status','open','advanced',true,'lot_number',num);
-end $function$
+end $function$;
 
 
 -- scout_draft_auction_bid
@@ -521,7 +521,7 @@ begin
  update public.scout_draft_rooms set updated_at=clock_timestamp() where id=rm.id;
  return jsonb_build_object('ok',true,'amount',p_amount,'ends_at',
     (select ends_at from public.scout_draft_auction_lots where id=lot.id),'max_bid',max_bid);
-end $function$
+end $function$;
 
 
 -- scout_draft_auction_complete_pick
@@ -575,5 +575,5 @@ begin
    auction_nomination_index=next_seat,updated_at=clock_timestamp() where id=rm.id;
  end if;
  return rm.next_pick;
-end $function$
+end $function$;
 
