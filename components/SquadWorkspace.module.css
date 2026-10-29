@@ -2196,3 +2196,47 @@ white-space:normal;
 overflow-wrap:anywhere;
 }
 }
+
+
+/* Current matchweek matchup underneath player names. Keep long club/opponent
+   combinations readable instead of truncating them on mobile. */
+.scope :global(.squad-fixture-meta){
+  display:block;
+  max-width:100%;
+  white-space:normal!important;
+  overflow:visible!important;
+  text-overflow:clip!important;
+  overflow-wrap:anywhere;
+  line-height:1.35!important;
+}
+.scope :global(.picker-copy)>small:global(.squad-fixture-meta){
+  display:block;
+  font-size:11px;
+  color:#586d83;
+  margin-top:4px;
+}
+.scope :global(.bench-copy)>small:global(.squad-fixture-meta){
+  font-size:10px;
+  margin-top:3px;
+  color:#687f91;
+}
+.scope :global(.roster-player)>small:global(.squad-fixture-meta),
+.scope :global(.my-pitch-player)>button small:global(.squad-fixture-meta){
+  font-size:8px;
+  line-height:1.3!important;
+  padding-inline:1px;
+  word-break:normal;
+}
+.scope :global(.captain-candidates) small:global(.squad-fixture-meta){
+  font-size:10px;
+  line-height:1.35;
+}
+@media(max-width:720px){
+  .scope :global(.picker-copy)>small:global(.squad-fixture-meta){
+    font-size:10px;
+  }
+  .scope :global(.roster-player)>small:global(.squad-fixture-meta),
+  .scope :global(.my-pitch-player)>button small:global(.squad-fixture-meta){
+    font-size:7px;
+  }
+}

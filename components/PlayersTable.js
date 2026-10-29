@@ -4,7 +4,7 @@ import Link from 'next/link'
 import {useRouter} from 'next/navigation'
 import {teamCssVars} from '@/lib/teamThemes'
 import {availabilityCompactNote,availabilityIsIssue} from '@/lib/availability'
-import {fixtureBadge,playerLabel} from '@/lib/playerPresentation'
+import {fixtureBadge,playerLabel,playerFixtureMeta} from '@/lib/playerPresentation'
 import {playerRoleLabel} from '@/lib/playerRole'
 import AccessGate from '@/components/AccessGate'
 import MultiSelectFilter from '@/components/MultiSelectFilter'
@@ -193,8 +193,8 @@ export default function PlayersTable({players,total,page,pageCount,teams,filters
         {visiblePlayers.map((p,i)=><Link href={'/players/'+p.id} className="card mobile-player-card team-accent-card" style={teamCssVars(p.team)} key={p.id}>
           <div className="mobile-player-top">
             <div className="mobile-card-badges"><span className="weekly-rank">#{offset+i+1}</span><span className={'pos '+p.position}>{posLabel(p.position)}</span></div>
-            <div className="mobile-player-name"><b>{playerLabel(p)}</b><span>{p.team}{playerRoleLabel(p)?' • '+playerRoleLabel(p):''} • {num(p.price,1)}m</span><small className="player-meta-badges">{fixtureBadge(p.projection)?<em>{fixtureBadge(p.projection)}</em>:null}</small></div>
-            <div className="mobile-xfp"><strong>{num(p.projection?.xfp)}</strong><small>xFP</small><em>{num(p.total_points,0)} toplam puan</em></div>
+            <div className="mobile-player-name"><b>{playerLabel(p)}</b><span>{playerFixtureMeta(p)}</span><small className="player-meta-badges">{fixtureBadge(p.projection)?<em>{fixtureBadge(p.projection)}</em>:null}</small></div>
+            <div className="mobile-xfp"><strong>{num(p.projection?.xfp)}</strong><small>xFP</small><em>{num(p.total_points,0)} toplam puan · {num(p.price,1)}m</em></div>
           </div>
           <div className="mobile-fixture"><span>{p.projection?.venue==='HOME'?'Ev':p.projection?.venue==='AWAY'?'Dep':'—'}</span><b>Rakip: {p.projection?.opponent_name||'—'}</b>{playerNote(p)?<em>{playerNote(p)}</em>:null}</div>
           <div className="mobile-player-metrics">
