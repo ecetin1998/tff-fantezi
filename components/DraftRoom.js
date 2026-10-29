@@ -17,13 +17,14 @@ const errors={
  ALREADY_JOINED:'Bu odaya zaten katıldın.',SEAT_TAKEN:'Bu takım dolu.',
  HOST_ONLY:'Bu işlemi sadece yönetici yapabilir.',WAIT_FOR_ALL_PLAYERS:'Tüm katılımcılar katılmadan draft başlayamaz.',
  DRAFT_NOT_ACTIVE:'Draft aktif değil.',NOT_YOUR_TURN:'Henüz senin sıran değil.',TURN_EXPIRED:'Seçim süresi doldu, otomatik seçim yapılıyor.',INVALID_TIMER_SETTINGS:'Süre ayarları geçersiz.',
- INVALID_PLAYER:'Bu oyuncu seçilemiyor.',POSITION_FULL:'Bu mevkide kontenjan dolu.',
+ INVALID_PLAYER:'Bu oyuncu seçilemiyor.',POSITION_FULL:'Bu mevkide kontenjan dolu.',CLUB_LIMIT_REACHED:'Aynı kulüpten en fazla 3 futbolcu seçebilirsin.',
  PLAYER_ALREADY_PICKED:'Oyuncu zaten seçilmiş.',NOTHING_TO_UNDO:'Geri alınacak seçim yok.', AUCTION_UNDO_UNSUPPORTED:'Açık artırmada geçmiş satışlar geri alınamaz.',AUCTION_NOT_ACTIVE:'Açık artırma aktif değil.', AUCTION_EXPIRED:'Oyuncunun teklif süresi doldu.',ALREADY_LEADING:'Zaten en yüksek teklif sende.',BID_TOO_LOW:'Daha yüksek teklif gir.',BID_EXCEEDS_SAFE_BUDGET:'Bütçe sınırı: kalan kadro yerlerine en az 1 kredi ayırmalısın.'
 }
 const errorText=e=>{const str=String(e?.message||e);const key=Object.keys(errors).find(k=>str.includes(k));return key?errors[key]:str.slice(0,160)}
 const risk=p=>Number(p.availability_probability??1)<.6||Number(p.xi_probability)<.6||Number(p.x_minutes)<45?'Yüksek':Number(p.xi_probability)<.85||Number(p.x_minutes)<70?'Orta':'Düşük'
 const sums=rows=>rows.reduce((sum,p)=>sum+Number(p.xfp||0),0)
 const positionCounts=rows=>Object.fromEntries(Object.keys(CAPS).map(pos=>[pos,rows.filter(p=>p.position===pos).length]))
+const clubCount=(team,club)=>team?.selections.filter(p=>p.team===club).length||0
 function xiScore(rows){
  if(rows.length<11)return null
  // Sorting each position once gives the exact max-XI for every allowed 1-GK formation.
@@ -230,7 +231,7 @@ export default function DraftRoom({initialRoom='',initialInvite=''}) {
  const secondsLeft=lot?Math.max(0,Math.ceil((Date.parse(lot.ends_at)-Date.parse(lot.server_time)-(clock-serverSnapshot))/1000)):0
  const safeMax=own?100-Number(own.spent||0)-(14-own.selections.length):0
  const canBid=Boolean(isAuction&&lot&&room?.status==='drafting'&&secondsLeft>0&&own&&
- own.count[lot.position]<CAPS[lot.position]&&own.selections.length<15&&
+ own.count[lot.position]<CAPS[lot.position]&&clubCount(own,lot.team)<3&&own.selections.length<15&&
  lot.leader_team_id!==own.id&&Number(bidAmount)>Number(lot.current_bid||0)&&Number(bidAmount)<=safeMax)
 
  const versionTwo=Number(room?.rules_version||1)>=2
@@ -264,13 +265,23 @@ export default function DraftRoom({initialRoom='',initialInvite=''}) {
   </>:<label className={s.timerSlider}><span>Her seçim için süre <strong>{timerSettings.classic} sn</strong></span><input type="range" min="15" max="120" step="15" value={timerSettings.classic} onChange={e=>setTimerSettings(v=>({...v,classic:Number(e.target.value)}))}/><small>15–120 saniye · Zaman aşımında otomatik xFP seçimi</small></label>}
  </div>
  const available=playerPool.filter(p=>!pickedIds.has(Number(p.id)))
- const fits=p=>canComplete?Boolean(own?.count[p.position]<CAPS[p.position]):!current||current.count[p.position]<CAPS[p.position]
+ const fits=p=>{
+  if(canComplete)return Boolean(own&&own.count[p.position]<CAPS[p.position]&&clubCount(own,p.team)<3)
+  if(canPick)return Boolean(current&&current.count[p.position]<CAPS[p.position]&&clubCount(current,p.team)<3)
+  if(canNominate)return teams.some(t=>t.selections.length<15&&t.count[p.position]<CAPS[p.position]&&clubCount(t,p.team)<3)
+  return false
+ }
  const clubs=[...new Set(playerPool.map(p=>p.team))].sort((a,b)=>a.localeCompare(b,'tr'))
  const filtered=available.filter(fits).filter(p=>pos==='ALL'||p.position===pos)
    .filter(p=>club==='ALL'||p.team===club)
    .filter(p=>(p.name+' '+p.team).toLocaleLowerCase('tr-TR').includes(search.toLocaleLowerCase('tr-TR')))
    .sort(sortPlayers)
  const options=available.filter(fits)
+ const selectedValid=Boolean(selected&&lookup.has(Number(selected))&&!pickedIds.has(Number(selected))&&fits(lookup.get(Number(selected))))
+ const fullClubs=(canComplete?own:current)?.selections.reduce((acc,p)=>{
+  if(p.team)acc[p.team]=(acc[p.team]||0)+1
+  return acc
+ },{})||{}
  const rosterPhase=room?.status==='finished'&&Boolean(room?.lineup_required)
  const leagueReady=Boolean(rosterPhase&&(leagueActive||room?.league_active_at))
  const main=[...options].sort((a,b)=>{
@@ -390,6 +401,7 @@ export default function DraftRoom({initialRoom='',initialInvite=''}) {
       <div className={s.auctionOffer}>
        <p>Senin kalan bütçen: <b>{own?.budget??'—'}/100</b></p>
        <p>Bu oyuncu için maksimum güvenli teklif: <b>{safeMax} kredi</b></p>
+       {own&&lot&&clubCount(own,lot.team)>=3&&<p className={s.auctionClubWarning} role="status">Bu kulüpten zaten 3 oyuncun var; teklif veremezsin.</p>}
        <label>Teklifin (kredi)<input type="number" min={Number(lot.current_bid||0)+1} max={safeMax}
         value={bidAmount} onChange={e=>setBidAmount(e.target.value)}/></label>
        <div className={s.bidShortcuts}>{[1,2,5].map(increase=><button key={increase} className={s.secondary}
@@ -403,15 +415,17 @@ export default function DraftRoom({initialRoom='',initialInvite=''}) {
    </div>}
    {room.status==='drafting'&&(!isAuction||versionTwo&&!lot)&&<div className={s.poolLayout}><div className={s.panel}>
     <div className={s.heading}><h2>Oyuncu havuzu</h2><span>{available.length} müsait</span></div>
+    <div className={s.clubRule}><strong>Kulüp sınırı: 3 futbolcu</strong>
+     <span>{Object.entries(fullClubs).filter(([,count])=>count>=3).map(([team])=>team).join(', ')||'Aynı kulüpten dördüncü oyuncu seçilemez.'}{Object.values(fullClubs).some(n=>n>=3)?' · Kontenjan dolu':''}</span></div>
     <div className={s.filters}><input placeholder="Oyuncu veya takım ara" value={search} onChange={e=>{setSearch(e.target.value);setAll(false)}}/><select value={pos} onChange={e=>setPos(e.target.value)}><option value="ALL">Tüm mevkiler</option>{Object.keys(P).map(p=><option value={p} key={p}>{P[p]}</option>)}</select><select value={club} onChange={e=>setClub(e.target.value)}><option value="ALL">Tüm takımlar</option>{clubs.map(c=><option key={c} value={c}>{c}</option>)}</select></div>
     <div className={s.sortBar}><label>Sıralama<select value={activeSort} onChange={e=>{setSort(e.target.value);setAll(false)}}><option value="xfp">xFP'ye göre</option><option value="xi">İlk 11 ihtimaline göre</option><option value="minutes">Dakikaya göre</option>{isPro&&proOverlayReady&&<><option value="p90">P90'a göre</option><option value="six">6+ ihtimaline göre</option></>}<option value="points">Toplam puana göre</option><option value="value">F/P'ye göre</option><option value="price">Fiyata göre</option></select></label><button className={s.secondary} onClick={()=>setSortDirection(d=>d==='desc'?'asc':'desc')} title="Sıralama yönünü değiştir">{sortDirection==='desc'?'Azalan ↓':'Artan ↑'}</button></div>
     <div className={s.pool}>{(all?filtered:filtered.slice(0,35)).map(p=><button key={p.id} disabled={!canChoose||busy} className={s.player+(selected===p.id?' '+s.chosen:'')} onClick={()=>setSelected(p.id)}><Item p={p} sort={activeSort}/><strong>{F(p.xfp)}</strong></button>)}</div>
     {filtered.length>35&&!all&&<button className={s.secondary} onClick={()=>setAll(true)}>Tüm {filtered.length} oyuncuyu göster</button>}
-    <div className={s.checkout}><b>{selected?lookup.get(Number(selected))?.name:'Oyuncu seçilmedi'}</b><button className={s.primary} disabled={!canChoose||busy||!selected} onClick={()=>action(async()=>{await call(canNominate?'scout_draft_auction_nominate':canComplete?'scout_draft_auction_complete_pick':'scout_draft_pick',{p_room_id:id,p_player_id:selected});setSelected(null);await refresh()})}>{canNominate?'Oyuncuyu göster →':canComplete?'1 krediyle kadroma al →':'Seçimi onayla →'}</button></div>
+    <div className={s.checkout}><b>{selected?lookup.get(Number(selected))?.name:'Oyuncu seçilmedi'}</b><button className={s.primary} disabled={!canChoose||busy||!selectedValid} onClick={()=>action(async()=>{await call(canNominate?'scout_draft_auction_nominate':canComplete?'scout_draft_auction_complete_pick':'scout_draft_pick',{p_room_id:id,p_player_id:selected});setSelected(null);await refresh()})}>{canNominate?'Oyuncuyu göster →':canComplete?'1 krediyle kadroma al →':'Seçimi onayla →'}</button></div>
    </div>
    <div className={s.panel}><small className={s.eyebrow}>DRAFT ANALİSTİ</small><h2>{isAuction?(nominator?.team_name||'Sıradaki takım')+' için öneriler':current?.team_name+' için öneriler'}</h2>
     {[['En mantıklı 5 seçim',main],['Bonus potansiyeli yüksek 3',high],['Radar altındaki 3',surprise]].map(([title,rows])=><div className={s.suggestions} key={title}><h3>{title}</h3>{rows.map(p=><button key={p.id} disabled={!canChoose||busy} onClick={()=>setSelected(p.id)}><Item p={p}/><strong>{F(p.xfp)}</strong></button>)}</div>)}
-    <p>Bu öneriler xFP, ilk 11, rol ve takımın kontenjanına göre hazırlanır. P90 ve 6+ yalnızca Pro erişimiyle sıralanır; ücretsiz üyeler için diğer ölçütler açıktır.</p>
+    <p>Bu öneriler xFP, ilk 11, rol, mevki kontenjanı ve kulüp başına en fazla 3 futbolcu sınırına göre hazırlanır. P90 ve 6+ yalnızca Pro erişimiyle sıralanır; ücretsiz üyeler için diğer ölçütler açıktır.</p>
    </div></div>}
    <div className={s.panel}><div className={s.heading}><h2>Seçim geçmişi</h2><span>{picked.length} seçim</span></div><div className={s.history}>{[...picked].reverse().map(p=><div key={p.pick_number}><strong>#{p.pick_number}</strong><span>{p.player_name}</span><small>{teams.find(t=>t.id===p.team_id)?.team_name} · {P[p.position]}{p.auto_selected?' · Otomatik':''}</small><b>{F(p.xfp)}</b></div>)}</div></div>
    <p className={s.note}>Oda oluşturulduğu anda model koşusu sabitlenir. Seçimler üç saniyede bir senkronize edilir. Mevcut site modeli ve kadroların değişmez.</p>
