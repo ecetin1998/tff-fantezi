@@ -5,7 +5,7 @@ import {createClient} from '@/lib/supabase/client'
 import { teamCssVars } from '@/lib/teamThemes'
 import { availabilityCompactNote, availabilityIsIssue } from '@/lib/availability'
 import {BUDGET,FORMATION_MAP,MAX_PLAYERS_PER_CLUB,SQUAD_LIMITS,SQUAD_SIZE,STARTING_GK,STARTING_XI_SIZE,TRANSFER_RULES} from '@/lib/rules'
-import {pitchPlayerLabel,playerLabel} from '@/lib/playerPresentation'
+import {pitchPlayerLabel,playerLabel,playerFixtureMeta} from '@/lib/playerPresentation'
 import ManagerCardPicker from '@/components/ManagerCardPicker'
 import MultiSelectFilter from '@/components/MultiSelectFilter'
 import {ATTACK_FORMATIONS,MANAGER_CARDS,MANAGER_CARD_NONE,captainMultiplierForCard,managerCardInfo,normalizeManagerCard,squadLimitsForCard} from '@/lib/managerCards'
@@ -667,7 +667,7 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
                 <button type="button" className="remove-player roster-remove" onClick={()=>remove(p.id)} aria-label="Oyuncuyu çıkar">×</button>
                 <span className={`fantasy-shirt ${p.position}`} style={teamCssVars(p.team)}><i>{shirtMark(p)}</i></span>
                 <b>{displayName(p)}</b>
-                <small>{p.team}</small>
+                <small className="squad-fixture-meta">{playerFixtureMeta(p)}</small>
                 <div className="pitch-player-tags"><span>{Number(p.price||0).toFixed(1)}m</span><strong>{xfp(p).toFixed(1)} xFP</strong></div>
               </div>
               return <button type="button" className="roster-player empty-roster-slot" key={`${position}-${slot}`} onClick={()=>chooseEmptySlot(position)} disabled={isLocked}>
@@ -733,7 +733,7 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
               <div className="picker-shirt-wrap"><span className={`fantasy-shirt tiny ${p.position}`} style={teamCssVars(p.team)}><i>{shirtMark(p)}</i></span></div>
               <div className="picker-copy">
                 <b>{playerLabel(p)}</b>
-                <small><strong>{p.team}</strong><em>Rakip: {p.projection?.opponent_name||'—'}</em></small>
+                <small className="squad-fixture-meta">{playerFixtureMeta(p)}</small>
                 {availabilityNote?<small className="picker-availability-note">{availabilityNote}</small>:null}
               </div>
               <div className={`picker-value price ${sortKey==='price'?'active':''}`}>{Number(p.price||0).toFixed(1)}m</div>
@@ -828,7 +828,7 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
                   <button type="button" className="player-swap-hit" onClick={()=>handleSwap(p.id)} disabled={isLocked} aria-label="Yedekle değiştir">
                     <span className={`fantasy-shirt ${p.position}`} style={teamCssVars(p.team)}><i>{shirtMark(p)}</i></span>
                     <b>{displayName(p)}</b>
-                    <small>{p.team}</small>
+                    <small className="squad-fixture-meta">{playerFixtureMeta(p)}</small>
                     <div className="pitch-player-tags"><span>{Number(p.price||0).toFixed(1)}m</span><strong>{xfp(p).toFixed(1)} xFP</strong></div>
                   </button>
                   {p.position!=='GK'?<button type="button" className={`captain-toggle ${p.id===captainId?'active':''}`} onClick={()=>setCaptainId(p.id)} disabled={isLocked} aria-label="Kaptan yap">K</button>:null}
@@ -856,7 +856,7 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
                 >
                   <span className="bench-order">{i+1}</span>
                   <span className={`fantasy-shirt mini ${p.position}`} style={teamCssVars(p.team)}><i>{shirtMark(p)}</i></span>
-                  <span className="bench-copy"><b>{playerLabel(p)}</b><small>{p.team} • {posLabel[p.position]} • {xfp(p).toFixed(1)} xFP</small></span>
+                  <span className="bench-copy"><b>{playerLabel(p)}</b><small className="squad-fixture-meta">{playerFixtureMeta(p)}</small><small>{xfp(p).toFixed(1)} xFP</small></span>
                 </button>
               })}
             </div>
@@ -870,7 +870,7 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
           <div className="captain-candidates">
             {captainCandidates.map((p,i)=><button type="button" className={p.id===captainId?'active':''} onClick={()=>setCaptainId(p.id)} disabled={isLocked} key={p.id}>
               <span>#{i+1}</span>
-              <div><b>{playerLabel(p)}</b><small>{p.team}</small></div>
+              <div><b>{playerLabel(p)}</b><small className="squad-fixture-meta">{playerFixtureMeta(p)}</small></div>
               <strong>{xfp(p).toFixed(1)}<small>xFP</small></strong>
             </button>)}
           </div>
