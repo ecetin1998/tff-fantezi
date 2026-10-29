@@ -2,7 +2,7 @@
 -- Preserve historical draft picks; preexisting over-limit teams remain archived.
 create or replace function private.scout_draft_club_has_space(
   p_room_id uuid,p_team_id uuid,p_club_id integer
-) returns boolean language sql stable security definer
+) returns boolean language sql volatile security definer
 set search_path=public,pg_temp as $$
  select p_club_id is not null and (
    select count(*) from public.scout_draft_picks pk
