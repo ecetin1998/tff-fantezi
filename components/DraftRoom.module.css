@@ -192,3 +192,7 @@
 .opponentSwitch button.opponentActive span{color:#087c6f}
 @media(max-width:580px){.opponentSwitch{grid-template-columns:1fr}.opponentSwitch button{min-height:70px;padding:12px 14px}}
 @media(prefers-reduced-motion:reduce){.opponentSwitch button{transition:none}}
+
+/* Club-count feedback for drafts: every manager is capped at 3 per club. */
+.clubRule{font-size:11px!important;line-height:1.5!important;color:#0d8071!important;background:#e9f7f2;border:1px solid #cee8dc;border-radius:10px;padding:9px 11px;margin:0!important}
+.clubLimitNotice{font-size:11px!important;font-weight:750;color:#a44a35!important;background:#fff1e8;border:1px solid #f3d1be;border-radius:9px;padding:9px 10px;margin:0!important}
