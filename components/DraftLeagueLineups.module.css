@@ -44,3 +44,5 @@
 .loading{color:#607e95;background:#f2f6f9}
 @media(max-width:700px){.wrap{padding:15px}.benchList{grid-template-columns:1fr}.pitch{padding:15px 9px}.shirt{width:calc(33.333% - 8px);min-width:79px;min-height:92px}.heading{gap:10px}.estimated{text-align:left}}
 @media(max-width:410px){.shirt{width:calc(50% - 7px)}.pitchPlayers{gap:7px}}
+
+.fixtureMeta{max-width:100%;white-space:normal;overflow-wrap:anywhere;line-height:1.4}

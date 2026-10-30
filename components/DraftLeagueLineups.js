@@ -1,6 +1,7 @@
 'use client'
 import {useEffect,useMemo,useState} from 'react'
 import {createClient} from '@/lib/supabase/client'
+import {draftFixtureMeta} from '@/lib/draftFixtureMeta'
 import s from './DraftLeagueLineups.module.css'
 
 const labels={GK:'KALECİ',DEF:'DEFANS',MID:'ORTA SAHA',FWD:'FORVET'}
@@ -8,14 +9,18 @@ const groups=['FWD','MID','DEF','GK']
 const cards={none:'Standart',triple_captain:'Tripleks Kaptan · 3×',quad_captain:'Dört Dörtlük Kaptan · 4×',bench_boost:'Tüm Takım Sahaya'}
 const fmt=n=>Number(n||0).toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2})
 
-export default function DraftLeagueLineups({roomId,picks=[]}){
+export default function DraftLeagueLineups({roomId,picks=[],pool=[]}){
  const client=useMemo(()=>createClient(),[])
  const [state,setState]=useState(null)
  const [selected,setSelected]=useState('')
  const [error,setError]=useState('')
- const players=useMemo(()=>new Map(picks.map(p=>[Number(p.player_id),{
-  id:Number(p.player_id),name:p.player_name,position:p.position,xfp:Number(p.xfp||0)
- }])),[picks])
+ const players=useMemo(()=>{
+  const byId=new Map(pool.map(p=>[Number(p.id),p]))
+  return new Map(picks.map(p=>[Number(p.player_id),{
+   ...byId.get(Number(p.player_id)),
+   id:Number(p.player_id),name:p.player_name,position:p.position,xfp:Number(p.xfp||0)
+  }]))
+ },[picks,pool])
  useEffect(()=>{
   if(!roomId)return
   let active=true
@@ -65,6 +70,7 @@ export default function DraftLeagueLineups({roomId,picks=[]}){
        return <div className={s.shirt} key={id}>
         <div className={s.shirtIcon} aria-hidden="true">{id===Number(focused.captain)?'C':'11'}</div>
         <strong>{p?.name||'Oyuncu'}</strong>
+        <small className={s.fixtureMeta}>{draftFixtureMeta(p)}</small>
         <small>{fmt(p?.xfp)} xFP{id===Number(focused.captain)?' · KAPTAN':''}</small>
        </div>
       })}</div>
@@ -75,7 +81,7 @@ export default function DraftLeagueLineups({roomId,picks=[]}){
      <div className={s.benchList}>{substitutes.map((id,i)=>{
       const p=players.get(id)
       return <div className={s.benchPlayer} key={id}><span className={s.benchIndex}>{i===0?'KL':i}</span>
-       <div><strong>{p?.name||'Oyuncu'}</strong><small>{labels[p?.position]||'—'}</small></div>
+       <div><strong>{p?.name||'Oyuncu'}</strong><small className={s.fixtureMeta}>{draftFixtureMeta(p)}</small></div>
        <span className={s.benchXfp}>{fmt(p?.xfp)} xFP</span></div>
      })}</div>
     </div>

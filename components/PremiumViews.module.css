@@ -2604,3 +2604,38 @@
 .scope :global(.recommendation-preview-card){min-width:0}
 .scope :global(.unified-squad-list){min-width:0}
 }
+
+/* Kadro önerilerinde haftaya ait takım, mevki ve rakip (Ev/Dep).
+   Uzun kulüp adlarını özellikle mobil kartlarda kesme. */
+.scope :global(.unified-squad-list) :global(.readonly-pitch-player)>small:global(.recommend-fixture-meta){
+  display:block;
+  max-width:100%;
+  margin-top:3px;
+  padding-inline:1px;
+  color:rgba(255,255,255,.92);
+  font-size:7px;
+  line-height:1.25;
+  white-space:normal;
+  overflow:visible;
+  overflow-wrap:anywhere;
+  text-overflow:clip;
+  text-align:center;
+}
+.scope :global(.unified-squad-list) :global(.bench-copy)>small:global(.recommend-fixture-meta){
+  display:block;
+  white-space:normal;
+  overflow:visible;
+  overflow-wrap:anywhere;
+  text-overflow:clip;
+  line-height:1.4;
+  font-size:9px;
+}
+.scope :global(.unified-squad-list) :global(.bench-copy)>small:global(.recommend-bench-stats){
+  display:block;
+  white-space:normal;
+  overflow-wrap:anywhere;
+}
+@media(max-width:620px){
+  .scope :global(.unified-squad-list) :global(.readonly-pitch-player)>small:global(.recommend-fixture-meta){font-size:6.5px}
+  .scope :global(.unified-squad-list) :global(.bench-copy)>small:global(.recommend-fixture-meta){font-size:8px}
+}
