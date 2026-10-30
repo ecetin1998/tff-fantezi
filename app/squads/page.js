@@ -1,7 +1,7 @@
 import { getAuthState, getRecommendation } from '@/lib/data'
 import SquadPitchView from '@/components/SquadPitchView'
 import AccessGate from '@/components/AccessGate'
-import {playerLabel} from '@/lib/playerPresentation'
+import {playerLabel,playerFixtureMeta} from '@/lib/playerPresentation'
 import ManagerCardRecommendations from '@/components/ManagerCardRecommendations'
 
 export const metadata={title:'Kadro Önerileri'}
@@ -36,7 +36,7 @@ export default async function Squads(){
       <section className="card recommendation-preview-card">
         <div><span className="eyebrow">ÜCRETSİZ ÖNİZLEME</span><h2>Model kadrosundan ilk adaylar</h2><p>Önerilen kadronun tamamını ve yedekleri görmek için ücretsiz hesap aç.</p></div>
         <div className="recommendation-preview-list">
-          {(rec.members||[]).filter(x=>x.squad_slot==='XI').slice(0,3).map((m,i)=><div key={m.player_id}><span>#{i+1}</span><b>{playerLabel(m.player)}</b><small>{m.team} • {Number(m.xfp||0).toFixed(2)} xFP</small></div>)}
+          {(rec.members||[]).filter(x=>x.squad_slot==='XI').slice(0,3).map((m,i)=><div key={m.player_id}><span>#{i+1}</span><b>{playerLabel(m.player)}</b><small>{playerFixtureMeta(m.player||{team:m.team})} • {Number(m.xfp||0).toFixed(2)} xFP</small></div>)}
         </div>
       </section>
       <AccessGate
