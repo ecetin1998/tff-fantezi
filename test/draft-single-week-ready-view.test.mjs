@@ -43,7 +43,7 @@ test('live final page shows only confirmed squads and standings, never draft poo
  assert.match(room,/const leagueReady=Boolean\(rosterPhase&&\(leagueActive\|\|room\?\.league_active_at\)\)/)
  assert.match(room,/\{rosterPhase&&\(!leagueReady/)
  assert.match(room,/<DraftLineupSetup/)
- assert.match(room,/<DraftLeagueLineups roomId=\{id\} picks=\{picked\}\/>/)
+ assert.match(room,/<DraftLeagueLineups roomId=\{id\} picks=\{picked\} pool=\{pool\}\/>/)
  assert.match(room,/<DraftLiveStandings roomId=\{id\}\/>/)
  assert.match(room,/\{!rosterPhase&&<>/)
  assert.match(room,/<div className=\{s\.board\}>/)
