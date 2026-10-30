@@ -332,7 +332,7 @@ export default function DraftRoom({initialRoom='',initialInvite=''}) {
    {['expired','cancelled'].includes(room.status)&&<div className={s.closedNotice} role="status"><strong>{room.status==='expired'?'Odanın süresi doldu':'Oda iptal edildi'}</strong><p>Draft tamamlanmadan kapandığı için bu odada yeni işlem yapılamaz. Geçmiş seçimler silinmedi.</p><button className={s.secondary} onClick={()=>{setId('');setRoom(null);window.history.pushState({},'','/draft')}}>Odalarıma dön</button></div>}
    {rosterPhase&&(!leagueReady
      ?<DraftLineupSetup roomId={id} picks={picked} pool={pool} myTeamId={own?.id} onLeagueActive={onLeagueActive}/>
-     :<><DraftLeagueLineups roomId={id} picks={picked}/><DraftLiveStandings roomId={id}/></>)}
+     :<><DraftLeagueLineups roomId={id} picks={picked} pool={pool}/><DraftLiveStandings roomId={id}/></>)}
    {!rosterPhase&&<>
    {room.status==='lobby'&&<div className={s.panel}>
     <div className={s.heading}><h2>Kura ve seçim sistemi</h2><span>{teams.filter(t=>t.occupied).length}/{room.team_count} hazır</span></div>
