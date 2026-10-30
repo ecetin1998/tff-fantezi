@@ -1,0 +1,50 @@
+import test from 'node:test'
+import assert from 'node:assert/strict'
+import {readFileSync} from 'node:fs'
+
+const read=path=>readFileSync(path,'utf8')
+const data=read('lib/data.js')
+const presentation=read('lib/playerPresentation.js')
+const pitch=read('components/SquadPitchView.js')
+const squads=read('app/squads/page.js')
+const edge=read('supabase/functions/manager-card-recommendation/index.ts')
+const style=read('components/PremiumViews.module.css')
+const draftMeta=read('lib/draftFixtureMeta.js')
+const draftEditor=read('components/DraftLineupSetup.js')
+const draftLeague=read('components/DraftLeagueLineups.js')
+const draftRoom=read('components/DraftRoom.js')
+
+test('active run provides projection opponent and venue to every recommended player card',()=>{
+ assert.match(data,/team:p\.team,projection:\{opponent_name:p\.projection\?\.opponent_name\?\?null,venue:p\.projection\?\.venue\?\?null\}/)
+ assert.match(presentation,/export function playerFixtureMeta\(player\)/)
+ assert.match(presentation,/projection\?\.venue==='HOME'\?'Ev'/)
+ assert.match(presentation,/projection\?\.venue==='AWAY'\?'Dep'/)
+ assert.match(pitch,/import \{pitchPlayerLabel,playerLabel,playerFixtureMeta\}/)
+ assert.equal((pitch.match(/playerFixtureMeta\(m\.player\|\|\{team:m\.team\}\)/g)||[]).length,2)
+ assert.match(pitch,/className="recommend-fixture-meta"/)
+ assert.match(squads,/playerFixtureMeta\(m\.player\|\|\{team:m\.team\}\)/)
+})
+test('manager card recommendations return fixture metadata from the SAME selected simulation run',()=>{
+ assert.match(edge,/\.eq\("run_id",RUN\)/)
+ assert.match(edge,/\.select\("player_id,xfp,opponent_name,venue,/)
+ assert.match(edge,/opponent_name:x\.opponent_name\?\?null,venue:x\.venue\?\?null/)
+ assert.match(edge,/projection:\{opponent_name:row\.opponent_name,venue:row\.venue\}/)
+ assert.match(edge,/team:teamMap\.get\(Number\(row\.team_id\)\)\|\|'—'/)
+})
+test('recommended XI and bench subtitles wrap on narrow mobile screens',()=>{
+ assert.match(style,/readonly-pitch-player\)>small:global\(\.recommend-fixture-meta\)/)
+ assert.match(style,/bench-copy\)>small:global\(\.recommend-fixture-meta\)/)
+ assert.match(style,/overflow-wrap:anywhere/)
+ assert.match(style,/white-space:normal/)
+})
+test('draft lineup cards reuse only the original rooms frozen-week fixture data',()=>{
+ assert.match(draftMeta,/player\?\.fixture_opponent/)
+ assert.match(draftMeta,/player\?\.fixture_venue/)
+ assert.match(draftMeta,/Fikstür bekleniyor/)
+ assert.equal((draftEditor.match(/draftFixtureMeta\(p\)/g)||[]).length,2)
+ assert.equal((draftLeague.match(/draftFixtureMeta\(p\)/g)||[]).length,2)
+ assert.match(draftLeague,/const byId=new Map\(pool\.map\(p=>\[Number\(p\.id\),p\]\)\)/)
+ assert.match(draftRoom,/<DraftLeagueLineups roomId=\{id\} picks=\{picked\} pool=\{pool\}\/>/)
+ assert.match(draftRoom,/rosterPhase&&\(!leagueReady/)
+ assert.match(draftRoom,/leagueActive\|\|room\?\.league_active_at/)
+})
