@@ -351,7 +351,7 @@ export default function DraftRoom({initialRoom='',initialInvite=''}) {
        <button className={s.secondary} disabled={busy} onClick={()=>action(async()=>{await saveTimerSettings(id);setMessage('Süreler kaydedildi.')})}>Süre ayarlarını kaydet</button>
       </>:<p>{isAuction?'Oyuncu '+(room.auction_bid_seconds??15)+' sn · her teklifte +'+(room.auction_extension_seconds??5)+' sn':Number(room.rules_version||1)>=2?'Her seçim '+(room.classic_pick_seconds??60)+' sn.':'Bu odada süre sınırı yok.'}</p>}
     </div>
-    <div className={s.seats}>{teams.map(t=><div className={s.seat} key={t.id}><small>Takım kaydı · ${t.team_index}</small><strong>{t.team_name}</strong><span>{t.mine?'SEN':t.is_bot?'🤖 Bilgisayar':t.occupied?'Katıldı':'Boş'}</span></div>)}</div>
+    <div className={s.seats}>{teams.map(t=><div className={s.seat} key={t.id}><small>Katılım yeri {t.team_index}</small><strong>{t.team_name}</strong><span>{t.mine?'SEN':t.is_bot?'🤖 Bilgisayar':t.occupied?'Katıldı':'Boş'}</span></div>)}</div>
     <p className={s.drawNotice}>🎲 Seçim sırası, draft başlatıldığı anda tüm takımlar arasında rastgele belirlenir. Oda kurucusu da kuraya katılır. {isAuction?'Açık artırmada aday gösterme sırası kura sonucunu izler.':room.mode==='snake'?'Snake draftta ikinci tur ters sırayla oynanır.':'Normal draftta her tur aynı kura sırası kullanılır.'}</p>
     {room.is_host?<button className={s.primary} disabled={busy||teams.some(t=>!t.occupied)} onClick={()=>action(async()=>{await call('scout_draft_start',{p_room_id:id});await refresh()})}>Draftı başlat →</button>:<p>Yönetici kurayı tamamlayınca seçimler başlayacak.</p>}
    </div>}
