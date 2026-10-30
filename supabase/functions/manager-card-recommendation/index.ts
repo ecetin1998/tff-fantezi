@@ -208,12 +208,12 @@ Deno.serve(async(req:Request)=>{
     const rules=effectiveRules(rulesRes.data.rules,card);
 
     const {data,error}=await admin.from("scout_player_projections")
-      .select("player_id,xfp,p90,six_plus_probability,top25_score,xi_probability,x_minutes,availability_probability,scout_players!inner(id,team_id,position,price,active,full_name,display_name,short_label,shirt_number)")
+      .select("player_id,xfp,opponent_name,venue,p90,six_plus_probability,top25_score,xi_probability,x_minutes,availability_probability,scout_players!inner(id,team_id,position,price,active,full_name,display_name,short_label,shirt_number)")
       .eq("run_id",RUN);
     if(error)throw error;
 
     const rows=(data||[]).map((x:any)=>({
-      player_id:Number(x.player_id),xfp:n(x.xfp),p90:n(x.p90),six_plus_probability:n(x.six_plus_probability),
+      player_id:Number(x.player_id),xfp:n(x.xfp),opponent_name:x.opponent_name??null,venue:x.venue??null,p90:n(x.p90),six_plus_probability:n(x.six_plus_probability),
       top25_score:n(x.top25_score),xi_probability:n(x.xi_probability),x_minutes:n(x.x_minutes),
       availability_probability:n(x.availability_probability),
       team_id:Number(x.scout_players.team_id),position:String(x.scout_players.position),price:n(x.scout_players.price),
@@ -258,6 +258,8 @@ Deno.serve(async(req:Request)=>{
           id:Number(row.player.id),full_name:row.player.full_name,display_name:row.player.display_name,
           short_label:row.player.short_label,shirt_number:row.player.shirt_number,
           position:row.player.position,price:n(row.player.price),team_id:Number(row.player.team_id),
+          team:teamMap.get(Number(row.team_id))||'—',
+          projection:{opponent_name:row.opponent_name,venue:row.venue},
         },
         team:teamMap.get(Number(row.team_id))||"—",
       };
