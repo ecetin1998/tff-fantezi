@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { teamCssVars } from '@/lib/teamThemes'
-import {pitchPlayerLabel,playerLabel} from '@/lib/playerPresentation'
+import {pitchPlayerLabel,playerLabel,playerFixtureMeta} from '@/lib/playerPresentation'
 
 const posLabel={GK:'KL',DEF:'DEF',MID:'OS',FWD:'FOR'}
 
@@ -63,7 +63,7 @@ export default function SquadPitchView({
         >
           <span className={`fantasy-shirt ${m.player?.position}`} style={teamCssVars(m.team)}><i>{posLabel[m.player?.position]||m.player?.position||'—'}</i></span>
           <b>{displayName(m.player)}</b>
-          <small>{m.team}</small>
+          <small className="recommend-fixture-meta">{playerFixtureMeta(m.player||{team:m.team})}</small>
           <div className="pitch-player-tags">
             <span>{Number(m.player?.price||0).toFixed(1)}m</span>
             {variant==='alternative'&&scoreLabel.includes('Tipik')?
@@ -84,7 +84,7 @@ export default function SquadPitchView({
         {bench.map((m,i)=><Link href={'/players/'+m.player_id} className="my-bench-player readonly-bench-player" key={m.player_id} title={variant==='alternative'&&scoreLabel.includes('Tipik')?scenarioTip(m):undefined}>
           <span className="bench-order">{i+1}</span>
           <span className={`fantasy-shirt mini ${m.player?.position}`} style={teamCssVars(m.team)}><i>{posLabel[m.player?.position]||m.player?.position||'—'}</i></span>
-          <span className="bench-copy"><b>{playerLabel(m.player)}</b><small>{m.team||'—'} • {posLabel[m.player?.position]||m.player?.position} • {Number(m.player?.price||0).toFixed(1)}m • {variant==='alternative'&&scoreLabel.includes('Tipik')?`${Math.round(Number(m.top3_weighted_avg||0))} tipik puan`:`${Number(m.xfp||0).toFixed(1)} xFP`}</small></span>
+          <span className="bench-copy"><b>{playerLabel(m.player)}</b><small className="recommend-fixture-meta">{playerFixtureMeta(m.player||{team:m.team})}</small><small className="recommend-bench-stats">{Number(m.player?.price||0).toFixed(1)}m • {variant==='alternative'&&scoreLabel.includes('Tipik')?`${Math.round(Number(m.top3_weighted_avg||0))} tipik puan`:`${Number(m.xfp||0).toFixed(1)} xFP`}</small></span>
         </Link>)}
       </div>
     </div>:null}
