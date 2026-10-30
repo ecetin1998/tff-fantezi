@@ -3,9 +3,9 @@ import {useEffect,useMemo,useState,useCallback} from 'react'
 import {createClient} from '@/lib/supabase/client'
 import {FORMATION_MAP} from '@/lib/rules'
 import {MANAGER_CARDS} from '@/lib/managerCards'
+import {draftFixtureMeta} from '@/lib/draftFixtureMeta'
 import s from './DraftLineupSetup.module.css'
 
-const positions={GK:'KL',DEF:'DEF',MID:'OS',FWD:'FOR'}
 const offered=MANAGER_CARDS.filter(c=>['none','triple_captain','quad_captain','bench_boost'].includes(c.id))
 const xfp=p=>Number(p.xfp||0)
 function initialFormation(players){
@@ -151,14 +151,14 @@ export default function DraftLineupSetup({roomId,picks=[],pool=[],myTeamId,onLea
    <div className={s.columns}>
     <div className={s.side}><div className={s.sideHead}><h3>İlk 11</h3><span>{starters.length} oyuncu</span></div>
      <div className={s.players}>{starters.map((id,i)=>{const p=playerById.get(id);return <button key={id} type="button" disabled={locked} aria-pressed={selected?.id===id} className={s.player+(selected?.id===id?' '+s.picked:'')} onClick={()=>choose(id,'starter')}>
-      <span className={s.playerIndex}>{i+1}</span><span className={s.playerInfo}><strong>{p?.name||'Oyuncu'}</strong><small>{positions[p?.position]||'—'} · {xfp(p||{}).toFixed(2)} xFP{id===Number(captain)?' · KAPTAN':''}</small></span>
+      <span className={s.playerIndex}>{i+1}</span><span className={s.playerInfo}><strong>{p?.name||'Oyuncu'}</strong><small>{draftFixtureMeta(p)}</small><small>{xfp(p||{}).toFixed(2)} xFP{id===Number(captain)?' · KAPTAN':''}</small></span>
       <span className={s.onPitch}>{id===Number(captain)?'C':'11'}</span>
      </button>})}</div>
     </div>
     <div className={s.side}><div className={s.sideHead}><h3>Yedekler</h3><span>Öncelik sırası</span></div>
       <div className={s.players}>{bench.map((id,i)=>{const p=playerById.get(id);return <div key={id} className={s.benchRow}>
        <button type="button" disabled={locked} aria-pressed={selected?.id===id} className={s.player+(selected?.id===id?' '+s.picked:'')} onClick={()=>choose(id,'bench')}>
-        <span className={s.playerIndex}>{i===0?'KL':i}</span><span className={s.playerInfo}><strong>{p?.name||'Oyuncu'}</strong><small>{positions[p?.position]||'—'} · {xfp(p||{}).toFixed(2)} xFP</small></span>
+        <span className={s.playerIndex}>{i===0?'KL':i}</span><span className={s.playerInfo}><strong>{p?.name||'Oyuncu'}</strong><small>{draftFixtureMeta(p)}</small><small>{xfp(p||{}).toFixed(2)} xFP</small></span>
        </button>
        {i>0&&<div className={s.benchButtons}><button type="button" disabled={locked||i===1} title="Yukarı" onClick={()=>swapBench(i,-1)}>↑</button><button type="button" disabled={locked||i===3} title="Aşağı" onClick={()=>swapBench(i,1)}>↓</button></div>}
       </div>})}</div>
