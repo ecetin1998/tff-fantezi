@@ -3,29 +3,20 @@ import {useEffect,useMemo,useState,useCallback} from 'react'
 import {createClient} from '@/lib/supabase/client'
 import {FORMATION_MAP} from '@/lib/rules'
 import {MANAGER_CARDS} from '@/lib/managerCards'
+import {rankDraftFormations} from '@/lib/draftFormationOptions'
 import {draftFixtureMeta} from '@/lib/draftFixtureMeta'
 import s from './DraftLineupSetup.module.css'
 
 const offered=MANAGER_CARDS.filter(c=>['none','triple_captain','quad_captain','bench_boost'].includes(c.id))
 const xfp=p=>Number(p.xfp||0)
 function initialFormation(players){
- let best=null
- for(const [key,formation] of Object.entries(FORMATION_MAP)){
-  const starters=[]
-  for(const [position,count] of Object.entries({GK:1,...formation}))
-   starters.push(...players.filter(p=>p.position===position).sort((a,b)=>xfp(b)-xfp(a)).slice(0,count))
-  if(starters.length!==11)continue
-  const value=starters.reduce((a,p)=>a+xfp(p),0)
-  if(!best||value>best.value)best={key,value,starters}
+ const best=rankDraftFormations(players,FORMATION_MAP)[0]
+ return {
+  starters:best?.starters||[],bench:best?.bench||[],
+  captain:best?.captain||0,card:'none'
  }
- const starters=best?.starters||[]
- const ids=new Set(starters.map(p=>Number(p.id)))
- const bench=players.filter(p=>!ids.has(Number(p.id)))
- return {starters:starters.map(p=>Number(p.id)),bench:[
-  ...bench.filter(p=>p.position==='GK'),
-  ...bench.filter(p=>p.position!=='GK').sort((a,b)=>xfp(b)-xfp(a))
- ].map(p=>Number(p.id)),captain:Number([...starters].filter(p=>p.position!=='GK').sort((a,b)=>xfp(b)-xfp(a))[0]?.id||starters[0]?.id||0),card:'none'}
 }
+
 export default function DraftLineupSetup({roomId,picks=[],pool=[],myTeamId,onLeagueActive}){
  const client=useMemo(()=>createClient(),[])
  const [status,setStatus]=useState(null)
@@ -48,6 +39,7 @@ export default function DraftLineupSetup({roomId,picks=[],pool=[],myTeamId,onLea
   }))
  },[picks,pool,myTeamId])
  const playerById=useMemo(()=>new Map(roster.map(p=>[p.id,p])),[roster])
+ const formationPlans=useMemo(()=>rankDraftFormations(roster,FORMATION_MAP,card),[roster,card])
  const refresh=useCallback(async()=>{
   const {data,error:rpcError}=await client.rpc('scout_draft_lineup_state',{p_room_id:roomId})
   if(rpcError)throw rpcError
@@ -109,6 +101,11 @@ export default function DraftLineupSetup({roomId,picks=[],pool=[],myTeamId,onLea
   const next=[...bench];[next[idx],next[j]]=[next[j],next[idx]]
   setBench(next);setDirty(true);setSelected(null)
  }
+ const applyFormation=plan=>{
+  if(locked)return
+  setStarters([...plan.starters]);setBench([...plan.bench]);setCaptain(plan.captain)
+  setDirty(true);setSelected(null);setInfo('')
+ }
  const save=async()=>{
   if(!status?.gameweek||!valid||locked)return
   setLoading(true);setError('');setInfo('')
@@ -148,6 +145,23 @@ export default function DraftLineupSetup({roomId,picks=[],pool=[],myTeamId,onLea
    </div>}
    {status.league_active&&<p className={s.explainer}>Herkes hazır. Bu tek haftalık yarışmanın kadroları kilitlendi; canlı puan tablosu açılıyor.</p>}
    {selected&&<p className={s.help}>Değiştirmek için başka bir futbolcuya dokun. Mevki dağılımı kaydetme sırasında kontrol edilir.</p>}
+   <div className={s.formationSection}>
+    <div className={s.formationHeading}>
+     <div><h3>Diziliş Önerileri</h3><p>Yalnızca draftta seçtiğin 15 futbolcuyla hesaplanır. Puanlar kaptan ve seçtiğin menajer kartı dahil tahmini xFP'dir.</p></div>
+     {formationPlans.length>0&&<span>En yüksek {formationPlans[0].total.toLocaleString('tr-TR',{minimumFractionDigits:1,maximumFractionDigits:1})} xFP</span>}
+    </div>
+    <div className={s.formationGrid}>{formationPlans.map((plan,index)=>{
+     const chosen=formation.label===plan.key
+     return <button type="button" key={plan.key} disabled={locked}
+       aria-pressed={chosen} className={s.formationOption+(chosen?' '+s.formationSelected:'')}
+       onClick={()=>applyFormation(plan)}>
+      {index===0&&<span className={s.formationRecommended}>ÖNERİ</span>}
+      <strong>{plan.key}</strong>
+      <span className={s.formationPoints}>{plan.total.toLocaleString('tr-TR',{minimumFractionDigits:1,maximumFractionDigits:1})}<small> xFP</small></span>
+      <small>{chosen?'Seçili diziliş':'Kaptan dahil'}</small>
+     </button>
+    })}</div>
+   </div>
    <div className={s.columns}>
     <div className={s.side}><div className={s.sideHead}><h3>İlk 11</h3><span>{starters.length} oyuncu</span></div>
      <div className={s.players}>{starters.map((id,i)=>{const p=playerById.get(id);return <button key={id} type="button" disabled={locked} aria-pressed={selected?.id===id} className={s.player+(selected?.id===id?' '+s.picked:'')} onClick={()=>choose(id,'starter')}>

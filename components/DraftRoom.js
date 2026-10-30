@@ -1,6 +1,7 @@
 'use client'
 import {useCallback,useEffect,useMemo,useState} from 'react'
 import {createClient} from '@/lib/supabase/client'
+import {MAX_PLAYERS_PER_CLUB} from '@/lib/rules'
 import s from './DraftRoom.module.css'
 import DraftLiveStandings from './DraftLiveStandings'
 import DraftArchives from './DraftArchives'
@@ -17,7 +18,7 @@ const errors={
  ALREADY_JOINED:'Bu odaya zaten katıldın.',SEAT_TAKEN:'Bu takım dolu.',
  HOST_ONLY:'Bu işlemi sadece yönetici yapabilir.',WAIT_FOR_ALL_PLAYERS:'Tüm katılımcılar katılmadan draft başlayamaz.',
  DRAFT_NOT_ACTIVE:'Draft aktif değil.',NOT_YOUR_TURN:'Henüz senin sıran değil.',TURN_EXPIRED:'Seçim süresi doldu, otomatik seçim yapılıyor.',INVALID_TIMER_SETTINGS:'Süre ayarları geçersiz.',
- INVALID_PLAYER:'Bu oyuncu seçilemiyor.',POSITION_FULL:'Bu mevkide kontenjan dolu.',
+ INVALID_PLAYER:'Bu oyuncu seçilemiyor.',POSITION_FULL:'Bu mevkide kontenjan dolu.',CLUB_LIMIT_REACHED:'Aynı kulüpten en fazla 3 oyuncu seçebilirsin.',
  PLAYER_ALREADY_PICKED:'Oyuncu zaten seçilmiş.',NOTHING_TO_UNDO:'Geri alınacak seçim yok.', AUCTION_UNDO_UNSUPPORTED:'Açık artırmada geçmiş satışlar geri alınamaz.',AUCTION_NOT_ACTIVE:'Açık artırma aktif değil.', AUCTION_EXPIRED:'Oyuncunun teklif süresi doldu.',ALREADY_LEADING:'Zaten en yüksek teklif sende.',BID_TOO_LOW:'Daha yüksek teklif gir.',BID_EXCEEDS_SAFE_BUDGET:'Bütçe sınırı: kalan kadro yerlerine en az 1 kredi ayırmalısın.'
 }
 const errorText=e=>{const str=String(e?.message||e);const key=Object.keys(errors).find(k=>str.includes(k));return key?errors[key]:str.slice(0,160)}
@@ -229,8 +230,12 @@ export default function DraftRoom({initialRoom='',initialInvite=''}) {
  const lot=room?.lot?.status==='open'?room.lot:null
  const secondsLeft=lot?Math.max(0,Math.ceil((Date.parse(lot.ends_at)-Date.parse(lot.server_time)-(clock-serverSnapshot))/1000)):0
  const safeMax=own?100-Number(own.spent||0)-(14-own.selections.length):0
+ const clubCount=(team,clubName)=>team?.selections.filter(p=>p.team===clubName).length||0
+ const canAddClub=(team,player)=>!team||!player?.team||clubCount(team,player.team)<MAX_PLAYERS_PER_CLUB
+ const lotPlayer=lookup.get(Number(lot?.player_id))
  const canBid=Boolean(isAuction&&lot&&room?.status==='drafting'&&secondsLeft>0&&own&&
  own.count[lot.position]<CAPS[lot.position]&&own.selections.length<15&&
+ canAddClub(own,lotPlayer)&&
  lot.leader_team_id!==own.id&&Number(bidAmount)>Number(lot.current_bid||0)&&Number(bidAmount)<=safeMax)
 
  const versionTwo=Number(room?.rules_version||1)>=2
@@ -264,7 +269,7 @@ export default function DraftRoom({initialRoom='',initialInvite=''}) {
   </>:<label className={s.timerSlider}><span>Her seçim için süre <strong>{timerSettings.classic} sn</strong></span><input type="range" min="15" max="120" step="15" value={timerSettings.classic} onChange={e=>setTimerSettings(v=>({...v,classic:Number(e.target.value)}))}/><small>15–120 saniye · Zaman aşımında otomatik xFP seçimi</small></label>}
  </div>
  const available=playerPool.filter(p=>!pickedIds.has(Number(p.id)))
- const fits=p=>canComplete?Boolean(own?.count[p.position]<CAPS[p.position]):!current||current.count[p.position]<CAPS[p.position]
+ const fits=p=>canComplete?Boolean(own?.count[p.position]<CAPS[p.position]&&canAddClub(own,p)):!current||(current.count[p.position]<CAPS[p.position]&&canAddClub(current,p))
  const clubs=[...new Set(playerPool.map(p=>p.team))].sort((a,b)=>a.localeCompare(b,'tr'))
  const filtered=available.filter(fits).filter(p=>pos==='ALL'||p.position===pos)
    .filter(p=>club==='ALL'||p.team===club)
@@ -364,6 +369,7 @@ export default function DraftRoom({initialRoom='',initialInvite=''}) {
      })}>↗ Sonuçları kopyala</button>
     </div>}
    <div className={s.heading}><h2>{room.team_count} takımın kadrosu</h2><span>{picked.length}/{totalPicks}</span></div>
+   <p className={s.clubRule}>Her takım en fazla {MAX_PLAYERS_PER_CLUB} futbolcuyu aynı kulüpten seçebilir. Mevki sınırlarıyla birlikte kontrol edilir.</p>
    <div className={s.progress}><i style={{width:(picked.length/totalPicks*100)+'%'}}/></div>
    <div className={s.board}>{teams.map(t=><div key={t.id} className={s.card+(current?.id===t.id?' '+s.active:'')}>
     <div className={s.teamTitle}><div><small>#{t.draft_order}{t.mine?' · SEN':t.is_bot?' · 🤖 BOT':''}</small><h3>{t.team_name}</h3></div><strong>{t.selections.length}/15</strong></div>
@@ -390,6 +396,7 @@ export default function DraftRoom({initialRoom='',initialInvite=''}) {
       <div className={s.auctionOffer}>
        <p>Senin kalan bütçen: <b>{own?.budget??'—'}/100</b></p>
        <p>Bu oyuncu için maksimum güvenli teklif: <b>{safeMax} kredi</b></p>
+        {lotPlayer&&!canAddClub(own,lotPlayer)&&<p className={s.clubLimitNotice}>Bu kulüpten zaten 3 oyuncun var. Bu oyuncuya teklif veremezsin.</p>}
        <label>Teklifin (kredi)<input type="number" min={Number(lot.current_bid||0)+1} max={safeMax}
         value={bidAmount} onChange={e=>setBidAmount(e.target.value)}/></label>
        <div className={s.bidShortcuts}>{[1,2,5].map(increase=><button key={increase} className={s.secondary}
