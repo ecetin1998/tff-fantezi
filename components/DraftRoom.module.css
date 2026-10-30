@@ -196,3 +196,9 @@
 /* Club-count feedback for drafts: every manager is capped at 3 per club. */
 .clubRule{font-size:11px!important;line-height:1.5!important;color:#0d8071!important;background:#e9f7f2;border:1px solid #cee8dc;border-radius:10px;padding:9px 11px;margin:0!important}
 .clubLimitNotice{font-size:11px!important;font-weight:750;color:#a44a35!important;background:#fff1e8;border:1px solid #f3d1be;border-radius:9px;padding:9px 10px;margin:0!important}
+
+/* Pick numbers are revealed only after the server draws the draft order. */
+.drawNotice{margin:2px 0 12px!important;padding:12px 14px;border:1px solid #bedfd7;border-radius:12px;background:#f0faf7;color:#267061;font-size:12px;line-height:1.6}
+.drawResult{display:flex;align-items:center;gap:9px 16px;flex-wrap:wrap;padding:12px 15px;border:1px solid #c7e8de;border-radius:13px;background:#effaf5;color:#255b55;font-size:12px;line-height:1.6}
+.drawResult strong{color:#087f74;white-space:nowrap}
+.drawResult span{overflow-wrap:anywhere}
