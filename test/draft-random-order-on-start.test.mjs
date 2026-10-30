@@ -41,7 +41,7 @@ test('shuffle is compatible with deferred unique order index and server-side tur
 })
 
 test('lobby never shows temporary join-order positions as the final draft lottery',()=>{
- assert.match(ui,/Takım kaydı · \{t\.team_index\}/)
+ assert.match(ui,/Katılım yeri \{t\.team_index\}/)
  assert.match(ui,/Kura sonucu/)
  assert.match(ui,/room\.status==='drafting'&&<div className=\{s\.drawResult\}>/)
  assert.match(ui,/teams\.map\(t=>'#'\+t\.draft_order\+' '\+t\.team_name\)/)
