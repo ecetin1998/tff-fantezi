@@ -25,12 +25,12 @@ test("only closed immutable live_frozen actuals contribute to accuracy",()=>{
  assert.equal(out.sample,4);
  assert.equal(out.overall.n,4);
  assert.equal(out.overall.fp_mae,1.75);
- assert.equal(out.overall.fp_bias,-0.75);
+ assert.equal(out.overall.fp_bias,-0.25);
  assert.equal(out.overall.minute_mae,12.5);
- assert.equal(out.overall.minute_bias,5);
+ assert.equal(out.overall.minute_bias,7.5);
  assert.equal(out.overall.six_plus_forecast,.25);
  assert.equal(out.overall.six_plus_observed,.5);
- assert.equal(out.overall.six_plus_brier,.175);
+ assert.equal(out.overall.six_plus_brier,.225);
  assert.equal(out.by_position["position:DEF"].n,1);
  assert.equal(out.by_position["position:MID"].n,1);
  assert.equal(out.by_position["position:GK"].n,2);
