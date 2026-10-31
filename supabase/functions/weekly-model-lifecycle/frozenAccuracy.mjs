@@ -80,7 +80,7 @@ export function frozenAccuracyReport({weeks=[],players=[],positions=[],weeklyPos
   const groups = new Map(), total=make(), filtered=[];
   const cohorts=new Map();
   const counts={
-    imputed_zero_without_source:0,inferred_zero_from_events:0,
+    imputed_zero_without_source:0,inferred_zero_from_events:0,mismatched_actual_source:0,
     independently_reconstructed_played:0,confirmed_source_zero:0,
     true_zero_zero:0,low_attention_zero_zero:0,
     ex_ante_predicted_active:0,actually_played:0,missed_surprise_starter:0,
@@ -105,7 +105,9 @@ export function frozenAccuracyReport({weeks=[],players=[],positions=[],weeklyPos
     const actual=finite(row.actual_minutes)?num(row.actual_minutes):null;
     const raw=evidence.get(`${gw}|${id}`)||[];
     const hasFinal=raw.length>0&&raw.every(e=>e.is_final);
-    const matched=hasFinal&&raw.every(e=>e.minutes!==null&&e.points!==null);
+    const matched=hasFinal&&raw.every(e=>e.minutes!==null&&e.points!==null)&&
+      actual!==null&&Math.abs(raw.reduce((sum,e)=>sum+e.minutes,0)-actual)<.05&&
+      Math.abs(raw.reduce((sum,e)=>sum+e.points,0)-num(row.actual_points))<.05;
     const verifiedZero=matched&&raw.every(e=>
       e.source_kind==="fresh_closed_actual"&&e.minutes===0&&e.points===0);
     const sourcePlayed=matched&&raw.some(e=>e.minutes>0);
@@ -113,7 +115,8 @@ export function frozenAccuracyReport({weeks=[],players=[],positions=[],weeklyPos
     // inference step. Do not use its silence as evidence that the coach
     // actually benched the player.
     const inferredZero=matched&&actual===0&&!verifiedZero;
-    const noSource=!matched;
+    const noSource=raw.length===0;
+    if(raw.length>0&&!matched)counts.mismatched_actual_source++;
     const trusted=matched&&(sourcePlayed||verifiedZero);
     const predictedActive=pred!==null&&pred>=30;
     const played=actual!==null&&actual>0;
