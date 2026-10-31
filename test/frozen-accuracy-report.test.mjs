@@ -140,3 +140,17 @@ test("only before-kickoff expected exposure defines training objective; realized
  assert.equal(result.learning_cohorts.actionable.fp_mae,5);
  assert.equal(result.learning_cohorts.surprise_starters.n,1);
 });
+
+test("source points or minutes contradicting backtest rows cannot be used to train",()=>{
+ const candidate=row(7,12,4,6,80,90,.35);
+ const report=frozenAccuracyReport({
+   weeks:[{...weeks[0],prediction_count:1,actual_count:1}],
+   fixtures,players:[candidate],
+   weeklyPositions:[{gameweek:7,player_id:12,position:"DEF",
+     source_kind:"fresh_closed_actual",minutes:0,points:0,is_final:true}]
+ });
+ assert.equal(report.learning_cohorts.ex_ante,undefined);
+ assert.equal(report.learning_cohorts.ex_ante_all.n,1);
+ assert.equal(report.evidence_quality.mismatched_actual_source,1);
+ assert.equal(report.evidence_quality.excluded_uncertain_active,1);
+});
