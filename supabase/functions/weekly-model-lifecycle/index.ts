@@ -1043,16 +1043,18 @@ Deno.serve(async(req:Request)=>{
         }
         throw new Error("FROZEN_BACKTEST_PAGINATION_LIMIT")
       }
-      const [players,positions,weeklyPositions]=await Promise.all([
+      const [players,positions,weeklyPositions,fixtures]=await Promise.all([
         getAll("scout_backtest_players",
           "gameweek,player_id,prediction_mode,predicted_xfp,actual_points,predicted_minutes,actual_minutes,six_plus_probability",
           q=>q.in("gameweek",weekIds).eq("prediction_mode","live_frozen")
             .not("actual_points","is",null).order("gameweek").order("player_id")),
         getAll("scout_players","id,position",q=>q.order("id")),
         getAll("scout_player_weekly_points","gameweek,player_id,position",
-          q=>q.in("gameweek",weekIds).eq("is_final",true).order("gameweek").order("player_id"))
+          q=>q.in("gameweek",weekIds).eq("is_final",true).order("gameweek").order("player_id")),
+        getAll("scout_match_history","gameweek,kickoff_at",
+          q=>q.eq("season","2026-27").in("gameweek",weekIds).order("gameweek").order("kickoff_at"))
       ])
-      const report=frozenAccuracyReport({weeks,players,positions,weeklyPositions})
+      const report=frozenAccuracyReport({weeks,players,positions,weeklyPositions,fixtures})
       return Response.json(report)
     }
     if(action==="audit_run"){
