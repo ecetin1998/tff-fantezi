@@ -60,7 +60,37 @@ export function frozenAccuracyReport({weeks=[],players=[],positions=[],weeklyPos
   const allowed = new Set(eligible.map(w=>Number(w.gameweek)));
   const fallback = new Map(positions.map(p=>[Number(p.id),String(p.position||"UNKNOWN")]));
   const historic = new Map(weeklyPositions.map(p=>[`${Number(p.gameweek)}|${Number(p.player_id)}`,String(p.position||"UNKNOWN")]));
+  // The week-close RPC historically fills absent player-result rows with 0/0.
+  // Never silently treat those imputed zeroes as verified negative examples.
+  // Independently reconstructed event rows are useful when minutes > 0,
+  // but their zero-minute rows DO NOT prove a bench / non-participation.
+  const evidence = new Map();
+  for(const row of weeklyPositions){
+    const key=`${Number(row.gameweek)}|${Number(row.player_id)}`;
+    const prev=evidence.get(key);
+    const item={
+      source_kind:String(row.source_kind||"unknown"),
+      is_final:row.is_final===true,
+      minutes:finite(row.minutes)?num(row.minutes):null,
+      points:finite(row.points)?num(row.points):null
+    };
+    if(!prev)evidence.set(key,[item]);
+    else prev.push(item);
+  }
   const groups = new Map(), total=make(), filtered=[];
+  const cohorts=new Map();
+  const counts={
+    imputed_zero_without_source:0,inferred_zero_from_events:0,
+    independently_reconstructed_played:0,confirmed_source_zero:0,
+    true_zero_zero:0,low_attention_zero_zero:0,
+    ex_ante_predicted_active:0,actually_played:0,missed_surprise_starter:0,
+    predicted_active_absent:0,confirmed_predicted_active_absent:0,
+    actionable_all:0,actionable_eligible:0,excluded_uncertain_active:0
+  };
+  const cohort=(name,row)=>{
+    if(!cohorts.has(name))cohorts.set(name,make());
+    add(cohorts.get(name),row);
+  };
   function track(key,row) {
     if(!groups.has(key))groups.set(key,make());
     add(groups.get(key),row);
@@ -71,7 +101,69 @@ export function frozenAccuracyReport({weeks=[],players=[],positions=[],weeklyPos
        !finite(row.predicted_xfp) || !finite(row.actual_points))continue;
     const position=historic.get(`${gw}|${id}`)||fallback.get(id)||"UNKNOWN";
     const minBucket=finite(row.predicted_minutes)?minuteBucket(num(row.predicted_minutes)):"UNKNOWN";
+    const pred=finite(row.predicted_minutes)?num(row.predicted_minutes):null;
+    const actual=finite(row.actual_minutes)?num(row.actual_minutes):null;
+    const raw=evidence.get(`${gw}|${id}`)||[];
+    const hasFinal=raw.length>0&&raw.every(e=>e.is_final);
+    const matched=hasFinal&&raw.every(e=>e.minutes!==null&&e.points!==null);
+    const verifiedZero=matched&&raw.every(e=>
+      e.source_kind==="fresh_closed_actual"&&e.minutes===0&&e.points===0);
+    const sourcePlayed=matched&&raw.some(e=>e.minutes>0);
+    // An independently-calculated 0-minute row may have been filled in by an
+    // inference step. Do not use its silence as evidence that the coach
+    // actually benched the player.
+    const inferredZero=matched&&actual===0&&!verifiedZero;
+    const noSource=!matched;
+    const trusted=matched&&(sourcePlayed||verifiedZero);
+    const predictedActive=pred!==null&&pred>=30;
+    const played=actual!==null&&actual>0;
+    const actionable=predictedActive||played;
+    if(actual===0&&num(row.actual_points)===0){
+      counts.true_zero_zero++;
+      if(pred!==null&&pred<15)counts.low_attention_zero_zero++;
+      if(noSource)counts.imputed_zero_without_source++;
+      else if(inferredZero)counts.inferred_zero_from_events++;
+      else if(verifiedZero)counts.confirmed_source_zero++;
+    }
+    if(sourcePlayed&&raw.some(e=>e.source_kind==="independently_calculated_source_events"))
+      counts.independently_reconstructed_played++;
+    if(predictedActive)counts.ex_ante_predicted_active++;
+    if(played)counts.actually_played++;
+    if(pred!==null&&pred<30&&actual!==null&&actual>=60)counts.missed_surprise_starter++;
+    if(predictedActive&&actual===0){
+      counts.predicted_active_absent++;
+      if(verifiedZero)counts.confirmed_predicted_active_absent++;
+    }
+    if(actionable){
+      counts.actionable_all++;
+      if(trusted)counts.actionable_eligible++;
+      else counts.excluded_uncertain_active++;
+    }
     filtered.push(row);add(total,row);
+    // Keep the old all-player metric as a COMPARISON only. It is NOT the
+    // learning objective: many easy 0/0 rows can dominate it.
+    cohort("legacy_all",row);
+    if(actionable)cohort("actionable_including_uncertain",row);
+    if(predictedActive)cohort("ex_ante_all",row);
+    if(trusted){
+      cohort("verified_source",row);
+      if(actionable){
+        cohort("actionable",row);
+        track(`learning:week:${gw}`,row);
+        track(`learning:position:${position}`,row);
+        track(`learning:week:${gw}:position:${position}`,row);
+      }
+      if(predictedActive)cohort("ex_ante",row);
+      if(played)cohort("played",row);
+      if(played&&predictedActive)cohort("correctly_expected_to_play",row);
+      if(played&&pred!==null&&pred<30)cohort("surprise_played",row);
+      if(actual!==null&&actual>=60&&pred!==null&&pred<30)
+        cohort("surprise_starters",row);
+      if(predictedActive&&actual===0&&verifiedZero)
+        cohort("confirmed_unexpected_absences",row);
+    }
+    if(pred!==null&&pred<15&&actual===0&&num(row.actual_points)===0)
+      cohort("trivial_zero_zero_monitor_only",row);
     track(`week:${gw}`,row);
     track(`position:${position}`,row);
     track(`week:${gw}:position:${position}`,row);
@@ -89,6 +181,25 @@ export function frozenAccuracyReport({weeks=[],players=[],positions=[],weeklyPos
     sample:filtered.length,overall:finish(total),
     per_week:section("week:"),by_position:section("position:"),
     by_minute_bucket:section("minutes:"),
+    // PRIMARY learning score uses ONLY pre-match player-selection criteria.
+    // Avoid evaluating only players who happened to play: that would leak
+    // realized outcomes into who qualifies for the model-selection target.
+    primary_learning_cohort:"ex_ante",
+    primary_learning_threshold_minutes:30,
+    learning_by_week:section("learning:week:"),
+    learning_by_position:section("learning:position:"),
+    learning_cohorts:Object.fromEntries([...cohorts.entries()].map(([k,v])=>[k,finish(v)])),
+    evidence_quality:counts,
+    learning_guardrails:{
+      selection:"pre_kickoff_expected_minutes_ge_30",
+      objective:"ex_ante.fp_mae, ex_ante.six_plus_brier, surprise_starters_count",
+      active_union_is_diagnostic:true,
+      historical_0_0_is_not_a_training_success:true,
+      zero_without_source_is_unverified:true,
+      reconstructed_zero_minutes_is_unverified:true,
+      minimum_independent_holdout_weeks:2,
+      can_change_weights_automatically:false
+    },
     // Explicitly non-promoting: model selection must be validated against a
     // genuinely later, untouched week; aggregate in-sample accuracy is NOT proof.
     auto_tuning_permitted:false,no_writes:true
