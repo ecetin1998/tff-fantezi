@@ -1,0 +1,61 @@
+name: Frozen forecast accuracy (read-only)
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/frozen-forecast-accuracy.yml"
+  workflow_dispatch:
+  schedule:
+    # 11:45 Turkish time every Monday; only CLOSED historical weeks are read.
+    - cron: '45 8 * * 1'
+permissions:
+  contents: read
+  id-token: write
+concurrency:
+  group: frozen-forecast-accuracy
+  cancel-in-progress: false
+jobs:
+  accuracy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      FUNCTIONS_URL: https://nnoagjayvrwyjtizhnfz.supabase.co/functions/v1
+      OIDC_AUDIENCE: tff-fantezi-scout
+    steps:
+      - name: Mint trusted GitHub identity
+        id: oidc
+        shell: bash
+        run: |
+          set -euo pipefail
+          response="$(curl --fail --show-error --silent -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=${OIDC_AUDIENCE}")"
+          token="$(printf '%s' "$response" | jq -er '.value')"
+          echo "::add-mask::$token"
+          echo "token=$token" >> "$GITHUB_OUTPUT"
+      - name: Evaluate closed pre-kickoff predictions only
+        env:
+          OIDC_TOKEN: ${{ steps.oidc.outputs.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail-with-body --silent --show-error --max-time 120 \
+            -H "Authorization: Bearer $OIDC_TOKEN" \
+            -H "Content-Type: application/json" \
+            --data '{"action":"diagnose_backtest"}' \
+            "$FUNCTIONS_URL/weekly-model-lifecycle" > frozen-accuracy.json
+          jq -e '.ok == true and .no_writes == true and .auto_tuning_permitted == false and .source == "immutable_pre_kickoff_live_frozen"' frozen-accuracy.json
+          {
+            echo "### Immutable pre-kickoff model accuracy"
+            jq -r '"Closed weeks: " + (.closed_weeks | map(tostring) | join(", "))' frozen-accuracy.json
+            echo ""
+            echo "| Metric | Value |"
+            echo "|---|---:|"
+            jq -r '"| Player forecasts | " + (.sample|tostring) + " |", "| Fantasy point MAE | " + (.overall.fp_mae|tostring) + " |", "| Minute MAE | " + (.overall.minute_mae|tostring) + " |", "| 6+ Brier | " + (.overall.six_plus_brier|tostring) + " |"' frozen-accuracy.json
+            echo ""
+            echo "Data: closed, original live_frozen snapshots ONLY. No weights, scores, user squads or production predictions changed."
+            echo "No automatic tuning; candidate changes require forward holdout."
+          } >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: frozen-backtest-accuracy
+          path: frozen-accuracy.json
+          retention-days: 60
