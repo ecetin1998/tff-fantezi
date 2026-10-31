@@ -73,3 +73,70 @@ test("a snapshot after first kickoff is rejected even when mislabeled live_froze
  assert.equal(out.sample,1);
  assert.deepEqual(out.excluded_invalid_snapshots,[7]);
 });
+
+test("learning excludes easy 0/0 results and distinguishes source-confirmed from invented zero",()=>{
+ const forecasts=[
+  row(7,1,4,6,80,90,.3),          // true projected starter
+  row(7,2,3,0,75,0,.2),           // confirmed DNP (recorded final)
+  row(7,3,1,9,10,70,.05),         // missed surprise 60+
+  row(7,4,.1,0,5,0,.01),         // inferred zero from reconstructed events
+  row(7,5,0,0,5,0,.01),          // close-backtest filled zero with NO result record
+  row(7,6,2,0,50,0,.1),          // high-impact but inferred DNP => never trusted
+  row(7,7,.1,1,5,10,.01),        // surprising cameo
+  row(7,8,2,1,40,90,.2)          // correctly predicted player
+ ];
+ const raw=(player_id,source_kind,minutes,points)=>({
+  gameweek:7,player_id,source_kind,minutes,points,is_final:true,position:"DEF"
+ });
+ const report=frozenAccuracyReport({
+   weeks:[{...weeks[0],prediction_count:8,actual_count:8}],
+   fixtures,players:forecasts,
+   weeklyPositions:[
+     raw(1,"fresh_closed_actual",90,6),
+     raw(2,"fresh_closed_actual",0,0),
+     raw(3,"independently_calculated_source_events",70,9),
+     raw(4,"independently_calculated_source_events",0,0),
+     raw(6,"independently_calculated_source_events",0,0),
+     raw(7,"independently_calculated_source_events",10,1),
+     raw(8,"independently_calculated_source_events",90,1)
+   ]
+ });
+ assert.equal(report.sample,8);
+ assert.equal(report.learning_cohorts.legacy_all.n,8);
+ assert.equal(report.learning_cohorts.ex_ante.n,3);
+ assert.equal(report.learning_cohorts.ex_ante.fp_mae,2);
+ assert.equal(report.learning_cohorts.actionable.n,5);
+ assert.equal(report.learning_cohorts.ex_ante_all.n,4);
+ assert.equal(report.learning_cohorts.played.n,4);
+ assert.equal(report.learning_cohorts.surprise_starters.n,1);
+ assert.equal(report.learning_cohorts.confirmed_unexpected_absences.n,1);
+ assert.equal(report.learning_cohorts.trivial_zero_zero_monitor_only.n,2);
+ assert.equal(report.evidence_quality.imputed_zero_without_source,1);
+ assert.equal(report.evidence_quality.inferred_zero_from_events,2);
+ assert.equal(report.evidence_quality.confirmed_source_zero,1);
+ assert.equal(report.evidence_quality.predicted_active_absent,2);
+ assert.equal(report.evidence_quality.confirmed_predicted_active_absent,1);
+ assert.equal(report.evidence_quality.actionable_all,6);
+ assert.equal(report.evidence_quality.actionable_eligible,5);
+ assert.equal(report.evidence_quality.excluded_uncertain_active,1);
+ assert.equal(report.learning_by_position["learning:position:DEF"].n,5);
+ assert.equal(report.primary_learning_cohort,"ex_ante");
+ assert.equal(report.learning_guardrails.can_change_weights_automatically,false);
+});
+
+test("only before-kickoff expected exposure defines training objective; realized play is diagnostic",()=>{
+ const examples=[row(7,1,1,8,5,90,.01),row(7,2,3,0,70,0,.3)];
+ const actual=[
+  {gameweek:7,player_id:1,position:"DEF",source_kind:"fresh_closed_actual",minutes:90,points:8,is_final:true},
+  {gameweek:7,player_id:2,position:"DEF",source_kind:"fresh_closed_actual",minutes:0,points:0,is_final:true}
+ ];
+ const result=frozenAccuracyReport({
+  weeks:[{...weeks[0],prediction_count:2,actual_count:2}],players:examples,
+  fixtures,weeklyPositions:actual
+ });
+ assert.equal(result.learning_cohorts.ex_ante.n,1);
+ assert.equal(result.learning_cohorts.ex_ante.fp_mae,3);
+ assert.equal(result.learning_cohorts.actionable.n,2);
+ assert.equal(result.learning_cohorts.actionable.fp_mae,5);
+ assert.equal(result.learning_cohorts.surprise_starters.n,1);
+});
