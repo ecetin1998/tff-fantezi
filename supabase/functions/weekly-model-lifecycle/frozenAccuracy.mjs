@@ -43,11 +43,20 @@ function finish(group) {
   };
 }
 
-export function frozenAccuracyReport({weeks=[],players=[],positions=[],weeklyPositions=[]}={}) {
+export function frozenAccuracyReport({weeks=[],players=[],positions=[],weeklyPositions=[],fixtures=[]}={}) {
+  const earliest=new Map();
+  for(const fixture of fixtures){
+    const week=Number(fixture.gameweek),kickoff=new Date(fixture.kickoff_at||"").getTime();
+    if(!Number.isInteger(week)||!Number.isFinite(kickoff))continue;
+    earliest.set(week,Math.min(earliest.get(week)??Infinity,kickoff));
+  }
   const eligible = weeks.filter(w => w.prediction_mode==="live_frozen" &&
     w.status==="closed" && Number.isInteger(Number(w.gameweek)) &&
     Boolean(w.snapshot_at) &&
-    Number(w.prediction_count)>0 && Number(w.actual_count)>0);
+    Number(w.prediction_count)>0 && Number(w.actual_count)>0 &&
+    earliest.has(Number(w.gameweek)) &&
+    Number.isFinite(new Date(w.snapshot_at).getTime()) &&
+    new Date(w.snapshot_at).getTime()<earliest.get(Number(w.gameweek)));
   const allowed = new Set(eligible.map(w=>Number(w.gameweek)));
   const fallback = new Map(positions.map(p=>[Number(p.id),String(p.position||"UNKNOWN")]));
   const historic = new Map(weeklyPositions.map(p=>[`${Number(p.gameweek)}|${Number(p.player_id)}`,String(p.position||"UNKNOWN")]));
@@ -76,6 +85,7 @@ export function frozenAccuracyReport({weeks=[],players=[],positions=[],weeklyPos
   return {
     ok:true,source:"immutable_pre_kickoff_live_frozen",
     closed_weeks:weeksOut,excluded_open_weeks:weeks.filter(w=>w.status!=="closed").map(w=>Number(w.gameweek)),
+    excluded_invalid_snapshots:weeks.filter(w=>w.status==="closed"&&w.prediction_mode==="live_frozen"&&!allowed.has(Number(w.gameweek))).map(w=>Number(w.gameweek)),
     sample:filtered.length,overall:finish(total),
     per_week:section("week:"),by_position:section("position:"),
     by_minute_bucket:section("minutes:"),
