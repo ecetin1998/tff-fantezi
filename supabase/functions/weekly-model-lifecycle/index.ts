@@ -12,6 +12,7 @@ import {currentTacticalRole} from "./recentTacticalRole.mjs"
 import {applyTeamMatchForm,recalibrateAnchoredMatchForm,auditMatchAllocation,auditRealizedModel} from "./teamRecentForm.mjs"
 import {credibleAttackWeights} from "./defenderOpportunity.mjs"
 import {frozenAccuracyReport} from "./frozenAccuracy.mjs"
+import {sourceCoverageReport} from "./sourceCoverage.mjs"
 import {FORWARD_LEARNING_V1,verifyForwardHistory,parseForwardExperiment,forwardFeedbackRate} from "./activeForwardFeedback.mjs"
 
 const AUDIENCE="tff-fantezi-scout"
@@ -1080,6 +1081,52 @@ Deno.serve(async(req:Request)=>{
     const current=currentQ.data
     const status=await sourceStatus(sb,current)
 
+    if(action==="diagnose_sources"){
+      // Read-only source health for the current prediction week, sourced only
+      // from historical data timestamped BEFORE its earliest kickoff.
+      const gw=Number(current.gameweek)
+      const kickoff=await sb.from("scout_match_history")
+        .select("kickoff_at").eq("season","2026-27").eq("gameweek",gw)
+        .order("kickoff_at",{ascending:true}).limit(1).maybeSingle()
+      if(kickoff.error)throw kickoff.error
+      if(!kickoff.data?.kickoff_at)
+        return Response.json({ok:false,error:"CURRENT_FIRST_KICKOFF_NOT_FOUND",no_writes:true},{status:409})
+      const page=async(table:string,columns:string,modify:(q:any)=>any)=>{
+        const result:any[]=[]
+        for(let offset=0;offset<10000;offset+=500){
+          const q=modify(sb.from(table).select(columns)).range(offset,offset+499)
+          const response=await q
+          if(response.error)throw response.error
+          const rows=response.data||[]
+          result.push(...rows)
+          if(rows.length<500)return result
+        }
+        throw new Error("SOURCE_COVERAGE_PAGINATION_LIMIT_"+table)
+      }
+      const base=(q:any)=>q.gte("gameweek",Math.max(1,gw-3)).lt("gameweek",gw)
+      const [players,weekly,advanced,verified,tactical,stats]=await Promise.all([
+        page("scout_players","id,position,active",q=>q.eq("active",true).order("id")),
+        page("scout_player_weekly_points",
+          "gameweek,player_id,match_id,is_final,minutes,points,source_kind,source_updated_at",
+          q=>base(q).order("gameweek").order("player_id").order("match_id")),
+        page("scout_player_advanced_weekly",
+          "gameweek,player_id,shots,key_passes,source_updated_at",
+          q=>base(q.eq("season","2026-27")).order("gameweek").order("player_id")),
+        page("scout_verified_weekly_attack",
+          "gameweek,player_id,shots,key_passes,observed_at",
+          q=>base(q.eq("season","2026-27")).order("gameweek").order("player_id")),
+        page("scout_player_tactical_role_observations",
+          "gameweek,player_id,verified,started,role,minutes,observed_at",
+          q=>base(q.eq("season","2026-27")).order("gameweek").order("player_id")),
+        page("scout_player_season_stats",
+          "player_id,through_gameweek,advanced_through_gameweek,minutes",
+          q=>q.eq("season","2026-27").eq("through_gameweek",gw-1).order("player_id"))
+      ])
+      return Response.json(sourceCoverageReport({
+        gameweek:gw,cutoffAt:kickoff.data.kickoff_at,
+        players,weekly,advanced,verified,tactical,stats
+      }))
+    }
     if(action==="diagnose_backtest"){
       // Protected, read-only, no historical rewriting and no automatic tuning.
       // Include only completed live_frozen PRE-KICKOFF snapshots, never the
