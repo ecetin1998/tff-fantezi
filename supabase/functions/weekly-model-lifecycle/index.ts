@@ -1049,7 +1049,7 @@ Deno.serve(async(req:Request)=>{
           q=>q.in("gameweek",weekIds).eq("prediction_mode","live_frozen")
             .not("actual_points","is",null).order("gameweek").order("player_id")),
         getAll("scout_players","id,position",q=>q.order("id")),
-        getAll("scout_player_weekly_points","gameweek,player_id,position",
+        getAll("scout_player_weekly_points","gameweek,player_id,position,minutes,points,source_kind,is_final",
           q=>q.in("gameweek",weekIds).eq("is_final",true).order("gameweek").order("player_id")),
         getAll("scout_match_history","gameweek,kickoff_at",
           q=>q.eq("season","2026-27").in("gameweek",weekIds).order("gameweek").order("kickoff_at"))

@@ -42,17 +42,34 @@ jobs:
             -H "Content-Type: application/json" \
             --data '{"action":"diagnose_backtest"}' \
             "$FUNCTIONS_URL/weekly-model-lifecycle" > frozen-accuracy.json
-          jq -e '.ok == true and .no_writes == true and .auto_tuning_permitted == false and .source == "immutable_pre_kickoff_live_frozen"' frozen-accuracy.json
+          jq -e '.ok == true and .no_writes == true and .auto_tuning_permitted == false and .source == "immutable_pre_kickoff_live_frozen" and .primary_learning_cohort == "ex_ante" and (.learning_cohorts.ex_ante.n > 0) and .learning_guardrails.zero_without_source_is_unverified == true and .learning_guardrails.reconstructed_zero_minutes_is_unverified == true' frozen-accuracy.json
           {
             echo "### Immutable pre-kickoff model accuracy"
             jq -r '"Closed weeks: " + (.closed_weeks | map(tostring) | join(", "))' frozen-accuracy.json
             echo ""
             echo "| Metric | Value |"
             echo "|---|---:|"
-            jq -r '"| Player forecasts | " + (.sample|tostring) + " |", "| Fantasy point MAE | " + (.overall.fp_mae|tostring) + " |", "| Minute MAE | " + (.overall.minute_mae|tostring) + " |", "| 6+ Brier | " + (.overall.six_plus_brier|tostring) + " |"' frozen-accuracy.json
+            jq -r '
+              "| Expected active (pre-match 30+ min) | " + (.learning_cohorts.ex_ante.n|tostring) + " |",
+              "| **PRIMARY** ex-ante FP MAE | **" + (.learning_cohorts.ex_ante.fp_mae|tostring) + "** |",
+              "| PRIMARY ex-ante minutes MAE | " + (.learning_cohorts.ex_ante.minute_mae|tostring) + " |",
+              "| PRIMARY ex-ante 6+ Brier | " + (.learning_cohorts.ex_ante.six_plus_brier|tostring) + " |",
+              "| Played or expected 30+ minutes | " + (.learning_cohorts.actionable.n|tostring) + " |",
+              "| Active union FP MAE (diagnostic) | " + (.learning_cohorts.actionable.fp_mae|tostring) + " |",
+              "| Missed 60+ minute starters | " + (.learning_cohorts.surprise_starters.n // 0|tostring) + " |",
+              "| Trivial predicted <15 min, actual 0/0 | " + (.evidence_quality.low_attention_zero_zero|tostring) + " |",
+              "| Imputed 0/0 with NO source | " + (.evidence_quality.imputed_zero_without_source|tostring) + " |",
+              "| Reconstructed, unconfirmed 0/0 | " + (.evidence_quality.inferred_zero_from_events|tostring) + " |",
+              "| Legacy all-player FP MAE (NOT training) | " + (.overall.fp_mae|tostring) + " |"' frozen-accuracy.json
             echo ""
-            echo "Data: closed, original live_frozen snapshots ONLY. No weights, scores, user squads or production predictions changed."
-            echo "No automatic tuning; candidate changes require forward holdout."
+            echo "### Active cohort by position"
+            echo "| Position | Sample | FP MAE | Minute MAE |"
+            echo "|---|---:|---:|---:|"
+            jq -r '.learning_by_position | to_entries[] | "| " + (.key | split(":")[-1]) + " | " + (.value.n|tostring) + " | " + (.value.fp_mae|tostring) + " | " + (.value.minute_mae|tostring) + " |"' frozen-accuracy.json
+            echo ""
+            echo "Primary cohort is defined BEFORE kickoff by expected minutes >= 30, with source-supported actuals. Realized-play and surprise-starter cohorts are diagnostic, not a hindsight selection rule."
+            echo "0/0 records without sourced evidence or with inferred absence are excluded from the primary learning objective."
+            echo "No automatic tuning; candidate changes require forward holdout before promotion."
           } >> "$GITHUB_STEP_SUMMARY"
       - uses: actions/upload-artifact@v4
         with:
