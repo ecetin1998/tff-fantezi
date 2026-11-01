@@ -11,6 +11,21 @@ const minuteBucket = mins => mins < 20 ? "00-19" : mins < 50 ? "20-49" : mins < 
 const make = () => ({n:0,fpSum:0,fpAbs:0,fpSq:0,minuteN:0,minuteSum:0,minuteAbs:0,minuteSq:0,
   p6N:0,p6Pred:0,p6Actual:0,p6Brier:0});
 
+const makeMinutes=()=>({verified:0,forecast_30_plus:0,actual_30_plus:0,
+  actual_60_plus:0,forecast_30_and_actual_30:0,
+  forecast_under_30_actual_30_plus:0,forecast_under_30_actual_60_plus:0,
+  forecast_30_actual_under_30:0,forecast_60_actual_under_30:0,
+  forecast_30_confirmed_dnp:0,forecast_30_reconstructed_zero_excluded:0});
+const finishMinutes=m=>({
+  ...m,
+  active_30_precision:m.forecast_30_plus?
+    round(m.forecast_30_and_actual_30/m.forecast_30_plus):null,
+  active_30_recall:m.actual_30_plus?
+    round(m.forecast_30_and_actual_30/m.actual_30_plus):null,
+  long_stint_60_recall:m.actual_60_plus?
+    round((m.actual_60_plus-m.forecast_under_30_actual_60_plus)/m.actual_60_plus):null
+});
+
 function add(group,row) {
   if(finite(row.predicted_xfp) && finite(row.actual_points)){
     const error=num(row.predicted_xfp)-num(row.actual_points);
@@ -78,6 +93,20 @@ export function frozenAccuracyReport({weeks=[],players=[],positions=[],weeklyPos
     else prev.push(item);
   }
   const groups = new Map(), total=make(), filtered=[];
+  const minutesByPosition=new Map(),minutesByWeek=new Map();
+  const recordMinutes=(group,row,verifiedZero)=>{
+    const pred=num(row.predicted_minutes),actual=num(row.actual_minutes);
+    group.verified++;
+    if(pred>=30)group.forecast_30_plus++;
+    if(actual>=30)group.actual_30_plus++;
+    if(actual>=60)group.actual_60_plus++;
+    if(pred>=30&&actual>=30)group.forecast_30_and_actual_30++;
+    if(pred<30&&actual>=30)group.forecast_under_30_actual_30_plus++;
+    if(pred<30&&actual>=60)group.forecast_under_30_actual_60_plus++;
+    if(pred>=30&&actual<30)group.forecast_30_actual_under_30++;
+    if(pred>=60&&actual<30)group.forecast_60_actual_under_30++;
+    if(pred>=30&&actual===0&&verifiedZero)group.forecast_30_confirmed_dnp++;
+  };
   const cohorts=new Map();
   const counts={
     imputed_zero_without_source:0,inferred_zero_from_events:0,mismatched_actual_source:0,
@@ -118,6 +147,17 @@ export function frozenAccuracyReport({weeks=[],players=[],positions=[],weeklyPos
     const noSource=raw.length===0;
     if(raw.length>0&&!matched)counts.mismatched_actual_source++;
     const trusted=matched&&(sourcePlayed||verifiedZero);
+    if(trusted&&pred!==null&&actual!==null){
+      if(!minutesByPosition.has(position))minutesByPosition.set(position,makeMinutes());
+      if(!minutesByWeek.has(gw))minutesByWeek.set(gw,makeMinutes());
+      recordMinutes(minutesByPosition.get(position),row,verifiedZero);
+      recordMinutes(minutesByWeek.get(gw),row,verifiedZero);
+    }else if(pred!==null&&pred>=30&&inferredZero){
+      if(!minutesByPosition.has(position))minutesByPosition.set(position,makeMinutes());
+      if(!minutesByWeek.has(gw))minutesByWeek.set(gw,makeMinutes());
+      minutesByPosition.get(position).forecast_30_reconstructed_zero_excluded++;
+      minutesByWeek.get(gw).forecast_30_reconstructed_zero_excluded++;
+    }
     const predictedActive=pred!==null&&pred>=30;
     const played=actual!==null&&actual>0;
     const actionable=predictedActive||played;
@@ -191,6 +231,10 @@ export function frozenAccuracyReport({weeks=[],players=[],positions=[],weeklyPos
     primary_learning_threshold_minutes:30,
     learning_by_week:section("learning:week:"),
     learning_by_position:section("learning:position:"),
+    minutes_decision_by_week:Object.fromEntries([...minutesByWeek.entries()]
+      .sort(([a],[b])=>a-b).map(([k,v])=>[k,finishMinutes(v)])),
+    minutes_decision_by_position:Object.fromEntries([...minutesByPosition.entries()]
+      .sort(([a],[b])=>a.localeCompare(b)).map(([k,v])=>[k,finishMinutes(v)])),
     learning_cohorts:Object.fromEntries([...cohorts.entries()].map(([k,v])=>[k,finish(v)])),
     evidence_quality:counts,
     learning_guardrails:{
