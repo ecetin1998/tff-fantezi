@@ -5,6 +5,7 @@ on:
     paths:
       - ".github/workflows/frozen-forecast-accuracy.yml"
       - "supabase/functions/weekly-model-lifecycle/frozenAccuracy.mjs"
+      - "supabase/functions/weekly-model-lifecycle/sourceCoverage.mjs"
   workflow_dispatch:
   schedule:
     # 11:45 Turkish time every Monday; only CLOSED historical weeks are read.
@@ -68,12 +69,55 @@ jobs:
             echo "|---|---:|---:|---:|"
             jq -r '.learning_by_position | to_entries[] | "| " + (.key | split(":")[-1]) + " | " + (.value.n|tostring) + " | " + (.value.fp_mae|tostring) + " | " + (.value.minute_mae|tostring) + " |"' frozen-accuracy.json
             echo ""
+            echo "### Source-verified playing-time misses (MH7–MH9)"
+            echo "| Position | Verified | Predicted ≥30m | Missed ≥60m | Expected 30m but <30m | Confirmed zero |"
+            echo "|---|---:|---:|---:|---:|---:|"
+            jq -r '.minutes_decision_by_position | to_entries[] |
+              "| " + .key + " | " + (.value.verified|tostring) +
+              " | " + (.value.forecast_30_plus|tostring) +
+              " | " + (.value.forecast_under_30_actual_60_plus|tostring) +
+              " | " + (.value.forecast_30_actual_under_30|tostring) +
+              " | " + (.value.forecast_30_confirmed_dnp|tostring) + " |"' frozen-accuracy.json
+            echo ""
             echo "Primary cohort is defined BEFORE kickoff by expected minutes >= 30, with source-supported actuals. Realized-play and surprise-starter cohorts are diagnostic, not a hindsight selection rule."
             echo "0/0 records without sourced evidence or with inferred absence are excluded from the primary learning objective."
             echo "No automatic tuning; candidate changes require forward holdout before promotion."
           } >> "$GITHUB_STEP_SUMMARY"
+      - name: Audit current MH source coverage (read-only)
+        shell: bash
+        env:
+          OIDC_TOKEN: ${{ steps.oidc.outputs.token }}
+        run: |
+          set -euo pipefail
+          curl --fail-with-body --silent --show-error --max-time 120 \
+            -H "Authorization: Bearer $OIDC_TOKEN" \
+            -H "Content-Type: application/json" \
+            --data '{"action":"diagnose_sources"}' \
+            "$FUNCTIONS_URL/weekly-model-lifecycle" > source-coverage.json
+          jq -e '.ok == true and .no_writes == true and .data_policy.absent_row == "unknown_not_zero" and .data_policy.auto_tuning_permitted == false and .active_players == 456' source-coverage.json
+          {
+            echo ""
+            echo "### Current MH verified source coverage"
+            jq -r '"Target MH: " + (.gameweek|tostring) + "; latest closed candidate MH: " + (.latest_week|tostring)' source-coverage.json
+            echo "| Position | Players | Sourced shots (latest week) | Sourced key passes | 3-week shot-form ready | 3-week key-pass-form ready | Verified tactical 2 starts |"
+            echo "|---|---:|---:|---:|---:|---:|---:|"
+            jq -r '.by_position | to_entries[] |
+              "| " + .key + " | " + (.value.players|tostring) +
+              " | " + (.value.shot_last|tostring) +
+              " | " + (.value.key_pass_last|tostring) +
+              " | " + (.value.eligible_shot_form|tostring) +
+              " | " + (.value.eligible_key_pass_form|tostring) +
+              " | " + (.value.tactical_roles_two_starts|tostring) + " |"' source-coverage.json
+            echo ""
+            jq -r '"Last MH data quality: confirmed 0m=" + (.totals.confirmed_zero|tostring) +
+              ", inferred 0m=" + (.totals.inferred_zero|tostring) +
+              ", missing final source=" + (.totals.no_final_result|tostring)' source-coverage.json
+            echo "Coverage is observational only. Missing evidence never becomes a zero; no automatic player-weight adjustment."
+          } >> "$GITHUB_STEP_SUMMARY"
       - uses: actions/upload-artifact@v4
         with:
           name: frozen-backtest-accuracy
-          path: frozen-accuracy.json
+          path: |
+            frozen-accuracy.json
+            source-coverage.json
           retention-days: 60
