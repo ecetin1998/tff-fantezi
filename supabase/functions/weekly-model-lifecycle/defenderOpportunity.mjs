@@ -13,9 +13,18 @@ const norm=(r)=>["CB","FB","WB"].includes(String(r||"").toUpperCase())?String(r)
 export function credibleAttackWeights(position,role,rates=[],forecastXg=null){
   const xg=forecastXg===null?safe(rates[0]):safe(forecastXg)
   const goals=safe(rates[1]),assists=safe(rates[2]),xa=safe(rates[3])
-  if(position!=="DEF")
-    return {goal:Math.max(1e-6,.75*xg+.25*goals),
-      assist:Math.max(1e-6,.70*xa+.30*assists),adjustedXg:xg,adjustedXa:xa}
+  if(position!=="DEF"){
+    // The 15th rate is a bounded forward-only learning experiment. It
+    // reallocates a team's sourced goals/assists among eligible teammates,
+    // never subtracts from final fantasy points or changes team goal rates.
+    // Absent/invalid marker is strictly the original 1.0 baseline.
+    const feedback=Number(rates[14]);
+    const eventFactor=position==="FWD"&&Number.isFinite(feedback)&&
+      feedback>=.50&&feedback<=1?feedback:1;
+    return {goal:Math.max(1e-6,(.75*xg+.25*goals)*eventFactor),
+      assist:Math.max(1e-6,(.70*xa+.30*assists)*eventFactor),
+      adjustedXg:xg,adjustedXa:xa,eventFactor};
+  }
   const prior=quality[norm(role)]
   // rates[12] and [13] are ONLY aligned season-to-date key passes and
   // shots per 90. -1 means unknown/stale; absence NEVER implies 0.
