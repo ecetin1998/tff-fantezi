@@ -12,6 +12,7 @@ import {currentTacticalRole} from "./recentTacticalRole.mjs"
 import {applyTeamMatchForm,recalibrateAnchoredMatchForm,auditMatchAllocation,auditRealizedModel} from "./teamRecentForm.mjs"
 import {credibleAttackWeights} from "./defenderOpportunity.mjs"
 import {frozenAccuracyReport} from "./frozenAccuracy.mjs"
+import {FORWARD_LEARNING_V1,verifyForwardHistory,parseForwardExperiment,forwardFeedbackRate} from "./activeForwardFeedback.mjs"
 
 const AUDIENCE="tff-fantezi-scout"
 const ISSUER="https://token.actions.githubusercontent.com"
@@ -560,6 +561,56 @@ async function prepare(sb:any,current:any,status:any,body:any={}){
 }
 
 
+// Explicit, source-backed MH10 live experiment. The cohort is pinned to a
+// preserved pre-experiment baseline run; never use a newly-calibrated parent's
+// xFP as its own selection criterion (oscillation/feedback leakage).
+async function loadCurrentForwardFeedback(sb:any,gameweek:number){
+  if(gameweek!==10)return null
+  const cfgQ=await sb.from("scout_learning_log")
+    .select("id,after_gameweek,status,component,notes")
+    .eq("component","Aktif FOR Tahmin Geri Beslemesi")
+    .eq("after_gameweek",9).order("id",{ascending:false}).limit(1).maybeSingle()
+  if(cfgQ.error)throw cfgQ.error
+  if(!cfgQ.data)throw new Error("MH10_FORWARD_FEEDBACK_CONFIG_MISSING")
+  const cfg=parseForwardExperiment(cfgQ.data,gameweek)
+  if(!cfg)throw new Error("MH10_FORWARD_FEEDBACK_NOT_APPROVED")
+  const [runQ,baselineQ,forwardsQ,weeksQ,fixturesQ]=await Promise.all([
+    sb.from("scout_model_runs").select("id,gameweek,status,is_current").eq("id",cfg.baselineRunId).single(),
+    sb.from("scout_player_projections").select("player_id,xfp,x_minutes").eq("run_id",cfg.baselineRunId),
+    sb.from("scout_players").select("id").eq("position","FWD"),
+    sb.from("scout_backtest_weeks").select("gameweek,status,prediction_mode,snapshot_at,prediction_count,actual_count")
+      .in("gameweek",[7,8,9]),
+    sb.from("scout_match_history").select("gameweek,kickoff_at").eq("season","2026-27")
+      .in("gameweek",[7,8,9])
+  ])
+  for(const q of [runQ,baselineQ,forwardsQ,weeksQ,fixturesQ])if(q.error)throw q.error
+  if(runQ.data?.gameweek!==gameweek||runQ.data?.status!=="ready"||
+    !(baselineQ.data||[]).length)throw new Error("MH10_FORWARD_FEEDBACK_BASELINE_MISSING")
+  const fwdIds=(forwardsQ.data||[]).map((x:any)=>Number(x.id))
+  if(!fwdIds.length)throw new Error("MH10_FORWARD_LEARNING_FWD_POOL_EMPTY")
+  const [forecastsQ,actualsQ]=await Promise.all([
+    sb.from("scout_backtest_players").select(
+      "gameweek,player_id,prediction_mode,predicted_xfp,predicted_minutes,actual_points,actual_minutes")
+      .in("gameweek",[7,8,9]).in("player_id",fwdIds).eq("prediction_mode","live_frozen"),
+    sb.from("scout_player_weekly_points").select(
+      "gameweek,player_id,minutes,points,source_kind,is_final")
+      .in("gameweek",[7,8,9]).in("player_id",fwdIds).eq("is_final",true)
+  ])
+  if(forecastsQ.error)throw forecastsQ.error
+  if(actualsQ.error)throw actualsQ.error
+  const evaluation=verifyForwardHistory({
+    weeks:weeksQ.data||[],fixtures:fixturesQ.data||[],
+    forecasts:forecastsQ.data||[],actuals:actualsQ.data||[]
+  })
+  if(!evaluation.pass)throw new Error("FORWARD_FEEDBACK_HOLDOUT_GATE_FAILED: "+JSON.stringify(evaluation))
+  const reference=new Map((baselineQ.data||[])
+    .map((x:any)=>[Number(x.player_id),x]))
+  const selected=[...reference.values()].filter((x:any)=>
+    forwardFeedbackRate("FWD",x.xfp,x.x_minutes,true)<1)
+  if(selected.length<3)throw new Error("MH10_FORWARD_FEEDBACK_COHORT_TOO_SMALL")
+  return {reference,config:cfg,validation:evaluation,selected: selected.length}
+}
+
 async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
   const gw=Number(current.gameweek)
   const now=Date.now()
@@ -774,6 +825,7 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
     }
   }
 
+  const feedback=await loadCurrentForwardFeedback(sb,gw)
   const inputRows=(inputsQ.data||[]).map((x:any)=>{
     const av=avMap.get(Number(x.player_id))
     const availability=clamp(0,1,n(av?.availability_probability,x.availability))
@@ -858,6 +910,9 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
       stats?.through_gameweek!=null&&Number(stats.advanced_through_gameweek)===Number(stats.through_gameweek)
     rates[12]=alignedOpportunity&&stats?.key_passes!=null?90*Number(stats.key_passes)/seasonMins:-1
     rates[13]=alignedOpportunity&&stats?.shots!=null?90*Number(stats.shots)/seasonMins:-1
+    const reference=feedback?.reference.get(Number(x.player_id)) as any
+    rates[14]=forwardFeedbackRate(x.position,reference?.xfp,reference?.x_minutes,
+      Boolean(feedback))
     return {
       ...x,benchmark_version:benchmark,availability,rates,
       sub_role:tactical.role||x.sub_role,role_side:tactical.side||x.role_side,
@@ -873,6 +928,7 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
         +(form.applied||String(stableInput.source_note||"").includes("recent-attack-form-v2")?` • recent-attack-form-v2`:"")
         +(tactical.changed?` • tactical-role-evidence-v1`:"")
         +(adjusted.applied?` • resmî maç: ${event.match_ref}`:"")
+        +(rates[14]<1?` • active-fwd-event-share-v1 factor=${rates[14]}`:"")
     }
   })
   const runId=crypto.randomUUID()
@@ -903,13 +959,16 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
       method:"weekly-auto-team-form-v2",
       model_note:"Kaynaklı son üç maç gol atma/yeme formu + sezon xG/xGA (ölçülü düzeltme)."}
   })
-  const meta={...latestMetaQ.data,benchmark_version:benchmark,created_at:new Date().toISOString(),source_note:`intraday refresh from ${sourceBenchmark}; source ${latestSourceAt}`}
+  const meta={...latestMetaQ.data,benchmark_version:benchmark,created_at:new Date().toISOString(),
+    source_note:`intraday refresh from ${sourceBenchmark}; source ${latestSourceAt}`+
+      (feedback?` • active-fwd-event-share-v1 • baseline ${feedback.config.baselineRunId} • holdouts MH8/MH9 passed`:"")}
   delete (meta as any).id
 
   const runInsert=await sb.from("scout_model_runs").insert({
     id:runId,gameweek:gw,model_version:current.model_version,generated_at:new Date().toISOString(),
     source_updated_at:latestSourceAt,source_cutoff:latestSourceAt,simulation_count:0,status:"building",is_current:false,
-    notes:`intraday ${snapshotAllowed?"pre-kickoff":"in-week rolling"} refresh • ${benchmark} • parent ${current.id} • source ${latestSourceAt}`,
+    notes:`intraday ${snapshotAllowed?"pre-kickoff":"in-week rolling"} refresh • ${benchmark} • parent ${current.id} • source ${latestSourceAt}`+
+      (feedback?` • active-fwd-event-share-v1 • reference ${feedback.config.baselineRunId} • ${feedback.selected} forwards`:""),
     code_sha:codeSha,config_version:configVersion
   })
   if(runInsert.error)throw runInsert.error
