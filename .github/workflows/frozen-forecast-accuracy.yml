@@ -4,6 +4,7 @@ on:
     branches: [main]
     paths:
       - ".github/workflows/frozen-forecast-accuracy.yml"
+      - "supabase/functions/weekly-model-lifecycle/frozenAccuracy.mjs"
   workflow_dispatch:
   schedule:
     # 11:45 Turkish time every Monday; only CLOSED historical weeks are read.
