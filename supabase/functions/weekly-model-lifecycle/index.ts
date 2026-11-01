@@ -605,7 +605,9 @@ async function loadCurrentForwardFeedback(sb:any,gameweek:number){
   if(!evaluation.pass)throw new Error("FORWARD_FEEDBACK_HOLDOUT_GATE_FAILED: "+JSON.stringify(evaluation))
   const reference=new Map((baselineQ.data||[])
     .map((x:any)=>[Number(x.player_id),x]))
+  const forwardIdSet=new Set(fwdIds)
   const selected=[...reference.values()].filter((x:any)=>
+    forwardIdSet.has(Number(x.player_id))&&
     forwardFeedbackRate("FWD",x.xfp,x.x_minutes,true)<1)
   if(selected.length<3)throw new Error("MH10_FORWARD_FEEDBACK_COHORT_TOO_SMALL")
   return {reference,config:cfg,validation:evaluation,selected: selected.length}
