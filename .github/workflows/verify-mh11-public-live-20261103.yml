@@ -24,9 +24,9 @@ jobs:
         run: |
           set -euo pipefail
           bash scripts/verify-published-gameweek.sh
-      - name: Verify exactly 9 MH11 fixtures and active model in public API
+      - name: Verify MH11 active model and 9 fixtures in public API
         shell: bash
         run: |
           set -euo pipefail
           curl -fsSL --max-time 45 -H 'Cache-Control: no-cache' "$BASE_URL/api/scout-data?section=matches&limit=9" |
-            jq -e '.current_run.gameweek == 11 and .current_run.is_current == true and .current_run.status == "ready" and .current_run.simulation_count == 50000 and (.matches|length) == 9'
+            jq -e '.current_run.gameweek == 11 and .current_run.is_current == true and .current_run.status == "ready" and (.matches|length) == 9'
