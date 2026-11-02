@@ -34,3 +34,40 @@ export function mh8CalculatedAdvancedLagAccepted({gameweek,activePlayers,stats,t
      weekly.reduce((sum,w)=>sum+Number(w.bonus_points),0)!==113)return false;
   return true;
 }
+
+/**
+ * MH10-only user-approved independent closure for generating MH11.
+ * Historical xG/xA may lag; this never forges advanced_through_gameweek.
+ * All scores and match closings must match the observed 2026-27 MH10 snapshot.
+ */
+export function mh10OwnerApprovedAdvancedLagAccepted({gameweek,activePlayers,stats,teamStats,matches,weekly}) {
+  if(Number(gameweek)!==10 ||
+     !Array.isArray(activePlayers) || activePlayers.length!==456 ||
+     !Array.isArray(stats) || stats.length!==456 ||
+     !Array.isArray(teamStats) || teamStats.length!==18 ||
+     !Array.isArray(matches) || matches.length!==9 ||
+     !Array.isArray(weekly) || weekly.length!==456) return false;
+  const ids=new Set(activePlayers.map(x=>Number(x.id)));
+  if(ids.size!==456 || new Set(stats.map(x=>Number(x.player_id))).size!==456 ||
+     new Set(teamStats.map(x=>Number(x.team_id))).size!==18 ||
+     new Set(matches.map(x=>Number(x.match_id))).size!==9 ||
+     new Set(weekly.map(x=>Number(x.player_id))).size!==456) return false;
+  if(matches.some(x=>x.match_status!=="Bitti" || x.fantasy_closure!=="KAPANDI"))return false;
+  if(stats.some(s=>!ids.has(Number(s.player_id)) ||
+      Number(s.through_gameweek)!==10 ||
+      ![7,9,10].includes(Number(s.advanced_through_gameweek))))return false;
+  if(weekly.some(w=>!ids.has(Number(w.player_id)) || w.is_final!==true ||
+      w.source_kind!=="mh10_owner_approved_independent_score_events" ||
+      w.minutes==null || !Number.isFinite(Number(w.minutes)) || Number(w.minutes)<0 ||
+      !Number.isInteger(Number(w.points)) ||
+      !Number.isInteger(Number(w.base_points)) ||
+      !Number.isInteger(Number(w.bonus_points)) ||
+      Number(w.points)!==Number(w.base_points)+Number(w.bonus_points) ||
+      Number(w.bonus_points)<0 || Number(w.bonus_points)>3 ||
+      (Number(w.minutes)===0 && Number(w.points)!==0)))return false;
+  if(weekly.filter(w=>Number(w.minutes)>0).length!==284 ||
+     weekly.filter(w=>Number(w.minutes)===0).length!==172 ||
+     weekly.reduce((sum,w)=>sum+Number(w.points),0)!==809 ||
+     weekly.reduce((sum,w)=>sum+Number(w.bonus_points),0)!==54)return false;
+  return true;
+}
