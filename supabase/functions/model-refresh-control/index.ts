@@ -1,5 +1,5 @@
 import {createClient} from "https://esm.sh/@supabase/supabase-js@2"
-import {mh8CalculatedAdvancedLagAccepted} from "./mh8AdvancedLag.mjs"
+import {mh8CalculatedAdvancedLagAccepted,mh10OwnerApprovedAdvancedLagAccepted} from "./mh8AdvancedLag.mjs"
 
 const AUDIENCE="tff-fantezi-scout"
 const ISSUER="https://token.actions.githubusercontent.com"
@@ -127,12 +127,14 @@ Deno.serve(async(req:Request)=>{
       const activeStats=(pstatsQ.data||[]).filter((x:any)=>activeIds.has(Number(x.player_id)))
       const playedCurrentIds=new Set((weeklyQ.data||[]).filter((x:any)=>Number(x.minutes||0)>0).map((x:any)=>Number(x.player_id)))
       const advancedMissing=activeStats.filter((x:any)=>playedCurrentIds.has(Number(x.player_id))&&Number(x.advanced_through_gameweek||0)<gw)
-      // MH8 only: independent, complete, owner-approved actuals permit an
-      // explicitly reported ONE-WEEK xG/xA lag. Never falsify advanced markers.
-      const acceptedLag=mh8CalculatedAdvancedLagAccepted({
+      // MH8 and explicitly owner-approved MH10 may use source-labelled, audited
+      // historical xG/xA without changing advanced freshness markers.
+      const lagInputs={
         gameweek:gw,activePlayers:playersQ.data||[],stats:activeStats,
         teamStats:tstatsQ.data||[],matches:histQ.data||[],weekly:weeklyQ.data||[]
-      })
+      }
+      const acceptedLag=mh8CalculatedAdvancedLagAccepted(lagInputs)||
+        mh10OwnerApprovedAdvancedLagAccepted(lagInputs)
       const fixtureCount=(histQ.data||[]).length
       const finalMatches=new Set((weeklyQ.data||[]).filter((x:any)=>x.is_final).map((x:any)=>String(x.match_id))).size
       const targetTeams=new Set((targetQ.data||[]).flatMap((x:any)=>[Number(x.home_team_id),Number(x.away_team_id)]))
@@ -145,7 +147,7 @@ Deno.serve(async(req:Request)=>{
         closed_fixtures:(histQ.data||[]).filter((x:any)=>x.match_status==="Bitti"&&x.fantasy_closure==="KAPANDI").length,
         final_actual_matches:finalMatches,
         advanced_missing_played:advancedMissing.length,
-        approved_mh8_advanced_lag:acceptedLag,
+        approved_independent_advanced_lag:acceptedLag,
         target_gameweek:gw+1,
         target_fixtures:(targetQ.data||[]).length,
         target_teams:targetTeams.size
@@ -181,11 +183,13 @@ Deno.serve(async(req:Request)=>{
         sb.from("scout_players").select("id").eq("active",true)
       ])
       for(const q of [participantsQ,statsQ,allWeeklyQ,teamsQ,matchesQ,activeQ])if(q.error)throw q.error
-      const acceptedLag=mh8CalculatedAdvancedLagAccepted({
+      const lagInputs={
         gameweek:observedGw,activePlayers:activeQ.data||[],
         stats:statsQ.data||[],teamStats:teamsQ.data||[],
         matches:matchesQ.data||[],weekly:allWeeklyQ.data||[]
-      })
+      }
+      const acceptedLag=mh8CalculatedAdvancedLagAccepted(lagInputs)||
+        mh10OwnerApprovedAdvancedLagAccepted(lagInputs)
       const participantIds=new Set((participantsQ.data||[]).map((x:any)=>Number(x.player_id)))
       const markers=new Map((statsQ.data||[]).map((x:any)=>[Number(x.player_id),Number(x.advanced_through_gameweek||0)]))
       const remaining=[...participantIds].filter((id:number)=>(markers.get(id)||0)<observedGw)
@@ -194,9 +198,9 @@ Deno.serve(async(req:Request)=>{
         ok:pass,pass,current_gameweek:gw,observed_gameweek:observedGw,
         played_players:participantIds.size,advanced_current:participantIds.size-remaining.length,
         stale_played_players:remaining.length,stale_player_ids:remaining.slice(0,30),
-        approved_mh8_advanced_lag:acceptedLag,
-        advanced_data_through_gameweek:acceptedLag?7:observedGw,
-        note:acceptedLag?"MH8 calculated actuals accepted; xG/xA remain through MH7 (transparent one-week lag)" : pass?`advanced data covers all MH${observedGw} participants`:`played-player advanced data must be ingested through MH${observedGw}`
+        approved_independent_advanced_lag:acceptedLag,
+        advanced_data_through_gameweek:acceptedLag?Math.min(...(statsQ.data||[]).map((s:any)=>Number(s.advanced_through_gameweek||0))):observedGw,
+        note:acceptedLag?`MH${observedGw} owner-approved independent actuals; xG/xA stale for some players (markers preserved)` : pass?`advanced data covers all MH${observedGw} participants`:`played-player advanced data must be ingested through MH${observedGw}`
       },{status:pass?200:409})
     }
 
