@@ -17,6 +17,8 @@ test("MH8/MH9 independently computed totals allowed only after explicit finality
   assert.equal(validFinalWeeklyPlayerRow(8,{...candidate,is_final:false}),false);
   assert.equal(validFinalWeeklyPlayerRow(9,candidate),true);
   assert.equal(validFinalWeeklyPlayerRow(10,candidate),false);
+  assert.equal(validFinalWeeklyPlayerRow(10,{...candidate,source_kind:"mh10_owner_approved_independent_score_events"}),true);
+  assert.equal(validFinalWeeklyPlayerRow(11,{...candidate,source_kind:"mh10_owner_approved_independent_score_events"}),false);
   assert.equal(validFinalWeeklyPlayerRow(8,{...candidate,source_kind:"unknown"}),false);
 });
 
@@ -45,5 +47,9 @@ test("inferred zero-minute players cannot get synthetic positive points",()=>{
   }),true);
   assert.equal(validFinalWeeklyPlayerRow(8,{
     ...candidate,minutes:0,base_points:1,bonus_points:0,points:1
+  }),false);
+  assert.equal(validFinalWeeklyPlayerRow(10,{
+    ...candidate,source_kind:"mh10_owner_approved_independent_score_events",
+    minutes:0,base_points:1,bonus_points:0,points:1
   }),false);
 });
