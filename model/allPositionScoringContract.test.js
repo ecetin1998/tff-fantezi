@@ -84,8 +84,8 @@ const {normalizedDefenderRole,singleShotCap,attackWeights}=require('./attackAllo
     'same-week refresh must retain original sourced xA candidate');
   assert.match(lifecycle,/const xaReconcile=reconcileDefenderXa\(stats,player,/,
     'same-week 50K refresh must align anomalous defender xA');
-  assert.match(lifecycle,/rates\[3\]=xaReconcile\.rate/,
-    'the same-week simulation input must consume the reconciled rate');
+  assert.match(lifecycle,/rates\[3\]=covered\.aligned&&covered\.xaPer90!==null\?covered\.xaPer90:xaReconcile\.rate/,
+    'same-week simulation consumes source-window aligned xA when verified, else original defender reconciliation');
   assert.match(lifecycle,/team_assist_share:credibleAttackWeights\(input\?\.position,input\?\.sub_role,input\?\.rates\|\|\[\]\)\.assist/,
     'refresh must recompute evidence-weighted role assist share after updating xA inputs');
   assert.match(lifecycle,/const roleBase=\(rolesQ\.data\|\|\[\]\)\.map\(\(x:any\)=>\{[\s\S]*?const input=refreshedInputs\.get\(Number\(x\.player_id\)\) as any[\s\S]*?team_assist_share:/,

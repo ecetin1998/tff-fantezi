@@ -8,6 +8,8 @@ import {roleTrendFromWeeklyEvidence} from "./roleTrend.mjs"
 import {blendVerifiedAttackRate} from "./mh8Attack.mjs"
 import {calibrateAttackRates} from "./roleAwareAttackRates.mjs"
 import {recentAttackForm,fetchRecentAttackEvidence,groupRecentAttack} from "./recentAttackForm.mjs"
+import {alignAttackSourceWindow} from "./sourceWindowAttack.mjs"
+import {laggedVerifiedAttackForm} from "./laggedVerifiedAttackForm.mjs"
 import {currentTacticalRole} from "./recentTacticalRole.mjs"
 import {applyTeamMatchForm,recalibrateAnchoredMatchForm,auditMatchAllocation,auditRealizedModel} from "./teamRecentForm.mjs"
 import {credibleAttackWeights} from "./defenderOpportunity.mjs"
@@ -442,19 +444,20 @@ async function prepare(sb:any,current:any,status:any,body:any={}){
     })
     const minutes=Math.max(0,n(s.minutes))
     const priorRates=(prior.rates||[]).map(Number)
-    const xg90=per90(s.xg_total,minutes,n(priorRates[0]))
+    const covered=alignAttackSourceWindow({stats:s,weekly:rows,targetWeek:target})
+    const xg90=covered.aligned&&covered.xgPer90!==null?covered.xgPer90:per90(s.xg_total,minutes,n(priorRates[0]))
     const g90=per90(s.goals,minutes,n(priorRates[1]))
     const a90=per90(s.assists,minutes,n(priorRates[2]))
     const xaRaw=firstRecordedRate(s.xa_per90,s.xa_model_per90,prior.effective_xa_per90,priorRates[3])
     const xaReconcile=reconcileDefenderXa(s,p,rows.find(x=>Number(x.gameweek)===target-1),xaRaw)
-    const xa90=xaReconcile.rate
+    const xa90=covered.aligned&&covered.xaPer90!==null?covered.xaPer90:xaReconcile.rate
     const yc90=per90(s.yellow_cards,minutes,n(priorRates[4]))
     const rc90=per90(s.red_cards,minutes,n(priorRates[5]))
     const saves90=per90(s.saves,minutes,n(priorRates[6]))
     const shots90=per90(s.shots,minutes,n(priorRates[10]))
     const sot90=per90(s.shots_on_target,minutes,n(priorRates[11]))
     const calibrated=calibrateAttackRates({
-      position:p.position,role:tactical.role,seasonMinutes:minutes,
+      position:p.position,role:tactical.role,seasonMinutes:covered.aligned?covered.coveredMinutes:minutes,
       seasonWeek:s.through_gameweek==null?null:Number(s.through_gameweek),
       advancedWeek:s.advanced_through_gameweek==null?null:Number(s.advanced_through_gameweek),
       shots:s.shots==null?null:Number(s.shots),keyPasses:s.key_passes==null?null:Number(s.key_passes),
@@ -464,8 +467,8 @@ async function prepare(sb:any,current:any,status:any,body:any={}){
     const form=recentAttackForm({
       position:p.position,targetWeek:target,cutoffAt:targetKickoff,weekly:rows,
       advanced:recentAdvanced.get(id)||[],verified:recentVerified.get(id)||[],
-      seasonShotsPer90:trustedAdvanced?shots90:null,
-      seasonKeyPassesPer90:trustedAdvanced&&minutes>0&&s.key_passes!=null
+      seasonShotsPer90:covered.aligned?covered.shotsPer90:trustedAdvanced?shots90:null,
+      seasonKeyPassesPer90:covered.aligned?covered.keyPassesPer90:trustedAdvanced&&minutes>0&&s.key_passes!=null
         ?90*n(s.key_passes)/minutes:null,
       xgPer90:calibrated.xgPer90,xaPer90:calibrated.xaPer90
     })
@@ -477,7 +480,11 @@ async function prepare(sb:any,current:any,status:any,body:any={}){
     const keyPass90=opportunityAligned&&s.key_passes!=null
       ?90*n(s.key_passes)/minutes:-1
     const trustedShots90=opportunityAligned&&s.shots!=null?90*n(s.shots)/minutes:-1
-    const rates=[form.xgPer90,calibrated.goalsPer90,a90,form.xaPer90,
+    const attackForm=form.applied?form:laggedVerifiedAttackForm({
+      position:p.position,targetWeek:target,cutoffAt:targetKickoff,weekly:rows,
+      verified:recentVerified.get(id)||[],xgPer90:form.xgPer90,xaPer90:form.xaPer90
+    })
+    const rates=[attackForm.xgPer90,calibrated.goalsPer90,a90,attackForm.xaPer90,
       yc90,rc90,saves90,n(priorRates[7]),n(priorRates[8]),n(priorRates[9]),shots90,sot90,
       keyPass90,trustedShots90]
     const availability=clamp(0,1,n(av.availability_probability,1))
@@ -487,9 +494,9 @@ async function prepare(sb:any,current:any,status:any,body:any={}){
       bench_weight:n(prior.bench_weight,1),durations,duration_weights:durationWeights,rates,
       data_confidence:prior.data_confidence||projMap.get(id)?.confidence||"medium",
       has_individual_prior:Boolean(prior.has_individual_prior),
-      source_note:key+(calibrated.applied?" • role-aware-attack-v1":"")+(form.applied?" • recent-attack-form-v2":"")+(tactical.changed?" • tactical-role-evidence-v1":"")+(momentum.rising?" • momentum-v1 +"+momentum.role_uplift:"")+(xaReconcile.adjusted?" • defender-xa-source-window-v1 "+xaReconcile.source_minutes+"dk":"")+(officialShift.applied?" • resmî maç: "+event.match_ref:""),
+      source_note:key+(calibrated.applied?" • role-aware-attack-v1":"")+(form.applied?" • recent-attack-form-v2":"")+(attackForm.applied&&!form.applied?" • lagged-verified-form-v1":"")+(covered.aligned&&covered.advancedWeek<target-1?" • source-window-attack-v1":"")+(tactical.changed?" • tactical-role-evidence-v1":"")+(momentum.rising?" • momentum-v1 +"+momentum.role_uplift:"")+(xaReconcile.adjusted?" • defender-xa-source-window-v1 "+xaReconcile.source_minutes+"dk":"")+(officialShift.applied?" • resmî maç: "+event.match_ref:""),
       sub_role:tactical.role||prior.sub_role||null,role_side:tactical.side||prior.role_side||null,
-      effective_xa_per90:form.xaPer90
+      effective_xa_per90:attackForm.xaPer90
     })
     const fx=teamFixtures.get(Number(p.team_id))||[]
     projectionRows.push({
@@ -859,11 +866,14 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
     const stats=sourceStatsMap.get(Number(x.player_id)) as any
     // Use the same aligned source policy in weekly and intraday passes.
     // Retain original stats fields; only the candidate rate is changed.
+    const covered=alignAttackSourceWindow({
+      stats,weekly:weeklyMomentumRows.get(Number(x.player_id))||[],targetWeek:gw
+    })
     const rateRaw=stats?firstRecordedRate(stats.xa_per90,stats.xa_model_per90,rates[3]):rates[3]
     const xaReconcile=reconcileDefenderXa(stats,player,
       (weeklyMomentumRows.get(Number(x.player_id))||[]).find((w:any)=>Number(w.gameweek)===gw-1),
       rateRaw)
-    rates[3]=xaReconcile.rate // safeguard existing defender source reconciliation
+    rates[3]=covered.aligned&&covered.xaPer90!==null?covered.xaPer90:xaReconcile.rate // dated source denominator
     // MH8 is a single observed fixture, not a season snapshot. Mix only
     // present numeric evidence into the non-intraday baseline with heavy
     // shrinkage; missing xG/xA remains unknown and does not become zero.
@@ -871,18 +881,20 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
     const history=(weeklyMomentumRows.get(Number(x.player_id))||[])
       .find((w:any)=>Number(w.gameweek)===gw-1)
     const observedMinutes=history?trustedMinute(history):null
-    const xgUpdate=blendVerifiedAttackRate(n(stableRates[0],rates[0]),mh8?.xg,observedMinutes,"xg")
-    const xaUpdate=blendVerifiedAttackRate(xaReconcile.rate,mh8?.xa,observedMinutes,"xa")
+    const xgUpdate=blendVerifiedAttackRate(
+      covered.aligned&&covered.xgPer90!==null?covered.xgPer90:n(stableRates[0],rates[0]),
+      mh8?.xg,observedMinutes,"xg")
+    const xaUpdate=blendVerifiedAttackRate(rates[3],mh8?.xa,observedMinutes,"xa")
     // Always anchor to the stable, non-intraday input. Otherwise a second
     // refresh recursively discounts the same historical xG again.
     // Forecast priors are always grounded in the untouched stable baseline;
     // MH8 observations can refresh rates but must not compound an earlier shrink.
-    const alreadyCalibrated=String(stableInput.source_note||"").includes("role-aware-attack-v1")
+    const alreadyCalibrated=String(stableInput.source_note||"").includes("role-aware-attack-v1")&&!covered.aligned
     const calibrated=alreadyCalibrated
       ?{xgPer90:xgUpdate.rate,goalsPer90:n(stableRates[1],rates[1]),xaPer90:xaUpdate.rate,applied:false}
       :calibrateAttackRates({
         position:player?.position||x.position,role:tactical.role,
-        seasonMinutes:stats?.minutes==null?null:Number(stats.minutes),
+        seasonMinutes:stats?.minutes==null?null:(covered.aligned?covered.coveredMinutes:Number(stats.minutes)),
         seasonWeek:stats?.through_gameweek==null?null:Number(stats.through_gameweek),
         advancedWeek:stats?.advanced_through_gameweek==null?null:Number(stats.advanced_through_gameweek),
         shots:stats?.shots==null?null:Number(stats.shots),
@@ -899,14 +911,21 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
         weekly:weeklyMomentumRows.get(Number(x.player_id))||[],
         advanced:recentAdvanced.get(Number(x.player_id))||[],
         verified:recentVerified.get(Number(x.player_id))||[],
-        seasonShotsPer90:trustedAdvanced?n(stableRates[10],0):null,
-        seasonKeyPassesPer90:trustedAdvanced&&seasonMins>0&&stats?.key_passes!=null
+        seasonShotsPer90:covered.aligned?covered.shotsPer90:trustedAdvanced?n(stableRates[10],0):null,
+        seasonKeyPassesPer90:covered.aligned?covered.keyPassesPer90:trustedAdvanced&&seasonMins>0&&stats?.key_passes!=null
           ?90*Number(stats.key_passes)/seasonMins:null,
         xgPer90:calibrated.xgPer90,xaPer90:calibrated.xaPer90
       })
-    rates[0]=form.xgPer90
+    const laggedInStableSource=String(stableInput.source_note||"").includes("lagged-verified-form-v1")
+    const attackForm=form.applied||laggedInStableSource?form:laggedVerifiedAttackForm({
+      position:player?.position||x.position,targetWeek:gw,cutoffAt:kickoff,
+      weekly:weeklyMomentumRows.get(Number(x.player_id))||[],
+      verified:recentVerified.get(Number(x.player_id))||[],
+      xgPer90:form.xgPer90,xaPer90:form.xaPer90
+    })
+    rates[0]=attackForm.xgPer90
     rates[1]=calibrated.goalsPer90
-    rates[3]=form.xaPer90
+    rates[3]=attackForm.xaPer90
     // Rebuild from current SOURCE season stats, not recursively from the
     // previous simulation. Mark unavailable/stale actions as unknown.
     const alignedOpportunity=seasonMins>=270&&stats?.advanced_through_gameweek!=null&&
@@ -929,6 +948,8 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
         +(xgUpdate.applied||xaUpdate.applied?` • mh8-attack-source-v1 ${xgUpdate.applied?"xg":""}${xaUpdate.applied?"+xa":""}`:"")
         +(calibrated.applied||alreadyCalibrated?` • role-aware-attack-v1`:"")
         +(form.applied||String(stableInput.source_note||"").includes("recent-attack-form-v2")?` • recent-attack-form-v2`:"")
+        +(attackForm.applied&&!form.applied?` • lagged-verified-form-v1`:"")
+        +(covered.aligned&&covered.advancedWeek<gw-1?` • source-window-attack-v1`:"")
         +(tactical.changed?` • tactical-role-evidence-v1`:"")
         +(adjusted.applied?` • resmî maç: ${event.match_ref}`:"")
         +(rates[14]<1?` • active-fwd-event-share-v1 factor=${rates[14]}`:"")
