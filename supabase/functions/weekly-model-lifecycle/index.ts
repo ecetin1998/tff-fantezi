@@ -916,7 +916,8 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
           ?90*Number(stats.key_passes)/seasonMins:null,
         xgPer90:calibrated.xgPer90,xaPer90:calibrated.xaPer90
       })
-    const attackForm=form.applied?form:laggedVerifiedAttackForm({
+    const laggedInStableSource=String(stableInput.source_note||"").includes("lagged-verified-form-v1")
+    const attackForm=form.applied||laggedInStableSource?form:laggedVerifiedAttackForm({
       position:player?.position||x.position,targetWeek:gw,cutoffAt:kickoff,
       weekly:weeklyMomentumRows.get(Number(x.player_id))||[],
       verified:recentVerified.get(Number(x.player_id))||[],
