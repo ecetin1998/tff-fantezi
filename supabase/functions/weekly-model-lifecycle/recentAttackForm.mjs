@@ -110,7 +110,7 @@ export async function fetchRecentAttackEvidence(sb,targetWeek){
   }
   const [advanced,verified]=await Promise.all([
     read("scout_player_advanced_weekly","player_id,gameweek,shots,key_passes,source,source_updated_at"),
-    read("scout_verified_weekly_attack","player_id,gameweek,shots,key_passes,source,observed_at")
+    read("scout_verified_weekly_attack","player_id,gameweek,shots,key_passes,xg,xa,source,observed_at")
   ])
   return advanced.error||verified.error
     ?{data:null,error:advanced.error||verified.error}
