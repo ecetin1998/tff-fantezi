@@ -89,5 +89,6 @@ test("both forecasting paths apply trusted source exposure and lagged production
  assert.match(src,/rates\[3\]=attackForm\.xaPer90/)
  assert.match(src,/source-window-attack-v1/)
  assert.match(src,/lagged-verified-form-v1/)
+ assert.match(src,/laggedInStableSource=String\(stableInput\.source_note\|\|""\)\.includes\("lagged-verified-form-v1"\)/)
  assert.doesNotMatch(src,/scout_player_weekly_points"\)\.update\(/)
 })
