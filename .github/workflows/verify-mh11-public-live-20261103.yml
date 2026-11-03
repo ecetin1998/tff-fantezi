@@ -17,6 +17,7 @@ jobs:
     env:
       BASE_URL: https://fanteziligrehberi.com
       EXPECTED_GAMEWEEK: "11"
+      EXPECTED_RUN_ID: "754c1985-09fb-4df0-a6eb-812adfad2568"
     steps:
       - uses: actions/checkout@v4
       - name: Verify published API and rendered MH11 across pages
@@ -29,4 +30,4 @@ jobs:
         run: |
           set -euo pipefail
           curl -fsSL --max-time 45 -H 'Cache-Control: no-cache' "$BASE_URL/api/scout-data?section=matches&limit=9" |
-            jq -e '.current_run.gameweek == 11 and .current_run.is_current == true and .current_run.status == "ready" and (.matches|length) == 9'
+            jq -e --arg run "$EXPECTED_RUN_ID" '.current_run.gameweek == 11 and .current_run.id == $run and .current_run.is_current == true and .current_run.status == "ready" and (.matches|length) == 9'
