@@ -95,6 +95,13 @@ test("evidence fetch pages both sources and preserves 500-row boundaries",async(
   assert.equal(res.data.verified.length,501)
   assert.equal(calls.length,4)
   assert.equal(groupRecentAttack(res.data.advanced).size,501)
+  // The bounded MH11 two-week form must receive verified xG/xA; requesting
+  // only shots and key passes silently disables the fallback.
+  const verifiedCall=calls.find(x=>x.table==="scout_verified_weekly_attack")
+  assert.ok(verifiedCall)
+  const reader=readFileSync(new URL("../supabase/functions/weekly-model-lifecycle/recentAttackForm.mjs",import.meta.url),"utf8")
+  assert.match(reader,/read\("scout_verified_weekly_attack","player_id,gameweek,shots,key_passes,xg,xa,source,observed_at"\)/)
+
 })
 test("both lifecycle paths use stable inputs, form rates and source notes, with no role/point overwrite",()=>{
   const code=readFileSync(new URL("../supabase/functions/weekly-model-lifecycle/index.ts",import.meta.url),"utf8")
