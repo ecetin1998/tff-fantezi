@@ -1,83 +1,71 @@
-# MH11 kaynak doğrulaması ve kapanış durumu — 8 Kasım 2026
+# MH11 kaynak doğrulaması ve kapatma engelleri — 9 Kasım 2026
 
-Bu belge, **MH11 için kaynakları kontrol edilen maç sonuçları ve kısmi gol verileri** ile kapatmayı engelleyen eksikleri kaydeder. Resmî Fantasy oyuncu puanı çıktısı değildir. **Dondurulmuş MH11 backtest, 456 oyuncunun henüz doğrulanmamış sıfır dakikası, kadro sonuçları ve canlı model performansı değiştirilmedi.**
+**Durum: 9/9 futbol maçı bitti; 0/9 Fantasy kapanışı; 0/456 kesin oyuncu puanı.** Bu dosya değişken haftalık tahminleri veya geçmiş frozen backtest'i güncellemez. Aşağıdaki kayıtlar resmî TFF Fantasy puanı değil, **kısmi ve kaynak bağlantılı futbol olayları**dır.
 
-## Sonuçlar ve TFF maç ID eşleştirmesi
+## Maç sonuçları ve iki ayrı kimlik sistemi
 
-Sistemdeki iç `scout_match_history.match_id` ile TFF dış ID'si **aynı alan değildir**. Maçlar yalnız takım çiftleri ve saatleri ile doğrulanarak `scout_match_external_ids` tablosuna işlendi.
+İç maç ID'leri asla TFF maç ID'si sanılmamalı; eşleştirmeler `scout_match_external_ids` tablosuna takım çiftleriyle doğrulandı.
 
-| İç maç ID | TFF ID | Maç | Skor |
-| ---: | ---: | --- | :---: |
-| 317874 | 317874 | Gaziantep – Kasımpaşa | 0–2 |
-| 317875 | 317875 | Eyüpspor – Kocaelispor | 0–2 |
-| 317876 | 317882 | Samsunspor – Konyaspor | 1–0 |
-| 317877 | 317878 | Göztepe – Başakşehir | 1–2 |
-| 317878 | 317880 | Galatasaray – Amed | 4–3 |
-| 317879 | 317877 | Rizespor – Erzurumspor | 2–1 |
-| 317880 | 317879 | Çorum FK – Fenerbahçe | 0–5 |
-| 317881 | 317876 | Alanyaspor – Trabzonspor | 0–2 |
-| 317882 | 317881 | Beşiktaş – Gençlerbirliği | 3–0 |
+| İç ID | TFF ID | Maç | Skor | Kısmi oyuncu kaydı | Bilinen ilk 11 | Bilinen oyuna giren | Doğrulanmış GK kurtarışı |
+| ---: | ---: | --- | :---: | ---: | ---: | ---: | ---: |
+| 317874 | 317874 | Gaziantep – Kasımpaşa | 0–2 | 5 | 5 | 0 | 0 |
+| 317875 | 317875 | Eyüpspor – Kocaelispor | 0–2 | 5 | 4 | 1 | 0 |
+| 317876 | 317882 | Samsunspor – Konyaspor | 1–0 | 7 | 5 | 2 | 0 |
+| 317877 | 317878 | Göztepe – Başakşehir | 1–2 | 9 | 7 | 2 | 0 |
+| 317878 | 317880 | Galatasaray – Amed | 4–3 | 14 | 12 | 2 | 2 |
+| 317879 | 317877 | Rizespor – Erzurumspor | 2–1 | 7 | 6 | 1 | 0 |
+| 317880 | 317879 | Çorum FK – Fenerbahçe | 0–5 | 9 | 8 | 1 | 0 |
+| 317881 | 317876 | Alanyaspor – Trabzonspor | 0–2 | 5 | 5 | 0 | 0 |
+| 317882 | 317881 | Beşiktaş – Gençlerbirliği | 3–0 | 4 | 3 | 1 | 0 |
+| **Toplam** | | **9 maç** | | **65** | **55** | **10** | **2** |
 
-Sistem güncellemesi: `scout_match_history` 9/9 **Bitti**, **Puan doğrulama bekleniyor**; `fixtures.is_finished` 9/9 true. Bu **Fantasy KAPANDI değildir**.
+`scout_match_history.match_status` 9/9 `Bitti`, `fantasy_closure` ise 9/9 `Puan doğrulama bekleniyor`. `fixtures.is_finished` 9/9 true. Hiçbir maçın Fantasy kapanışı yapılmadı.
 
-Kaynaklar: [beIN MH11 fikstür](https://www.beinsports.com.tr/lig/super-lig/fikstur), [Çorum FK–Fenerbahçe TFF maç detayları](https://www.tff.org/Default.aspx?macId=317879&pageId=29), [Çorum FK resmî maç akışı](https://corumfk.com.tr/mac/2026-11-08-corum-fk-fenerbahce), [Galatasaray resmî maç haberi](https://www.galatasaray.org/haber/futbol/galatasaray-4-3-amed-sportif-faaliyetler/61341), [Eyüpspor–Kocaelispor beIN](https://beinsports.com.tr/haber/eyupspor-kocaelispor), [Alanyaspor–Trabzonspor beIN](https://www.beinsports.com.tr/mac-merkezi/corendon-alanyaspor-trabzonspor/1515834).
+## Kaydedilen kaynaklı futbol olayları
 
-## Kısmi kaynaklı gol bileşeni
+- **27 normal gol + 1 kendi kalesine gol**. Mevcut Scout mevkileriyle gol bileşeni toplam **125 puan** (OG −2 içerir).
+- **19 aday asist**, **26 sarı kart**, **1 ikinci-sarıdan kırmızı kart** (Gençlerbirliği / Metehan Baltacı). Kırmızı kart alan oyuncunun sarı kart sayısı **NULL** bırakıldı: çift sarı–kırmızı Fantasy hükmü doğrulanmadan iki kez kesinti yapılmamalı.
+- Bilinen olayları *varsayımsal olarak* TFF puan katsayılarıyla toplarsak `125 + 19×3 − 26 − 3 = 153` çıkar. **Bu bir haftalık toplam Fantasy puanı değildir:** özellikle asist ataması, ikinci sarı/kırmızı, kaçan penaltılar, 60 dakika, temiz sayfa, gol yeme, bonuslar henüz kesinleştirilmedi.
+- **55 bilinen ilk 11** oyuncusu (`started=true`, `verified_first_11=true`); **10 bilinen oyuna giren** oyuncu (`started=false`, `verified_substitution=true`). Kaydı olmayan oyuncuların `started=false` veya `minutes=0` olduğu **söylenemez**.
+- **İki per-player kurtarış**: Galatasaray kalecisi Uğurcan Çakır **2**, Amed kalecisi Alban-Marc Lafont **3**. Her iki rakam [GNCScout maç listesi](https://www.gncscout.com/match/19746558-galatasaray-amed-sk) ve [MatchCalendar oyuncu istatistikleri](https://matchcalendar.football/tr/competition/super-lig/match/galatasaray-vs-amed/) kaynaklarıyla eşleştirildi. Diğer maçlarda yalnız takım toplamına dayanarak kaleci kurtarışı doldurulmadı.
+- Kısmi satırlarda bilinmeyen goller/asistler/kartlar NULL kaldı. `evidence_status=partial`; hiçbirini resmî Fantasy kaydı olarak işaretlemeyin.
 
-`scout_match_player_evidence` MH11 için **32 ayrı oyuncu-maç kısmi kayıt** içeriyor (9 maç; 24 gol kaydı, diğer 8 kaynaklı olay oyuncusu). Toplam **27 normal gol + 1 kendi kalesine gol**, tüm maç skorlarıyla mutabık. Oyuncuların Scout mevki tanımlarına göre Fantasy gol bileşeni: **125 puan**. Bu, **tüm oyuncuların haftalık Fantasy puanlarının toplamı değil**.
+### Kontrol kaynakları
 
-| İç maç ID | Normal gol | Kendi kalesine gol | Gol bileşeni |
-| ---: | ---: | ---: | ---: |
-| 317874 | 2 | 0 | +9 |
-| 317875 | 2 | 0 | +10 |
-| 317876 | 1 | 0 | +5 |
-| 317877 | 3 | 0 | +13 |
-| 317878 | 6 | 1 (Alban-Marc Lafont) | +27 |
-| 317879 | 3 | 0 | +12 |
-| 317880 | 5 | 0 | +25 |
-| 317881 | 2 | 0 | +11 |
-| 317882 | 3 | 0 | +13 |
-| **Toplam** | **27** | **1** | **+125** |
+- [Gaziantep kulüp maç özeti](https://www.gaziantepfk.org/haberler/mac-sonucu-gaziantep-0-2-kasimpasa) — ilk 11, değişiklik ve kartlar.
+- [Eyüpspor–Kocaelispor olay akışı](https://www.fotmob.com/tr/matches/kocaelispor-vs-eyupspor/bmsfk), [maç istatistikleri](https://www.futbolradar.com/mac/eyupspor-kocaelispor-7-kasim-2026.html).
+- [Samsunspor–Konyaspor kadro](https://www.kamu1.net/mac/samsunspor-konyaspor-7-kasim-2026), [Konyaspor resmî raporu](https://www.konyaspor.org.tr/index.php/haber/samsunspor-1-0-tumosan-konyasporumuz3829).
+- [Göztepe–Başakşehir olay akışı](https://www.futbolradar.com/mac/goztepe-basaksehir-7-kasim-2026).
+- [Galatasaray resmî raporu](https://www.galatasaray.org/haber/futbol/galatasaray-4-3-amed-sportif-faaliyetler/61341), [ayrıntılı kadro](https://web-production-a0606.up.railway.app/tr/match/galatasaray-vs-amed-2026-11-07/lineups).
+- [Rizespor–Erzurumspor DHA raporu](https://www.dha.com.tr/spor/caykur-rizespor-erzurumspor-fk-2-1-2977515).
+- [Çorum FK resmî olay akışı](https://corumfk.com.tr/mac/2026-11-08-corum-fk-fenerbahce), [TFF maç kaydı](https://www.tff.org/Default.aspx?macId=317879&pageId=29).
+- [Alanyaspor–Trabzonspor canlı anlatım](https://www.haber.com/spor/alanyaspor-trabzonspor-canli-anlatim-31714).
+- [Beşiktaş–Gençlerbirliği AA raporu](https://www.aa.com.tr/tr/spor/besiktas-sahasindan-galibiyetle-ayrildi/4116284), [Beşiktaş maç kadrosu](https://www.bjk.com.tr/tr/mac_merkezi/canli/25506).
 
-Örnekler: Greenwood iki gol (MID, +10), İrfan Can Kahveci iki gol (MID, +10), Ali Sowe iki gol (FWD, +8), Vlahović iki gol (FWD, +8). **Kendi kalesine gol** cezası, Scout kaynak notundaki `own_goal=1` değeriyle açıkça etiketlidir. Veri tablosundaki `goals=0` o oyuncunun normal gol atmadığını ifade eder; OG cezası notlarda yer alır.
+## Kapatmayı engelleyen TAM eksikler
 
-**Kısmi olay kanıtı ilavesi:** Maç zaman çizelgelerinden ayrıca **7 aday asist** (Çorum FK–Fenerbahçe 5; Alanyaspor–Trabzonspor 2) ve **2 sarı kart** (Mohamed Diomandé, Nélson Semedo) eşleştirildi. `Oğuz Aydın` gol kaydına asist eklendi; diğer 8 yeni oyuncu için kısmi satır açıldı. Bunlar yalnızca kaynaklı olaylardır; resmî Fantasy asist/bonus ataması olarak kabul edilmedi. Olay bazlı aday katkı: 7×3−2×1 = **+19**; gol katkısıyla birlikte **144 aday olay puanı** (tüm haftanın Fantasy skoru değildir).
+1. **Kesin oynama/dakika verisi:** 65 kısmi kaydın hiçbirinde bitmiş resmî oyuncu dakikası yok (`minutes` tamamen NULL). Maç içi değişiklik dakikasını doğrudan kesin maç dakikası gibi yazmayın. Toplam 9×22=**198 ilk 11** olmalı; şu an yalnız **55'i** mevcut kayıtlarla eşlendi; en az **143 ilk 11 kaydı** daha doğrulanıp kaydedilmeli. Bu, yalnız ilk 11 eksikliği; ek oyuna girenler ve tüm yedekler ayrıca gerekli.
+2. **Kadro/dakika 0 doğrulaması:** aktif **456 oyuncunun tamamı** için kaynaklı gerçekleşen süre veya gerçek DNP kanıtı şart. Henüz yalnız **65 kısmi oyuncu kaydı** var; diğerlerinin yokluğu 0 dk kanıtı değildir. İlgili `scout_player_weekly_points` tablosunda MH11 için **0 final satır** bulunuyor.
+3. **Kaleci kurtarışları ve cezalar:** şimdilik 2 GK için per-player kurtarış mevcut, kalan maçların 16 ilk 11 kalecisi kaynaklı ve kimlik eşlemeli doğrulanmalı. Penaltı kurtarma, kırmızı kart (özellikle ikinci sarı) ve sarı kart ataması resmî Fantasy kurallarıyla eşleştirilmeli. Örn. Çorum maçında futbol web kaynaklarının takım isabetli şut/kurtarış toplamları birbiriyle tutarsız; doğrudan kaleciye yazılmadı.
+4. **Fantasy oyununa göre kesin puan:** 19 aday asistin resmî oyun kredisi, kalan eksik asist/ceza, gol yememe, 2 gol yeme kesintisi, +1/+2 süre ve maçın en iyi 3 oyuncusuna bonus [3,2,1] eşleşmeli.
+5. **Kaynak ve versiyon:** `scout_backtest_weeks` MH11 `live_frozen/status=open/actual_count=0`. `closureSource.mjs` MH11 için doğrudan kaynak türü `fresh_closed_actual` bekliyor; tarihsel MH8–10 owner-approved özel kaynakları MH11'e otomatik genişletmeyin. Fantasy resmî dışa aktarımı veya tam maç-oyuncu olay seti üzerinden bağımsız denetim olmadan `KAPANDI` yazılamaz.
 
-**Eksik alanlar:** `minutes`, `started`, `red_cards`, `saves` henüz güvenle doğrulanmamıştır; çoğu oyuncu için `assists` ve `yellow_cards` da **NULL** kalmıştır, 0 yapılmamıştır. Bu nedenle dakika, gol yememe, yenilen gol, kurtarış, diğer kartlar, penaltı ve maç bonusları **henüz kesin hesaplanamaz**. Kaynakta adı geçmeyen oyuncuları 0 dakika veya 0 asist diye işaretlemeyin.
+### Toplu veri kaynağı uyarısı
 
-## Mevcut yayın ve kapanış kriterleri
+Çevrimiçi [fport/super-lig-fantasy](https://huggingface.co/datasets/fport/super-lig-fantasy) seti birçok maç-oyuncu olayı içeriyor olsa da kaynak açıkça **resmî Fantasy puanlarının doğrulanmadığını** ve **ticari kullanım kısıtını** bildiriyor. Fantezi Lig Rehberi üyelikli/Pro bir ürün olduğu için o set canlı veri havuzuna toplu kopyalanmadı.
 
-- `scout_player_weekly_points` MH11 için **0 kesinleşmiş satır / 456 aktif oyuncu**.
-- `scout_backtest_weeks` MH11 **open**, `actual_count=0`.
-- `scout_match_history.fantasy_closure` **0/9 KAPANDI**.
-- 456 oyuncunun **gerçek 0 dk** durumunu, yalnızca ilk 11 veya goller görülmedi diye çıkarmayın.
-- `scout_player_season_stats` MH11 ve takım sezon istatistiklerinin tazelenmesi ayrıca doğrulanmalı.
-- Resmî oyun bonusu ve asist yorumunu, saha dışı istatistik sağlayıcısının hesapladığı puanla karıştırmayın. [TFF Fantasy puan kuralları](https://tfffantezilig.com/yardim?tab=kurallar-1) referanstır.
-- `scout_close_live_backtest` sadece doğru, maç öncesi dondurulmuş run ve **tüm** 456 final oyuncu satırı / kaynak katmanları geçtikten sonra çalıştırılabilir.
-- Yeni MH12 50K koşusuna **eksik MH11 puanlarını sıfır sayıp** geçmeyin; öğrenme ve dakika hatası güvenilirliğini bozar.
-- Bonus eşitlikleri, kendi kalesine gol, ceza ve kaleci kurtarışı Fantasy sistemine göre son kez karşılaştırılmalıdır.
-
-## Read-only doğrulama sorgusu
+## Kapanışa hazır olma kontrolü (salt okunur)
 
 ```sql
-SELECT m.gameweek,
- count(*) AS fixtures,
- count(*) FILTER (WHERE m.match_status='Bitti') AS finished,
- count(*) FILTER (WHERE m.fantasy_closure='KAPANDI') AS fantasy_closed
-FROM public.scout_match_history m
-WHERE m.season='2026-27' AND m.gameweek=11
-GROUP BY m.gameweek;
-
-SELECT count(*) AS evidence_players,
- count(*) FILTER (WHERE minutes IS NOT NULL) AS minutes_sourced,
- count(*) FILTER (WHERE assists IS NOT NULL) AS assists_sourced,
- count(*) FILTER (WHERE saves IS NOT NULL) AS saves_sourced
-FROM public.scout_match_player_evidence
-WHERE season='2026-27' AND gameweek=11;
-
-SELECT count(*) AS final_actuals
-FROM public.scout_player_weekly_points
-WHERE gameweek=11 AND is_final=true;
+SELECT
+ (SELECT count(*) FROM public.scout_match_history WHERE gameweek=11 AND season='2026-27' AND match_status='Bitti') AS finished_matches,
+ (SELECT count(*) FROM public.scout_match_history WHERE gameweek=11 AND season='2026-27' AND fantasy_closure='KAPANDI') AS fantasy_closed_matches,
+ (SELECT count(*) FROM public.scout_match_player_evidence WHERE season='2026-27' AND gameweek=11) AS partial_actor_rows,
+ (SELECT count(*) FROM public.scout_match_player_evidence WHERE season='2026-27' AND gameweek=11 AND verified_first_11) AS verified_starters,
+ (SELECT count(*) FROM public.scout_match_player_evidence WHERE season='2026-27' AND gameweek=11 AND verified_substitution) AS verified_subs,
+ (SELECT count(*) FROM public.scout_match_player_evidence WHERE season='2026-27' AND gameweek=11 AND minutes IS NOT NULL) AS exact_minutes,
+ (SELECT count(*) FROM public.scout_match_player_evidence WHERE season='2026-27' AND gameweek=11 AND saves IS NOT NULL) AS per_keeper_saves,
+ (SELECT count(*) FROM public.scout_player_weekly_points WHERE gameweek=11 AND is_final) AS final_fantasy_rows;
 ```
 
-**Kapanış kararı:** MH11 futbol skorları sonuçlandı ancak Fantasy doğrulaması tamamlanmadı. Skorları geriye çevirmeyin, oyuncu puanlarını varsayımla doldurmayın; `fantasy_closure` KAPANDI olmasın.
+**Karar: MH11 futbol sonuçları kesin, Fantasy oyuncu puanları henüz değil.** 0/0 uydurarak modeli eğitmeyin, resmî çıktı olmadan 456 final satırı üretmeyin, `scout_close_live_backtest` ve MH12 canlı terfisini eksik veri üzerinden başlatmayın.
