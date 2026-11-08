@@ -15,6 +15,7 @@ const jsTests=[
   'model/mh8GoalEventStaging.test.js',
   'model/replayAudit.test.js',
   'model/publicReadCompatibility.test.js',
+  'model/verifiedFrozenWeeklyAccuracy.test.js',
   'model/auditHardening.test.js',
   'model/scoutApiCache.test.js',
   'model/scoutFeedStructure.test.js',
