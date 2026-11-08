@@ -38,4 +38,14 @@ Sources matched the match crosswalk in `scout_match_external_ids`. All 126 remai
 4. **Unconfirmed penalty events**, possible card or assist scorer adjudication, and independent finality/provenance. Observed assists 22 and on-pitch conceded corrections verified, but do not assume missing penalty event is proven zero.
 5. **Technical promotion**: Must source-approve **456 final** `mh11_owner_approved_independent_score_events` weekly scores (never claim TFF official), close all 9 match Fantasy statuses, materialize 456 player + 18 team season summaries through MH11 without inventing unobserved advanced stats, close only original pre-kickoff frozen backtest; then verified MH12 `scout_match_history` 9 fixtures, QA, 50K and publish. `fixtures` already has 9 MH12 games; the model-specific table is empty.
 
-**No 805-point transfer to official `scout_player_weekly_points`, no `is_final`, no backtest close and no MH12 simulation during this audit.** Never present 805 as official TFF Fantasy awarded score.
+**No unverified independent score transfer to official `scout_player_weekly_points`, no `is_final`, no backtest close and no MH12 simulation during this audit.** Never present provisional totals as official TFF Fantasy awarded score.
+
+## 9 Kasım — Proje sahibinin 5 kaleci kurtarışını onaylaması
+
+Proje sahibi MH11 için şu kurtarışları açıkça verdi: **Ataberk Dadakdeniz 3; Deniz Dilmen 3; Ederson 9; Zafer Görgen 3; Marcos Felipe 2.** Bunlar birinci elden kullanıcı teyitli spor istatistiğidir, **TFF Fantasy resmi verilmiş puanı olarak gösterilemez**.
+
+Bu değerler `scout_independent_score_candidates` ve `scout_match_player_evidence` tablolarının her ikisine de kontrollü biçimde kaydedildi; beşine de `[MH11_GK_SAVE_OWNER_CONFIRMATION_20261109]` kaynak notu düşüldü. Dördü önceki değerleriyle aynıydı; **Zafer Görgen 2→3 kurtarış** değişimi `save_points` 0→1, `base_points` 2→3, `estimated_total` 2→3 değiştirdi. Diğer dört oyuncunun kurtarış / toplam puanları: Ataberk 3/2, Deniz 3/2, Ederson 9/9, Marcos Felipe 2/0. 3 kurtarışta 1 puan kuralı uygulanmıştır.
+
+**Yeni MH11 taslak toplam: 727 temel + 79 tahminî bonus = 806 puan / 456 oyuncu.** Yeni base sıralamasında bonuslar yeniden denetlendi: **0 bonus uyuşmazlığı, 39 bonus alıcısı, 79 bonus puanı**. `keeper_save_disputed` etiketi beş satırdan kalktı, önceki kaynak anlaşmazlıkları `evidence_note` içinde korunuyor; tüm 456 satır `provisional` statüsünde, `official_fantasy_not_verified` flag'i devam ediyor.
+
+**Kapanış kararı değişmedi:** MH11 9 maç için Fantasy `KAPANDI` sayısı 0; 456 oyuncunun `is_final` haftalık puan sayısı 0. Resmî bonus, oynanan dakikanın resmî dökümü ve puana etki edebilen diğer olayların doğrulanması/bağımsız skor dizisi sahibinin kesin onayı olmadan final bayraklarını kaldırma veya MH12'ye eğitim verisi olarak alma.
