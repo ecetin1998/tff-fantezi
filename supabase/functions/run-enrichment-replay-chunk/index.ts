@@ -67,16 +67,17 @@ function expectedKeeperSaves(opponentGoalLambda,per90Saves,exposure=1){
 
 // Shots on target, goals conceded and saves must belong to the SAME sampled fixture.
 // A goal consumes a shot on target; 9 saves with 2 conceded needs at least 11 on target.
-function keeperSavesForScore(conceded,opponentLambda,per90Saves,exposure,poissonDraw,attackingTeamSot=null){
+function keeperSavesForScore(conceded,opponentLambda,per90Saves,exposure,poissonDraw,attackingTeamSot=null,attackingTeamWeight=.15){
   const goals=Math.max(0,num(conceded));
   const exp=Math.max(0,num(exposure));
   const baselineShots=Math.max(0,num(opponentLambda))*exp
     +expectedKeeperSaves(opponentLambda,per90Saves,exp);
-  // Snapshot of the attacking opponent's SOT history; 15% weight and
-  // only if it was sourced before the FIRST gameweek fixture.
+  // Snapshot of the opponent's SOT history; at most 15% weight with
+  // time-decay for old but still defensible pre-first-kickoff evidence.
   const sourced=typeof attackingTeamSot==="number"&&Number.isFinite(attackingTeamSot)
     &&attackingTeamSot>=1.5&&attackingTeamSot<=10;
-  const shotsMean=sourced ? .85*baselineShots+.15*attackingTeamSot*exp : baselineShots;
+  const blendWeight=sourced ? Math.max(0,Math.min(.15,Number(attackingTeamWeight)||0)) : 0;
+  const shotsMean=(1-blendWeight)*baselineShots+blendWeight*(sourced?attackingTeamSot:0)*exp;
   return Math.max(0,poissonDraw(shotsMean)-goals);
 }
 
@@ -348,8 +349,10 @@ Deno.serve(async(req)=>{
           if(SCORING.conceded_per_2[p.pos])comp.conceded[i]=Math.floor(gc[i]/2)*SCORING.conceded_per_2[p.pos];
           if(p.pos==="GK"){
             const opponentTeam=p.club===clubs[0]?clubs[1]:clubs[0];
-            const incomingSot=keeperSotTeams[String(opponentTeam)]?.shots_on_target;
-            const normalSaves=keeperSavesForScore(gc[i],opponentLambda,rates[6],exposure,poisson,incomingSot);
+            const incomingEvidence=keeperSotTeams[String(opponentTeam)]||null;
+            const incomingSot=incomingEvidence?.shots_on_target;
+            const incomingWeight=incomingEvidence?.weight??.15;
+            const normalSaves=keeperSavesForScore(gc[i],opponentLambda,rates[6],exposure,poisson,incomingSot,incomingWeight);
             // A saved penalty counts as a keeper save, never a separate invented shot.
             comp.saves[i]=Math.floor((normalSaves+savedPenaltyByKeeper[i])/3)*SCORING.saves_per_3;
           }
