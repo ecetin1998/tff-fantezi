@@ -14,9 +14,9 @@ assert.match(workflow,/action":"close_backtest"/)
 assert.match(workflow,/action:"prepare"/)
 assert.match(workflow,/action:"prepare_current"/,'Current MH must be refreshable before kickoff when source data advances.')
 assert.match(workflow,/code_sha:\$sha/,'Lifecycle must stamp the source commit SHA into generated runs.')
-assert.equal((workflow.match(/for part in \\$\\(seq 0 99\\); do/g)||[]).length,2,
+assert.equal((workflow.match(/for part in \$\(seq 0 99\); do/g)||[]).length,2,
   'Both current-week and rollover 50K jobs must run 100 bounded Edge chunks.')
-assert.equal((workflow.match(/draws=500&seed=\\$seed/g)||[]).length,2,
+assert.equal((workflow.match(/draws=500&seed=\$seed/g)||[]).length,2,
   'Each simulation chunk is capped at 500 draws to respect Edge CPU budgets.')
 assert.equal(100*500,50000,'Changing chunk size must not change total 50K draws.')
 assert.match(workflow,/--retry 5/,'Simulation chunks must retry transient Edge failures.')
