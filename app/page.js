@@ -61,10 +61,10 @@ export default async function Home(){
         </div>
         <h1>Fantezi Lig Rehberi<br/><span>Veriyi oku, kararı sen ver.</span></h1>
         <p>Oyuncu rolü, dakika ihtimali, maç modeli ve puan dağılımını tek bir karar ekranında birleştiriyoruz. Tek bir “doğru kadro” yerine, nedenini görebildiğin daha güçlü seçimler yap.</p>
-        <div className="home-intro-actions">
-          <Link href="/players" className="cta">Oyuncuları incele</Link>
-          <Link href="/squad" className="secondary">Kadromu kur</Link>
-          <Link href="/matches" className="text-action">Maç modeline git <span>→</span></Link>
+        <div className="home-intro-actions" aria-label="Hızlı erişim">
+          <Link href="/players" className="cta home-cta-btn home-cta-primary">Oyuncuları incele</Link>
+          <Link href="/squad" className="secondary home-cta-btn home-cta-outline">Kadromu kur</Link>
+          <Link href="/matches" className="secondary home-cta-btn home-cta-outline">Maç modeline git</Link>
         </div>
         <div className="home-hero-mini">
           <div><b>{playerCount}</b><span>aktif oyuncu</span></div>
