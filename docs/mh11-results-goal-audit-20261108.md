@@ -24,7 +24,7 @@ Kaynaklar: [beIN MH11 fikstür](https://www.beinsports.com.tr/lig/super-lig/fiks
 
 ## Kısmi kaynaklı gol bileşeni
 
-`scout_match_player_evidence` MH11 için **24 ayrı oyuncu-maç kısmi kayıt** içeriyor (9 maç). Toplam **27 normal gol + 1 kendi kalesine gol**, tüm maç skorlarıyla mutabık. Oyuncuların Scout mevki tanımlarına göre Fantasy gol bileşeni: **125 puan**. Bu, **tüm oyuncuların haftalık Fantasy puanlarının toplamı değil**.
+`scout_match_player_evidence` MH11 için **32 ayrı oyuncu-maç kısmi kayıt** içeriyor (9 maç; 24 gol kaydı, diğer 8 kaynaklı olay oyuncusu). Toplam **27 normal gol + 1 kendi kalesine gol**, tüm maç skorlarıyla mutabık. Oyuncuların Scout mevki tanımlarına göre Fantasy gol bileşeni: **125 puan**. Bu, **tüm oyuncuların haftalık Fantasy puanlarının toplamı değil**.
 
 | İç maç ID | Normal gol | Kendi kalesine gol | Gol bileşeni |
 | ---: | ---: | ---: | ---: |
@@ -41,7 +41,9 @@ Kaynaklar: [beIN MH11 fikstür](https://www.beinsports.com.tr/lig/super-lig/fiks
 
 Örnekler: Greenwood iki gol (MID, +10), İrfan Can Kahveci iki gol (MID, +10), Ali Sowe iki gol (FWD, +8), Vlahović iki gol (FWD, +8). **Kendi kalesine gol** cezası, Scout kaynak notundaki `own_goal=1` değeriyle açıkça etiketlidir. Veri tablosundaki `goals=0` o oyuncunun normal gol atmadığını ifade eder; OG cezası notlarda yer alır.
 
-**Kısmi kayıt alanları:** `minutes`, `started`, `assists`, `yellow_cards`, `red_cards`, `saves` henüz güvenle doğrulanmamıştır ve **NULL tutulmuştur**, 0 yapılmamıştır. Bu nedenle dakika, asist, gol yememe, yenilen gol, kurtarış, kart, penaltı ve maç bonusları **henüz hesaplanamaz**.
+**Kısmi olay kanıtı ilavesi:** Maç zaman çizelgelerinden ayrıca **7 aday asist** (Çorum FK–Fenerbahçe 5; Alanyaspor–Trabzonspor 2) ve **2 sarı kart** (Mohamed Diomandé, Nélson Semedo) eşleştirildi. `Oğuz Aydın` gol kaydına asist eklendi; diğer 8 yeni oyuncu için kısmi satır açıldı. Bunlar yalnızca kaynaklı olaylardır; resmî Fantasy asist/bonus ataması olarak kabul edilmedi. Olay bazlı aday katkı: 7×3−2×1 = **+19**; gol katkısıyla birlikte **144 aday olay puanı** (tüm haftanın Fantasy skoru değildir).
+
+**Eksik alanlar:** `minutes`, `started`, `red_cards`, `saves` henüz güvenle doğrulanmamıştır; çoğu oyuncu için `assists` ve `yellow_cards` da **NULL** kalmıştır, 0 yapılmamıştır. Bu nedenle dakika, gol yememe, yenilen gol, kurtarış, diğer kartlar, penaltı ve maç bonusları **henüz kesin hesaplanamaz**. Kaynakta adı geçmeyen oyuncuları 0 dakika veya 0 asist diye işaretlemeyin.
 
 ## Mevcut yayın ve kapanış kriterleri
 
