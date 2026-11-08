@@ -206,7 +206,7 @@ console.log('DGW, opponent-aware saves, red-card and bonus-tie checks passed');
   const fs=require('node:fs');
   for(const f of ['supabase/functions/run-live-sim-chunk/index.ts','supabase/functions/run-enrichment-replay-chunk/index.ts']){
     const edge=fs.readFileSync(f,'utf8');
-    assert.match(edge,/keeperSavesForScore\(gc\[i\],opponentLambda,rates\[6\],exposure,poisson\)/,
+    assert.match(edge,/keeperSavesForScore\(gc\[i\],opponentLambda,rates\[6\],exposure,poisson,incomingSot\)/,
       f+' must couple saves to the actual conceded match score');
     assert.match(edge,/keeperPenaltySaveChance\(P\[opponentGK\]\.rates\[8\],attackingLambda,mins\[opponentGK\]\/90\)/,
       f+' must use the defending goalkeeper prior for the same penalty attempt');
