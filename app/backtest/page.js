@@ -195,6 +195,20 @@ export default async function BacktestPage(){
           </tr>)}</tbody>
         </table>
       </div>:<p className="muted">Henüz kaynak eşleşmesi ve maç öncesi dondurma şartlarını sağlayan kapalı hafta bulunamadı.</p>}
+      {latestVerified&&Object.keys(latestVerified.minutes_by_position||{}).length?<div className="table-scroll" style={{marginTop:16}}>
+        <p className="muted">Son kapanan haftada mevki bazlı dakika/ilk 11 tespiti • yalnız gerçekleşen süresi doğrulanmış oyuncular</p>
+        <table className="backtest-table">
+          <thead><tr><th>Mevki</th><th>Doğrulanmış</th><th>30+ dk isabet</th><th>30+ dk yakalama</th><th>Beklenmedik 60+ dk</th><th>Beklenen 30+ ama gerçek &lt;30</th></tr></thead>
+          <tbody>{Object.entries(latestVerified.minutes_by_position).map(([position,m])=><tr key={position}>
+            <td>{({GK:'KL',DEF:'DEF',MID:'OS',FWD:'FOR'})[position]||position}</td>
+            <td>{m.verified}</td>
+            <td>{pct(m.active_30_precision)}</td>
+            <td>{pct(m.active_30_recall)}</td>
+            <td>{m.surprise_60}</td>
+            <td>{m.predicted_30_but_under_30}</td>
+          </tr>)}</tbody>
+        </table>
+      </div>:null}
       {latestVerified?<div className="model-health-coverage-grid" style={{marginTop:20}}>
         {Object.entries(latestVerified.by_position||{}).map(([position,metrics])=><div key={position} className="card">
           <span>{({GK:'KL',DEF:'DEF',MID:'OS',FWD:'FOR'})[position]||position} • {metrics.n} oyuncu</span>
@@ -291,8 +305,8 @@ export default async function BacktestPage(){
         {activeLearning.length?<div className="learning-grid">{activeLearning.map(item=><article key={item.id} className="learning-card">
           <div><span>{learningPriority(item)<99?'Sıra '+learningPriority(item)+' • ':''}{'MH'+item.after_gameweek+' sonrası'}</span><em>{learningStatus[item.status]||item.status}</em></div>
           <h3>{localizeModelText(item.component)}</h3><p>{localizeModelText(item.summary_tr||item.signal)}</p>
-        </article>)}</div>:<div className="empty-learning-state">Şu an müdahale bekleyen açık model sorunu yok.</div>}
-        {resolvedLearning.length?<><div className="panel-head" style={{marginTop:24}}><div><span className="eyebrow">KAPANAN KARARLAR</span><h3>Çözülen veya değişiklik gerektirmeyenler</h3></div><small>{resolvedLearning.length} kayıt</small></div>
+        </article>)}</div>:<div className="empty-learning-state">Karar bekleyen açık aksiyon kaydı yok. Tahminlerdeki riskler ve devam eden performans takibi yukarıdaki doğrulanmış haftalık ölçümlerde gösterilir.</div>}
+        {resolvedLearning.length?<><div className="panel-head" style={{marginTop:24}}><div><span className="eyebrow">KAPANAN KARARLAR</span><h3>Sonuçlandırılan müdahale kararları</h3></div><small>{resolvedLearning.length} kayıt</small></div>
         <div className="learning-grid">{resolvedLearning.map(item=><article key={item.id} className="learning-card">
           <div><span>{'MH'+item.after_gameweek+' sonrası'}</span><em>{learningStatus[item.status]||item.status}</em></div>
           <h3>{localizeModelText(item.component)}</h3><p>{localizeModelText(item.summary_tr||item.signal)}</p>
