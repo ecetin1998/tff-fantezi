@@ -3,6 +3,7 @@ import {applyOfficialMinutesEvidence,firstRecordedRate,observedPer90} from "./ex
 import {validFinalWeeklyPlayerRow} from "./closureSource.mjs"
 import {risingMinutesMomentum,trustedMinute} from "./momentum.mjs"
 import {stabilizeVerifiedStarter} from "./verifiedStarter.mjs"
+import {freezeKeeperSot} from "./keeperShotEvidence.mjs"
 import {reconcileDefenderXa} from "./defenderXa.mjs"
 import {fetchTrustedWeeklyEvidence} from "./weeklyEvidence.mjs"
 import {roleTrendFromWeeklyEvidence} from "./roleTrend.mjs"
@@ -549,13 +550,21 @@ async function prepare(sb:any,current:any,status:any,body:any={}){
     playerInputs:inputRows,roleShares:roleRows
   })
   if(!preparationQA.pass)throw new Error("TEAM_PLAYER_PREP_QA_FAILED: "+preparationQA.failures.join(","))
+  const keeperShotQ=await sb.from("scout_team_tactical_profiles")
+    .select("team_id,through_gameweek,matches_played,shots_on_target_per_match,source_updated_at")
+    .eq("season","2026-27").gte("through_gameweek",Math.max(1,target-4))
+    .lt("through_gameweek",target);
+  if(keeperShotQ.error)throw keeperShotQ.error
+  const keeperShotEvidence=freezeKeeperSot(keeperShotQ.data||[],{
+    gameweek:target,firstKickoff:targetKickoff
+  });
   const meta={
     gameweek:target,benchmark_version:benchmark,
     temperature:n(priorMetaQ.data.temperature,1.7),assist_fraction:n(priorMetaQ.data.assist_fraction,.67),
     own_goal_fraction:n(priorMetaQ.data.own_goal_fraction,.031),simulation_seed:2026000000+target*1000,
     source_note:key+" • generated from closed MH"+current.gameweek,
     formations:priorMetaQ.data.formations,team_formations:priorMetaQ.data.team_formations,
-    lineup_factors:priorMetaQ.data.lineup_factors
+    lineup_factors:{...(priorMetaQ.data.lineup_factors||{}),goalkeeper_sot_v1:keeperShotEvidence}
   }
   for(const [table,rows] of [
     ["scout_replay_input_meta",[meta]],["scout_replay_match_inputs",matchInputs],
@@ -569,7 +578,8 @@ async function prepare(sb:any,current:any,status:any,body:any={}){
   const inputHash=await snapshotHash({
     gameweek:target,benchmark,
     players:inputRows.map((x:any)=>[x.player_id,x.club_id,x.position,x.price,x.availability,x.role_probability,x.durations,x.duration_weights,x.rates,x.sub_role,x.role_side]),
-    matches:matchInputs.map((x:any)=>[x.match_id,x.home_team_id,x.away_team_id,x.home_lambda,x.away_lambda])
+    matches:matchInputs.map((x:any)=>[x.match_id,x.home_team_id,x.away_team_id,x.home_lambda,x.away_lambda]),
+    goalkeeper_sot_v1:keeperShotEvidence
   })
   const metaUpdate=await sb.from("scout_model_runs").update({
     input_snapshot_hash:inputHash,source_cutoff:status.latest_source_at,code_sha:codeSha,config_version:configVersion
@@ -1001,7 +1011,16 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
       method:"weekly-auto-team-form-v2",
       model_note:"Kaynaklı son üç maç gol atma/yeme formu + sezon xG/xGA (ölçülü düzeltme)."}
   })
+  const keeperShotQ=await sb.from("scout_team_tactical_profiles")
+    .select("team_id,through_gameweek,matches_played,shots_on_target_per_match,source_updated_at")
+    .eq("season","2026-27").gte("through_gameweek",Math.max(1,gw-4))
+    .lt("through_gameweek",gw);
+  if(keeperShotQ.error)throw keeperShotQ.error
+  const keeperShotEvidence=freezeKeeperSot(keeperShotQ.data||[],{
+    gameweek:gw,firstKickoff:new Date(kickoff).toISOString()
+  });
   const meta={...latestMetaQ.data,benchmark_version:benchmark,created_at:new Date().toISOString(),
+    lineup_factors:{...(latestMetaQ.data.lineup_factors||{}),goalkeeper_sot_v1:keeperShotEvidence},
     source_note:`intraday refresh from ${sourceBenchmark}; source ${latestSourceAt}`+
       (feedback?` • active-fwd-event-share-v1 • baseline ${feedback.config.baselineRunId} • holdouts MH8/MH9 passed`:"")}
   delete (meta as any).id
@@ -1097,7 +1116,8 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
   const inputHash=await snapshotHash({
     gameweek:gw,benchmark,
     players:inputRows.map((x:any)=>[x.player_id,x.club_id,x.position,x.price,x.availability,x.role_probability,x.durations,x.duration_weights,x.rates,x.sub_role,x.role_side]),
-    matches:matchInputs.map((x:any)=>[x.match_id,x.home_team_id,x.away_team_id,x.home_lambda,x.away_lambda])
+    matches:matchInputs.map((x:any)=>[x.match_id,x.home_team_id,x.away_team_id,x.home_lambda,x.away_lambda]),
+    goalkeeper_sot_v1:keeperShotEvidence
   })
   const runUpdate=await sb.from("scout_model_runs").update({input_snapshot_hash:inputHash}).eq("id",runId)
   if(runUpdate.error)throw runUpdate.error
