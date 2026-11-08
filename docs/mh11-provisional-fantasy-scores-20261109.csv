@@ -1,0 +1,459 @@
+# MH11 provisional fantasy scores — not official fantasy points, not final; source data 2026-11-09
+# Sources: source-verified match participation and event records, TFF published fantasy formula; bonus tied-rank approximation
+match_id,match_name,team_name,player_id,player_name,position,minutes,minutes_source,goals,assists_candidate,yellow_cards,red_cards,own_goals,saves_candidate,team_conceded,minutes_points,goal_points,assist_points,clean_sheet_points,conceded_points,save_points,card_og_points,base_points,estimated_bonus,estimated_total
+317874,Gaziantep - Kasımpaşa,Kasımpaşa,71,Ayberk Karapo,DEF,90,derived_full90,0,0,1,0,0,0,0,2,0,0,4,0,0,-1,5,0,5
+317874,Gaziantep - Kasımpaşa,Kasımpaşa,72,Ali Yavuz Kol,MID,63,derived_substitution_clock,0,0,0,0,0,0,0,2,0,0,1,0,0,0,3,0,3
+317874,Gaziantep - Kasımpaşa,Kasımpaşa,75,Adrian Dawid Benedyczak,FWD,85,derived_substitution_clock,1,0,0,0,0,0,0,2,4,0,0,0,0,0,6,1,7
+317874,Gaziantep - Kasımpaşa,Kasımpaşa,76,Taylan Utku Aydın,DEF,0,sourced_dnp,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+317874,Gaziantep - Kasımpaşa,Kasımpaşa,77,Kerem Demirbay,MID,90,derived_full90,0,0,0,0,0,0,0,2,0,0,1,0,0,0,3,0,3
+317874,Gaziantep - Kasımpaşa,Kasımpaşa,78,Marcus Albin John Rafferty,MID,27,derived_substitution_clock,0,0,0,0,0,0,0,1,0,0,0,0,0,0,1,0,1
+317874,Gaziantep - Kasımpaşa,Kasımpaşa,80,Andreas Gianniotis,GK,90,sourced_keeper90,0,0,0,0,0,4,0,2,0,0,4,0,1,0,7,2,9
+317874,Gaziantep - Kasımpaşa,Kasımpaşa,81,Güven Yalçın,FWD,5,derived_substitution_clock,0,0,0,0,0,0,0,1,0,0,0,0,0,0,1,0,1
+317874,Gaziantep - Kasımpaşa,Kasımpaşa,84,Adem Arous,DEF,90,derived_full90,0,0,0,0,0,0,0,2,0,0,4,0,0,0,6,1,7
+317874,Gaziantep - Kasımpaşa,Kasımpaşa,85,Emirhan Boz,MID,15,derived_substitution_clock,0,0,0,0,0,0,0,1,0,0,0,0,0,0,1,0,1
+317874,Gaziantep - Kasımpaşa,Kasımpaşa,86,Andri Fannar Baldursson,MID,0,sourced_dnp,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+317874,Gaziantep - Kasımpaşa,Kasımpaşa,88,Jakob Vestergaard Jessen,DEF,4,derived_substitution_clock,0,0,0,0,0,0,0,1,0,0,0,0,0,0,1,0,1
+317874,Gaziantep - Kasımpaşa,Kasımpaşa,89,Emirhan Yiğit,MID,0,sourced_dnp,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+317874,Gaziantep - Kasımpaşa,Kasımpaşa,92,Haris Hajradinović,MID,86,derived_substitution_clock,1,0,0,0,0,0,0,2,5,0,1,0,0,0,8,3,11
+317874,Gaziantep - Kasımpaşa,Kasımpaşa,93,Mecit Sercan Deniz,MID,0,sourced_dnp,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+317874,Gaziantep - Kasımpaşa,Kasımpaşa,94,Cláudio Winck Neto,DEF,90,derived_full90,0,0,0,0,0,0,0,2,0,0,4,0,0,0,6,1,7
+317874,Gaziantep - Kasımpaşa,Kasımpaşa,95,Kamil Ahmet Çörekçi,DEF,0,sourced_dnp,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+317874,Gaziantep - Kasımpaşa,Kasımpaşa,97,Elson Mendes Da Silva,MID,75,derived_substitution_clock,0,0,1,0,0,0,0,2,0,0,1,0,0,-1,2,0,2
+317874,Gaziantep - Kasımpaşa,Kasımpaşa,102,Thiemoko Diarra,MID,27,derived_substitution_clock,0,0,0,0,0,0,0,1,0,0,0,0,0,0,1,0,1
+317874,Gaziantep - Kasımpaşa,Kasımpaşa,104,Matei Cristian Ilie,DEF,90,derived_full90,0,0,0,0,0,0,0,2,0,0,4,0,0,0,6,1,7
+317874,Gaziantep - Kasımpaşa,Kasımpaşa,106,Ali Emre Yanar,GK,0,sourced_dnp,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+317874,Gaziantep - Kasımpaşa,Gaziantep,536,Halil İbrahim Dervişoğlu,FWD,19,derived_substitution_clock,0,0,0,0,0,0,2,1,0,0,0,0,0,0,1,0,1
+317874,Gaziantep - Kasımpaşa,Gaziantep,549,Cemilhan Aslan,GK,0,sourced_dnp,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0
+317874,Gaziantep - Kasımpaşa,Gaziantep,550,Leo Myenty Janna Abena,DEF,90,derived_full90,0,0,0,0,0,0,2,2,0,0,0,-1,0,0,1,0,1
+317874,Gaziantep - Kasımpaşa,Gaziantep,552,İbrahim Kağan Alkış,GK,0,sourced_dnp,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0
+317874,Gaziantep - Kasımpaşa,Gaziantep,553,Trivante Vincent Stewart,FWD,45,derived_substitution_clock,0,0,0,0,0,0,2,1,0,0,0,0,0,0,1,0,1
+317874,Gaziantep - Kasımpaşa,Gaziantep,554,Kacper Tobiasz,GK,0,sourced_dnp,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0
+317874,Gaziantep - Kasımpaşa,Gaziantep,555,Arda Kızıldağ,DEF,0,sourced_dnp,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0
+317874,Gaziantep - Kasımpaşa,Gaziantep,557,Ulrich Sidoine Meleke,MID,0,sourced_dnp,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0
+317874,Gaziantep - Kasımpaşa,Gaziantep,559,Victor Ntino-Emo Gidado,MID,45,derived_substitution_clock,0,0,0,0,0,0,2,1,0,0,0,0,0,0,1,0,1
+317874,Gaziantep - Kasımpaşa,Gaziantep,560,Juninho Gracielo Bacuna,MID,71,derived_substitution_clock,0,0,0,0,0,0,2,2,0,0,0,0,0,0,2,0,2
+317874,Gaziantep - Kasımpaşa,Gaziantep,561,Drissa Gui Camara,MID,90,derived_full90,0,0,0,0,0,0,2,2,0,0,0,0,0,0,2,0,2
+317874,Gaziantep - Kasımpaşa,Gaziantep,564,Kerim Çalhanoğlu,DEF,90,derived_full90,0,0,0,0,0,0,2,2,0,0,0,-1,0,0,1,0,1
+317874,Gaziantep - Kasımpaşa,Gaziantep,565,Nazım Sangaré,DEF,0,sourced_dnp,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0
+317874,Gaziantep - Kasımpaşa,Gaziantep,566,Ali Osman Kalın,MID,0,sourced_dnp,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0
+317874,Gaziantep - Kasımpaşa,Gaziantep,567,Deian Cristian Sorescu,DEF,45,derived_substitution_clock,0,0,1,0,0,0,2,1,0,0,0,-1,0,-1,-1,0,-1
+317874,Gaziantep - Kasımpaşa,Gaziantep,568,Alexandru Iulian Maxim,MID,45,derived_substitution_clock,0,0,0,0,0,0,2,1,0,0,0,0,0,0,1,0,1
+317874,Gaziantep - Kasımpaşa,Gaziantep,571,Karamba Gassama,MID,0,sourced_dnp,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0
+317874,Gaziantep - Kasımpaşa,Gaziantep,572,Luis Jesús Pérez Maqueda,DEF,63,derived_substitution_clock,0,0,0,0,0,0,2,2,0,0,0,-1,0,0,1,0,1
+317874,Gaziantep - Kasımpaşa,Gaziantep,573,Kacper Szymon Kozłowski,MID,90,derived_full90,0,0,0,0,0,0,2,2,0,0,0,0,0,0,2,0,2
+317874,Gaziantep - Kasımpaşa,Gaziantep,575,Fuat Bavuk,FWD,0,sourced_dnp,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0
+317874,Gaziantep - Kasımpaşa,Gaziantep,576,Ogün Özçiçek,MID,45,derived_substitution_clock,0,0,0,0,0,0,2,1,0,0,0,0,0,0,1,0,1
+317874,Gaziantep - Kasımpaşa,Gaziantep,577,Mirza Cihan,MID,0,sourced_dnp,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0
+317874,Gaziantep - Kasımpaşa,Gaziantep,578,Serdar Dursun,FWD,45,derived_substitution_clock,0,0,0,0,0,0,2,1,0,0,0,0,0,0,1,0,1
+317874,Gaziantep - Kasımpaşa,Gaziantep,579,Muhammet Akmelek,FWD,0,sourced_dnp,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0
+317874,Gaziantep - Kasımpaşa,Gaziantep,844,Misjonne Juniffer Naigelino Hansen,MID,0,sourced_dnp,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0
+317874,Gaziantep - Kasımpaşa,Kasımpaşa,1075,Kevin Camron Mouanga,DEF,0,sourced_dnp,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+317874,Gaziantep - Kasımpaşa,Gaziantep,1539,Loubadhe Abakar Sylla,DEF,90,derived_full90,0,0,0,0,0,0,2,2,0,0,0,-1,0,0,1,0,1
+317874,Gaziantep - Kasımpaşa,Kasımpaşa,1541,Ömer Bayram,DEF,0,sourced_dnp,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+317874,Gaziantep - Kasımpaşa,Kasımpaşa,1543,Jesurun Rak-Sakyi,MID,63,derived_substitution_clock,0,1,0,0,0,0,0,2,0,3,1,0,0,0,6,1,7
+317874,Gaziantep - Kasımpaşa,Gaziantep,1546,Mehmet Ataberk Dadakdeniz,GK,90,sourced_keeper90,0,0,0,0,0,3,2,2,0,0,0,-1,1,0,2,0,2
+317874,Gaziantep - Kasımpaşa,Gaziantep,1570,Efe Sarıkaya,DEF,0,sourced_dnp,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0
+317874,Gaziantep - Kasımpaşa,Gaziantep,1609,Sabahattin Destici,DEF,27,derived_substitution_clock,0,0,0,0,0,0,2,1,0,0,0,-1,0,0,0,0,0
+317875,Eyüpspor - Kocaelispor,Eyüpspor,82,Yusuf Barası,FWD,45,derived_substitution_clock,0,0,0,0,0,0,2,1,0,0,0,0,0,0,1,0,1
+317875,Eyüpspor - Kocaelispor,Kocaelispor,107,Arda Özyar,FWD,0,sourced_dnp,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+317875,Eyüpspor - Kocaelispor,Kocaelispor,108,Daniel Ebenezer Kwasi Agyei,MID,90,derived_full90,1,0,1,0,0,0,0,2,5,0,1,0,0,-1,7,2,9
+317875,Eyüpspor - Kocaelispor,Kocaelispor,109,Tayfur Bingöl,MID,84,derived_substitution_clock,0,0,1,0,0,0,0,2,0,0,1,0,0,-1,2,0,2
+317875,Eyüpspor - Kocaelispor,Kocaelispor,110,Haydar Karataş,MID,0,sourced_dnp,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+317875,Eyüpspor - Kocaelispor,Kocaelispor,111,Emir Ortakaya,DEF,90,derived_full90,0,0,0,0,0,0,0,2,0,0,4,0,0,0,6,0,6
+317875,Eyüpspor - Kocaelispor,Kocaelispor,112,Muharrem Cinan,DEF,7,derived_substitution_clock,0,0,0,0,0,0,0,1,0,0,0,0,0,0,1,0,1
+317875,Eyüpspor - Kocaelispor,Kocaelispor,113,Uğur Kaan Yıldız,DEF,90,derived_full90,0,0,0,0,0,0,0,2,0,0,4,0,0,0,6,0,6
+317875,Eyüpspor - Kocaelispor,Kocaelispor,116,Aleksandar Jovanović,GK,0,sourced_dnp,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+317875,Eyüpspor - Kocaelispor,Kocaelispor,117,Makana Nsimba Baku,MID,74,derived_substitution_clock,0,0,0,0,0,0,0,2,0,0,1,0,0,0,3,0,3
+317875,Eyüpspor - Kocaelispor,Kocaelispor,118,Bruno Petković,FWD,0,sourced_dnp,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+317875,Eyüpspor - Kocaelispor,Kocaelispor,119,Metehan Altunbaş,FWD,16,derived_substitution_clock,0,0,0,0,0,0,0,1,0,0,0,0,0,0,1,0,1
+317875,Eyüpspor - Kocaelispor,Kocaelispor,120,Anfernee Jamal Dijksteel,DEF,90,derived_full90,0,0,0,0,0,0,0,2,0,0,4,0,0,0,6,0,6
+317875,Eyüpspor - Kocaelispor,Kocaelispor,121,Onurcan Piri,GK,0,sourced_dnp,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+317875,Eyüpspor - Kocaelispor,Kocaelispor,125,Mahamadou Susoho Sissoho,MID,83,derived_substitution_clock,0,0,0,0,0,0,0,2,0,0,1,0,0,0,3,0,3
+317875,Eyüpspor - Kocaelispor,Kocaelispor,126,Banhie Xavier Tanguy Zoukrou,DEF,0,sourced_dnp,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+317875,Eyüpspor - Kocaelispor,Kocaelispor,127,Rigoberto Manuel Rivas Vindel,MID,83,derived_substitution_clock,0,1,1,0,0,0,0,2,0,3,1,0,0,-1,5,0,5
+317875,Eyüpspor - Kocaelispor,Kocaelispor,130,Serhat Öztaşdelen,GK,90,sourced_keeper90,0,0,0,0,0,3,0,2,0,0,4,0,1,0,7,2,9
+317875,Eyüpspor - Kocaelispor,Kocaelispor,131,Manuel Luís da Silva Cafumana,MID,6,derived_substitution_clock,0,0,0,0,0,0,0,1,0,0,0,0,0,0,1,0,1
+317875,Eyüpspor - Kocaelispor,Kocaelispor,132,Massadio Haïdara,DEF,0,sourced_dnp,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+317875,Eyüpspor - Kocaelispor,Kocaelispor,212,Berkan İsmail Kutlu,MID,90,derived_full90,1,0,0,0,0,0,0,2,5,0,1,0,0,0,8,3,11
+317875,Eyüpspor - Kocaelispor,Eyüpspor,272,Emre Bilgin,GK,0,sourced_dnp,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0
+317875,Eyüpspor - Kocaelispor,Eyüpspor,355,Seyfettin Anıl Yaşar,DEF,90,derived_full90,0,0,0,0,0,0,2,2,0,0,0,-1,0,0,1,0,1
+317875,Eyüpspor - Kocaelispor,Eyüpspor,475,Charles-André Raux-Yao,MID,90,derived_full90,0,0,0,0,0,0,2,2,0,0,0,0,0,0,2,0,2
+317875,Eyüpspor - Kocaelispor,Eyüpspor,477,Konrad Hubert Michalak,MID,0,sourced_dnp,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0
+317875,Eyüpspor - Kocaelispor,Eyüpspor,478,Abdelhamid Sabiri,MID,45,derived_substitution_clock,0,0,0,0,0,0,2,1,0,0,0,0,0,0,1,0,1
+317875,Eyüpspor - Kocaelispor,Eyüpspor,479,Bilal Boutobba,MID,45,derived_substitution_clock,0,0,0,0,0,0,2,1,0,0,0,0,0,0,1,0,1
+317875,Eyüpspor - Kocaelispor,Eyüpspor,481,Chandrel Géraud Massanga Matondo,MID,85,derived_substitution_clock,0,0,0,0,0,0,2,2,0,0,0,0,0,0,2,0,2
+317875,Eyüpspor - Kocaelispor,Eyüpspor,482,Horațiu Alexandru Moldovan,GK,90,sourced_keeper90,0,0,0,0,0,5,2,2,0,0,0,-1,1,0,2,0,2
+317875,Eyüpspor - Kocaelispor,Eyüpspor,483,David José Soares Oliveira Furtado Costa,MID,45,derived_substitution_clock,0,0,0,0,0,0,2,1,0,0,0,0,0,0,1,0,1
+317875,Eyüpspor - Kocaelispor,Eyüpspor,484,Mete Kaan Demir,MID,0,sourced_dnp,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0
+317875,Eyüpspor - Kocaelispor,Eyüpspor,485,Umut Keseci,GK,0,sourced_dnp,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0
+317875,Eyüpspor - Kocaelispor,Eyüpspor,486,Lenny Jean-Pierre Pintor,MID,18,derived_substitution_clock,0,0,0,0,0,0,2,1,0,0,0,0,0,0,1,0,1
+317875,Eyüpspor - Kocaelispor,Eyüpspor,489,Jawad El Yamiq,DEF,90,derived_full90,0,0,0,0,0,0,2,2,0,0,0,-1,0,0,1,0,1
+317875,Eyüpspor - Kocaelispor,Eyüpspor,491,Talha Ülvan,DEF,0,sourced_dnp,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0
+317875,Eyüpspor - Kocaelispor,Eyüpspor,492,Abdou Khadre Sy,FWD,0,sourced_dnp,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0
+317875,Eyüpspor - Kocaelispor,Eyüpspor,493,Zak Kennedy Jules,DEF,90,derived_full90,0,0,1,0,0,0,2,2,0,0,0,-1,0,-1,0,0,0
+317875,Eyüpspor - Kocaelispor,Eyüpspor,495,Ahmed Abdullahi,FWD,90,derived_full90,0,0,0,0,0,0,2,2,0,0,0,0,0,0,2,0,2
+317875,Eyüpspor - Kocaelispor,Eyüpspor,498,Arda Yavuz,DEF,0,sourced_dnp,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0
+317875,Eyüpspor - Kocaelispor,Eyüpspor,500,Taşkın İlter,MID,0,sourced_dnp,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0
+317875,Eyüpspor - Kocaelispor,Eyüpspor,501,Christ Otiniel Sadia,MID,72,derived_substitution_clock,0,0,0,0,0,0,2,2,0,0,0,0,0,0,2,0,2
+317875,Eyüpspor - Kocaelispor,Eyüpspor,503,Hamza Yiğit Akman,MID,5,derived_substitution_clock,0,0,0,0,0,0,2,1,0,0,0,0,0,0,1,0,1
+317875,Eyüpspor - Kocaelispor,Kocaelispor,745,Gonçalo Santos Sousa,MID,16,derived_substitution_clock,0,0,0,0,0,0,0,1,0,0,0,0,0,0,1,0,1
+317875,Eyüpspor - Kocaelispor,Eyüpspor,943,Simone Giordano,DEF,0,sourced_dnp,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0
+317875,Eyüpspor - Kocaelispor,Kocaelispor,976,Matej Maglica,DEF,0,sourced_dnp,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+317875,Eyüpspor - Kocaelispor,Eyüpspor,1174,Yiğit Demir,DEF,0,sourced_dnp,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0
+317875,Eyüpspor - Kocaelispor,Kocaelispor,1208,Florian Ayé,FWD,74,derived_substitution_clock,0,0,0,0,0,0,0,2,0,0,0,0,0,0,2,0,2
+317875,Eyüpspor - Kocaelispor,Kocaelispor,1373,Tobias Fjeld Gulliksen,MID,7,derived_substitution_clock,0,0,0,0,0,0,0,1,0,0,0,0,0,0,1,0,1
+317875,Eyüpspor - Kocaelispor,Kocaelispor,1610,Onur Öztonga,DEF,0,sourced_dnp,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+317876,Samsunspor - Konyaspor,Konyaspor,201,Egemen Aydın,GK,0,sourced_dnp,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0
+317876,Samsunspor - Konyaspor,Konyaspor,202,Melih İbrahimoğlu,MID,90,derived_full90,0,0,0,0,0,0,1,2,0,0,0,0,0,0,2,0,2
+317876,Samsunspor - Konyaspor,Konyaspor,204,Emir Bars,MID,0,sourced_dnp,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0
+317876,Samsunspor - Konyaspor,Konyaspor,205,Deniz Türüç,MID,0,sourced_dnp,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0
+317876,Samsunspor - Konyaspor,Konyaspor,206,Ebrima Colley,MID,77,derived_substitution_clock,0,0,0,0,0,0,1,2,0,0,0,0,0,0,2,0,2
+317876,Samsunspor - Konyaspor,Konyaspor,207,Deniz Ertaş,GK,0,sourced_dnp,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0
+317876,Samsunspor - Konyaspor,Konyaspor,210,Jackson Muleka Kyanvubu,FWD,29,derived_substitution_clock,0,0,0,0,0,0,1,1,0,0,0,0,0,0,1,0,1
+317876,Samsunspor - Konyaspor,Konyaspor,211,Yhoan Many Andzouana,DEF,45,derived_substitution_clock,0,0,0,0,0,0,1,1,0,0,0,0,0,0,1,0,1
+317876,Samsunspor - Konyaspor,Konyaspor,213,Marko Jevtović,MID,45,derived_substitution_clock,0,0,0,0,0,0,1,1,0,0,0,0,0,0,1,0,1
+317876,Samsunspor - Konyaspor,Konyaspor,214,Uğurcan Yazğılı,DEF,45,derived_substitution_clock,0,0,0,0,0,0,1,1,0,0,0,0,0,0,1,0,1
+317876,Samsunspor - Konyaspor,Konyaspor,215,Enis Bardhi,MID,13,derived_substitution_clock,0,0,0,0,0,0,1,1,0,0,0,0,0,0,1,0,1
+317876,Samsunspor - Konyaspor,Konyaspor,216,Bahadır Han Güngördü,GK,90,sourced_keeper90,0,0,0,0,0,2,1,2,0,0,0,0,0,0,2,0,2
+317876,Samsunspor - Konyaspor,Konyaspor,217,Chidozie Collins Awaziem,DEF,90,derived_full90,0,0,0,0,0,0,1,2,0,0,0,0,0,0,2,0,2
+317876,Samsunspor - Konyaspor,Konyaspor,218,Arif Boşluk,DEF,0,sourced_dnp,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0
+317876,Samsunspor - Konyaspor,Konyaspor,219,João Pedro do Nascimento da Mata,DEF,0,sourced_dnp,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0
+317876,Samsunspor - Konyaspor,Konyaspor,220,Diogo António Cupido Gonçalves,MID,61,derived_substitution_clock,0,0,0,0,0,0,1,2,0,0,0,0,0,0,2,0,2
+317876,Samsunspor - Konyaspor,Konyaspor,221,Rayyan Baniya,DEF,90,derived_full90,0,0,0,0,0,0,1,2,0,0,0,0,0,0,2,0,2
+317876,Samsunspor - Konyaspor,Konyaspor,222,Adil Demirbağ,DEF,0,sourced_dnp,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0
+317876,Samsunspor - Konyaspor,Samsunspor,439,Yunus Emre Çift,DEF,0,sourced_dnp,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+317876,Samsunspor - Konyaspor,Samsunspor,443,Samed Onur,MID,90,derived_full90,0,0,1,0,0,0,0,2,0,0,1,0,0,-1,2,0,2
+317876,Samsunspor - Konyaspor,Samsunspor,446,Fatih Kaya,FWD,0,sourced_dnp,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+317876,Samsunspor - Konyaspor,Samsunspor,447,Bilal Bayazıt,GK,90,sourced_keeper90,0,0,0,0,0,1,0,2,0,0,4,0,0,0,6,2,8
+317876,Samsunspor - Konyaspor,Samsunspor,448,Kouadou Jaurès Assoumou,MID,18,derived_substitution_clock,0,0,0,0,0,0,0,1,0,0,0,0,0,0,1,0,1
+317876,Samsunspor - Konyaspor,Samsunspor,453,Tanguy Bemin Coulibaly,MID,90,derived_substitution_clock,0,1,0,0,0,0,0,2,0,3,1,0,0,0,6,2,8
+317876,Samsunspor - Konyaspor,Samsunspor,455,Elliot William Watt,MID,90,derived_full90,0,0,0,0,0,0,0,2,0,0,1,0,0,0,3,0,3
+317876,Samsunspor - Konyaspor,Samsunspor,456,Afonso Gamelas de Pinho Sousa,MID,72,derived_substitution_clock,0,0,0,0,0,0,0,2,0,0,1,0,0,0,3,0,3
+317876,Samsunspor - Konyaspor,Samsunspor,457,Logi Tómasson,DEF,90,derived_full90,0,0,0,0,0,0,0,2,0,0,4,0,0,0,6,2,8
+317876,Samsunspor - Konyaspor,Samsunspor,458,Enes Albak,DEF,0,sourced_dnp,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+317876,Samsunspor - Konyaspor,Samsunspor,461,Igor Drapiński,DEF,90,derived_full90,0,0,0,0,0,0,0,2,0,0,4,0,0,0,6,2,8
+317876,Samsunspor - Konyaspor,Samsunspor,462,Celil Yüksel,MID,0,sourced_dnp,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+317876,Samsunspor - Konyaspor,Samsunspor,463,Yirigue Foungognan Sekongo,MID,78,derived_substitution_clock,1,0,0,0,0,0,0,2,5,0,1,0,0,0,8,3,11
+317876,Samsunspor - Konyaspor,Samsunspor,466,Yalçın Kayan,MID,0,sourced_dnp,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+317876,Samsunspor - Konyaspor,Samsunspor,467,Emre Kılınç,MID,0,sourced_dnp,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+317876,Samsunspor - Konyaspor,Samsunspor,470,Okan Kocuk,GK,0,sourced_dnp,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+317876,Samsunspor - Konyaspor,Samsunspor,471,Elayis Tavşan,MID,18,derived_substitution_clock,0,0,1,0,0,0,0,1,0,0,0,0,0,-1,0,0,0
+317876,Samsunspor - Konyaspor,Samsunspor,472,Josafat Wooding Mendes,DEF,90,derived_full90,0,0,1,0,0,0,0,2,0,0,4,0,0,-1,5,0,5
+317876,Samsunspor - Konyaspor,Samsunspor,474,Saikuba Jarju,MID,0,sourced_dnp,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+317876,Samsunspor - Konyaspor,Konyaspor,597,Fuka-Arthur Masuaku Kawela,DEF,90,derived_full90,0,0,1,0,0,0,1,2,0,0,0,0,0,-1,1,0,1
+317876,Samsunspor - Konyaspor,Samsunspor,613,Gabriele Guarino,DEF,1,derived_substitution_clock,0,0,0,0,0,0,0,1,0,0,0,0,0,0,1,0,1
+317876,Samsunspor - Konyaspor,Konyaspor,627,Enis Destan,FWD,29,derived_substitution_clock,0,0,1,0,0,0,1,1,0,0,0,0,0,-1,0,0,0
+317876,Samsunspor - Konyaspor,Konyaspor,629,Mücahit İbrahimoğlu,MID,0,sourced_dnp,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0
+317876,Samsunspor - Konyaspor,Konyaspor,679,Rajmund Tóth,MID,45,derived_substitution_clock,0,0,0,0,0,0,1,1,0,0,0,0,0,0,1,0,1
+317876,Samsunspor - Konyaspor,Samsunspor,1042,Oskar Skovbjerg Øhlenschlæger,MID,12,derived_substitution_clock,0,0,0,0,0,0,0,1,0,0,0,0,0,0,1,0,1
+317876,Samsunspor - Konyaspor,Konyaspor,1207,Jean-Luc Mamadou Diarra Dompé,MID,90,derived_full90,0,0,0,0,0,0,1,2,0,0,0,0,0,0,2,0,2
+317876,Samsunspor - Konyaspor,Konyaspor,1372,Mostafa Mohamed Ahmed Abdalla,FWD,61,derived_substitution_clock,0,0,0,0,0,0,1,2,0,0,0,0,0,0,2,0,2
+317876,Samsunspor - Konyaspor,Konyaspor,1540,Ahmet Oğuz,DEF,0,sourced_dnp,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0
+317876,Samsunspor - Konyaspor,Samsunspor,1573,Strahinja Eraković,DEF,90,derived_full90,0,0,0,0,0,0,0,2,0,0,4,0,0,0,6,2,8
+317876,Samsunspor - Konyaspor,Samsunspor,1603,Mohamed Lamine Bayo,FWD,72,derived_substitution_clock,0,0,0,0,0,0,0,2,0,0,0,0,0,0,2,0,2
+317877,Göztepe - Başakşehir,Başakşehir,36,Umut Dilan Bozok,FWD,0,sourced_dnp,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0
+317877,Göztepe - Başakşehir,Göztepe,286,Allan Godói Santos,DEF,88,derived_substitution_clock,0,0,0,0,0,0,2,2,0,0,0,-1,0,0,1,0,1
+317877,Göztepe - Başakşehir,Göztepe,288,Taha Altıkardeş,DEF,90,derived_full90,0,0,0,0,0,0,2,2,0,0,0,-1,0,0,1,0,1
+317877,Göztepe - Başakşehir,Göztepe,289,Alexis Antunes Gomez,MID,82,derived_substitution_clock,0,0,1,0,0,0,2,2,0,0,0,0,0,-1,1,0,1
+317877,Göztepe - Başakşehir,Göztepe,290,Luka Gugeshashvili,GK,0,sourced_dnp,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0
+317877,Göztepe - Başakşehir,Göztepe,291,Malcom Narcisse Bokélé Mputu,DEF,90,derived_full90,0,0,1,0,0,0,2,2,0,0,0,-1,0,-1,0,0,0
+317877,Göztepe - Başakşehir,Göztepe,292,Ege Yıldırım,DEF,0,sourced_dnp,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0
+317877,Göztepe - Başakşehir,Göztepe,294,Ogün Bayrak,MID,0,sourced_dnp,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0
+317877,Göztepe - Başakşehir,Göztepe,295,Juan Santos da Silva,FWD,82,derived_substitution_clock,1,0,0,0,0,0,2,2,4,0,0,0,0,0,6,3,9
+317877,Göztepe - Başakşehir,Göztepe,298,Gökdeniz Bayrakdar,FWD,0,sourced_dnp,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0
+317877,Göztepe - Başakşehir,Göztepe,299,Arda Okan Kurtulan,DEF,82,derived_substitution_clock,0,0,0,0,0,0,2,2,0,0,0,-1,0,0,1,0,1
+317877,Göztepe - Başakşehir,Göztepe,300,Novatus Dismas Miroshi,MID,90,derived_full90,0,0,0,0,0,0,2,2,0,0,0,0,0,0,2,0,2
+317877,Göztepe - Başakşehir,Göztepe,301,Jonatan Noah Kemeseng Sonko Sundberg,DEF,0,sourced_dnp,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0
+317877,Göztepe - Başakşehir,Göztepe,303,Janderson de Carvalho Costa,FWD,66,derived_substitution_clock,0,0,0,0,0,0,2,2,0,0,0,0,0,0,2,0,2
+317877,Göztepe - Başakşehir,Göztepe,304,Rhaldney Norberto Simião Gomes,MID,90,derived_full90,0,0,0,0,0,0,2,2,0,0,0,0,0,0,2,0,2
+317877,Göztepe - Başakşehir,Göztepe,305,Furkan Bayır,DEF,0,sourced_dnp,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0
+317877,Göztepe - Başakşehir,Göztepe,308,Efkan Bekiroğlu,MID,0,sourced_dnp,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0
+317877,Göztepe - Başakşehir,Göztepe,309,Arda Özçimen,GK,90,derived_full90,0,0,0,0,0,3,2,2,0,0,0,-1,1,0,2,0,2
+317877,Göztepe - Başakşehir,Göztepe,310,André Henrique da Silva Martins,FWD,24,derived_substitution_clock,0,0,0,0,0,0,2,1,0,0,0,0,0,0,1,0,1
+317877,Göztepe - Başakşehir,Göztepe,312,Mehmet Şamil Öztürk,GK,0,sourced_dnp,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0
+317877,Göztepe - Başakşehir,Göztepe,313,Alexandre Matos,MID,8,derived_substitution_clock,0,0,0,0,0,0,2,1,0,0,0,0,0,0,1,0,1
+317877,Göztepe - Başakşehir,Göztepe,314,Sinclair Ntomuchukwu Armstrong,FWD,8,derived_substitution_clock,0,0,0,0,0,0,2,1,0,0,0,0,0,0,1,0,1
+317877,Göztepe - Başakşehir,Başakşehir,380,Muhammed Şengezer,GK,0,sourced_dnp,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0
+317877,Göztepe - Başakşehir,Başakşehir,381,Jerome Osei Opoku,DEF,4,derived_substitution_clock,0,0,0,0,0,0,1,1,0,0,0,0,0,0,1,0,1
+317877,Göztepe - Başakşehir,Başakşehir,382,Abbosbek Fayzullayev,MID,0,sourced_dnp,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0
+317877,Göztepe - Başakşehir,Başakşehir,384,Jakub Kałuziński,MID,78,derived_substitution_clock,0,0,0,0,0,0,1,2,0,0,0,0,0,0,2,0,2
+317877,Göztepe - Başakşehir,Başakşehir,385,Ivan Brnić,MID,66,derived_substitution_clock,0,1,0,0,0,0,1,2,0,3,0,0,0,0,5,0,5
+317877,Göztepe - Başakşehir,Başakşehir,386,Deniz Dilmen,GK,90,derived_full90,0,0,1,0,0,3,1,2,0,0,0,0,1,-1,2,0,2
+317877,Göztepe - Başakşehir,Başakşehir,387,Umut Güneş,MID,0,sourced_dnp,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0
+317877,Göztepe - Başakşehir,Başakşehir,388,Andreas Skov Olsen,MID,90,derived_full90,0,0,0,0,0,0,1,2,0,0,0,0,0,0,2,0,2
+317877,Göztepe - Başakşehir,Başakşehir,390,Emin Bayram,DEF,90,derived_full90,0,0,0,0,0,0,1,2,0,0,0,0,0,0,2,0,2
+317877,Göztepe - Başakşehir,Başakşehir,391,Saba Kharebashvili,DEF,0,sourced_dnp,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0
+317877,Göztepe - Başakşehir,Başakşehir,393,Volkan Babacan,GK,0,sourced_dnp,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0
+317877,Göztepe - Başakşehir,Başakşehir,394,Onur Ergün,MID,12,derived_substitution_clock,0,0,0,0,0,0,1,1,0,0,0,0,0,0,1,0,1
+317877,Göztepe - Başakşehir,Başakşehir,395,Davie Selke,FWD,66,derived_substitution_clock,1,0,0,0,0,0,1,2,4,0,0,0,0,0,6,3,9
+317877,Göztepe - Başakşehir,Başakşehir,396,Ousseynou Ba,DEF,90,derived_full90,0,0,1,0,0,0,1,2,0,0,0,0,0,-1,1,0,1
+317877,Göztepe - Başakşehir,Başakşehir,397,Hamza Güreler,DEF,0,sourced_dnp,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0
+317877,Göztepe - Başakşehir,Başakşehir,398,Christopher Téa Domoraud Opéri,DEF,0,sourced_dnp,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0
+317877,Göztepe - Başakşehir,Başakşehir,400,Ömer Ali Şahiner,DEF,78,derived_substitution_clock,0,0,0,0,0,0,1,2,0,0,0,0,0,0,2,0,2
+317877,Göztepe - Başakşehir,Başakşehir,402,Michał Karbownik,DEF,90,derived_full90,0,0,0,0,0,0,1,2,0,0,0,0,0,0,2,0,2
+317877,Göztepe - Başakşehir,Başakşehir,404,Eldor Shomurodov,FWD,86,derived_substitution_clock,0,0,0,0,0,0,1,2,0,0,0,0,0,0,2,0,2
+317877,Göztepe - Başakşehir,Başakşehir,407,Olivier Michel Kemen,MID,90,derived_full90,0,0,0,0,0,0,1,2,0,0,0,0,0,0,2,0,2
+317877,Göztepe - Başakşehir,Başakşehir,408,Edin Višća,MID,24,derived_substitution_clock,1,0,0,0,0,0,1,1,5,0,0,0,0,0,6,3,9
+317877,Göztepe - Başakşehir,Başakşehir,409,Yusuf Sarı,MID,0,sourced_dnp,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0
+317877,Göztepe - Başakşehir,Başakşehir,410,Berkay Özcan,MID,0,sourced_dnp,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0
+317877,Göztepe - Başakşehir,Başakşehir,411,Onur Bulut,DEF,12,derived_substitution_clock,0,1,0,0,0,0,1,1,0,3,0,0,0,0,4,0,4
+317877,Göztepe - Başakşehir,Başakşehir,412,Bertuğ Özgür Yıldırım,FWD,24,derived_substitution_clock,0,0,0,0,0,0,1,1,0,0,0,0,0,0,1,0,1
+317877,Göztepe - Başakşehir,Göztepe,712,Bekir Turaç Böke,FWD,2,derived_substitution_clock,0,0,0,0,0,0,2,1,0,0,0,0,0,0,1,0,1
+317877,Göztepe - Başakşehir,Göztepe,811,Richard Akonnor,DEF,90,derived_full90,0,0,0,0,0,0,2,2,0,0,0,-1,0,0,1,0,1
+317877,Göztepe - Başakşehir,Göztepe,1542,Faustino Adebola Rasheed Anjorin,MID,8,derived_substitution_clock,0,0,0,0,0,0,2,1,0,0,0,0,0,0,1,0,1
+317878,Galatasaray - Amed,Amed,134,Kahraman Demirtaş,DEF,0,sourced_dnp,0,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0
+317878,Galatasaray - Amed,Amed,135,Mehmet Yeşil,DEF,27,derived_substitution_clock,0,0,0,0,0,0,4,1,0,0,0,-2,0,0,-1,0,-1
+317878,Galatasaray - Amed,Amed,136,Diaa Sabi'a,MID,90,derived_full90,1,0,0,0,0,0,4,2,5,0,0,0,0,0,7,3,10
+317878,Galatasaray - Amed,Amed,139,Cengiz Umut Meraş,DEF,90,derived_full90,0,0,0,0,0,0,4,2,0,0,0,-2,0,0,0,0,0
+317878,Galatasaray - Amed,Amed,144,Mbaye Diagne,FWD,45,derived_substitution_clock,0,0,0,0,0,0,4,1,0,0,0,0,0,0,1,0,1
+317878,Galatasaray - Amed,Amed,145,Mustafa Burak Bozan,GK,0,sourced_dnp,0,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0
+317878,Galatasaray - Amed,Amed,148,Gift Emmanuel Orban,FWD,90,derived_full90,1,0,1,0,0,0,4,2,4,0,0,0,0,-1,5,0,5
+317878,Galatasaray - Amed,Amed,149,Rayan Ny Aina Arnaldo Raveloson,MID,90,derived_substitution_clock,0,0,1,0,0,0,4,2,0,0,0,0,0,-1,1,0,1
+317878,Galatasaray - Amed,Amed,151,David Robert Bates,DEF,90,derived_full90,0,0,1,0,0,0,4,2,0,0,0,-2,0,-1,-1,0,-1
+317878,Galatasaray - Amed,Amed,152,Ermal Krasniqi,MID,90,derived_full90,0,0,0,0,0,0,4,2,0,0,0,0,0,0,2,0,2
+317878,Galatasaray - Amed,Amed,154,Amadou Cissé,DEF,0,sourced_dnp,0,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0
+317878,Galatasaray - Amed,Amed,155,Cem Üstündağ,MID,1,derived_substitution_clock,0,0,0,0,0,0,4,1,0,0,0,0,0,0,1,0,1
+317878,Galatasaray - Amed,Amed,157,Furkan Soyalp,MID,77,derived_substitution_clock,0,1,0,0,0,0,4,2,0,3,0,0,0,0,5,0,5
+317878,Galatasaray - Amed,Amed,160,Berk Kızıldemir,MID,0,sourced_dnp,0,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0
+317878,Galatasaray - Amed,Amed,161,Alban-Marc Lafont,GK,90,derived_full90,0,0,0,0,1,3,4,2,0,0,0,-2,1,-2,-1,0,-1
+317878,Galatasaray - Amed,Amed,162,Lumbardh Dellova,DEF,63,derived_substitution_clock,0,0,0,0,0,0,4,2,0,0,0,-2,0,0,0,0,0
+317878,Galatasaray - Amed,Amed,328,Dilhan Demir,MID,0,sourced_dnp,0,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0
+317878,Galatasaray - Amed,Galatasaray,505,Yunus Akgün,MID,69,derived_substitution_clock,0,0,0,0,0,0,3,2,0,0,0,0,0,0,2,0,2
+317878,Galatasaray - Amed,Galatasaray,506,Jankat Yılmaz,GK,0,sourced_dnp,0,0,0,0,0,0,3,0,0,0,0,0,0,0,0,0,0
+317878,Galatasaray - Amed,Galatasaray,507,Victor James Osimhen,FWD,0,sourced_dnp,0,0,0,0,0,0,3,0,0,0,0,0,0,0,0,0,0
+317878,Galatasaray - Amed,Galatasaray,511,Uğurcan Çakır,GK,90,derived_full90,0,0,0,0,0,2,3,2,0,0,0,-1,0,0,1,0,1
+317878,Galatasaray - Amed,Galatasaray,514,Leroy Aziz Sané,MID,21,derived_substitution_clock,0,0,0,0,0,0,3,1,0,0,0,0,0,0,1,0,1
+317878,Galatasaray - Amed,Galatasaray,515,Lesley Chimuanya Ugochukwu,MID,0,sourced_dnp,0,0,0,0,0,0,3,0,0,0,0,0,0,0,0,0,0
+317878,Galatasaray - Amed,Galatasaray,516,Davinson Sánchez Mina,DEF,90,derived_full90,0,0,0,0,0,0,3,2,0,0,0,-1,0,0,1,0,1
+317878,Galatasaray - Amed,Galatasaray,517,Kazımcan Karataş,DEF,0,sourced_dnp,0,0,0,0,0,0,3,0,0,0,0,0,0,0,0,0,0
+317878,Galatasaray - Amed,Galatasaray,520,Barış Alper Yılmaz,MID,90,derived_full90,1,0,0,0,0,0,3,2,5,0,0,0,0,0,7,3,10
+317878,Galatasaray - Amed,Galatasaray,522,Kaan Ayhan,DEF,0,sourced_dnp,0,0,0,0,0,0,3,0,0,0,0,0,0,0,0,0,0
+317878,Galatasaray - Amed,Galatasaray,523,Arda Ünyay,DEF,0,sourced_dnp,0,0,0,0,0,0,3,0,0,0,0,0,0,0,0,0,0
+317878,Galatasaray - Amed,Galatasaray,525,Mario René Junior Lemina,MID,90,derived_full90,0,0,0,0,0,0,3,2,0,0,0,0,0,0,2,0,2
+317878,Galatasaray - Amed,Galatasaray,527,Renato Sam-Na Nhaga,MID,6,derived_substitution_clock,0,0,0,0,0,0,3,1,0,0,0,0,0,0,1,0,1
+317878,Galatasaray - Amed,Galatasaray,529,Ismail Joshua Jakobs,DEF,90,derived_full90,0,0,0,0,0,0,3,2,0,0,0,-1,0,0,1,0,1
+317878,Galatasaray - Amed,Galatasaray,530,İlkay Gündoğan,MID,0,sourced_dnp,0,0,0,0,0,0,3,0,0,0,0,0,0,0,0,0,0
+317878,Galatasaray - Amed,Galatasaray,531,Evren Eren Elmalı,DEF,83,derived_substitution_clock,0,0,0,0,0,0,3,2,0,0,0,-1,0,0,1,0,1
+317878,Galatasaray - Amed,Galatasaray,532,Gabriel Davi Gomes Sara,MID,21,derived_substitution_clock,0,1,0,0,0,0,3,1,0,3,0,0,0,0,4,0,4
+317878,Galatasaray - Amed,Galatasaray,533,Abdülkerim Bardakcı,DEF,0,sourced_dnp,0,0,0,0,0,0,3,0,0,0,0,0,0,0,0,0,0
+317878,Galatasaray - Amed,Galatasaray,535,Can Armando Güner,MID,0,sourced_dnp,0,0,0,0,0,0,3,0,0,0,0,0,0,0,0,0,0
+317878,Galatasaray - Amed,Galatasaray,537,Günay Güvenç,GK,0,sourced_dnp,0,0,0,0,0,0,3,0,0,0,0,0,0,0,0,0,0
+317878,Galatasaray - Amed,Galatasaray,539,Lucas Sebastián Torreira di Pascua,MID,69,derived_substitution_clock,0,1,0,0,0,0,3,2,0,3,0,0,0,0,5,0,5
+317878,Galatasaray - Amed,Galatasaray,542,Roland Sallai,DEF,90,derived_full90,0,1,0,0,0,0,3,2,0,3,0,-1,0,0,4,0,4
+317878,Galatasaray - Amed,Galatasaray,545,Wilfried Stéphane Singo,DEF,7,derived_substitution_clock,0,0,0,0,0,0,3,1,0,0,0,-1,0,0,0,0,0
+317878,Galatasaray - Amed,Amed,586,Yira Collins Sor,MID,45,derived_substitution_clock,1,0,0,0,0,0,4,1,5,0,0,0,0,0,6,0,6
+317878,Galatasaray - Amed,Amed,595,Mohamed Khalil,MID,0,sourced_dnp,0,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0
+317878,Galatasaray - Amed,Amed,600,Samuel Leo Beat Ballet,MID,0,sourced_dnp,0,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0
+317878,Galatasaray - Amed,Amed,617,Rayan Lutin,MID,13,derived_substitution_clock,0,0,0,0,0,0,4,1,0,0,0,0,0,0,1,0,1
+317878,Galatasaray - Amed,Amed,624,Gökhan Gül,MID,45,derived_substitution_clock,0,0,0,0,0,0,4,1,0,0,0,0,0,0,1,0,1
+317878,Galatasaray - Amed,Galatasaray,877,Aleksey Batrakov,MID,84,derived_substitution_clock,1,0,0,0,0,0,3,2,5,0,0,0,0,0,7,3,10
+317878,Galatasaray - Amed,Galatasaray,1306,Rafael Alexandre da Conceição Leão,MID,50,derived_substitution_clock,1,0,0,0,0,0,3,1,5,0,0,0,0,0,6,0,6
+317878,Galatasaray - Amed,Galatasaray,1405,Deniz Daniel Gül,FWD,40,derived_substitution_clock,0,0,0,0,0,0,3,1,0,0,0,0,0,0,1,0,1
+317878,Galatasaray - Amed,Galatasaray,1438,El Chadaille Bitshiabu,DEF,0,sourced_dnp,0,0,0,0,0,0,3,0,0,0,0,0,0,0,0,0,0
+317878,Galatasaray - Amed,Amed,1604,Ali Turap Bülbül,DEF,45,derived_substitution_clock,0,0,0,0,0,0,4,1,0,0,0,-2,0,0,-1,0,-1
+317878,Galatasaray - Amed,Amed,1607,Miraç Acer,DEF,0,sourced_dnp,0,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0
+317879,Rizespor - Erzurumspor,Erzurumspor,41,Orhan Ovacıklı,DEF,90,derived_full90,0,0,0,0,0,0,2,2,0,0,0,-1,0,0,1,0,1
+317879,Rizespor - Erzurumspor,Erzurumspor,42,Cengizhan Bayrak,DEF,0,sourced_dnp,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0
+317879,Rizespor - Erzurumspor,Erzurumspor,43,Ömer Arda Kara,DEF,0,sourced_dnp,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0
+317879,Rizespor - Erzurumspor,Erzurumspor,44,Yakup Kırtay,DEF,0,sourced_dnp,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0
+317879,Rizespor - Erzurumspor,Erzurumspor,45,Mustafa Fettahoğlu,MID,13,derived_substitution_clock,0,0,0,0,0,0,2,1,0,0,0,0,0,0,1,0,1
+317879,Rizespor - Erzurumspor,Erzurumspor,47,Nihad Mujakić,DEF,90,derived_full90,0,0,0,0,0,0,2,2,0,0,0,-1,0,0,1,0,1
+317879,Rizespor - Erzurumspor,Erzurumspor,48,Guram Giorbelidze,DEF,90,derived_substitution_clock,0,0,0,0,0,0,2,2,0,0,0,-1,0,0,1,0,1
+317879,Rizespor - Erzurumspor,Erzurumspor,49,Nariman Akhundzada,FWD,0,sourced_dnp,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0
+317879,Rizespor - Erzurumspor,Erzurumspor,51,Mahmut Ertuğrul Taşkıran,GK,90,derived_full90,0,0,0,0,0,4,2,2,0,0,0,-1,1,0,2,0,2
+317879,Rizespor - Erzurumspor,Erzurumspor,52,Eren Tozlu,FWD,14,derived_substitution_clock,0,0,0,0,0,0,2,1,0,0,0,0,0,0,1,0,1
+317879,Rizespor - Erzurumspor,Erzurumspor,53,Amar Gërxhaliu,DEF,90,derived_full90,0,0,0,0,0,0,2,2,0,0,0,-1,0,0,1,0,1
+317879,Rizespor - Erzurumspor,Erzurumspor,58,Martín Vladimir Rodríguez Torrejón,MID,14,derived_substitution_clock,0,0,0,0,0,0,2,1,0,0,0,0,0,0,1,0,1
+317879,Rizespor - Erzurumspor,Erzurumspor,59,Brandon Baiye,MID,90,derived_full90,0,0,0,0,0,0,2,2,0,0,0,0,0,0,2,0,2
+317879,Rizespor - Erzurumspor,Erzurumspor,63,Mustafa Yumlu,DEF,1,derived_substitution_clock,0,0,1,0,0,0,2,1,0,0,0,-1,0,-1,-1,0,-1
+317879,Rizespor - Erzurumspor,Erzurumspor,64,Matija Orbanić,GK,0,sourced_dnp,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0
+317879,Rizespor - Erzurumspor,Erzurumspor,67,Sefa Akgün,MID,1,derived_substitution_clock,0,0,0,0,0,0,2,1,0,0,0,0,0,0,1,0,1
+317879,Rizespor - Erzurumspor,Erzurumspor,70,Erkan Anapa,GK,0,sourced_dnp,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0
+317879,Rizespor - Erzurumspor,Rizespor,351,Ibrahim Olawoyin Olasunkanmi,MID,90,derived_full90,0,1,0,0,0,0,1,2,0,3,0,0,0,0,5,1,6
+317879,Rizespor - Erzurumspor,Rizespor,352,Qazim Laçi,MID,87,derived_substitution_clock,0,0,0,0,0,0,1,2,0,0,0,0,0,0,2,0,2
+317879,Rizespor - Erzurumspor,Rizespor,353,Ali Sowe,FWD,90,derived_full90,2,0,0,0,0,0,1,2,8,0,0,0,0,0,10,3,13
+317879,Rizespor - Erzurumspor,Rizespor,354,Muhammet Taha Şahin,DEF,0,sourced_dnp,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0
+317879,Rizespor - Erzurumspor,Rizespor,356,Mithat Pala,DEF,90,derived_full90,0,0,0,0,0,0,1,2,0,0,0,0,0,0,2,0,2
+317879,Rizespor - Erzurumspor,Rizespor,358,Yakup Ayan,DEF,0,sourced_dnp,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0
+317879,Rizespor - Erzurumspor,Rizespor,359,Adedire Emmanuel Awokoya-Mebude,MID,87,derived_substitution_clock,0,1,0,0,0,0,1,2,0,3,0,0,0,0,5,1,6
+317879,Rizespor - Erzurumspor,Rizespor,360,Tayyip Talha Sanuç,DEF,3,derived_substitution_clock,0,0,0,0,0,0,1,1,0,0,0,0,0,0,1,0,1
+317879,Rizespor - Erzurumspor,Rizespor,362,Yahia Fofana,GK,0,sourced_dnp,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0
+317879,Rizespor - Erzurumspor,Rizespor,363,Husniddin Aliqulov,DEF,0,sourced_dnp,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0
+317879,Rizespor - Erzurumspor,Rizespor,364,Emrecan Bulut,MID,27,derived_substitution_clock,0,0,0,0,0,0,1,1,0,0,0,0,0,0,1,0,1
+317879,Rizespor - Erzurumspor,Rizespor,365,Modibo Sagnan,DEF,0,sourced_dnp,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0
+317879,Rizespor - Erzurumspor,Rizespor,367,Attila Mocsi,DEF,90,derived_full90,0,0,0,0,0,0,1,2,0,0,0,0,0,0,2,0,2
+317879,Rizespor - Erzurumspor,Rizespor,370,Mihai Valentin Mihăilă,FWD,0,sourced_dnp,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0
+317879,Rizespor - Erzurumspor,Rizespor,371,Dal Varešanović,MID,3,derived_substitution_clock,0,0,0,0,0,0,1,1,0,0,0,0,0,0,1,0,1
+317879,Rizespor - Erzurumspor,Rizespor,373,Taylan Antalyalı,MID,27,derived_substitution_clock,0,0,0,0,0,0,1,1,0,0,0,0,0,0,1,0,1
+317879,Rizespor - Erzurumspor,Rizespor,375,Efe Doğan,GK,0,sourced_dnp,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0
+317879,Rizespor - Erzurumspor,Rizespor,376,Zafer Görgen,GK,90,derived_full90,0,0,0,0,0,2,1,2,0,0,0,0,0,0,2,0,2
+317879,Rizespor - Erzurumspor,Rizespor,377,Siaka Bakayoko,DEF,90,derived_full90,0,0,0,0,0,0,1,2,0,0,0,0,0,0,2,0,2
+317879,Rizespor - Erzurumspor,Rizespor,378,Ahmed Kutucu,MID,63,derived_substitution_clock,0,0,0,0,0,0,1,2,0,0,0,0,0,0,2,0,2
+317879,Rizespor - Erzurumspor,Rizespor,379,Zakaria Ariss,DEF,90,derived_full90,0,0,0,0,0,0,1,2,0,0,0,0,0,0,2,0,2
+317879,Rizespor - Erzurumspor,Erzurumspor,401,Festy Oseiwe Ebosele,DEF,77,derived_substitution_clock,0,0,0,0,0,0,2,2,0,0,0,-1,0,0,1,0,1
+317879,Rizespor - Erzurumspor,Rizespor,601,Umut Erdem,DEF,0,sourced_dnp,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0
+317879,Rizespor - Erzurumspor,Rizespor,614,Emirhan Yılmaz,MID,0,sourced_dnp,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0
+317879,Rizespor - Erzurumspor,Erzurumspor,623,Gyrano Emilio Kerk,FWD,76,derived_substitution_clock,0,1,1,0,0,0,2,2,0,3,0,0,0,-1,4,0,4
+317879,Rizespor - Erzurumspor,Rizespor,635,Moussa Diakité,MID,63,derived_substitution_clock,0,0,0,0,0,0,1,2,0,0,0,0,0,0,2,0,2
+317879,Rizespor - Erzurumspor,Erzurumspor,746,Miguel Felipe Nunes Cardoso,MID,76,derived_substitution_clock,0,0,1,0,0,0,2,2,0,0,0,0,0,-1,1,0,1
+317879,Rizespor - Erzurumspor,Erzurumspor,778,Elisha Owusu,MID,90,derived_substitution_clock,0,0,0,0,0,0,2,2,0,0,0,0,0,0,2,0,2
+317879,Rizespor - Erzurumspor,Erzurumspor,1108,Ibrahim Yalatif Diabate,FWD,90,derived_full90,1,0,0,0,0,0,2,2,4,0,0,0,0,0,6,2,8
+317879,Rizespor - Erzurumspor,Rizespor,1109,Albert Iustin Doicaru,MID,0,sourced_dnp,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0
+317879,Rizespor - Erzurumspor,Rizespor,1538,Can Bozdoğan,MID,0,sourced_dnp,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0
+317879,Rizespor - Erzurumspor,Rizespor,1544,Gennaro Borrelli,FWD,0,sourced_dnp,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0
+317879,Rizespor - Erzurumspor,Erzurumspor,1571,Lawrence Agyekum,MID,0,sourced_dnp,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0
+317879,Rizespor - Erzurumspor,Erzurumspor,1572,Emirhan Acar,MID,0,sourced_dnp,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0
+317880,Çorum FK - Fenerbahçe,Çorum FK,16,Göktan Gürpüz,MID,0,sourced_dnp,0,0,0,0,0,0,5,0,0,0,0,0,0,0,0,0,0
+317880,Çorum FK - Fenerbahçe,Fenerbahçe,163,Marco Asensio Willemsen,MID,0,sourced_dnp,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+317880,Çorum FK - Fenerbahçe,Fenerbahçe,165,Tarık Çetin,GK,0,sourced_dnp,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+317880,Çorum FK - Fenerbahçe,Fenerbahçe,166,Ederson Santana de Moraes,GK,90,derived_full90,0,0,0,0,0,9,0,2,0,0,4,0,3,0,9,0,9
+317880,Çorum FK - Fenerbahçe,Fenerbahçe,169,Muhammed Kerem Aktürkoğlu,MID,26,derived_substitution_clock,0,1,0,0,0,0,0,1,0,3,0,0,0,0,4,0,4
+317880,Çorum FK - Fenerbahçe,Fenerbahçe,170,Nélson Cabral Semedo,DEF,64,derived_substitution_clock,0,0,1,0,0,0,0,2,0,0,4,0,0,-1,5,0,5
+317880,Çorum FK - Fenerbahçe,Fenerbahçe,171,Vedat Muriqi,FWD,33,derived_substitution_clock,0,0,0,0,0,0,0,1,0,0,0,0,0,0,1,0,1
+317880,Çorum FK - Fenerbahçe,Fenerbahçe,172,Milan Škriniar,DEF,90,derived_full90,0,0,0,0,0,0,0,2,0,0,4,0,0,0,6,0,6
+317880,Çorum FK - Fenerbahçe,Fenerbahçe,174,Münir Levent Mercan,DEF,90,derived_full90,0,1,0,0,0,0,0,2,0,3,4,0,0,0,9,0,9
+317880,Çorum FK - Fenerbahçe,Fenerbahçe,175,İsmail Yüksek,MID,90,derived_full90,0,0,0,0,0,0,0,2,0,0,1,0,0,0,3,0,3
+317880,Çorum FK - Fenerbahçe,Fenerbahçe,176,Mason Will John Greenwood,MID,64,derived_substitution_clock,2,0,0,0,0,0,0,2,10,0,1,0,0,0,13,3,16
+317880,Çorum FK - Fenerbahçe,Fenerbahçe,178,Oğuz Aydın,MID,90,derived_full90,1,1,0,0,0,0,0,2,5,3,1,0,0,0,11,2,13
+317880,Çorum FK - Fenerbahçe,Fenerbahçe,180,Nathan Benjamin Aké,DEF,0,sourced_dnp,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+317880,Çorum FK - Fenerbahçe,Fenerbahçe,181,Yiğit Efe Demir,DEF,0,sourced_dnp,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+317880,Çorum FK - Fenerbahçe,Fenerbahçe,182,Archibald Norman Brown,DEF,0,sourced_dnp,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+317880,Çorum FK - Fenerbahçe,Fenerbahçe,184,Dorgeles Nene,MID,0,sourced_dnp,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+317880,Çorum FK - Fenerbahçe,Fenerbahçe,185,N'Golo Kanté,MID,33,derived_substitution_clock,0,0,0,0,0,0,0,1,0,0,0,0,0,0,1,0,1
+317880,Çorum FK - Fenerbahçe,Fenerbahçe,186,Mattéo Elias Kenzo Guendouzi Olié,MID,77,derived_substitution_clock,0,1,0,0,0,0,0,2,0,3,1,0,0,0,6,0,6
+317880,Çorum FK - Fenerbahçe,Çorum FK,187,Çağlar Söyüncü,DEF,90,derived_full90,0,0,0,0,0,0,5,2,0,0,0,-2,0,0,0,0,0
+317880,Çorum FK - Fenerbahçe,Fenerbahçe,188,Mert Müldür,DEF,26,derived_substitution_clock,0,0,0,0,0,0,0,1,0,0,0,0,0,0,1,0,1
+317880,Çorum FK - Fenerbahçe,Fenerbahçe,189,Bartuğ Elmaz,MID,0,sourced_dnp,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+317880,Çorum FK - Fenerbahçe,Fenerbahçe,190,Fehmi Mert Günok,GK,0,sourced_dnp,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+317880,Çorum FK - Fenerbahçe,Çorum FK,193,Cengiz Ünder,MID,61,derived_substitution_clock,0,0,0,0,0,0,5,2,0,0,0,0,0,0,2,0,2
+317880,Çorum FK - Fenerbahçe,Fenerbahçe,194,Ognjen Mimović,DEF,0,sourced_dnp,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+317880,Çorum FK - Fenerbahçe,Fenerbahçe,199,İrfan Can Kahveci,MID,57,derived_substitution_clock,2,0,0,0,0,0,0,1,10,0,0,0,0,0,11,2,13
+317880,Çorum FK - Fenerbahçe,Fenerbahçe,200,Mert Hakan Yandaş,MID,13,derived_substitution_clock,0,0,0,0,0,0,0,1,0,0,0,0,0,0,1,0,1
+317880,Çorum FK - Fenerbahçe,Çorum FK,225,Hüseyin Bulut,DEF,0,sourced_dnp,0,0,0,0,0,0,5,0,0,0,0,0,0,0,0,0,0
+317880,Çorum FK - Fenerbahçe,Çorum FK,226,Ahmed Ildız,MID,0,sourced_dnp,0,0,0,0,0,0,5,0,0,0,0,0,0,0,0,0,0
+317880,Çorum FK - Fenerbahçe,Çorum FK,228,Atakan Akkaynak,MID,0,sourced_dnp,0,0,0,0,0,0,5,0,0,0,0,0,0,0,0,0,0
+317880,Çorum FK - Fenerbahçe,Çorum FK,229,Alfredo Kulembe Gomes Ribeiro,MID,0,sourced_dnp,0,0,0,0,0,0,5,0,0,0,0,0,0,0,0,0,0
+317880,Çorum FK - Fenerbahçe,Çorum FK,230,Arif Şimşir,GK,0,sourced_dnp,0,0,0,0,0,0,5,0,0,0,0,0,0,0,0,0,0
+317880,Çorum FK - Fenerbahçe,Çorum FK,232,Cemali Sertel,DEF,0,sourced_dnp,0,0,0,0,0,0,5,0,0,0,0,0,0,0,0,0,0
+317880,Çorum FK - Fenerbahçe,Çorum FK,234,Marcos Felipe de Freitas Monteiro,GK,90,derived_full90,0,0,0,0,0,2,5,2,0,0,0,-2,0,0,0,0,0
+317880,Çorum FK - Fenerbahçe,Çorum FK,235,Gökhan Sazdağı,DEF,0,sourced_dnp,0,0,0,0,0,0,5,0,0,0,0,0,0,0,0,0,0
+317880,Çorum FK - Fenerbahçe,Çorum FK,236,Emircan Gürlük,MID,29,derived_substitution_clock,0,0,0,0,0,0,5,1,0,0,0,0,0,0,1,0,1
+317880,Çorum FK - Fenerbahçe,Çorum FK,237,Jesús Andrés Ramírez Díaz,FWD,90,derived_full90,0,0,0,0,0,0,5,2,0,0,0,0,0,0,2,0,2
+317880,Çorum FK - Fenerbahçe,Çorum FK,239,Hrvoje Smolčić,DEF,90,derived_full90,0,0,0,0,0,0,5,2,0,0,0,-2,0,0,0,0,0
+317880,Çorum FK - Fenerbahçe,Çorum FK,241,Serdar Saatçı,DEF,0,sourced_dnp,0,0,0,0,0,0,5,0,0,0,0,0,0,0,0,0,0
+317880,Çorum FK - Fenerbahçe,Çorum FK,242,Mame Baba Thiam,FWD,0,sourced_dnp,0,0,0,0,0,0,5,0,0,0,0,0,0,0,0,0,0
+317880,Çorum FK - Fenerbahçe,Çorum FK,244,Erhan Erentürk,GK,0,sourced_dnp,0,0,0,0,0,0,5,0,0,0,0,0,0,0,0,0,0
+317880,Çorum FK - Fenerbahçe,Çorum FK,247,Sebastian Andrei Borza,DEF,90,derived_full90,0,0,0,0,0,0,5,2,0,0,0,-2,0,0,0,0,0
+317880,Çorum FK - Fenerbahçe,Çorum FK,248,Ylber Ramadani,MID,90,derived_full90,0,0,0,0,0,0,5,2,0,0,0,0,0,0,2,0,2
+317880,Çorum FK - Fenerbahçe,Çorum FK,249,Alexandre Manuel Penetra Correia,DEF,65,derived_substitution_clock,0,0,0,0,0,0,5,2,0,0,0,-2,0,0,0,0,0
+317880,Çorum FK - Fenerbahçe,Çorum FK,250,Arda Hilmi Şengül,DEF,25,derived_substitution_clock,0,0,0,0,0,0,5,1,0,0,0,-2,0,0,-1,0,-1
+317880,Çorum FK - Fenerbahçe,Çorum FK,389,Berat Ayberk Özdemir,MID,0,sourced_dnp,0,0,0,0,0,0,5,0,0,0,0,0,0,0,0,0,0
+317880,Çorum FK - Fenerbahçe,Çorum FK,585,Markus Seehusen Karlsbakk,MID,0,sourced_dnp,0,0,0,0,0,0,5,0,0,0,0,0,0,0,0,0,0
+317880,Çorum FK - Fenerbahçe,Fenerbahçe,590,Romelu Menama Lukaku Bolingoli,FWD,57,derived_substitution_clock,0,1,0,0,0,0,0,1,0,3,0,0,0,0,4,0,4
+317880,Çorum FK - Fenerbahçe,Çorum FK,608,Alexandros Kyziridis,MID,90,derived_full90,0,0,0,0,0,0,5,2,0,0,0,0,0,0,2,0,2
+317880,Çorum FK - Fenerbahçe,Çorum FK,611,Mohamed Baba Diomandé,MID,90,derived_full90,0,0,1,0,0,0,5,2,0,0,0,0,0,-1,1,0,1
+317880,Çorum FK - Fenerbahçe,Fenerbahçe,1240,Kojo Peprah Oppong,DEF,90,derived_full90,0,0,0,0,0,0,0,2,0,0,4,0,0,0,6,0,6
+317880,Çorum FK - Fenerbahçe,Çorum FK,1307,Ermin Mahmić,MID,58,derived_substitution_clock,0,0,0,0,0,0,5,1,0,0,0,0,0,0,1,0,1
+317880,Çorum FK - Fenerbahçe,Çorum FK,1406,Youssoufa Mohamadu Moukoko,FWD,32,derived_substitution_clock,0,0,0,0,0,0,5,1,0,0,0,0,0,0,1,0,1
+317881,Alanyaspor - Trabzonspor,Trabzonspor,2,Metehan Mimaroğlu,MID,1,derived_substitution_clock,0,0,0,0,0,0,0,1,0,0,0,0,0,0,1,0,1
+317881,Alanyaspor - Trabzonspor,Trabzonspor,3,Tim Jabol-Folcarelli,MID,0,sourced_dnp,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+317881,Alanyaspor - Trabzonspor,Trabzonspor,4,Ernest Muçi,MID,80,derived_substitution_clock,0,0,0,0,0,0,0,2,0,0,1,0,0,0,3,0,3
+317881,Alanyaspor - Trabzonspor,Trabzonspor,5,Cihan Çanak,MID,0,sourced_dnp,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+317881,Alanyaspor - Trabzonspor,Trabzonspor,7,Mehmet Umut Nayir,FWD,0,sourced_dnp,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+317881,Alanyaspor - Trabzonspor,Trabzonspor,9,Ruslan Malinovskyi,MID,0,sourced_dnp,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+317881,Alanyaspor - Trabzonspor,Trabzonspor,10,Noah José Damesquita E Melo Saviolo,MID,90,derived_full90,0,0,0,0,0,0,0,2,0,0,1,0,0,0,3,0,3
+317881,Alanyaspor - Trabzonspor,Trabzonspor,11,Doğuhan Aral Şimşir,MID,0,sourced_dnp,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+317881,Alanyaspor - Trabzonspor,Trabzonspor,12,Mohamed Salah Hamed Mahrous Ghaly,MID,89,derived_substitution_clock,1,0,0,0,0,0,0,2,5,0,1,0,0,0,8,2,10
+317881,Alanyaspor - Trabzonspor,Trabzonspor,14,Ozan Tufan,MID,69,derived_substitution_clock,0,0,0,0,0,0,0,2,0,0,1,0,0,0,3,0,3
+317881,Alanyaspor - Trabzonspor,Trabzonspor,15,Mustafa Eskihellaç,DEF,10,derived_substitution_clock,0,0,0,0,0,0,0,1,0,0,0,0,0,0,1,0,1
+317881,Alanyaspor - Trabzonspor,Trabzonspor,17,Arsenii Batahov,DEF,0,sourced_dnp,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+317881,Alanyaspor - Trabzonspor,Trabzonspor,18,Ebere Paul Onuachu,FWD,89,derived_substitution_clock,0,1,0,0,0,0,0,2,0,3,0,0,0,0,5,0,5
+317881,Alanyaspor - Trabzonspor,Trabzonspor,22,André Onana,GK,90,sourced_keeper90,0,0,0,0,0,1,0,2,0,0,4,0,0,0,6,0,6
+317881,Alanyaspor - Trabzonspor,Trabzonspor,27,Stefan Savić,DEF,90,derived_full90,0,0,0,0,0,0,0,2,0,0,4,0,0,0,6,0,6
+317881,Alanyaspor - Trabzonspor,Trabzonspor,28,Wagner Fabrício Cardoso de Pina,DEF,90,derived_full90,1,0,0,0,0,0,0,2,6,0,4,0,0,0,12,3,15
+317881,Alanyaspor - Trabzonspor,Trabzonspor,30,Onuralp Çevikkan,GK,0,sourced_dnp,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+317881,Alanyaspor - Trabzonspor,Trabzonspor,32,Melih Kabasakal,MID,21,derived_substitution_clock,0,0,0,0,0,0,0,1,0,0,0,0,0,0,1,0,1
+317881,Alanyaspor - Trabzonspor,Trabzonspor,33,Cenk Özkacar,DEF,0,sourced_dnp,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+317881,Alanyaspor - Trabzonspor,Trabzonspor,34,Okay Yokuşlu,MID,0,sourced_dnp,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+317881,Alanyaspor - Trabzonspor,Trabzonspor,35,Sidny Lopes Cabral,DEF,90,derived_full90,0,0,0,0,0,0,0,2,0,0,4,0,0,0,6,0,6
+317881,Alanyaspor - Trabzonspor,Trabzonspor,37,Chibuike Godfrey Nwaiwu,DEF,90,derived_full90,0,1,1,0,0,0,0,2,0,3,4,0,0,-1,8,2,10
+317881,Alanyaspor - Trabzonspor,Trabzonspor,38,Samet Akaydin,DEF,0,sourced_dnp,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+317881,Alanyaspor - Trabzonspor,Trabzonspor,40,Ahmet Doğan Yıldırım,GK,0,sourced_dnp,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+317881,Alanyaspor - Trabzonspor,Alanyaspor,413,Fidan Aliti,DEF,90,derived_full90,0,0,1,0,0,0,2,2,0,0,0,-1,0,-1,0,0,0
+317881,Alanyaspor - Trabzonspor,Alanyaspor,415,Meschack Elia Lina,FWD,0,sourced_dnp,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0
+317881,Alanyaspor - Trabzonspor,Alanyaspor,416,Yusuf Özdemir,MID,90,derived_full90,0,0,0,0,0,0,2,2,0,0,0,0,0,0,2,0,2
+317881,Alanyaspor - Trabzonspor,Alanyaspor,417,Ui-Jo Hwang,FWD,76,derived_substitution_clock,0,0,0,0,0,0,2,2,0,0,0,0,0,0,2,0,2
+317881,Alanyaspor - Trabzonspor,Alanyaspor,418,Mert Furkan Bayram,GK,0,sourced_dnp,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0
+317881,Alanyaspor - Trabzonspor,Alanyaspor,419,Paulo Victor de Mileo Vidotti,GK,90,sourced_keeper90,0,0,0,0,0,2,2,2,0,0,0,-1,0,0,1,0,1
+317881,Alanyaspor - Trabzonspor,Alanyaspor,420,António Simão Muanza,MID,90,derived_full90,0,0,0,0,0,0,2,2,0,0,0,0,0,0,2,0,2
+317881,Alanyaspor - Trabzonspor,Alanyaspor,421,Ianis Hagi,MID,0,sourced_dnp,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0
+317881,Alanyaspor - Trabzonspor,Alanyaspor,423,Enes Keskin,MID,14,derived_substitution_clock,0,0,0,0,0,0,2,1,0,0,0,0,0,0,1,0,1
+317881,Alanyaspor - Trabzonspor,Alanyaspor,425,İzzet Çelik,MID,0,sourced_dnp,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0
+317881,Alanyaspor - Trabzonspor,Alanyaspor,426,Fatih Aksoy,DEF,0,sourced_dnp,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0
+317881,Alanyaspor - Trabzonspor,Alanyaspor,427,Florent Hadërgjonaj,DEF,90,derived_full90,0,0,0,0,0,0,2,2,0,0,0,-1,0,0,1,0,1
+317881,Alanyaspor - Trabzonspor,Alanyaspor,429,Ruan Pereira Duarte,MID,90,derived_full90,0,0,0,0,0,0,2,2,0,0,0,0,0,0,2,0,2
+317881,Alanyaspor - Trabzonspor,Alanyaspor,430,İbrahim Kaya,FWD,14,derived_substitution_clock,0,0,0,0,0,0,2,1,0,0,0,0,0,0,1,0,1
+317881,Alanyaspor - Trabzonspor,Alanyaspor,431,Omar Ben Ali,FWD,28,derived_substitution_clock,0,0,0,0,0,0,2,1,0,0,0,0,0,0,1,0,1
+317881,Alanyaspor - Trabzonspor,Alanyaspor,435,Gaïus Abraham Jered Makouta,MID,0,sourced_dnp,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0
+317881,Alanyaspor - Trabzonspor,Alanyaspor,436,Nuno Miguel Reis Lima,DEF,90,derived_full90,0,0,0,0,0,0,2,2,0,0,0,-1,0,0,1,0,1
+317881,Alanyaspor - Trabzonspor,Alanyaspor,437,Arda Usluoğlu,FWD,62,derived_substitution_clock,0,0,0,0,0,0,2,2,0,0,0,0,0,0,2,0,2
+317881,Alanyaspor - Trabzonspor,Alanyaspor,596,Arouna Kigbafory Soro,MID,0,sourced_dnp,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0
+317881,Alanyaspor - Trabzonspor,Alanyaspor,599,Baran Ali Gezek,MID,76,derived_substitution_clock,0,0,0,0,0,0,2,2,0,0,0,0,0,0,2,0,2
+317881,Alanyaspor - Trabzonspor,Alanyaspor,910,Iván Cédric Bikoue Embolo,FWD,0,sourced_dnp,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0
+317881,Alanyaspor - Trabzonspor,Alanyaspor,977,Paolo Fernandes Cantin,MID,0,sourced_dnp,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0
+317881,Alanyaspor - Trabzonspor,Trabzonspor,1009,Fábio Henrique Tavares,MID,90,derived_full90,0,0,0,0,0,0,0,2,0,0,1,0,0,0,3,0,3
+317881,Alanyaspor - Trabzonspor,Trabzonspor,1471,Franculino Gluda Djú,FWD,0,sourced_dnp,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+317881,Alanyaspor - Trabzonspor,Trabzonspor,1547,Ali Habeşoğlu,FWD,1,derived_substitution_clock,0,0,0,0,0,0,0,1,0,0,0,0,0,0,1,0,1
+317881,Alanyaspor - Trabzonspor,Alanyaspor,1608,Bedirhan Özyurt,DEF,90,derived_full90,0,0,0,0,0,0,2,2,0,0,0,-1,0,0,1,0,1
+317882,Beşiktaş - Gençlerbirliği,Gençlerbirliği,195,İrfan Can Eğribayat,GK,90,derived_full90,0,0,0,0,0,6,3,2,0,0,0,-1,2,0,3,0,3
+317882,Beşiktaş - Gençlerbirliği,Beşiktaş,257,Milot Rashica,MID,0,sourced_dnp,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+317882,Beşiktaş - Gençlerbirliği,Beşiktaş,258,Kartal Kayra Yılmaz,MID,19,derived_substitution_clock,0,0,0,0,0,0,0,1,0,0,0,0,0,0,1,0,1
+317882,Beşiktaş - Gençlerbirliği,Beşiktaş,259,Rıdvan Yılmaz,DEF,90,derived_full90,0,0,0,0,0,0,0,2,0,0,4,0,0,0,6,1,7
+317882,Beşiktaş - Gençlerbirliği,Beşiktaş,260,Taylan Bulut,DEF,19,derived_substitution_clock,0,0,0,0,0,0,0,1,0,0,0,0,0,0,1,0,1
+317882,Beşiktaş - Gençlerbirliği,Beşiktaş,261,Badobre Emmanuel Elysee Djedje Agbadou,DEF,90,derived_full90,0,0,0,0,0,0,0,2,0,0,4,0,0,0,6,1,7
+317882,Beşiktaş - Gençlerbirliği,Beşiktaş,263,Doğan Alemdar,GK,0,sourced_dnp,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+317882,Beşiktaş - Gençlerbirliği,Beşiktaş,264,Junior Olaïtan Ishola,MID,19,derived_substitution_clock,0,0,0,0,0,0,0,1,0,0,0,0,0,0,1,0,1
+317882,Beşiktaş - Gençlerbirliği,Beşiktaş,266,Mustafa Erhan Hekimoğlu,FWD,0,sourced_dnp,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+317882,Beşiktaş - Gençlerbirliği,Beşiktaş,268,Semih Kılıçsoy,FWD,4,derived_substitution_clock,0,0,0,0,0,0,0,1,0,0,0,0,0,0,1,0,1
+317882,Beşiktaş - Gençlerbirliği,Beşiktaş,269,Onyinye Wilfred Ndidi,MID,71,derived_substitution_clock,0,0,1,0,0,0,0,2,0,0,1,0,0,-1,2,0,2
+317882,Beşiktaş - Gençlerbirliği,Beşiktaş,270,Kassoum Ouattara,DEF,0,sourced_dnp,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+317882,Beşiktaş - Gençlerbirliği,Beşiktaş,271,Tiago Emanuel Embaló Djaló,DEF,0,sourced_dnp,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+317882,Beşiktaş - Gençlerbirliği,Beşiktaş,273,Leandro Trossard,MID,90,derived_full90,0,3,0,0,0,0,0,2,0,9,1,0,0,0,12,3,15
+317882,Beşiktaş - Gençlerbirliği,Beşiktaş,275,Hyeon-Gyu Oh,FWD,0,sourced_dnp,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+317882,Beşiktaş - Gençlerbirliği,Beşiktaş,277,Michael Amir Murillo Bermúdez,DEF,71,derived_substitution_clock,0,0,1,0,0,0,0,2,0,0,4,0,0,-1,5,0,5
+317882,Beşiktaş - Gençlerbirliği,Beşiktaş,278,İlhan Fakılı,MID,77,derived_substitution_clock,0,0,0,0,0,0,0,2,0,0,1,0,0,0,3,0,3
+317882,Beşiktaş - Gençlerbirliği,Beşiktaş,279,Václav Černý,MID,0,sourced_dnp,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+317882,Beşiktaş - Gençlerbirliği,Beşiktaş,280,Alexander Nübel,GK,90,derived_full90,0,0,0,0,0,1,0,2,0,0,4,0,0,0,6,1,7
+317882,Beşiktaş - Gençlerbirliği,Beşiktaş,281,Orkun Kökçü,MID,71,derived_substitution_clock,0,0,1,0,0,0,0,2,0,0,1,0,0,-1,2,0,2
+317882,Beşiktaş - Gençlerbirliği,Beşiktaş,282,Emirhan Topçu,DEF,90,derived_full90,0,0,0,0,0,0,0,2,0,0,4,0,0,0,6,1,7
+317882,Beşiktaş - Gençlerbirliği,Beşiktaş,284,Yasin Özcan,DEF,0,sourced_dnp,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+317882,Beşiktaş - Gençlerbirliği,Beşiktaş,285,Salih Özcan,MID,90,derived_full90,0,0,0,0,0,0,0,2,0,0,1,0,0,0,3,0,3
+317882,Beşiktaş - Gençlerbirliği,Gençlerbirliği,317,Gökhan Akkan,GK,0,sourced_dnp,0,0,0,0,0,0,3,0,0,0,0,0,0,0,0,0,0
+317882,Beşiktaş - Gençlerbirliği,Gençlerbirliği,319,Sékou Koïta,FWD,3,derived_substitution_clock,0,0,0,0,0,0,3,1,0,0,0,0,0,0,1,0,1
+317882,Beşiktaş - Gençlerbirliği,Gençlerbirliği,322,Muhammet Ensar Çavuşoğlu,DEF,0,sourced_dnp,0,0,0,0,0,0,3,0,0,0,0,0,0,0,0,0,0
+317882,Beşiktaş - Gençlerbirliği,Gençlerbirliği,326,Ousmane Diabate,MID,63,derived_substitution_clock,0,0,1,0,0,0,3,2,0,0,0,0,0,-1,1,0,1
+317882,Beşiktaş - Gençlerbirliği,Gençlerbirliği,330,Oğulcan Ülgün,MID,87,derived_substitution_clock,0,0,0,0,0,0,3,2,0,0,0,0,0,0,2,0,2
+317882,Beşiktaş - Gençlerbirliği,Gençlerbirliği,332,Kévin Manuel Rodrigues,DEF,0,sourced_dnp,0,0,0,0,0,0,3,0,0,0,0,0,0,0,0,0,0
+317882,Beşiktaş - Gençlerbirliği,Gençlerbirliği,335,Zafer Göktuğ Erdem,MID,0,sourced_dnp,0,0,0,0,0,0,3,0,0,0,0,0,0,0,0,0,0
+317882,Beşiktaş - Gençlerbirliği,Gençlerbirliği,336,Thalisson Kelven da Silva,DEF,27,derived_substitution_clock,0,0,0,0,0,0,3,1,0,0,0,-1,0,0,0,0,0
+317882,Beşiktaş - Gençlerbirliği,Gençlerbirliği,338,Pedro Miguel Almeida Lopes Pereira,DEF,0,sourced_dnp,0,0,0,0,0,0,3,0,0,0,0,0,0,0,0,0,0
+317882,Beşiktaş - Gençlerbirliği,Gençlerbirliği,339,Dimitrios Goutas,DEF,0,sourced_dnp,0,0,0,0,0,0,3,0,0,0,0,0,0,0,0,0,0
+317882,Beşiktaş - Gençlerbirliği,Gençlerbirliği,341,Furkan Ayaz Özcan,FWD,0,sourced_dnp,0,0,0,0,0,0,3,0,0,0,0,0,0,0,0,0,0
+317882,Beşiktaş - Gençlerbirliği,Gençlerbirliği,342,Fıratcan Üzüm,DEF,19,derived_substitution_clock,0,0,0,0,0,0,3,1,0,0,0,-1,0,0,0,0,0
+317882,Beşiktaş - Gençlerbirliği,Gençlerbirliği,344,Abdurrahim Dursun,DEF,0,sourced_dnp,0,0,0,0,0,0,3,0,0,0,0,0,0,0,0,0,0
+317882,Beşiktaş - Gençlerbirliği,Gençlerbirliği,345,Adama Malouda Traoré,MID,71,derived_substitution_clock,0,0,0,0,0,0,3,2,0,0,0,0,0,0,2,0,2
+317882,Beşiktaş - Gençlerbirliği,Gençlerbirliği,346,Franco Daryl Tongya Heubang,MID,90,derived_full90,0,0,0,0,0,0,3,2,0,0,0,0,0,0,2,0,2
+317882,Beşiktaş - Gençlerbirliği,Gençlerbirliği,347,Berk Deniz Çukurcu,GK,0,sourced_dnp,0,0,0,0,0,0,3,0,0,0,0,0,0,0,0,0,0
+317882,Beşiktaş - Gençlerbirliği,Beşiktaş,428,Ümit Akdağ,DEF,0,sourced_dnp,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+317882,Beşiktaş - Gençlerbirliği,Gençlerbirliği,541,Metehan Baltacı,DEF,22,derived_substitution_clock,0,0,0,1,0,0,3,1,0,0,0,-1,0,-3,-3,0,-3
+317882,Beşiktaş - Gençlerbirliği,Gençlerbirliği,583,Salih Uçan,MID,3,derived_substitution_clock,0,0,0,0,0,0,3,1,0,0,0,0,0,0,1,0,1
+317882,Beşiktaş - Gençlerbirliği,Beşiktaş,593,Dušan Vlahović,FWD,86,derived_substitution_clock,2,0,0,0,0,0,0,2,8,0,0,0,0,0,10,2,12
+317882,Beşiktaş - Gençlerbirliği,Gençlerbirliği,812,Tiago Maria Antunes Gouveia,MID,71,derived_substitution_clock,0,0,0,0,0,0,3,2,0,0,0,0,0,0,2,0,2
+317882,Beşiktaş - Gençlerbirliği,Gençlerbirliği,813,Cheikh Ahmet Tidiane Niasse,MID,90,derived_full90,0,0,0,0,0,0,3,2,0,0,0,0,0,0,2,0,2
+317882,Beşiktaş - Gençlerbirliği,Beşiktaş,1141,Ernest Poku,MID,13,derived_substitution_clock,1,0,0,0,0,0,0,1,5,0,0,0,0,0,6,1,7
+317882,Beşiktaş - Gençlerbirliği,Beşiktaş,1209,Fabio Miretti,MID,0,sourced_dnp,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+317882,Beşiktaş - Gençlerbirliği,Gençlerbirliği,1504,Victor Ikechukwu Jonathan Orakpo,FWD,0,sourced_dnp,0,0,0,0,0,0,3,0,0,0,0,0,0,0,0,0,0
+317882,Beşiktaş - Gençlerbirliği,Gençlerbirliği,1537,Pedro Manuel Lobo Peixoto Mineiro Mendes,FWD,87,derived_substitution_clock,0,0,0,0,0,0,3,2,0,0,0,0,0,0,2,0,2
+317882,Beşiktaş - Gençlerbirliği,Gençlerbirliği,1545,Rafael Filipe Gonçalves Soares Luís,MID,19,derived_substitution_clock,0,0,0,0,0,0,3,1,0,0,0,0,0,0,1,0,1
+317882,Beşiktaş - Gençlerbirliği,Gençlerbirliği,1605,Hamza Aydar,DEF,90,derived_full90,0,0,0,0,0,0,3,2,0,0,0,-1,0,0,1,0,1
+317882,Beşiktaş - Gençlerbirliği,Gençlerbirliği,1606,Prince Martor Jr.,FWD,0,sourced_dnp,0,0,0,0,0,0,3,0,0,0,0,0,0,0,0,0,0
