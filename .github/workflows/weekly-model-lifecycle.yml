@@ -59,6 +59,12 @@ jobs:
           OIDC_TOKEN: ${{ steps.oidc.outputs.token }}
         run: |
           set -euo pipefail
+          # Fetch a fresh job-scoped GitHub OIDC token for this step: initial JWT expires
+          # during a long 50K Monte Carlo run. Never reuse the initial token for post-run QA.
+          OIDC_TOKEN="$(curl --fail-with-body --silent --show-error --max-time 30 \
+            -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+            "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=${OIDC_AUDIENCE}" | jq -er '.value')"
+          echo "::add-mask::$OIDC_TOKEN"
           response="$(curl --fail --show-error --silent --max-time 90 \
             -H "Authorization: Bearer $OIDC_TOKEN" \
             "$FUNCTIONS_URL/refresh-availability")"
@@ -72,6 +78,12 @@ jobs:
           OIDC_TOKEN: ${{ steps.oidc.outputs.token }}
         run: |
           set -euo pipefail
+          # Fetch a fresh job-scoped GitHub OIDC token for this step: initial JWT expires
+          # during a long 50K Monte Carlo run. Never reuse the initial token for post-run QA.
+          OIDC_TOKEN="$(curl --fail-with-body --silent --show-error --max-time 30 \
+            -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+            "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=${OIDC_AUDIENCE}" | jq -er '.value')"
+          echo "::add-mask::$OIDC_TOKEN"
           response="$(curl --fail --show-error --silent --max-time 240             -H "Authorization: Bearer $OIDC_TOKEN"             -H "Content-Type: application/json"             --data '{"stage":"ingest","strict":false}'             "$FUNCTIONS_URL/model-refresh-control")"
           echo "$response" | jq .
           echo "configured=$(printf '%s' "$response" | jq -r '.upstream_configured // false')" >> "$GITHUB_OUTPUT"
@@ -83,6 +95,12 @@ jobs:
           OIDC_TOKEN: ${{ steps.oidc.outputs.token }}
         run: |
           set -euo pipefail
+          # Fetch a fresh job-scoped GitHub OIDC token for this step: initial JWT expires
+          # during a long 50K Monte Carlo run. Never reuse the initial token for post-run QA.
+          OIDC_TOKEN="$(curl --fail-with-body --silent --show-error --max-time 30 \
+            -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+            "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=${OIDC_AUDIENCE}" | jq -er '.value')"
+          echo "::add-mask::$OIDC_TOKEN"
           response="$(curl --fail --show-error --silent --max-time 90 \
             -H "Authorization: Bearer $OIDC_TOKEN" \
             -H "Content-Type: application/json" \
@@ -98,6 +116,12 @@ jobs:
           OIDC_TOKEN: ${{ steps.oidc.outputs.token }}
         run: |
           set -euo pipefail
+          # Fetch a fresh job-scoped GitHub OIDC token for this step: initial JWT expires
+          # during a long 50K Monte Carlo run. Never reuse the initial token for post-run QA.
+          OIDC_TOKEN="$(curl --fail-with-body --silent --show-error --max-time 30 \
+            -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+            "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=${OIDC_AUDIENCE}" | jq -er '.value')"
+          echo "::add-mask::$OIDC_TOKEN"
           for attempt in 1 2 3; do
             echo "Prediction-input repair attempt $attempt/3"
             curl --fail --show-error --silent --max-time 240 --retry 3 --retry-delay 5 --retry-all-errors \
@@ -118,6 +142,12 @@ jobs:
           OIDC_TOKEN: ${{ steps.oidc.outputs.token }}
         run: |
           set -euo pipefail
+          # Fetch a fresh job-scoped GitHub OIDC token for this step: initial JWT expires
+          # during a long 50K Monte Carlo run. Never reuse the initial token for post-run QA.
+          OIDC_TOKEN="$(curl --fail-with-body --silent --show-error --max-time 30 \
+            -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+            "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=${OIDC_AUDIENCE}" | jq -er '.value')"
+          echo "::add-mask::$OIDC_TOKEN"
           response="$(curl --fail --show-error --silent             -H "Authorization: Bearer $OIDC_TOKEN"             -H "Content-Type: application/json"             --data '{"action":"status"}'             "$FUNCTIONS_URL/weekly-model-lifecycle")"
           echo "$response" | jq .
           echo "ready=$(printf '%s' "$response" | jq -r '.ready_to_advance // false')" >> "$GITHUB_OUTPUT"
@@ -151,6 +181,12 @@ jobs:
           OIDC_TOKEN: ${{ steps.oidc.outputs.token }}
         run: |
           set -euo pipefail
+          # Fetch a fresh job-scoped GitHub OIDC token for this step: initial JWT expires
+          # during a long 50K Monte Carlo run. Never reuse the initial token for post-run QA.
+          OIDC_TOKEN="$(curl --fail-with-body --silent --show-error --max-time 30 \
+            -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+            "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=${OIDC_AUDIENCE}" | jq -er '.value')"
+          echo "::add-mask::$OIDC_TOKEN"
           response="$(curl --silent --show-error --max-time 90 \
             -H "Authorization: Bearer $OIDC_TOKEN" -H "Content-Type: application/json" \
             --data '{"action":"audit_run"}' "$FUNCTIONS_URL/weekly-model-lifecycle")"
@@ -165,6 +201,12 @@ jobs:
           OIDC_TOKEN: ${{ steps.oidc.outputs.token }}
         run: |
           set -euo pipefail
+          # Fetch a fresh job-scoped GitHub OIDC token for this step: initial JWT expires
+          # during a long 50K Monte Carlo run. Never reuse the initial token for post-run QA.
+          OIDC_TOKEN="$(curl --fail-with-body --silent --show-error --max-time 30 \
+            -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+            "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=${OIDC_AUDIENCE}" | jq -er '.value')"
+          echo "::add-mask::$OIDC_TOKEN"
           response="$(jq -n --arg sha "$GITHUB_SHA" '{action:"prepare_current",code_sha:$sha}' |             curl --show-error --silent --max-time 240               -H "Authorization: Bearer $OIDC_TOKEN"               -H "Content-Type: application/json"               --data-binary @- "$FUNCTIONS_URL/weekly-model-lifecycle")"
           echo "$response" | jq .
           test "$(printf '%s' "$response" | jq -r '.ok // false')" = "true"
@@ -185,11 +227,25 @@ jobs:
           BENCHMARK: ${{ steps.current_refresh.outputs.benchmark }}
         run: |
           set -euo pipefail
+          # Fetch a fresh job-scoped GitHub OIDC token for this step: initial JWT expires
+          # during a long 50K Monte Carlo run. Never reuse the initial token for post-run QA.
+          OIDC_TOKEN="$(curl --fail-with-body --silent --show-error --max-time 30 \
+            -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+            "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=${OIDC_AUDIENCE}" | jq -er '.value')"
+          echo "::add-mask::$OIDC_TOKEN"
           common=(-H "Authorization: Bearer $OIDC_TOKEN")
           curl --fail --show-error --silent --max-time 240 --retry 5 --retry-delay 2 --retry-all-errors --retry-max-time 120 "${common[@]}"             "$FUNCTIONS_URL/run-live-sim-chunk?mode=reset&gw=$GAMEWEEK&run=$RUN_ID&benchmark=$BENCHMARK" | jq -e -c 'if .ok == true and .policy_version == "gk-sot-source-blend-v2" then . else error("MODEL_SCORER_POLICY_MISMATCH") end'
           # Bounded Edge CPU: 100 x 500 = 50,000 draws/player, no loss of Monte Carlo volume.
           # Finalize refuses any player with fewer than 50,000 accumulated draws.
           for part in $(seq 0 99); do
+            # Re-mint before expiration: 100x500 chunks exceed a JWT lifetime.
+            if (( part > 0 && part % 10 == 0 )); then
+              OIDC_TOKEN="$(curl --fail-with-body --silent --show-error --max-time 30 \
+                -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+                "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=${OIDC_AUDIENCE}" | jq -er '.value')"
+              echo "::add-mask::$OIDC_TOKEN"
+              common=(-H "Authorization: Bearer $OIDC_TOKEN")
+            fi
             seed=$((2026000000 + GAMEWEEK * 100000 + part * 500 + 1))
             curl --fail --show-error --silent --max-time 240 --retry 5 --retry-delay 2 --retry-all-errors --retry-max-time 120 "${common[@]}"               "$FUNCTIONS_URL/run-live-sim-chunk?gw=$GAMEWEEK&run=$RUN_ID&benchmark=$BENCHMARK&draws=500&seed=$seed" | jq -e -c 'if .ok == true and .policy_version == "gk-sot-source-blend-v2" then . else error("MODEL_SCORER_POLICY_MISMATCH") end'
             sleep 1
@@ -205,6 +261,12 @@ jobs:
           BENCHMARK: ${{ steps.current_refresh.outputs.benchmark }}
         run: |
           set -euo pipefail
+          # Fetch a fresh job-scoped GitHub OIDC token for this step: initial JWT expires
+          # during a long 50K Monte Carlo run. Never reuse the initial token for post-run QA.
+          OIDC_TOKEN="$(curl --fail-with-body --silent --show-error --max-time 30 \
+            -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+            "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=${OIDC_AUDIENCE}" | jq -er '.value')"
+          echo "::add-mask::$OIDC_TOKEN"
           jq -n --arg run "$RUN_ID" --arg bench "$BENCHMARK" \
             '{action:"audit_run",run_id:$run,benchmark:$bench}' | \
             curl --silent --show-error --max-time 90 \
@@ -219,6 +281,12 @@ jobs:
           RUN_ID: ${{ steps.current_refresh.outputs.run_id }}
         run: |
           set -euo pipefail
+          # Fetch a fresh job-scoped GitHub OIDC token for this step: initial JWT expires
+          # during a long 50K Monte Carlo run. Never reuse the initial token for post-run QA.
+          OIDC_TOKEN="$(curl --fail-with-body --silent --show-error --max-time 30 \
+            -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+            "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=${OIDC_AUDIENCE}" | jq -er '.value')"
+          echo "::add-mask::$OIDC_TOKEN"
           curl --fail --show-error --silent --max-time 300 --retry 4 --retry-delay 2 --retry-all-errors --retry-max-time 90             -H "Authorization: Bearer $OIDC_TOKEN"             "$FUNCTIONS_URL/run-staging-optimizer?mode=recommended&run=$RUN_ID" | jq .
 
       - name: Optimize current-MH ceiling squad
@@ -228,6 +296,12 @@ jobs:
           RUN_ID: ${{ steps.current_refresh.outputs.run_id }}
         run: |
           set -euo pipefail
+          # Fetch a fresh job-scoped GitHub OIDC token for this step: initial JWT expires
+          # during a long 50K Monte Carlo run. Never reuse the initial token for post-run QA.
+          OIDC_TOKEN="$(curl --fail-with-body --silent --show-error --max-time 30 \
+            -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+            "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=${OIDC_AUDIENCE}" | jq -er '.value')"
+          echo "::add-mask::$OIDC_TOKEN"
           curl --fail --show-error --silent --max-time 300 --retry 4 --retry-delay 2 --retry-all-errors --retry-max-time 90             -H "Authorization: Bearer $OIDC_TOKEN"             "$FUNCTIONS_URL/run-staging-optimizer?mode=alternative&run=$RUN_ID" | jq .
 
       - name: QA current-MH refresh
@@ -238,6 +312,12 @@ jobs:
           PARENT_RUN_ID: ${{ steps.current_refresh.outputs.parent_run_id }}
         run: |
           set -euo pipefail
+          # Fetch a fresh job-scoped GitHub OIDC token for this step: initial JWT expires
+          # during a long 50K Monte Carlo run. Never reuse the initial token for post-run QA.
+          OIDC_TOKEN="$(curl --fail-with-body --silent --show-error --max-time 30 \
+            -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+            "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=${OIDC_AUDIENCE}" | jq -er '.value')"
+          echo "::add-mask::$OIDC_TOKEN"
           for stage in qa integrity bugfix; do
             jq -n --arg run "$RUN_ID" --arg stage "$stage" '{stage:$stage,run_id:$run}' |               curl --fail --show-error --silent -H "Authorization: Bearer $OIDC_TOKEN" -H "Content-Type: application/json"                 --data-binary @- "$FUNCTIONS_URL/model-refresh-control" | jq .
           done
@@ -252,6 +332,12 @@ jobs:
           RUN_ID: ${{ steps.current_refresh.outputs.run_id }}
         run: |
           set -euo pipefail
+          # Fetch a fresh job-scoped GitHub OIDC token for this step: initial JWT expires
+          # during a long 50K Monte Carlo run. Never reuse the initial token for post-run QA.
+          OIDC_TOKEN="$(curl --fail-with-body --silent --show-error --max-time 30 \
+            -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+            "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=${OIDC_AUDIENCE}" | jq -er '.value')"
+          echo "::add-mask::$OIDC_TOKEN"
           jq -n --arg run "$RUN_ID" '{action:"snapshot",run_id:$run}' |             curl --fail --show-error --silent -H "Authorization: Bearer $OIDC_TOKEN" -H "Content-Type: application/json"               --data-binary @- "$FUNCTIONS_URL/weekly-model-lifecycle" | jq .
 
       - name: Promote refreshed current MH
@@ -261,6 +347,12 @@ jobs:
           RUN_ID: ${{ steps.current_refresh.outputs.run_id }}
         run: |
           set -euo pipefail
+          # Fetch a fresh job-scoped GitHub OIDC token for this step: initial JWT expires
+          # during a long 50K Monte Carlo run. Never reuse the initial token for post-run QA.
+          OIDC_TOKEN="$(curl --fail-with-body --silent --show-error --max-time 30 \
+            -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+            "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=${OIDC_AUDIENCE}" | jq -er '.value')"
+          echo "::add-mask::$OIDC_TOKEN"
           jq -n --arg run "$RUN_ID" '{stage:"promote",run_id:$run}' |             curl --fail --show-error --silent -H "Authorization: Bearer $OIDC_TOKEN" -H "Content-Type: application/json"               --data-binary @- "$FUNCTIONS_URL/model-refresh-control" | jq .
 
       - name: Verify refreshed current MH
@@ -270,6 +362,12 @@ jobs:
           GAMEWEEK: ${{ steps.current_refresh.outputs.gameweek }}
         run: |
           set -euo pipefail
+          # Fetch a fresh job-scoped GitHub OIDC token for this step: initial JWT expires
+          # during a long 50K Monte Carlo run. Never reuse the initial token for post-run QA.
+          OIDC_TOKEN="$(curl --fail-with-body --silent --show-error --max-time 30 \
+            -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+            "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=${OIDC_AUDIENCE}" | jq -er '.value')"
+          echo "::add-mask::$OIDC_TOKEN"
           jq -n --argjson gw "$GAMEWEEK" '{action:"verify",gameweek:$gw}' |             curl --fail --show-error --silent -H "Authorization: Bearer $OIDC_TOKEN" -H "Content-Type: application/json"               --data-binary @- "$FUNCTIONS_URL/weekly-model-lifecycle" | jq .
 
       - name: Require fresh source data before advancing
@@ -279,6 +377,12 @@ jobs:
           OIDC_TOKEN: ${{ steps.oidc.outputs.token }}
         run: |
           set -euo pipefail
+          # Fetch a fresh job-scoped GitHub OIDC token for this step: initial JWT expires
+          # during a long 50K Monte Carlo run. Never reuse the initial token for post-run QA.
+          OIDC_TOKEN="$(curl --fail-with-body --silent --show-error --max-time 30 \
+            -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+            "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=${OIDC_AUDIENCE}" | jq -er '.value')"
+          echo "::add-mask::$OIDC_TOKEN"
           curl --fail --show-error --silent --max-time 240             -H "Authorization: Bearer $OIDC_TOKEN"             -H "Content-Type: application/json"             --data '{"stage":"ingest","strict":true}'             "$FUNCTIONS_URL/model-refresh-control" | jq .
 
       - name: Close live performance for finished MH
@@ -289,6 +393,12 @@ jobs:
           OIDC_TOKEN: ${{ steps.oidc.outputs.token }}
         run: |
           set -euo pipefail
+          # Fetch a fresh job-scoped GitHub OIDC token for this step: initial JWT expires
+          # during a long 50K Monte Carlo run. Never reuse the initial token for post-run QA.
+          OIDC_TOKEN="$(curl --fail-with-body --silent --show-error --max-time 30 \
+            -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+            "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=${OIDC_AUDIENCE}" | jq -er '.value')"
+          echo "::add-mask::$OIDC_TOKEN"
           response="$(curl --fail --show-error --silent             -H "Authorization: Bearer $OIDC_TOKEN"             -H "Content-Type: application/json"             --data '{"action":"close_backtest"}'             "$FUNCTIONS_URL/weekly-model-lifecycle")"
           echo "$response" | jq .
           printf '%s' "$response" > "$RUNNER_TEMP/closed-week.json"
@@ -301,6 +411,12 @@ jobs:
           OIDC_TOKEN: ${{ steps.oidc.outputs.token }}
         run: |
           set -euo pipefail
+          # Fetch a fresh job-scoped GitHub OIDC token for this step: initial JWT expires
+          # during a long 50K Monte Carlo run. Never reuse the initial token for post-run QA.
+          OIDC_TOKEN="$(curl --fail-with-body --silent --show-error --max-time 30 \
+            -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+            "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=${OIDC_AUDIENCE}" | jq -er '.value')"
+          echo "::add-mask::$OIDC_TOKEN"
           response="$(jq -n --arg sha "$GITHUB_SHA" '{action:"prepare",code_sha:$sha}' |             curl --fail --show-error --silent --max-time 240               -H "Authorization: Bearer $OIDC_TOKEN"               -H "Content-Type: application/json"               --data-binary @- "$FUNCTIONS_URL/weekly-model-lifecycle")"
           echo "$response" | jq .
           echo "run_id=$(printf '%s' "$response" | jq -r '.run_id')" >> "$GITHUB_OUTPUT"
@@ -317,11 +433,25 @@ jobs:
           BENCHMARK: ${{ steps.prepare.outputs.benchmark }}
         run: |
           set -euo pipefail
+          # Fetch a fresh job-scoped GitHub OIDC token for this step: initial JWT expires
+          # during a long 50K Monte Carlo run. Never reuse the initial token for post-run QA.
+          OIDC_TOKEN="$(curl --fail-with-body --silent --show-error --max-time 30 \
+            -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+            "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=${OIDC_AUDIENCE}" | jq -er '.value')"
+          echo "::add-mask::$OIDC_TOKEN"
           common=(-H "Authorization: Bearer $OIDC_TOKEN")
           curl --fail --show-error --silent --max-time 240 --retry 5 --retry-delay 2 --retry-all-errors --retry-max-time 120 "${common[@]}"             "$FUNCTIONS_URL/run-live-sim-chunk?mode=reset&gw=$GAMEWEEK&run=$RUN_ID&benchmark=$BENCHMARK" | jq -e -c 'if .ok == true and .policy_version == "gk-sot-source-blend-v2" then . else error("MODEL_SCORER_POLICY_MISMATCH") end'
           # Bounded Edge CPU: 100 x 500 = 50,000 draws/player, no loss of Monte Carlo volume.
           # Finalize refuses any player with fewer than 50,000 accumulated draws.
           for part in $(seq 0 99); do
+            # Re-mint before expiration: 100x500 chunks exceed a JWT lifetime.
+            if (( part > 0 && part % 10 == 0 )); then
+              OIDC_TOKEN="$(curl --fail-with-body --silent --show-error --max-time 30 \
+                -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+                "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=${OIDC_AUDIENCE}" | jq -er '.value')"
+              echo "::add-mask::$OIDC_TOKEN"
+              common=(-H "Authorization: Bearer $OIDC_TOKEN")
+            fi
             seed=$((2026000000 + GAMEWEEK * 100000 + part * 500 + 1))
             echo "Simulation chunk $((part+1))/100"
             curl --fail --show-error --silent --max-time 240 --retry 5 --retry-delay 2 --retry-all-errors --retry-max-time 120 "${common[@]}"               "$FUNCTIONS_URL/run-live-sim-chunk?gw=$GAMEWEEK&run=$RUN_ID&benchmark=$BENCHMARK&draws=500&seed=$seed" | jq -e -c 'if .ok == true and .policy_version == "gk-sot-source-blend-v2" then . else error("MODEL_SCORER_POLICY_MISMATCH") end'
@@ -338,6 +468,12 @@ jobs:
           BENCHMARK: ${{ steps.prepare.outputs.benchmark }}
         run: |
           set -euo pipefail
+          # Fetch a fresh job-scoped GitHub OIDC token for this step: initial JWT expires
+          # during a long 50K Monte Carlo run. Never reuse the initial token for post-run QA.
+          OIDC_TOKEN="$(curl --fail-with-body --silent --show-error --max-time 30 \
+            -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+            "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=${OIDC_AUDIENCE}" | jq -er '.value')"
+          echo "::add-mask::$OIDC_TOKEN"
           jq -n --arg run "$RUN_ID" --arg bench "$BENCHMARK" \
             '{action:"audit_run",run_id:$run,benchmark:$bench}' | \
             curl --silent --show-error --max-time 90 \
@@ -353,6 +489,12 @@ jobs:
           RUN_ID: ${{ steps.prepare.outputs.run_id }}
         run: |
           set -euo pipefail
+          # Fetch a fresh job-scoped GitHub OIDC token for this step: initial JWT expires
+          # during a long 50K Monte Carlo run. Never reuse the initial token for post-run QA.
+          OIDC_TOKEN="$(curl --fail-with-body --silent --show-error --max-time 30 \
+            -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+            "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=${OIDC_AUDIENCE}" | jq -er '.value')"
+          echo "::add-mask::$OIDC_TOKEN"
           curl --fail --show-error --silent --max-time 300 --retry 4 --retry-delay 2 --retry-all-errors --retry-max-time 90             -H "Authorization: Bearer $OIDC_TOKEN"             "$FUNCTIONS_URL/run-staging-optimizer?mode=recommended&run=$RUN_ID" | jq .
 
       - name: Optimize ceiling squad
@@ -363,6 +505,12 @@ jobs:
           RUN_ID: ${{ steps.prepare.outputs.run_id }}
         run: |
           set -euo pipefail
+          # Fetch a fresh job-scoped GitHub OIDC token for this step: initial JWT expires
+          # during a long 50K Monte Carlo run. Never reuse the initial token for post-run QA.
+          OIDC_TOKEN="$(curl --fail-with-body --silent --show-error --max-time 30 \
+            -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+            "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=${OIDC_AUDIENCE}" | jq -er '.value')"
+          echo "::add-mask::$OIDC_TOKEN"
           curl --fail --show-error --silent --max-time 300 --retry 4 --retry-delay 2 --retry-all-errors --retry-max-time 90             -H "Authorization: Bearer $OIDC_TOKEN"             "$FUNCTIONS_URL/run-staging-optimizer?mode=alternative&run=$RUN_ID" | jq .
 
       - name: Model QA
@@ -373,6 +521,12 @@ jobs:
           RUN_ID: ${{ steps.prepare.outputs.run_id }}
         run: |
           set -euo pipefail
+          # Fetch a fresh job-scoped GitHub OIDC token for this step: initial JWT expires
+          # during a long 50K Monte Carlo run. Never reuse the initial token for post-run QA.
+          OIDC_TOKEN="$(curl --fail-with-body --silent --show-error --max-time 30 \
+            -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+            "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=${OIDC_AUDIENCE}" | jq -er '.value')"
+          echo "::add-mask::$OIDC_TOKEN"
           jq -n --arg run "$RUN_ID" '{stage:"qa",run_id:$run}' |             curl --fail --show-error --silent -H "Authorization: Bearer $OIDC_TOKEN" -H "Content-Type: application/json" --data-binary @-             "$FUNCTIONS_URL/model-refresh-control" | jq .
 
       - name: Data-integrity and availability QA
@@ -383,6 +537,12 @@ jobs:
           RUN_ID: ${{ steps.prepare.outputs.run_id }}
         run: |
           set -euo pipefail
+          # Fetch a fresh job-scoped GitHub OIDC token for this step: initial JWT expires
+          # during a long 50K Monte Carlo run. Never reuse the initial token for post-run QA.
+          OIDC_TOKEN="$(curl --fail-with-body --silent --show-error --max-time 30 \
+            -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+            "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=${OIDC_AUDIENCE}" | jq -er '.value')"
+          echo "::add-mask::$OIDC_TOKEN"
           jq -n --arg run "$RUN_ID" '{stage:"integrity",run_id:$run}' |             curl --fail --show-error --silent -H "Authorization: Bearer $OIDC_TOKEN" -H "Content-Type: application/json" --data-binary @-             "$FUNCTIONS_URL/model-refresh-control" | jq .
 
       - name: Bugfix invariants QA
@@ -393,6 +553,12 @@ jobs:
           RUN_ID: ${{ steps.prepare.outputs.run_id }}
         run: |
           set -euo pipefail
+          # Fetch a fresh job-scoped GitHub OIDC token for this step: initial JWT expires
+          # during a long 50K Monte Carlo run. Never reuse the initial token for post-run QA.
+          OIDC_TOKEN="$(curl --fail-with-body --silent --show-error --max-time 30 \
+            -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+            "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=${OIDC_AUDIENCE}" | jq -er '.value')"
+          echo "::add-mask::$OIDC_TOKEN"
           jq -n --arg run "$RUN_ID" '{stage:"bugfix",run_id:$run}' |             curl --fail --show-error --silent -H "Authorization: Bearer $OIDC_TOKEN" -H "Content-Type: application/json" --data-binary @-             "$FUNCTIONS_URL/model-refresh-control" | jq .
 
       - name: Record closed-week live backtest gate
@@ -403,6 +569,12 @@ jobs:
           RUN_ID: ${{ steps.prepare.outputs.run_id }}
         run: |
           set -euo pipefail
+          # Fetch a fresh job-scoped GitHub OIDC token for this step: initial JWT expires
+          # during a long 50K Monte Carlo run. Never reuse the initial token for post-run QA.
+          OIDC_TOKEN="$(curl --fail-with-body --silent --show-error --max-time 30 \
+            -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+            "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=${OIDC_AUDIENCE}" | jq -er '.value')"
+          echo "::add-mask::$OIDC_TOKEN"
           jq -n --arg run "$RUN_ID" --slurpfile closed "$RUNNER_TEMP/closed-week.json"             '{stage:"replay",run_id:$run,pass:true,details:{pass:true,kind:"closed_live_week",closed_week:$closed[0]}}' |             curl --fail --show-error --silent -H "Authorization: Bearer $OIDC_TOKEN" -H "Content-Type: application/json" --data-binary @-             "$FUNCTIONS_URL/model-refresh-control" | jq .
 
       - name: Inherit validated model gate
@@ -413,6 +585,12 @@ jobs:
           RUN_ID: ${{ steps.prepare.outputs.run_id }}
         run: |
           set -euo pipefail
+          # Fetch a fresh job-scoped GitHub OIDC token for this step: initial JWT expires
+          # during a long 50K Monte Carlo run. Never reuse the initial token for post-run QA.
+          OIDC_TOKEN="$(curl --fail-with-body --silent --show-error --max-time 30 \
+            -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+            "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=${OIDC_AUDIENCE}" | jq -er '.value')"
+          echo "::add-mask::$OIDC_TOKEN"
           jq -n --arg run "$RUN_ID" '{stage:"model_gate",run_id:$run}' |             curl --fail --show-error --silent -H "Authorization: Bearer $OIDC_TOKEN" -H "Content-Type: application/json" --data-binary @-             "$FUNCTIONS_URL/model-refresh-control" | jq .
 
       - name: Freeze next-MH live benchmark before promotion
@@ -423,6 +601,12 @@ jobs:
           RUN_ID: ${{ steps.prepare.outputs.run_id }}
         run: |
           set -euo pipefail
+          # Fetch a fresh job-scoped GitHub OIDC token for this step: initial JWT expires
+          # during a long 50K Monte Carlo run. Never reuse the initial token for post-run QA.
+          OIDC_TOKEN="$(curl --fail-with-body --silent --show-error --max-time 30 \
+            -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+            "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=${OIDC_AUDIENCE}" | jq -er '.value')"
+          echo "::add-mask::$OIDC_TOKEN"
           jq -n --arg run "$RUN_ID" '{action:"snapshot",run_id:$run}' |             curl --fail --show-error --silent -H "Authorization: Bearer $OIDC_TOKEN" -H "Content-Type: application/json" --data-binary @-             "$FUNCTIONS_URL/weekly-model-lifecycle" | jq .
 
       - name: Promote candidate
@@ -433,6 +617,12 @@ jobs:
           RUN_ID: ${{ steps.prepare.outputs.run_id }}
         run: |
           set -euo pipefail
+          # Fetch a fresh job-scoped GitHub OIDC token for this step: initial JWT expires
+          # during a long 50K Monte Carlo run. Never reuse the initial token for post-run QA.
+          OIDC_TOKEN="$(curl --fail-with-body --silent --show-error --max-time 30 \
+            -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+            "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=${OIDC_AUDIENCE}" | jq -er '.value')"
+          echo "::add-mask::$OIDC_TOKEN"
           jq -n --arg run "$RUN_ID" '{stage:"promote",run_id:$run}' |             curl --fail --show-error --silent -H "Authorization: Bearer $OIDC_TOKEN" -H "Content-Type: application/json" --data-binary @-             "$FUNCTIONS_URL/model-refresh-control" | jq .
 
       - name: Verify exactly one new current run
@@ -443,6 +633,12 @@ jobs:
           GAMEWEEK: ${{ steps.prepare.outputs.gameweek }}
         run: |
           set -euo pipefail
+          # Fetch a fresh job-scoped GitHub OIDC token for this step: initial JWT expires
+          # during a long 50K Monte Carlo run. Never reuse the initial token for post-run QA.
+          OIDC_TOKEN="$(curl --fail-with-body --silent --show-error --max-time 30 \
+            -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+            "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=${OIDC_AUDIENCE}" | jq -er '.value')"
+          echo "::add-mask::$OIDC_TOKEN"
           jq -n --argjson gw "$GAMEWEEK" '{action:"verify",gameweek:$gw}' |             curl --fail --show-error --silent -H "Authorization: Bearer $OIDC_TOKEN" -H "Content-Type: application/json" --data-binary @-             "$FUNCTIONS_URL/weekly-model-lifecycle" | jq .
       - name: Revalidate application cache with signed GitHub OIDC
         if: success()
