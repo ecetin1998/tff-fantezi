@@ -76,7 +76,7 @@ function keeperSavesForScore(conceded,opponentLambda,per90Saves,exposure,poisson
   // only if it was sourced before the FIRST gameweek fixture.
   const sourced=typeof attackingTeamSot==="number"&&Number.isFinite(attackingTeamSot)
     &&attackingTeamSot>=1.5&&attackingTeamSot<=10;
-  const shotsMean=sourced?.85*baselineShots+.15*attackingTeamSot*exp:baselineShots;
+  const shotsMean=sourced ? .85*baselineShots+.15*attackingTeamSot*exp : baselineShots;
   return Math.max(0,poissonDraw(shotsMean)-goals);
 }
 
