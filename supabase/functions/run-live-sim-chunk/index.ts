@@ -5,7 +5,7 @@ const GITHUB_OIDC_ISSUER="https://token.actions.githubusercontent.com";
 const GITHUB_REPOSITORY_ID="1353738004";
 const GITHUB_JWKS_URL="https://token.actions.githubusercontent.com/.well-known/jwks";
 const OPS_REF="refs/heads/main";
-const SCORER_POLICY_VERSION="gk-sot-source-age-decay-v3";
+const SCORER_POLICY_VERSION="gk-sot-source-age-decay-v4-attack-reliability";
 
 function decodeJwtJson(value){
   const padded=value.replace(/-/g,"+").replace(/_/g,"/").padEnd(Math.ceil(value.length/4)*4,"=");
@@ -132,8 +132,10 @@ function credibleAttackWeights(position,role,rates=[],forecastXg=null){
     const feedback=Number(rates[14]);
     const eventFactor=position==="FWD"&&Number.isFinite(feedback)&&
       feedback>=.50&&feedback<=1?feedback:1;
-    return {goal:Math.max(1e-6,(.75*xg+.25*goals)*eventFactor),
-      assist:Math.max(1e-6,(.70*xa+.30*assists)*eventFactor),
+    // Forward-only role allocation; keep source-derived expected chances
+    // above short realized finishing streaks. Official Fantasy points unchanged.
+    return {goal:Math.max(1e-6,(.82*xg+.18*goals)*eventFactor),
+      assist:Math.max(1e-6,(.82*xa+.18*assists)*eventFactor),
       adjustedXg:xg,adjustedXa:xa,eventFactor};
   }
   const prior=quality[norm(role)]
