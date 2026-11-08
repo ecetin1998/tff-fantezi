@@ -9,15 +9,13 @@ function snapshot(){
   const matches=Array.from({length:9},(_,i)=>({match_id:317874+i,match_status:"Bitti",fantasy_closure:"KAPANDI"}));
   const weekly=activePlayers.map((p,i)=>{
     const plays=i<278;
-    const points=plays?(i<250?3:2):0;
+    const base=plays?(i<171?3:2):0;
     const bonus=plays?(i<26?3:i===26?1:0):0;
-    return {player_id:p.id,minutes:plays?90:0,points:points+bonus,base_points:points,bonus_points:bonus,
+    return {player_id:p.id,minutes:plays?90:0,points:base+bonus,base_points:base,bonus_points:bonus,
       is_final:true,source_kind:"mh11_owner_approved_independent_score_events"};
   });
   // Prove exact MH11 806 total, 79 bonus, 278 played, 178 DNP.
-  // Baseline: 250*3 + 28*2=806; bonus is separate and must be included in final points.
-  // Compensate by subtracting bonuses from base, preserving total=806.
-  for(const w of weekly)w.base_points-=w.bonus_points;
+  // 171*3 + 107*2 = 727 base, plus 26*3+1 = 79 bonus -> 806 total.
   return {gameweek:11,activePlayers,stats,teamStats,matches,weekly};
 }
 
