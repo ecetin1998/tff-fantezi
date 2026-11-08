@@ -502,3 +502,289 @@
   border-color:#F8DDA5;
   color:#29200E;
 }
+
+
+/* Midnight Pitch mobile contrast repair — 2026-11-09
+   Replace hard-coded LIGHT surfaces from legacy component modules. 
+   Keep team shirt colors, warning states and 1/X/2 probabilities semantic.
+   The dark background must NEVER retain dark foreground text. */
+
+/* 1 — Player search: search/filter wrapper was still white. */
+.scope :global(.filters),
+.scope :global(.picker-filters){
+  background:var(--mp-card);
+  border:1px solid var(--mp-line);
+  color:var(--mp-text);
+  box-shadow:0 10px 26px rgba(2,8,18,.24);
+}
+.scope :global(.filters) input,
+.scope :global(.filters) select,
+.scope :global(.picker-filters) input,
+.scope :global(.picker-filters) select,
+.scope :global(.squad-formation-control) select,
+.scope :global(.auth-resend) input{
+  background:#203149;
+  color:var(--mp-text);
+  border-color:#435A74;
+  color-scheme:dark;
+}
+.scope :global(.filters) input:focus,
+.scope :global(.filters) select:focus,
+.scope :global(.picker-filters) input:focus,
+.scope :global(.picker-filters) select:focus,
+.scope :global(.squad-formation-control) select:focus{
+  background:#293D55;
+  border-color:var(--mp-mint);
+  box-shadow:0 0 0 3px rgba(86,222,185,.15);
+}
+.scope :global(.filters) input::placeholder,
+.scope :global(.picker-filters) input::placeholder{color:#B3C2D3}
+.scope :global(.table-summary),
+.scope :global(.projection-legend),
+.scope :global(.player-table-note),
+.scope :global(.player-filters-note){color:var(--mp-muted)}
+.scope :global(.table-summary) b{color:var(--mp-text)}
+.scope :global(.mobile-player-card) :global(.mobile-xfp){
+  background:#26384E;
+  border:1px solid #4A607B;
+  color:var(--mp-text);
+  box-shadow:0 6px 18px rgba(2,8,18,.22);
+}
+.scope :global(.mobile-player-card) :global(.mobile-xfp) strong{color:var(--mp-mint)}
+.scope :global(.mobile-player-card) :global(.mobile-xfp) small{color:#B9C9D9}
+.scope :global(.mobile-player-card) :global(.mobile-xfp) em{color:var(--mp-muted)}
+/* The metric cells should look like one family with the player card. */
+.scope :global(.mobile-player-card) :global(.mobile-player-metrics)>div{
+  background:var(--mp-raised);
+  color:var(--mp-text);
+  border:1px solid #2D465F;
+}
+.scope :global(.mobile-player-card) :global(.mobile-player-metrics) span{color:#B9C9D9}
+.scope :global(.mobile-player-card) :global(.mobile-player-metrics) b{color:var(--mp-text)}
+
+/* 2 — Match predictions: four equal dark metrics, visible labels and values. */
+.scope :global(.match-analysis-card) :global(.match-card-top),
+.scope :global(.match-analysis-card) :global(.match-team-block)>span:first-child{
+  color:var(--mp-muted);
+}
+.scope :global(.match-analysis-card) :global(.match-date-label) b{
+  background:var(--mp-raised);
+  color:#DDE8F3;
+  border:1px solid #40576F;
+}
+.scope :global(.match-analysis-card) :global(.match-date-label) em{color:var(--mp-mint)}
+.scope :global(.match-analysis-card) :global(.match-team-identity) b,
+.scope :global(.match-analysis-card) :global(.match-team-link) b{color:var(--mp-text)}
+.scope :global(.match-analysis-card) :global(.match-team-meta) small{color:var(--mp-muted)}
+.scope :global(.match-analysis-card) :global(.fantasy-first-meta)>span,
+.scope :global(.match-analysis-card) :global(.match-fantasy-meta)>span{
+  background:#23364C;
+  border:1px solid #40566F;
+  color:var(--mp-text);
+  box-shadow:none;
+}
+.scope :global(.match-analysis-card) :global(.fantasy-first-meta)>span:global(.edge){
+  background:#203F40;
+  border-color:#4E927E;
+}
+.scope :global(.match-analysis-card) :global(.fantasy-first-meta) small,
+.scope :global(.match-analysis-card) :global(.match-fantasy-meta) small{
+  color:#C1D0DF;
+  opacity:1;
+}
+.scope :global(.match-analysis-card) :global(.fantasy-first-meta) b,
+.scope :global(.match-analysis-card) :global(.match-fantasy-meta) b{color:#F5F7FB}
+.scope :global(.match-analysis-card) :global(.fantasy-first-meta)>span:global(.edge) b{color:var(--mp-mint)}
+.scope :global(.match-analysis-card) :global(.match-team-xfp-side){
+  background:var(--mp-raised);
+  border-color:var(--mp-line);
+  color:var(--mp-text);
+}
+.scope :global(.match-analysis-card) :global(.match-team-xfp-side):global(.away){
+  border-left-color:var(--mp-line);
+}
+.scope :global(.match-analysis-card) :global(.match-team-xfp-side) small{color:#B9C9D9}
+.scope :global(.match-analysis-card) :global(.match-team-xfp-side)>span b{color:var(--mp-mint)}
+.scope :global(.match-analysis-card) :global(.match-team-xfp-side)>a b{color:var(--mp-text)}
+.scope :global(.match-analysis-card) :global(.match-team-xfp-side)>a em{color:var(--mp-blue)}
+.scope :global(.match-analysis-card) :global(.match-fantasy-note){
+  background:#1C2D40;
+  border-color:var(--mp-line);
+  color:var(--mp-text);
+}
+.scope :global(.match-analysis-card) :global(.match-fantasy-note) p{color:#CDD9E6}
+/* Do not recolor the win/draw/loss probability bar or its legends. */
+
+/* 3 — Recommendations: matte pitch plus dark bench (never paper white). */
+.scope :global(.readonly-squad-view) :global(.readonly-squad-head) h2{color:var(--mp-text)}
+.scope :global(.readonly-squad-view) :global(.readonly-squad-head-right)>span{
+  background:var(--mp-raised);
+  border-color:var(--mp-line);
+  color:var(--mp-text);
+}
+.scope :global(.readonly-squad-view) :global(.readonly-squad-head-right) small{color:var(--mp-muted)}
+.scope :global(.readonly-squad-view) :global(.readonly-squad-head-right) b{color:var(--mp-text)}
+.scope :global(.readonly-squad-view) :global(.formation-summary-pill){
+  background:#1A403D;
+  border-color:#3C7968;
+  color:#DFF7EE;
+}
+.scope :global(.readonly-squad-view) :global(.formation-summary-pill) small{color:#A5D8CA}
+.scope :global(.readonly-squad-view) :global(.formation-summary-pill) b{color:var(--mp-text)}
+.scope :global(.readonly-bench-zone),
+.scope :global(.unified-squad-list) :global(.readonly-bench-zone){
+  background:#16283A;
+  border:1px solid #345066;
+  color:var(--mp-text);
+}
+.scope :global(.readonly-bench-zone) :global(.bench-zone-head){
+  color:var(--mp-muted);
+}
+.scope :global(.readonly-bench-zone) :global(.bench-zone-head) :global(.eyebrow){
+  color:var(--mp-mint);
+}
+.scope :global(.readonly-bench-zone) :global(.bench-zone-head) b{
+  color:var(--mp-muted);
+}
+.scope :global(.readonly-bench-zone) :global(.bench-zone-head)>span{color:#AFC3D6}
+.scope :global(.readonly-bench-player),
+.scope :global(.unified-squad-list) :global(.readonly-bench-player){
+  background:var(--mp-raised);
+  border:1px solid #40566F;
+  color:var(--mp-text);
+  box-shadow:none;
+}
+.scope :global(.readonly-bench-player):hover{
+  background:#2A455E;
+  border-color:#61849C;
+}
+.scope :global(.readonly-bench-player) :global(.bench-order){
+  background:#314960;
+  color:#D5E3F1;
+  border-color:#536C85;
+}
+.scope :global(.readonly-bench-player) :global(.bench-copy) b{
+  color:var(--mp-text);
+}
+.scope :global(.readonly-bench-player) :global(.bench-copy) small{
+  color:#B9CADB;
+}
+.scope :global(.readonly-bench-player) :global(.bench-copy) :global(.recommend-bench-stats){
+  color:var(--mp-blue);
+}
+/* Keep the alternative XI heading in view even when no pitch is visible. */
+.scope :global(.readonly-squad-head) h2{color:var(--mp-text)}
+.scope :global(.manager-card-copy) h3,
+.scope :global(.manager-card-roster-copy) h3{color:var(--mp-text)}
+.scope :global(.manager-card-select) select{
+  background:var(--mp-raised);
+  border-color:var(--mp-line);
+  color:var(--mp-text);
+}
+.scope :global(.manager-card-effects)>span,
+.scope :global(.manager-card-roster-effect)>span{
+  background:#253950;
+  border-color:#466178;
+  color:#DBE6F1;
+}
+
+/* 4 — My Squad: saved weeks must not be white on an otherwise dark page. */
+.scope :global(.squad-history-card) :global(.squad-history-head)>p{color:var(--mp-muted)}
+.scope :global(.squad-history-item){
+  background:linear-gradient(135deg,#23364C,#1C2E43);
+  border:1px solid #435B75;
+  color:var(--mp-text);
+  box-shadow:none;
+}
+.scope :global(.squad-history-item) :global(.squad-history-week)>span{
+  color:var(--mp-text);
+}
+.scope :global(.squad-history-item) :global(.squad-history-captain) small,
+.scope :global(.squad-history-item) :global(.squad-history-score) small{
+  color:#B2C5D9;
+}
+.scope :global(.squad-history-item) :global(.squad-history-captain) b{
+  color:var(--mp-text);
+}
+.scope :global(.squad-history-item) :global(.squad-history-score) strong{
+  color:var(--mp-mint);
+}
+.scope :global(.squad-history-item) :global(.squad-history-week)>em:global(.complete){
+  background:#1C483D;
+  color:#A6F5D6;
+  border-color:#488871;
+}
+.scope :global(.squad-history-item) :global(.squad-history-week)>em:global(.pending){
+  background:#4B3A24;
+  color:#F5D28F;
+  border-color:#7C6440;
+}
+.scope :global(.squad-history-item) :global(.squad-history-captain) em{
+  background:#1F3C3B;
+  color:#92E6D1;
+  border:1px solid #497D70;
+}
+.scope :global(.squad-history-empty){
+  background:var(--mp-raised);
+  border-color:var(--mp-line);
+  color:var(--mp-text);
+}
+
+/* Shared squad controls inherit the same color logic as the fixed cards. */
+.scope :global(.my-squad-shell) :global(.squad-deadline-status),
+.scope :global(.my-squad-shell) :global(.lineup-action-row),
+.scope :global(.my-squad-shell) :global(.lineup-score-strip)>span,
+.scope :global(.my-squad-shell) :global(.captain-panel),
+.scope :global(.my-squad-shell) :global(.formation-option){
+  background:var(--mp-raised);
+  border-color:var(--mp-line);
+  color:var(--mp-text);
+}
+.scope :global(.my-squad-shell) :global(.squad-deadline-status)>b,
+.scope :global(.my-squad-shell) :global(.lineup-score-strip) b,
+.scope :global(.my-squad-shell) :global(.formation-option)>b,
+.scope :global(.my-squad-shell) :global(.captain-panel) h3{color:var(--mp-text)}
+.scope :global(.my-squad-shell) :global(.squad-deadline-status)>span,
+.scope :global(.my-squad-shell) :global(.formation-option):global(.selected)>b{color:var(--mp-mint)}
+.scope :global(.my-squad-shell) :global(.lineup-score-strip) small,
+.scope :global(.my-squad-shell) :global(.lineup-action-row) span,
+.scope :global(.my-squad-shell) :global(.lineup-action-row) small{color:var(--mp-muted)}
+.scope :global(.my-squad-shell) :global(.formation-option):global(.selected){
+  background:#20443E;
+  border-color:var(--mp-mint);
+}
+.scope :global(.my-squad-shell) :global(.lineup-score-strip) :global(.lineup-total){
+  background:#1B413B;
+  border-color:#427C6C;
+}
+.scope :global(.my-squad-shell) :global(.lineup-score-strip) :global(.lineup-total) b{color:var(--mp-mint)}
+.scope :global(.my-squad-shell) :global(.lineup-score-strip) :global(.captain-total){
+  background:#413725;
+  border-color:#806A43;
+}
+.scope :global(.my-squad-shell) :global(.lineup-score-strip) :global(.captain-total) b{color:var(--mp-gold)}
+
+/* iPhone sized cards: keep metric labels visible without changing the grid. */
+@media(max-width:760px){
+  .scope :global(.mobile-player-card) :global(.mobile-xfp){
+    background:#26384E;
+    border-color:#4A607B;
+  }
+  .scope :global(.readonly-bench-player) :global(.bench-copy) b{
+    font-size:clamp(10px,2.7vw,13px);
+    line-height:1.3;
+    white-space:normal;
+    overflow-wrap:anywhere;
+  }
+  .scope :global(.readonly-bench-player) :global(.bench-copy) small{
+    font-size:clamp(9px,2.35vw,11px);
+    line-height:1.3;
+    white-space:normal;
+    overflow-wrap:anywhere;
+  }
+  .scope :global(.squad-history-item) :global(.squad-history-captain) b{
+    font-size:clamp(10px,2.8vw,13px);
+    line-height:1.4;
+    overflow-wrap:anywhere;
+  }
+}
