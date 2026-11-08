@@ -114,8 +114,9 @@ const tendency=v=>{
 export default async function BacktestPage(){
   const auth=await getAuthState()
   if(auth.email!=='dummy.pro.20261001@example.com'||auth.plan!=='pro')notFound()
-  const {currentRun,currentRunQa,replayWeeks,liveWeeks,learning,replayPlayers,livePlayers,preseasonCoverage}=await getBacktestOverview()
+  const {currentRun,currentRunQa,replayWeeks,liveWeeks,learning,replayPlayers,livePlayers,verifiedWeekMetrics=[],preseasonCoverage}=await getBacktestOverview()
   const replayClosed=replayWeeks.filter(w=>w.status==='closed')
+  const latestVerified=verifiedWeekMetrics.at(-1)
   const latestLive=liveWeeks.length?liveWeeks[liveWeeks.length-1]:null
   const replayBenchmark=localizeModelText(replayWeeks[0]?.engine_version||'Canlı model v3.1')
   const replayBenchmarkVersion=localizeModelText(replayWeeks[0]?.benchmark_version||'—')
@@ -172,6 +173,35 @@ export default async function BacktestPage(){
       <article className="card"><span>Aralık dışına çıkınca ortalama sapma</span><b>{num(overallOutside)}</b><small>Yalnız tahmin aralığının dışındaki puan mesafesi</small></article>
       <article className="card"><span>İlk 25 yakalama • xFP</span><b>{pct(overallTop25)}</b><small>{overallTop25V2!==null?'İlk 25 modeli '+pct(overallTop25V2)+' • fark '+pp(overallTop25Lift):'İlk 25 modelinin ilk gerçek dış örnek ölçümü MH7 kapanınca oluşacak'}</small></article>
       <article className="card"><span>Şu an takip edilen hafta</span><b>{latestLive?'MH'+latestLive.gameweek:'—'}</b><small>{latestLive?liveStatus[latestLive.status]||latestLive.status:'Canlı kayıt yok'}</small></article>
+    </section>
+
+    <section className="card backtest-table-card">
+      <div className="panel-head">
+        <div><span className="eyebrow">KAYNAK DOĞRULAMALI • HER KAPANAN HAFTA</span><h2>Gerçek karar doğruluğu</h2></div>
+        <small>{latestVerified?'Son tamamlanan test MH'+latestVerified.gameweek:'Doğrulanmış kapanış bekleniyor'}</small>
+      </div>
+      <p className="muted">Birincil ölçüm: maç başlamadan 30+ dakika oynar dediğimiz, gerçekleşen puan ve dakikası bağımsız kaynakla doğrulanan oyuncular. Doğrulanmayan 0/0 sonuçları başarı gibi sayılmıyor; oyun başladıktan sonra yenilenen tahminler geçmişe dönük teste alınmıyor.</p>
+      {verifiedWeekMetrics.length?<div className="table-scroll">
+        <table className="backtest-table">
+          <thead><tr><th>Hafta</th><th>Gerçek örnek / Beklenen</th><th>xFP hatası</th><th>Dakika hatası</th><th>Tahmin eğilimi</th><th>Sürpriz 60+ dk</th><th>Doğrulanmayan 0/0</th></tr></thead>
+          <tbody>{verifiedWeekMetrics.map(w=><tr key={w.gameweek}>
+            <td>MH{w.gameweek}</td>
+            <td>{w.n} / {w.ex_ante_total}</td>
+            <td>{num(w.fp_mae)} puan</td>
+            <td>{num(w.minute_mae,1)} dk</td>
+            <td>{num(w.fp_bias)} puan</td>
+            <td>{w.surprise_60}</td>
+            <td>{w.unverified_zero}</td>
+          </tr>)}</tbody>
+        </table>
+      </div>:<p className="muted">Henüz kaynak eşleşmesi ve maç öncesi dondurma şartlarını sağlayan kapalı hafta bulunamadı.</p>}
+      {latestVerified?<div className="model-health-coverage-grid" style={{marginTop:20}}>
+        {Object.entries(latestVerified.by_position||{}).map(([position,metrics])=><div key={position} className="card">
+          <span>{({GK:'KL',DEF:'DEF',MID:'OS',FWD:'FOR'})[position]||position} • {metrics.n} oyuncu</span>
+          <b>{num(metrics.fp_mae)} xFP hata</b>
+          <small>{num(metrics.minute_mae,1)} dk hata</small>
+        </div>)}
+      </div>:null}
     </section>
 
     <section className="card backtest-method">
