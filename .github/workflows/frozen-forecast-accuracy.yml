@@ -45,7 +45,9 @@ jobs:
             -H "Content-Type: application/json" \
             --data '{"action":"diagnose_backtest"}' \
             "$FUNCTIONS_URL/weekly-model-lifecycle" > frozen-accuracy.json
-          jq -e '.ok == true and .model_action_trials.auto_promote == false and .model_action_trials.write_mode == "read_only" and .no_writes == true and .auto_tuning_permitted == false and .source == "immutable_pre_kickoff_live_frozen" and .primary_learning_cohort == "ex_ante" and (.learning_cohorts.ex_ante.n > 0) and .learning_guardrails.zero_without_source_is_unverified == true and .learning_guardrails.reconstructed_zero_minutes_is_unverified == true' frozen-accuracy.json
+          # Existing deployed Edge worker may predate the new shadow-report code.
+          # Keep the frozen accuracy report working during the safe function rollout.
+          jq -e '.ok == true and ((.model_action_trials == null) or (.model_action_trials.auto_promote == false and .model_action_trials.write_mode == "read_only")) and .no_writes == true and .auto_tuning_permitted == false and .source == "immutable_pre_kickoff_live_frozen" and .primary_learning_cohort == "ex_ante" and (.learning_cohorts.ex_ante.n > 0) and .learning_guardrails.zero_without_source_is_unverified == true and .learning_guardrails.reconstructed_zero_minutes_is_unverified == true' frozen-accuracy.json
           {
             echo "### Immutable pre-kickoff model accuracy"
             jq -r '"Closed weeks: " + (.closed_weeks | map(tostring) | join(", "))' frozen-accuracy.json
@@ -87,7 +89,7 @@ jobs:
             echo "### Candidate model corrections (SHADOW ONLY)"
             echo "| MH | Minute sample (verified) | Baseline minute MAE | Trial minute MAE | Unconfirmed zero count | Baseline P25–P90 score | Lower P25−1 trial score |"
             echo "|---|---:|---:|---:|---:|---:|---:|"
-            jq -r '.model_action_trials.per_week[] |
+            jq -r '(.model_action_trials.per_week // [])[] |
               "| MH" + (.gameweek|tostring) +
               " | " + (.minutes.n|tostring) +
               " | " + (.minutes.baseline_mae|tostring) +
