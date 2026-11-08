@@ -23,3 +23,8 @@ assert.match(source,/\bshort_label\b/)
 assert.match(source,/\bconfidence\b/)
 assert.match(source,/\bcanonical_reason\b/)
 assert.match(source,/\bexpected_return_date\b/)
+
+// Model Performansı must read live-player errors through the public projection view;
+// the base table is intentionally inaccessible to anon/authenticated roles.
+assert.match(source,/\.from\('v_scout_backtest_players_public'\)/)
+assert.doesNotMatch(source,/\.from\('scout_backtest_players'\)/)
