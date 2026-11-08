@@ -1,0 +1,346 @@
+{
+  "season": "2026-27",
+  "gameweek": 11,
+  "review_date": "2026-11-08",
+  "event_type": "partial_independent_match_goal_evidence",
+  "status": {
+    "football_results": "verified_9_of_9",
+    "tff_external_ids": "verified_9_of_9",
+    "goal_events": "partial_24_player_rows",
+    "fantasy_week_closed": false,
+    "official_fantasy_points_available": false,
+    "complete_player_actuals": 0,
+    "required_player_actuals": 456
+  },
+  "scoring_scope": "Normal goals and own goals only. Appearance, 60+ minutes, clean sheets, goals conceded, saves, assists, cards, penalties and bonus remain UNKNOWN, not zero.",
+  "scoring_reference": "rules/tff-fantasy.json",
+  "summaries": {
+    "matches": 9,
+    "normal_goals": 27,
+    "own_goals": 1,
+    "total_football_goals": 28,
+    "goal_component_fantasy_points": 125,
+    "partial_player_evidence_rows": 24
+  },
+  "provenance_note": "Internal gameweek-11 scout fixture IDs and external official TFF macIds differ for seven matches. Crosswalk mapped by observed home/away teams and confirmed FT scores; source URLs retain match-level provenance. Some match pages had delayed official updates, so non-TFF club or independently corroborated result sources are recorded. No unverified 0-minute player scores synthesized.",
+  "missing_to_close": [
+    "Official or independently verified per-player participation and accurate minutes for entire active player pool, including actual nonparticipants",
+    "Complete assists, disciplinary, penalties and GK save events with sources",
+    "Clean sheet and conceded-goal calculations supported by verified playing minutes",
+    "Fantasy bonus allocation and tie handling",
+    "Final source-kind gate and 456 scored-player completeness",
+    "Official MH11 player and team cumulative season stats",
+    "Pre-kickoff frozen backtest validation and closure source QA"
+  ],
+  "fixtures": [
+    {
+      "match_id": 317874,
+      "tff_match_id": 317874,
+      "home_id": 18,
+      "away_id": 3,
+      "home": "Gaziantep",
+      "away": "Kasımpaşa",
+      "home_goals": 0,
+      "away_goals": 2,
+      "source": "https://www.tff.org/Default.aspx?macId=317874&pageId=29",
+      "events": [
+        {
+          "player_id": 92,
+          "team_id": 3,
+          "position": "MID",
+          "normal_goals": 1,
+          "own_goals": 0,
+          "goal_component_points": 5
+        },
+        {
+          "player_id": 75,
+          "team_id": 3,
+          "position": "FWD",
+          "normal_goals": 1,
+          "own_goals": 0,
+          "goal_component_points": 4
+        }
+      ]
+    },
+    {
+      "match_id": 317875,
+      "tff_match_id": 317875,
+      "home_id": 16,
+      "away_id": 4,
+      "home": "Eyüpspor",
+      "away": "Kocaelispor",
+      "home_goals": 0,
+      "away_goals": 2,
+      "source": "https://www.tff.org/Default.aspx?macId=317875&pageId=29",
+      "events": [
+        {
+          "player_id": 108,
+          "team_id": 4,
+          "position": "MID",
+          "normal_goals": 1,
+          "own_goals": 0,
+          "goal_component_points": 5
+        },
+        {
+          "player_id": 212,
+          "team_id": 4,
+          "position": "MID",
+          "normal_goals": 1,
+          "own_goals": 0,
+          "goal_component_points": 5
+        }
+      ]
+    },
+    {
+      "match_id": 317876,
+      "tff_match_id": 317882,
+      "home_id": 15,
+      "away_id": 7,
+      "home": "Samsunspor",
+      "away": "Konyaspor",
+      "home_goals": 1,
+      "away_goals": 0,
+      "source": "https://beinsports.com.tr/haber/samsunspor-tumosan-konyaspor-3",
+      "events": [
+        {
+          "player_id": 463,
+          "team_id": 15,
+          "position": "MID",
+          "normal_goals": 1,
+          "own_goals": 0,
+          "goal_component_points": 5
+        }
+      ]
+    },
+    {
+      "match_id": 317877,
+      "tff_match_id": 317878,
+      "home_id": 10,
+      "away_id": 13,
+      "home": "Göztepe",
+      "away": "Başakşehir",
+      "home_goals": 1,
+      "away_goals": 2,
+      "source": "https://www.sofascore.com/football/match/basaksehir-fk-goztepe/elbsLlb",
+      "events": [
+        {
+          "player_id": 295,
+          "team_id": 10,
+          "position": "FWD",
+          "normal_goals": 1,
+          "own_goals": 0,
+          "goal_component_points": 4
+        },
+        {
+          "player_id": 395,
+          "team_id": 13,
+          "position": "FWD",
+          "normal_goals": 1,
+          "own_goals": 0,
+          "goal_component_points": 4
+        },
+        {
+          "player_id": 408,
+          "team_id": 13,
+          "position": "MID",
+          "normal_goals": 1,
+          "own_goals": 0,
+          "goal_component_points": 5
+        }
+      ]
+    },
+    {
+      "match_id": 317878,
+      "tff_match_id": 317880,
+      "home_id": 17,
+      "away_id": 5,
+      "home": "Galatasaray",
+      "away": "Amed",
+      "home_goals": 4,
+      "away_goals": 3,
+      "source": "https://www.sofascore.com/tr/football/match/amed-sportif-faaliyetler-galatasaray/llbslPHb",
+      "events": [
+        {
+          "player_id": 1306,
+          "team_id": 17,
+          "position": "MID",
+          "normal_goals": 1,
+          "own_goals": 0,
+          "goal_component_points": 5
+        },
+        {
+          "player_id": 877,
+          "team_id": 17,
+          "position": "MID",
+          "normal_goals": 1,
+          "own_goals": 0,
+          "goal_component_points": 5
+        },
+        {
+          "player_id": 520,
+          "team_id": 17,
+          "position": "MID",
+          "normal_goals": 1,
+          "own_goals": 0,
+          "goal_component_points": 5
+        },
+        {
+          "player_id": 161,
+          "team_id": 5,
+          "position": "GK",
+          "normal_goals": 0,
+          "own_goals": 1,
+          "goal_component_points": -2
+        },
+        {
+          "player_id": 136,
+          "team_id": 5,
+          "position": "MID",
+          "normal_goals": 1,
+          "own_goals": 0,
+          "goal_component_points": 5
+        },
+        {
+          "player_id": 148,
+          "team_id": 5,
+          "position": "FWD",
+          "normal_goals": 1,
+          "own_goals": 0,
+          "goal_component_points": 4
+        },
+        {
+          "player_id": 586,
+          "team_id": 5,
+          "position": "MID",
+          "normal_goals": 1,
+          "own_goals": 0,
+          "goal_component_points": 5
+        }
+      ]
+    },
+    {
+      "match_id": 317879,
+      "tff_match_id": 317877,
+      "home_id": 12,
+      "away_id": 2,
+      "home": "Rizespor",
+      "away": "Erzurumspor",
+      "home_goals": 2,
+      "away_goals": 1,
+      "source": "https://www.dha.com.tr/spor/caykur-rizespor-erzurumspor-fk-2-1-2977515",
+      "events": [
+        {
+          "player_id": 353,
+          "team_id": 12,
+          "position": "FWD",
+          "normal_goals": 2,
+          "own_goals": 0,
+          "goal_component_points": 8
+        },
+        {
+          "player_id": 1108,
+          "team_id": 2,
+          "position": "FWD",
+          "normal_goals": 1,
+          "own_goals": 0,
+          "goal_component_points": 4
+        }
+      ]
+    },
+    {
+      "match_id": 317880,
+      "tff_match_id": 317879,
+      "home_id": 8,
+      "away_id": 6,
+      "home": "Çorum FK",
+      "away": "Fenerbahçe",
+      "home_goals": 0,
+      "away_goals": 5,
+      "source": "https://corumfk.com.tr/mac/2026-11-08-corum-fk-fenerbahce",
+      "events": [
+        {
+          "player_id": 176,
+          "team_id": 6,
+          "position": "MID",
+          "normal_goals": 2,
+          "own_goals": 0,
+          "goal_component_points": 10
+        },
+        {
+          "player_id": 199,
+          "team_id": 6,
+          "position": "MID",
+          "normal_goals": 2,
+          "own_goals": 0,
+          "goal_component_points": 10
+        },
+        {
+          "player_id": 178,
+          "team_id": 6,
+          "position": "MID",
+          "normal_goals": 1,
+          "own_goals": 0,
+          "goal_component_points": 5
+        }
+      ]
+    },
+    {
+      "match_id": 317881,
+      "tff_match_id": 317876,
+      "home_id": 14,
+      "away_id": 1,
+      "home": "Alanyaspor",
+      "away": "Trabzonspor",
+      "home_goals": 0,
+      "away_goals": 2,
+      "source": "https://www.trabzonspor.org.tr/tr/haberler/corendon-alanyaspor-0-2-trabzonspor-08-11-2026",
+      "events": [
+        {
+          "player_id": 28,
+          "team_id": 1,
+          "position": "DEF",
+          "normal_goals": 1,
+          "own_goals": 0,
+          "goal_component_points": 6
+        },
+        {
+          "player_id": 12,
+          "team_id": 1,
+          "position": "MID",
+          "normal_goals": 1,
+          "own_goals": 0,
+          "goal_component_points": 5
+        }
+      ]
+    },
+    {
+      "match_id": 317882,
+      "tff_match_id": 317881,
+      "home_id": 9,
+      "away_id": 11,
+      "home": "Beşiktaş",
+      "away": "Gençlerbirliği",
+      "home_goals": 3,
+      "away_goals": 0,
+      "source": "https://www.gzt.com/spor/besiktas-genclerbirligi-mac-ozeti-besiktas-maci-izle-4276720",
+      "events": [
+        {
+          "player_id": 593,
+          "team_id": 9,
+          "position": "FWD",
+          "normal_goals": 2,
+          "own_goals": 0,
+          "goal_component_points": 8
+        },
+        {
+          "player_id": 1141,
+          "team_id": 9,
+          "position": "MID",
+          "normal_goals": 1,
+          "own_goals": 0,
+          "goal_component_points": 5
+        }
+      ]
+    }
+  ]
+}
