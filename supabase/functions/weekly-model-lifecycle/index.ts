@@ -552,7 +552,7 @@ async function prepare(sb:any,current:any,status:any,body:any={}){
   if(!preparationQA.pass)throw new Error("TEAM_PLAYER_PREP_QA_FAILED: "+preparationQA.failures.join(","))
   const keeperShotQ=await sb.from("scout_team_tactical_profiles")
     .select("team_id,through_gameweek,matches_played,shots_on_target_per_match,source_updated_at")
-    .eq("season","2026-27").gte("through_gameweek",Math.max(1,target-4))
+    .eq("season","2026-27").gte("through_gameweek",Math.max(1,target-6))
     .lt("through_gameweek",target);
   if(keeperShotQ.error)throw keeperShotQ.error
   const keeperShotEvidence=freezeKeeperSot(keeperShotQ.data||[],{
@@ -1013,7 +1013,7 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
   })
   const keeperShotQ=await sb.from("scout_team_tactical_profiles")
     .select("team_id,through_gameweek,matches_played,shots_on_target_per_match,source_updated_at")
-    .eq("season","2026-27").gte("through_gameweek",Math.max(1,gw-4))
+    .eq("season","2026-27").gte("through_gameweek",Math.max(1,gw-6))
     .lt("through_gameweek",gw);
   if(keeperShotQ.error)throw keeperShotQ.error
   const keeperShotEvidence=freezeKeeperSot(keeperShotQ.data||[],{
