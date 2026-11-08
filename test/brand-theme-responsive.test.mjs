@@ -51,3 +51,13 @@ test('lime foreground contrast on Petrol Blue meets WCAG AA for ordinary text',(
   const ratio=(Math.max(a,b)+.05)/(Math.min(a,b)+.05);
   assert.ok(ratio>=4.5,'Petrol Blue text on Signal Lime buttons must meet AA contrast');
 });
+
+
+test('hero secondary CTA text cannot be overridden to dark on dark Petrol',()=>{
+  assert.match(css,/\.scope :global\(\.home-intro-hero\) :global\(\.home-intro-actions\) > :global\(a\.home-cta-outline\),[\s\S]*?color:var\(--brand-ice\)!important;/,
+    'both secondary links must force Ice White text on their dark translucent surface');
+  assert.match(css,/\.scope :global\(\.home-intro-hero\) :global\(\.home-intro-actions\) > :global\(a\.home-cta-outline:hover\),[\s\S]*?color:var\(--brand-petrol\)!important;/,
+    'hover may show dark text only when lime background is provided');
+  assert.match(css,/\.scope :global\(\.home-intro-hero\) :global\(\.home-intro-actions\) > :global\(a\.home-cta-primary\),[\s\S]*?color:var\(--brand-petrol\)!important;/,
+    'lime primary CTA must retain dark text');
+});
