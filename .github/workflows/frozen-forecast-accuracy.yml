@@ -6,6 +6,7 @@ on:
       - ".github/workflows/frozen-forecast-accuracy.yml"
       - "supabase/functions/weekly-model-lifecycle/frozenAccuracy.mjs"
       - "supabase/functions/weekly-model-lifecycle/sourceCoverage.mjs"
+      - "supabase/functions/weekly-model-lifecycle/modelActionCandidates.mjs"
   workflow_dispatch:
   schedule:
     # 11:45 Turkish time every Monday; only CLOSED historical weeks are read.
@@ -44,7 +45,7 @@ jobs:
             -H "Content-Type: application/json" \
             --data '{"action":"diagnose_backtest"}' \
             "$FUNCTIONS_URL/weekly-model-lifecycle" > frozen-accuracy.json
-          jq -e '.ok == true and .no_writes == true and .auto_tuning_permitted == false and .source == "immutable_pre_kickoff_live_frozen" and .primary_learning_cohort == "ex_ante" and (.learning_cohorts.ex_ante.n > 0) and .learning_guardrails.zero_without_source_is_unverified == true and .learning_guardrails.reconstructed_zero_minutes_is_unverified == true' frozen-accuracy.json
+          jq -e '.ok == true and .model_action_trials.auto_promote == false and .model_action_trials.write_mode == "read_only" and .no_writes == true and .auto_tuning_permitted == false and .source == "immutable_pre_kickoff_live_frozen" and .primary_learning_cohort == "ex_ante" and (.learning_cohorts.ex_ante.n > 0) and .learning_guardrails.zero_without_source_is_unverified == true and .learning_guardrails.reconstructed_zero_minutes_is_unverified == true' frozen-accuracy.json
           {
             echo "### Immutable pre-kickoff model accuracy"
             jq -r '"Closed weeks: " + (.closed_weeks | map(tostring) | join(", "))' frozen-accuracy.json
@@ -82,6 +83,19 @@ jobs:
             echo "Primary cohort is defined BEFORE kickoff by expected minutes >= 30, with source-supported actuals. Realized-play and surprise-starter cohorts are diagnostic, not a hindsight selection rule."
             echo "0/0 records without sourced evidence or with inferred absence are excluded from the primary learning objective."
             echo "No automatic tuning; candidate changes require forward holdout before promotion."
+            echo ""
+            echo "### Candidate model corrections (SHADOW ONLY)"
+            echo "| MH | Minute sample (verified) | Baseline minute MAE | Trial minute MAE | Unconfirmed zero count | Baseline P25–P90 score | Lower P25−1 trial score |"
+            echo "|---|---:|---:|---:|---:|---:|---:|"
+            jq -r '.model_action_trials.per_week[] |
+              "| MH" + (.gameweek|tostring) +
+              " | " + (.minutes.n|tostring) +
+              " | " + (.minutes.baseline_mae|tostring) +
+              " | " + (.minutes.trial_mae|tostring) +
+              " | " + (.minutes.unverified_zero|tostring) +
+              " | " + (.band.baseline_mae|tostring) +
+              " | " + (.band.trial_mae|tostring) + " |"' frozen-accuracy.json
+            echo "Retrospective shadow results are NOT independent holdouts. Never change live forecasts from this report."
           } >> "$GITHUB_STEP_SUMMARY"
       - name: Audit current MH source coverage (read-only)
         shell: bash
