@@ -19,6 +19,13 @@ assert.equal((workflow.match(/for part in \$\(seq 0 99\); do/g)||[]).length,2,
 assert.equal((workflow.match(/draws=500&seed=\$seed/g)||[]).length,2,
   'Each simulation chunk is capped at 500 draws to respect Edge CPU budgets.')
 assert.equal(100*500,50000,'Changing chunk size must not change total 50K draws.')
+assert.equal((workflow.match(/part % 10 == 0/g)||[]).length,2,
+  'Both 50K loops must re-mint OIDC tokens before expiration.')
+assert.ok((workflow.match(/ACTIONS_ID_TOKEN_REQUEST_URL/g)||[]).length>=30,
+  'Protected QA and promotion steps need fresh per-step OIDC rather than one expiring JWT.')
+assert.ok((workflow.match(/echo "::add-mask::\$OIDC_TOKEN"/g)||[]).length>=30,
+  'Reissued OIDC tokens must be masked from Actions logs.')
+
 assert.match(workflow,/--retry 5/,'Simulation chunks must retry transient Edge failures.')
 assert.match(workflow,/--retry-all-errors/,'HTTP 546 and other transient Edge errors must be retried.')
 assert.match(workflow,/sleep 1/,'Simulation chunks must be paced to avoid Edge bursts.')
