@@ -45,8 +45,11 @@ function credibleAttackWeights(position,role,rates=[],forecastXg=null){
     const feedback=Number(rates[14]);
     const eventFactor=position==="FWD"&&Number.isFinite(feedback)&&
       feedback>=.50&&feedback<=1?feedback:1;
-    return {goal:Math.max(1e-6,(.75*xg+.25*goals)*eventFactor),
-      assist:Math.max(1e-6,(.70*xa+.30*assists)*eventFactor),
+    // Forward-only 2026/27 calibration: use chance quality ahead of noisy
+    // realized goal/assist streaks; preserves each team's fixture-goal totals.
+    // The rare-event/double-source guard on DEF remains unchanged.
+    return {goal:Math.max(1e-6,(.82*xg+.18*goals)*eventFactor),
+      assist:Math.max(1e-6,(.82*xa+.18*assists)*eventFactor),
       adjustedXg:xg,adjustedXa:xa,eventFactor};
   }
   const prior=quality[norm(role)]
