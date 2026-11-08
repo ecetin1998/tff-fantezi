@@ -1,5 +1,3 @@
-# MH11 provisional fantasy scores — not official fantasy points, not final; source data 2026-11-09
-# Sources: source-verified match participation and event records, TFF published fantasy formula; bonus tied-rank approximation
 match_id,match_name,team_name,player_id,player_name,position,minutes,minutes_source,goals,assists_candidate,yellow_cards,red_cards,own_goals,saves_candidate,team_conceded,minutes_points,goal_points,assist_points,clean_sheet_points,conceded_points,save_points,card_og_points,base_points,estimated_bonus,estimated_total
 317874,Gaziantep - Kasımpaşa,Kasımpaşa,71,Ayberk Karapo,DEF,90,derived_full90,0,0,1,0,0,0,0,2,0,0,4,0,0,-1,5,0,5
 317874,Gaziantep - Kasımpaşa,Kasımpaşa,72,Ali Yavuz Kol,MID,63,derived_substitution_clock,0,0,0,0,0,0,0,2,0,0,1,0,0,0,3,0,3
