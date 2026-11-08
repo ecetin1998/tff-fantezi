@@ -489,3 +489,16 @@
 @media(prefers-reduced-motion:reduce){
   .scope :global(.home-intro-actions)>:global(.home-cta-btn){transition:none}
 }
+
+/* Gold is reserved for Pro-only actions, never ordinary navigation. */
+.scope :global(.pro-btn){
+  background:var(--mp-gold);
+  border-color:var(--mp-gold);
+  color:#29200E;
+  box-shadow:0 8px 20px rgba(65,45,12,.19);
+}
+.scope :global(.pro-btn):hover{
+  background:#F8DDA5;
+  border-color:#F8DDA5;
+  color:#29200E;
+}
