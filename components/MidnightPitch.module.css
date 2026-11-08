@@ -1,0 +1,504 @@
+/*
+ * Midnight Pitch • Fantezi Lig Rehberi
+ * Final brand layer. Loaded after the existing design modules; intentionally
+ * keeps gameplay/status/club colors while changing the neutral UI surfaces.
+ */
+:global(:root).scope{
+  --mp-bg:#0B1220;
+  --mp-card:#172438;
+  --mp-raised:#23364C;
+  --mp-line:#30455B;
+  --mp-text:#F5F7FB;
+  --mp-muted:#B7C5D6;
+  --mp-mint:#56DEB9;
+  --mp-mint-hover:#7BE9CA;
+  --mp-mint-ink:#09261F;
+  --mp-blue:#83B2FF;
+  --mp-gold:#F1CB7A;
+  --mp-pitch:#112F2C;
+  --brand-ice:var(--mp-text);
+  --brand-petrol:var(--mp-bg);
+  --brand-lime:var(--mp-mint);
+  --brand-lime-hover:var(--mp-mint-hover);
+  --brand-paper:var(--mp-raised);
+  --brand-surface:var(--mp-card);
+  --brand-line:var(--mp-line);
+  --brand-muted:var(--mp-muted);
+  --brand-soft:#1A413A;
+  --bg:var(--mp-bg);
+  --panel:var(--mp-card);
+  --panel2:var(--mp-raised);
+  --line:var(--mp-line);
+  --text:var(--mp-text);
+  --muted:var(--mp-muted);
+  --green:var(--mp-mint);
+  --green2:var(--mp-mint-hover);
+  --cyan:var(--mp-mint);
+  --violet:var(--mp-blue);
+  --amber:var(--mp-gold);
+  --premium-bg:var(--mp-bg);
+  --premium-surface:var(--mp-card);
+  --premium-surface-soft:var(--mp-raised);
+  --premium-line:var(--mp-line);
+  --premium-line-strong:#46607A;
+  --premium-text:var(--mp-text);
+  --premium-muted:var(--mp-muted);
+  --premium-faint:#94A9C0;
+  --premium-accent:var(--mp-mint);
+  --premium-accent-2:var(--mp-blue);
+  --premium-shadow:0 14px 38px rgba(2,8,18,.24);
+  --premium-shadow-hover:0 18px 42px rgba(2,8,18,.35);
+  color-scheme:dark;
+}
+:global(html).scope{background:var(--mp-bg)}
+:global(body).scope{
+  background:radial-gradient(ellipse 65% 35% at 55% -10%,#203B4D 0%,transparent 78%),var(--mp-bg);
+  color:var(--mp-text);
+}
+.scope main{color:var(--mp-text)}
+.scope footer{border-color:var(--mp-line);color:var(--mp-muted)}
+.scope footer a:hover{color:var(--mp-mint)}
+.scope :global(.muted),.scope :global(.footnote){color:var(--mp-muted)}
+.scope :global(.eyebrow),
+.scope :global(.sortmark),
+.scope :global(.home-guide-link),
+.scope :global(.hub-card) i{color:var(--mp-mint)}
+.scope main :is(h1,h2,h3){color:var(--mp-text)}
+.scope :global(.section-title)>:global(.muted){color:var(--mp-muted)}
+/* Core panels. */
+.scope :global(.card),
+.scope :global(.section-title),
+.scope :global(.home-model-guide),
+.scope :global(.home-feature-card),
+.scope :global(.home-highlight-grid) :global(.spotlight-card),
+.scope :global(.team-card),
+.scope :global(.profile-card),
+.scope :global(.auth-card),
+.scope :global(.price-card),
+.scope :global(.player-profile-head),
+.scope :global(.recommendation-preview-card){
+  background:linear-gradient(155deg,#1A2A40,var(--mp-card));
+  border-color:var(--mp-line);
+  color:var(--mp-text);
+  box-shadow:var(--premium-shadow);
+}
+.scope :global(.card):hover,
+.scope :global(.home-feature-card):hover{border-color:#47647A}
+.scope :global(.section-title) h1,
+.scope :global(.section-title) h2,
+.scope :global(.home-section-head) h2,
+.scope :global(.home-guide-copy) h2,
+.scope :global(.home-feature-card)>div>b,
+.scope :global(.home-guide-metrics) span,
+.scope :global(.home-highlight-grid) :global(.spotlight-card)>b,
+.scope :global(.team-card-head) h2,
+.scope :global(.player-hero-main) h1,
+.scope :global(.profile-card) h2{color:var(--mp-text)}
+.scope :global(.section-title) p,
+.scope :global(.home-section-head)>p,
+.scope :global(.home-guide-copy) p,
+.scope :global(.home-feature-card)>div>p,
+.scope :global(.home-highlight-grid) :global(.spotlight-card)>small,
+.scope :global(.home-highlight-grid) :global(.spotlight-card)>span{color:var(--mp-muted)}
+/* Navigation: dark glass and readable active states. */
+.scope :global(.topbar){
+  background:rgba(11,18,32,.96);
+  border-bottom:1px solid var(--mp-line);
+  box-shadow:0 10px 28px rgba(3,9,20,.25);
+}
+.scope :global(.brand-mark){
+  background:var(--mp-mint);
+  color:var(--mp-mint-ink);
+  box-shadow:0 5px 17px rgba(86,222,185,.18);
+}
+.scope :global(.brand-copy) b{color:var(--mp-text)}
+.scope :global(.brand-copy) small{color:var(--mp-muted)}
+.scope :global(.desktop-nav)>a,
+.scope :global(.desktop-more)>button,
+.scope :global(.topbar) :global(.desktop-nav)>a,
+.scope :global(.topbar) :global(.desktop-more)>button{color:#DFE8F3}
+.scope :global(.desktop-nav)>a:hover,
+.scope :global(.desktop-more)>button:hover,
+.scope :global(.desktop-nav) :global(.nav-active),
+.scope :global(.desktop-more)>button:global(.nav-active){
+  color:var(--mp-mint);
+  background:#1A373A;
+  border-color:#38675E;
+}
+.scope :global(.desktop-more-panel),
+.scope :global(.mobile-menu-panel),
+.scope :global(.compact-mobile-menu-panel){
+  background:#172438;
+  color:var(--mp-text);
+  border-color:var(--mp-line);
+  box-shadow:0 18px 42px rgba(0,0,0,.35);
+}
+.scope :global(.desktop-more-panel) a,
+.scope :global(.mobile-menu-panel) a,
+.scope :global(.mobile-menu-panel) button,
+.scope :global(.mobile-menu-row),
+.scope :global(.topbar) :global(.desktop-more-panel) a{color:var(--mp-text)}
+.scope :global(.desktop-more-panel) a:hover,
+.scope :global(.desktop-more-panel) a:global(.nav-active),
+.scope :global(.mobile-menu-panel) a:hover,
+.scope :global(.mobile-menu-row):global(.active){
+  color:var(--mp-mint);
+  background:#203A42;
+}
+.scope :global(.mobile-menu-trigger),
+.scope :global(.topbar) :global(.ghost-btn),
+.scope :global(.topbar) :global(.my-team-btn){
+  background:var(--mp-raised);
+  border-color:#40576F;
+  color:var(--mp-text);
+}
+.scope :global(.mobile-menu-trigger)>span{background:var(--mp-text)}
+.scope :global(.mobile-menu-row-icon),
+.scope :global(.bottom-nav-icon){background:var(--mp-raised);border-color:var(--mp-line);color:inherit}
+/* Main action = mint surface + dark ink; quiet actions = dark surface + white ink. */
+.scope :global(.cta),
+.scope :global(.pro-btn),
+.scope :global(.multi-filter-done),
+.scope :global(.home-intro-actions)>:global(.home-cta-primary){
+  background:var(--mp-mint);
+  border:1px solid var(--mp-mint);
+  color:var(--mp-mint-ink);
+  text-shadow:none;
+  box-shadow:0 8px 19px rgba(6,36,31,.25);
+}
+.scope :global(.cta):hover,
+.scope :global(.pro-btn):hover,
+.scope :global(.multi-filter-done):hover,
+.scope :global(.home-intro-actions)>:global(.home-cta-primary):hover{
+  background:var(--mp-mint-hover);
+  border-color:var(--mp-mint-hover);
+  color:var(--mp-mint-ink);
+}
+.scope :global(.secondary),
+.scope :global(.ghost-btn),
+.scope :global(.my-team-btn),
+.scope :global(.home-intro-actions)>:global(.home-cta-outline){
+  background:var(--mp-raised);
+  border:1px solid #40566E;
+  color:var(--mp-text);
+  box-shadow:none;
+}
+.scope :global(.secondary):hover,
+.scope :global(.ghost-btn):hover,
+.scope :global(.my-team-btn):hover,
+.scope :global(.home-intro-actions)>:global(.home-cta-outline):hover{
+  background:#2D4761;
+  color:#FFFFFF;
+  border-color:#6A859A;
+}
+.scope :global(.home-intro-hero) :global(.home-intro-actions)>:global(a.home-cta-primary),
+.scope :global(.home-intro-hero) :global(.home-intro-actions)>:global(a.home-cta-primary:visited){
+  background:var(--mp-mint);
+  border-color:var(--mp-mint);
+  color:var(--mp-mint-ink)!important;
+}
+.scope :global(.home-intro-hero) :global(.home-intro-actions)>:global(a.home-cta-outline),
+.scope :global(.home-intro-hero) :global(.home-intro-actions)>:global(a.home-cta-outline:visited){
+  background:#23364C;
+  border-color:#6C879A;
+  color:#F5F7FB!important;
+  text-shadow:none;
+}
+.scope :global(.home-intro-hero) :global(.home-intro-actions)>:global(a.home-cta-outline:hover),
+.scope :global(.home-intro-hero) :global(.home-intro-actions)>:global(a.home-cta-outline:focus-visible){
+  background:#2D4761;
+  border-color:var(--mp-mint);
+  color:#FFFFFF!important;
+}
+.scope :global(.pro-label),.scope :global(.plan){border-color:#806A40;color:var(--mp-gold);background:rgba(241,203,122,.10)}
+.scope :global(.pro-lock)>span{background:var(--mp-gold);color:#29200E}
+.scope :global(.pro-lock) small{color:#F2DAA3}
+.scope :global(button):focus-visible,
+.scope :global(a):focus-visible,
+.scope :global(input):focus-visible,
+.scope :global(select):focus-visible,
+.scope :global(textarea):focus-visible{outline:2px solid var(--mp-mint);outline-offset:3px}
+.scope :global(button:disabled){cursor:not-allowed;opacity:.55}
+/* Home: navy hero + mint highlights. */
+.scope :global(.home-intro-hero){
+  background:radial-gradient(ellipse at 90% 4%,rgba(86,222,185,.13),transparent 53%),linear-gradient(135deg,#142438,#0B1220 87%);
+  border-color:#314960;
+  box-shadow:0 22px 54px rgba(2,8,18,.38);
+}
+.scope :global(.home-intro-hero):before{background:radial-gradient(circle,rgba(131,178,255,.12),transparent 70%);box-shadow:none}
+.scope :global(.home-intro-hero) h1{color:var(--mp-text)}
+.scope :global(.home-intro-hero) h1 span{color:var(--mp-mint)}
+.scope :global(.home-intro-hero)>p{color:#D0DCE9}
+.scope :global(.home-intro-hero) :global(.eyebrow),
+.scope :global(.home-intro-hero) :global(.home-hero-kicker)>span:first-child{color:var(--mp-mint)}
+.scope :global(.home-live-pill){background:#183A36;color:var(--mp-mint);border-color:#396C61}
+.scope :global(.home-hero-mini)>div,
+.scope :global(.home-guide-metrics)>div,
+.scope :global(.team-metrics)>div,
+.scope :global(.home-highlight-grid) :global(.spotlight-card){
+  background:var(--mp-card);
+  border-color:var(--mp-line);
+}
+.scope :global(.home-hero-mini)>div{background:rgba(35,54,76,.78);border-color:#456078}
+.scope :global(.home-hero-mini) b{color:var(--mp-text)}
+.scope :global(.home-hero-mini) span,
+.scope :global(.home-guide-metrics) small,
+.scope :global(.team-metrics) span{color:var(--mp-muted)}
+.scope :global(.home-guide-copy) h2 span,
+.scope :global(.home-guide-metrics) b,
+.scope :global(.home-highlight-grid) :global(.spotlight-card)>strong{color:var(--mp-mint)}
+.scope :global(.home-highlight-grid) :global(.spotlight-card){border-top:3px solid #438E85}
+.scope :global(.home-highlight-grid) :global(.spotlight-card)>strong{color:var(--mp-mint)}
+.scope :global(.home-feature-no){background:#1C423C;color:var(--mp-mint);border-color:#3B6E60}
+.scope :global(.home-feature-card)>strong{color:var(--mp-mint)}
+.scope :global(.home-feature-card):after{background:rgba(86,222,185,.06)}
+.scope :global(.home-status-card){border-top-color:var(--mp-line)!important}
+.scope :global(.home-status-ready):global(.fresh){border-top-color:var(--mp-mint)!important}
+.scope :global(.home-intro-actions){
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  align-items:stretch;
+  gap:10px;
+  width:100%;
+  margin-top:26px;
+}
+.scope :global(.home-intro-actions)>:global(.home-cta-btn){
+  box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;
+  width:100%;min-width:0;min-height:50px;padding:11px 12px;border-radius:14px;
+  font-size:12px;font-weight:850;line-height:1.3;text-align:center;white-space:normal;text-decoration:none;
+}
+/* Players and stats: dark cards, restrained accents, high-contrast data. */
+.scope :global(.table-wrap),
+.scope :global(.desktop-player-table){
+  background:var(--mp-card);
+  border-color:var(--mp-line);
+  color:var(--mp-text);
+}
+.scope :global(.table-wrap) :is(th,td){border-color:#2B4057}
+.scope :global(.table-wrap) :is(th,thead th){
+  background:#23364C;
+  color:#CDDAE9;
+  border-bottom-color:#3E5670;
+}
+.scope :global(.table-wrap) tbody td{color:#E9F0F7;background:transparent}
+.scope :global(.table-wrap) tbody td b{color:var(--mp-text)}
+.scope :global(.table-wrap) tbody tr:nth-child(even) td{background:rgba(131,178,255,.025)}
+.scope :global(.table-wrap) tbody tr:hover td{background:rgba(86,222,185,.09)}
+.scope :global(.table-wrap) :global(.cell-note){color:#A5B7CD}
+.scope :global(.table-wrap) :global(.player-link),
+.scope :global(.table-wrap) :global(.team-table-link){color:#F5F7FB}
+.scope :global(.table-wrap) tbody td:has(:global(.player-link)) b{color:#F5F7FB}
+.scope :global(.table-wrap)::-webkit-scrollbar-track{background:var(--mp-bg)}
+.scope :global(.table-wrap)::-webkit-scrollbar-thumb{background:#4D6378;border-color:var(--mp-bg)}
+.scope :global(.mobile-player-card),
+.scope :global(.weekly-mobile-card),
+.scope :global(.team-analysis-mobile-card){
+  background:linear-gradient(160deg,#1B2B41,#172438)!important;
+  border-color:var(--mp-line)!important;
+  color:var(--mp-text);
+}
+.scope :global(.mobile-player-name) b,
+.scope :global(.weekly-mobile-player-name) b{color:var(--mp-text)!important}
+.scope :global(.mobile-player-name) span,
+.scope :global(.mobile-fixture),
+.scope :global(.weekly-mobile-player-name) small,
+.scope :global(.mobile-xfp) em{color:var(--mp-muted)!important}
+.scope :global(.mobile-xfp) strong,
+.scope :global(.weekly-mobile-head)>strong{color:var(--mp-mint)}
+.scope :global(.mobile-player-metrics)>div,
+.scope :global(.weekly-mobile-meta) span{background:var(--mp-raised);border-color:var(--mp-line)}
+.scope :global(.mobile-player-metrics) span{color:var(--mp-muted)}
+.scope :global(.mobile-player-metrics) b{color:var(--mp-text)}
+.scope :global(.mobile-card-badges) :global(.weekly-rank){background:#2A3C54;color:var(--mp-blue);border-color:#3D5671}
+.scope :global(.filters) input,
+.scope :global(.filters) select,
+.scope :global(.auth-form) input,
+.scope :global(.team-roster-tools) input,
+.scope :global(.team-roster-tools) select,
+.scope :global(.picker-filters) input,
+.scope :global(.picker-filters) select,
+.scope :global(.multi-filter-trigger),
+.scope :global(.multi-filter-panel),
+.scope :global(.multi-filter-search),
+.scope :global(.global-player-search-panel),
+.scope :global(.mobile-sort-select){
+  background:#1E3046;
+  color:var(--mp-text);
+  border-color:#3C556D;
+}
+.scope :global(input)::placeholder,
+.scope :global(textarea)::placeholder{color:#91A9C1}
+.scope :global(.multi-filter-panel){box-shadow:0 22px 54px rgba(0,0,0,.42)}
+.scope :global(.multi-filter-panel-top),
+.scope :global(.multi-filter-empty){color:var(--mp-muted)}
+.scope :global(.multi-filter-option){color:var(--mp-text)}
+.scope :global(.multi-filter-option:hover),
+.scope :global(.multi-filter-option.selected),
+.scope :global(.multi-filter.is-active-filter) :global(.multi-filter-trigger){
+  background:#1A403D;
+  border-color:#416C61;
+  color:#DFF9EF;
+}
+.scope :global(.multi-filter-option) input[type="checkbox"]{accent-color:var(--mp-mint)}
+.scope :global(.multi-filter-footer){background:var(--mp-card);border-color:var(--mp-line)}
+.scope :global(.multi-filter-reset),
+.scope :global(.multi-filter-footer) button{color:var(--mp-mint)}
+.scope :global(.multi-filter-footer) :global(.multi-filter-done){background:var(--mp-mint);color:var(--mp-mint-ink);border-color:var(--mp-mint)}
+.scope :global(.pagination-bar) button{background:var(--mp-raised);border-color:var(--mp-line);color:var(--mp-text)}
+.scope :global(.player-detail-v2){color:var(--mp-text)}
+.scope :global(.player-detail-v2) :global(.player-hero-score)>strong{color:var(--mp-mint)!important}
+.scope :global(.player-detail-v2) :global(.player-hero-score) span,
+.scope :global(.player-detail-v2) :global(.player-hero-score) small{color:var(--mp-muted)}
+.scope :global(.player-detail-metric-grid)>div,
+.scope :global(.player-attacking-expectation)>div,
+.scope :global(.player-form-strip)>div,
+.scope :global(.team-week-metrics)>div,
+.scope :global(.player-model-note){
+  background:var(--mp-raised);
+  border-color:var(--mp-line);
+}
+.scope :global(.player-detail-metric-grid) b,
+.scope :global(.player-attacking-expectation) b,
+.scope :global(.player-form-strip) b,
+.scope :global(.team-week-metrics) b{color:var(--mp-text)}
+.scope :global(.player-detail-metric-grid) :global(.is-emphasis) b{color:var(--mp-mint)}
+.scope :global(.player-detail-v2) :global(.player-detail-metric-grid) :is(span,small),
+.scope :global(.player-detail-v2) :global(.projection-explainer),
+.scope :global(.player-detail-v2) :global(.player-role-explainer),
+.scope :global(.player-detail-v2) :global(.player-model-note) p{color:var(--mp-muted)}
+.scope :global(.player-detail-v2) :global(.player-advanced-details) summary span b{color:var(--mp-text)}
+.scope :global(.player-advanced-details) summary i{background:var(--mp-raised);border-color:var(--mp-line);color:var(--mp-text)}
+/* Squad recommendations and builder. Keep the pitch matte and player labels crisp. */
+.scope :global(.unified-squad-card),
+.scope :global(.recommendation-preview-card),
+.scope :global(.manager-card-panel),
+.scope :global(.manager-card-roster-control),
+.scope :global(.manager-card-weekly-read),
+.scope :global(.manager-card-choice){
+  background:var(--mp-card);
+  color:var(--mp-text);
+  border-color:var(--mp-line);
+}
+.scope :global(.manager-card-panel):global(.active),
+.scope :global(.manager-card-roster-control):global(.active),
+.scope :global(.manager-card-choice):global(.selected){
+  background:linear-gradient(135deg,#1B3B3B,#192B40);
+  border-color:#56A78F;
+  box-shadow:0 12px 30px rgba(2,8,18,.24);
+}
+.scope :global(.manager-card-choice)>span,
+.scope :global(.manager-card-choice)>b,
+.scope :global(.manager-card-weekly-read)>b{color:var(--mp-text)}
+.scope :global(.manager-card-choice)>small,
+.scope :global(.manager-card-copy) p,
+.scope :global(.manager-card-weekly-read)>small{color:var(--mp-muted)}
+.scope :global(.manager-card-panel):global(.active) :global(.manager-card-effects)>span,
+.scope :global(.manager-card-roster-control):global(.active) :global(.manager-card-roster-effect)>span{
+  background:#20443E;
+  color:#BDF6E3;
+  border-color:#437969;
+}
+.scope :global(.squad-tabs-note) span{background:#1C2B3E;color:var(--mp-muted);border-color:var(--mp-line)}
+.scope :global(.fantasy-pitch),
+.scope :global(.readonly-squad-pitch),
+.scope :global(.roster-pitch){
+  background:linear-gradient(rgba(255,255,255,.065) 1px,transparent 1px) 0 0/100% 25%,
+    linear-gradient(155deg,#17453F 0%,var(--mp-pitch) 85%);
+  border-color:#376459;
+}
+.scope :global(.pitch-player),
+.scope :global(.readonly-pitch-player){
+  border-color:rgba(210,244,233,.30);
+  color:#F5F7FB;
+}
+.scope :global(.pitch-player) small,
+.scope :global(.readonly-pitch-player) small{color:#DFEDE8}
+.scope :global(.selected-player),
+.scope :global(.candidate-list) button,
+.scope :global(.picker-player),
+.scope :global(.player-picker),
+.scope :global(.squad-history-empty),
+.scope :global(.squad-history-week){
+  background:var(--mp-card);
+  border-color:var(--mp-line);
+  color:var(--mp-text);
+}
+.scope :global(.picker-copy)>b,
+.scope :global(.my-squad-shell) :global(.picker-copy)>b,
+.scope :global(.my-squad-shell) :global(.picker-player)>:global(.picker-value){color:var(--mp-text)}
+.scope :global(.picker-metrics)>b,
+.scope :global(.simulation-metrics) b{color:var(--mp-text)}
+.scope :global(.squad-tool-btn),
+.scope :global(.formation-option){background:var(--mp-raised);color:var(--mp-text);border-color:var(--mp-line)}
+.scope :global(.formation-option):global(.selected){background:#19443C;border-color:var(--mp-mint);color:var(--mp-mint)}
+.scope :global(.squad-stage-actions) :global(.auto-fill-btn),
+.scope :global(.squad-stage-actions) :global(.save-squad-btn){
+  background:var(--mp-mint);
+  border-color:var(--mp-mint);
+  color:var(--mp-mint-ink);
+}
+.scope :global(.squad-stage-actions) :global(.auto-fill-btn):hover,
+.scope :global(.squad-stage-actions) :global(.save-squad-btn):hover{
+  background:var(--mp-mint-hover);color:var(--mp-mint-ink);
+}
+.scope :global(.squad-stage-actions) :global(.clear-squad-btn){
+  background:#502C38;border-color:#905263;color:#FFC5CC;
+}
+/* Secondary page surfaces: no leftover white panels on dark layouts. */
+.scope :global(.match-analysis-card),
+.scope :global(.modern-match-card),
+.scope :global(.match-team-xfp-side),
+.scope :global(.team-roster-xfp),
+.scope :global(.team-roster-metric),
+.scope :global(.team-roster-player-v3) :global(.team-roster-metric),
+.scope :global(.role-change-card),
+.scope :global(.faq-quick-card),
+.scope :global(.faq-menu-card),
+.scope :global(.faq-cta),
+.scope :global(.availability-updated-card){
+  background:var(--mp-card);
+  color:var(--mp-text);
+  border-color:var(--mp-line);
+}
+.scope :global(.match-analysis-card) :global(.match-team-identity) b,
+.scope :global(.match-team-xfp-side)>a b,
+.scope :global(.team-roster-metric) b,
+.scope :global(.role-change-metrics) b,
+.scope :global(.faq-quick-card) h3,
+.scope :global(.faq-menu-card) h3{color:var(--mp-text)}
+.scope :global(.team-roster-filter-count),
+.scope :global(.faq-cta) p,
+.scope :global(.faq-quick-card) p{color:var(--mp-muted)}
+.scope :global(.status-chip){background:#23364C;color:#CEDDED;border-color:#425D77}
+.scope :global(.pro-lock){background:#263448;border-color:#6D694F}
+.scope :global(.mobile-bottom-nav){
+  background:rgba(17,29,47,.98);
+  border:1px solid var(--mp-line);
+  box-shadow:0 11px 34px rgba(0,0,0,.35);
+}
+.scope :global(.mobile-bottom-nav) a{color:#BDCDDD}
+.scope :global(.mobile-bottom-nav) a:global(.active){background:#1B3F3B;color:var(--mp-mint)}
+.scope :global(.mobile-bottom-nav) a:global(.active):before{background:var(--mp-mint)}
+.scope :global(.mobile-bottom-nav) a:global(.active) :global(.bottom-nav-icon){
+  background:#244940;color:var(--mp-mint);border-color:#4A8775;
+}
+@media(max-width:680px){
+  .scope :global(.home-intro-actions){grid-template-columns:minmax(0,1fr);gap:10px;margin-top:24px}
+  .scope :global(.home-intro-actions)>:global(.home-cta-btn){width:100%;min-height:50px;font-size:13px}
+}
+@media(prefers-reduced-motion:reduce){
+  .scope :global(.home-intro-actions)>:global(.home-cta-btn){transition:none}
+}
+
+/* Gold is reserved for Pro-only actions, never ordinary navigation. */
+.scope :global(.pro-btn){
+  background:var(--mp-gold);
+  border-color:var(--mp-gold);
+  color:#29200E;
+  box-shadow:0 8px 20px rgba(65,45,12,.19);
+}
+.scope :global(.pro-btn):hover{
+  background:#F8DDA5;
+  border-color:#F8DDA5;
+  color:#29200E;
+}
