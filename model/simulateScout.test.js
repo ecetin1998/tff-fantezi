@@ -135,6 +135,21 @@ function zeroEventInput(doubleWeek=false){
   assert.equal(isActiveAt(0,exit,exit),false,'dismissed player cannot be selected for scoring/assist events after red');
 }
 
+
+{
+  let sampledBase, sampledSourced;
+  keeperSavesForScore(1,1.5,3,1,x=>{sampledBase=x;return 6;});
+  keeperSavesForScore(1,1.5,3,1,x=>{sampledSourced=x;return 6;},7);
+  assert(sampledSourced>sampledBase,'verified higher opponent SOT increases chance of saves, not fantasy scoring values');
+  let fallback;
+  keeperSavesForScore(1,1.5,3,1,x=>{fallback=x;return 6;},0);
+  assert.equal(fallback,sampledBase,'untrusted source cannot modify goalie shot distribution');
+  for(const edge of ['supabase/functions/run-live-sim-chunk/index.ts','supabase/functions/run-enrichment-replay-chunk/index.ts']){
+    const src=require('node:fs').readFileSync(edge,'utf8');
+    assert.match(src,/keeperSotTeams\[String\(opponentTeam\)\]/,'edge scorer uses frozen attacking-team shot data');
+    assert.match(src,/\.85\*baselineShots\+\.15\*attackingTeamSot\*exp/,'edge and local SOT shrink coefficients must match');
+  }
+}
 console.log('DGW, opponent-aware saves, red-card and bonus-tie checks passed');
 
 {
@@ -191,7 +206,7 @@ console.log('DGW, opponent-aware saves, red-card and bonus-tie checks passed');
   const fs=require('node:fs');
   for(const f of ['supabase/functions/run-live-sim-chunk/index.ts','supabase/functions/run-enrichment-replay-chunk/index.ts']){
     const edge=fs.readFileSync(f,'utf8');
-    assert.match(edge,/keeperSavesForScore\(gc\[i\],opponentLambda,rates\[6\],exposure,poisson\)/,
+    assert.match(edge,/keeperSavesForScore\(gc\[i\],opponentLambda,rates\[6\],exposure,poisson,incomingSot\)/,
       f+' must couple saves to the actual conceded match score');
     assert.match(edge,/keeperPenaltySaveChance\(P\[opponentGK\]\.rates\[8\],attackingLambda,mins\[opponentGK\]\/90\)/,
       f+' must use the defending goalkeeper prior for the same penalty attempt');
@@ -233,7 +248,7 @@ console.log('DGW, opponent-aware saves, red-card and bonus-tie checks passed');
   const fs=require('node:fs');
   const edge=fs.readFileSync('supabase/functions/run-live-sim-chunk/index.ts','utf8');
   const workflow=fs.readFileSync('.github/workflows/weekly-model-lifecycle.yml','utf8');
-  assert.match(edge,/SCORER_POLICY_VERSION="gk-sot-penalty-matched-v1"/);
+  assert.match(edge,/SCORER_POLICY_VERSION="gk-sot-source-blend-v2"/);
   assert.equal((workflow.match(/MODEL_SCORER_POLICY_MISMATCH/g)||[]).length,6,
     'both current-MH and next-MH runs must enforce scorer policy on reset/chunks/finalize');
 }
