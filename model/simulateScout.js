@@ -74,10 +74,14 @@ function expectedKeeperSaves(opponentGoalLambda,per90Saves,exposure=1){
 
 // Shots on target, goals conceded and saves must belong to the SAME sampled fixture.
 // A goal consumes a shot on target; 9 saves with 2 conceded needs at least 11 on target.
-function keeperSavesForScore(conceded,opponentLambda,per90Saves,exposure,poissonDraw){
+function keeperSavesForScore(conceded,opponentLambda,per90Saves,exposure,poissonDraw,attackingTeamSot=null){
   const goals=Math.max(0,Number(conceded)||0);
-  const shotsMean=Math.max(0,Number(opponentLambda)||0)*Math.max(0,Number(exposure)||0)
-    +expectedKeeperSaves(opponentLambda,per90Saves,exposure);
+  const exp=Math.max(0,Number(exposure)||0);
+  const baselineShots=Math.max(0,Number(opponentLambda)||0)*exp
+    +expectedKeeperSaves(opponentLambda,per90Saves,exp);
+  const sourced=typeof attackingTeamSot==="number"&&Number.isFinite(attackingTeamSot)
+    &&attackingTeamSot>=1.5&&attackingTeamSot<=10;
+  const shotsMean=sourced?.85*baselineShots+.15*attackingTeamSot*exp:baselineShots;
   return Math.max(0,poissonDraw(shotsMean)-goals);
 }
 
@@ -125,6 +129,7 @@ function bonusByCompetitionRank(ids,base,minutes){
 }
 
 function simulateScout(input,count,seed,attackPolicy=true){
+  const keeperSotTeams=input.keeper_sot_snapshot?.teams||{};
   const P=input.players,M=P.length,positions=['GK','DEF','MID','FWD'];
   const allocation=P.map(p=>attackPolicy?attackWeights(p,input.playerMatches||[]):{
     goal:Math.max(1e-6,.8*p.rates[0]+.2*p.rates[1]),
@@ -292,7 +297,9 @@ function simulateScout(input,count,seed,attackPolicy=true){
         comp.cs[i]=mins[i]>=60&&score[Number(p.club)===clubs[0]?1:0]===0?SCORING.clean_sheet[p.pos]:0;
         if(SCORING.conceded_per_2[p.pos])comp.conceded[i]=Math.floor(gc[i]/2)*SCORING.conceded_per_2[p.pos];
         if(p.pos==="GK"){
-          const normalSaves=keeperSavesForScore(gc[i],opponentLambda,rates[6],exposure,poisson);
+          const opponentTeam=p.club===clubs[0]?clubs[1]:clubs[0];
+          const incomingSot=keeperSotTeams[String(opponentTeam)]?.shots_on_target;
+          const normalSaves=keeperSavesForScore(gc[i],opponentLambda,rates[6],exposure,poisson,incomingSot);
           // A saved penalty counts as a keeper save, never a separate invented shot.
           comp.saves[i]=Math.floor((normalSaves+savedPenaltyByKeeper[i])/3)*SCORING.saves_per_3;
         }
