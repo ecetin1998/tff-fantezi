@@ -2,6 +2,7 @@ import {createClient} from "https://esm.sh/@supabase/supabase-js@2"
 import {applyOfficialMinutesEvidence,firstRecordedRate,observedPer90} from "./externalRole.mjs"
 import {validFinalWeeklyPlayerRow} from "./closureSource.mjs"
 import {risingMinutesMomentum,trustedMinute} from "./momentum.mjs"
+import {stabilizeVerifiedStarter} from "./verifiedStarter.mjs"
 import {reconcileDefenderXa} from "./defenderXa.mjs"
 import {fetchTrustedWeeklyEvidence} from "./weeklyEvidence.mjs"
 import {roleTrendFromWeeklyEvidence} from "./roleTrend.mjs"
@@ -429,6 +430,15 @@ async function prepare(sb:any,current:any,status:any,body:any={}){
     // a small residual uplift for a *sustained*, independently evidenced rise.
     const momentum=risingMinutesMomentum(rows,target,n(av.availability_probability,1))
     if(momentum.rising)roleProb=clamp(.01,.995,roleProb+momentum.role_uplift)
+    // Sourced 60+ minutes in the immediately prior week are stronger lineup
+    // evidence than a stale season-average role. Keep correction bounded;
+    // a new official demotion/rotation signal below still takes precedence.
+    const recentStarter=stabilizeVerifiedStarter({
+      baseline:roleProb,weekly:rows,targetWeek:target,
+      cutoffAt:teamKickoffs.get(Number(p.team_id))||targetKickoff,
+      availability:n(av.availability_probability,1)
+    })
+    if(recentStarter.applied)roleProb=recentStarter.role
     const event=official.latest.get(id)
     const officialShift=applyOfficialMinutesEvidence({
       baseline:roleProb,durations,durationWeights,
@@ -495,7 +505,7 @@ async function prepare(sb:any,current:any,status:any,body:any={}){
       bench_weight:n(prior.bench_weight,1),durations,duration_weights:durationWeights,rates,
       data_confidence:prior.data_confidence||projMap.get(id)?.confidence||"medium",
       has_individual_prior:Boolean(prior.has_individual_prior),
-      source_note:key+(calibrated.applied?" • role-aware-attack-v1":"")+(form.applied?" • recent-attack-form-v2":"")+(attackForm.applied&&!form.applied?" • lagged-verified-form-v1":"")+(covered.aligned&&covered.advancedWeek<target-1?" • source-window-attack-v1":"")+(tactical.changed?" • tactical-role-evidence-v1":"")+(momentum.rising?" • momentum-v1 +"+momentum.role_uplift:"")+(xaReconcile.adjusted?" • defender-xa-source-window-v1 "+xaReconcile.source_minutes+"dk":"")+(officialShift.applied?" • resmî maç: "+event.match_ref:""),
+      source_note:key+(calibrated.applied?" • role-aware-attack-v1":"")+(form.applied?" • recent-attack-form-v2":"")+(attackForm.applied&&!form.applied?" • lagged-verified-form-v1":"")+(covered.aligned&&covered.advancedWeek<target-1?" • source-window-attack-v1":"")+(tactical.changed?" • tactical-role-evidence-v1":"")+(momentum.rising?" • momentum-v1 +"+momentum.role_uplift:"")+(recentStarter.applied?" • verified-recent-starter-v1 +"+recentStarter.delta.toFixed(4):"")+(xaReconcile.adjusted?" • defender-xa-source-window-v1 "+xaReconcile.source_minutes+"dk":"")+(officialShift.applied?" • resmî maç: "+event.match_ref:""),
       sub_role:tactical.role||prior.sub_role||null,role_side:tactical.side||prior.role_side||null,
       effective_xa_per90:attackForm.xaPer90
     })
@@ -856,8 +866,14 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
     // Never add the same rise twice: non-intraday inputs may already include it.
     const momentumBoost=String(stableInput.source_note||"").includes("momentum-v1")
       ?0:momentum.role_uplift
+    const recentStarter=stabilizeVerifiedStarter({
+      baseline:clamp(.01,.995,stableRole+momentumBoost),
+      weekly:weeklyMomentumRows.get(Number(x.player_id))||[],targetWeek:gw,
+      cutoffAt:targetKickoffs.get(Number(x.club_id))||new Date(kickoff).toISOString(),
+      availability,alreadyApplied:String(stableInput.source_note||"").includes("verified-recent-starter-v1")
+    })
     const adjusted=applyOfficialMinutesEvidence({
-      baseline:clamp(.01,.995,stableRole+momentumBoost),durations:stableInput.durations,durationWeights:stableInput.duration_weights,
+      baseline:recentStarter.role,durations:stableInput.durations,durationWeights:stableInput.duration_weights,
       fixtureKickoff:targetKickoffs.get(Number(x.club_id))||new Date(kickoff).toISOString(),evidence:event,
       sameSlotStarter:player&&event?official.directCompetitor(player,event):false,
       availability,
@@ -945,6 +961,7 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
       duration_weights:adjusted.applied?adjusted.duration_weights:x.duration_weights,
       source_note:`intraday refresh from ${sourceBenchmark}; role baseline ${stableRoleBenchmark}; source ${latestSourceAt}`
         +(momentum.rising?` • momentum-v1 +${momentumBoost}`:"")
+        +(recentStarter.applied||String(stableInput.source_note||"").includes("verified-recent-starter-v1")?` • verified-recent-starter-v1 +${recentStarter.delta.toFixed(4)}`:"")
         +(xaReconcile.adjusted?` • defender-xa-source-window-v1 ${xaReconcile.source_minutes}dk`:"")
         +(xgUpdate.applied||xaUpdate.applied?` • mh8-attack-source-v1 ${xgUpdate.applied?"xg":""}${xaUpdate.applied?"+xa":""}`:"")
         +(calibrated.applied||alreadyCalibrated?` • role-aware-attack-v1`:"")
