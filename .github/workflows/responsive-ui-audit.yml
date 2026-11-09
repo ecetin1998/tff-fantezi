@@ -1,0 +1,53 @@
+name: Responsive UI audit
+on:
+  pull_request:
+    paths:
+      - 'app/**'
+      - 'components/**'
+      - 'scripts/audit-responsive-routes.mjs'
+      - '.github/workflows/responsive-ui-audit.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'app/**'
+      - 'components/**'
+      - 'scripts/audit-responsive-routes.mjs'
+      - '.github/workflows/responsive-ui-audit.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  responsive:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: https://example.supabase.co
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable_ci_placeholder
+      NEXT_PUBLIC_SITE_URL: https://fanteziligrehberi.com
+      SCOUT_OFFLINE_BUILD: '1'
+      SCOUT_RUNTIME_FIXTURE: '1'
+      SCOUT_DATA_API_KEY: runtime-test-key-12345678901234567890
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install
+        run: npm ci --no-audit --no-fund
+      - name: Build
+        run: npm run build
+      - name: Browser dependencies
+        run: |
+          npm install --no-save --no-package-lock --no-audit --no-fund playwright
+          npx playwright install --with-deps chromium
+      - name: Audit routes and screenshots
+        run: node scripts/audit-responsive-routes.mjs
+      - name: Save screenshots and report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: skyblue-responsive-audit
+          path: artifacts/responsive-audit/
+          retention-days: 7
+          if-no-files-found: warn
