@@ -479,3 +479,27 @@
     border-radius:9px;
   }
 }
+
+
+/* Four equal responsive sort controls: no orphaned fourth button. */
+.scope :global(.my-squad-shell) :global(.player-picker) :global(.picker-table-head){
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr)) !important;
+  gap:6px;
+  align-items:stretch;
+}
+.scope :global(.my-squad-shell) :global(.player-picker) :global(.picker-table-head)>button,
+.scope :global(.my-squad-shell) :global(.player-picker) :global(.picker-table-head)>button:nth-of-type(1),
+.scope :global(.my-squad-shell) :global(.player-picker) :global(.picker-table-head)>button:nth-of-type(2),
+.scope :global(.my-squad-shell) :global(.player-picker) :global(.picker-table-head)>button:nth-of-type(3),
+.scope :global(.my-squad-shell) :global(.player-picker) :global(.picker-table-head)>button:nth-of-type(4){
+  grid-column:auto !important;
+  grid-row:auto !important;
+  justify-self:stretch !important;
+  text-align:center !important;
+  width:100%;
+  min-width:0;
+  margin:0;
+  padding-inline:3px;
+  flex:none;
+}
