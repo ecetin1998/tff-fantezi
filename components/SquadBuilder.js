@@ -729,16 +729,23 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
             const availabilityNote=(availabilityIsIssue(p.availability)||p.availability?.availability_type==='return')
               ? availabilityCompactNote(p.availability)
               : ''
-            return <div className={`picker-player ${chosen?'chosen':''} ${disabled?'disabled':''}`} style={teamCssVars(p.team)} key={p.id}>
-              <div className="picker-shirt-wrap"><span className={`fantasy-shirt tiny ${p.position}`} style={teamCssVars(p.team)}><i>{shirtMark(p)}</i></span></div>
-              <div className="picker-copy">
-                <b>{playerLabel(p)}</b>
-                <small className="squad-fixture-meta">{playerFixtureMeta(p)}</small>
-                {availabilityNote?<small className="picker-availability-note">{availabilityNote}</small>:null}
+            return <div className={`picker-player picker-player-v3 ${chosen?'chosen':''} ${disabled?'disabled':''}`} style={teamCssVars(p.team)} key={p.id}>
+              <div className="picker-player-content">
+                <div className="picker-player-identity">
+                  <div className="picker-shirt-wrap"><span className={`fantasy-shirt tiny ${p.position}`} style={teamCssVars(p.team)}><i>{shirtMark(p)}</i></span></div>
+                  <div className="picker-copy">
+                    <b>{playerLabel(p)}</b>
+                    <small className="squad-fixture-meta">{playerFixtureMeta(p)}</small>
+                    {availabilityNote?<small className="picker-availability-note">{availabilityNote}</small>:null}
+                  </div>
+                </div>
+                <div className="picker-player-facts">
+                  <span className={`picker-value price ${sortKey==='price'?'active':''}`}>{Number(p.price||0).toFixed(1)}m</span>
+                  <span className="picker-fact-divider" aria-hidden="true">•</span>
+                  <span className={`picker-value points ${sortKey==='points'?'active':''}`}>{totalPoints(p).toFixed(0)} puan</span>
+                </div>
               </div>
-              <div className={`picker-value price ${sortKey==='price'?'active':''}`}>{Number(p.price||0).toFixed(1)}m</div>
-              <div className={`picker-value xfp ${sortKey==='xfp'?'active':''}`}>{xfp(p).toFixed(2)}</div>
-              <div className={`picker-value points ${sortKey==='points'?'active':''}`}>{totalPoints(p).toFixed(0)}</div>
+              <div className={`picker-value xfp ${sortKey==='xfp'?'active':''}`}><strong>{xfp(p).toFixed(2)}</strong><small>xFP</small></div>
               <button
                 type="button"
                 className={chosen?'picker-remove-player':'picker-add-player'}
