@@ -788,3 +788,365 @@
     overflow-wrap:anywhere;
   }
 }
+
+
+/* Midnight Pitch: squad player picker visual authority 2026-11-09 */
+/* Player pool is one consistent, readable dark surface regardless of selection
+   state, team color, affordable budget or position limits. The ability to add
+   or remove a player is unchanged. */
+.scope :global(.my-squad-shell) :global(.player-picker){
+  background:#172438;
+  border:1px solid #344D66;
+  color:#F5F7FB;
+}
+.scope :global(.my-squad-shell) :global(.player-picker-head){
+  border-bottom:1px solid #344D66;
+}
+.scope :global(.my-squad-shell) :global(.player-picker-head) h2{
+  color:#F5F7FB;
+}
+.scope :global(.my-squad-shell) :global(.player-picker-head)>span{
+  background:#1D3C3C;
+  border:1px solid #3E796C;
+  color:#9EEED5;
+}
+.scope :global(.my-squad-shell) :global(.picker-table-head){
+  background:#1B2F45;
+  border-top:1px solid #355069;
+  border-bottom:1px solid #355069;
+  color:#B7C5D6;
+}
+.scope :global(.my-squad-shell) :global(.picker-table-head) button{
+  color:#BECEDF;
+  font-size:11px;
+}
+.scope :global(.my-squad-shell) :global(.picker-table-head) button:hover,
+.scope :global(.my-squad-shell) :global(.picker-table-head) button:global(.active){
+  color:#56DEB9;
+}
+.scope :global(.my-squad-shell) :global(.picker-list){
+  background:transparent;
+}
+/* The same dark fill for normal/selected/disabled. Only selection accent changes. */
+.scope :global(.my-squad-shell) :global(.picker-player),
+.scope :global(.my-squad-shell) :global(.picker-player):global(.chosen),
+.scope :global(.my-squad-shell) :global(.picker-player):global(.disabled){
+  position:relative;
+  background:#14263A;
+  border:1px solid #34506A;
+  border-left:3px solid #34506A;
+  border-radius:14px;
+  color:#F5F7FB;
+  opacity:1;
+  box-shadow:none;
+  transition:background .15s ease,border-color .15s ease;
+}
+.scope :global(.my-squad-shell) :global(.picker-player):hover{
+  background:#1C324A;
+  border-color:#57738C;
+  border-left-color:#57738C;
+}
+.scope :global(.my-squad-shell) :global(.picker-player):global(.chosen){
+  background:#1A3042;
+  border-color:#426C6B;
+  border-left:4px solid #56DEB9;
+}
+.scope :global(.my-squad-shell) :global(.picker-player):global(.chosen):hover{
+  background:#213B4B;
+  border-color:#61A28E;
+  border-left-color:#56DEB9;
+}
+.scope :global(.my-squad-shell) :global(.picker-player):global(.disabled):not(:global(.chosen)){
+  background:#142438;
+  border-color:#30465D;
+  border-left-color:#30465D;
+  color:#F5F7FB;
+}
+/* Names and fixtures do not inherit the previous light theme's dark ink. */
+.scope :global(.my-squad-shell) :global(.picker-player) :global(.picker-copy)>b{
+  display:block;
+  color:#F5F7FB;
+  font-size:14px;
+  font-weight:850;
+  line-height:1.3;
+}
+.scope :global(.my-squad-shell) :global(.picker-player) :global(.picker-copy)>small,
+.scope :global(.my-squad-shell) :global(.picker-player) :global(.picker-copy)>small:global(.squad-fixture-meta){
+  display:block;
+  color:#B6C8DA;
+  font-size:11px;
+  line-height:1.4;
+  white-space:normal;
+  overflow:visible;
+  overflow-wrap:anywhere;
+  text-overflow:clip;
+}
+.scope :global(.my-squad-shell) :global(.picker-player) :global(.picker-copy)>small:global(.picker-availability-note){
+  color:#F3D291;
+}
+.scope :global(.my-squad-shell) :global(.picker-player)>:global(.picker-value){
+  color:#D2DEEA;
+  font-size:12px;
+  font-weight:750;
+  font-variant-numeric:tabular-nums;
+  white-space:nowrap;
+}
+.scope :global(.my-squad-shell) :global(.picker-player)>:global(.picker-value):global(.price),
+.scope :global(.my-squad-shell) :global(.picker-player)>:global(.picker-value):global(.points){
+  color:#C7D6E5;
+}
+.scope :global(.my-squad-shell) :global(.picker-player)>:global(.picker-value):global(.xfp),
+.scope :global(.my-squad-shell) :global(.picker-player)>:global(.picker-value):global(.xfp):global(.active){
+  color:#56DEB9;
+  font-size:17px;
+  font-weight:950;
+}
+.scope :global(.my-squad-shell) :global(.picker-player)>:global(.picker-value):global(.price):global(.active),
+.scope :global(.my-squad-shell) :global(.picker-player)>:global(.picker-value):global(.points):global(.active){
+  color:#F5F7FB;
+  font-size:12px;
+}
+.scope :global(.my-squad-shell) :global(.picker-player)>button{
+  display:grid;
+  place-items:center;
+  justify-self:center;
+  align-self:center;
+  width:42px;
+  min-width:42px;
+  height:42px;
+  min-height:42px;
+  padding:0;
+  border-radius:12px;
+  font-size:24px;
+  line-height:1;
+  font-weight:900;
+  box-shadow:none;
+  touch-action:manipulation;
+}
+.scope :global(.my-squad-shell) :global(.picker-player)>button:global(.picker-add-player){
+  background:#EAFBF5;
+  color:#0B7864;
+  border:1px solid #A7DCCA;
+}
+.scope :global(.my-squad-shell) :global(.picker-player)>button:global(.picker-add-player):not(:disabled):hover{
+  background:#C7F6E5;
+  border-color:#56DEB9;
+}
+.scope :global(.my-squad-shell) :global(.picker-player)>button:global(.picker-remove-player){
+  background:#FFF1F3;
+  color:#BF3C57;
+  border:1px solid #F2BCC8;
+}
+.scope :global(.my-squad-shell) :global(.picker-player)>button:global(.picker-remove-player):not(:disabled):hover{
+  background:#FDDCE3;
+  border-color:#E792A6;
+}
+.scope :global(.my-squad-shell) :global(.picker-player)>button:disabled{
+  background:#2A3D52;
+  border:1px solid #40566C;
+  color:#AFC0D1;
+  opacity:.75;
+  cursor:not-allowed;
+}
+.scope :global(.my-squad-shell) :global(.picker-player)>button:focus-visible,
+.scope :global(.my-squad-shell) :global(.picker-table-head) button:focus-visible{
+  outline:2px solid #56DEB9;
+  outline-offset:2px;
+}
+/* Larger pool table on desktop preserves all four sortable columns. */
+@media(min-width:761px){
+  .scope :global(.my-squad-shell) :global(.picker-table-head),
+  .scope :global(.my-squad-shell) :global(.picker-player){
+    grid-template-columns:42px minmax(0,1fr) 56px 65px 52px 44px;
+    column-gap:8px;
+    padding-inline:10px;
+  }
+  .scope :global(.my-squad-shell) :global(.picker-player){
+    min-height:76px;
+    padding-block:10px;
+    margin-bottom:7px;
+  }
+  .scope :global(.my-squad-shell) :global(.picker-player)>:global(.picker-shirt-wrap){
+    grid-column:1;grid-row:1;
+  }
+  .scope :global(.my-squad-shell) :global(.picker-player)>:global(.picker-copy){
+    grid-column:2;grid-row:1;
+  }
+  .scope :global(.my-squad-shell) :global(.picker-player)>:global(.picker-value):global(.price){
+    grid-column:3;grid-row:1;
+  }
+  .scope :global(.my-squad-shell) :global(.picker-player)>:global(.picker-value):global(.xfp){
+    grid-column:4;grid-row:1;
+  }
+  .scope :global(.my-squad-shell) :global(.picker-player)>:global(.picker-value):global(.points){
+    grid-column:5;grid-row:1;
+  }
+  .scope :global(.my-squad-shell) :global(.picker-player)>button{
+    grid-column:6;grid-row:1;
+  }
+}
+/* Mobile: a player-first two-row card, not six squeezed table columns.
+   Sorting stays available as four compact pills above the list. */
+@media(max-width:760px){
+  .scope :global(.my-squad-shell) :global(.picker-table-head){
+    display:flex;
+    flex-wrap:wrap;
+    align-items:center;
+    gap:6px;
+    width:auto;
+    margin:0 8px 8px;
+    padding:10px 0 4px;
+    background:transparent;
+    border-top:1px solid #355069;
+    border-bottom:0;
+  }
+  .scope :global(.my-squad-shell) :global(.picker-table-head)>:global(.picker-shirt-head),
+  .scope :global(.my-squad-shell) :global(.picker-table-head)>:global(.picker-action-head){display:none}
+  .scope :global(.my-squad-shell) :global(.picker-table-head)>button{
+    display:inline-flex;
+    flex:1 1 auto;
+    align-items:center;
+    justify-content:center;
+    min-height:34px;
+    padding:7px 10px;
+    border:1px solid #39556E;
+    border-radius:9px;
+    background:#23364C;
+    color:#C6D6E6;
+    font-size:11px;
+    font-weight:850;
+    white-space:nowrap;
+  }
+  .scope :global(.my-squad-shell) :global(.picker-table-head)>button:global(.active){
+    background:#1E453D;
+    border-color:#58AA90;
+    color:#8EF0D0;
+  }
+  .scope :global(.my-squad-shell) :global(.picker-list){
+    width:100%;
+    padding:0 6px 10px;
+    max-height:min(60dvh,540px);
+    overflow-y:auto;
+    overflow-x:hidden;
+  }
+  .scope :global(.my-squad-shell) :global(.picker-player){
+    display:grid;
+    grid-template-columns:42px minmax(0,1fr) 69px 42px;
+    grid-template-rows:auto auto;
+    column-gap:9px;
+    row-gap:5px;
+    min-height:92px;
+    width:100%;
+    padding:11px 9px;
+    margin-bottom:8px;
+    align-items:center;
+  }
+  .scope :global(.my-squad-shell) :global(.picker-player)>:global(.picker-shirt-wrap){
+    grid-column:1;grid-row:1/3;
+    width:42px;
+    min-width:0;
+    align-self:center;
+    justify-self:center;
+  }
+  .scope :global(.my-squad-shell) :global(.picker-player) :global(.fantasy-shirt):global(.tiny){
+    width:32px;
+    height:36px;
+  }
+  .scope :global(.my-squad-shell) :global(.picker-player)>:global(.picker-copy){
+    grid-column:2;grid-row:1;
+    min-width:0;
+    overflow:visible;
+    align-self:end;
+  }
+  .scope :global(.my-squad-shell) :global(.picker-player) :global(.picker-copy)>b{
+    font-size:clamp(12px,3.3vw,15px);
+    line-height:1.25;
+    white-space:normal;
+    overflow:visible;
+    overflow-wrap:anywhere;
+    text-overflow:clip;
+  }
+  .scope :global(.my-squad-shell) :global(.picker-player) :global(.picker-copy)>small,
+  .scope :global(.my-squad-shell) :global(.picker-player) :global(.picker-copy)>small:global(.squad-fixture-meta){
+    margin-top:4px;
+    font-size:clamp(10px,2.7vw,12px);
+    line-height:1.35;
+    white-space:normal;
+    overflow-wrap:anywhere;
+  }
+  .scope :global(.my-squad-shell) :global(.picker-player)>:global(.picker-value):global(.xfp){
+    grid-column:3;grid-row:1;
+    align-self:center;
+    justify-self:end;
+    text-align:right;
+    font-size:clamp(16px,4vw,20px);
+    line-height:1.15;
+    overflow:visible;
+    color:#56DEB9;
+  }
+  .scope :global(.my-squad-shell) :global(.picker-player)>:global(.picker-value):global(.xfp):global(.active){
+    font-size:clamp(16px,4vw,20px);
+    color:#56DEB9;
+  }
+  .scope :global(.my-squad-shell) :global(.picker-player)>:global(.picker-value):global(.xfp)::after{
+    content:"xFP";
+    display:block;
+    padding-top:3px;
+    color:#A9D6CB;
+    font-size:10px;
+    font-weight:750;
+  }
+  .scope :global(.my-squad-shell) :global(.picker-player)>:global(.picker-value):global(.price){
+    grid-column:2;grid-row:2;
+    justify-self:start;
+    align-self:start;
+    text-align:left;
+    font-size:11px;
+    font-weight:750;
+    color:#C7D6E5;
+  }
+  .scope :global(.my-squad-shell) :global(.picker-player)>:global(.picker-value):global(.price)::before{
+    content:"Fiyat ";
+    color:#97B0C6;
+    font-weight:650;
+  }
+  .scope :global(.my-squad-shell) :global(.picker-player)>:global(.picker-value):global(.points){
+    grid-column:3;grid-row:2;
+    justify-self:end;
+    align-self:start;
+    text-align:right;
+    font-size:11px;
+    color:#C7D6E5;
+  }
+  .scope :global(.my-squad-shell) :global(.picker-player)>:global(.picker-value):global(.points)::after{
+    content:" puan";
+    color:#97B0C6;
+    font-weight:650;
+  }
+  .scope :global(.my-squad-shell) :global(.picker-player)>button{
+    grid-column:4;grid-row:1/3;
+    width:42px;min-width:42px;
+    height:42px;min-height:42px;
+    justify-self:end;
+    align-self:center;
+  }
+}
+/* On very narrow devices give the name more width by reducing side spacing. */
+@media(max-width:380px){
+  .scope :global(.my-squad-shell) :global(.picker-player){
+    grid-template-columns:32px minmax(0,1fr) 57px 38px;
+    column-gap:6px;
+    padding-inline:7px;
+  }
+  .scope :global(.my-squad-shell) :global(.picker-player)>:global(.picker-shirt-wrap){width:32px}
+  .scope :global(.my-squad-shell) :global(.picker-player) :global(.fantasy-shirt):global(.tiny){
+    width:27px;height:32px;
+  }
+  .scope :global(.my-squad-shell) :global(.picker-player)>button{
+    width:38px;min-width:38px;
+    height:40px;min-height:40px;
+  }
+  .scope :global(.my-squad-shell) :global(.picker-player) :global(.picker-copy)>b{
+    font-size:12px;
+  }
+}
