@@ -57,6 +57,27 @@ try{
         const response=await page.goto(BASE+path,{waitUntil:'domcontentloaded',timeout:25000})
         record.status=response?.status()||null
         await page.waitForTimeout(350)
+        // The real squad picker is member-only. Render a synthetic fixture with
+        // the exact production DOM classes and difficult long names if needed.
+        // This tests actual CSS at each viewport without bypassing authentication.
+        if(path==='/squad'){
+          record.synthetic=await page.evaluate(()=>{
+            if(document.querySelector('.picker-player-v3'))return false
+            const host=document.createElement('section')
+            host.className='my-squad-shell'
+            host.setAttribute('data-audit-fixture','true')
+            host.style.cssText='width:100%;margin:16px auto;padding:8px;max-width:860px'
+            const names=[
+              ['Mohamed Salah Hamed Mahrous Ghaly','Trabzonspor · OS · vs Eyüpspor (Ev)','12.0m','96 puan','8.05',true],
+              ['Franco Daryl Tongya Heubang','Gençlerbirliği · OS · vs Gaziantep (Ev)','5.0m','45 puan','6.53',false],
+              ['Abdülkerim Bardakcı','Galatasaray · DEF · vs Samsunspor (Ev) · 1 maç cezalı','5.5m','44 puan','0.00',false]
+            ]
+            const safe=s=>s.replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;')
+            host.innerHTML='<aside class="player-picker"><div class="picker-table-head"><span class="picker-shirt-head"></span>'+['Oyuncu','Fiyat','xFP','Puan'].map(t=>'<button type="button">'+t+'</button>').join('')+'<span class="picker-action-head"></span></div><div class="picker-list">'+names.map(([name,meta,price,points,xfp,chosen])=>'<div class="picker-player picker-player-v3 '+(chosen?'chosen':'')+'"><div class="picker-player-content"><div class="picker-player-identity"><div class="picker-shirt-wrap"><span class="fantasy-shirt tiny OS"><i>OS</i></span></div><div class="picker-copy"><b>'+safe(name)+'</b><small class="squad-fixture-meta">'+safe(meta)+'</small></div></div><div class="picker-player-facts"><span class="picker-value price">'+safe(price)+'</span><span class="picker-fact-divider">•</span><span class="picker-value points">'+safe(points)+'</span></div></div><div class="picker-value xfp"><strong>'+safe(xfp)+'</strong><small>xFP</small></div><button class="'+(chosen?'picker-remove-player':'picker-add-player')+'" type="button">'+(chosen?'−':'+')+'</button></div>').join('')+'</div></aside>'
+            document.querySelector('main')?.appendChild(host)
+            return true
+          })
+        }
         const data=await page.evaluate(()=>{
           const viewportWidth=document.documentElement.clientWidth
           const body=document.body
