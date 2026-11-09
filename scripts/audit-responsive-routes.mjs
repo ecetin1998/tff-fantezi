@@ -22,7 +22,7 @@ const out='artifacts/responsive-audit'
 await mkdir(out,{recursive:true})
 
 let logs=''
-const server=spawn('npm',['start','--','-p',String(PORT)],{
+const server=spawn(process.execPath,['node_modules/next/dist/bin/next','start','-p',String(PORT)],{
   env:{
     ...process.env,
     SCOUT_OFFLINE_BUILD:'1',
@@ -56,9 +56,9 @@ try{
       const page=await context.newPage()
       const record={width,path,status:null,overflow:0,suspectCount:0,suspects:[],pickerCount:0,pickerCollisions:[],error:null}
       try{
-        const response=await page.goto(BASE+path,{waitUntil:'domcontentloaded',timeout:25000})
+        const response=await page.goto(BASE+path,{waitUntil:'domcontentloaded',timeout:12000})
         record.status=response?.status()||null
-        await page.waitForTimeout(350)
+        await page.waitForTimeout(180)
         // The real squad picker is member-only. Render a synthetic fixture with
         // the exact production DOM classes and difficult long names if needed.
         // This tests actual CSS at each viewport without bypassing authentication.
@@ -115,7 +115,7 @@ try{
         record.pickerCollisions=data.collisions
         record.pickerCount=data.pickerCount
         const suffix=path==='/'?'home':path.replaceAll('/','-').replace(/^-/, '')
-        await page.screenshot({path:out+'/'+width+'-'+suffix+'.png',fullPage:true,animations:'disabled'})
+        await page.screenshot({path:out+'/'+width+'-'+suffix+'.png',fullPage:width===390&&critical.includes(path),animations:'disabled',timeout:12000})
       }catch(e){
         record.error=String(e?.message||e).slice(0,280)
       }finally{
@@ -128,6 +128,8 @@ try{
 }finally{
   await browser?.close().catch(()=>{})
   server.kill('SIGTERM')
+  server.stdout?.destroy()
+  server.stderr?.destroy()
 }
 const criticalIssues=all.filter(x=>x.overflow>4||x.pickerCollisions.length>0||x.error)
 const report={
