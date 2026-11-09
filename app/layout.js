@@ -5,10 +5,11 @@ import dataViews from '@/components/DataViews.module.css'
 import managerCards from '@/components/ManagerCards.module.css'
 import brandTheme from '@/components/BrandTheme.module.css'
 import skyBlueTheme from '@/components/SkyBlueTheme.module.css'
+import layoutAudit from '@/components/LayoutAudit.module.css'
 import Nav from '@/components/Nav'
 import JsonLd from '@/components/JsonLd'
 
-const cssScopes=[siteShell.scope,premiumViews.scope,dataViews.scope,managerCards.scope,brandTheme.scope,skyBlueTheme.scope].join(' ')
+const cssScopes=[siteShell.scope,premiumViews.scope,dataViews.scope,managerCards.scope,brandTheme.scope,skyBlueTheme.scope,layoutAudit.scope].join(' ')
 
 const siteUrl=process.env.NEXT_PUBLIC_SITE_URL||'https://fanteziligrehberi.com'
 export const metadata={
