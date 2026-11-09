@@ -3,6 +3,8 @@
  * and player picker card collisions. Runs in a GitHub-hosted Chromium browser.
  * Logged-in-only sections require a separate authenticated visual QA run.
  */
+// The dedicated audit workflow installs Playwright after the normal CI lint stage.
+// eslint-disable-next-line import/no-unresolved
 import {chromium} from 'playwright'
 import {spawn} from 'node:child_process'
 import {mkdir,writeFile} from 'node:fs/promises'
