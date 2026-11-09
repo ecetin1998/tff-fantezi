@@ -337,3 +337,60 @@
   :global(body).scope{padding-bottom:calc(100px + env(safe-area-inset-bottom))}
   .scope footer{padding-bottom:calc(96px + env(safe-area-inset-bottom))}
 }
+
+
+/* iPhone SE / narrow-device header: brand and actions must share the viewport. */
+@media(max-width:380px){
+  .scope :global(.topbar){
+    width:100%;
+    max-width:100%;
+    min-width:0;
+    gap:6px;
+    padding-inline:8px;
+    box-sizing:border-box;
+  }
+  .scope :global(.topbar) :global(.brand){
+    flex:1 1 auto;
+    min-width:0;
+    gap:6px;
+  }
+  .scope :global(.topbar) :global(.brand-mark){
+    flex:0 0 32px;
+    width:32px;
+    height:32px;
+    font-size:13px;
+  }
+  .scope :global(.topbar) :global(.brand-copy){
+    flex:1 1 auto;
+    min-width:0;
+    overflow:hidden;
+  }
+  .scope :global(.topbar) :global(.brand-copy) b{
+    display:block;
+    font-size:12.5px;
+    line-height:1.2;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .scope :global(.topbar) :global(.nav-actions){
+    display:flex;
+    flex:0 0 auto;
+    min-width:0;
+    gap:4px;
+  }
+  .scope :global(.topbar) :global(.global-player-search-trigger),
+  .scope :global(.topbar) :global(.mobile-menu-trigger){
+    width:32px;
+    min-width:32px;
+    height:34px;
+    padding:5px;
+  }
+  .scope :global(.topbar) :global(.pro-btn){
+    min-width:0;
+    min-height:34px;
+    padding:6px 7px;
+    font-size:9px;
+    white-space:nowrap;
+  }
+}
