@@ -394,3 +394,88 @@
     white-space:nowrap;
   }
 }
+
+
+/* Full-site audit fixes: iPhone 360px topbar + supporting-copy contrast. */
+.scope :global(.projection-legend),
+.scope :global(.table-summary),
+.scope :global(.player-table-note){
+  color:#294C69;
+  background:rgba(253,253,254,.92);
+  border:1px solid #C6DFEF;
+  border-radius:11px;
+  padding:10px 12px;
+  line-height:1.5;
+}
+.scope :global(.projection-legend) b,
+.scope :global(.table-summary) b{color:#105C92}
+.scope :global(.access-gate-actions) :global(.cta){
+  background:#FF3D17;
+  border-color:#FF3D17;
+  color:#FFFFFF;
+  box-shadow:0 7px 18px rgba(226,65,26,.16);
+}
+.scope :global(.access-gate-actions) :global(.cta):hover{
+  background:#E93610;
+  border-color:#E93610;
+  color:#FFFFFF;
+}
+@media(max-width:380px){
+  /* Old navigation imposed min-width:max-content on .brand;
+     it caused a measured 21px document overflow at 360px. */
+  .scope :global(.topbar){
+    min-width:0;
+    max-width:100%;
+    padding-inline:8px;
+    gap:5px;
+  }
+  .scope :global(.topbar) :global(.brand){
+    flex:1 1 auto;
+    min-width:0;
+    gap:6px;
+  }
+  .scope :global(.topbar) :global(.brand-mark){
+    width:33px;
+    min-width:33px;
+    height:34px;
+    font-size:15px;
+  }
+  .scope :global(.topbar) :global(.brand-copy){
+    min-width:0;
+    max-width:100%;
+    overflow:hidden;
+  }
+  .scope :global(.topbar) :global(.brand-copy) b{
+    display:block;
+    max-width:100%;
+    font-size:12px;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .scope :global(.topbar) :global(.nav-actions){
+    display:flex;
+    flex:0 0 auto;
+    gap:4px;
+    min-width:0;
+  }
+  .scope :global(.topbar) :global(.global-player-search-trigger){
+    width:32px;
+    min-width:32px;
+    height:34px;
+    padding:0;
+  }
+  .scope :global(.topbar) :global(.pro-btn){
+    min-height:34px;
+    padding:7px 8px;
+    border-radius:9px;
+    font-size:9.5px;
+  }
+  .scope :global(.topbar) :global(.mobile-menu-trigger){
+    width:34px;
+    min-width:34px;
+    height:34px;
+    padding:0;
+    border-radius:9px;
+  }
+}
