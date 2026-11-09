@@ -26,10 +26,10 @@ test('layout guard loaded after Sky Blue theme on every route',()=>{
   assert.match(css,/picker-value\):global\(\.xfp\)::after\{\s*content:none !important/)
 })
 
-test('mobile sorter is a wrap-safe flex control instead of legacy positioned columns',()=>{
-  assert.match(css,/\.picker-table-head\)\{\s*display:flex;/)
-  assert.match(css,/flex-wrap:wrap;/)
-  assert.match(css,/picker-table-head\)>button\{[\s\S]*?flex:1 1 72px/)
+test('mobile sorter has four equal buttons on one row',()=>{
+  assert.match(css,/\.picker-table-head\)\{\s*display:grid;/)
+  assert.match(css,/grid-template-columns:repeat\(4,minmax\(0,1fr\)\) !important/)
+  assert.match(css,/picker-table-head\)>button\{[\s\S]*?min-width:0/)
   assert.match(css,/grid-template-columns:minmax\(0,1fr\) 48px 34px !important/)
 })
 
