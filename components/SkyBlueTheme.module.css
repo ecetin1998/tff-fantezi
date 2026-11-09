@@ -1,0 +1,1116 @@
+/*
+ * Fantezi Lig Rehberi — SKY BLUE × CLOUD WHITE × VERMILION (2026-11-09)
+ * Light, energetic, airy replacement for Midnight Pitch.
+ * IMPORTANT: Preserve club shirts, performance semantics, scoring, data and
+ * playing-field colors. This is presentation-only and is loaded LAST.
+ */
+:global(:root).scope{
+  --sky:#0099FF;
+  --sky-deep:#006FCA;
+  --sky-text:#006DBA;
+  --sky-soft:#E8F6FF;
+  --cloud:#FDFDFE;
+  --paper:#F3F9FD;
+  --vermilion:#FF3D17;
+  --vermilion-hover:#E93610;
+  --ink:#172744;
+  --ink-soft:#435B76;
+  --steel:#5D718C;
+  --border-sky:#C9DFEF;
+  --brand-ice:#FDFDFE;
+  --brand-petrol:var(--ink);
+  --brand-lime:var(--sky);
+  --brand-lime-hover:var(--sky-deep);
+  --brand-paper:var(--paper);
+  --brand-surface:var(--cloud);
+  --brand-line:var(--border-sky);
+  --brand-muted:var(--steel);
+  --brand-soft:var(--sky-soft);
+  --bg:#EDF8FF;
+  --panel:var(--cloud);
+  --panel2:var(--paper);
+  --line:var(--border-sky);
+  --text:var(--ink);
+  --muted:var(--steel);
+  --green:var(--sky);
+  --green2:var(--sky-deep);
+  --cyan:var(--sky);
+  --violet:#6C75DA;
+  --amber:#D6A21B;
+  --premium-bg:var(--cloud);
+  --premium-surface:var(--cloud);
+  --premium-surface-soft:var(--paper);
+  --premium-line:var(--border-sky);
+  --premium-line-strong:#AACBDF;
+  --premium-text:var(--ink);
+  --premium-muted:var(--steel);
+  --premium-faint:#7A91AA;
+  --premium-accent:var(--sky-text);
+  --premium-accent-2:#3E79BE;
+  --premium-shadow:0 12px 34px rgba(31,105,155,.09);
+  --premium-shadow-hover:0 18px 42px rgba(31,105,155,.16);
+  color-scheme:light;
+}
+:global(html).scope{background:#FDFDFE}
+:global(body).scope{
+  background:
+    radial-gradient(ellipse 42% 360px at 86% 360px,rgba(236,252,255,.55),transparent 100%),
+    linear-gradient(180deg,#0099FF 0px,#42B8FF 255px,#B7E6FF 530px,#E6F5FF 760px,#F3F9FD 990px,#FDFDFE 1260px);
+  background-repeat:no-repeat;
+  background-color:#FDFDFE;
+  color:var(--ink);
+}
+.scope main{color:var(--ink)}
+.scope h1,.scope h2,.scope h3{color:var(--ink)}
+.scope p,.scope :global(.muted),.scope :global(.footnote){color:var(--ink-soft)}
+.scope footer{border-color:var(--border-sky);color:var(--steel)}
+.scope footer a{color:var(--sky-text)}
+.scope footer a:hover{color:var(--vermilion)}
+.scope :global(.eyebrow),.scope :global(.sortmark),
+.scope :global(.home-guide-link),.scope :global(.home-feature-card)>strong,
+.scope :global(.hub-card) i{color:var(--sky-text)}
+.scope :global(.section-title) h1,
+.scope :global(.section-title) h2,
+.scope :global(.home-section-head) h2,
+.scope :global(.card) h2,.scope :global(.card) h3,
+.scope :global(.team-card-head) h2,
+.scope :global(.player-hero-main) h1{color:var(--ink)}
+
+/* PRIMARY BRAND: Sky Blue header + white typography + vermilion PRO button. */
+.scope :global(.topbar){
+  background:rgba(0,153,255,.95);
+  border-bottom:1px solid rgba(255,255,255,.28);
+  box-shadow:0 8px 24px rgba(0,107,195,.14);
+  backdrop-filter:blur(18px) saturate(1.2);
+}
+.scope :global(.brand-mark){
+  background:var(--cloud);
+  color:var(--sky-text);
+  box-shadow:0 5px 15px rgba(0,75,147,.14);
+}
+.scope :global(.brand-copy) b{color:#FFFFFF}
+.scope :global(.brand-copy) small{color:#E2F5FF}
+.scope :global(.desktop-nav)>a,
+.scope :global(.desktop-more)>button,
+.scope :global(.topbar) :global(.desktop-nav)>a,
+.scope :global(.topbar) :global(.desktop-more)>button{color:#FFFFFF}
+.scope :global(.desktop-nav)>a:hover,
+.scope :global(.desktop-more)>button:hover,
+.scope :global(.desktop-nav) :global(.nav-active),
+.scope :global(.desktop-more)>button:global(.nav-active){
+  background:rgba(255,255,255,.17);
+  border-color:rgba(255,255,255,.30);
+  color:#FFFFFF;
+}
+.scope :global(.desktop-more-panel),
+.scope :global(.mobile-menu-panel),
+.scope :global(.compact-mobile-menu-panel){
+  background:#FFFFFF;
+  border-color:var(--border-sky);
+  box-shadow:0 18px 38px rgba(15,81,137,.18);
+}
+.scope :global(.desktop-more-panel) a,
+.scope :global(.mobile-menu-panel) a,
+.scope :global(.mobile-menu-panel) button,
+.scope :global(.mobile-menu-row),
+.scope :global(.topbar) :global(.desktop-more-panel) a{color:var(--ink)}
+.scope :global(.desktop-more-panel) a:hover,
+.scope :global(.desktop-more-panel) a:global(.nav-active),
+.scope :global(.mobile-menu-panel) a:hover,
+.scope :global(.mobile-menu-row):global(.active){
+  background:#E8F5FF;
+  color:var(--sky-text);
+}
+.scope :global(.mobile-menu-trigger){
+  background:rgba(255,255,255,.16);
+  color:#FFFFFF;
+  border:1px solid rgba(255,255,255,.45);
+}
+.scope :global(.mobile-menu-trigger)>span{background:#FFFFFF}
+.scope :global(.topbar) :global(.ghost-btn),
+.scope :global(.topbar) :global(.my-team-btn){
+  background:#FFFFFF;
+  border:1px solid #D4EBFF;
+  color:var(--sky-text);
+  box-shadow:none;
+}
+.scope :global(.topbar) :global(.ghost-btn):hover,
+.scope :global(.topbar) :global(.my-team-btn):hover{
+  background:#EAF7FF;
+  color:#005A9D;
+  border-color:#FFFFFF;
+}
+/* Pro uses vermilion for a clear third hue in the header. */
+.scope :global(.topbar) :global(.pro-btn),
+.scope :global(.pro-btn){
+  color:#FFFFFF;
+  background:var(--vermilion);
+  border:1px solid var(--vermilion);
+  box-shadow:0 8px 21px rgba(225,65,24,.22);
+}
+.scope :global(.topbar) :global(.pro-btn):hover,
+.scope :global(.pro-btn):hover{
+  color:#FFFFFF;
+  background:var(--vermilion-hover);
+  border-color:var(--vermilion-hover);
+}
+
+/* Action vocabulary: primary orange-red; secondary white + blue border. */
+.scope :global(.cta),
+.scope :global(.multi-filter-done){
+  background:var(--vermilion);
+  border:1px solid var(--vermilion);
+  color:#FFFFFF;
+  box-shadow:0 8px 20px rgba(255,61,23,.18);
+}
+.scope :global(.cta):hover,
+.scope :global(.multi-filter-done):hover{
+  background:var(--vermilion-hover);
+  border-color:var(--vermilion-hover);
+  color:#FFFFFF;
+}
+.scope :global(.secondary),
+.scope :global(.ghost-btn),
+.scope :global(.my-team-btn){
+  background:var(--cloud);
+  border:1px solid #B9D7ED;
+  color:var(--sky-text);
+  box-shadow:none;
+}
+.scope :global(.secondary):hover,
+.scope :global(.ghost-btn):hover,
+.scope :global(.my-team-btn):hover{
+  background:#EAF7FF;
+  color:#005DAB;
+  border-color:#83BDE5;
+}
+.scope :global(button):focus-visible,
+.scope :global(a):focus-visible,
+.scope :global(input):focus-visible,
+.scope :global(select):focus-visible,
+.scope :global(textarea):focus-visible{
+  outline:2px solid #006FC5;
+  outline-offset:3px;
+}
+.scope :global(button:disabled){opacity:.58;cursor:not-allowed}
+.scope :global(.pro-label),.scope :global(.plan){
+  color:#B63A22;
+  background:#FFF0E9;
+  border-color:#FFD2C7;
+}
+
+/* Elevated white cards; across players / matches / teams / squad / billing. */
+.scope :global(.card),
+.scope :global(.section-title),
+.scope :global(.home-model-guide),
+.scope :global(.home-feature-card),
+.scope :global(.home-highlight-grid) :global(.spotlight-card),
+.scope :global(.team-card),
+.scope :global(.profile-card),
+.scope :global(.auth-card),
+.scope :global(.price-card),
+.scope :global(.player-profile-head),
+.scope :global(.recommendation-preview-card){
+  background:rgba(253,253,254,.98);
+  border-color:var(--border-sky);
+  color:var(--ink);
+  box-shadow:var(--premium-shadow);
+}
+.scope :global(.card):hover,
+.scope :global(.home-feature-card):hover{border-color:#99C8E9}
+.scope :global(.section-title){
+  background:rgba(253,253,254,.98);
+  border:1px solid #CDE5F3;
+}
+.scope :global(.section-title)>:global(.muted){
+  background:#EDF7FE;
+  color:var(--steel);
+  border-color:#D7E9F6;
+}
+.scope :global(.section-title)>div>p,
+.scope :global(.section-title) p,
+.scope :global(.home-section-head)>p,
+.scope :global(.home-feature-card)>div>p,
+.scope :global(.home-guide-copy) p{color:var(--ink-soft)}
+
+/* HOME: not another dark theme; blue atmosphere is the actual background. */
+.scope :global(.home-intro-layout){
+  display:grid;
+  grid-template-columns:minmax(0,1fr);
+  gap:18px;
+  margin-bottom:30px;
+}
+.scope :global(.home-intro-hero){
+  position:relative;
+  width:100%;
+  min-height:350px;
+  padding:clamp(23px,4.3vw,54px);
+  overflow:hidden;
+  border:1px solid rgba(255,255,255,.38);
+  border-radius:24px;
+  background:
+    radial-gradient(ellipse 36% 75% at 91% 90%,rgba(223,248,255,.39),transparent 80%),
+    radial-gradient(circle 180px at 95% 17%,rgba(255,255,255,.17),transparent 95%),
+    linear-gradient(132deg,#008CFA 0%,#16A6FE 52%,#66CBFF 100%);
+  color:#FFFFFF;
+  box-shadow:0 22px 56px rgba(0,109,189,.23);
+}
+.scope :global(.home-intro-hero):before{
+  background:radial-gradient(circle,rgba(255,255,255,.2),transparent 70%);
+  box-shadow:none;
+}
+.scope :global(.home-intro-hero) h1{
+  color:#FFFFFF;
+  font-size:clamp(32px,4.7vw,65px);
+  line-height:1.08;
+  letter-spacing:-.042em;
+  max-width:970px;
+  text-wrap:balance;
+}
+.scope :global(.home-intro-hero) h1 span{color:#FFFFFF}
+.scope :global(.home-intro-hero)>p{
+  color:#F0FAFF;
+  font-size:clamp(12px,1.25vw,16px);
+  line-height:1.55;
+  max-width:760px;
+}
+.scope :global(.home-intro-hero) :global(.eyebrow),
+.scope :global(.home-intro-hero) :global(.home-hero-kicker)>span:first-child{color:#FFFFFF}
+.scope :global(.home-live-pill){
+  background:rgba(255,255,255,.19);
+  border-color:rgba(255,255,255,.50);
+  color:#FFFFFF;
+}
+.scope :global(.home-intro-actions){
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  width:min(850px,100%);
+  gap:10px;
+  margin-top:24px;
+}
+.scope :global(.home-intro-actions)>:global(.home-cta-btn){
+  box-sizing:border-box;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:100%;
+  min-width:0;
+  min-height:49px;
+  padding:11px 14px;
+  border-radius:12px;
+  font-size:12px;
+  font-weight:850;
+  line-height:1.3;
+  text-align:center;
+  white-space:normal;
+  text-decoration:none;
+}
+.scope :global(.home-intro-hero) :global(.home-intro-actions)>:global(a.home-cta-primary),
+.scope :global(.home-intro-hero) :global(.home-intro-actions)>:global(a.home-cta-primary:visited){
+  background:var(--vermilion);
+  border:1px solid var(--vermilion);
+  color:#FFFFFF!important;
+  text-shadow:none;
+}
+.scope :global(.home-intro-hero) :global(.home-intro-actions)>:global(a.home-cta-primary:hover){
+  background:var(--vermilion-hover);
+  border-color:var(--vermilion-hover);
+  color:#FFFFFF!important;
+}
+.scope :global(.home-intro-hero) :global(.home-intro-actions)>:global(a.home-cta-outline),
+.scope :global(.home-intro-hero) :global(.home-intro-actions)>:global(a.home-cta-outline:visited){
+  background:#FFFFFF;
+  border:1px solid #FFFFFF;
+  color:var(--sky-text)!important;
+  text-shadow:none;
+}
+.scope :global(.home-intro-hero) :global(.home-intro-actions)>:global(a.home-cta-outline:hover),
+.scope :global(.home-intro-hero) :global(.home-intro-actions)>:global(a.home-cta-outline:focus-visible){
+  color:#004F93!important;
+  background:#E8F6FF;
+  border-color:#FFFFFF;
+  text-shadow:none;
+}
+.scope :global(.home-hero-mini){
+  position:relative;
+  inset:auto;
+  width:min(950px,100%);
+  margin-top:27px;
+  padding-top:0;
+}
+.scope :global(.home-hero-mini)>div{
+  background:rgba(255,255,255,.18);
+  border:1px solid rgba(255,255,255,.38);
+  box-shadow:none;
+}
+.scope :global(.home-hero-mini) b{color:#FFFFFF}
+.scope :global(.home-hero-mini) span{color:#ECF9FF}
+.scope :global(.home-highlight-grid){
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:12px;
+}
+.scope :global(.home-highlight-grid) :global(.spotlight-card){
+  min-height:145px;
+  background:rgba(253,253,254,.97);
+  border:1px solid #D8EAF5;
+  border-top:3px solid #0099FF;
+  box-shadow:0 11px 29px rgba(11,97,151,.10);
+}
+.scope :global(.home-highlight-grid) :global(.spotlight-card)>span,
+.scope :global(.home-highlight-grid) :global(.spotlight-card)>small{color:var(--steel)}
+.scope :global(.home-highlight-grid) :global(.spotlight-card)>b{color:var(--ink)}
+.scope :global(.home-highlight-grid) :global(.spotlight-card)>strong{color:var(--sky-text)}
+.scope :global(.home-highlight-grid) :global(.spotlight-card)>strong em{color:var(--ink-soft)}
+.scope :global(.home-status-ready):global(.fresh){border-top-color:#13B39B!important}
+.scope :global(.home-feature-section){margin-block:25px}
+.scope :global(.home-feature-grid){gap:12px}
+.scope :global(.home-feature-card){
+  border:1px solid var(--border-sky);
+  background:linear-gradient(145deg,#FFFFFF,#F0F8FF);
+}
+.scope :global(.home-feature-card):after{background:rgba(0,153,255,.07)}
+.scope :global(.home-feature-no){
+  background:#E4F5FF;
+  color:var(--sky-text);
+  border-color:#B6DFFD;
+}
+.scope :global(.home-feature-card)>div>b{color:var(--ink)}
+.scope :global(.home-feature-card)>strong{color:var(--sky-text)}
+.scope :global(.home-guide-copy) h2 span,
+.scope :global(.home-guide-metrics) b{color:var(--sky-text)}
+.scope :global(.home-guide-metrics)>div,
+.scope :global(.home-model-guide){border-color:var(--border-sky);background:#FDFDFE}
+.scope :global(.home-guide-metrics) span{color:var(--ink)}
+.scope :global(.home-guide-metrics) small{color:var(--steel)}
+
+/* FILTERS + TABLES: pure white, pale blue sorting, dark ink. */
+.scope :global(.filters),
+.scope :global(.picker-filters),
+.scope :global(.team-roster-tools),
+.scope :global(.availability-filters){
+  background:#FFFFFF;
+  border-color:var(--border-sky);
+  color:var(--ink);
+}
+.scope :global(.filters) input,
+.scope :global(.filters) select,
+.scope :global(.picker-filters) input,
+.scope :global(.picker-filters) select,
+.scope :global(.team-roster-tools) input,
+.scope :global(.team-roster-tools) select,
+.scope :global(.availability-filters) input,
+.scope :global(.availability-filters) select,
+.scope :global(.auth-form) input,
+.scope :global(.auth-resend) input,
+.scope :global(.squad-formation-control) select,
+.scope :global(.multi-filter-trigger),
+.scope :global(.multi-filter-panel),
+.scope :global(.multi-filter-search),
+.scope :global(.global-player-search-panel),
+.scope :global(.mobile-sort-select){
+  background:#FFFFFF;
+  color:var(--ink);
+  border-color:#BED8EB;
+  color-scheme:light;
+}
+.scope :global(input)::placeholder,
+.scope :global(textarea)::placeholder{color:#7288A2}
+.scope :global(.filters) input:focus,
+.scope :global(.filters) select:focus,
+.scope :global(.picker-filters) input:focus,
+.scope :global(.picker-filters) select:focus{
+  border-color:var(--sky);
+  box-shadow:0 0 0 3px rgba(0,153,255,.12);
+}
+.scope :global(.multi-filter-panel){
+  box-shadow:0 18px 40px rgba(12,96,150,.16);
+}
+.scope :global(.multi-filter-panel-top),
+.scope :global(.multi-filter-empty){color:var(--steel)}
+.scope :global(.multi-filter-option){color:var(--ink)}
+.scope :global(.multi-filter-option):hover,
+.scope :global(.multi-filter-option.selected),
+.scope :global(.multi-filter.is-active-filter) :global(.multi-filter-trigger){
+  background:#E8F6FF;
+  color:#005EAA;
+  border-color:#A8D8F6;
+}
+.scope :global(.multi-filter-option) input[type="checkbox"]{accent-color:var(--sky)}
+.scope :global(.multi-filter-footer){
+  background:#F4F9FD;
+  border-color:var(--border-sky);
+}
+.scope :global(.multi-filter-reset),
+.scope :global(.multi-filter-footer) button{color:var(--sky-text)}
+.scope :global(.multi-filter-footer) :global(.multi-filter-done){
+  background:var(--sky);
+  border-color:var(--sky);
+  color:#FFFFFF;
+}
+.scope :global(.table-wrap),
+.scope :global(.desktop-player-table){
+  background:#FFFFFF;
+  border-color:var(--border-sky);
+  color:var(--ink);
+}
+.scope :global(.table-wrap) :is(th,td){border-color:#DAE9F3}
+.scope :global(.table-wrap) :is(th,thead th){
+  background:#EBF6FE;
+  border-color:#D1E5F3;
+  color:#3E6281;
+}
+.scope :global(.table-wrap) tbody td{color:var(--ink);background:transparent}
+.scope :global(.table-wrap) tbody td b{color:var(--ink)}
+.scope :global(.table-wrap) tbody tr:nth-child(even) td{background:rgba(0,153,255,.022)}
+.scope :global(.table-wrap) tbody tr:hover td{background:rgba(0,153,255,.075)}
+.scope :global(.table-wrap) :global(.cell-note){color:var(--steel)}
+.scope :global(.table-wrap) :global(.player-link),
+.scope :global(.table-wrap) :global(.team-table-link){color:var(--ink)}
+.scope :global(.table-wrap)::-webkit-scrollbar-track{background:#F1F7FC}
+.scope :global(.table-wrap)::-webkit-scrollbar-thumb{background:#ADCAE0;border-color:#F1F7FC}
+.scope :global(.pagination-bar) button{
+  background:#FFFFFF;
+  color:var(--sky-text);
+  border-color:#BCD8EB;
+}
+
+/* Player mobile cards: sky scoring on white; team color remains on shirts. */
+.scope :global(.mobile-player-card),
+.scope :global(.weekly-mobile-card),
+.scope :global(.team-analysis-mobile-card){
+  background:linear-gradient(155deg,#FFFFFF,#F5FAFE);
+  border-color:#D3E5F1;
+  color:var(--ink);
+}
+.scope :global(.mobile-player-name) b,
+.scope :global(.weekly-mobile-player-name) b{color:var(--ink)}
+.scope :global(.mobile-player-name) span,
+.scope :global(.mobile-fixture),
+.scope :global(.weekly-mobile-player-name) small,
+.scope :global(.mobile-xfp) em{color:var(--steel)}
+.scope :global(.mobile-xfp){
+  background:#E4F5FF;
+  border:1px solid #B6DDFC;
+  color:var(--sky-text);
+  box-shadow:none;
+}
+.scope :global(.mobile-xfp) strong,
+.scope :global(.weekly-mobile-head)>strong{color:var(--sky-text)}
+.scope :global(.mobile-xfp) small{color:#527696}
+.scope :global(.mobile-player-metrics)>div,
+.scope :global(.weekly-mobile-meta) span{
+  background:#EFF7FD;
+  border:1px solid #D6E7F3;
+}
+.scope :global(.mobile-player-metrics) span{color:var(--steel)}
+.scope :global(.mobile-player-metrics) b{color:var(--ink)}
+.scope :global(.mobile-card-badges) :global(.weekly-rank){
+  background:#E7F4FF;
+  color:var(--sky-text);
+  border-color:#B5DDF7;
+}
+
+/* Match model: a single coherent light surface incl. 4 xG/CS metrics. */
+.scope :global(.modern-match-card),
+.scope :global(.match-analysis-card){
+  background:#FFFFFF;
+  border-color:#CDE2F2;
+  color:var(--ink);
+}
+.scope :global(.match-analysis-card) :global(.match-card-top),
+.scope :global(.match-analysis-card) :global(.match-team-block)>span:first-child{color:var(--steel)}
+.scope :global(.match-analysis-card) :global(.match-date-label) b{
+  background:#EAF5FE;
+  color:#235579;
+  border:1px solid #C1E0F2;
+}
+.scope :global(.match-analysis-card) :global(.match-date-label) em{color:var(--sky-text)}
+.scope :global(.match-analysis-card) :global(.match-team-identity) b,
+.scope :global(.match-analysis-card) :global(.match-team-link) b{color:var(--ink)}
+.scope :global(.match-analysis-card) :global(.match-team-meta) small{color:var(--steel)}
+.scope :global(.match-analysis-card) :global(.fantasy-first-meta)>span,
+.scope :global(.match-analysis-card) :global(.match-fantasy-meta)>span{
+  background:#EFF8FE;
+  border:1px solid #D4E6F3;
+  color:var(--ink);
+  box-shadow:none;
+}
+.scope :global(.match-analysis-card) :global(.fantasy-first-meta)>span:global(.edge){
+  background:#E3F4FF;
+  border-color:#78BBEC;
+}
+.scope :global(.match-analysis-card) :global(.fantasy-first-meta) small,
+.scope :global(.match-analysis-card) :global(.match-fantasy-meta) small{color:#59718C;opacity:1}
+.scope :global(.match-analysis-card) :global(.fantasy-first-meta) b,
+.scope :global(.match-analysis-card) :global(.match-fantasy-meta) b{color:var(--ink)}
+.scope :global(.match-analysis-card) :global(.fantasy-first-meta)>span:global(.edge) b{color:var(--sky-text)}
+.scope :global(.match-analysis-card) :global(.match-team-xfp-side){
+  background:#EDF7FE;
+  border-color:#C9E4F1;
+  color:var(--ink);
+}
+.scope :global(.match-analysis-card) :global(.match-team-xfp-side) small{color:var(--steel)}
+.scope :global(.match-analysis-card) :global(.match-team-xfp-side)>span b{color:var(--sky-text)}
+.scope :global(.match-analysis-card) :global(.match-team-xfp-side)>a b{color:var(--ink)}
+.scope :global(.match-analysis-card) :global(.match-team-xfp-side)>a em{color:var(--sky-text)}
+.scope :global(.match-fantasy-note){
+  background:#EFF7FD;
+  border-color:#D0E4F3;
+  color:var(--ink);
+}
+.scope :global(.match-fantasy-note) p{color:var(--ink-soft)}
+/* The 1/X/2 home/draw/away colors communicate probabilities and are unchanged. */
+
+/* Player detail + team stats. */
+.scope :global(.player-detail-v2){color:var(--ink)}
+.scope :global(.player-detail-v2) :global(.player-hero-score)>strong{color:var(--sky-text)}
+.scope :global(.player-detail-v2) :global(.player-hero-score) span,
+.scope :global(.player-detail-v2) :global(.player-hero-score) small{color:var(--steel)}
+.scope :global(.player-detail-metric-grid)>div,
+.scope :global(.player-attacking-expectation)>div,
+.scope :global(.player-form-strip)>div,
+.scope :global(.team-week-metrics)>div,
+.scope :global(.player-model-note){
+  background:#EFF8FF;
+  border-color:#D4E6F3;
+}
+.scope :global(.player-detail-metric-grid) b,
+.scope :global(.player-attacking-expectation) b,
+.scope :global(.player-form-strip) b,
+.scope :global(.team-week-metrics) b{color:var(--ink)}
+.scope :global(.player-detail-metric-grid) :global(.is-emphasis) b{color:var(--sky-text)}
+.scope :global(.player-detail-v2) :global(.player-detail-metric-grid) :is(span,small),
+.scope :global(.player-detail-v2) :global(.projection-explainer),
+.scope :global(.player-detail-v2) :global(.player-role-explainer),
+.scope :global(.player-detail-v2) :global(.player-model-note) p{color:var(--steel)}
+.scope :global(.player-detail-v2) :global(.player-advanced-details) summary span b{color:var(--ink)}
+.scope :global(.player-advanced-details) summary i{
+  background:#E9F5FE;
+  border-color:#C9E2F2;
+  color:var(--ink);
+}
+.scope :global(.team-roster-xfp),.scope :global(.team-roster-metric),
+.scope :global(.team-roster-player-v3) :global(.team-roster-metric){
+  background:#EAF5FC;
+  border-color:#CDE3F0;
+  color:var(--ink);
+}
+.scope :global(.team-roster-metric) b{color:var(--ink)}
+
+/* Squad recommendations: a green field inside a very LIGHT interface. */
+.scope :global(.unified-squad-card),
+.scope :global(.recommendation-preview-card),
+.scope :global(.manager-card-panel),
+.scope :global(.manager-card-roster-control),
+.scope :global(.manager-card-weekly-read),
+.scope :global(.manager-card-choice){
+  background:#FFFFFF;
+  border-color:#CDDFEE;
+  color:var(--ink);
+}
+.scope :global(.manager-card-panel):global(.active),
+.scope :global(.manager-card-roster-control):global(.active),
+.scope :global(.manager-card-choice):global(.selected){
+  background:#EAF5FF;
+  border-color:#84BCE9;
+  box-shadow:0 9px 28px rgba(0,120,215,.09);
+}
+.scope :global(.manager-card-copy) h3,
+.scope :global(.manager-card-roster-copy) h3,
+.scope :global(.manager-card-choice)>span,
+.scope :global(.manager-card-choice)>b,
+.scope :global(.manager-card-weekly-read)>b{color:var(--ink)}
+.scope :global(.manager-card-choice)>small,
+.scope :global(.manager-card-copy) p,
+.scope :global(.manager-card-weekly-read)>small{color:var(--steel)}
+.scope :global(.manager-card-panel):global(.active) :global(.manager-card-effects)>span,
+.scope :global(.manager-card-roster-control):global(.active) :global(.manager-card-roster-effect)>span,
+.scope :global(.manager-card-effects)>span,
+.scope :global(.manager-card-roster-effect)>span{
+  background:#EBF6FF;
+  border-color:#C4DEEE;
+  color:var(--sky-text);
+}
+.scope :global(.manager-card-select) select{
+  background:#FFFFFF;
+  border-color:#C4DEEE;
+  color:var(--ink);
+}
+.scope :global(.readonly-squad-view) :global(.readonly-squad-head) h2{color:var(--ink)}
+.scope :global(.readonly-squad-view) :global(.readonly-squad-head-right)>span{
+  background:#EDF7FD;
+  border-color:#CDDFEE;
+  color:var(--ink);
+}
+.scope :global(.readonly-squad-view) :global(.readonly-squad-head-right) small{color:var(--steel)}
+.scope :global(.readonly-squad-view) :global(.readonly-squad-head-right) b{color:var(--ink)}
+.scope :global(.readonly-squad-view) :global(.formation-summary-pill){
+  background:#E5F4FF;
+  border-color:#B5DBF7;
+  color:var(--sky-text);
+}
+.scope :global(.readonly-squad-view) :global(.formation-summary-pill) b{color:var(--ink)}
+.scope :global(.readonly-squad-view) :global(.formation-summary-pill) small{color:var(--steel)}
+.scope :global(.my-squad-pitch),
+.scope :global(.readonly-squad-pitch),
+.scope :global(.roster-pitch),
+.scope :global(.fantasy-pitch){
+  background:
+    repeating-linear-gradient(0deg,rgba(255,255,255,.035) 0px,rgba(255,255,255,.035) 52px,transparent 52px,transparent 104px),
+    linear-gradient(145deg,#1C8569,#116B59 72%,#0D564C);
+  border-color:#1D7965;
+}
+/* Field items retain high contrast against actual green grass. */
+.scope :global(.readonly-pitch-player),
+.scope :global(.my-pitch-player),
+.scope :global(.pitch-player){color:#FFFFFF}
+.scope :global(.readonly-pitch-player)>b,
+.scope :global(.my-pitch-player)>b{color:#FFFFFF}
+.scope :global(.readonly-pitch-player)>small,
+.scope :global(.my-pitch-player)>button small{color:#DFF7F0}
+.scope :global(.readonly-bench-zone),
+.scope :global(.unified-squad-list) :global(.readonly-bench-zone),
+.scope :global(.bench-zone){
+  background:#F0F8FE;
+  border:1px solid #D0E4F2;
+  color:var(--ink);
+}
+.scope :global(.readonly-bench-zone) :global(.bench-zone-head) :global(.eyebrow){color:var(--sky-text)}
+.scope :global(.readonly-bench-zone) :global(.bench-zone-head)>span,
+.scope :global(.readonly-bench-zone) :global(.bench-zone-head) b{color:var(--steel)}
+.scope :global(.readonly-bench-player),
+.scope :global(.unified-squad-list) :global(.readonly-bench-player){
+  background:#FFFFFF;
+  border:1px solid #D1E3F1;
+  color:var(--ink);
+  box-shadow:none;
+}
+.scope :global(.readonly-bench-player):hover{
+  background:#E8F5FF;
+  border-color:#95C6E8;
+}
+.scope :global(.readonly-bench-player) :global(.bench-order){
+  background:#E5F3FE;
+  color:var(--sky-text);
+  border-color:#C9E2F3;
+}
+.scope :global(.readonly-bench-player) :global(.bench-copy) b{color:var(--ink)}
+.scope :global(.readonly-bench-player) :global(.bench-copy) small{color:var(--steel)}
+.scope :global(.readonly-bench-player) :global(.bench-copy) :global(.recommend-bench-stats){color:var(--sky-text)}
+.scope :global(.squad-tabs-note) span{
+  background:#EAF5FE;
+  color:#4E6E8B;
+  border-color:#CDDFEE;
+}
+
+/* My Squad: white pool with compact and legible selected state. */
+.scope :global(.my-squad-shell) :global(.squad-stage),
+.scope :global(.my-squad-shell) :global(.player-picker),
+.scope :global(.my-squad-shell) :global(.lineup-workbench),
+.scope :global(.my-squad-shell) :global(.captain-panel){
+  background:#FFFFFF;
+  border-color:#CDDFEE;
+  color:var(--ink);
+}
+.scope :global(.my-squad-shell) :global(.picker-list){background:#FFFFFF}
+.scope :global(.my-squad-shell) :global(.player-picker-head){border-color:#D7E9F5}
+.scope :global(.my-squad-shell) :global(.player-picker-head) h2{color:var(--ink)}
+.scope :global(.my-squad-shell) :global(.player-picker-head)>span{
+  background:#E5F4FF;
+  color:var(--sky-text);
+  border-color:#C2DFF1;
+}
+.scope :global(.my-squad-shell) :global(.picker-table-head){
+  background:#ECF6FE;
+  border-color:#D2E7F5;
+  color:var(--steel);
+}
+.scope :global(.my-squad-shell) :global(.picker-table-head) button{
+  color:#4B6A87;
+  font-size:10px;
+}
+.scope :global(.my-squad-shell) :global(.picker-table-head) button:global(.active),
+.scope :global(.my-squad-shell) :global(.picker-table-head) button:hover{color:var(--sky-text)}
+.scope :global(.my-squad-shell) :global(.picker-player),
+.scope :global(.my-squad-shell) :global(.picker-player):global(.chosen),
+.scope :global(.my-squad-shell) :global(.picker-player):global(.disabled){
+  background:#FFFFFF;
+  color:var(--ink);
+  border:1px solid #D0E1F0;
+  border-left:3px solid #D0E1F0;
+  border-radius:13px;
+  opacity:1;
+  box-shadow:none;
+}
+.scope :global(.my-squad-shell) :global(.picker-player):hover{
+  background:#F1F9FF;
+  border-color:#A4CEEA;
+}
+.scope :global(.my-squad-shell) :global(.picker-player):global(.chosen){
+  background:#EAF6FF;
+  border-color:#AAD5F0;
+  border-left:4px solid var(--sky);
+}
+.scope :global(.my-squad-shell) :global(.picker-player):global(.disabled):not(:global(.chosen)){
+  background:#F8FAFD;
+  color:var(--ink);
+}
+.scope :global(.my-squad-shell) :global(.picker-player) :global(.picker-copy)>b{
+  color:var(--ink);
+  font-size:12px;
+  font-weight:800;
+  line-height:1.25;
+}
+.scope :global(.my-squad-shell) :global(.picker-player) :global(.picker-copy)>small,
+.scope :global(.my-squad-shell) :global(.picker-player) :global(.picker-copy)>small:global(.squad-fixture-meta){
+  color:#58718D;
+  font-size:10px;
+  line-height:1.3;
+  white-space:normal;
+  overflow-wrap:anywhere;
+}
+.scope :global(.my-squad-shell) :global(.picker-player)>:global(.picker-value){
+  color:#415A77;
+  font-size:10px;
+}
+.scope :global(.my-squad-shell) :global(.picker-player)>:global(.picker-value):global(.xfp),
+.scope :global(.my-squad-shell) :global(.picker-player)>:global(.picker-value):global(.xfp):global(.active){
+  color:var(--sky-text);
+  font-size:15px;
+  font-weight:900;
+}
+.scope :global(.my-squad-shell) :global(.picker-player)>button{
+  display:grid;
+  place-items:center;
+  border-radius:10px;
+  padding:0;
+  box-shadow:none;
+  font-size:20px;
+  touch-action:manipulation;
+}
+.scope :global(.my-squad-shell) :global(.picker-player)>button:global(.picker-add-player){
+  background:#E2F5FF;
+  color:var(--sky-text);
+  border:1px solid #99CFF1;
+}
+.scope :global(.my-squad-shell) :global(.picker-player)>button:global(.picker-remove-player){
+  background:#FFF0ED;
+  color:#D13E25;
+  border:1px solid #F6BCB1;
+}
+.scope :global(.my-squad-shell) :global(.picker-player)>button:disabled{
+  background:#F1F4F8;
+  color:#8799AC;
+  border-color:#DCE6ED;
+  opacity:1;
+}
+
+/* My Squad controls and saved weeks: no dark remnants. */
+.scope :global(.my-squad-shell) :global(.squad-deadline-status),
+.scope :global(.my-squad-shell) :global(.lineup-action-row),
+.scope :global(.my-squad-shell) :global(.lineup-score-strip)>span,
+.scope :global(.my-squad-shell) :global(.formation-option),
+.scope :global(.my-squad-shell) :global(.squad-control-stat),
+.scope :global(.my-squad-shell) :global(.squad-formation-control){
+  background:#F1F8FE;
+  border-color:#D4E6F4;
+  color:var(--ink);
+}
+.scope :global(.my-squad-shell) :global(.squad-deadline-status)>b,
+.scope :global(.my-squad-shell) :global(.lineup-score-strip) b,
+.scope :global(.my-squad-shell) :global(.formation-option)>b,
+.scope :global(.my-squad-shell) :global(.captain-panel) h3{color:var(--ink)}
+.scope :global(.my-squad-shell) :global(.squad-deadline-status)>span{color:var(--sky-text)}
+.scope :global(.my-squad-shell) :global(.lineup-score-strip) small,
+.scope :global(.my-squad-shell) :global(.lineup-action-row) span,
+.scope :global(.my-squad-shell) :global(.lineup-action-row) small{color:var(--steel)}
+.scope :global(.my-squad-shell) :global(.formation-option):global(.selected){
+  background:#E4F5FF;
+  border-color:#69B7ED;
+}
+.scope :global(.my-squad-shell) :global(.formation-option):global(.selected)>b,
+.scope :global(.my-squad-shell) :global(.formation-option):global(.selected)>span{color:var(--sky-text)}
+.scope :global(.my-squad-shell) :global(.lineup-score-strip) :global(.lineup-total){
+  background:#E1F4FF;
+  border-color:#ABDAF4;
+}
+.scope :global(.my-squad-shell) :global(.lineup-score-strip) :global(.lineup-total) b{color:var(--sky-text)}
+.scope :global(.my-squad-shell) :global(.lineup-score-strip) :global(.captain-total){
+  background:#FFF3ED;
+  border-color:#FFBEAA;
+}
+.scope :global(.my-squad-shell) :global(.lineup-score-strip) :global(.captain-total) b{color:#C54123}
+.scope :global(.my-squad-shell) :global(.squad-stage-actions) :global(.auto-fill-btn),
+.scope :global(.my-squad-shell) :global(.squad-stage-actions) :global(.save-squad-btn){
+  background:var(--vermilion);
+  color:#FFFFFF;
+  border-color:var(--vermilion);
+}
+.scope :global(.my-squad-shell) :global(.squad-stage-actions) :global(.clear-squad-btn){
+  background:#FFF0ED;
+  border-color:#FFD1C5;
+  color:#C23E25;
+}
+.scope :global(.squad-tool-btn){
+  background:#FFFFFF;
+  border-color:#BFD8EA;
+  color:var(--sky-text);
+}
+.scope :global(.squad-tool-btn):hover{
+  background:#EAF6FF;
+  color:#005A9B;
+}
+.scope :global(.squad-history-card) :global(.squad-history-head)>p{color:var(--ink-soft)}
+.scope :global(.squad-history-item){
+  background:#FFFFFF;
+  border:1px solid #D0E4F2;
+  color:var(--ink);
+  box-shadow:0 6px 16px rgba(18,98,156,.06);
+}
+.scope :global(.squad-history-item) :global(.squad-history-week)>span,
+.scope :global(.squad-history-item) :global(.squad-history-captain) b{color:var(--ink)}
+.scope :global(.squad-history-item) :global(.squad-history-captain) small,
+.scope :global(.squad-history-item) :global(.squad-history-score) small{color:var(--steel)}
+.scope :global(.squad-history-item) :global(.squad-history-score) strong{color:var(--sky-text)}
+.scope :global(.squad-history-item) :global(.squad-history-week)>em:global(.complete){
+  background:#E3F8F1;
+  color:#167E61;
+  border-color:#A7DDCA;
+}
+.scope :global(.squad-history-item) :global(.squad-history-week)>em:global(.pending){
+  background:#FFF5E7;
+  color:#956616;
+  border-color:#F1D5A2;
+}
+.scope :global(.squad-history-item) :global(.squad-history-captain) em{
+  background:#E6F5FF;
+  color:var(--sky-text);
+  border-color:#BDE2F3;
+}
+.scope :global(.squad-history-empty){
+  background:#F2F9FE;
+  border-color:#CDE2F2;
+  color:var(--ink);
+}
+
+/* Other business pages: readable lights, keep warnings and team identity. */
+.scope :global(.role-change-card),
+.scope :global(.faq-quick-card),
+.scope :global(.faq-menu-card),
+.scope :global(.faq-cta),
+.scope :global(.availability-updated-card){
+  background:#FFFFFF;
+  color:var(--ink);
+  border-color:var(--border-sky);
+}
+.scope :global(.role-change-metrics) b,
+.scope :global(.faq-quick-card) h3,
+.scope :global(.faq-menu-card) h3{color:var(--ink)}
+.scope :global(.faq-quick-card) p,
+.scope :global(.faq-cta) p{color:var(--ink-soft)}
+
+/* Bottom navigation: white glass with a strong Sky Blue active tab. */
+.scope :global(.mobile-bottom-nav){
+  background:rgba(253,253,254,.98);
+  border:1px solid #BEDBED;
+  box-shadow:0 12px 35px rgba(0,104,188,.17);
+}
+.scope :global(.mobile-bottom-nav) a{color:#4B6681}
+.scope :global(.mobile-bottom-nav) :global(.bottom-nav-icon){
+  background:#EFF7FC;
+  border:1px solid #D2E4EF;
+  color:#597994;
+}
+.scope :global(.mobile-bottom-nav) a:global(.active){
+  background:var(--sky);
+  color:#FFFFFF;
+  border-color:var(--sky);
+}
+.scope :global(.mobile-bottom-nav) a:global(.active):before{background:#FFFFFF}
+.scope :global(.mobile-bottom-nav) a:global(.active) :global(.bottom-nav-icon){
+  background:rgba(255,255,255,.18);
+  border:1px solid rgba(255,255,255,.55);
+  color:#FFFFFF;
+}
+
+/* Phones: keep the white system AND compact pool from previous mobile fixes. */
+@media(max-width:760px){
+  .scope :global(.home-intro-hero){min-height:0;padding:24px 20px;border-radius:18px}
+  .scope :global(.home-intro-hero) h1{font-size:clamp(29px,8vw,40px)}
+  .scope :global(.home-intro-hero)>p{font-size:12px}
+  .scope :global(.home-intro-actions){
+    grid-template-columns:1fr;
+    gap:8px;
+    width:100%;
+    margin-top:20px;
+  }
+  .scope :global(.home-intro-actions)>:global(.home-cta-btn){
+    min-height:44px;
+    font-size:12px;
+  }
+  .scope :global(.home-hero-mini){margin-top:18px;padding-top:0}
+  .scope :global(.home-highlight-grid){grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+  .scope :global(.home-highlight-grid) :global(.spotlight-card){min-height:116px}
+  .scope :global(.my-squad-shell) :global(.picker-table-head){
+    display:flex;
+    flex-wrap:wrap;
+    align-items:center;
+    gap:5px;
+    width:auto;
+    margin:0 6px 7px;
+    padding:7px 0 4px;
+    background:transparent;
+    border-top:1px solid #D7EAF5;
+    border-bottom:0;
+  }
+  .scope :global(.my-squad-shell) :global(.picker-table-head)>:global(.picker-shirt-head),
+  .scope :global(.my-squad-shell) :global(.picker-table-head)>:global(.picker-action-head){display:none}
+  .scope :global(.my-squad-shell) :global(.picker-table-head)>button{
+    display:inline-flex;
+    flex:1 1 auto;
+    align-items:center;
+    justify-content:center;
+    min-height:30px;
+    padding:5px 7px;
+    background:#EFF8FE;
+    border:1px solid #C9DFEE;
+    border-radius:9px;
+    color:#4D6882;
+    font-size:10px;
+    font-weight:850;
+    white-space:nowrap;
+  }
+  .scope :global(.my-squad-shell) :global(.picker-table-head)>button:global(.active){
+    background:#DFF1FF;
+    color:var(--sky-text);
+    border-color:#66B9F2;
+  }
+  .scope :global(.my-squad-shell) :global(.picker-list){
+    padding:0 5px 9px;
+    max-height:min(58dvh,520px);
+    overflow-x:hidden;
+    overflow-y:auto;
+  }
+  .scope :global(.my-squad-shell) :global(.picker-player){
+    display:grid;
+    grid-template-columns:32px minmax(0,1fr) 54px 36px;
+    grid-template-rows:minmax(0,auto) auto;
+    column-gap:6px;
+    row-gap:3px;
+    min-height:78px;
+    padding:8px 7px;
+    margin-bottom:6px;
+    align-items:center;
+  }
+  .scope :global(.my-squad-shell) :global(.picker-player)>:global(.picker-shirt-wrap){
+    grid-column:1;grid-row:1/3;
+    width:32px;min-width:0;
+    justify-self:center;
+  }
+  .scope :global(.my-squad-shell) :global(.picker-player) :global(.fantasy-shirt):global(.tiny){
+    width:28px;height:32px;
+  }
+  .scope :global(.my-squad-shell) :global(.picker-player)>:global(.picker-copy){
+    grid-column:2;grid-row:1;
+    min-width:0;
+    align-self:center;
+    overflow:hidden;
+  }
+  .scope :global(.my-squad-shell) :global(.picker-player) :global(.picker-copy)>b{
+    font-size:12px;
+    line-height:1.22;
+    white-space:normal;
+    overflow-wrap:anywhere;
+  }
+  .scope :global(.my-squad-shell) :global(.picker-player) :global(.picker-copy)>small{
+    font-size:9.5px;
+    line-height:1.27;
+    white-space:normal;
+    margin-top:3px;
+    overflow-wrap:anywhere;
+  }
+  .scope :global(.my-squad-shell) :global(.picker-player)>:global(.picker-value):global(.xfp),
+  .scope :global(.my-squad-shell) :global(.picker-player)>:global(.picker-value):global(.xfp):global(.active){
+    grid-column:3;grid-row:1;
+    align-self:center;
+    justify-self:end;
+    text-align:right;
+    color:var(--sky-text);
+    font-size:15px;
+    line-height:1.1;
+    white-space:nowrap;
+    overflow:visible;
+  }
+  .scope :global(.my-squad-shell) :global(.picker-player)>:global(.picker-value):global(.xfp)::after{
+    content:"xFP";
+    display:block;
+    padding-top:2px;
+    color:#6187A3;
+    font-size:9px;
+    font-weight:750;
+  }
+  .scope :global(.my-squad-shell) :global(.picker-player)>:global(.picker-value):global(.price),
+  .scope :global(.my-squad-shell) :global(.picker-player)>:global(.picker-value):global(.price):global(.active){
+    grid-column:2;grid-row:2;
+    justify-self:start;
+    align-self:start;
+    width:auto;
+    text-align:left;
+    color:#47637E;
+    font-size:10px;
+    white-space:nowrap;
+    overflow:visible;
+  }
+  .scope :global(.my-squad-shell) :global(.picker-player)>:global(.picker-value):global(.price)::before{content:none}
+  .scope :global(.my-squad-shell) :global(.picker-player)>:global(.picker-value):global(.points),
+  .scope :global(.my-squad-shell) :global(.picker-player)>:global(.picker-value):global(.points):global(.active){
+    grid-column:3;grid-row:2;
+    justify-self:end;
+    align-self:start;
+    width:auto;
+    text-align:right;
+    color:#47637E;
+    font-size:10px;
+    white-space:nowrap;
+    overflow:visible;
+  }
+  .scope :global(.my-squad-shell) :global(.picker-player)>:global(.picker-value):global(.points)::after{
+    content:"p";
+    padding-left:2px;
+    color:#7992AA;
+    font-size:9px;
+  }
+  .scope :global(.my-squad-shell) :global(.picker-player)>button{
+    grid-column:4;grid-row:1/3;
+    width:36px;min-width:36px;
+    height:38px;min-height:38px;
+    font-size:20px;
+    align-self:center;
+    justify-self:end;
+  }
+  .scope :global(.readonly-bench-player) :global(.bench-copy) b{
+    font-size:clamp(10px,2.7vw,13px);
+    line-height:1.3;
+    white-space:normal;
+    overflow-wrap:anywhere;
+  }
+  .scope :global(.readonly-bench-player) :global(.bench-copy) small{
+    font-size:clamp(9px,2.35vw,11px);
+    line-height:1.3;
+    white-space:normal;
+    overflow-wrap:anywhere;
+  }
+}
+@media(max-width:380px){
+  .scope :global(.my-squad-shell) :global(.picker-player){
+    grid-template-columns:28px minmax(0,1fr) 49px 34px;
+    column-gap:5px;
+    padding-inline:6px;
+  }
+  .scope :global(.my-squad-shell) :global(.picker-player)>:global(.picker-shirt-wrap){width:28px}
+  .scope :global(.my-squad-shell) :global(.picker-player)>button{width:34px;min-width:34px}
+}
+@media(prefers-reduced-motion:reduce){
+  .scope :global(.home-intro-actions)>:global(.home-cta-btn){transition:none}
+}
