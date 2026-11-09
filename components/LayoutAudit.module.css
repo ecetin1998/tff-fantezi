@@ -4,11 +4,11 @@
  * Legacy direct-child 6-column selectors no longer apply to price/points.
  */
 .scope :global(.my-squad-shell) :global(.player-picker) :global(.picker-table-head){
-  display:flex;
-  flex-wrap:wrap;
-  align-items:center;
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr)) !important;
+  align-items:stretch;
   justify-content:stretch;
-  gap:7px;
+  gap:6px;
   padding:8px 8px 10px;
   margin:0 7px 8px;
   background:transparent;
