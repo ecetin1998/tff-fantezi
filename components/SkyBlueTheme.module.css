@@ -1114,3 +1114,28 @@
 @media(prefers-reduced-motion:reduce){
   .scope :global(.home-intro-actions)>:global(.home-cta-btn){transition:none}
 }
+
+
+/* Sky Blue action cleanup: remove leftover teal CTA from access gates. */
+.scope :global(.access-gate-actions) :global(.cta),
+.scope :global(.access-tier-card) :global(.cta),
+.scope :global(.role-upgrade-actions) :global(.cta),
+.scope :global(.faq-cta) :global(.cta){
+  background:var(--vermilion);
+  border:1px solid var(--vermilion);
+  color:#FFFFFF;
+  box-shadow:0 8px 20px rgba(255,61,23,.15);
+}
+.scope :global(.access-gate-actions) :global(.cta):hover,
+.scope :global(.access-tier-card) :global(.cta):hover,
+.scope :global(.role-upgrade-actions) :global(.cta):hover,
+.scope :global(.faq-cta) :global(.cta):hover{
+  background:var(--vermilion-hover);
+  border-color:var(--vermilion-hover);
+  color:#FFFFFF;
+}
+.scope :global(.access-gate-actions) :global(.secondary){
+  background:#FFFFFF;
+  border-color:#C5DFF1;
+  color:var(--sky-text);
+}
