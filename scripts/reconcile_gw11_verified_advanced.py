@@ -83,14 +83,14 @@ def extract_fixture(data,record,roster):
         stats_found=explicit_attack_metrics(raw)
         matched.append({
             "player_id":row["player_id"],"team_id":team,"match_id":record["match_id"],
-            "gameweek":11,"provider_player_id":pid,"identity_method":method,
+            "gameweek":record["gameweek"],"provider_player_id":pid,"identity_method":method,
             "source_minutes_db":float(row["minutes"]),
             **{k:stats_found.get(k) for k in FIELDS}
         })
     return matched,missing
 
 def audit(fixtures,roster):
-    if fixtures["gameweek"]!=11 or roster["gameweek"]!=11:raise ValueError("wrong week")
+    if fixtures["gameweek"] not in (10,11) or fixtures["gameweek"]!=roster["gameweek"]:raise ValueError("wrong week")
     if len(fixtures["matches"])!=9 or len(roster["players"])!=456:
         raise ValueError("incomplete frozen source manifest")
     result=[];missing=[];verified=0
@@ -114,7 +114,7 @@ def audit(fixtures,roster):
     expected=sum(float(x.get("minutes") or 0)>0 for x in roster["players"])
     metrics={key:sum(row[key] is not None for row in result) for key in FIELDS}
     return {
-        "season":"2026-27","gameweek":11,
+        "season":"2026-27","gameweek":fixtures["gameweek"],
         "audited_at_utc":datetime.now(timezone.utc).isoformat(),
         "verified_fixtures":verified,"matched_played":len(result),
         "expected_played":expected,"unmatched_played":len(missing),
@@ -127,8 +127,10 @@ def audit(fixtures,roster):
 def main():
     p=argparse.ArgumentParser()
     p.add_argument("--output",type=Path,default=Path("gw11-player-advanced-staging.json"))
+    p.add_argument("--fixtures",type=Path,default=FIXTURES)
+    p.add_argument("--roster",type=Path,default=ROSTER)
     args=p.parse_args()
-    result=audit(json.loads(FIXTURES.read_text()),json.loads(ROSTER.read_text()))
+    result=audit(json.loads(args.fixtures.read_text()),json.loads(args.roster.read_text()))
     args.output.write_text(json.dumps(result,indent=2,ensure_ascii=False)+"\n",encoding="utf8")
     print(f"MH11 advanced mapped {result['matched_played']}/{result['expected_played']}"
           f" verified fixtures {result['verified_fixtures']}/9, 0 min excluded {result['zero_minute_rows_kept_out']}")
