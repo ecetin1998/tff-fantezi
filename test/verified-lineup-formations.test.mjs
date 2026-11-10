@@ -57,3 +57,11 @@ test('both weekly prepare and current refresh must call the source-gated selecto
  assert.match(worker,/team_formations:verifiedFormations\.formations/)
  assert.match(worker,/verified_formations_v1/)
 })
+
+test('auditing an unpublished MH12 run refuses stale formation metadata even with matching code SHA',()=>{
+ const worker=readFileSync(new URL('../supabase/functions/weekly-model-lifecycle/index.ts',import.meta.url),'utf8')
+ assert.match(worker,/SOURCE_VERIFIED_FORMATION_INPUT_PROVENANCE_MISSING/)
+ assert.match(worker,/gw>=12&&run\.is_current!==true/)
+ assert.match(worker,/Array\.isArray\(meta\.data\?\.lineup_factors\?\.verified_formations_v1\)/)
+ assert.match(worker,/select\("own_goal_fraction,lineup_factors"\)/)
+})

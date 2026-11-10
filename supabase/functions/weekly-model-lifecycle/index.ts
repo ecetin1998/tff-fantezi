@@ -1316,11 +1316,18 @@ Deno.serve(async(req:Request)=>{
         sb.from("scout_player_projections").select("player_id,expected_goals").eq("run_id",runId),
         sb.from("scout_match_predictions").select("match_id,home_xg,away_xg,home_cs_probability,away_cs_probability").eq("run_id",runId),
         sb.from("scout_goal_distribution_config").select("alpha_used,distribution,gate_passed").eq("active",true).order("created_at",{ascending:false}).limit(1).maybeSingle(),
-        sb.from("scout_replay_input_meta").select("own_goal_fraction").eq("gameweek",gw).eq("benchmark_version",benchmark).maybeSingle(),
+        sb.from("scout_replay_input_meta").select("own_goal_fraction,lineup_factors").eq("gameweek",gw).eq("benchmark_version",benchmark).maybeSingle(),
         sb.from("scout_team_season_stats").select("team_id,through_gameweek,advanced_matches,matches_played").eq("through_gameweek",gw-1),
         sb.from("scout_team_tactical_profiles").select("team_id,through_gameweek,coverage,event_shot_sample,conceded_channel_sample_actions").eq("season","2026-27")
       ])
       for(const q of [players,matches,fixtures,shares,projections,matchPreds,goalConfig,meta,teamStats,tactical])if(q.error)throw q.error
+      // An MH12+ unpublished candidate must demonstrate its XI quota inputs
+      // were built with the source-verified formation policy. A SHA string alone
+      // is NOT proof a newly deployed Edge Function prepared those inputs.
+      if(gw>=12&&run.is_current!==true&&!Array.isArray(meta.data?.lineup_factors?.verified_formations_v1)){
+        return Response.json({ok:false,pass:false,error:"SOURCE_VERIFIED_FORMATION_INPUT_PROVENANCE_MISSING",
+          run_id:runId,gameweek:gw,benchmark,no_writes:true},{status:409})
+      }
       const prep=auditMatchAllocation({
         gameweek:gw,fixtures:fixtures.data||[],matchInputs:matches.data||[],
         playerInputs:players.data||[],roleShares:shares.data||[]
