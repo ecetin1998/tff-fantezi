@@ -54,7 +54,17 @@ def extract_fixture(data,record,roster):
             missing.append({"player_id":row["player_id"],"reason":"team_not_in_fixture"});continue
         pid,method=pick_player(row,team_maps[team],used[team])
         if pid is None:
-            missing.append({"player_id":row["player_id"],"name":row["full_name"],"reason":method});continue
+            from difflib import SequenceMatcher
+            reference=normalized(row.get("full_name") or "")
+            choices=sorted([
+                {"provider_id":candidate_id,"name":source_player.get("name"),
+                 "similarity":round(SequenceMatcher(None,reference,normalized(source_player.get("name") or "")).ratio(),3)}
+                for candidate_id,source_player in team_maps[team].items()
+                if candidate_id not in used[team]
+            ],key=lambda x:x["similarity"],reverse=True)[:4]
+            missing.append({"player_id":row["player_id"],"name":row["full_name"],
+                            "match_id":row["match_id"],"team_id":team,
+                            "reason":method,"candidate_names":choices});continue
         used[team].add(pid)
         raw=stats.get(str(pid))
         if not isinstance(raw,dict):
