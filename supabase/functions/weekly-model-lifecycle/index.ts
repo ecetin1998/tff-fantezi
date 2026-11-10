@@ -10,6 +10,7 @@ import {roleTrendFromWeeklyEvidence} from "./roleTrend.mjs"
 import {blendVerifiedAttackRate} from "./mh8Attack.mjs"
 import {calibrateAttackRates} from "./roleAwareAttackRates.mjs"
 import {starterDurationProfile} from "./starterDuration.mjs"
+import {verifiedLineupFormations} from "./verifiedLineupFormations.mjs"
 import {recentAttackForm,fetchRecentAttackEvidence,groupRecentAttack} from "./recentAttackForm.mjs"
 import {alignAttackSourceWindow} from "./sourceWindowAttack.mjs"
 import {laggedVerifiedAttackForm} from "./laggedVerifiedAttackForm.mjs"
@@ -238,6 +239,32 @@ async function sourceStatus(sb:any,current:any){
       ...(targetHist.data||[]).map((x:any)=>x.source_updated_at)
     )).toISOString()
   }
+}
+
+
+// A same-week refresh must not inherit stale position quotas from a prior
+// simulation. Refresh from two independently verified, complete, closed XIs.
+// No current/future fixture events are eligible before that fixture's kickoff.
+async function fetchVerifiedTeamFormations(sb:any,targetWeek:number,players:any[],
+  baseFormations:any,cutoffAt:string){
+  const start=Math.max(1,targetWeek-2)
+  const [evidenceQ,fixturesQ]=await Promise.all([
+    sb.from("scout_match_player_evidence")
+      .select("gameweek,match_id,player_id,started,verified_first_11,source_url,updated_at")
+      .eq("season","2026-27").gte("gameweek",start).lt("gameweek",targetWeek)
+      .eq("started",true).eq("verified_first_11",true),
+    sb.from("scout_match_history")
+      .select("gameweek,match_id,home_team_id,away_team_id,match_status,kickoff_at")
+      .eq("season","2026-27").gte("gameweek",start).lt("gameweek",targetWeek)
+  ])
+  if(evidenceQ.error)throw evidenceQ.error
+  if(fixturesQ.error)throw fixturesQ.error
+  if((evidenceQ.data||[]).length>=1000)
+    throw new Error("VERIFIED_LINEUP_EVIDENCE_PAGINATION_REQUIRED")
+  return verifiedLineupFormations({
+    targetWeek,cutoffAt,players,evidence:evidenceQ.data||[],
+    matches:fixturesQ.data||[],baseFormations:baseFormations||{}
+  })
 }
 
 async function prepare(sb:any,current:any,status:any,body:any={}){
@@ -562,13 +589,16 @@ async function prepare(sb:any,current:any,status:any,body:any={}){
   const keeperShotEvidence=freezeKeeperSot(keeperShotQ.data||[],{
     gameweek:target,firstKickoff:targetKickoff
   });
+  const verifiedFormations=await fetchVerifiedTeamFormations(sb,target,players,
+    priorMetaQ.data.team_formations,targetKickoff)
   const meta={
     gameweek:target,benchmark_version:benchmark,
     temperature:n(priorMetaQ.data.temperature,1.7),assist_fraction:n(priorMetaQ.data.assist_fraction,.67),
     own_goal_fraction:n(priorMetaQ.data.own_goal_fraction,.031),simulation_seed:2026000000+target*1000,
     source_note:key+" • generated from closed MH"+current.gameweek,
-    formations:priorMetaQ.data.formations,team_formations:priorMetaQ.data.team_formations,
-    lineup_factors:{...(priorMetaQ.data.lineup_factors||{}),goalkeeper_sot_v1:keeperShotEvidence}
+    formations:priorMetaQ.data.formations,team_formations:verifiedFormations.formations,
+    lineup_factors:{...(priorMetaQ.data.lineup_factors||{}),goalkeeper_sot_v1:keeperShotEvidence,
+      verified_formations_v1:verifiedFormations.changed_teams}
   }
   for(const [table,rows] of [
     ["scout_replay_input_meta",[meta]],["scout_replay_match_inputs",matchInputs],
@@ -1040,8 +1070,12 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
   const keeperShotEvidence=freezeKeeperSot(keeperShotQ.data||[],{
     gameweek:gw,firstKickoff:new Date(kickoff).toISOString()
   });
+  const verifiedFormations=await fetchVerifiedTeamFormations(sb,gw,playersQ.data||[],
+    latestMetaQ.data.team_formations,new Date(kickoff).toISOString())
   const meta={...latestMetaQ.data,benchmark_version:benchmark,created_at:new Date().toISOString(),
-    lineup_factors:{...(latestMetaQ.data.lineup_factors||{}),goalkeeper_sot_v1:keeperShotEvidence},
+    team_formations:verifiedFormations.formations,
+    lineup_factors:{...(latestMetaQ.data.lineup_factors||{}),goalkeeper_sot_v1:keeperShotEvidence,
+      verified_formations_v1:verifiedFormations.changed_teams},
     source_note:`intraday refresh from ${sourceBenchmark}; source ${latestSourceAt}`+
       (feedback?` • active-fwd-event-share-v1 • baseline ${feedback.config.baselineRunId} • holdouts MH8/MH9 passed`:"")}
   delete (meta as any).id
