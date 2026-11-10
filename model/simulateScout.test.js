@@ -252,7 +252,7 @@ console.log('DGW, opponent-aware saves, red-card and bonus-tie checks passed');
   const fs=require('node:fs');
   const edge=fs.readFileSync('supabase/functions/run-live-sim-chunk/index.ts','utf8');
   const workflow=fs.readFileSync('.github/workflows/weekly-model-lifecycle.yml','utf8');
-  assert.match(edge,/SCORER_POLICY_VERSION="gk-sot-source-age-decay-v4-attack-reliability"/);
+  assert.match(edge,/SCORER_POLICY_VERSION="gk-sot-source-age-decay-v5-starter-duration-sparse-exposure"/);
   assert.equal((workflow.match(/MODEL_SCORER_POLICY_MISMATCH/g)||[]).length,6,
     'both current-MH and next-MH runs must enforce scorer policy on reset/chunks/finalize');
 }
