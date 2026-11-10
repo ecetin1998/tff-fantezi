@@ -234,7 +234,7 @@ jobs:
             "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=${OIDC_AUDIENCE}" | jq -er '.value')"
           echo "::add-mask::$OIDC_TOKEN"
           common=(-H "Authorization: Bearer $OIDC_TOKEN")
-          curl --fail --show-error --silent --max-time 240 --retry 5 --retry-delay 2 --retry-all-errors --retry-max-time 120 "${common[@]}"             "$FUNCTIONS_URL/run-live-sim-chunk?mode=reset&gw=$GAMEWEEK&run=$RUN_ID&benchmark=$BENCHMARK" | jq -e -c 'if .ok == true and .policy_version == "gk-sot-source-age-decay-v4-attack-reliability" then . else error("MODEL_SCORER_POLICY_MISMATCH") end'
+          curl --fail --show-error --silent --max-time 240 --retry 5 --retry-delay 2 --retry-all-errors --retry-max-time 120 "${common[@]}"             "$FUNCTIONS_URL/run-live-sim-chunk?mode=reset&gw=$GAMEWEEK&run=$RUN_ID&benchmark=$BENCHMARK" | jq -e -c 'if .ok == true and .policy_version == "gk-sot-source-age-decay-v5-starter-duration-sparse-exposure" then . else error("MODEL_SCORER_POLICY_MISMATCH") end'
           # Bounded Edge CPU: 100 x 500 = 50,000 draws/player, no loss of Monte Carlo volume.
           # Finalize refuses any player with fewer than 50,000 accumulated draws.
           for part in $(seq 0 99); do
@@ -247,10 +247,10 @@ jobs:
               common=(-H "Authorization: Bearer $OIDC_TOKEN")
             fi
             seed=$((2026000000 + GAMEWEEK * 100000 + part * 500 + 1))
-            curl --fail --show-error --silent --max-time 240 --retry 5 --retry-delay 2 --retry-all-errors --retry-max-time 120 "${common[@]}"               "$FUNCTIONS_URL/run-live-sim-chunk?gw=$GAMEWEEK&run=$RUN_ID&benchmark=$BENCHMARK&draws=500&seed=$seed" | jq -e -c 'if .ok == true and .policy_version == "gk-sot-source-age-decay-v4-attack-reliability" then . else error("MODEL_SCORER_POLICY_MISMATCH") end'
+            curl --fail --show-error --silent --max-time 240 --retry 5 --retry-delay 2 --retry-all-errors --retry-max-time 120 "${common[@]}"               "$FUNCTIONS_URL/run-live-sim-chunk?gw=$GAMEWEEK&run=$RUN_ID&benchmark=$BENCHMARK&draws=500&seed=$seed" | jq -e -c 'if .ok == true and .policy_version == "gk-sot-source-age-decay-v5-starter-duration-sparse-exposure" then . else error("MODEL_SCORER_POLICY_MISMATCH") end'
             sleep 1
           done
-          curl --fail --show-error --silent --max-time 240 --retry 5 --retry-delay 2 --retry-all-errors --retry-max-time 120 "${common[@]}"             "$FUNCTIONS_URL/run-live-sim-chunk?mode=finalize&gw=$GAMEWEEK&run=$RUN_ID&benchmark=$BENCHMARK" | jq -e -c 'if .ok == true and .policy_version == "gk-sot-source-age-decay-v4-attack-reliability" then . else error("MODEL_SCORER_POLICY_MISMATCH") end'
+          curl --fail --show-error --silent --max-time 240 --retry 5 --retry-delay 2 --retry-all-errors --retry-max-time 120 "${common[@]}"             "$FUNCTIONS_URL/run-live-sim-chunk?mode=finalize&gw=$GAMEWEEK&run=$RUN_ID&benchmark=$BENCHMARK" | jq -e -c 'if .ok == true and .policy_version == "gk-sot-source-age-decay-v5-starter-duration-sparse-exposure" then . else error("MODEL_SCORER_POLICY_MISMATCH") end'
 
       - name: Audit refreshed current MH after finalized 50K
         if: steps.status.outputs.ready != 'true' && steps.current_refresh.outputs.refresh == 'true'
@@ -440,7 +440,7 @@ jobs:
             "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=${OIDC_AUDIENCE}" | jq -er '.value')"
           echo "::add-mask::$OIDC_TOKEN"
           common=(-H "Authorization: Bearer $OIDC_TOKEN")
-          curl --fail --show-error --silent --max-time 240 --retry 5 --retry-delay 2 --retry-all-errors --retry-max-time 120 "${common[@]}"             "$FUNCTIONS_URL/run-live-sim-chunk?mode=reset&gw=$GAMEWEEK&run=$RUN_ID&benchmark=$BENCHMARK" | jq -e -c 'if .ok == true and .policy_version == "gk-sot-source-age-decay-v4-attack-reliability" then . else error("MODEL_SCORER_POLICY_MISMATCH") end'
+          curl --fail --show-error --silent --max-time 240 --retry 5 --retry-delay 2 --retry-all-errors --retry-max-time 120 "${common[@]}"             "$FUNCTIONS_URL/run-live-sim-chunk?mode=reset&gw=$GAMEWEEK&run=$RUN_ID&benchmark=$BENCHMARK" | jq -e -c 'if .ok == true and .policy_version == "gk-sot-source-age-decay-v5-starter-duration-sparse-exposure" then . else error("MODEL_SCORER_POLICY_MISMATCH") end'
           # Bounded Edge CPU: 100 x 500 = 50,000 draws/player, no loss of Monte Carlo volume.
           # Finalize refuses any player with fewer than 50,000 accumulated draws.
           for part in $(seq 0 99); do
@@ -454,10 +454,10 @@ jobs:
             fi
             seed=$((2026000000 + GAMEWEEK * 100000 + part * 500 + 1))
             echo "Simulation chunk $((part+1))/100"
-            curl --fail --show-error --silent --max-time 240 --retry 5 --retry-delay 2 --retry-all-errors --retry-max-time 120 "${common[@]}"               "$FUNCTIONS_URL/run-live-sim-chunk?gw=$GAMEWEEK&run=$RUN_ID&benchmark=$BENCHMARK&draws=500&seed=$seed" | jq -e -c 'if .ok == true and .policy_version == "gk-sot-source-age-decay-v4-attack-reliability" then . else error("MODEL_SCORER_POLICY_MISMATCH") end'
+            curl --fail --show-error --silent --max-time 240 --retry 5 --retry-delay 2 --retry-all-errors --retry-max-time 120 "${common[@]}"               "$FUNCTIONS_URL/run-live-sim-chunk?gw=$GAMEWEEK&run=$RUN_ID&benchmark=$BENCHMARK&draws=500&seed=$seed" | jq -e -c 'if .ok == true and .policy_version == "gk-sot-source-age-decay-v5-starter-duration-sparse-exposure" then . else error("MODEL_SCORER_POLICY_MISMATCH") end'
             sleep 1
           done
-          curl --fail --show-error --silent --max-time 240 --retry 5 --retry-delay 2 --retry-all-errors --retry-max-time 120 "${common[@]}"             "$FUNCTIONS_URL/run-live-sim-chunk?mode=finalize&gw=$GAMEWEEK&run=$RUN_ID&benchmark=$BENCHMARK" | jq -e -c 'if .ok == true and .policy_version == "gk-sot-source-age-decay-v4-attack-reliability" then . else error("MODEL_SCORER_POLICY_MISMATCH") end'
+          curl --fail --show-error --silent --max-time 240 --retry 5 --retry-delay 2 --retry-all-errors --retry-max-time 120 "${common[@]}"             "$FUNCTIONS_URL/run-live-sim-chunk?mode=finalize&gw=$GAMEWEEK&run=$RUN_ID&benchmark=$BENCHMARK" | jq -e -c 'if .ok == true and .policy_version == "gk-sot-source-age-decay-v5-starter-duration-sparse-exposure" then . else error("MODEL_SCORER_POLICY_MISMATCH") end'
 
       - name: Audit candidate MH after finalized 50K
         if: steps.status.outputs.ready == 'true'
