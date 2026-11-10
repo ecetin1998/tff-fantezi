@@ -19,6 +19,7 @@ on:
       - ".github/workflows/weekly-model-lifecycle.yml"
       - "supabase/migrations/20260929*.sql"
       - "supabase/migrations/20261019195000_red_card_qa_rounding_epsilon.sql"
+      - "supabase/migrations/20261110221200_redcard_stint_qa_upper_bound.sql"
   schedule:
     - cron: '17 * * * *'
   workflow_dispatch:
@@ -319,7 +320,7 @@ jobs:
             "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=${OIDC_AUDIENCE}" | jq -er '.value')"
           echo "::add-mask::$OIDC_TOKEN"
           for stage in qa integrity bugfix; do
-            jq -n --arg run "$RUN_ID" --arg stage "$stage" '{stage:$stage,run_id:$run}' |               curl --fail --show-error --silent -H "Authorization: Bearer $OIDC_TOKEN" -H "Content-Type: application/json"                 --data-binary @- "$FUNCTIONS_URL/model-refresh-control" | jq .
+            jq -n --arg run "$RUN_ID" --arg stage "$stage" '{stage:$stage,run_id:$run}' |               curl --fail-with-body --show-error --silent -H "Authorization: Bearer $OIDC_TOKEN" -H "Content-Type: application/json"                 --data-binary @- "$FUNCTIONS_URL/model-refresh-control" | jq .
           done
           jq -n --arg run "$RUN_ID" --arg parent "$PARENT_RUN_ID" '{stage:"model_gate",run_id:$run,parent_run_id:$parent}' |             curl --fail --show-error --silent -H "Authorization: Bearer $OIDC_TOKEN" -H "Content-Type: application/json"               --data-binary @- "$FUNCTIONS_URL/model-refresh-control" | jq .
 
