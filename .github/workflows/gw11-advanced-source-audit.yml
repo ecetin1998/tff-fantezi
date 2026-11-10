@@ -4,6 +4,9 @@ on:
     branches: [fix/advanced-coverage-truth-and-denominators]
     paths:
       - scripts/audit_gw11_advanced_sources.py
+      - scripts/reconcile_gw11_verified_advanced.py
+      - data/source-evidence/gw11-scout-verified-player-identity.json
+      - test/gw11_source_player_crosswalk_test.py
       - test/gw11_advanced_source_audit_test.py
       - data/source-evidence/gw11-advanced-provider-candidates.json
       - .github/workflows/gw11-advanced-source-audit.yml
@@ -28,9 +31,17 @@ jobs:
           python scripts/audit_gw11_advanced_sources.py --output gw11-advanced-audit.json
           jq -r '"MH11 matches independently verified: \(.verified_fixtures)/9; safe source import=\(.safe_to_import_advanced)"' gw11-advanced-audit.json >> "$GITHUB_STEP_SUMMARY"
           jq -e '.verified_fixtures == 9 and .safe_to_import_advanced == true and .db_writes==0 and .fantasy_points_written==0' gw11-advanced-audit.json
+      - name: Reconcile explicit MH11 player attack stats (read only)
+        run: |
+          python -m unittest discover -s test -p gw11_source_player_crosswalk_test.py -v
+          python scripts/reconcile_gw11_verified_advanced.py --output gw11-player-advanced-staging.json
+          jq -r '"MH11 source-matched: \(.matched_played)/\(.expected_played); zero min excluded=\(.zero_minute_rows_kept_out)"' gw11-player-advanced-staging.json >> "$GITHUB_STEP_SUMMARY"
+          jq -e '.ready_for_review == true and .verified_fixtures == 9 and .matched_played == .expected_played and .db_writes==0' gw11-player-advanced-staging.json
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: mh11-advanced-source-audit
-          path: gw11-advanced-audit.json
+          path: |
+            gw11-advanced-audit.json
+            gw11-player-advanced-staging.json
           if-no-files-found: ignore
