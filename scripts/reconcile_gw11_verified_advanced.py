@@ -24,7 +24,7 @@ OVERRIDES={int(row["player_id"]):row for row in
 def pick_player(target,source,used):
     # Only exact normalized names, or a PREVIOUSLY SOURCE-LINKED provider ID
     # which must still be present in the same team on this particular match.
-    reviewed=OVERRIDES.get(int(target["player_id"]))
+    reviewed=OVERRIDES.get(int(target.get("player_id") or 0))
     if reviewed and int(reviewed["match_id"])==int(target["match_id"]) and \
        int(reviewed["team_id"])==int(target["team_id"]):
         candidate=int(reviewed["provider_player_id"])
