@@ -15,7 +15,7 @@ const ROLE={
 const positive=x=>typeof x==='number'&&Number.isFinite(x)&&x>=0;
 export function calibrateAttackRates({
  position,role,seasonMinutes,seasonWeek,advancedWeek,shots,keyPasses,
- xgPer90,goalsPer90,xaPer90,assistsPer90
+ xgPer90,goalsPer90,xaPer90,assistsPer90,hasSourcedXg=true
 }={}){
  const original={xgPer90,goalsPer90,xaPer90,assistsPer90,applied:false,
    confidence:"unknown",sourceAligned:false,reason:"unavailable"}
@@ -39,15 +39,20 @@ export function calibrateAttackRates({
      sourceAligned:trustedShots,reason:'cb_sparse_opportunity_bayes'}
  }
  const posterior=(rate,target)=>((rate*exp)+(target*prior.k))/(exp+prior.k)
- // Even with bad/missing shots, never blanket-cut creative fullbacks,
- // real wingers or centre-forwards. Exposure and plausible repeated shooting
- // limit the maximum drop independently from the Bayesian prior.
+ // Established and repeatedly shooting players retain their source rates.
+ // For less than three 90-minute matches, a stale/unverified *sourced* xG
+ // spike is not reliable per-90 skill; pull it toward the tactical-role prior.
+ // Crucially, missing source xG is not a zero and must not be re-shrunk.
  const shotRate=trustedShots?shots/exp:null
  const regularShooting=shotRate!==null&&shotRate>=
    (roleCode==='ST'?.95:roleCode==='W'||roleCode==='AM'?.65:.45);
  const maxXgReduction=regularShooting?.04:exp>=6?.10:.18
  const proposal=posterior(xgPer90,prior.xg)
- const nextXg=Math.min(xgPer90,Math.max(xgPer90*(1-maxXgReduction),proposal))
+ const sparseUnverified=hasSourcedXg===true&&exp<3&&!regularShooting&&
+   xgPer90>prior.xg*1.6
+ const nextXg=sparseUnverified
+   ?Math.min(xgPer90,proposal)
+   :Math.min(xgPer90,Math.max(xgPer90*(1-maxXgReduction),proposal))
  // A one-goal finishing surge with few minutes is weak evidence, but players
  // with repeated appearances or consistent chance creation retain their skill.
  const nextGoals=exp<5&&goalsPer90>Math.max(xgPer90*1.7,prior.xg*2)
@@ -62,7 +67,8 @@ export function calibrateAttackRates({
    assistsPer90,applied:nextXg<xgPer90-1e-9||nextGoals<goalsPer90-1e-9||
      (positive(xaPer90)&&positive(nextXa)&&nextXa<xaPer90-1e-9),
    confidence:trustedShots&&trustedPasses?'high':trustedShots?'medium':'low',
-   sourceAligned:trustedShots,reason:trustedShots?'aligned_shot_recurrence':'source_stale_or_missing',
+   sourceAligned:trustedShots,reason:sparseUnverified?'sparse_unverified_source_xg':
+     trustedShots?'aligned_shot_recurrence':'source_stale_or_missing',
    tacticalRole:roleCode
  }
 }
