@@ -11,7 +11,7 @@ on:
       - .github/workflows/gw10-advanced-source-audit.yml
   workflow_dispatch:
 permissions:
-  contents: read
+  contents: write
 jobs:
   source-audit:
     runs-on: ubuntu-latest
@@ -37,6 +37,19 @@ jobs:
             --output gw10-advanced-staging.json
           jq -r '"MH10 source-matched: \(.matched_played)/\(.expected_played), 0-min excluded: \(.zero_minute_rows_kept_out)"' gw10-advanced-staging.json >> "$GITHUB_STEP_SUMMARY"
           jq -e '.ready_for_review == true and .verified_fixtures == 9 and .matched_played == .expected_played and .db_writes==0' gw10-advanced-staging.json
+      - name: Preserve independently matched MH10 observations for review
+        if: ${{ always() && github.ref_name == 'fix/advanced-coverage-truth-and-denominators' }}
+        run: |
+          if [ ! -s gw10-advanced-staging.json ]; then exit 0; fi
+          if ! jq -e '.verified_fixtures==9 and .matched_played>=270 and .db_writes==0' gw10-advanced-staging.json; then exit 0; fi
+          cp gw10-advanced-staging.json data/source-evidence/gw10-player-advanced-staging-observed.json
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config user.name "github-actions[bot]"
+          git add data/source-evidence/gw10-player-advanced-staging-observed.json
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m "data(source): record verified MH10 observed advanced player facts"
+          git pull --rebase origin "${GITHUB_REF_NAME}"
+          git push origin "HEAD:${GITHUB_REF_NAME}"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
