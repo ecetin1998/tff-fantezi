@@ -16,6 +16,7 @@ import {alignAttackSourceWindow} from "./sourceWindowAttack.mjs"
 import {laggedVerifiedAttackForm} from "./laggedVerifiedAttackForm.mjs"
 import {currentTacticalRole} from "./recentTacticalRole.mjs"
 import {applyTeamMatchForm,recalibrateAnchoredMatchForm,auditMatchAllocation,auditRealizedModel} from "./teamRecentForm.mjs"
+import {teamEloMatchFactor,TEAM_ELO_POLICY} from "./teamElo.mjs"
 import {credibleAttackWeights} from "./defenderOpportunity.mjs"
 import {frozenAccuracyReport} from "./frozenAccuracy.mjs"
 import {evaluateModelActionCandidates} from "./modelActionCandidates.mjs"
@@ -353,8 +354,8 @@ async function prepare(sb:any,current:any,status:any,body:any={}){
       .select("player_id,gameweek,role,side,minutes,started,verified,observed_at")
       .eq("season","2026-27").gte("gameweek",Math.max(1,target-3)).lt("gameweek",target)
       .eq("verified",true),
-    sb.from("scout_match_history").select("gameweek,home_team_id,away_team_id,home_goals,away_goals,match_status,fantasy_closure")
-      .eq("season","2026-27").gte("gameweek",Math.max(1,target-8)).lt("gameweek",target),
+    sb.from("scout_match_history").select("gameweek,match_id,kickoff_at,home_team_id,away_team_id,home_goals,away_goals,match_status,fantasy_closure")
+      .eq("season","2026-27").gte("gameweek",1).lt("gameweek",target),
     fetchRecentAttackEvidence(sb,target)
   ])
   for(const q of [playersQ,rolesQ,availabilityQ,statsQ,teamStatsQ,fixturesQ,weeklyQ,priorInputsQ,teamsQ,currentProjQ,tacticalQ,teamHistoryQ,recentAttackQ])if(q.error)throw q.error
@@ -401,12 +402,19 @@ async function prepare(sb:any,current:any,status:any,body:any={}){
       baselineHome,baselineAway,homeTeamId:Number(fx.home_team_id),
       awayTeamId:Number(fx.away_team_id),gameweek:target,matches:teamHistoryQ.data||[]
     })
-    const hl=teamForm.homeLambda,al=teamForm.awayLambda,prob=matchPrediction(hl,al)
+    const elo=teamEloMatchFactor({
+      homeId:Number(fx.home_team_id),awayId:Number(fx.away_team_id),history:teamHistoryQ.data||[],
+      targetWeek:target,cutoffAt:targetKickoff,
+      homeLambda:teamForm.homeLambda,awayLambda:teamForm.awayLambda
+    })
+    if(target>=12&&!elo.applied)throw new Error("SOURCE_VERIFIED_TEAM_ELO_MISSING_"+fx.match_id)
+    const hl=elo.homeLambda,al=elo.awayLambda,prob=matchPrediction(hl,al)
     matchInputs.push({
       gameweek:target,benchmark_version:benchmark,match_id:Number(fx.match_id),
       home_team_id:Number(fx.home_team_id),away_team_id:Number(fx.away_team_id),
       home_lambda:hl,away_lambda:al,source_note:key+" • team xG/xGA + observed finishing/conceding blend"+
-        (teamForm.applied?" • verified-team-form-v2":"")
+        (teamForm.applied?" • verified-team-form-v2":"")+
+        (elo.applied?" • "+TEAM_ELO_POLICY+" shift="+elo.shift.toFixed(5):"")
     })
     matchPredictions.push({
       run_id:runId,match_id:Number(fx.match_id),gameweek:target,kickoff_at:fx.kickoff_at,
@@ -762,8 +770,8 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
       .select("player_id,gameweek,role,side,minutes,started,verified,observed_at")
       .eq("season","2026-27").gte("gameweek",Math.max(1,gw-3)).lt("gameweek",gw)
       .eq("verified",true),
-    sb.from("scout_match_history").select("gameweek,home_team_id,away_team_id,home_goals,away_goals,match_status,fantasy_closure")
-      .eq("season","2026-27").gte("gameweek",Math.max(1,gw-8)).lt("gameweek",gw),
+    sb.from("scout_match_history").select("gameweek,match_id,kickoff_at,home_team_id,away_team_id,home_goals,away_goals,match_status,fantasy_closure")
+      .eq("season","2026-27").gte("gameweek",1).lt("gameweek",gw),
     fetchRecentAttackEvidence(sb,gw)
   ])
   for(const q of [latestMetaQ,stableMetaQ,availabilityQ,rolesQ,goalConfigQ,playersUpdatedQ,currentProjectionQ,officialQ,playersQ,teamFixturesQ,attackSourceQ,tacticalQ,teamHistoryQ,recentAttackQ])if(q.error)throw q.error
@@ -1046,10 +1054,17 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
       homeTeamId:Number(x.home_team_id),awayTeamId:Number(x.away_team_id),
       gameweek:gw,matches:teamHistoryQ.data||[]
     })
+    const elo=teamEloMatchFactor({
+      homeId:Number(x.home_team_id),awayId:Number(x.away_team_id),
+      history:teamHistoryQ.data||[],targetWeek:gw,cutoffAt:new Date(kickoff).toISOString(),
+      homeLambda:factor.homeLambda,awayLambda:factor.awayLambda
+    })
+    if(gw>=12&&!elo.applied)throw new Error("SOURCE_VERIFIED_TEAM_ELO_MISSING_"+x.match_id)
     return {...x,benchmark_version:benchmark,
-      home_lambda:factor.homeLambda,away_lambda:factor.awayLambda,
+      home_lambda:elo.homeLambda,away_lambda:elo.awayLambda,
       source_note:`intraday refresh from ${stableRoleBenchmark}`+
-        (factor.version==="v2"||factor.applied?" • verified-team-form-v2":"")}
+        (factor.version==="v2"||factor.applied?" • verified-team-form-v2":"")+
+        (elo.applied?" • "+TEAM_ELO_POLICY+" shift="+elo.shift.toFixed(5):"")}
   })
   const computedMatches=new Map(matchInputs.map((m:any)=>[Number(m.match_id),m]))
   const matchPredictions=(teamFixturesQ.data||[]).map((m:any)=>{
@@ -1310,7 +1325,7 @@ Deno.serve(async(req:Request)=>{
       if(!benchmark)return Response.json({ok:false,error:"AUDIT_BENCHMARK_MISSING"},{status:409})
       const [players,matches,fixtures,shares,projections,matchPreds,goalConfig,meta,teamStats,tactical]=await Promise.all([
         sb.from("scout_replay_player_inputs").select("player_id,club_id,position,rates,availability").eq("gameweek",gw).eq("benchmark_version",benchmark),
-        sb.from("scout_replay_match_inputs").select("match_id,home_team_id,away_team_id,home_lambda,away_lambda").eq("gameweek",gw).eq("benchmark_version",benchmark),
+        sb.from("scout_replay_match_inputs").select("match_id,home_team_id,away_team_id,home_lambda,away_lambda,source_note").eq("gameweek",gw).eq("benchmark_version",benchmark),
         sb.from("scout_match_history").select("match_id,home_team_id,away_team_id").eq("season","2026-27").eq("gameweek",gw),
         sb.from("scout_role_signals").select("player_id,team_goal_share,team_assist_share").eq("run_id",runId),
         sb.from("scout_player_projections").select("player_id,expected_goals").eq("run_id",runId),
@@ -1327,6 +1342,11 @@ Deno.serve(async(req:Request)=>{
       if(gw>=12&&run.is_current!==true&&!Array.isArray(meta.data?.lineup_factors?.verified_formations_v1)){
         return Response.json({ok:false,pass:false,error:"SOURCE_VERIFIED_FORMATION_INPUT_PROVENANCE_MISSING",
           run_id:runId,gameweek:gw,benchmark,no_writes:true},{status:409})
+      }
+      if(gw>=12&&run.is_current!==true&&
+        (matches.data||[]).some((m:any)=>!String(m.source_note||"").includes(TEAM_ELO_POLICY))){
+        return Response.json({ok:false,pass:false,error:"SOURCE_VERIFIED_TEAM_ELO_PROVENANCE_MISSING",
+          run_id:runId,benchmark,no_writes:true},{status:409})
       }
       const prep=auditMatchAllocation({
         gameweek:gw,fixtures:fixtures.data||[],matchInputs:matches.data||[],
