@@ -13,7 +13,10 @@ export function teamEloFromClosed(history=[],{targetWeek,cutoffAt}={}){
   const matches=(history||[]).filter(m=>{
     const at=validDate(m.kickoff_at)
     return Number(m.gameweek)>0&&Number(m.gameweek)<week&&at!==null&&at<cutoff&&
-      m.match_status==="Bitti"&&m.fantasy_closure==="KAPANDI"&&
+      // Football final scores are independent of fantasy score adjudication;
+      // old MH1-5 fantasy_closure remains pending, but sourced FT goals are
+      // valid historical Elo evidence available before MH12 kickoff.
+      m.match_status==="Bitti"&&
       Number.isFinite(Number(m.home_goals))&&m.home_goals!==null&&
       Number.isFinite(Number(m.away_goals))&&m.away_goals!==null&&
       Number.isSafeInteger(Number(m.home_team_id))&&Number.isSafeInteger(Number(m.away_team_id))&&
