@@ -100,7 +100,7 @@ test('edge/Actions score policies and formulas must match',()=>{
   const wf=readFileSync('.github/workflows/weekly-model-lifecycle.yml','utf8');
   assert.match(edge,/\.82\*xg\+\.18\*goals/);
   assert.match(edge,/\.82\*xa\+\.18\*assists/);
-  assert.match(edge,/gk-sot-source-age-decay-v4-attack-reliability/);
-  assert.equal((wf.match(/gk-sot-source-age-decay-v4-attack-reliability/g)||[]).length,6);
+  assert.match(edge,/gk-sot-source-age-decay-v5-starter-duration-sparse-exposure/);
+  assert.equal((wf.match(/gk-sot-source-age-decay-v5-starter-duration-sparse-exposure/g)||[]).length,6);
   assert.doesNotMatch(wf,/gk-sot-source-age-decay-v3/,'new scorer must deploy before 50K can run');
 });
