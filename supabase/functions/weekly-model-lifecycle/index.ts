@@ -926,7 +926,15 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
     // refresh recursively discounts the same historical xG again.
     // Forecast priors are always grounded in the untouched stable baseline;
     // MH8 observations can refresh rates but must not compound an earlier shrink.
-    const alreadyCalibrated=String(stableInput.source_note||"").includes("role-aware-attack-v1")&&!covered.aligned
+    // The MH12 stable input already carries the old weak role-aware shrink.
+    // Recompute *sparse* candidates from immutable sourced season totals, not
+    // from the previously calibrated input (which would leak stale priors).
+    const seasonExposure=Number(stats?.minutes)
+    const sourcedSparseXg=stats?.xg_total!=null&&Number.isFinite(seasonExposure)&&
+      seasonExposure>0&&seasonExposure<270&&Number.isFinite(Number(stats.xg_total))
+      ?Math.max(0,90*Number(stats.xg_total)/seasonExposure):null
+    const alreadyCalibrated=String(stableInput.source_note||"").includes("role-aware-attack-v1")&&
+      !covered.aligned&&sourcedSparseXg===null
     const calibrated=alreadyCalibrated
       ?{xgPer90:xgUpdate.rate,goalsPer90:n(stableRates[1],rates[1]),xaPer90:xaUpdate.rate,applied:false}
       :calibrateAttackRates({
@@ -936,7 +944,8 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
         advancedWeek:stats?.advanced_through_gameweek==null?null:Number(stats.advanced_through_gameweek),
         shots:stats?.shots==null?null:Number(stats.shots),
         keyPasses:stats?.key_passes==null?null:Number(stats.key_passes),
-        xgPer90:xgUpdate.rate,goalsPer90:n(stableRates[1],rates[1]),
+        xgPer90:sourcedSparseXg===null?xgUpdate.rate:sourcedSparseXg,
+        goalsPer90:n(stableRates[1],rates[1]),
         xaPer90:xaUpdate.rate,assistsPer90:n(stableRates[2],rates[2]),
         hasSourcedXg:stats?.xg_total!=null
       })
