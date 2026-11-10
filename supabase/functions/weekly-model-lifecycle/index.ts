@@ -9,6 +9,7 @@ import {fetchTrustedWeeklyEvidence} from "./weeklyEvidence.mjs"
 import {roleTrendFromWeeklyEvidence} from "./roleTrend.mjs"
 import {blendVerifiedAttackRate} from "./mh8Attack.mjs"
 import {calibrateAttackRates} from "./roleAwareAttackRates.mjs"
+import {starterDurationProfile} from "./starterDuration.mjs"
 import {recentAttackForm,fetchRecentAttackEvidence,groupRecentAttack} from "./recentAttackForm.mjs"
 import {alignAttackSourceWindow} from "./sourceWindowAttack.mjs"
 import {laggedVerifiedAttackForm} from "./laggedVerifiedAttackForm.mjs"
@@ -420,11 +421,13 @@ async function prepare(sb:any,current:any,status:any,body:any={}){
     // source", not verified DNP. Never teach role/bench probabilities
     // that they are real zero-minute appearances.
     const trustedRows=rows.filter(x=>trustedMinute(x)!==null)
-    let durations=trustedRows.map(x=>n(x.minutes)).filter(x=>x>0).map(x=>clamp(1,90,x))
-    if(!durations.length)durations=(prior.durations||[]).map((x:any)=>clamp(1,90,n(x))).filter((x:number)=>x>0)
-    if(!durations.length)durations=[p.position==="GK"?90:70]
-    durations=durations.slice(0,5)
-    let durationWeights=normalizedWeights(durations.length)
+    const durationProfile=starterDurationProfile({
+      position:p.position,seasonStarts:s.starts,weekly:rows,
+      verified:tacticalEvidence.get(id)||[],targetWeek:target,
+      cutoffAt:teamKickoffs.get(Number(p.team_id))||targetKickoff
+    })
+    let durations=durationProfile.durations
+    let durationWeights=durationProfile.duration_weights
     const recentMinuteRate=trustedRows.length?clamp(0,1,avg(trustedRows.slice(0,3).map(x=>n(x.minutes)/90))):n(prior.role_probability,n(r.predicted_xi_probability,.5))
     let roleProb=clamp(.01,.995,.65*n(r.predicted_xi_probability,n(prior.role_probability,.5))+.35*recentMinuteRate)
     // Existing minute weighting already gives recent games credit. Add only
@@ -473,7 +476,8 @@ async function prepare(sb:any,current:any,status:any,body:any={}){
       seasonWeek:s.through_gameweek==null?null:Number(s.through_gameweek),
       advancedWeek:s.advanced_through_gameweek==null?null:Number(s.advanced_through_gameweek),
       shots:s.shots==null?null:Number(s.shots),keyPasses:s.key_passes==null?null:Number(s.key_passes),
-      xgPer90:xg90,goalsPer90:g90,xaPer90:xa90,assistsPer90:a90
+      xgPer90:xg90,goalsPer90:g90,xaPer90:xa90,assistsPer90:a90,
+      hasSourcedXg:s.xg_total!=null
     })
     const trustedAdvanced=Number(s.advanced_through_gameweek)>=target-2
     const form=recentAttackForm({
@@ -506,7 +510,7 @@ async function prepare(sb:any,current:any,status:any,body:any={}){
       bench_weight:n(prior.bench_weight,1),durations,duration_weights:durationWeights,rates,
       data_confidence:prior.data_confidence||projMap.get(id)?.confidence||"medium",
       has_individual_prior:Boolean(prior.has_individual_prior),
-      source_note:key+(calibrated.applied?" • role-aware-attack-v1":"")+(form.applied?" • recent-attack-form-v2":"")+(attackForm.applied&&!form.applied?" • lagged-verified-form-v1":"")+(covered.aligned&&covered.advancedWeek<target-1?" • source-window-attack-v1":"")+(tactical.changed?" • tactical-role-evidence-v1":"")+(momentum.rising?" • momentum-v1 +"+momentum.role_uplift:"")+(recentStarter.applied?" • verified-recent-starter-v1 +"+recentStarter.delta.toFixed(4):"")+(xaReconcile.adjusted?" • defender-xa-source-window-v1 "+xaReconcile.source_minutes+"dk":"")+(officialShift.applied?" • resmî maç: "+event.match_ref:""),
+      source_note:key+" • starter-duration-source-gated-v2 "+durationProfile.reason+(calibrated.applied?" • role-aware-attack-v1":"")+(form.applied?" • recent-attack-form-v2":"")+(attackForm.applied&&!form.applied?" • lagged-verified-form-v1":"")+(covered.aligned&&covered.advancedWeek<target-1?" • source-window-attack-v1":"")+(tactical.changed?" • tactical-role-evidence-v1":"")+(momentum.rising?" • momentum-v1 +"+momentum.role_uplift:"")+(recentStarter.applied?" • verified-recent-starter-v1 +"+recentStarter.delta.toFixed(4):"")+(xaReconcile.adjusted?" • defender-xa-source-window-v1 "+xaReconcile.source_minutes+"dk":"")+(officialShift.applied?" • resmî maç: "+event.match_ref:""),
       sub_role:tactical.role||prior.sub_role||null,role_side:tactical.side||prior.role_side||null,
       effective_xa_per90:attackForm.xaPer90
     })
@@ -798,7 +802,7 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
     stableRoleBenchmark===sourceBenchmark
       ?Promise.resolve({data:null,error:null})
       :sb.from("scout_replay_player_inputs").select("player_id,role_probability,durations,duration_weights,source_note,rates").eq("gameweek",gw).eq("benchmark_version",stableRoleBenchmark).order("player_id"),
-    sb.from("scout_player_season_stats").select("player_id,through_gameweek,advanced_through_gameweek,minutes,shots,key_passes,goals,assists,xg_total,xa_total,xa_per90,xa_model_per90,xa_source")
+    sb.from("scout_player_season_stats").select("player_id,through_gameweek,advanced_through_gameweek,minutes,starts,shots,key_passes,goals,assists,xg_total,xa_total,xa_per90,xa_model_per90,xa_source")
       .eq("season","2026-27").eq("through_gameweek",gw-1),
     fetchTrustedWeeklyEvidence(sb,gw),
     stableRoleBenchmark===sourceBenchmark
@@ -882,15 +886,21 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
       cutoffAt:targetKickoffs.get(Number(x.club_id))||new Date(kickoff).toISOString(),
       availability,alreadyApplied:String(stableInput.source_note||"").includes("verified-recent-starter-v1")
     })
+    const stats=sourceStatsMap.get(Number(x.player_id)) as any
+    const durationProfile=starterDurationProfile({
+      position:player?.position||x.position,seasonStarts:stats?.starts,
+      weekly:weeklyMomentumRows.get(Number(x.player_id))||[],
+      verified:tacticalEvidence.get(Number(x.player_id))||[],
+      targetWeek:gw,cutoffAt:targetKickoffs.get(Number(x.club_id))||new Date(kickoff).toISOString()
+    })
     const adjusted=applyOfficialMinutesEvidence({
-      baseline:recentStarter.role,durations:stableInput.durations,durationWeights:stableInput.duration_weights,
+      baseline:recentStarter.role,durations:durationProfile.durations,durationWeights:durationProfile.duration_weights,
       fixtureKickoff:targetKickoffs.get(Number(x.club_id))||new Date(kickoff).toISOString(),evidence:event,
       sameSlotStarter:player&&event?official.directCompetitor(player,event):false,
       availability,
     })
     const rates=(x.rates||[]).map(Number)
     const stableRates=Array.isArray(stableInput.rates)?stableInput.rates.map(Number):rates
-    const stats=sourceStatsMap.get(Number(x.player_id)) as any
     // Use the same aligned source policy in weekly and intraday passes.
     // Retain original stats fields; only the candidate rate is changed.
     const covered=alignAttackSourceWindow({
@@ -927,7 +937,8 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
         shots:stats?.shots==null?null:Number(stats.shots),
         keyPasses:stats?.key_passes==null?null:Number(stats.key_passes),
         xgPer90:xgUpdate.rate,goalsPer90:n(stableRates[1],rates[1]),
-        xaPer90:xaUpdate.rate,assistsPer90:n(stableRates[2],rates[2])
+        xaPer90:xaUpdate.rate,assistsPer90:n(stableRates[2],rates[2]),
+        hasSourcedXg:stats?.xg_total!=null
       })
     const seasonMins=Number(stats?.minutes||0)
     const trustedAdvanced=Number(stats?.advanced_through_gameweek)>=gw-2
@@ -967,9 +978,10 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
       sub_role:tactical.role||x.sub_role,role_side:tactical.side||x.role_side,
       role_probability:adjusted.role,
       effective_xa_per90:rates[3],
-      durations:adjusted.applied?adjusted.durations:x.durations,
-      duration_weights:adjusted.applied?adjusted.duration_weights:x.duration_weights,
+      durations:adjusted.applied?adjusted.durations:durationProfile.durations,
+      duration_weights:adjusted.applied?adjusted.duration_weights:durationProfile.duration_weights,
       source_note:`intraday refresh from ${sourceBenchmark}; role baseline ${stableRoleBenchmark}; source ${latestSourceAt}`
+        +` • starter-duration-source-gated-v2 ${durationProfile.reason}`
         +(momentum.rising?` • momentum-v1 +${momentumBoost}`:"")
         +(recentStarter.applied||String(stableInput.source_note||"").includes("verified-recent-starter-v1")?` • verified-recent-starter-v1 +${recentStarter.delta.toFixed(4)}`:"")
         +(xaReconcile.adjusted?` • defender-xa-source-window-v1 ${xaReconcile.source_minutes}dk`:"")
