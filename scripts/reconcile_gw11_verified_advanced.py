@@ -16,15 +16,18 @@ from audit_gw11_advanced_sources import verified_fixture
 
 FIXTURES=Path("data/source-evidence/gw11-advanced-provider-candidates.json")
 ROSTER=Path("data/source-evidence/gw11-scout-verified-player-identity.json")
-REVIEW=Path("data/source-evidence/gw11-reviewed-provider-name-truncations.json")
-OVERRIDES={int(row["player_id"]):row for row in
-           json.loads(REVIEW.read_text(encoding="utf-8"))["mappings"]}
+REVIEWS=[
+    Path("data/source-evidence/gw10-reviewed-provider-name-truncations.json"),
+    Path("data/source-evidence/gw11-reviewed-provider-name-truncations.json"),
+]
+OVERRIDES={(int(row["match_id"]),int(row["player_id"])):row for file in REVIEWS
+           for row in json.loads(file.read_text(encoding="utf-8"))["mappings"]}
 
 
 def pick_player(target,source,used):
     # Only exact normalized names, or a PREVIOUSLY SOURCE-LINKED provider ID
     # which must still be present in the same team on this particular match.
-    reviewed=OVERRIDES.get(int(target.get("player_id") or 0))
+    reviewed=OVERRIDES.get((int(target.get("match_id") or 0),int(target.get("player_id") or 0)))
     if reviewed and int(reviewed["match_id"])==int(target["match_id"]) and \
        int(reviewed["team_id"])==int(target["team_id"]):
         candidate=int(reviewed["provider_player_id"])
