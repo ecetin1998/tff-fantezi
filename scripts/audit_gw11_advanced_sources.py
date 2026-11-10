@@ -50,7 +50,7 @@ def observed(data):
     return {"players":len(stats),"observed":counter}
 
 def audit(manifest,fetch_page=fetch_html,read_details=read_json):
-    if manifest.get("season")!="2026-27" or manifest.get("gameweek")!=11:
+    if manifest.get("season")!="2026-27" or manifest.get("gameweek") not in (10,11):
         raise ValueError("wrong season/week")
     records=manifest.get("matches") or []
     if len(records)!=9 or len({x["match_id"] for x in records})!=9:
@@ -87,7 +87,7 @@ def audit(manifest,fetch_page=fetch_html,read_details=read_json):
         time.sleep(1)
     verified=sum(row["status"]=="VERIFIED_FULLTIME" for row in output)
     return {
-        "season":"2026-27","gameweek":11,
+        "season":"2026-27","gameweek":manifest["gameweek"],
         "audited_at_utc":datetime.now(timezone.utc).isoformat(),
         "read_only":True,"db_writes":0,"fantasy_points_written":0,
         "verified_fixtures":verified,"expected_fixtures":9,
