@@ -64,6 +64,12 @@ export default async function PlayerPage({ params }){
   const replay=[...(data.replay||[]).filter(row=>row.history_mode!=='live_frozen'),...(pro?.history||[]).map(row=>({...row,history_mode:'live_frozen'}))].sort((a,b)=>Number(a.gameweek)-Number(b.gameweek)).slice(-12)
   const closedWeeks=[...(weekly||[])].sort((x,y)=>Number(x.gameweek||0)-Number(y.gameweek||0))
   const playedWeeks=closedWeeks.filter(w=>Number(w.minutes||0)>0)
+  const advancedWeek=Number(s?.advanced_through_gameweek||0)
+  const seasonWeek=Number(s?.through_gameweek||0)
+  const advancedStale=seasonWeek>advancedWeek
+  const advancedNote=advancedWeek?`MH1–MH${advancedWeek} kaynaklı, sonrası eksik`:'Doğrulanmış ileri veri bulunmuyor'
+  const lastWeek=closedWeeks.at(-1)
+  const lastWeekZero=lastWeek?.minutes===0||Number(lastWeek?.minutes)===0
   const played=Number(s?.matches_played ?? playedWeeks.length)
   const actual=Number(s?.actual_points ?? closedWeeks.reduce((sum,w)=>sum+Number(w.points||0),0))
   const average=played?actual/played:0
@@ -123,7 +129,7 @@ export default async function PlayerPage({ params }){
     {label:'Puan / maç',value:average.toFixed(2)},
     {label:'Maç',value:played},
     {label:'İlk 11',value:Number(s?.starts||0)},
-    {label:'Dakika',value:num(s?.minutes,0)},
+    {label:'Dakika',value:num(s?.minutes,0),note:lastWeekZero?`Son MH${lastWeek.gameweek}: 0 dk kaydı (DNP bağımsız doğrulanmalı)`:undefined},
     ...(isPro?[{label:'6+ maç',value:Number(s?.six_plus_count||0)}]:[]),
   ]
   if(isGK){
@@ -137,17 +143,17 @@ export default async function PlayerPage({ params }){
       {label:'Asist',value:Number(s?.assists||0)}
     )
     if(isPro)seasonMetrics.push(
-      {label:'xG toplam',value:num(s?.xg_total)},
+      {label:'xG toplam',value:num(s?.xg_total),note:advancedNote},
       {label:'xA / 90',value:s?.xa_per90===null||s?.xa_per90===undefined?num(s?.xa_model_per90):num(s?.xa_per90),note:s?.xa_per90===null||s?.xa_per90===undefined?'model/öncül':'gözlenen'},
-      {label:'Şut',value:s?.shots===null||s?.shots===undefined?'—':Number(s.shots)},
+      {label:'Şut',value:s?.shots===null||s?.shots===undefined?'—':Number(s.shots),note:advancedNote},
       {label:'İsabetli şut',value:s?.shots_on_target===null||s?.shots_on_target===undefined?'—':Number(s.shots_on_target)},
       {label:'Şut payı',value:s?.shot_share===null||s?.shot_share===undefined?'—':pct(s.shot_share),note:'takım şutları içindeki pay'},
-      {label:'Yaratılan şans',value:s?.key_passes===null||s?.key_passes===undefined?'—':Number(s.key_passes)},
+      {label:'Yaratılan şans',value:s?.key_passes===null||s?.key_passes===undefined?'—':Number(s.key_passes),note:advancedNote},
       {label:'Şans yaratma payı',value:s?.chance_creation_share===null||s?.chance_creation_share===undefined?'—':pct(s.chance_creation_share),note:'takım yaratılan şans payı'},
       {label:'Orta',value:s?.crosses===null||s?.crosses===undefined?'—':`${Number(s.successful_crosses||0)}/${Number(s.crosses)}`,note:'başarılı / toplam'},
       {label:'Çalım',value:s?.takeons===null||s?.takeons===undefined?'—':`${Number(s.successful_takeons||0)}/${Number(s.takeons)}`,note:'başarılı / toplam'},
       {label:'Takım hücum katkısı',value:s?.attack_contribution_share===null||s?.attack_contribution_share===undefined?'—':pct(s.attack_contribution_share),note:'xG + etkili xA payı'},
-      {label:'İleri veri kapsamı',value:s?.advanced_through_gameweek?`MH1–MH${s.advanced_through_gameweek}`:'—',note:'kaynaklı maç aksiyonları'}
+      {label:'İleri veri kapsamı',value:advancedWeek?`MH1–MH${advancedWeek}`:'—',note:advancedStale?`Sezon MH${seasonWeek}; ileri aksiyonlar kaynak bekliyor`:'kaynaklı maç aksiyonları'}
     )
     if(isDEF)seasonMetrics.push({label:'Gol yemeden',value:Number(s?.clean_sheets||0)})
   }
