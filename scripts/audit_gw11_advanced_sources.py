@@ -60,7 +60,12 @@ def audit(manifest,fetch_page=fetch_html,read_details=read_json):
         result={"match_id":record["match_id"],"source_url":record["candidate_fotmob_url"],
                 "status":"SOURCE_UNAVAILABLE","source_match_id":None}
         try:
-            html=fetch_page(record["candidate_fotmob_url"])
+            original=record["candidate_fotmob_url"]
+            # The legacy verified fetcher accepts only /matches/ (no /tr/).
+            # The localized /tr/matches/ paths stored by official-evidence
+            # reviewers refer to the same FotMob path, not a different host.
+            trusted=original.replace("https://www.fotmob.com/tr/matches/","https://www.fotmob.com/matches/",1)
+            html=fetch_page(trusted)
             options=candidates(html)[:5]
             for match_id in options:
                 try:data=read_details(match_id)
