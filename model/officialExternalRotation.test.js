@@ -69,9 +69,9 @@ const fs=require('node:fs')
   assert.match(worker,/stableRoleMap/,'Intraday refresh must avoid feeding simulation outputs into inputs')
   assert.match(worker,/officialSourceLatest/,'Official external match should trigger predeadline refresh')
   assert.match(worker,/durations:stableInput\.durations,durationWeights:stableInput\.duration_weights/,
-    'Official source must always be applied to weekly stable baseline, not prior modified intraday durations.')
+    'Official source must use source-rebuilt starter durations, never prior modified intraday durations.')
   assert.match(worker,/duration_weights:adjusted\.applied\?adjusted\.duration_weights:x\.duration_weights/,
-    'The current inputs should change only when authenticated official source is applied.')
+    'Only source-derived starter profiles or authenticated official evidence may alter durations.')
   const again=calc({
     baseline:.1318777777,durations:[13,1],durationWeights:[.5555555556,.4444444444],
     fixtureKickoff:kickoff,availability:1,evidence:played(90)
