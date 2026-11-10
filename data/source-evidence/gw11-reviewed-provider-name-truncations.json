@@ -1,0 +1,104 @@
+{
+  "season": "2026-27",
+  "gameweek": 11,
+  "kind": "explicit_reviewed_same_team_provider_identity",
+  "no_automatic_fuzzy_mapping": true,
+  "mappings": [
+    {
+      "match_id": 317874,
+      "team_id": 18,
+      "player_id": 1546,
+      "provider_player_id": 751562,
+      "source_player_name": "Ataberk Dadakdeniz",
+      "evidence": "2026-11-10 23:04Z provider same-team lineup candidate + previously verified Scout identity; manually reviewed truncation; no sole fuzzy scoring"
+    },
+    {
+      "match_id": 317875,
+      "team_id": 16,
+      "player_id": 482,
+      "provider_player_id": 1017745,
+      "source_player_name": "Horațiu Moldovan",
+      "evidence": "2026-11-10 23:04Z provider same-team lineup candidate + previously verified Scout identity; manually reviewed truncation; no sole fuzzy scoring"
+    },
+    {
+      "match_id": 317875,
+      "team_id": 16,
+      "player_id": 501,
+      "provider_player_id": 1844328,
+      "source_player_name": "Christ Sadia",
+      "evidence": "2026-11-10 23:04Z provider same-team lineup candidate + previously verified Scout identity; manually reviewed truncation; no sole fuzzy scoring"
+    },
+    {
+      "match_id": 317875,
+      "team_id": 16,
+      "player_id": 503,
+      "provider_player_id": 1388936,
+      "source_player_name": "Hamza Akman",
+      "evidence": "2026-11-10 23:04Z provider same-team lineup candidate + previously verified Scout identity; manually reviewed truncation; no sole fuzzy scoring"
+    },
+    {
+      "match_id": 317876,
+      "team_id": 15,
+      "player_id": 448,
+      "provider_player_id": 1514682,
+      "source_player_name": "Kouadou Assoumou",
+      "evidence": "2026-11-10 23:04Z provider same-team lineup candidate + previously verified Scout identity; manually reviewed truncation; no sole fuzzy scoring"
+    },
+    {
+      "match_id": 317877,
+      "team_id": 10,
+      "player_id": 286,
+      "provider_player_id": 1304343,
+      "source_player_name": "Allan Godói",
+      "evidence": "2026-11-10 23:04Z provider same-team lineup candidate + previously verified Scout identity; manually reviewed truncation; no sole fuzzy scoring"
+    },
+    {
+      "match_id": 317877,
+      "team_id": 13,
+      "player_id": 381,
+      "provider_player_id": 873227,
+      "source_player_name": "Jerome Opoku",
+      "evidence": "2026-11-10 23:04Z provider same-team lineup candidate + previously verified Scout identity; manually reviewed truncation; no sole fuzzy scoring"
+    },
+    {
+      "match_id": 317878,
+      "team_id": 17,
+      "player_id": 527,
+      "provider_player_id": 1741323,
+      "source_player_name": "Renato Nhaga",
+      "evidence": "2026-11-10 23:04Z provider same-team lineup candidate + previously verified Scout identity; manually reviewed truncation; no sole fuzzy scoring"
+    },
+    {
+      "match_id": 317878,
+      "team_id": 5,
+      "player_id": 586,
+      "provider_player_id": 1054011,
+      "source_player_name": "Collins Sor",
+      "evidence": "2026-11-10 23:04Z provider same-team lineup candidate + previously verified Scout identity; manually reviewed truncation; no sole fuzzy scoring"
+    },
+    {
+      "match_id": 317879,
+      "team_id": 2,
+      "player_id": 401,
+      "provider_player_id": 1060654,
+      "source_player_name": "Festy Ebosele",
+      "evidence": "2026-11-10 23:04Z provider same-team lineup candidate + previously verified Scout identity; manually reviewed truncation; no sole fuzzy scoring"
+    },
+    {
+      "match_id": 317881,
+      "team_id": 1,
+      "player_id": 18,
+      "provider_player_id": 412357,
+      "source_player_name": "Paul Onuachu",
+      "evidence": "2026-11-10 23:04Z provider same-team lineup candidate + previously verified Scout identity; manually reviewed truncation; no sole fuzzy scoring"
+    },
+    {
+      "match_id": 317882,
+      "team_id": 11,
+      "player_id": 813,
+      "provider_player_id": 1011022,
+      "source_player_name": "Cheikh Niasse",
+      "evidence": "2026-11-10 23:04Z provider same-team lineup candidate + previously verified Scout identity; manually reviewed truncation; no sole fuzzy scoring"
+    }
+  ]
+}
