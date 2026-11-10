@@ -68,8 +68,7 @@ export default async function PlayerPage({ params }){
   const seasonWeek=Number(s?.through_gameweek||0)
   const advancedStale=seasonWeek>advancedWeek
   const advancedNote=advancedWeek?`MH1–MH${advancedWeek} kaynaklı, sonrası eksik`:'Doğrulanmış ileri veri bulunmuyor'
-  const lastWeek=closedWeeks.at(-1)
-  const lastWeekZero=lastWeek?.minutes===0||Number(lastWeek?.minutes)===0
+
   const played=Number(s?.matches_played ?? playedWeeks.length)
   const actual=Number(s?.actual_points ?? closedWeeks.reduce((sum,w)=>sum+Number(w.points||0),0))
   const average=played?actual/played:0
@@ -91,6 +90,7 @@ export default async function PlayerPage({ params }){
   const recentWeeks=playedWeeks.slice(-3)
   const recentAverage=recentWeeks.length?recentWeeks.reduce((sum,w)=>sum+Number(w.points||0),0)/recentWeeks.length:0
   const lastWeek=closedWeeks.at(-1)
+  const lastWeekZero=lastWeek?.minutes!==null&&lastWeek?.minutes!==undefined&&Number(lastWeek.minutes)===0
   const bestWeek=closedWeeks.length?Math.max(...closedWeeks.map(w=>Number(w.points||0))):0
   const replayRows=(replay||[])
     .filter(row=>row.actual_points!==null&&row.actual_points!==undefined&&row.p25!==null&&row.p25!==undefined&&row.p90!==null&&row.p90!==undefined)
