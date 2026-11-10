@@ -5,7 +5,7 @@ const GITHUB_OIDC_ISSUER="https://token.actions.githubusercontent.com";
 const GITHUB_REPOSITORY_ID="1353738004";
 const GITHUB_JWKS_URL="https://token.actions.githubusercontent.com/.well-known/jwks";
 const OPS_REF="refs/heads/main";
-const SCORER_POLICY_VERSION="gk-sot-source-age-decay-v4-attack-reliability";
+const SCORER_POLICY_VERSION="gk-sot-source-age-decay-v5-starter-duration-sparse-exposure";
 
 function decodeJwtJson(value){
   const padded=value.replace(/-/g,"+").replace(/_/g,"/").padEnd(Math.ceil(value.length/4)*4,"=");
@@ -265,6 +265,15 @@ Deno.serve(async(req)=>{
       durations:(x.durations||[]).map(Number),duration_weights:(x.duration_weights||[]).map(Number),
       rates:(x.rates||[]).map(Number),sub_role:x.sub_role||null,source_note:x.source_note||""
     }));
+    // An older MH12+ input can pass arithmetic QA while using short bench
+    // appearances as starter exit times. Never score/publish those inputs.
+    if(GAMEWEEK>=12){
+      const stale=P.filter(p=>!String(p.source_note).includes("starter-duration-source-gated-v2"));
+      if(stale.length)return Response.json({
+        error:"STARTER_DURATION_SOURCE_POLICY_MISSING",gameweek:GAMEWEEK,
+        rows:stale.length,policy_version:SCORER_POLICY_VERSION
+      },{status:409});
+    }
     const M=P.length;
     const matches=(mq.data||[]).map(x=>({
       match_id:Number(x.match_id),home_id:Number(x.home_team_id),away_id:Number(x.away_team_id),
