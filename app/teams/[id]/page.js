@@ -52,11 +52,17 @@ export default async function TeamPage({params}){
   const safeMatches=Math.max(1,matchesPlayed)
   const goalsPerMatch=Number(s?.goals_for||0)/safeMatches
   const concededPerMatch=Number(s?.goals_against||0)/safeMatches
-  const shotsPerMatch=Number(s?.shots||0)/safeMatches
-  const oppSotPerMatch=Number(s?.opponent_sot||0)/safeMatches
-  const finishingDelta=Number(s?.goals_for||0)-Number(s?.xg_total||0)
-  const defensiveDelta=Number(s?.xga_total||0)-Number(s?.goals_against||0)
-  const xgDiffPerMatch=Number(s?.xg_diff||0)/safeMatches
+  // MH11 results must not divide MH7 sourced actions, or subtract
+  // MH11 goals from MH7 xG. Carry both periods independently.
+  const advancedMatches=Number(s?.advanced_matches||0)
+  const advancedWeek=advancedMatches>0?Number(s?.through_gameweek||0)-(matchesPlayed-advancedMatches):0
+  const hasAlignedGoals=advancedMatches>0&&advancedMatches===matchesPlayed
+  const shotsPerMatch=advancedMatches>0?Number(s?.shots||0)/advancedMatches:null
+  const oppSotPerMatch=advancedMatches>0?Number(s?.opponent_sot||0)/advancedMatches:null
+  const finishingDelta=hasAlignedGoals?Number(s?.goals_for||0)-Number(s?.xg_total||0):null
+  const defensiveDelta=hasAlignedGoals?Number(s?.xga_total||0)-Number(s?.goals_against||0):null
+  const xgDiffPerMatch=advancedMatches>0?Number(s?.xg_diff||0)/advancedMatches:null
+  const advancedStale=advancedMatches<matchesPlayed
   const tacticalCoverage=tactical?.coverage||'aggregate_only'
   const hasEventProfile=Number(tactical?.event_shot_sample||0)>0
   const hasAdvancedProfile=Number(tactical?.advanced_profile_matches||0)>0
@@ -88,11 +94,12 @@ export default async function TeamPage({params}){
       <div className="team-detail-copy">
         <span className="eyebrow">TAKIM ANALİZİ</span>
         <h1>{team.name}</h1>
-        <p>MH1–MH{s?.through_gameweek||'—'} • {players.length} aktif oyuncu</p>
+        <p>MH1–MH{s?.through_gameweek||'—'} sezon sonuçları • {players.length} aktif oyuncu</p>
+        {advancedStale?<p className="muted">İleri xG/şut kaynağı: MH1–MH{advancedWeek} ({advancedMatches} maç). Sonraki haftalar henüz doğrulanmadı.</p>:null}
         <div className="team-hero-pills">
           <span>{matchesPlayed} maç</span>
-          <span>{num(s?.xg_per_match)} xG/maç</span>
-          <span>{num(s?.xga_per_match)} xGA/maç</span>
+          <span>{advancedMatches?num(s?.xg_per_match):'—'} xG/maç (MH{advancedWeek})</span>
+          <span>{advancedMatches?num(s?.xga_per_match):'—'} xGA/maç (MH{advancedWeek})</span>
           <span>{fantasyTotal} fantezi puanı</span>
         </div>
       </div>
@@ -144,10 +151,10 @@ export default async function TeamPage({params}){
 
     <section className="team-detail-stat-grid team-core-stat-grid">
       <div className="card"><span>Gol / maç</span><b>{num(goalsPerMatch)}</b><small>{s?.goals_for||0} gol</small></div>
-      <div className="card"><span>xG / maç</span><b>{num(s?.xg_per_match)}</b><small>{num(s?.xg_total)} toplam</small></div>
+      <div className="card"><span>xG / maç</span><b>{advancedMatches?num(s?.xg_per_match):'—'}</b><small>MH1–MH{advancedWeek} • {num(s?.xg_total)} toplam</small></div>
       <div className="card"><span>Yenen / maç</span><b>{num(concededPerMatch)}</b><small>{s?.goals_against||0} gol</small></div>
-      <div className="card"><span>xGA / maç</span><b>{num(s?.xga_per_match)}</b><small>{num(s?.xga_total)} toplam</small></div>
-      <div className="card xg-diff-stat"><span>xG farkı / maç</span><b>{xgDiffPerMatch>0?'+':''}{num(xgDiffPerMatch)}</b><small>toplam {Number(s?.xg_diff||0)>0?'+':''}{num(s?.xg_diff)}</small></div>
+      <div className="card"><span>xGA / maç</span><b>{advancedMatches?num(s?.xga_per_match):'—'}</b><small>MH1–MH{advancedWeek} • {num(s?.xga_total)} toplam</small></div>
+      <div className="card xg-diff-stat"><span>xG farkı / maç</span><b>{xgDiffPerMatch===null?'—':(xgDiffPerMatch>0?'+':'')+num(xgDiffPerMatch)}</b><small>MH1–MH{advancedWeek} kaynak kapsamı</small></div>
     </section>
 
     {isPro?<section className="card profile-card team-tactical-profile">
@@ -162,7 +169,7 @@ export default async function TeamPage({params}){
         <div className="card"><span>Rakip isabetli şut baskısı</span><b>{idx(tactical?.keeper_pressure_index)}</b><small>yüksek değer daha fazla baskı</small></div>
         <div className="card"><span>İsabetli şut / maç</span><b>{num(tactical?.shots_on_target_per_match,1)}</b><small>hücum baskısı</small></div>
         <div className="card"><span>Büyük şans</span><b>{tactical?.big_chances??'—'}</b><small>kaçan: {tactical?.big_chances_missed??'—'}</small></div>
-        <div className="card"><span>Rakip ceza sahası dokunuşu</span><b>{tactical?.touches_in_opposition_box??'—'}</b><small>sezon toplamı</small></div>
+        <div className="card"><span>Rakip ceza sahası dokunuşu</span><b>{tactical?.touches_in_opposition_box??'—'}</b><small>MH1–MH{tactical?.advanced_profile_through_gameweek||'—'} toplamı</small></div>
         <div className="card"><span>Şut dönüşümü</span><b>{tactical?.shot_conversion_rate===null||tactical?.shot_conversion_rate===undefined?'—':Number(tactical.shot_conversion_rate).toFixed(1)+'%'}</b><small>gol / şut</small></div>
       </div>
       {hasAdvancedProfile?<div className="team-detail-stat-grid team-core-stat-grid">
@@ -314,16 +321,16 @@ export default async function TeamPage({params}){
           <div className="team-profile-group-head"><span>HÜCUM</span><b>{s?.goals_for||0} gol</b></div>
           <div className="detail-list">
             <div><span>Toplam xG</span><b>{num(s?.xg_total)}</b></div>
-            <div><span>Şut / maç</span><b>{num(shotsPerMatch,1)}</b></div>
-            <div><span>Gol − xG</span><b>{finishingDelta>0?'+':''}{num(finishingDelta)}</b></div>
+            <div><span>Şut / maç</span><b>{shotsPerMatch===null?'—':num(shotsPerMatch,1)}</b><small>{advancedMatches} kaynaklı maç</small></div>
+            <div><span>Gol − xG</span><b>{finishingDelta===null?'—':(finishingDelta>0?'+':'')+num(finishingDelta)}</b><small>{hasAlignedGoals?'Eş dönem':'Dönemler farklı'}</small></div>
           </div>
         </div>
         <div className="team-advanced-group">
           <div className="team-profile-group-head"><span>SAVUNMA & BASKI</span><b>{s?.goals_against||0} gol yedi</b></div>
           <div className="detail-list">
             <div><span>Toplam xGA</span><b>{num(s?.xga_total)}</b></div>
-            <div><span>Rakip isabetli şut / maç</span><b>{num(oppSotPerMatch,1)}</b></div>
-            <div><span>xGA − yenen gol</span><b>{defensiveDelta>0?'+':''}{num(defensiveDelta)}</b></div>
+            <div><span>Rakip isabetli şut / maç</span><b>{oppSotPerMatch===null?'—':num(oppSotPerMatch,1)}</b><small>{advancedMatches} kaynaklı maç</small></div>
+            <div><span>xGA − yenen gol</span><b>{defensiveDelta===null?'—':(defensiveDelta>0?'+':'')+num(defensiveDelta)}</b><small>{hasAlignedGoals?'Eş dönem':'Dönemler farklı'}</small></div>
             <div><span>PPDA</span><b>{num(s?.ppda)}</b></div>
           </div>
         </div>
