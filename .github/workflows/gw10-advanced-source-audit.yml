@@ -7,6 +7,7 @@ on:
       - scripts/reconcile_gw11_verified_advanced.py
       - data/source-evidence/gw10-advanced-provider-candidates.json
       - data/source-evidence/gw10-scout-verified-player-identity.json
+      - data/source-evidence/gw10-reviewed-provider-name-truncations.json
       - .github/workflows/gw10-advanced-source-audit.yml
   workflow_dispatch:
 permissions:
