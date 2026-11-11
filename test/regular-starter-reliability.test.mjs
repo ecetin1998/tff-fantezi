@@ -60,3 +60,10 @@ test('candidate audit requires all new starter-duration provenance, not just a c
   assert.match(src,/run\.is_current!==true/)
   assert.match(src,/select\("player_id,club_id,position,rates,availability,source_note"\)/)
 })
+
+test('long-minute history is independently copied before the five-week attack window is sliced',()=>{
+  const src=readFileSync(new URL('../supabase/functions/weekly-model-lifecycle/index.ts',import.meta.url),'utf8')
+  assert.match(src,/const longerMinuteHistory=new Map\(weeklyMomentumRows\)/)
+  assert.match(src,/weeklyMomentumRows\.set\(playerId,weekly\.slice\(0,5\)\)/)
+  assert.match(src,/weekly:longerMinuteHistory\.get\(Number\(x\.player_id\)\)\|\|\[\]/)
+})
