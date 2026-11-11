@@ -1395,7 +1395,7 @@ Deno.serve(async(req:Request)=>{
       }
       if(!benchmark)return Response.json({ok:false,error:"AUDIT_BENCHMARK_MISSING"},{status:409})
       const [players,matches,fixtures,shares,projections,matchPreds,goalConfig,meta,teamStats,tactical]=await Promise.all([
-        sb.from("scout_replay_player_inputs").select("player_id,club_id,position,rates,availability").eq("gameweek",gw).eq("benchmark_version",benchmark),
+        sb.from("scout_replay_player_inputs").select("player_id,club_id,position,rates,availability,source_note").eq("gameweek",gw).eq("benchmark_version",benchmark),
         sb.from("scout_replay_match_inputs").select("match_id,home_team_id,away_team_id,home_lambda,away_lambda,source_note").eq("gameweek",gw).eq("benchmark_version",benchmark),
         sb.from("scout_match_history").select("match_id,home_team_id,away_team_id").eq("season","2026-27").eq("gameweek",gw),
         sb.from("scout_role_signals").select("player_id,team_goal_share,team_assist_share").eq("run_id",runId),
@@ -1418,6 +1418,11 @@ Deno.serve(async(req:Request)=>{
         (matches.data||[]).some((m:any)=>!String(m.source_note||"").includes(TEAM_ELO_POLICY))){
         return Response.json({ok:false,pass:false,error:"SOURCE_VERIFIED_TEAM_ELO_PROVENANCE_MISSING",
           run_id:runId,benchmark,no_writes:true},{status:409})
+      }
+      if(gw>=12&&run.is_current!==true&&
+        (players.data||[]).some((r:any)=>!String(r.source_note||"").includes("starter-duration-long-window-v3"))){
+        return Response.json({ok:false,pass:false,error:"STARTER_DURATION_LONG_WINDOW_PROVENANCE_MISSING",
+          run_id:runId,gameweek:gw,benchmark,no_writes:true},{status:409})
       }
       const prep=auditMatchAllocation({
         gameweek:gw,fixtures:fixtures.data||[],matchInputs:matches.data||[],
