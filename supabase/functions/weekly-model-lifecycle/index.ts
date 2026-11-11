@@ -832,6 +832,34 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
     }
   }
 
+  // MH12 advanced team update was source-reconciled from 36 FT matches
+  // across MH8–11. Fail closed on missing, duplicated or post-kickoff inputs.
+  // Do not equate this team coverage to player-level xG/xA or deep channels.
+  let verifiedTeamAdvanced:any=null
+  if(gw===12){
+    const [teamQ,sourceQ]=await Promise.all([
+      sb.from("scout_team_season_stats")
+        .select("team_id,advanced_matches,matches_played,through_gameweek")
+        .eq("through_gameweek",11),
+      sb.from("scout_verified_team_match_advanced")
+        .select("team_id,gameweek,match_id,source_observed_at")
+        .eq("season","2026-27").gte("gameweek",8).lte("gameweek",11)
+    ])
+    if(teamQ.error)throw teamQ.error
+    if(sourceQ.error)throw sourceQ.error
+    const sourceRows=sourceQ.data||[],teamRows=teamQ.data||[]
+    const pairs=new Set(sourceRows.map((r:any)=>String(r.gameweek)+":"+String(r.team_id)))
+    const firstKickoff=new Date(kickoff).getTime()
+    if(teamRows.length!==18||teamRows.some((t:any)=>
+       Number(t.advanced_matches)!==11||Number(t.matches_played)!==11)||
+       sourceRows.length!==72||pairs.size!==72||!Number.isFinite(firstKickoff)||
+       sourceRows.some((r:any)=>!Number.isFinite(Date.parse(r.source_observed_at))||
+         Date.parse(r.source_observed_at)>=firstKickoff))
+      throw new Error("MH12_VERIFIED_TEAM_ADVANCED_SOURCE_COVERAGE_MISSING")
+    verifiedTeamAdvanced={policy:"fotmob-tff-team-advanced-mh8-11-v1",source_team_matches:72,
+      source_fixtures:36,teams:18,through_week:11}
+  }
+
   const sourceBenchmark=String(latestMetaQ.data.benchmark_version)
   const stableRoleBenchmark=String(stableMetaQ.data?.benchmark_version||sourceBenchmark)
   const [inputsQ,matchesQ,stableInputsQ,sourceStatsQ,weeklyRecentQ,stableMatchesQ]=await Promise.all([
@@ -1090,7 +1118,8 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
   const meta={...latestMetaQ.data,benchmark_version:benchmark,created_at:new Date().toISOString(),
     team_formations:verifiedFormations.formations,
     lineup_factors:{...(latestMetaQ.data.lineup_factors||{}),goalkeeper_sot_v1:keeperShotEvidence,
-      verified_formations_v1:verifiedFormations.changed_teams},
+      verified_formations_v1:verifiedFormations.changed_teams,
+      verified_team_advanced_v1:verifiedTeamAdvanced},
     source_note:`intraday refresh from ${sourceBenchmark}; source ${latestSourceAt}`+
       (feedback?` • active-fwd-event-share-v1 • baseline ${feedback.config.baselineRunId} • holdouts MH8/MH9 passed`:"")}
   delete (meta as any).id
