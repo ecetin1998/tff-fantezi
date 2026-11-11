@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { getAuthState, getTeamDetail, getTeamFixturesOverview } from '@/lib/data'
+import { getAuthState, getTeamDetail, getTeamDetailAdvancedPro, getTeamFixturesOverview } from '@/lib/data'
 import AccessGate from '@/components/AccessGate'
 import { teamCssVars } from '@/lib/teamThemes'
 import TeamRoster from '@/components/TeamRoster'
@@ -39,6 +39,8 @@ export default async function TeamPage({params}){
     />
   </div>
 
+  const recent=await getTeamDetailAdvancedPro(id)
+  const recentMatches=Number(recent?.source_matches||0)
   const {team,run,season:s,tactical,history,currentMatches=[],currentMatch,opponent,players,fantasyByGameweek}=data
   const isHome=currentMatch?Number(currentMatch.home_team_id)===Number(team.id):false
   const teamXg=currentMatch?(isHome?currentMatch.home_xg:currentMatch.away_xg):null
@@ -156,6 +158,24 @@ export default async function TeamPage({params}){
       <div className="card"><span>xGA / maç</span><b>{advancedMatches?num(s?.xga_per_match):'—'}</b><small>MH1–MH{advancedWeek} • {num(s?.xga_total)} toplam</small></div>
       <div className="card xg-diff-stat"><span>xG farkı / maç</span><b>{xgDiffPerMatch===null?'—':(xgDiffPerMatch>0?'+':'')+num(xgDiffPerMatch)}</b><small>MH1–MH{advancedWeek} kaynak kapsamı</small></div>
     </section>
+
+    {recentMatches===4?<section className="card profile-card team-recent-advanced-source">
+      <div className="panel-head">
+        <div><span className="eyebrow">GÜNCEL İLERİ VERİ</span><h2>Son 4 maçın kaynaklı profili</h2></div>
+        <small>MH{recent.first_gameweek}–MH{recent.through_gameweek} • {recentMatches} maç</small>
+      </div>
+      <div className="team-detail-stat-grid team-core-stat-grid">
+        <div className="card"><span>xG / maç</span><b>{num(Number(recent.xg)/recentMatches)}</b><small>kaynaklı gol beklentisi</small></div>
+        <div className="card"><span>xGA / maç</span><b>{num(Number(recent.xga)/recentMatches)}</b><small>kaynaklı rakip xG</small></div>
+        <div className="card"><span>Şut / maç</span><b>{num(Number(recent.shots)/recentMatches,1)}</b><small>son dört maç</small></div>
+        <div className="card"><span>İsabetli şut / maç</span><b>{num(Number(recent.shots_on_target)/recentMatches,1)}</b><small>son dört maç</small></div>
+        <div className="card"><span>Büyük şans</span><b>{recent.big_chances??'—'}</b><small>kaçan: {recent.big_chances_missed??'—'} • toplam</small></div>
+        <div className="card"><span>Rakip ceza sahası dokunuşu</span><b>{recent.touches_in_opposition_box??'—'}</b><small>son dört maç toplamı</small></div>
+        <div className="card"><span>Duran top xG / maç</span><b>{recent.set_piece_xg==null?'—':num(Number(recent.set_piece_xg)/recentMatches)}</b><small>doğrudan gözlenen</small></div>
+        <div className="card"><span>Topa sahip olma</span><b>{recent.possession_pct==null?'—':num(recent.possession_pct,1)+'%'}</b><small>dört maç ortalaması</small></div>
+      </div>
+      <p className="muted">Bu bölüm MH{recent.first_gameweek}–MH{recent.through_gameweek} maçlarından bağımsız doğrulanan değerleri gösterir. Alttaki tarihsel detay profili ayrı bir kaynak dönemine ait olabilir.</p>
+    </section>:null}
 
     {isPro?<section className="card profile-card team-tactical-profile">
       <div className="panel-head">
