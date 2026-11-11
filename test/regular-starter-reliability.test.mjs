@@ -98,3 +98,10 @@ test('low-sample cameo players never obtain stable-season outlier protection',()
    targetWeek:12,cutoffAt:cutoff})
  assert.ok(x.duration_weights[0]>.30)
 })
+
+test('weekly prepare does not accidentally call a string instead of concatenating source provenance',()=>{
+ const source=readFileSync(new URL('../supabase/functions/weekly-model-lifecycle/index.ts',import.meta.url),'utf8')
+ assert.doesNotMatch(source,/starter-duration-long-window-v3"\(regularStarter\.applied/)
+ assert.match(source,/starter-duration-single-short-shrink-v4/)
+ assert.match(source,/STARTER_DURATION_SINGLE_SHORT_OUTLIER_POLICY_MISSING/)
+})
