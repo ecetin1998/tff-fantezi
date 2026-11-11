@@ -462,14 +462,15 @@ async function prepare(sb:any,current:any,status:any,body:any={}){
   for(const p of players){
     const id=Number(p.id),prior=priorMap.get(id)||{},s=statsMap.get(id)||{},r=roleMap.get(id)||{},av=avMap.get(id)
     if(!av)throw new Error("AVAILABILITY_MISSING_"+id)
-    const rows=(recent.get(id)||[])
+    const minuteHistory=recent.get(id)||[]
+    const rows=minuteHistory.slice(0,5) // retain calibrated role/attack lookback
     const verifiedStarts=verifiedXiEvidence.get(id)||[]
     // Independently calculated MH8 0-minute entries can mean "not in
     // source", not verified DNP. Never teach role/bench probabilities
     // that they are real zero-minute appearances.
     const trustedRows=rows.filter(x=>trustedMinute(x)!==null)
     const durationProfile=starterDurationProfile({
-      position:p.position,seasonStarts:s.starts,weekly:rows,
+      position:p.position,seasonStarts:s.starts,weekly:minuteHistory,
       verified:[...verifiedStarts.map(z=>({...z,verified:true,observed_at:z.updated_at})),...(tacticalEvidence.get(id)||[])],targetWeek:target,
       cutoffAt:teamKickoffs.get(Number(p.team_id))||targetKickoff
     })
@@ -492,7 +493,7 @@ async function prepare(sb:any,current:any,status:any,body:any={}){
     if(recentStarter.applied)roleProb=recentStarter.role
     const regularStarter=regularStarterReliability({
       baseline:roleProb,seasonStarts:s.starts,matchesPlayed:s.matches_played,
-      weekly:rows,verified:verifiedStarts,targetWeek:target,
+      weekly:minuteHistory,verified:verifiedStarts,targetWeek:target,
       cutoffAt:teamKickoffs.get(Number(p.team_id))||targetKickoff,
       availability:n(av.availability_probability,1)
     })
@@ -933,6 +934,10 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
     if(!verifiedXiEvidence.has(id))verifiedXiEvidence.set(id,[])
     verifiedXiEvidence.get(id)!.push(xi)
   }
+  const longerMinuteHistory=weeklyMomentumRows
+  for(const [playerId,weekly] of longerMinuteHistory){
+    weeklyMomentumRows.set(playerId,weekly.slice(0,5))
+  }
   const sourceStatsMap=new Map((sourceStatsQ.data||[]).map((x:any)=>[Number(x.player_id),x]))
   const recentAdvanced=groupRecentAttack(recentAttackQ.data?.advanced||[])
   const recentVerified=groupRecentAttack(recentAttackQ.data?.verified||[])
@@ -985,13 +990,13 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
     const verifiedStarts=verifiedXiEvidence.get(Number(x.player_id))||[]
     const regularStarter=regularStarterReliability({
       baseline:recentStarter.role,seasonStarts:stats?.starts,matchesPlayed:stats?.matches_played,
-      weekly:weeklyMomentumRows.get(Number(x.player_id))||[],verified:verifiedStarts,
+      weekly:longerMinuteHistory.get(Number(x.player_id))||[],verified:verifiedStarts,
       targetWeek:gw,cutoffAt:targetKickoffs.get(Number(x.club_id))||new Date(kickoff).toISOString(),
       availability,alreadyApplied:String(stableInput.source_note||"").includes("season-starter-reliability-v1")
     })
     const durationProfile=starterDurationProfile({
       position:player?.position||x.position,seasonStarts:stats?.starts,
-      weekly:weeklyMomentumRows.get(Number(x.player_id))||[],
+      weekly:longerMinuteHistory.get(Number(x.player_id))||[],
       verified:[...verifiedStarts.map(z=>({...z,verified:true,observed_at:z.updated_at})),...(tacticalEvidence.get(Number(x.player_id))||[])],
       targetWeek:gw,cutoffAt:targetKickoffs.get(Number(x.club_id))||new Date(kickoff).toISOString()
     })
