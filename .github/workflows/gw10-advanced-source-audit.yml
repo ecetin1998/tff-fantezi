@@ -1,0 +1,60 @@
+name: MH10 advanced source audit (read only)
+on:
+  push:
+    branches: [fix/advanced-coverage-truth-and-denominators]
+    paths:
+      - scripts/audit_gw11_advanced_sources.py
+      - scripts/reconcile_gw11_verified_advanced.py
+      - data/source-evidence/gw10-advanced-provider-candidates.json
+      - data/source-evidence/gw10-scout-verified-player-identity.json
+      - data/source-evidence/gw10-reviewed-provider-name-truncations.json
+      - .github/workflows/gw10-advanced-source-audit.yml
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  source-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install source reader
+        run: python -m pip install --disable-pip-version-check beautifulsoup4
+      - name: Verify 9 MH10 fixtures and nullable player advanced metrics
+        run: |
+          python -m unittest discover -s test -p gw11_advanced_source_audit_test.py -v
+          python scripts/audit_gw11_advanced_sources.py --manifest data/source-evidence/gw10-advanced-provider-candidates.json --output gw10-source-fixtures.json
+          jq -e '.verified_fixtures==9 and .db_writes==0 and .fantasy_points_written==0' gw10-source-fixtures.json
+      - name: Reconcile 284 positive-minute players (without guessing zeroes)
+        run: |
+          python -m unittest discover -s test -p gw11_source_player_crosswalk_test.py -v
+          python scripts/reconcile_gw11_verified_advanced.py \
+            --fixtures data/source-evidence/gw10-advanced-provider-candidates.json \
+            --roster data/source-evidence/gw10-scout-verified-player-identity.json \
+            --output gw10-advanced-staging.json
+          jq -r '"MH10 source-matched: \(.matched_played)/\(.expected_played), 0-min excluded: \(.zero_minute_rows_kept_out)"' gw10-advanced-staging.json >> "$GITHUB_STEP_SUMMARY"
+          jq -e '.ready_for_review == true and .verified_fixtures == 9 and .matched_played == .expected_played and .db_writes==0' gw10-advanced-staging.json
+      - name: Preserve independently matched MH10 observations for review
+        if: ${{ always() && github.ref_name == 'fix/advanced-coverage-truth-and-denominators' }}
+        run: |
+          if [ ! -s gw10-advanced-staging.json ]; then exit 0; fi
+          if ! jq -e '.verified_fixtures==9 and .matched_played>=270 and .db_writes==0' gw10-advanced-staging.json; then exit 0; fi
+          cp gw10-advanced-staging.json data/source-evidence/gw10-player-advanced-staging-observed.json
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config user.name "github-actions[bot]"
+          git add data/source-evidence/gw10-player-advanced-staging-observed.json
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m "data(source): record verified MH10 observed advanced player facts"
+          git pull --rebase origin "${GITHUB_REF_NAME}"
+          git push origin "HEAD:${GITHUB_REF_NAME}"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mh10-advanced-source-audit
+          path: |
+            gw10-source-fixtures.json
+            gw10-advanced-staging.json
+          if-no-files-found: ignore

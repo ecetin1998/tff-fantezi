@@ -1,0 +1,116 @@
+{
+  "season": "2026-27",
+  "gameweek": 10,
+  "source": "reviewed FotMob indexed match URLs, independently validate live FT + teams + score + UTC kickoff; original TFF fixtures from Supabase",
+  "matching_policy": "fixture+UTC_kickoff+score+both_teams",
+  "matches": [
+    {
+      "gameweek": 10,
+      "match_id": 317865,
+      "home_team_id": 1,
+      "away_team_id": 18,
+      "home_team": "Trabzonspor",
+      "away_team": "Gaziantep",
+      "home_goals": 2,
+      "away_goals": 0,
+      "kickoff_at": "2026-11-01 13:00:00+00",
+      "candidate_fotmob_url": "https://www.fotmob.com/matches/gaziantep-fk-vs-trabzonspor/1kz0w5"
+    },
+    {
+      "gameweek": 10,
+      "match_id": 317866,
+      "home_team_id": 3,
+      "away_team_id": 9,
+      "home_team": "Kasımpaşa",
+      "away_team": "Beşiktaş",
+      "home_goals": 2,
+      "away_goals": 2,
+      "kickoff_at": "2026-11-01 16:00:00+00",
+      "candidate_fotmob_url": "https://www.fotmob.com/matches/kasmpasa-vs-besiktas/1tuv82"
+    },
+    {
+      "gameweek": 10,
+      "match_id": 317867,
+      "home_team_id": 13,
+      "away_team_id": 15,
+      "home_team": "Başakşehir",
+      "away_team": "Samsunspor",
+      "home_goals": 5,
+      "away_goals": 2,
+      "kickoff_at": "2026-11-01 13:00:00+00",
+      "candidate_fotmob_url": "https://www.fotmob.com/matches/basaksehir-vs-samsunspor/14n364"
+    },
+    {
+      "gameweek": 10,
+      "match_id": 317868,
+      "home_team_id": 5,
+      "away_team_id": 16,
+      "home_team": "Amed",
+      "away_team": "Eyüpspor",
+      "home_goals": 5,
+      "away_goals": 1,
+      "kickoff_at": "2026-11-01 10:30:00+00",
+      "candidate_fotmob_url": "https://www.fotmob.com/matches/eyupspor-vs-amed-sportif/2cnkeos"
+    },
+    {
+      "gameweek": 10,
+      "match_id": 317869,
+      "home_team_id": 11,
+      "away_team_id": 14,
+      "home_team": "Gençlerbirliği",
+      "away_team": "Alanyaspor",
+      "home_goals": 5,
+      "away_goals": 0,
+      "kickoff_at": "2026-11-02 17:00:00+00",
+      "candidate_fotmob_url": "https://www.fotmob.com/matches/alanyaspor-vs-genclerbirligi/1acwgp"
+    },
+    {
+      "gameweek": 10,
+      "match_id": 317870,
+      "home_team_id": 7,
+      "away_team_id": 17,
+      "home_team": "Konyaspor",
+      "away_team": "Galatasaray",
+      "home_goals": 0,
+      "away_goals": 4,
+      "kickoff_at": "2026-10-30 17:00:00+00",
+      "candidate_fotmob_url": "https://www.fotmob.com/matches/konyaspor-vs-galatasaray/2golhr"
+    },
+    {
+      "gameweek": 10,
+      "match_id": 317871,
+      "home_team_id": 6,
+      "away_team_id": 10,
+      "home_team": "Fenerbahçe",
+      "away_team": "Göztepe",
+      "home_goals": 1,
+      "away_goals": 2,
+      "kickoff_at": "2026-10-31 16:00:00+00",
+      "candidate_fotmob_url": "https://www.fotmob.com/matches/goztepe-vs-fenerbahce/xkzb1"
+    },
+    {
+      "gameweek": 10,
+      "match_id": 317872,
+      "home_team_id": 4,
+      "away_team_id": 12,
+      "home_team": "Kocaelispor",
+      "away_team": "Rizespor",
+      "home_goals": 0,
+      "away_goals": 0,
+      "kickoff_at": "2026-10-31 13:00:00+00",
+      "candidate_fotmob_url": "https://www.fotmob.com/matches/kocaelispor-vs-rizespor/45l56"
+    },
+    {
+      "gameweek": 10,
+      "match_id": 317873,
+      "home_team_id": 2,
+      "away_team_id": 8,
+      "home_team": "Erzurumspor",
+      "away_team": "Çorum FK",
+      "home_goals": 1,
+      "away_goals": 3,
+      "kickoff_at": "2026-10-31 10:30:00+00",
+      "candidate_fotmob_url": "https://www.fotmob.com/matches/erzurumspor-fk-vs-corum-fk/2lpps0ld"
+    }
+  ]
+}

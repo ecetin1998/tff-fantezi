@@ -1,0 +1,4567 @@
+{
+  "season": "2026-27",
+  "gameweek": 10,
+  "join_policy": "per player final minutes (owner approved), candidate identity only, zero minutes not verified DNP",
+  "players": [
+    {
+      "match_id": 317865,
+      "player_id": 2,
+      "team_id": 1,
+      "full_name": "Metehan Mimaroğlu",
+      "display_name": "Metehan",
+      "short_label": "Metehan",
+      "minutes": "17.00",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317865,
+      "player_id": 3,
+      "team_id": 1,
+      "full_name": "Tim Jabol-Folcarelli",
+      "display_name": "Folcarelli",
+      "short_label": "Folcarelli",
+      "minutes": "45.00",
+      "known_provider_player_id": 1244808
+    },
+    {
+      "match_id": 317865,
+      "player_id": 4,
+      "team_id": 1,
+      "full_name": "Ernest Muçi",
+      "display_name": "Muçi",
+      "short_label": "Muçi",
+      "minutes": "73.00",
+      "known_provider_player_id": 1121511
+    },
+    {
+      "match_id": 317865,
+      "player_id": 5,
+      "team_id": 1,
+      "full_name": "Cihan Çanak",
+      "display_name": "Cihan",
+      "short_label": "Cihan",
+      "minutes": "0",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317865,
+      "player_id": 7,
+      "team_id": 1,
+      "full_name": "Mehmet Umut Nayir",
+      "display_name": "Umut",
+      "short_label": "Umut",
+      "minutes": "27.00",
+      "known_provider_player_id": 411605
+    },
+    {
+      "match_id": 317865,
+      "player_id": 9,
+      "team_id": 1,
+      "full_name": "Ruslan Malinovskyi",
+      "display_name": "Malinovskyi",
+      "short_label": "Malinovskyi",
+      "minutes": "0",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317865,
+      "player_id": 10,
+      "team_id": 1,
+      "full_name": "Noah José Damesquita E Melo Saviolo",
+      "display_name": "Saviolo",
+      "short_label": "Saviolo",
+      "minutes": "73.00",
+      "known_provider_player_id": 1793475
+    },
+    {
+      "match_id": 317865,
+      "player_id": 11,
+      "team_id": 1,
+      "full_name": "Doğuhan Aral Şimşir",
+      "display_name": "Aral",
+      "short_label": "Aral",
+      "minutes": "0",
+      "known_provider_player_id": 1126769
+    },
+    {
+      "match_id": 317865,
+      "player_id": 12,
+      "team_id": 1,
+      "full_name": "Mohamed Salah Hamed Mahrous Ghaly",
+      "display_name": "Salah",
+      "short_label": "Salah",
+      "minutes": "90.00",
+      "known_provider_player_id": 292462
+    },
+    {
+      "match_id": 317865,
+      "player_id": 14,
+      "team_id": 1,
+      "full_name": "Ozan Tufan",
+      "display_name": "Ozan",
+      "short_label": "Ozan",
+      "minutes": "17.00",
+      "known_provider_player_id": 358936
+    },
+    {
+      "match_id": 317865,
+      "player_id": 15,
+      "team_id": 1,
+      "full_name": "Mustafa Eskihellaç",
+      "display_name": "Mustafa",
+      "short_label": "Mustafa",
+      "minutes": "10.00",
+      "known_provider_player_id": 889717
+    },
+    {
+      "match_id": 317865,
+      "player_id": 17,
+      "team_id": 1,
+      "full_name": "Arsenii Batahov",
+      "display_name": "Batahov",
+      "short_label": "Batahov",
+      "minutes": "0",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317865,
+      "player_id": 18,
+      "team_id": 1,
+      "full_name": "Ebere Paul Onuachu",
+      "display_name": "Onuachu",
+      "short_label": "Onuachu",
+      "minutes": "63.00",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317865,
+      "player_id": 22,
+      "team_id": 1,
+      "full_name": "André Onana",
+      "display_name": "Onana",
+      "short_label": "Onana",
+      "minutes": "90.00",
+      "known_provider_player_id": 611491
+    },
+    {
+      "match_id": 317865,
+      "player_id": 27,
+      "team_id": 1,
+      "full_name": "Stefan Savić",
+      "display_name": "Savic",
+      "short_label": "Savic",
+      "minutes": "90.00",
+      "known_provider_player_id": 178955
+    },
+    {
+      "match_id": 317865,
+      "player_id": 28,
+      "team_id": 1,
+      "full_name": "Wagner Fabrício Cardoso de Pina",
+      "display_name": "Pina",
+      "short_label": "Pina",
+      "minutes": "90.00",
+      "known_provider_player_id": 1460591
+    },
+    {
+      "match_id": 317865,
+      "player_id": 30,
+      "team_id": 1,
+      "full_name": "Onuralp Çevikkan",
+      "display_name": "Onuralp",
+      "short_label": "Onuralp",
+      "minutes": "0",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317865,
+      "player_id": 32,
+      "team_id": 1,
+      "full_name": "Melih Kabasakal",
+      "display_name": "Melih",
+      "short_label": "Melih",
+      "minutes": "45.00",
+      "known_provider_player_id": 718867
+    },
+    {
+      "match_id": 317865,
+      "player_id": 33,
+      "team_id": 1,
+      "full_name": "Cenk Özkacar",
+      "display_name": "Cenk",
+      "short_label": "Cenk",
+      "minutes": "0",
+      "known_provider_player_id": 1107951
+    },
+    {
+      "match_id": 317865,
+      "player_id": 34,
+      "team_id": 1,
+      "full_name": "Okay Yokuşlu",
+      "display_name": "Okay",
+      "short_label": "Okay",
+      "minutes": "0",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317865,
+      "player_id": 35,
+      "team_id": 1,
+      "full_name": "Sidny Lopes Cabral",
+      "display_name": "Cabral",
+      "short_label": "Cabral",
+      "minutes": "90.00",
+      "known_provider_player_id": 1441786
+    },
+    {
+      "match_id": 317865,
+      "player_id": 37,
+      "team_id": 1,
+      "full_name": "Chibuike Godfrey Nwaiwu",
+      "display_name": "Nwaiwu",
+      "short_label": "Nwaiwu",
+      "minutes": "90.00",
+      "known_provider_player_id": 1435397
+    },
+    {
+      "match_id": 317865,
+      "player_id": 38,
+      "team_id": 1,
+      "full_name": "Samet Akaydin",
+      "display_name": "Samet",
+      "short_label": "Samet",
+      "minutes": "0",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317865,
+      "player_id": 40,
+      "team_id": 1,
+      "full_name": "Ahmet Doğan Yıldırım",
+      "display_name": "Ahmet",
+      "short_label": "Ahmet",
+      "minutes": "0",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317865,
+      "player_id": 536,
+      "team_id": 18,
+      "full_name": "Halil İbrahim Dervişoğlu",
+      "display_name": "Halil",
+      "short_label": "Halil",
+      "minutes": "17.00",
+      "known_provider_player_id": 938521
+    },
+    {
+      "match_id": 317865,
+      "player_id": 549,
+      "team_id": 18,
+      "full_name": "Cemilhan Aslan",
+      "display_name": "Cemilhan",
+      "short_label": "Cemilhan",
+      "minutes": "0",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317865,
+      "player_id": 550,
+      "team_id": 18,
+      "full_name": "Leo Myenty Janna Abena",
+      "display_name": "Abena",
+      "short_label": "Abena",
+      "minutes": "0",
+      "known_provider_player_id": 523380
+    },
+    {
+      "match_id": 317865,
+      "player_id": 552,
+      "team_id": 18,
+      "full_name": "İbrahim Kağan Alkış",
+      "display_name": "İbrahim",
+      "short_label": "İbrahim",
+      "minutes": "0",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317865,
+      "player_id": 553,
+      "team_id": 18,
+      "full_name": "Trivante Vincent Stewart",
+      "display_name": "Stewart",
+      "short_label": "Stewart",
+      "minutes": "73.00",
+      "known_provider_player_id": 1420378
+    },
+    {
+      "match_id": 317865,
+      "player_id": 554,
+      "team_id": 18,
+      "full_name": "Kacper Tobiasz",
+      "display_name": "Tobiasz",
+      "short_label": "Tobiasz",
+      "minutes": "0",
+      "known_provider_player_id": 1194358
+    },
+    {
+      "match_id": 317865,
+      "player_id": 555,
+      "team_id": 18,
+      "full_name": "Arda Kızıldağ",
+      "display_name": "Arda",
+      "short_label": "Arda",
+      "minutes": "0",
+      "known_provider_player_id": 1079065
+    },
+    {
+      "match_id": 317865,
+      "player_id": 557,
+      "team_id": 18,
+      "full_name": "Ulrich Sidoine Meleke",
+      "display_name": "Meleke",
+      "short_label": "Meleke",
+      "minutes": "0",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317865,
+      "player_id": 559,
+      "team_id": 18,
+      "full_name": "Victor Ntino-Emo Gidado",
+      "display_name": "Gidado",
+      "short_label": "Gidado",
+      "minutes": "90.00",
+      "known_provider_player_id": 1637892
+    },
+    {
+      "match_id": 317865,
+      "player_id": 560,
+      "team_id": 18,
+      "full_name": "Juninho Gracielo Bacuna",
+      "display_name": "Bacuna",
+      "short_label": "Bacuna",
+      "minutes": "90.00",
+      "known_provider_player_id": 614574
+    },
+    {
+      "match_id": 317865,
+      "player_id": 561,
+      "team_id": 18,
+      "full_name": "Drissa Gui Camara",
+      "display_name": "Camara",
+      "short_label": "Camara",
+      "minutes": "90.00",
+      "known_provider_player_id": 967759
+    },
+    {
+      "match_id": 317865,
+      "player_id": 564,
+      "team_id": 18,
+      "full_name": "Kerim Çalhanoğlu",
+      "display_name": "Kerim",
+      "short_label": "Kerim",
+      "minutes": "90.00",
+      "known_provider_player_id": 1211252
+    },
+    {
+      "match_id": 317865,
+      "player_id": 565,
+      "team_id": 18,
+      "full_name": "Nazım Sangaré",
+      "display_name": "Sangaré",
+      "short_label": "Sangaré",
+      "minutes": "0",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317865,
+      "player_id": 566,
+      "team_id": 18,
+      "full_name": "Ali Osman Kalın",
+      "display_name": "Ali",
+      "short_label": "Ali",
+      "minutes": "0",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317865,
+      "player_id": 567,
+      "team_id": 18,
+      "full_name": "Deian Cristian Sorescu",
+      "display_name": "Sorescu",
+      "short_label": "Sorescu",
+      "minutes": "73.00",
+      "known_provider_player_id": 783806
+    },
+    {
+      "match_id": 317865,
+      "player_id": 568,
+      "team_id": 18,
+      "full_name": "Alexandru Iulian Maxim",
+      "display_name": "Maxim",
+      "short_label": "Maxim",
+      "minutes": "17.00",
+      "known_provider_player_id": 298923
+    },
+    {
+      "match_id": 317865,
+      "player_id": 571,
+      "team_id": 18,
+      "full_name": "Karamba Gassama",
+      "display_name": "Gassama",
+      "short_label": "Gassama",
+      "minutes": "45.00",
+      "known_provider_player_id": 1717397
+    },
+    {
+      "match_id": 317865,
+      "player_id": 572,
+      "team_id": 18,
+      "full_name": "Luis Jesús Pérez Maqueda",
+      "display_name": "Pérez",
+      "short_label": "Pérez",
+      "minutes": "90.00",
+      "known_provider_player_id": 766957
+    },
+    {
+      "match_id": 317865,
+      "player_id": 573,
+      "team_id": 18,
+      "full_name": "Kacper Szymon Kozłowski",
+      "display_name": "Kozlowski",
+      "short_label": "Kozlowski",
+      "minutes": "45.00",
+      "known_provider_player_id": 1051411
+    },
+    {
+      "match_id": 317865,
+      "player_id": 575,
+      "team_id": 18,
+      "full_name": "Fuat Bavuk",
+      "display_name": "Fuat",
+      "short_label": "Fuat",
+      "minutes": "0",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317865,
+      "player_id": 576,
+      "team_id": 18,
+      "full_name": "Ogün Özçiçek",
+      "display_name": "Ogün",
+      "short_label": "Ogün",
+      "minutes": "0",
+      "known_provider_player_id": 1289513
+    },
+    {
+      "match_id": 317865,
+      "player_id": 577,
+      "team_id": 18,
+      "full_name": "Mirza Cihan",
+      "display_name": "Mirza",
+      "short_label": "Mirza",
+      "minutes": "0",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317865,
+      "player_id": 578,
+      "team_id": 18,
+      "full_name": "Serdar Dursun",
+      "display_name": "Serdar",
+      "short_label": "Serdar",
+      "minutes": "0",
+      "known_provider_player_id": 317267
+    },
+    {
+      "match_id": 317865,
+      "player_id": 579,
+      "team_id": 18,
+      "full_name": "Muhammet Akmelek",
+      "display_name": "Muhammet",
+      "short_label": "Muhammet",
+      "minutes": "0",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317865,
+      "player_id": 844,
+      "team_id": 18,
+      "full_name": "Misjonne Juniffer Naigelino Hansen",
+      "display_name": "Hansen",
+      "short_label": "Hansen",
+      "minutes": "0",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317865,
+      "player_id": 1009,
+      "team_id": 1,
+      "full_name": "Fábio Henrique Tavares",
+      "display_name": "Fabinho",
+      "short_label": "Fabinho",
+      "minutes": "80.00",
+      "known_provider_player_id": 359188
+    },
+    {
+      "match_id": 317865,
+      "player_id": 1471,
+      "team_id": 1,
+      "full_name": "Franculino Gluda Djú",
+      "display_name": "Dju",
+      "short_label": "Dju",
+      "minutes": "0",
+      "known_provider_player_id": 1374500
+    },
+    {
+      "match_id": 317865,
+      "player_id": 1539,
+      "team_id": 18,
+      "full_name": "Loubadhe Abakar Sylla",
+      "display_name": "Sylla",
+      "short_label": "Sylla",
+      "minutes": "90.00",
+      "known_provider_player_id": 1359613
+    },
+    {
+      "match_id": 317865,
+      "player_id": 1546,
+      "team_id": 18,
+      "full_name": "Mehmet Ataberk Dadakdeniz",
+      "display_name": "Ataberk",
+      "short_label": "Ataberk",
+      "minutes": "90.00",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317865,
+      "player_id": 1547,
+      "team_id": 1,
+      "full_name": "Ali Habeşoğlu",
+      "display_name": "Ali",
+      "short_label": "Ali",
+      "minutes": "0",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317865,
+      "player_id": 1570,
+      "team_id": 18,
+      "full_name": "Efe Sarıkaya",
+      "display_name": "Efe",
+      "short_label": "Efe",
+      "minutes": "90.00",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317865,
+      "player_id": 1609,
+      "team_id": 18,
+      "full_name": "Sabahattin Destici",
+      "display_name": null,
+      "short_label": "Destici",
+      "minutes": "1.00",
+      "known_provider_player_id": 1564576
+    },
+    {
+      "match_id": 317866,
+      "player_id": 71,
+      "team_id": 3,
+      "full_name": "Ayberk Karapo",
+      "display_name": "Ayberk",
+      "short_label": "Ayberk",
+      "minutes": "86.00",
+      "known_provider_player_id": 1403468
+    },
+    {
+      "match_id": 317866,
+      "player_id": 72,
+      "team_id": 3,
+      "full_name": "Ali Yavuz Kol",
+      "display_name": "Ali",
+      "short_label": "Ali",
+      "minutes": "86.00",
+      "known_provider_player_id": 997497
+    },
+    {
+      "match_id": 317866,
+      "player_id": 75,
+      "team_id": 3,
+      "full_name": "Adrian Dawid Benedyczak",
+      "display_name": "Benedyczak",
+      "short_label": "Benedyczak",
+      "minutes": "90.00",
+      "known_provider_player_id": 920861
+    },
+    {
+      "match_id": 317866,
+      "player_id": 76,
+      "team_id": 3,
+      "full_name": "Taylan Utku Aydın",
+      "display_name": "Taylan",
+      "short_label": "Taylan",
+      "minutes": "0",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317866,
+      "player_id": 77,
+      "team_id": 3,
+      "full_name": "Kerem Demirbay",
+      "display_name": "Kerem",
+      "short_label": "Kerem",
+      "minutes": "90.00",
+      "known_provider_player_id": 331540
+    },
+    {
+      "match_id": 317866,
+      "player_id": 78,
+      "team_id": 3,
+      "full_name": "Marcus Albin John Rafferty",
+      "display_name": "Rafferty",
+      "short_label": "Rafferty",
+      "minutes": "7.00",
+      "known_provider_player_id": 1505429
+    },
+    {
+      "match_id": 317866,
+      "player_id": 80,
+      "team_id": 3,
+      "full_name": "Andreas Gianniotis",
+      "display_name": "Gianniotis",
+      "short_label": "Gianniotis",
+      "minutes": "90.00",
+      "known_provider_player_id": 380858
+    },
+    {
+      "match_id": 317866,
+      "player_id": 81,
+      "team_id": 3,
+      "full_name": "Güven Yalçın",
+      "display_name": "Güven",
+      "short_label": "Güven",
+      "minutes": "24.00",
+      "known_provider_player_id": 950417
+    },
+    {
+      "match_id": 317866,
+      "player_id": 84,
+      "team_id": 3,
+      "full_name": "Adem Arous",
+      "display_name": "Arous",
+      "short_label": "Arous",
+      "minutes": "90.00",
+      "known_provider_player_id": 1797902
+    },
+    {
+      "match_id": 317866,
+      "player_id": 85,
+      "team_id": 3,
+      "full_name": "Emirhan Boz",
+      "display_name": "Emirhan",
+      "short_label": "Emirhan B.",
+      "minutes": "0",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317866,
+      "player_id": 86,
+      "team_id": 3,
+      "full_name": "Andri Fannar Baldursson",
+      "display_name": "Baldursson",
+      "short_label": "Baldursson",
+      "minutes": "0",
+      "known_provider_player_id": 937034
+    },
+    {
+      "match_id": 317866,
+      "player_id": 88,
+      "team_id": 3,
+      "full_name": "Jakob Vestergaard Jessen",
+      "display_name": "Jessen",
+      "short_label": "Jessen",
+      "minutes": "4.00",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317866,
+      "player_id": 89,
+      "team_id": 3,
+      "full_name": "Emirhan Yiğit",
+      "display_name": "Emirhan",
+      "short_label": "Emirhan Y.",
+      "minutes": "0",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317866,
+      "player_id": 92,
+      "team_id": 3,
+      "full_name": "Haris Hajradinović",
+      "display_name": "Haris",
+      "short_label": "Haris",
+      "minutes": "83.00",
+      "known_provider_player_id": 384343
+    },
+    {
+      "match_id": 317866,
+      "player_id": 93,
+      "team_id": 3,
+      "full_name": "Mecit Sercan Deniz",
+      "display_name": "Sercan",
+      "short_label": "Sercan",
+      "minutes": "0",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317866,
+      "player_id": 94,
+      "team_id": 3,
+      "full_name": "Cláudio Winck Neto",
+      "display_name": "Winck",
+      "short_label": "Winck",
+      "minutes": "90.00",
+      "known_provider_player_id": 267368
+    },
+    {
+      "match_id": 317866,
+      "player_id": 95,
+      "team_id": 3,
+      "full_name": "Kamil Ahmet Çörekçi",
+      "display_name": "Kamil",
+      "short_label": "Kamil",
+      "minutes": "0",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317866,
+      "player_id": 97,
+      "team_id": 3,
+      "full_name": "Elson Mendes Da Silva",
+      "display_name": "Mendes",
+      "short_label": "Mendes",
+      "minutes": "90.00",
+      "known_provider_player_id": 1595606
+    },
+    {
+      "match_id": 317866,
+      "player_id": 102,
+      "team_id": 3,
+      "full_name": "Thiemoko Diarra",
+      "display_name": "Diarra",
+      "short_label": "Diarra",
+      "minutes": "4.00",
+      "known_provider_player_id": 1540435
+    },
+    {
+      "match_id": 317866,
+      "player_id": 104,
+      "team_id": 3,
+      "full_name": "Matei Cristian Ilie",
+      "display_name": "Ilie",
+      "short_label": "Ilie",
+      "minutes": "90.00",
+      "known_provider_player_id": 1197741
+    },
+    {
+      "match_id": 317866,
+      "player_id": 106,
+      "team_id": 3,
+      "full_name": "Ali Emre Yanar",
+      "display_name": "Ali Emre",
+      "short_label": "Ali Emre",
+      "minutes": "0",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317866,
+      "player_id": 257,
+      "team_id": 9,
+      "full_name": "Milot Rashica",
+      "display_name": "Rashica",
+      "short_label": "Rashica",
+      "minutes": "7.00",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317866,
+      "player_id": 258,
+      "team_id": 9,
+      "full_name": "Kartal Kayra Yılmaz",
+      "display_name": "Kartal",
+      "short_label": "Kartal",
+      "minutes": "0",
+      "known_provider_player_id": 1001348
+    },
+    {
+      "match_id": 317866,
+      "player_id": 259,
+      "team_id": 9,
+      "full_name": "Rıdvan Yılmaz",
+      "display_name": "Rıdvan",
+      "short_label": "Rıdvan",
+      "minutes": "90.00",
+      "known_provider_player_id": 992071
+    },
+    {
+      "match_id": 317866,
+      "player_id": 260,
+      "team_id": 9,
+      "full_name": "Taylan Bulut",
+      "display_name": "Taylan",
+      "short_label": "Taylan",
+      "minutes": "7.00",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317866,
+      "player_id": 261,
+      "team_id": 9,
+      "full_name": "Badobre Emmanuel Elysee Djedje Agbadou",
+      "display_name": "Agbadou",
+      "short_label": "Agbadou",
+      "minutes": "90.00",
+      "known_provider_player_id": 1114979
+    },
+    {
+      "match_id": 317866,
+      "player_id": 263,
+      "team_id": 9,
+      "full_name": "Doğan Alemdar",
+      "display_name": "Doğan",
+      "short_label": "Doğan",
+      "minutes": "0",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317866,
+      "player_id": 264,
+      "team_id": 9,
+      "full_name": "Junior Olaïtan Ishola",
+      "display_name": "Olaitan",
+      "short_label": "Olaitan",
+      "minutes": "63.00",
+      "known_provider_player_id": 1264368
+    },
+    {
+      "match_id": 317866,
+      "player_id": 266,
+      "team_id": 9,
+      "full_name": "Mustafa Erhan Hekimoğlu",
+      "display_name": "Mustafa",
+      "short_label": "Mustafa",
+      "minutes": "0",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317866,
+      "player_id": 268,
+      "team_id": 9,
+      "full_name": "Semih Kılıçsoy",
+      "display_name": "Semih",
+      "short_label": "Semih",
+      "minutes": "0",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317866,
+      "player_id": 269,
+      "team_id": 9,
+      "full_name": "Onyinye Wilfred Ndidi",
+      "display_name": "Ndidi",
+      "short_label": "Ndidi",
+      "minutes": "90.00",
+      "known_provider_player_id": 533228
+    },
+    {
+      "match_id": 317866,
+      "player_id": 270,
+      "team_id": 9,
+      "full_name": "Kassoum Ouattara",
+      "display_name": "Ouattara",
+      "short_label": "Ouattara",
+      "minutes": "0",
+      "known_provider_player_id": 1387194
+    },
+    {
+      "match_id": 317866,
+      "player_id": 271,
+      "team_id": 9,
+      "full_name": "Tiago Emanuel Embaló Djaló",
+      "display_name": "Djaló",
+      "short_label": "Djaló",
+      "minutes": "14.00",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317866,
+      "player_id": 273,
+      "team_id": 9,
+      "full_name": "Leandro Trossard",
+      "display_name": "Trossard",
+      "short_label": "Trossard",
+      "minutes": "83.00",
+      "known_provider_player_id": 318615
+    },
+    {
+      "match_id": 317866,
+      "player_id": 275,
+      "team_id": 9,
+      "full_name": "Hyeon-Gyu Oh",
+      "display_name": "Oh",
+      "short_label": "Oh",
+      "minutes": "27.00",
+      "known_provider_player_id": 1044299
+    },
+    {
+      "match_id": 317866,
+      "player_id": 277,
+      "team_id": 9,
+      "full_name": "Michael Amir Murillo Bermúdez",
+      "display_name": "Murillo",
+      "short_label": "Murillo",
+      "minutes": "83.00",
+      "known_provider_player_id": 643635
+    },
+    {
+      "match_id": 317866,
+      "player_id": 278,
+      "team_id": 9,
+      "full_name": "İlhan Fakılı",
+      "display_name": "İlhan",
+      "short_label": "İlhan",
+      "minutes": "45.00",
+      "known_provider_player_id": 1642084
+    },
+    {
+      "match_id": 317866,
+      "player_id": 279,
+      "team_id": 9,
+      "full_name": "Václav Černý",
+      "display_name": "Cerny",
+      "short_label": "Cerny",
+      "minutes": "45.00",
+      "known_provider_player_id": 623540
+    },
+    {
+      "match_id": 317866,
+      "player_id": 280,
+      "team_id": 9,
+      "full_name": "Alexander Nübel",
+      "display_name": "Nübel",
+      "short_label": "Nübel",
+      "minutes": "90.00",
+      "known_provider_player_id": 554534
+    },
+    {
+      "match_id": 317866,
+      "player_id": 281,
+      "team_id": 9,
+      "full_name": "Orkun Kökçü",
+      "display_name": "Orkun",
+      "short_label": "Orkun",
+      "minutes": "0",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317866,
+      "player_id": 282,
+      "team_id": 9,
+      "full_name": "Emirhan Topçu",
+      "display_name": "Emirhan",
+      "short_label": "Emirhan",
+      "minutes": "76.00",
+      "known_provider_player_id": 873855
+    },
+    {
+      "match_id": 317866,
+      "player_id": 284,
+      "team_id": 9,
+      "full_name": "Yasin Özcan",
+      "display_name": "Yasin",
+      "short_label": "Yasin",
+      "minutes": "0",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317866,
+      "player_id": 285,
+      "team_id": 9,
+      "full_name": "Salih Özcan",
+      "display_name": "Salih",
+      "short_label": "Salih",
+      "minutes": "90.00",
+      "known_provider_player_id": 738064
+    },
+    {
+      "match_id": 317866,
+      "player_id": 428,
+      "team_id": 9,
+      "full_name": "Ümit Akdağ",
+      "display_name": "Ümit",
+      "short_label": "Ümit",
+      "minutes": "0",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317866,
+      "player_id": 593,
+      "team_id": 9,
+      "full_name": "Dušan Vlahović",
+      "display_name": "Vlahović",
+      "short_label": "Vlahović",
+      "minutes": "90.00",
+      "known_provider_player_id": 737857
+    },
+    {
+      "match_id": 317866,
+      "player_id": 1075,
+      "team_id": 3,
+      "full_name": "Kevin Camron Mouanga",
+      "display_name": "Mouanga",
+      "short_label": "Mouanga",
+      "minutes": "0",
+      "known_provider_player_id": 978112
+    },
+    {
+      "match_id": 317866,
+      "player_id": 1141,
+      "team_id": 9,
+      "full_name": "Ernest Poku",
+      "display_name": "Poku",
+      "short_label": "Poku",
+      "minutes": "0",
+      "known_provider_player_id": 1251666
+    },
+    {
+      "match_id": 317866,
+      "player_id": 1209,
+      "team_id": 9,
+      "full_name": "Fabio Miretti",
+      "display_name": "Miretti",
+      "short_label": "Miretti",
+      "minutes": "0",
+      "known_provider_player_id": 1280080
+    },
+    {
+      "match_id": 317866,
+      "player_id": 1541,
+      "team_id": 3,
+      "full_name": "Ömer Bayram",
+      "display_name": "Ömer",
+      "short_label": "Ömer",
+      "minutes": "0",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317866,
+      "player_id": 1543,
+      "team_id": 3,
+      "full_name": "Jesurun Rak-Sakyi",
+      "display_name": "Sakyi",
+      "short_label": "Sakyi",
+      "minutes": "66.00",
+      "known_provider_player_id": 1226789
+    },
+    {
+      "match_id": 317867,
+      "player_id": 36,
+      "team_id": 13,
+      "full_name": "Umut Dilan Bozok",
+      "display_name": "Umut",
+      "short_label": "Umut B.",
+      "minutes": "0",
+      "known_provider_player_id": 791915
+    },
+    {
+      "match_id": 317867,
+      "player_id": 380,
+      "team_id": 13,
+      "full_name": "Muhammed Şengezer",
+      "display_name": "Muhammed",
+      "short_label": "Muhammed",
+      "minutes": "90.00",
+      "known_provider_player_id": 814153
+    },
+    {
+      "match_id": 317867,
+      "player_id": 381,
+      "team_id": 13,
+      "full_name": "Jerome Osei Opoku",
+      "display_name": "Opoku",
+      "short_label": "Opoku",
+      "minutes": "0",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317867,
+      "player_id": 382,
+      "team_id": 13,
+      "full_name": "Abbosbek Fayzullayev",
+      "display_name": "Fayzullayev",
+      "short_label": "Fayzullayev",
+      "minutes": "12.00",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317867,
+      "player_id": 384,
+      "team_id": 13,
+      "full_name": "Jakub Kałuziński",
+      "display_name": "Kaluzinski",
+      "short_label": "Kaluzinski",
+      "minutes": "90.00",
+      "known_provider_player_id": 1131992
+    },
+    {
+      "match_id": 317867,
+      "player_id": 385,
+      "team_id": 13,
+      "full_name": "Ivan Brnić",
+      "display_name": "Brnic",
+      "short_label": "Brnic",
+      "minutes": "78.00",
+      "known_provider_player_id": 1186010
+    },
+    {
+      "match_id": 317867,
+      "player_id": 386,
+      "team_id": 13,
+      "full_name": "Deniz Dilmen",
+      "display_name": "Deniz",
+      "short_label": "Deniz",
+      "minutes": "0",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317867,
+      "player_id": 387,
+      "team_id": 13,
+      "full_name": "Umut Güneş",
+      "display_name": "Umut",
+      "short_label": "Umut G.",
+      "minutes": "0",
+      "known_provider_player_id": 844473
+    },
+    {
+      "match_id": 317867,
+      "player_id": 388,
+      "team_id": 13,
+      "full_name": "Andreas Skov Olsen",
+      "display_name": "Olsen",
+      "short_label": "Olsen",
+      "minutes": "78.00",
+      "known_provider_player_id": 861932
+    },
+    {
+      "match_id": 317867,
+      "player_id": 390,
+      "team_id": 13,
+      "full_name": "Emin Bayram",
+      "display_name": "Emin",
+      "short_label": "Emin",
+      "minutes": "90.00",
+      "known_provider_player_id": 1114123
+    },
+    {
+      "match_id": 317867,
+      "player_id": 391,
+      "team_id": 13,
+      "full_name": "Saba Kharebashvili",
+      "display_name": "Kharebashvili",
+      "short_label": "Kharebashvili",
+      "minutes": "90.00",
+      "known_provider_player_id": 1658140
+    },
+    {
+      "match_id": 317867,
+      "player_id": 393,
+      "team_id": 13,
+      "full_name": "Volkan Babacan",
+      "display_name": "Volkan",
+      "short_label": "Volkan",
+      "minutes": "0",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317867,
+      "player_id": 394,
+      "team_id": 13,
+      "full_name": "Onur Ergün",
+      "display_name": "Onur",
+      "short_label": "Onur E.",
+      "minutes": "12.00",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317867,
+      "player_id": 395,
+      "team_id": 13,
+      "full_name": "Davie Selke",
+      "display_name": "Selke",
+      "short_label": "Selke",
+      "minutes": "67.00",
+      "known_provider_player_id": 501568
+    },
+    {
+      "match_id": 317867,
+      "player_id": 396,
+      "team_id": 13,
+      "full_name": "Ousseynou Ba",
+      "display_name": "Ba",
+      "short_label": "Ba",
+      "minutes": "90.00",
+      "known_provider_player_id": 864066
+    },
+    {
+      "match_id": 317867,
+      "player_id": 397,
+      "team_id": 13,
+      "full_name": "Hamza Güreler",
+      "display_name": "Hamza",
+      "short_label": "Hamza",
+      "minutes": "0",
+      "known_provider_player_id": 1561076
+    },
+    {
+      "match_id": 317867,
+      "player_id": 398,
+      "team_id": 13,
+      "full_name": "Christopher Téa Domoraud Opéri",
+      "display_name": "Operi",
+      "short_label": "Operi",
+      "minutes": "0",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317867,
+      "player_id": 400,
+      "team_id": 13,
+      "full_name": "Ömer Ali Şahiner",
+      "display_name": "Ömer Ali",
+      "short_label": "Ömer Ali",
+      "minutes": "0",
+      "known_provider_player_id": 303187
+    },
+    {
+      "match_id": 317867,
+      "player_id": 402,
+      "team_id": 13,
+      "full_name": "Michał Karbownik",
+      "display_name": "Karbownik",
+      "short_label": "Karbownik",
+      "minutes": "90.00",
+      "known_provider_player_id": 1065940
+    },
+    {
+      "match_id": 317867,
+      "player_id": 404,
+      "team_id": 13,
+      "full_name": "Eldor Shomurodov",
+      "display_name": "Shomu",
+      "short_label": "Shomu",
+      "minutes": "90.00",
+      "known_provider_player_id": 619513
+    },
+    {
+      "match_id": 317867,
+      "player_id": 407,
+      "team_id": 13,
+      "full_name": "Olivier Michel Kemen",
+      "display_name": "Kemen",
+      "short_label": "Kemen",
+      "minutes": "78.00",
+      "known_provider_player_id": 625164
+    },
+    {
+      "match_id": 317867,
+      "player_id": 408,
+      "team_id": 13,
+      "full_name": "Edin Višća",
+      "display_name": "Visca",
+      "short_label": "Visca",
+      "minutes": "0",
+      "known_provider_player_id": 199302
+    },
+    {
+      "match_id": 317867,
+      "player_id": 409,
+      "team_id": 13,
+      "full_name": "Yusuf Sarı",
+      "display_name": "Yusuf",
+      "short_label": "Yusuf",
+      "minutes": "12.00",
+      "known_provider_player_id": 863858
+    },
+    {
+      "match_id": 317867,
+      "player_id": 410,
+      "team_id": 13,
+      "full_name": "Berkay Özcan",
+      "display_name": "Berkay",
+      "short_label": "Berkay",
+      "minutes": "0",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317867,
+      "player_id": 411,
+      "team_id": 13,
+      "full_name": "Onur Bulut",
+      "display_name": "Onur",
+      "short_label": "Onur B.",
+      "minutes": "0",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317867,
+      "player_id": 412,
+      "team_id": 13,
+      "full_name": "Bertuğ Özgür Yıldırım",
+      "display_name": "Bertuğ",
+      "short_label": "Bertuğ",
+      "minutes": "23.00",
+      "known_provider_player_id": 1282765
+    },
+    {
+      "match_id": 317867,
+      "player_id": 439,
+      "team_id": 15,
+      "full_name": "Yunus Emre Çift",
+      "display_name": "Yunus",
+      "short_label": "Yunus",
+      "minutes": "0",
+      "known_provider_player_id": 1322580
+    },
+    {
+      "match_id": 317867,
+      "player_id": 443,
+      "team_id": 15,
+      "full_name": "Samed Onur",
+      "display_name": "Samed",
+      "short_label": "Samed",
+      "minutes": "19.00",
+      "known_provider_player_id": 1215016
+    },
+    {
+      "match_id": 317867,
+      "player_id": 446,
+      "team_id": 15,
+      "full_name": "Fatih Kaya",
+      "display_name": "Fatih",
+      "short_label": "Fatih",
+      "minutes": "0",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317867,
+      "player_id": 447,
+      "team_id": 15,
+      "full_name": "Bilal Bayazıt",
+      "display_name": "Bilal",
+      "short_label": "Bilal",
+      "minutes": "90.00",
+      "known_provider_player_id": 873568
+    },
+    {
+      "match_id": 317867,
+      "player_id": 448,
+      "team_id": 15,
+      "full_name": "Kouadou Jaurès Assoumou",
+      "display_name": "Assoumou",
+      "short_label": "Assoumou",
+      "minutes": "19.00",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317867,
+      "player_id": 453,
+      "team_id": 15,
+      "full_name": "Tanguy Bemin Coulibaly",
+      "display_name": "Coulibaly",
+      "short_label": "Coulibaly",
+      "minutes": "82.00",
+      "known_provider_player_id": 1072913
+    },
+    {
+      "match_id": 317867,
+      "player_id": 455,
+      "team_id": 15,
+      "full_name": "Elliot William Watt",
+      "display_name": "Watt",
+      "short_label": "Watt",
+      "minutes": "71.00",
+      "known_provider_player_id": 959435
+    },
+    {
+      "match_id": 317867,
+      "player_id": 456,
+      "team_id": 15,
+      "full_name": "Afonso Gamelas de Pinho Sousa",
+      "display_name": "Sousa",
+      "short_label": "Sousa",
+      "minutes": "0",
+      "known_provider_player_id": 1083349
+    },
+    {
+      "match_id": 317867,
+      "player_id": 457,
+      "team_id": 15,
+      "full_name": "Logi Tómasson",
+      "display_name": "Tómasson",
+      "short_label": "Tómasson",
+      "minutes": "90.00",
+      "known_provider_player_id": 796756
+    },
+    {
+      "match_id": 317867,
+      "player_id": 458,
+      "team_id": 15,
+      "full_name": "Enes Albak",
+      "display_name": "Enes",
+      "short_label": "Enes",
+      "minutes": "0",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317867,
+      "player_id": 461,
+      "team_id": 15,
+      "full_name": "Igor Drapiński",
+      "display_name": "Igor",
+      "short_label": "Igor",
+      "minutes": "90.00",
+      "known_provider_player_id": 1277126
+    },
+    {
+      "match_id": 317867,
+      "player_id": 462,
+      "team_id": 15,
+      "full_name": "Celil Yüksel",
+      "display_name": "Celil",
+      "short_label": "Celil",
+      "minutes": "15.00",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317867,
+      "player_id": 463,
+      "team_id": 15,
+      "full_name": "Yirigue Foungognan Sekongo",
+      "display_name": "Sekongo",
+      "short_label": "Sekongo",
+      "minutes": "71.00",
+      "known_provider_player_id": 1666481
+    },
+    {
+      "match_id": 317867,
+      "player_id": 466,
+      "team_id": 15,
+      "full_name": "Yalçın Kayan",
+      "display_name": "Yalçın",
+      "short_label": "Yalçın",
+      "minutes": "0",
+      "known_provider_player_id": 955627
+    },
+    {
+      "match_id": 317867,
+      "player_id": 467,
+      "team_id": 15,
+      "full_name": "Emre Kılınç",
+      "display_name": "Emre",
+      "short_label": "Emre",
+      "minutes": "0",
+      "known_provider_player_id": 305679
+    },
+    {
+      "match_id": 317867,
+      "player_id": 470,
+      "team_id": 15,
+      "full_name": "Okan Kocuk",
+      "display_name": "Okan",
+      "short_label": "Okan",
+      "minutes": "0",
+      "known_provider_player_id": 305148
+    },
+    {
+      "match_id": 317867,
+      "player_id": 471,
+      "team_id": 15,
+      "full_name": "Elayis Tavşan",
+      "display_name": "Elayis",
+      "short_label": "Elayis",
+      "minutes": "45.00",
+      "known_provider_player_id": 983047
+    },
+    {
+      "match_id": 317867,
+      "player_id": 472,
+      "team_id": 15,
+      "full_name": "Josafat Wooding Mendes",
+      "display_name": "Mendes",
+      "short_label": "Mendes",
+      "minutes": "90.00",
+      "known_provider_player_id": 1284496
+    },
+    {
+      "match_id": 317867,
+      "player_id": 474,
+      "team_id": 15,
+      "full_name": "Saikuba Jarju",
+      "display_name": "Jarju",
+      "short_label": "Jarju",
+      "minutes": "8.00",
+      "known_provider_player_id": 1883401
+    },
+    {
+      "match_id": 317867,
+      "player_id": 613,
+      "team_id": 15,
+      "full_name": "Gabriele Guarino",
+      "display_name": "Guarino",
+      "short_label": "Guarino",
+      "minutes": "45.00",
+      "known_provider_player_id": 1396086
+    },
+    {
+      "match_id": 317867,
+      "player_id": 1042,
+      "team_id": 15,
+      "full_name": "Oskar Skovbjerg Øhlenschlæger",
+      "display_name": "Oskar",
+      "short_label": "Oskar",
+      "minutes": "75.00",
+      "known_provider_player_id": 1436939
+    },
+    {
+      "match_id": 317867,
+      "player_id": 1573,
+      "team_id": 15,
+      "full_name": "Strahinja Eraković",
+      "display_name": "Erakovic",
+      "short_label": "Erakovic",
+      "minutes": "90.00",
+      "known_provider_player_id": 1122595
+    },
+    {
+      "match_id": 317867,
+      "player_id": 1603,
+      "team_id": 15,
+      "full_name": "Mohamed Lamine Bayo",
+      "display_name": "Bayo",
+      "short_label": "Bayo",
+      "minutes": "90.00",
+      "known_provider_player_id": 891373
+    },
+    {
+      "match_id": 317868,
+      "player_id": 82,
+      "team_id": 16,
+      "full_name": "Yusuf Barası",
+      "display_name": "Barası",
+      "short_label": "Barası",
+      "minutes": "45.00",
+      "known_provider_player_id": 1125999
+    },
+    {
+      "match_id": 317868,
+      "player_id": 134,
+      "team_id": 5,
+      "full_name": "Kahraman Demirtaş",
+      "display_name": "Kahraman",
+      "short_label": "Kahraman",
+      "minutes": "5.00",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317868,
+      "player_id": 135,
+      "team_id": 5,
+      "full_name": "Mehmet Yeşil",
+      "display_name": "Mehmet",
+      "short_label": "Mehmet",
+      "minutes": "90.00",
+      "known_provider_player_id": 751842
+    },
+    {
+      "match_id": 317868,
+      "player_id": 136,
+      "team_id": 5,
+      "full_name": "Diaa Sabi'a",
+      "display_name": "Diaa Sabi'a",
+      "short_label": "Diaa Sabi'a",
+      "minutes": "77.00",
+      "known_provider_player_id": 289473
+    },
+    {
+      "match_id": 317868,
+      "player_id": 139,
+      "team_id": 5,
+      "full_name": "Cengiz Umut Meraş",
+      "display_name": "Umut",
+      "short_label": "Umut",
+      "minutes": "85.00",
+      "known_provider_player_id": 707668
+    },
+    {
+      "match_id": 317868,
+      "player_id": 144,
+      "team_id": 5,
+      "full_name": "Mbaye Diagne",
+      "display_name": "Diagne",
+      "short_label": "Diagne",
+      "minutes": "0",
+      "known_provider_player_id": 512734
+    },
+    {
+      "match_id": 317868,
+      "player_id": 145,
+      "team_id": 5,
+      "full_name": "Mustafa Burak Bozan",
+      "display_name": "Burak",
+      "short_label": "Burak",
+      "minutes": "0",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317868,
+      "player_id": 148,
+      "team_id": 5,
+      "full_name": "Gift Emmanuel Orban",
+      "display_name": "Orban",
+      "short_label": "Orban",
+      "minutes": "78.00",
+      "known_provider_player_id": 1368557
+    },
+    {
+      "match_id": 317868,
+      "player_id": 149,
+      "team_id": 5,
+      "full_name": "Rayan Ny Aina Arnaldo Raveloson",
+      "display_name": "Rayan",
+      "short_label": "Rayan",
+      "minutes": "90.00",
+      "known_provider_player_id": 591529
+    },
+    {
+      "match_id": 317868,
+      "player_id": 151,
+      "team_id": 5,
+      "full_name": "David Robert Bates",
+      "display_name": "Bates",
+      "short_label": "Bates",
+      "minutes": "90.00",
+      "known_provider_player_id": 470399
+    },
+    {
+      "match_id": 317868,
+      "player_id": 152,
+      "team_id": 5,
+      "full_name": "Ermal Krasniqi",
+      "display_name": "Krasniqi",
+      "short_label": "Krasniqi",
+      "minutes": "55.00",
+      "known_provider_player_id": 1315511
+    },
+    {
+      "match_id": 317868,
+      "player_id": 154,
+      "team_id": 5,
+      "full_name": "Amadou Cissé",
+      "display_name": "Cissé",
+      "short_label": "Cissé",
+      "minutes": "0",
+      "known_provider_player_id": 1697247
+    },
+    {
+      "match_id": 317868,
+      "player_id": 155,
+      "team_id": 5,
+      "full_name": "Cem Üstündağ",
+      "display_name": "Cem",
+      "short_label": "Cem",
+      "minutes": "0",
+      "known_provider_player_id": 1385176
+    },
+    {
+      "match_id": 317868,
+      "player_id": 157,
+      "team_id": 5,
+      "full_name": "Furkan Soyalp",
+      "display_name": "Furkan",
+      "short_label": "Furkan",
+      "minutes": "55.00",
+      "known_provider_player_id": 390642
+    },
+    {
+      "match_id": 317868,
+      "player_id": 160,
+      "team_id": 5,
+      "full_name": "Berk Kızıldemir",
+      "display_name": "Berk",
+      "short_label": "Berk",
+      "minutes": "0",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317868,
+      "player_id": 161,
+      "team_id": 5,
+      "full_name": "Alban-Marc Lafont",
+      "display_name": "Lafont",
+      "short_label": "Lafont",
+      "minutes": "90.00",
+      "known_provider_player_id": 698273
+    },
+    {
+      "match_id": 317868,
+      "player_id": 162,
+      "team_id": 5,
+      "full_name": "Lumbardh Dellova",
+      "display_name": "Dellova",
+      "short_label": "Dellova",
+      "minutes": "0",
+      "known_provider_player_id": 1067805
+    },
+    {
+      "match_id": 317868,
+      "player_id": 272,
+      "team_id": 16,
+      "full_name": "Emre Bilgin",
+      "display_name": "Emre",
+      "short_label": "Emre",
+      "minutes": "90.00",
+      "known_provider_player_id": 1178124
+    },
+    {
+      "match_id": 317868,
+      "player_id": 328,
+      "team_id": 5,
+      "full_name": "Dilhan Demir",
+      "display_name": "Dilhan",
+      "short_label": "Dilhan",
+      "minutes": "0",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317868,
+      "player_id": 355,
+      "team_id": 16,
+      "full_name": "Seyfettin Anıl Yaşar",
+      "display_name": "Anıl",
+      "short_label": "Anıl",
+      "minutes": "0",
+      "known_provider_player_id": 1210344
+    },
+    {
+      "match_id": 317868,
+      "player_id": 475,
+      "team_id": 16,
+      "full_name": "Charles-André Raux-Yao",
+      "display_name": "Charles",
+      "short_label": "Charles",
+      "minutes": "62.00",
+      "known_provider_player_id": 1668290
+    },
+    {
+      "match_id": 317868,
+      "player_id": 477,
+      "team_id": 16,
+      "full_name": "Konrad Hubert Michalak",
+      "display_name": "Michalak",
+      "short_label": "Michalak",
+      "minutes": "28.00",
+      "known_provider_player_id": 815981
+    },
+    {
+      "match_id": 317868,
+      "player_id": 478,
+      "team_id": 16,
+      "full_name": "Abdelhamid Sabiri",
+      "display_name": "Sabiri",
+      "short_label": "Sabiri",
+      "minutes": "28.00",
+      "known_provider_player_id": 769644
+    },
+    {
+      "match_id": 317868,
+      "player_id": 479,
+      "team_id": 16,
+      "full_name": "Bilal Boutobba",
+      "display_name": "Boutobba",
+      "short_label": "Boutobba",
+      "minutes": "62.00",
+      "known_provider_player_id": 605858
+    },
+    {
+      "match_id": 317868,
+      "player_id": 481,
+      "team_id": 16,
+      "full_name": "Chandrel Géraud Massanga Matondo",
+      "display_name": "Massanga",
+      "short_label": "Massanga",
+      "minutes": "90.00",
+      "known_provider_player_id": 1120319
+    },
+    {
+      "match_id": 317868,
+      "player_id": 482,
+      "team_id": 16,
+      "full_name": "Horațiu Alexandru Moldovan",
+      "display_name": "Moldovan",
+      "short_label": "Moldovan",
+      "minutes": "0",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317868,
+      "player_id": 483,
+      "team_id": 16,
+      "full_name": "David José Soares Oliveira Furtado Costa",
+      "display_name": "Costa",
+      "short_label": "Costa",
+      "minutes": "90.00",
+      "known_provider_player_id": 1523340
+    },
+    {
+      "match_id": 317868,
+      "player_id": 484,
+      "team_id": 16,
+      "full_name": "Mete Kaan Demir",
+      "display_name": "Mete",
+      "short_label": "Mete",
+      "minutes": "90.00",
+      "known_provider_player_id": 872726
+    },
+    {
+      "match_id": 317868,
+      "player_id": 485,
+      "team_id": 16,
+      "full_name": "Umut Keseci",
+      "display_name": "Umut",
+      "short_label": "Umut",
+      "minutes": "0",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317868,
+      "player_id": 486,
+      "team_id": 16,
+      "full_name": "Lenny Jean-Pierre Pintor",
+      "display_name": "Pintor",
+      "short_label": "Pintor",
+      "minutes": "85.00",
+      "known_provider_player_id": 889626
+    },
+    {
+      "match_id": 317868,
+      "player_id": 489,
+      "team_id": 16,
+      "full_name": "Jawad El Yamiq",
+      "display_name": "El Yamiq",
+      "short_label": "El Yamiq",
+      "minutes": "90.00",
+      "known_provider_player_id": 798736
+    },
+    {
+      "match_id": 317868,
+      "player_id": 491,
+      "team_id": 16,
+      "full_name": "Talha Ülvan",
+      "display_name": "Talha",
+      "short_label": "Talha",
+      "minutes": "30.00",
+      "known_provider_player_id": 1393698
+    },
+    {
+      "match_id": 317868,
+      "player_id": 492,
+      "team_id": 16,
+      "full_name": "Abdou Khadre Sy",
+      "display_name": "Sy",
+      "short_label": "Sy",
+      "minutes": "0",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317868,
+      "player_id": 493,
+      "team_id": 16,
+      "full_name": "Zak Kennedy Jules",
+      "display_name": "Jules",
+      "short_label": "Jules",
+      "minutes": "90.00",
+      "known_provider_player_id": 708872
+    },
+    {
+      "match_id": 317868,
+      "player_id": 495,
+      "team_id": 16,
+      "full_name": "Ahmed Abdullahi",
+      "display_name": "Ahmed",
+      "short_label": "Ahmed",
+      "minutes": "45.00",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317868,
+      "player_id": 498,
+      "team_id": 16,
+      "full_name": "Arda Yavuz",
+      "display_name": "Arda",
+      "short_label": "Arda",
+      "minutes": "5.00",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317868,
+      "player_id": 500,
+      "team_id": 16,
+      "full_name": "Taşkın İlter",
+      "display_name": "Taşkın",
+      "short_label": "Taşkın",
+      "minutes": "0",
+      "known_provider_player_id": 589567
+    },
+    {
+      "match_id": 317868,
+      "player_id": 501,
+      "team_id": 16,
+      "full_name": "Christ Otiniel Sadia",
+      "display_name": "Sadia",
+      "short_label": "Sadia",
+      "minutes": "0",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317868,
+      "player_id": 503,
+      "team_id": 16,
+      "full_name": "Hamza Yiğit Akman",
+      "display_name": "Hamza",
+      "short_label": "Hamza",
+      "minutes": "60.00",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317868,
+      "player_id": 586,
+      "team_id": 5,
+      "full_name": "Yira Collins Sor",
+      "display_name": "Sor",
+      "short_label": "Sor",
+      "minutes": "13.00",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317868,
+      "player_id": 595,
+      "team_id": 5,
+      "full_name": "Mohamed Khalil",
+      "display_name": "Khalil",
+      "short_label": "Khalil",
+      "minutes": "12.00",
+      "known_provider_player_id": 1697928
+    },
+    {
+      "match_id": 317868,
+      "player_id": 600,
+      "team_id": 5,
+      "full_name": "Samuel Leo Beat Ballet",
+      "display_name": "Ballet",
+      "short_label": "Ballet",
+      "minutes": "90.00",
+      "known_provider_player_id": 1097796
+    },
+    {
+      "match_id": 317868,
+      "player_id": 617,
+      "team_id": 5,
+      "full_name": "Rayan Lutin",
+      "display_name": "Lutin",
+      "short_label": "Lutin",
+      "minutes": "90.00",
+      "known_provider_player_id": 1514624
+    },
+    {
+      "match_id": 317868,
+      "player_id": 624,
+      "team_id": 5,
+      "full_name": "Gökhan Gül",
+      "display_name": "Gökhan",
+      "short_label": "Gökhan",
+      "minutes": "35.00",
+      "known_provider_player_id": 642495
+    },
+    {
+      "match_id": 317868,
+      "player_id": 943,
+      "team_id": 16,
+      "full_name": "Simone Giordano",
+      "display_name": "Giordano",
+      "short_label": "Giordano",
+      "minutes": "0",
+      "known_provider_player_id": 1346625
+    },
+    {
+      "match_id": 317868,
+      "player_id": 1174,
+      "team_id": 16,
+      "full_name": "Yiğit Demir",
+      "display_name": "Yiğit",
+      "short_label": "Yiğit",
+      "minutes": "0",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317868,
+      "player_id": 1604,
+      "team_id": 5,
+      "full_name": "Ali Turap Bülbül",
+      "display_name": null,
+      "short_label": "Bülbül",
+      "minutes": "35.00",
+      "known_provider_player_id": 1393739
+    },
+    {
+      "match_id": 317868,
+      "player_id": 1607,
+      "team_id": 5,
+      "full_name": "Miraç Acer",
+      "display_name": null,
+      "short_label": "Acer",
+      "minutes": "0",
+      "known_provider_player_id": 1117176
+    },
+    {
+      "match_id": 317869,
+      "player_id": 195,
+      "team_id": 11,
+      "full_name": "İrfan Can Eğribayat",
+      "display_name": "İrfan Can",
+      "short_label": "İrfan Can",
+      "minutes": "90.00",
+      "known_provider_player_id": 707777
+    },
+    {
+      "match_id": 317869,
+      "player_id": 317,
+      "team_id": 11,
+      "full_name": "Gökhan Akkan",
+      "display_name": "Gökhan",
+      "short_label": "Gökhan",
+      "minutes": "0",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317869,
+      "player_id": 319,
+      "team_id": 11,
+      "full_name": "Sékou Koïta",
+      "display_name": "Koïta",
+      "short_label": "Koïta",
+      "minutes": "0",
+      "known_provider_player_id": 690411
+    },
+    {
+      "match_id": 317869,
+      "player_id": 322,
+      "team_id": 11,
+      "full_name": "Muhammet Ensar Çavuşoğlu",
+      "display_name": "Ensar",
+      "short_label": "Ensar Ç.",
+      "minutes": "0",
+      "known_provider_player_id": 1897362
+    },
+    {
+      "match_id": 317869,
+      "player_id": 326,
+      "team_id": 11,
+      "full_name": "Ousmane Diabate",
+      "display_name": "Diabate",
+      "short_label": "Diabate",
+      "minutes": "0",
+      "known_provider_player_id": 1904467
+    },
+    {
+      "match_id": 317869,
+      "player_id": 330,
+      "team_id": 11,
+      "full_name": "Oğulcan Ülgün",
+      "display_name": "Oğulcan",
+      "short_label": "Oğulcan",
+      "minutes": "90.00",
+      "known_provider_player_id": 820089
+    },
+    {
+      "match_id": 317869,
+      "player_id": 332,
+      "team_id": 11,
+      "full_name": "Kévin Manuel Rodrigues",
+      "display_name": "Rodrigues",
+      "short_label": "Rodrigues",
+      "minutes": "0",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317869,
+      "player_id": 335,
+      "team_id": 11,
+      "full_name": "Zafer Göktuğ Erdem",
+      "display_name": "Göktuğ",
+      "short_label": "Göktuğ",
+      "minutes": "0",
+      "known_provider_player_id": 2089192
+    },
+    {
+      "match_id": 317869,
+      "player_id": 336,
+      "team_id": 11,
+      "full_name": "Thalisson Kelven da Silva",
+      "display_name": "Thalisson",
+      "short_label": "Thalisson",
+      "minutes": "90.00",
+      "known_provider_player_id": 815997
+    },
+    {
+      "match_id": 317869,
+      "player_id": 338,
+      "team_id": 11,
+      "full_name": "Pedro Miguel Almeida Lopes Pereira",
+      "display_name": "Pereira",
+      "short_label": "Pereira",
+      "minutes": "0",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317869,
+      "player_id": 339,
+      "team_id": 11,
+      "full_name": "Dimitrios Goutas",
+      "display_name": "Goutas",
+      "short_label": "Goutas",
+      "minutes": "0",
+      "known_provider_player_id": 282615
+    },
+    {
+      "match_id": 317869,
+      "player_id": 341,
+      "team_id": 11,
+      "full_name": "Furkan Ayaz Özcan",
+      "display_name": "Furkan",
+      "short_label": "Furkan",
+      "minutes": "4.00",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317869,
+      "player_id": 342,
+      "team_id": 11,
+      "full_name": "Fıratcan Üzüm",
+      "display_name": "Fıratcan",
+      "short_label": "Fıratcan",
+      "minutes": "0",
+      "known_provider_player_id": 848349
+    },
+    {
+      "match_id": 317869,
+      "player_id": 344,
+      "team_id": 11,
+      "full_name": "Abdurrahim Dursun",
+      "display_name": "Abdurrahim",
+      "short_label": "Abdurrahim",
+      "minutes": "0",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317869,
+      "player_id": 345,
+      "team_id": 11,
+      "full_name": "Adama Malouda Traoré",
+      "display_name": "Traoré",
+      "short_label": "Traoré",
+      "minutes": "72.00",
+      "known_provider_player_id": 547710
+    },
+    {
+      "match_id": 317869,
+      "player_id": 346,
+      "team_id": 11,
+      "full_name": "Franco Daryl Tongya Heubang",
+      "display_name": "Tongya",
+      "short_label": "Tongya",
+      "minutes": "86.00",
+      "known_provider_player_id": 1051047
+    },
+    {
+      "match_id": 317869,
+      "player_id": 347,
+      "team_id": 11,
+      "full_name": "Berk Deniz Çukurcu",
+      "display_name": "Berk",
+      "short_label": "Berk",
+      "minutes": "0",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317869,
+      "player_id": 413,
+      "team_id": 14,
+      "full_name": "Fidan Aliti",
+      "display_name": "Aliti",
+      "short_label": "Aliti",
+      "minutes": "90.00",
+      "known_provider_player_id": 521203
+    },
+    {
+      "match_id": 317869,
+      "player_id": 415,
+      "team_id": 14,
+      "full_name": "Meschack Elia Lina",
+      "display_name": "Elia",
+      "short_label": "Elia",
+      "minutes": "35.00",
+      "known_provider_player_id": 694060
+    },
+    {
+      "match_id": 317869,
+      "player_id": 416,
+      "team_id": 14,
+      "full_name": "Yusuf Özdemir",
+      "display_name": "Yusuf",
+      "short_label": "Yusuf",
+      "minutes": "28.00",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317869,
+      "player_id": 417,
+      "team_id": 14,
+      "full_name": "Ui-Jo Hwang",
+      "display_name": "Hwang",
+      "short_label": "Hwang",
+      "minutes": "0",
+      "known_provider_player_id": 433677
+    },
+    {
+      "match_id": 317869,
+      "player_id": 418,
+      "team_id": 14,
+      "full_name": "Mert Furkan Bayram",
+      "display_name": "Mert",
+      "short_label": "Mert",
+      "minutes": "0",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317869,
+      "player_id": 419,
+      "team_id": 14,
+      "full_name": "Paulo Victor de Mileo Vidotti",
+      "display_name": "Victor",
+      "short_label": "Victor",
+      "minutes": "90.00",
+      "known_provider_player_id": 171914
+    },
+    {
+      "match_id": 317869,
+      "player_id": 420,
+      "team_id": 14,
+      "full_name": "António Simão Muanza",
+      "display_name": "Maestro",
+      "short_label": "Maestro",
+      "minutes": "90.00",
+      "known_provider_player_id": 1525007
+    },
+    {
+      "match_id": 317869,
+      "player_id": 421,
+      "team_id": 14,
+      "full_name": "Ianis Hagi",
+      "display_name": "Hagi",
+      "short_label": "Hagi",
+      "minutes": "35.00",
+      "known_provider_player_id": 645107
+    },
+    {
+      "match_id": 317869,
+      "player_id": 423,
+      "team_id": 14,
+      "full_name": "Enes Keskin",
+      "display_name": "Enes",
+      "short_label": "Enes",
+      "minutes": "16.00",
+      "known_provider_player_id": 1302409
+    },
+    {
+      "match_id": 317869,
+      "player_id": 425,
+      "team_id": 14,
+      "full_name": "İzzet Çelik",
+      "display_name": "İzzet",
+      "short_label": "İzzet",
+      "minutes": "0",
+      "known_provider_player_id": 1388695
+    },
+    {
+      "match_id": 317869,
+      "player_id": 426,
+      "team_id": 14,
+      "full_name": "Fatih Aksoy",
+      "display_name": "Fatih",
+      "short_label": "Fatih",
+      "minutes": "0",
+      "known_provider_player_id": 712070
+    },
+    {
+      "match_id": 317869,
+      "player_id": 427,
+      "team_id": 14,
+      "full_name": "Florent Hadërgjonaj",
+      "display_name": "Hadërgjonaj",
+      "short_label": "Hadërgjonaj",
+      "minutes": "90.00",
+      "known_provider_player_id": 492132
+    },
+    {
+      "match_id": 317869,
+      "player_id": 429,
+      "team_id": 14,
+      "full_name": "Ruan Pereira Duarte",
+      "display_name": "Ruan",
+      "short_label": "Ruan",
+      "minutes": "90.00",
+      "known_provider_player_id": 1402068
+    },
+    {
+      "match_id": 317869,
+      "player_id": 430,
+      "team_id": 14,
+      "full_name": "İbrahim Kaya",
+      "display_name": "İbrahim",
+      "short_label": "İbrahim",
+      "minutes": "55.00",
+      "known_provider_player_id": 1300869
+    },
+    {
+      "match_id": 317869,
+      "player_id": 431,
+      "team_id": 14,
+      "full_name": "Omar Ben Ali",
+      "display_name": "Omar",
+      "short_label": "Omar",
+      "minutes": "16.00",
+      "known_provider_player_id": 1677029
+    },
+    {
+      "match_id": 317869,
+      "player_id": 435,
+      "team_id": 14,
+      "full_name": "Gaïus Abraham Jered Makouta",
+      "display_name": "Makouta",
+      "short_label": "Makouta",
+      "minutes": "55.00",
+      "known_provider_player_id": 773062
+    },
+    {
+      "match_id": 317869,
+      "player_id": 436,
+      "team_id": 14,
+      "full_name": "Nuno Miguel Reis Lima",
+      "display_name": "Lima",
+      "short_label": "Lima",
+      "minutes": "90.00",
+      "known_provider_player_id": 1282423
+    },
+    {
+      "match_id": 317869,
+      "player_id": 437,
+      "team_id": 14,
+      "full_name": "Arda Usluoğlu",
+      "display_name": "Arda",
+      "short_label": "Arda",
+      "minutes": "0",
+      "known_provider_player_id": 1679800
+    },
+    {
+      "match_id": 317869,
+      "player_id": 541,
+      "team_id": 11,
+      "full_name": "Metehan Baltacı",
+      "display_name": "Metehan",
+      "short_label": "Metehan",
+      "minutes": "90.00",
+      "known_provider_player_id": 1388938
+    },
+    {
+      "match_id": 317869,
+      "player_id": 583,
+      "team_id": 11,
+      "full_name": "Salih Uçan",
+      "display_name": "Salih",
+      "short_label": "Salih",
+      "minutes": "17.00",
+      "known_provider_player_id": 239061
+    },
+    {
+      "match_id": 317869,
+      "player_id": 596,
+      "team_id": 14,
+      "full_name": "Arouna Kigbafory Soro",
+      "display_name": "Soro",
+      "short_label": "Soro",
+      "minutes": "0",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317869,
+      "player_id": 599,
+      "team_id": 14,
+      "full_name": "Baran Ali Gezek",
+      "display_name": "Baran",
+      "short_label": "Baran",
+      "minutes": "74.00",
+      "known_provider_player_id": 1398327
+    },
+    {
+      "match_id": 317869,
+      "player_id": 812,
+      "team_id": 11,
+      "full_name": "Tiago Maria Antunes Gouveia",
+      "display_name": "Gouveia",
+      "short_label": "Gouveia",
+      "minutes": "81.00",
+      "known_provider_player_id": 1072317
+    },
+    {
+      "match_id": 317869,
+      "player_id": 813,
+      "team_id": 11,
+      "full_name": "Cheikh Ahmet Tidiane Niasse",
+      "display_name": "Niasse",
+      "short_label": "Niasse",
+      "minutes": "73.00",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317869,
+      "player_id": 910,
+      "team_id": 14,
+      "full_name": "Iván Cédric Bikoue Embolo",
+      "display_name": "Cedric",
+      "short_label": "Cedric",
+      "minutes": "74.00",
+      "known_provider_player_id": 1322849
+    },
+    {
+      "match_id": 317869,
+      "player_id": 977,
+      "team_id": 14,
+      "full_name": "Paolo Fernandes Cantin",
+      "display_name": "Fernandes",
+      "short_label": "Fernandes",
+      "minutes": "0",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317869,
+      "player_id": 1504,
+      "team_id": 11,
+      "full_name": "Victor Ikechukwu Jonathan Orakpo",
+      "display_name": "Orakpo",
+      "short_label": "Orakpo",
+      "minutes": "9.00",
+      "known_provider_player_id": 1669931
+    },
+    {
+      "match_id": 317869,
+      "player_id": 1537,
+      "team_id": 11,
+      "full_name": "Pedro Manuel Lobo Peixoto Mineiro Mendes",
+      "display_name": "Mendes",
+      "short_label": "Mendes",
+      "minutes": "81.00",
+      "known_provider_player_id": 863130
+    },
+    {
+      "match_id": 317869,
+      "player_id": 1545,
+      "team_id": 11,
+      "full_name": "Rafael Filipe Gonçalves Soares Luís",
+      "display_name": "Luis",
+      "short_label": "Luis",
+      "minutes": "18.00",
+      "known_provider_player_id": 1526822
+    },
+    {
+      "match_id": 317869,
+      "player_id": 1605,
+      "team_id": 11,
+      "full_name": "Hamza Aydar",
+      "display_name": null,
+      "short_label": "Aydar",
+      "minutes": "90.00",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317869,
+      "player_id": 1606,
+      "team_id": 11,
+      "full_name": "Prince Martor Jr.",
+      "display_name": null,
+      "short_label": "Martor",
+      "minutes": "9.00",
+      "known_provider_player_id": 1895450
+    },
+    {
+      "match_id": 317869,
+      "player_id": 1608,
+      "team_id": 14,
+      "full_name": "Bedirhan Özyurt",
+      "display_name": null,
+      "short_label": "Özyurt",
+      "minutes": "62.00",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317870,
+      "player_id": 201,
+      "team_id": 7,
+      "full_name": "Egemen Aydın",
+      "display_name": "Egemen",
+      "short_label": "Egemen",
+      "minutes": "0",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317870,
+      "player_id": 202,
+      "team_id": 7,
+      "full_name": "Melih İbrahimoğlu",
+      "display_name": "Melih",
+      "short_label": "Melih",
+      "minutes": "82.00",
+      "known_provider_player_id": 1098065
+    },
+    {
+      "match_id": 317870,
+      "player_id": 204,
+      "team_id": 7,
+      "full_name": "Emir Bars",
+      "display_name": "Emir",
+      "short_label": "Emir",
+      "minutes": "0",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317870,
+      "player_id": 205,
+      "team_id": 7,
+      "full_name": "Deniz Türüç",
+      "display_name": "Deniz",
+      "short_label": "Deniz T.",
+      "minutes": "90.00",
+      "known_provider_player_id": 352023
+    },
+    {
+      "match_id": 317870,
+      "player_id": 206,
+      "team_id": 7,
+      "full_name": "Ebrima Colley",
+      "display_name": "Colley",
+      "short_label": "Colley",
+      "minutes": "19.00",
+      "known_provider_player_id": 996894
+    },
+    {
+      "match_id": 317870,
+      "player_id": 207,
+      "team_id": 7,
+      "full_name": "Deniz Ertaş",
+      "display_name": "Deniz",
+      "short_label": "Deniz E.",
+      "minutes": "50.00",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317870,
+      "player_id": 210,
+      "team_id": 7,
+      "full_name": "Jackson Muleka Kyanvubu",
+      "display_name": "Muleka",
+      "short_label": "Muleka",
+      "minutes": "45.00",
+      "known_provider_player_id": 938682
+    },
+    {
+      "match_id": 317870,
+      "player_id": 211,
+      "team_id": 7,
+      "full_name": "Yhoan Many Andzouana",
+      "display_name": "Andzouana",
+      "short_label": "Andzouana",
+      "minutes": "56.00",
+      "known_provider_player_id": 692810
+    },
+    {
+      "match_id": 317870,
+      "player_id": 213,
+      "team_id": 7,
+      "full_name": "Marko Jevtović",
+      "display_name": "Jevtovic",
+      "short_label": "Jevtovic",
+      "minutes": "90.00",
+      "known_provider_player_id": 463591
+    },
+    {
+      "match_id": 317870,
+      "player_id": 214,
+      "team_id": 7,
+      "full_name": "Uğurcan Yazğılı",
+      "display_name": "Uğurcan",
+      "short_label": "Uğurcan",
+      "minutes": "34.00",
+      "known_provider_player_id": 891469
+    },
+    {
+      "match_id": 317870,
+      "player_id": 215,
+      "team_id": 7,
+      "full_name": "Enis Bardhi",
+      "display_name": "Bardhi",
+      "short_label": "Bardhi",
+      "minutes": "45.00",
+      "known_provider_player_id": 592783
+    },
+    {
+      "match_id": 317870,
+      "player_id": 216,
+      "team_id": 7,
+      "full_name": "Bahadır Han Güngördü",
+      "display_name": "Bahadır",
+      "short_label": "Bahadır",
+      "minutes": "40.00",
+      "known_provider_player_id": 712040
+    },
+    {
+      "match_id": 317870,
+      "player_id": 217,
+      "team_id": 7,
+      "full_name": "Chidozie Collins Awaziem",
+      "display_name": "Awaziem",
+      "short_label": "Awaziem",
+      "minutes": "90.00",
+      "known_provider_player_id": 666954
+    },
+    {
+      "match_id": 317870,
+      "player_id": 218,
+      "team_id": 7,
+      "full_name": "Arif Boşluk",
+      "display_name": "Arif",
+      "short_label": "Arif",
+      "minutes": "0",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317870,
+      "player_id": 219,
+      "team_id": 7,
+      "full_name": "João Pedro do Nascimento da Mata",
+      "display_name": "Da Mata",
+      "short_label": "Da Mata",
+      "minutes": "0",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317870,
+      "player_id": 220,
+      "team_id": 7,
+      "full_name": "Diogo António Cupido Gonçalves",
+      "display_name": "Gonçalves",
+      "short_label": "Gonçalves",
+      "minutes": "0",
+      "known_provider_player_id": 576118
+    },
+    {
+      "match_id": 317870,
+      "player_id": 221,
+      "team_id": 7,
+      "full_name": "Rayyan Baniya",
+      "display_name": "Baniya",
+      "short_label": "Baniya",
+      "minutes": "90.00",
+      "known_provider_player_id": 1112763
+    },
+    {
+      "match_id": 317870,
+      "player_id": 222,
+      "team_id": 7,
+      "full_name": "Adil Demirbağ",
+      "display_name": "Adil",
+      "short_label": "Adil",
+      "minutes": "0",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317870,
+      "player_id": 505,
+      "team_id": 17,
+      "full_name": "Yunus Akgün",
+      "display_name": "Yunus",
+      "short_label": "Yunus",
+      "minutes": "61.00",
+      "known_provider_player_id": 845991
+    },
+    {
+      "match_id": 317870,
+      "player_id": 506,
+      "team_id": 17,
+      "full_name": "Jankat Yılmaz",
+      "display_name": "Jankat",
+      "short_label": "Jankat",
+      "minutes": "0",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317870,
+      "player_id": 507,
+      "team_id": 17,
+      "full_name": "Victor James Osimhen",
+      "display_name": "Osimhen",
+      "short_label": "Osimhen",
+      "minutes": "61.00",
+      "known_provider_player_id": 687681
+    },
+    {
+      "match_id": 317870,
+      "player_id": 511,
+      "team_id": 17,
+      "full_name": "Uğurcan Çakır",
+      "display_name": "Uğurcan",
+      "short_label": "Uğurcan",
+      "minutes": "90.00",
+      "known_provider_player_id": 603669
+    },
+    {
+      "match_id": 317870,
+      "player_id": 514,
+      "team_id": 17,
+      "full_name": "Leroy Aziz Sané",
+      "display_name": "Sané",
+      "short_label": "Sané",
+      "minutes": "29.00",
+      "known_provider_player_id": 530859
+    },
+    {
+      "match_id": 317870,
+      "player_id": 515,
+      "team_id": 17,
+      "full_name": "Lesley Chimuanya Ugochukwu",
+      "display_name": "Lesley",
+      "short_label": "Lesley",
+      "minutes": "29.00",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317870,
+      "player_id": 516,
+      "team_id": 17,
+      "full_name": "Davinson Sánchez Mina",
+      "display_name": "Sánchez",
+      "short_label": "Sánchez",
+      "minutes": "69.00",
+      "known_provider_player_id": 643533
+    },
+    {
+      "match_id": 317870,
+      "player_id": 517,
+      "team_id": 17,
+      "full_name": "Kazımcan Karataş",
+      "display_name": "Kazımcan",
+      "short_label": "Kazımcan",
+      "minutes": "0",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317870,
+      "player_id": 520,
+      "team_id": 17,
+      "full_name": "Barış Alper Yılmaz",
+      "display_name": "Barış A.",
+      "short_label": "Barış A.",
+      "minutes": "0",
+      "known_provider_player_id": 890232
+    },
+    {
+      "match_id": 317870,
+      "player_id": 522,
+      "team_id": 17,
+      "full_name": "Kaan Ayhan",
+      "display_name": "Kaan",
+      "short_label": "Kaan",
+      "minutes": "0",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317870,
+      "player_id": 523,
+      "team_id": 17,
+      "full_name": "Arda Ünyay",
+      "display_name": "Arda",
+      "short_label": "Arda",
+      "minutes": "0",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317870,
+      "player_id": 525,
+      "team_id": 17,
+      "full_name": "Mario René Junior Lemina",
+      "display_name": "Lemina",
+      "short_label": "Lemina",
+      "minutes": "0",
+      "known_provider_player_id": 421786
+    },
+    {
+      "match_id": 317870,
+      "player_id": 527,
+      "team_id": 17,
+      "full_name": "Renato Sam-Na Nhaga",
+      "display_name": "Nhaga",
+      "short_label": "Nhaga",
+      "minutes": "29.00",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317870,
+      "player_id": 529,
+      "team_id": 17,
+      "full_name": "Ismail Joshua Jakobs",
+      "display_name": "Jacobs",
+      "short_label": "Jacobs",
+      "minutes": "0",
+      "known_provider_player_id": 906945
+    },
+    {
+      "match_id": 317870,
+      "player_id": 530,
+      "team_id": 17,
+      "full_name": "İlkay Gündoğan",
+      "display_name": "İlkay",
+      "short_label": "İlkay",
+      "minutes": "29.00",
+      "known_provider_player_id": 178818
+    },
+    {
+      "match_id": 317870,
+      "player_id": 531,
+      "team_id": 17,
+      "full_name": "Evren Eren Elmalı",
+      "display_name": "Eren",
+      "short_label": "Eren",
+      "minutes": "90.00",
+      "known_provider_player_id": 1041660
+    },
+    {
+      "match_id": 317870,
+      "player_id": 532,
+      "team_id": 17,
+      "full_name": "Gabriel Davi Gomes Sara",
+      "display_name": "Sara",
+      "short_label": "Sara",
+      "minutes": "61.00",
+      "known_provider_player_id": 902710
+    },
+    {
+      "match_id": 317870,
+      "player_id": 533,
+      "team_id": 17,
+      "full_name": "Abdülkerim Bardakcı",
+      "display_name": "Abdulkerim",
+      "short_label": "Abdulkerim",
+      "minutes": "0",
+      "known_provider_player_id": 291399
+    },
+    {
+      "match_id": 317870,
+      "player_id": 535,
+      "team_id": 17,
+      "full_name": "Can Armando Güner",
+      "display_name": "Can",
+      "short_label": "Can",
+      "minutes": "0",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317870,
+      "player_id": 537,
+      "team_id": 17,
+      "full_name": "Günay Güvenç",
+      "display_name": "Günay",
+      "short_label": "Günay",
+      "minutes": "0",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317870,
+      "player_id": 539,
+      "team_id": 17,
+      "full_name": "Lucas Sebastián Torreira di Pascua",
+      "display_name": "Torreira",
+      "short_label": "Torreira",
+      "minutes": "61.00",
+      "known_provider_player_id": 592909
+    },
+    {
+      "match_id": 317870,
+      "player_id": 542,
+      "team_id": 17,
+      "full_name": "Roland Sallai",
+      "display_name": "Sallai",
+      "short_label": "Sallai",
+      "minutes": "90.00",
+      "known_provider_player_id": 583601
+    },
+    {
+      "match_id": 317870,
+      "player_id": 545,
+      "team_id": 17,
+      "full_name": "Wilfried Stéphane Singo",
+      "display_name": "Singo",
+      "short_label": "Singo",
+      "minutes": "90.00",
+      "known_provider_player_id": 1027472
+    },
+    {
+      "match_id": 317870,
+      "player_id": 597,
+      "team_id": 7,
+      "full_name": "Fuka-Arthur Masuaku Kawela",
+      "display_name": "Masuaku",
+      "short_label": "Masuaku",
+      "minutes": "90.00",
+      "known_provider_player_id": 418137
+    },
+    {
+      "match_id": 317870,
+      "player_id": 627,
+      "team_id": 7,
+      "full_name": "Enis Destan",
+      "display_name": "Enis",
+      "short_label": "Enis",
+      "minutes": "8.00",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317870,
+      "player_id": 629,
+      "team_id": 7,
+      "full_name": "Mücahit İbrahimoğlu",
+      "display_name": "Mücahit",
+      "short_label": "Mücahit",
+      "minutes": "0",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317870,
+      "player_id": 679,
+      "team_id": 7,
+      "full_name": "Rajmund Tóth",
+      "display_name": "Tóth",
+      "short_label": "Tóth",
+      "minutes": "45.00",
+      "known_provider_player_id": 1562891
+    },
+    {
+      "match_id": 317870,
+      "player_id": 877,
+      "team_id": 17,
+      "full_name": "Aleksey Batrakov",
+      "display_name": "Batrakov",
+      "short_label": "Batrakov",
+      "minutes": "61.00",
+      "known_provider_player_id": 1504343
+    },
+    {
+      "match_id": 317870,
+      "player_id": 1207,
+      "team_id": 7,
+      "full_name": "Jean-Luc Mamadou Diarra Dompé",
+      "display_name": "Dompe",
+      "short_label": "Dompe",
+      "minutes": "71.00",
+      "known_provider_player_id": 613260
+    },
+    {
+      "match_id": 317870,
+      "player_id": 1306,
+      "team_id": 17,
+      "full_name": "Rafael Alexandre da Conceição Leão",
+      "display_name": "Leao",
+      "short_label": "Leao",
+      "minutes": "90.00",
+      "known_provider_player_id": 848844
+    },
+    {
+      "match_id": 317870,
+      "player_id": 1372,
+      "team_id": 7,
+      "full_name": "Mostafa Mohamed Ahmed Abdalla",
+      "display_name": "Mohamed",
+      "short_label": "Mohamed",
+      "minutes": "45.00",
+      "known_provider_player_id": 817500
+    },
+    {
+      "match_id": 317870,
+      "player_id": 1405,
+      "team_id": 17,
+      "full_name": "Deniz Daniel Gül",
+      "display_name": "Deniz",
+      "short_label": "Deniz",
+      "minutes": "29.00",
+      "known_provider_player_id": 1406300
+    },
+    {
+      "match_id": 317870,
+      "player_id": 1438,
+      "team_id": 17,
+      "full_name": "El Chadaille Bitshiabu",
+      "display_name": "Bitshiabu",
+      "short_label": "Bitshiabu",
+      "minutes": "21.00",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317870,
+      "player_id": 1540,
+      "team_id": 7,
+      "full_name": "Ahmet Oğuz",
+      "display_name": "Ahmet",
+      "short_label": "Ahmet",
+      "minutes": "0",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317871,
+      "player_id": 163,
+      "team_id": 6,
+      "full_name": "Marco Asensio Willemsen",
+      "display_name": "Asensio",
+      "short_label": "Asensio",
+      "minutes": "0",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317871,
+      "player_id": 165,
+      "team_id": 6,
+      "full_name": "Tarık Çetin",
+      "display_name": "Tarık",
+      "short_label": "Tarık",
+      "minutes": "0",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317871,
+      "player_id": 166,
+      "team_id": 6,
+      "full_name": "Ederson Santana de Moraes",
+      "display_name": "Ederson",
+      "short_label": "Ederson",
+      "minutes": "90.00",
+      "known_provider_player_id": 363364
+    },
+    {
+      "match_id": 317871,
+      "player_id": 169,
+      "team_id": 6,
+      "full_name": "Muhammed Kerem Aktürkoğlu",
+      "display_name": "Kerem",
+      "short_label": "Kerem",
+      "minutes": "83.00",
+      "known_provider_player_id": 1117570
+    },
+    {
+      "match_id": 317871,
+      "player_id": 170,
+      "team_id": 6,
+      "full_name": "Nélson Cabral Semedo",
+      "display_name": "Semedo",
+      "short_label": "Semedo",
+      "minutes": "65.00",
+      "known_provider_player_id": 470834
+    },
+    {
+      "match_id": 317871,
+      "player_id": 171,
+      "team_id": 6,
+      "full_name": "Vedat Muriqi",
+      "display_name": "Muriqi",
+      "short_label": "Muriqi",
+      "minutes": "7.00",
+      "known_provider_player_id": 517052
+    },
+    {
+      "match_id": 317871,
+      "player_id": 172,
+      "team_id": 6,
+      "full_name": "Milan Škriniar",
+      "display_name": "Škriniar",
+      "short_label": "Škriniar",
+      "minutes": "90.00",
+      "known_provider_player_id": 309328
+    },
+    {
+      "match_id": 317871,
+      "player_id": 174,
+      "team_id": 6,
+      "full_name": "Münir Levent Mercan",
+      "display_name": "Levent",
+      "short_label": "Levent",
+      "minutes": "90.00",
+      "known_provider_player_id": 1080172
+    },
+    {
+      "match_id": 317871,
+      "player_id": 175,
+      "team_id": 6,
+      "full_name": "İsmail Yüksek",
+      "display_name": "İsmail",
+      "short_label": "İsmail",
+      "minutes": "0",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317871,
+      "player_id": 176,
+      "team_id": 6,
+      "full_name": "Mason Will John Greenwood",
+      "display_name": "Greenwood",
+      "short_label": "Greenwood",
+      "minutes": "0",
+      "known_provider_player_id": 950473
+    },
+    {
+      "match_id": 317871,
+      "player_id": 178,
+      "team_id": 6,
+      "full_name": "Oğuz Aydın",
+      "display_name": "Oğuz",
+      "short_label": "Oğuz",
+      "minutes": "84.00",
+      "known_provider_player_id": 1092015
+    },
+    {
+      "match_id": 317871,
+      "player_id": 180,
+      "team_id": 6,
+      "full_name": "Nathan Benjamin Aké",
+      "display_name": "Ake",
+      "short_label": "Ake",
+      "minutes": "0",
+      "known_provider_player_id": 417068
+    },
+    {
+      "match_id": 317871,
+      "player_id": 181,
+      "team_id": 6,
+      "full_name": "Yiğit Efe Demir",
+      "display_name": "Yiğit",
+      "short_label": "Yiğit",
+      "minutes": "6.00",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317871,
+      "player_id": 182,
+      "team_id": 6,
+      "full_name": "Archibald Norman Brown",
+      "display_name": "Brown",
+      "short_label": "Brown",
+      "minutes": "0",
+      "known_provider_player_id": 1113704
+    },
+    {
+      "match_id": 317871,
+      "player_id": 184,
+      "team_id": 6,
+      "full_name": "Dorgeles Nene",
+      "display_name": "Nene",
+      "short_label": "Nene",
+      "minutes": "6.00",
+      "known_provider_player_id": 1230287
+    },
+    {
+      "match_id": 317871,
+      "player_id": 185,
+      "team_id": 6,
+      "full_name": "N'Golo Kanté",
+      "display_name": "Kanté",
+      "short_label": "Kanté",
+      "minutes": "90.00",
+      "known_provider_player_id": 319300
+    },
+    {
+      "match_id": 317871,
+      "player_id": 186,
+      "team_id": 6,
+      "full_name": "Mattéo Elias Kenzo Guendouzi Olié",
+      "display_name": "Guendouzi",
+      "short_label": "Guendouzi",
+      "minutes": "90.00",
+      "known_provider_player_id": 800609
+    },
+    {
+      "match_id": 317871,
+      "player_id": 188,
+      "team_id": 6,
+      "full_name": "Mert Müldür",
+      "display_name": "Mert",
+      "short_label": "Mert M.",
+      "minutes": "25.00",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317871,
+      "player_id": 189,
+      "team_id": 6,
+      "full_name": "Bartuğ Elmaz",
+      "display_name": "Bartuğ",
+      "short_label": "Bartuğ",
+      "minutes": "0",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317871,
+      "player_id": 190,
+      "team_id": 6,
+      "full_name": "Fehmi Mert Günok",
+      "display_name": "Mert",
+      "short_label": "Mert G.",
+      "minutes": "0",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317871,
+      "player_id": 194,
+      "team_id": 6,
+      "full_name": "Ognjen Mimović",
+      "display_name": "Mimović",
+      "short_label": "Mimović",
+      "minutes": "0",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317871,
+      "player_id": 199,
+      "team_id": 6,
+      "full_name": "İrfan Can Kahveci",
+      "display_name": "İrfan Can",
+      "short_label": "İrfan Can",
+      "minutes": "90.00",
+      "known_provider_player_id": 316544
+    },
+    {
+      "match_id": 317871,
+      "player_id": 200,
+      "team_id": 6,
+      "full_name": "Mert Hakan Yandaş",
+      "display_name": "Mert Hakan",
+      "short_label": "Mert Hakan",
+      "minutes": "0",
+      "known_provider_player_id": 796006
+    },
+    {
+      "match_id": 317871,
+      "player_id": 286,
+      "team_id": 10,
+      "full_name": "Allan Godói Santos",
+      "display_name": "Godói",
+      "short_label": "Godói",
+      "minutes": "1.00",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317871,
+      "player_id": 288,
+      "team_id": 10,
+      "full_name": "Taha Altıkardeş",
+      "display_name": "Taha",
+      "short_label": "Taha",
+      "minutes": "90.00",
+      "known_provider_player_id": 1315351
+    },
+    {
+      "match_id": 317871,
+      "player_id": 289,
+      "team_id": 10,
+      "full_name": "Alexis Antunes Gomez",
+      "display_name": "Antunes",
+      "short_label": "Antunes",
+      "minutes": "74.00",
+      "known_provider_player_id": 864556
+    },
+    {
+      "match_id": 317871,
+      "player_id": 290,
+      "team_id": 10,
+      "full_name": "Luka Gugeshashvili",
+      "display_name": "Luka",
+      "short_label": "Luka",
+      "minutes": "0",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317871,
+      "player_id": 291,
+      "team_id": 10,
+      "full_name": "Malcom Narcisse Bokélé Mputu",
+      "display_name": "Bokele",
+      "short_label": "Bokele",
+      "minutes": "90.00",
+      "known_provider_player_id": 1258137
+    },
+    {
+      "match_id": 317871,
+      "player_id": 292,
+      "team_id": 10,
+      "full_name": "Ege Yıldırım",
+      "display_name": "Ege",
+      "short_label": "Ege",
+      "minutes": "0",
+      "known_provider_player_id": 1665499
+    },
+    {
+      "match_id": 317871,
+      "player_id": 294,
+      "team_id": 10,
+      "full_name": "Ogün Bayrak",
+      "display_name": "Ogün",
+      "short_label": "Ogün",
+      "minutes": "0",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317871,
+      "player_id": 295,
+      "team_id": 10,
+      "full_name": "Juan Santos da Silva",
+      "display_name": "Juan",
+      "short_label": "Juan",
+      "minutes": "74.00",
+      "known_provider_player_id": 1118178
+    },
+    {
+      "match_id": 317871,
+      "player_id": 298,
+      "team_id": 10,
+      "full_name": "Gökdeniz Bayrakdar",
+      "display_name": "Gökdeniz",
+      "short_label": "Gökdeniz",
+      "minutes": "0",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317871,
+      "player_id": 299,
+      "team_id": 10,
+      "full_name": "Arda Okan Kurtulan",
+      "display_name": "Arda",
+      "short_label": "Arda K.",
+      "minutes": "90.00",
+      "known_provider_player_id": 1301081
+    },
+    {
+      "match_id": 317871,
+      "player_id": 300,
+      "team_id": 10,
+      "full_name": "Novatus Dismas Miroshi",
+      "display_name": "Miroshi",
+      "short_label": "Miroshi",
+      "minutes": "90.00",
+      "known_provider_player_id": 1284559
+    },
+    {
+      "match_id": 317871,
+      "player_id": 301,
+      "team_id": 10,
+      "full_name": "Jonatan Noah Kemeseng Sonko Sundberg",
+      "display_name": "Sundberg",
+      "short_label": "Sundberg",
+      "minutes": "90.00",
+      "known_provider_player_id": 469201
+    },
+    {
+      "match_id": 317871,
+      "player_id": 303,
+      "team_id": 10,
+      "full_name": "Janderson de Carvalho Costa",
+      "display_name": "Janderson",
+      "short_label": "Janderson",
+      "minutes": "65.00",
+      "known_provider_player_id": 1463351
+    },
+    {
+      "match_id": 317871,
+      "player_id": 304,
+      "team_id": 10,
+      "full_name": "Rhaldney Norberto Simião Gomes",
+      "display_name": "Rhaldney",
+      "short_label": "Rhaldney",
+      "minutes": "90.00",
+      "known_provider_player_id": 1185467
+    },
+    {
+      "match_id": 317871,
+      "player_id": 305,
+      "team_id": 10,
+      "full_name": "Furkan Bayır",
+      "display_name": "Furkan",
+      "short_label": "Furkan",
+      "minutes": "0",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317871,
+      "player_id": 308,
+      "team_id": 10,
+      "full_name": "Efkan Bekiroğlu",
+      "display_name": "Efkan",
+      "short_label": "Efkan",
+      "minutes": "1.00",
+      "known_provider_player_id": 678812
+    },
+    {
+      "match_id": 317871,
+      "player_id": 309,
+      "team_id": 10,
+      "full_name": "Arda Özçimen",
+      "display_name": "Arda",
+      "short_label": "Arda Ö.",
+      "minutes": "90.00",
+      "known_provider_player_id": 1004963
+    },
+    {
+      "match_id": 317871,
+      "player_id": 310,
+      "team_id": 10,
+      "full_name": "André Henrique da Silva Martins",
+      "display_name": "Henrique",
+      "short_label": "Henrique",
+      "minutes": "25.00",
+      "known_provider_player_id": 1459652
+    },
+    {
+      "match_id": 317871,
+      "player_id": 312,
+      "team_id": 10,
+      "full_name": "Mehmet Şamil Öztürk",
+      "display_name": "Şamil",
+      "short_label": "Şamil",
+      "minutes": "0",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317871,
+      "player_id": 313,
+      "team_id": 10,
+      "full_name": "Alexandre Matos",
+      "display_name": "Matos",
+      "short_label": "Matos",
+      "minutes": "0",
+      "known_provider_player_id": 1202031
+    },
+    {
+      "match_id": 317871,
+      "player_id": 314,
+      "team_id": 10,
+      "full_name": "Sinclair Ntomuchukwu Armstrong",
+      "display_name": "Sinclair",
+      "short_label": "Sinclair",
+      "minutes": "16.00",
+      "known_provider_player_id": 1307663
+    },
+    {
+      "match_id": 317871,
+      "player_id": 590,
+      "team_id": 6,
+      "full_name": "Romelu Menama Lukaku Bolingoli",
+      "display_name": "Lukaku",
+      "short_label": "Lukaku",
+      "minutes": "90.00",
+      "known_provider_player_id": 181276
+    },
+    {
+      "match_id": 317871,
+      "player_id": 712,
+      "team_id": 10,
+      "full_name": "Bekir Turaç Böke",
+      "display_name": "Bekir",
+      "short_label": "Bekir",
+      "minutes": "0",
+      "known_provider_player_id": 889745
+    },
+    {
+      "match_id": 317871,
+      "player_id": 811,
+      "team_id": 10,
+      "full_name": "Richard Akonnor",
+      "display_name": "Akonnor",
+      "short_label": "Akonnor",
+      "minutes": "90.00",
+      "known_provider_player_id": 1427366
+    },
+    {
+      "match_id": 317871,
+      "player_id": 1240,
+      "team_id": 6,
+      "full_name": "Kojo Peprah Oppong",
+      "display_name": "Oppong",
+      "short_label": "Oppong",
+      "minutes": "84.00",
+      "known_provider_player_id": 1429607
+    },
+    {
+      "match_id": 317871,
+      "player_id": 1542,
+      "team_id": 10,
+      "full_name": "Faustino Adebola Rasheed Anjorin",
+      "display_name": "Anjorin",
+      "short_label": "Anjorin",
+      "minutes": "16.00",
+      "known_provider_player_id": 983199
+    },
+    {
+      "match_id": 317872,
+      "player_id": 107,
+      "team_id": 4,
+      "full_name": "Arda Özyar",
+      "display_name": "Arda",
+      "short_label": "Arda",
+      "minutes": "0",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317872,
+      "player_id": 108,
+      "team_id": 4,
+      "full_name": "Daniel Ebenezer Kwasi Agyei",
+      "display_name": "Agyei",
+      "short_label": "Agyei",
+      "minutes": "27.00",
+      "known_provider_player_id": 627223
+    },
+    {
+      "match_id": 317872,
+      "player_id": 109,
+      "team_id": 4,
+      "full_name": "Tayfur Bingöl",
+      "display_name": "Tayfur",
+      "short_label": "Tayfur",
+      "minutes": "0",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317872,
+      "player_id": 110,
+      "team_id": 4,
+      "full_name": "Haydar Karataş",
+      "display_name": "Haydar",
+      "short_label": "Haydar",
+      "minutes": "0",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317872,
+      "player_id": 111,
+      "team_id": 4,
+      "full_name": "Emir Ortakaya",
+      "display_name": "Emir",
+      "short_label": "Emir",
+      "minutes": "90.00",
+      "known_provider_player_id": 1209961
+    },
+    {
+      "match_id": 317872,
+      "player_id": 112,
+      "team_id": 4,
+      "full_name": "Muharrem Cinan",
+      "display_name": "Muharrem",
+      "short_label": "Muharrem",
+      "minutes": "15.00",
+      "known_provider_player_id": 1107967
+    },
+    {
+      "match_id": 317872,
+      "player_id": 113,
+      "team_id": 4,
+      "full_name": "Uğur Kaan Yıldız",
+      "display_name": "Uğur",
+      "short_label": "Uğur",
+      "minutes": "90.00",
+      "known_provider_player_id": 1210041
+    },
+    {
+      "match_id": 317872,
+      "player_id": 116,
+      "team_id": 4,
+      "full_name": "Aleksandar Jovanović",
+      "display_name": "Jovanovic",
+      "short_label": "Jovanovic",
+      "minutes": "0",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317872,
+      "player_id": 117,
+      "team_id": 4,
+      "full_name": "Makana Nsimba Baku",
+      "display_name": "Baku",
+      "short_label": "Baku",
+      "minutes": "75.00",
+      "known_provider_player_id": 862718
+    },
+    {
+      "match_id": 317872,
+      "player_id": 118,
+      "team_id": 4,
+      "full_name": "Bruno Petković",
+      "display_name": "Petkovic",
+      "short_label": "Petkovic",
+      "minutes": "0",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317872,
+      "player_id": 119,
+      "team_id": 4,
+      "full_name": "Metehan Altunbaş",
+      "display_name": "Metehan",
+      "short_label": "Metehan",
+      "minutes": "15.00",
+      "known_provider_player_id": 975117
+    },
+    {
+      "match_id": 317872,
+      "player_id": 120,
+      "team_id": 4,
+      "full_name": "Anfernee Jamal Dijksteel",
+      "display_name": "Dijksteel",
+      "short_label": "Dijksteel",
+      "minutes": "90.00",
+      "known_provider_player_id": 798661
+    },
+    {
+      "match_id": 317872,
+      "player_id": 121,
+      "team_id": 4,
+      "full_name": "Onurcan Piri",
+      "display_name": "Onurcan",
+      "short_label": "Onurcan",
+      "minutes": "0",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317872,
+      "player_id": 125,
+      "team_id": 4,
+      "full_name": "Mahamadou Susoho Sissoho",
+      "display_name": "Susoho",
+      "short_label": "Susoho",
+      "minutes": "63.00",
+      "known_provider_player_id": 1333449
+    },
+    {
+      "match_id": 317872,
+      "player_id": 126,
+      "team_id": 4,
+      "full_name": "Banhie Xavier Tanguy Zoukrou",
+      "display_name": "Zoukrou",
+      "short_label": "Zoukrou",
+      "minutes": "0",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317872,
+      "player_id": 127,
+      "team_id": 4,
+      "full_name": "Rigoberto Manuel Rivas Vindel",
+      "display_name": "Rivas",
+      "short_label": "Rivas",
+      "minutes": "75.00",
+      "known_provider_player_id": 850311
+    },
+    {
+      "match_id": 317872,
+      "player_id": 130,
+      "team_id": 4,
+      "full_name": "Serhat Öztaşdelen",
+      "display_name": "Serhat",
+      "short_label": "Serhat",
+      "minutes": "90.00",
+      "known_provider_player_id": 1787611
+    },
+    {
+      "match_id": 317872,
+      "player_id": 131,
+      "team_id": 4,
+      "full_name": "Manuel Luís da Silva Cafumana",
+      "display_name": "Show",
+      "short_label": "Show",
+      "minutes": "90.00",
+      "known_provider_player_id": 859042
+    },
+    {
+      "match_id": 317872,
+      "player_id": 132,
+      "team_id": 4,
+      "full_name": "Massadio Haïdara",
+      "display_name": "Haïdara",
+      "short_label": "Haïdara",
+      "minutes": "0",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317872,
+      "player_id": 212,
+      "team_id": 4,
+      "full_name": "Berkan İsmail Kutlu",
+      "display_name": "Berkan",
+      "short_label": "Berkan",
+      "minutes": "90.00",
+      "known_provider_player_id": 1162410
+    },
+    {
+      "match_id": 317872,
+      "player_id": 351,
+      "team_id": 12,
+      "full_name": "Ibrahim Olawoyin Olasunkanmi",
+      "display_name": "Olawoyin",
+      "short_label": "Olawoyin",
+      "minutes": "88.00",
+      "known_provider_player_id": 1042086
+    },
+    {
+      "match_id": 317872,
+      "player_id": 352,
+      "team_id": 12,
+      "full_name": "Qazim Laçi",
+      "display_name": "Laçi",
+      "short_label": "Laçi",
+      "minutes": "80.00",
+      "known_provider_player_id": 613262
+    },
+    {
+      "match_id": 317872,
+      "player_id": 353,
+      "team_id": 12,
+      "full_name": "Ali Sowe",
+      "display_name": "Ali Sowe",
+      "short_label": "Ali Sowe",
+      "minutes": "45.00",
+      "known_provider_player_id": 447367
+    },
+    {
+      "match_id": 317872,
+      "player_id": 354,
+      "team_id": 12,
+      "full_name": "Muhammet Taha Şahin",
+      "display_name": "Taha",
+      "short_label": "Taha",
+      "minutes": "0",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317872,
+      "player_id": 356,
+      "team_id": 12,
+      "full_name": "Mithat Pala",
+      "display_name": "Mithat",
+      "short_label": "Mithat",
+      "minutes": "90.00",
+      "known_provider_player_id": 1183742
+    },
+    {
+      "match_id": 317872,
+      "player_id": 358,
+      "team_id": 12,
+      "full_name": "Yakup Ayan",
+      "display_name": "Yakup",
+      "short_label": "Yakup",
+      "minutes": "0",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317872,
+      "player_id": 359,
+      "team_id": 12,
+      "full_name": "Adedire Emmanuel Awokoya-Mebude",
+      "display_name": "Mebude",
+      "short_label": "Mebude",
+      "minutes": "45.00",
+      "known_provider_player_id": 1211804
+    },
+    {
+      "match_id": 317872,
+      "player_id": 360,
+      "team_id": 12,
+      "full_name": "Tayyip Talha Sanuç",
+      "display_name": "Tayyip Talha",
+      "short_label": "Tayyip Talha",
+      "minutes": "0",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317872,
+      "player_id": 362,
+      "team_id": 12,
+      "full_name": "Yahia Fofana",
+      "display_name": "Fofana",
+      "short_label": "Fofana",
+      "minutes": "0",
+      "known_provider_player_id": 873566
+    },
+    {
+      "match_id": 317872,
+      "player_id": 363,
+      "team_id": 12,
+      "full_name": "Husniddin Aliqulov",
+      "display_name": "Alikulov",
+      "short_label": "Alikulov",
+      "minutes": "0",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317872,
+      "player_id": 364,
+      "team_id": 12,
+      "full_name": "Emrecan Bulut",
+      "display_name": "Emrecan",
+      "short_label": "Emrecan",
+      "minutes": "66.00",
+      "known_provider_player_id": 1410083
+    },
+    {
+      "match_id": 317872,
+      "player_id": 365,
+      "team_id": 12,
+      "full_name": "Modibo Sagnan",
+      "display_name": "Sagnan",
+      "short_label": "Sagnan",
+      "minutes": "90.00",
+      "known_provider_player_id": 884272
+    },
+    {
+      "match_id": 317872,
+      "player_id": 367,
+      "team_id": 12,
+      "full_name": "Attila Mocsi",
+      "display_name": "Mocsi",
+      "short_label": "Mocsi",
+      "minutes": "0",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317872,
+      "player_id": 370,
+      "team_id": 12,
+      "full_name": "Mihai Valentin Mihăilă",
+      "display_name": "Mihăilă",
+      "short_label": "Mihăilă",
+      "minutes": "24.00",
+      "known_provider_player_id": 890266
+    },
+    {
+      "match_id": 317872,
+      "player_id": 371,
+      "team_id": 12,
+      "full_name": "Dal Varešanović",
+      "display_name": "Varesanovic",
+      "short_label": "Varesanovic",
+      "minutes": "2.00",
+      "known_provider_player_id": 1078853
+    },
+    {
+      "match_id": 317872,
+      "player_id": 373,
+      "team_id": 12,
+      "full_name": "Taylan Antalyalı",
+      "display_name": "Taylan",
+      "short_label": "Taylan",
+      "minutes": "10.00",
+      "known_provider_player_id": 449999
+    },
+    {
+      "match_id": 317872,
+      "player_id": 375,
+      "team_id": 12,
+      "full_name": "Efe Doğan",
+      "display_name": "Efe",
+      "short_label": "Efe",
+      "minutes": "0",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317872,
+      "player_id": 376,
+      "team_id": 12,
+      "full_name": "Zafer Görgen",
+      "display_name": "Zafer",
+      "short_label": "Zafer",
+      "minutes": "90.00",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317872,
+      "player_id": 377,
+      "team_id": 12,
+      "full_name": "Siaka Bakayoko",
+      "display_name": "Bakayoko",
+      "short_label": "Bakayoko",
+      "minutes": "90.00",
+      "known_provider_player_id": 1603757
+    },
+    {
+      "match_id": 317872,
+      "player_id": 378,
+      "team_id": 12,
+      "full_name": "Ahmed Kutucu",
+      "display_name": "Ahmed",
+      "short_label": "Ahmed",
+      "minutes": "45.00",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317872,
+      "player_id": 379,
+      "team_id": 12,
+      "full_name": "Zakaria Ariss",
+      "display_name": "Ariss",
+      "short_label": "Ariss",
+      "minutes": "90.00",
+      "known_provider_player_id": 1559202
+    },
+    {
+      "match_id": 317872,
+      "player_id": 601,
+      "team_id": 12,
+      "full_name": "Umut Erdem",
+      "display_name": "Umut",
+      "short_label": "Umut",
+      "minutes": "0",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317872,
+      "player_id": 614,
+      "team_id": 12,
+      "full_name": "Emirhan Yılmaz",
+      "display_name": "Emirhan",
+      "short_label": "Emirhan",
+      "minutes": "0",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317872,
+      "player_id": 635,
+      "team_id": 12,
+      "full_name": "Moussa Diakité",
+      "display_name": "Diakité",
+      "short_label": "Diakité",
+      "minutes": "90.00",
+      "known_provider_player_id": 1415502
+    },
+    {
+      "match_id": 317872,
+      "player_id": 745,
+      "team_id": 4,
+      "full_name": "Gonçalo Santos Sousa",
+      "display_name": "Sousa",
+      "short_label": "Sousa",
+      "minutes": "63.00",
+      "known_provider_player_id": 1481576
+    },
+    {
+      "match_id": 317872,
+      "player_id": 976,
+      "team_id": 4,
+      "full_name": "Matej Maglica",
+      "display_name": "Maglica",
+      "short_label": "Maglica",
+      "minutes": "0",
+      "known_provider_player_id": 1283022
+    },
+    {
+      "match_id": 317872,
+      "player_id": 1109,
+      "team_id": 12,
+      "full_name": "Albert Iustin Doicaru",
+      "display_name": "Doicaru",
+      "short_label": "Doicaru",
+      "minutes": "0",
+      "known_provider_player_id": 1506578
+    },
+    {
+      "match_id": 317872,
+      "player_id": 1208,
+      "team_id": 4,
+      "full_name": "Florian Ayé",
+      "display_name": "Aye",
+      "short_label": "Aye",
+      "minutes": "90.00",
+      "known_provider_player_id": 660314
+    },
+    {
+      "match_id": 317872,
+      "player_id": 1373,
+      "team_id": 4,
+      "full_name": "Tobias Fjeld Gulliksen",
+      "display_name": "Gulliksen",
+      "short_label": "Gulliksen",
+      "minutes": "1.00",
+      "known_provider_player_id": 1093003
+    },
+    {
+      "match_id": 317872,
+      "player_id": 1538,
+      "team_id": 12,
+      "full_name": "Can Bozdoğan",
+      "display_name": "Can",
+      "short_label": "Can",
+      "minutes": "0",
+      "known_provider_player_id": 940086
+    },
+    {
+      "match_id": 317872,
+      "player_id": 1544,
+      "team_id": 12,
+      "full_name": "Gennaro Borrelli",
+      "display_name": "Borrelli",
+      "short_label": "Borrelli",
+      "minutes": "45.00",
+      "known_provider_player_id": 1030646
+    },
+    {
+      "match_id": 317872,
+      "player_id": 1610,
+      "team_id": 4,
+      "full_name": "Onur Öztonga",
+      "display_name": null,
+      "short_label": "Öztonga",
+      "minutes": "0",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317873,
+      "player_id": 16,
+      "team_id": 8,
+      "full_name": "Göktan Gürpüz",
+      "display_name": "Göktan",
+      "short_label": "Göktan",
+      "minutes": "3.00",
+      "known_provider_player_id": 1183141
+    },
+    {
+      "match_id": 317873,
+      "player_id": 41,
+      "team_id": 2,
+      "full_name": "Orhan Ovacıklı",
+      "display_name": "Orhan",
+      "short_label": "Orhan",
+      "minutes": "78.00",
+      "known_provider_player_id": 387670
+    },
+    {
+      "match_id": 317873,
+      "player_id": 42,
+      "team_id": 2,
+      "full_name": "Cengizhan Bayrak",
+      "display_name": "Cengizhan",
+      "short_label": "Cengizhan",
+      "minutes": "0",
+      "known_provider_player_id": 1117190
+    },
+    {
+      "match_id": 317873,
+      "player_id": 43,
+      "team_id": 2,
+      "full_name": "Ömer Arda Kara",
+      "display_name": "Ömer",
+      "short_label": "Ömer",
+      "minutes": "0",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317873,
+      "player_id": 44,
+      "team_id": 2,
+      "full_name": "Yakup Kırtay",
+      "display_name": "Yakup",
+      "short_label": "Yakup",
+      "minutes": "68.00",
+      "known_provider_player_id": 1531530
+    },
+    {
+      "match_id": 317873,
+      "player_id": 45,
+      "team_id": 2,
+      "full_name": "Mustafa Fettahoğlu",
+      "display_name": "Mustafa",
+      "short_label": "Mustafa F.",
+      "minutes": "22.00",
+      "known_provider_player_id": 1804781
+    },
+    {
+      "match_id": 317873,
+      "player_id": 47,
+      "team_id": 2,
+      "full_name": "Nihad Mujakić",
+      "display_name": "Mujakic",
+      "short_label": "Mujakic",
+      "minutes": "90.00",
+      "known_provider_player_id": 857436
+    },
+    {
+      "match_id": 317873,
+      "player_id": 48,
+      "team_id": 2,
+      "full_name": "Guram Giorbelidze",
+      "display_name": "Giorbelidze",
+      "short_label": "Giorbelidze",
+      "minutes": "90.00",
+      "known_provider_player_id": 553759
+    },
+    {
+      "match_id": 317873,
+      "player_id": 49,
+      "team_id": 2,
+      "full_name": "Nariman Akhundzada",
+      "display_name": "Nariman",
+      "short_label": "Nariman",
+      "minutes": "0",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317873,
+      "player_id": 51,
+      "team_id": 2,
+      "full_name": "Mahmut Ertuğrul Taşkıran",
+      "display_name": "Ertuğrul",
+      "short_label": "Ertuğrul",
+      "minutes": "90.00",
+      "known_provider_player_id": 178899
+    },
+    {
+      "match_id": 317873,
+      "player_id": 52,
+      "team_id": 2,
+      "full_name": "Eren Tozlu",
+      "display_name": "Eren",
+      "short_label": "Eren",
+      "minutes": "90.00",
+      "known_provider_player_id": 305198
+    },
+    {
+      "match_id": 317873,
+      "player_id": 53,
+      "team_id": 2,
+      "full_name": "Amar Gërxhaliu",
+      "display_name": "Gerxhaliu",
+      "short_label": "Gerxhaliu",
+      "minutes": "90.00",
+      "known_provider_player_id": 1398149
+    },
+    {
+      "match_id": 317873,
+      "player_id": 58,
+      "team_id": 2,
+      "full_name": "Martín Vladimir Rodríguez Torrejón",
+      "display_name": "Rodríguez",
+      "short_label": "Rodríguez",
+      "minutes": "78.00",
+      "known_provider_player_id": 264744
+    },
+    {
+      "match_id": 317873,
+      "player_id": 59,
+      "team_id": 2,
+      "full_name": "Brandon Baiye",
+      "display_name": "Baiye",
+      "short_label": "Baiye",
+      "minutes": "90.00",
+      "known_provider_player_id": 951054
+    },
+    {
+      "match_id": 317873,
+      "player_id": 63,
+      "team_id": 2,
+      "full_name": "Mustafa Yumlu",
+      "display_name": "Mustafa",
+      "short_label": "Mustafa Y.",
+      "minutes": "0",
+      "known_provider_player_id": 150185
+    },
+    {
+      "match_id": 317873,
+      "player_id": 64,
+      "team_id": 2,
+      "full_name": "Matija Orbanić",
+      "display_name": "Orbanic",
+      "short_label": "Orbanic",
+      "minutes": "0",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317873,
+      "player_id": 67,
+      "team_id": 2,
+      "full_name": "Sefa Akgün",
+      "display_name": "Sefa",
+      "short_label": "Sefa",
+      "minutes": "12.00",
+      "known_provider_player_id": 952440
+    },
+    {
+      "match_id": 317873,
+      "player_id": 70,
+      "team_id": 2,
+      "full_name": "Erkan Anapa",
+      "display_name": "Erkan",
+      "short_label": "Erkan",
+      "minutes": "0",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317873,
+      "player_id": 187,
+      "team_id": 8,
+      "full_name": "Çağlar Söyüncü",
+      "display_name": "Çağlar",
+      "short_label": "Çağlar",
+      "minutes": "90.00",
+      "known_provider_player_id": 602261
+    },
+    {
+      "match_id": 317873,
+      "player_id": 193,
+      "team_id": 8,
+      "full_name": "Cengiz Ünder",
+      "display_name": "Cengiz",
+      "short_label": "Cengiz",
+      "minutes": "90.00",
+      "known_provider_player_id": 603477
+    },
+    {
+      "match_id": 317873,
+      "player_id": 225,
+      "team_id": 8,
+      "full_name": "Hüseyin Bulut",
+      "display_name": "Hüseyin",
+      "short_label": "Hüseyin",
+      "minutes": "0",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317873,
+      "player_id": 226,
+      "team_id": 8,
+      "full_name": "Ahmed Ildız",
+      "display_name": "Ahmed",
+      "short_label": "Ahmed",
+      "minutes": "7.00",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317873,
+      "player_id": 228,
+      "team_id": 8,
+      "full_name": "Atakan Akkaynak",
+      "display_name": "Atakan",
+      "short_label": "Atakan",
+      "minutes": "0",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317873,
+      "player_id": 229,
+      "team_id": 8,
+      "full_name": "Alfredo Kulembe Gomes Ribeiro",
+      "display_name": "Fredy",
+      "short_label": "Fredy",
+      "minutes": "0",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317873,
+      "player_id": 230,
+      "team_id": 8,
+      "full_name": "Arif Şimşir",
+      "display_name": "Arif",
+      "short_label": "Arif",
+      "minutes": "0",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317873,
+      "player_id": 232,
+      "team_id": 8,
+      "full_name": "Cemali Sertel",
+      "display_name": "Cemali",
+      "short_label": "Cemali",
+      "minutes": "0",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317873,
+      "player_id": 234,
+      "team_id": 8,
+      "full_name": "Marcos Felipe de Freitas Monteiro",
+      "display_name": "Felipe",
+      "short_label": "Felipe",
+      "minutes": "90.00",
+      "known_provider_player_id": 535789
+    },
+    {
+      "match_id": 317873,
+      "player_id": 235,
+      "team_id": 8,
+      "full_name": "Gökhan Sazdağı",
+      "display_name": "Gökhan",
+      "short_label": "Gökhan",
+      "minutes": "87.00",
+      "known_provider_player_id": 602095
+    },
+    {
+      "match_id": 317873,
+      "player_id": 236,
+      "team_id": 8,
+      "full_name": "Emircan Gürlük",
+      "display_name": "Emircan",
+      "short_label": "Emircan",
+      "minutes": "0",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317873,
+      "player_id": 237,
+      "team_id": 8,
+      "full_name": "Jesús Andrés Ramírez Díaz",
+      "display_name": "Ramirez",
+      "short_label": "Ramirez",
+      "minutes": "83.00",
+      "known_provider_player_id": 1075457
+    },
+    {
+      "match_id": 317873,
+      "player_id": 239,
+      "team_id": 8,
+      "full_name": "Hrvoje Smolčić",
+      "display_name": "Smolcic",
+      "short_label": "Smolcic",
+      "minutes": "90.00",
+      "known_provider_player_id": 1077685
+    },
+    {
+      "match_id": 317873,
+      "player_id": 241,
+      "team_id": 8,
+      "full_name": "Serdar Saatçı",
+      "display_name": "Serdar",
+      "short_label": "Serdar S.",
+      "minutes": "0",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317873,
+      "player_id": 242,
+      "team_id": 8,
+      "full_name": "Mame Baba Thiam",
+      "display_name": "Thiam",
+      "short_label": "Thiam",
+      "minutes": "0",
+      "known_provider_player_id": 299358
+    },
+    {
+      "match_id": 317873,
+      "player_id": 244,
+      "team_id": 8,
+      "full_name": "Erhan Erentürk",
+      "display_name": "Erhan",
+      "short_label": "Erhan",
+      "minutes": "0",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317873,
+      "player_id": 247,
+      "team_id": 8,
+      "full_name": "Sebastian Andrei Borza",
+      "display_name": "Borza",
+      "short_label": "Borza",
+      "minutes": "90.00",
+      "known_provider_player_id": 1336714
+    },
+    {
+      "match_id": 317873,
+      "player_id": 248,
+      "team_id": 8,
+      "full_name": "Ylber Ramadani",
+      "display_name": "Ramadani",
+      "short_label": "Ramadani",
+      "minutes": "90.00",
+      "known_provider_player_id": 762028
+    },
+    {
+      "match_id": 317873,
+      "player_id": 249,
+      "team_id": 8,
+      "full_name": "Alexandre Manuel Penetra Correia",
+      "display_name": "Penetra",
+      "short_label": "Penetra",
+      "minutes": "15.00",
+      "known_provider_player_id": 1186780
+    },
+    {
+      "match_id": 317873,
+      "player_id": 250,
+      "team_id": 8,
+      "full_name": "Arda Hilmi Şengül",
+      "display_name": "Arda",
+      "short_label": "Arda",
+      "minutes": "0",
+      "known_provider_player_id": 1210674
+    },
+    {
+      "match_id": 317873,
+      "player_id": 389,
+      "team_id": 8,
+      "full_name": "Berat Ayberk Özdemir",
+      "display_name": "Berat",
+      "short_label": "Berat",
+      "minutes": "0",
+      "known_provider_player_id": 955596
+    },
+    {
+      "match_id": 317873,
+      "player_id": 401,
+      "team_id": 2,
+      "full_name": "Festy Oseiwe Ebosele",
+      "display_name": "Ebosele",
+      "short_label": "Ebosele",
+      "minutes": "12.00",
+      "known_provider_player_id": 0
+    },
+    {
+      "match_id": 317873,
+      "player_id": 585,
+      "team_id": 8,
+      "full_name": "Markus Seehusen Karlsbakk",
+      "display_name": "Karlsbakk",
+      "short_label": "Karlsbakk",
+      "minutes": "3.00",
+      "known_provider_player_id": 842682
+    },
+    {
+      "match_id": 317873,
+      "player_id": 608,
+      "team_id": 8,
+      "full_name": "Alexandros Kyziridis",
+      "display_name": "Kyziridis",
+      "short_label": "Kyziridis",
+      "minutes": "87.00",
+      "known_provider_player_id": 1106569
+    },
+    {
+      "match_id": 317873,
+      "player_id": 611,
+      "team_id": 8,
+      "full_name": "Mohamed Baba Diomandé",
+      "display_name": "Diomandé",
+      "short_label": "Diomandé",
+      "minutes": "83.00",
+      "known_provider_player_id": 1064272
+    },
+    {
+      "match_id": 317873,
+      "player_id": 623,
+      "team_id": 2,
+      "full_name": "Gyrano Emilio Kerk",
+      "display_name": "Kerk",
+      "short_label": "Kerk",
+      "minutes": "31.00",
+      "known_provider_player_id": 519134
+    },
+    {
+      "match_id": 317873,
+      "player_id": 746,
+      "team_id": 2,
+      "full_name": "Miguel Felipe Nunes Cardoso",
+      "display_name": "Cardoso",
+      "short_label": "Cardoso",
+      "minutes": "68.00",
+      "known_provider_player_id": 673749
+    },
+    {
+      "match_id": 317873,
+      "player_id": 778,
+      "team_id": 2,
+      "full_name": "Elisha Owusu",
+      "display_name": "Owusu",
+      "short_label": "Owusu",
+      "minutes": "59.00",
+      "known_provider_player_id": 883823
+    },
+    {
+      "match_id": 317873,
+      "player_id": 1108,
+      "team_id": 2,
+      "full_name": "Ibrahim Yalatif Diabate",
+      "display_name": "Diabate",
+      "short_label": "Diabate",
+      "minutes": "22.00",
+      "known_provider_player_id": 1104401
+    },
+    {
+      "match_id": 317873,
+      "player_id": 1307,
+      "team_id": 8,
+      "full_name": "Ermin Mahmić",
+      "display_name": "Mahmic",
+      "short_label": "Mahmic",
+      "minutes": "75.00",
+      "known_provider_player_id": 1528815
+    },
+    {
+      "match_id": 317873,
+      "player_id": 1406,
+      "team_id": 8,
+      "full_name": "Youssoufa Mohamadu Moukoko",
+      "display_name": "Moukoko",
+      "short_label": "Moukoko",
+      "minutes": "7.00",
+      "known_provider_player_id": 1174708
+    },
+    {
+      "match_id": 317873,
+      "player_id": 1571,
+      "team_id": 2,
+      "full_name": "Lawrence Agyekum",
+      "display_name": "Agyekum",
+      "short_label": "Agyekum",
+      "minutes": "0",
+      "known_provider_player_id": 1246235
+    },
+    {
+      "match_id": 317873,
+      "player_id": 1572,
+      "team_id": 2,
+      "full_name": "Emirhan Acar",
+      "display_name": "Emirhan",
+      "short_label": "Emirhan",
+      "minutes": "0",
+      "known_provider_player_id": 0
+    }
+  ]
+}
