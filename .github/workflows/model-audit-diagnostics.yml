@@ -1,0 +1,45 @@
+name: Source-gated model candidate audit (read only)
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/model-audit-diagnostics.yml"
+  workflow_dispatch:
+    inputs:
+      run_id:
+        description: "Existing candidate run UUID (read-only audit)"
+        required: true
+        type: string
+permissions:
+  contents: read
+  id-token: write
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      FUNCTIONS_URL: https://nnoagjayvrwyjtizhnfz.supabase.co/functions/v1
+      AUDIENCE: tff-fantezi-scout
+      RUN_ID: ${{ inputs.run_id || '691f2e28-af32-4e93-ad80-f62a05361d74' }}
+    steps:
+      - name: Verify candidate model audit without writes
+        shell: bash
+        run: |
+          set -euo pipefail
+          TOKEN="$(curl --fail-with-body --silent --show-error --max-time 30 \
+            -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+            "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=${AUDIENCE}" | jq -er '.value')"
+          echo "::add-mask::$TOKEN"
+          status="$(jq -n --arg run "$RUN_ID" '{action:"audit_run",run_id:$run}' |
+            curl --silent --show-error --max-time 90 \
+            -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
+            --write-out '\n%{http_code}' --data-binary @- \
+            "$FUNCTIONS_URL/weekly-model-lifecycle" |
+            tee "$RUNNER_TEMP/model-audit-response.txt" | tail -1)"
+          head -n -1 "$RUNNER_TEMP/model-audit-response.txt" | jq -S '{
+            ok,pass,error,run_id,gameweek,allocation,distribution,warnings,no_writes,
+            benchmark,team_advanced_rows,inferred_weak_zones
+          }'
+          echo "Audit HTTP status: $status"
+          head -n -1 "$RUNNER_TEMP/model-audit-response.txt" |
+            jq -e --arg run "$RUN_ID" '.run_id==$run and (.no_writes==true) and (.pass==true)' >/dev/null
