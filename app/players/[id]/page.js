@@ -60,6 +60,8 @@ export default async function PlayerPage({ params }){
   const pro=await getPlayerDetailPro(id,data.run?.id)
   const {run,player,availability:a,season:s,modelFeatures:mf,weekly,matches=[]}=data
   const r=pro?.role||null
+  const advancedRecent=pro?.advancedRecent||[]
+  const observed=(value,d=2)=>value===null||value===undefined?'—':Number(value).toFixed(d)
   const p={...(data.projection||{}),...(pro?.projection||{})}
   const replay=[...(data.replay||[]).filter(row=>row.history_mode!=='live_frozen'),...(pro?.history||[]).map(row=>({...row,history_mode:'live_frozen'}))].sort((a,b)=>Number(a.gameweek)-Number(b.gameweek)).slice(-12)
   const closedWeeks=[...(weekly||[])].sort((x,y)=>Number(x.gameweek||0)-Number(y.gameweek||0))
@@ -250,6 +252,26 @@ export default async function PlayerPage({ params }){
       title="Puan dağılımı, xG/xA ve rol değişimini aç."
       description="P25/P75/P90, 6+ ihtimali, beklenen gol/asist ve son maç rol-dakika karşılaştırmaları Gelişmiş üyelikte görünür."
     />}
+
+    {!isGK&&advancedRecent.length?<section className="card profile-card player-verified-source-card">
+      <div className="panel-head">
+        <div><span className="eyebrow">KAYNAKLI İLERİ VERİ</span><h2>Son doğrulanan maç aksiyonları</h2></div>
+        <span className="pill">MH{Math.min(...advancedRecent.map(row=>Number(row.gameweek)))}–MH{Math.max(...advancedRecent.map(row=>Number(row.gameweek)))} • {advancedRecent.length} maç</span>
+      </div>
+      <div className="profile-grid player-profile-main-grid">
+        {advancedRecent.map(row=><div className="card" key={row.gameweek}>
+          <span className="eyebrow">MH{row.gameweek} • {observed(row.minutes,0)} dk</span>
+          <MetricGrid items={[
+            {label:'xG',value:observed(row.xg)},
+            {label:'xA',value:observed(row.xa)},
+            {label:'Şut',value:observed(row.shots,0)},
+            {label:'İsabetli şut',value:observed(row.shots_on_target,0)},
+            {label:'Yaratılan şans',value:observed(row.key_passes,0)}
+          ]}/>
+        </div>)}
+      </div>
+      <p className="muted">Yalnızca kaynağın açıkça bildirdiği değerler gösterilir. “—” veri yok demektir, sıfır değil. 0 dakika kayıtları kaynakla doğrulanmadan aksiyonlara sıfır olarak eklenmez.</p>
+    </section>:null}
 
     <section className="card profile-card season-card player-season-card">
       <div className="panel-head">
