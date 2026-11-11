@@ -11,7 +11,7 @@ test('Pro-only observed advanced data is separate from old cumulative stats',()=
  assert.match(player,/0 dakika kayıtları kaynakla doğrulanmadan/)
  assert.match(team,/recentMatches===4/)
  assert.match(team,/son dört maç/i)
- assert.match(team,/Detay profil MH/)
+ assert.match(team,/Ayrıntılı olay MH/)
 })
 test('RPCs require real active Pro and never grant anonymous execution',()=>{
  const sql=root('supabase/migrations/20261111023700_pro_recent_advanced_verified_player_team.sql')
