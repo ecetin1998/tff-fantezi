@@ -52,3 +52,11 @@ test('weekly and intraday builders must both recompute source-backed regular-sta
   assert.match(lifecycle,/scout_match_player_evidence/)
   assert.match(evidence,/Number\(targetWeek\)-10/)
 })
+
+test('candidate audit requires all new starter-duration provenance, not just a changed code SHA',()=>{
+  const src=readFileSync(new URL('../supabase/functions/weekly-model-lifecycle/index.ts',import.meta.url),'utf8')
+  assert.match(src,/STARTER_DURATION_LONG_WINDOW_PROVENANCE_MISSING/)
+  assert.match(src,/starter-duration-long-window-v3/)
+  assert.match(src,/run\.is_current!==true/)
+  assert.match(src,/select\("player_id,club_id,position,rates,availability,source_note"\)/)
+})
