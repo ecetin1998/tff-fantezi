@@ -1,5 +1,5 @@
 /**
- * Fetch the latest five gameweeks of final minutes evidence without silently
+ * Fetch the latest ten gameweeks of final minutes evidence without silently
  * truncating at Supabase/PostgREST's configured max-rows cap (often 1,000).
  * Important: absence of older weeks is NOT a verified zero-minute benching.
  * Stable ordering is required for offset pagination.
@@ -11,7 +11,7 @@ export async function fetchTrustedWeeklyEvidence(sb, targetWeek) {
   for(let offset=0;offset<maxRows;offset+=pageSize){
     const page=await sb.from("scout_player_weekly_points")
       .select("player_id,gameweek,match_id,minutes,points,is_final,source_kind,source_updated_at")
-      .gte("gameweek",Math.max(1,Number(targetWeek)-5))
+      .gte("gameweek",Math.max(1,Number(targetWeek)-10))
       .lt("gameweek",Number(targetWeek))
       .eq("is_final",true)
       .order("gameweek",{ascending:false})

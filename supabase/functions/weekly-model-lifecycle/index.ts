@@ -10,6 +10,7 @@ import {roleTrendFromWeeklyEvidence} from "./roleTrend.mjs"
 import {blendVerifiedAttackRate} from "./mh8Attack.mjs"
 import {calibrateAttackRates} from "./roleAwareAttackRates.mjs"
 import {starterDurationProfile} from "./starterDuration.mjs"
+import {regularStarterReliability} from "./regularStarterReliability.mjs"
 import {verifiedLineupFormations} from "./verifiedLineupFormations.mjs"
 import {recentAttackForm,fetchRecentAttackEvidence,groupRecentAttack} from "./recentAttackForm.mjs"
 import {alignAttackSourceWindow} from "./sourceWindowAttack.mjs"
@@ -338,7 +339,7 @@ async function prepare(sb:any,current:any,status:any,body:any={}){
   }
 
   const [
-    playersQ,rolesQ,availabilityQ,statsQ,teamStatsQ,fixturesQ,weeklyQ,priorInputsQ,teamsQ,currentProjQ,tacticalQ,teamHistoryQ,recentAttackQ
+    playersQ,rolesQ,availabilityQ,statsQ,teamStatsQ,fixturesQ,weeklyQ,priorInputsQ,teamsQ,currentProjQ,tacticalQ,teamHistoryQ,recentAttackQ,verifiedXiQ
   ]=await Promise.all([
     sb.from("scout_players").select("id,full_name,team_id,position,price,primary_role,role_side,active").eq("active",true),
     sb.from("scout_role_signals").select("*").eq("run_id",current.id),
@@ -356,9 +357,13 @@ async function prepare(sb:any,current:any,status:any,body:any={}){
       .eq("verified",true),
     sb.from("scout_match_history").select("gameweek,match_id,kickoff_at,home_team_id,away_team_id,home_goals,away_goals,match_status,fantasy_closure")
       .eq("season","2026-27").gte("gameweek",1).lt("gameweek",target),
-    fetchRecentAttackEvidence(sb,target)
+    fetchRecentAttackEvidence(sb,target),
+    sb.from("scout_match_player_evidence")
+      .select("player_id,gameweek,started,verified_first_11,minutes,source_url,updated_at")
+      .eq("season","2026-27").gte("gameweek",Math.max(1,target-2)).lt("gameweek",target)
+      .eq("started",true).eq("verified_first_11",true)
   ])
-  for(const q of [playersQ,rolesQ,availabilityQ,statsQ,teamStatsQ,fixturesQ,weeklyQ,priorInputsQ,teamsQ,currentProjQ,tacticalQ,teamHistoryQ,recentAttackQ])if(q.error)throw q.error
+  for(const q of [playersQ,rolesQ,availabilityQ,statsQ,teamStatsQ,fixturesQ,weeklyQ,priorInputsQ,teamsQ,currentProjQ,tacticalQ,teamHistoryQ,recentAttackQ,verifiedXiQ])if(q.error)throw q.error
   const players=playersQ.data||[]
   if((availabilityQ.data||[]).length<players.length)throw new Error("AVAILABILITY_COVERAGE_INCOMPLETE")
   if((teamStatsQ.data||[]).length!==18)throw new Error("TEAM_STATS_INCOMPLETE")
@@ -384,6 +389,12 @@ async function prepare(sb:any,current:any,status:any,body:any={}){
     const id=Number(obs.player_id)
     if(!tacticalEvidence.has(id))tacticalEvidence.set(id,[])
     tacticalEvidence.get(id)!.push(obs)
+  }
+  const verifiedXiEvidence=new Map<number,any[]>()
+  for(const xi of verifiedXiQ.data||[]){
+    const id=Number(xi.player_id)
+    if(!verifiedXiEvidence.has(id))verifiedXiEvidence.set(id,[])
+    verifiedXiEvidence.get(id)!.push(xi)
   }
   const recentAdvanced=groupRecentAttack(recentAttackQ.data?.advanced||[])
   const recentVerified=groupRecentAttack(recentAttackQ.data?.verified||[])
@@ -451,14 +462,16 @@ async function prepare(sb:any,current:any,status:any,body:any={}){
   for(const p of players){
     const id=Number(p.id),prior=priorMap.get(id)||{},s=statsMap.get(id)||{},r=roleMap.get(id)||{},av=avMap.get(id)
     if(!av)throw new Error("AVAILABILITY_MISSING_"+id)
-    const rows=(recent.get(id)||[]).slice(0,5)
+    const minuteHistory=recent.get(id)||[]
+    const rows=minuteHistory.slice(0,5) // retain calibrated role/attack lookback
+    const verifiedStarts=verifiedXiEvidence.get(id)||[]
     // Independently calculated MH8 0-minute entries can mean "not in
     // source", not verified DNP. Never teach role/bench probabilities
     // that they are real zero-minute appearances.
     const trustedRows=rows.filter(x=>trustedMinute(x)!==null)
     const durationProfile=starterDurationProfile({
-      position:p.position,seasonStarts:s.starts,weekly:rows,
-      verified:tacticalEvidence.get(id)||[],targetWeek:target,
+      position:p.position,seasonStarts:s.starts,weekly:minuteHistory,
+      verified:[...verifiedStarts.map(z=>({...z,verified:true,observed_at:z.updated_at})),...(tacticalEvidence.get(id)||[])],targetWeek:target,
       cutoffAt:teamKickoffs.get(Number(p.team_id))||targetKickoff
     })
     let durations=durationProfile.durations
@@ -478,6 +491,13 @@ async function prepare(sb:any,current:any,status:any,body:any={}){
       availability:n(av.availability_probability,1)
     })
     if(recentStarter.applied)roleProb=recentStarter.role
+    const regularStarter=regularStarterReliability({
+      baseline:roleProb,seasonStarts:s.starts,matchesPlayed:s.matches_played,
+      weekly:minuteHistory,verified:verifiedStarts,targetWeek:target,
+      cutoffAt:teamKickoffs.get(Number(p.team_id))||targetKickoff,
+      availability:n(av.availability_probability,1)
+    })
+    if(regularStarter.applied)roleProb=regularStarter.role
     const event=official.latest.get(id)
     const officialShift=applyOfficialMinutesEvidence({
       baseline:roleProb,durations,durationWeights,
@@ -545,7 +565,7 @@ async function prepare(sb:any,current:any,status:any,body:any={}){
       bench_weight:n(prior.bench_weight,1),durations,duration_weights:durationWeights,rates,
       data_confidence:prior.data_confidence||projMap.get(id)?.confidence||"medium",
       has_individual_prior:Boolean(prior.has_individual_prior),
-      source_note:key+" • starter-duration-source-gated-v2 "+durationProfile.reason+(calibrated.applied?" • role-aware-attack-v1":"")+(form.applied?" • recent-attack-form-v2":"")+(attackForm.applied&&!form.applied?" • lagged-verified-form-v1":"")+(covered.aligned&&covered.advancedWeek<target-1?" • source-window-attack-v1":"")+(tactical.changed?" • tactical-role-evidence-v1":"")+(momentum.rising?" • momentum-v1 +"+momentum.role_uplift:"")+(recentStarter.applied?" • verified-recent-starter-v1 +"+recentStarter.delta.toFixed(4):"")+(xaReconcile.adjusted?" • defender-xa-source-window-v1 "+xaReconcile.source_minutes+"dk":"")+(officialShift.applied?" • resmî maç: "+event.match_ref:""),
+      source_note:key+" • starter-duration-source-gated-v2 "+durationProfile.reason+" • starter-duration-long-window-v3"(regularStarter.applied?" • season-starter-reliability-v1 +"+regularStarter.delta.toFixed(4):"")+(calibrated.applied?" • role-aware-attack-v1":"")+(form.applied?" • recent-attack-form-v2":"")+(attackForm.applied&&!form.applied?" • lagged-verified-form-v1":"")+(covered.aligned&&covered.advancedWeek<target-1?" • source-window-attack-v1":"")+(tactical.changed?" • tactical-role-evidence-v1":"")+(momentum.rising?" • momentum-v1 +"+momentum.role_uplift:"")+(recentStarter.applied?" • verified-recent-starter-v1 +"+recentStarter.delta.toFixed(4):"")+(xaReconcile.adjusted?" • defender-xa-source-window-v1 "+xaReconcile.source_minutes+"dk":"")+(officialShift.applied?" • resmî maç: "+event.match_ref:""),
       sub_role:tactical.role||prior.sub_role||null,role_side:tactical.side||prior.role_side||null,
       effective_xa_per90:attackForm.xaPer90
     })
@@ -862,21 +882,25 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
 
   const sourceBenchmark=String(latestMetaQ.data.benchmark_version)
   const stableRoleBenchmark=String(stableMetaQ.data?.benchmark_version||sourceBenchmark)
-  const [inputsQ,matchesQ,stableInputsQ,sourceStatsQ,weeklyRecentQ,stableMatchesQ]=await Promise.all([
+  const [inputsQ,matchesQ,stableInputsQ,sourceStatsQ,weeklyRecentQ,stableMatchesQ,verifiedXiQ]=await Promise.all([
     sb.from("scout_replay_player_inputs").select("*").eq("gameweek",gw).eq("benchmark_version",sourceBenchmark).order("player_id"),
     sb.from("scout_replay_match_inputs").select("*").eq("gameweek",gw).eq("benchmark_version",sourceBenchmark).order("match_id"),
     stableRoleBenchmark===sourceBenchmark
       ?Promise.resolve({data:null,error:null})
       :sb.from("scout_replay_player_inputs").select("player_id,role_probability,durations,duration_weights,source_note,rates").eq("gameweek",gw).eq("benchmark_version",stableRoleBenchmark).order("player_id"),
-    sb.from("scout_player_season_stats").select("player_id,through_gameweek,advanced_through_gameweek,minutes,starts,shots,key_passes,goals,assists,xg_total,xa_total,xa_per90,xa_model_per90,xa_source")
+    sb.from("scout_player_season_stats").select("player_id,through_gameweek,advanced_through_gameweek,minutes,starts,matches_played,shots,key_passes,goals,assists,xg_total,xa_total,xa_per90,xa_model_per90,xa_source")
       .eq("season","2026-27").eq("through_gameweek",gw-1),
     fetchTrustedWeeklyEvidence(sb,gw),
     stableRoleBenchmark===sourceBenchmark
       ?Promise.resolve({data:null,error:null})
       :sb.from("scout_replay_match_inputs").select("*")
-        .eq("gameweek",gw).eq("benchmark_version",stableRoleBenchmark).order("match_id")
+        .eq("gameweek",gw).eq("benchmark_version",stableRoleBenchmark).order("match_id"),
+    sb.from("scout_match_player_evidence")
+      .select("player_id,gameweek,started,verified_first_11,minutes,source_url,updated_at")
+      .eq("season","2026-27").gte("gameweek",Math.max(1,gw-2)).lt("gameweek",gw)
+      .eq("started",true).eq("verified_first_11",true)
   ])
-  for(const q of [inputsQ,matchesQ,stableInputsQ,sourceStatsQ,weeklyRecentQ,stableMatchesQ])if(q.error)throw q.error
+  for(const q of [inputsQ,matchesQ,stableInputsQ,sourceStatsQ,weeklyRecentQ,stableMatchesQ,verifiedXiQ])if(q.error)throw q.error
   if(!(inputsQ.data||[]).length||!(matchesQ.data||[]).length)throw new Error("CURRENT_SIM_INPUT_COVERAGE_MISSING")
   const stableInputsMap=new Map(((stableInputsQ.data||inputsQ.data)||[]).map((x:any)=>[Number(x.player_id),x]))
   const stableRoleMap=new Map([...stableInputsMap.entries()].map(([id,x]:any)=>[id,n(x.role_probability,.5)]))
@@ -903,6 +927,16 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
     const id=Number(w.player_id)
     if(!weeklyMomentumRows.has(id))weeklyMomentumRows.set(id,[])
     weeklyMomentumRows.get(id)!.push(w)
+  }
+  const verifiedXiEvidence=new Map<number,any[]>()
+  for(const xi of verifiedXiQ.data||[]){
+    const id=Number(xi.player_id)
+    if(!verifiedXiEvidence.has(id))verifiedXiEvidence.set(id,[])
+    verifiedXiEvidence.get(id)!.push(xi)
+  }
+  const longerMinuteHistory=new Map(weeklyMomentumRows)
+  for(const [playerId,weekly] of longerMinuteHistory){
+    weeklyMomentumRows.set(playerId,weekly.slice(0,5))
   }
   const sourceStatsMap=new Map((sourceStatsQ.data||[]).map((x:any)=>[Number(x.player_id),x]))
   const recentAdvanced=groupRecentAttack(recentAttackQ.data?.advanced||[])
@@ -953,14 +987,21 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
       availability,alreadyApplied:String(stableInput.source_note||"").includes("verified-recent-starter-v1")
     })
     const stats=sourceStatsMap.get(Number(x.player_id)) as any
+    const verifiedStarts=verifiedXiEvidence.get(Number(x.player_id))||[]
+    const regularStarter=regularStarterReliability({
+      baseline:recentStarter.role,seasonStarts:stats?.starts,matchesPlayed:stats?.matches_played,
+      weekly:longerMinuteHistory.get(Number(x.player_id))||[],verified:verifiedStarts,
+      targetWeek:gw,cutoffAt:targetKickoffs.get(Number(x.club_id))||new Date(kickoff).toISOString(),
+      availability,alreadyApplied:String(stableInput.source_note||"").includes("season-starter-reliability-v1")
+    })
     const durationProfile=starterDurationProfile({
       position:player?.position||x.position,seasonStarts:stats?.starts,
-      weekly:weeklyMomentumRows.get(Number(x.player_id))||[],
-      verified:tacticalEvidence.get(Number(x.player_id))||[],
+      weekly:longerMinuteHistory.get(Number(x.player_id))||[],
+      verified:[...verifiedStarts.map(z=>({...z,verified:true,observed_at:z.updated_at})),...(tacticalEvidence.get(Number(x.player_id))||[])],
       targetWeek:gw,cutoffAt:targetKickoffs.get(Number(x.club_id))||new Date(kickoff).toISOString()
     })
     const adjusted=applyOfficialMinutesEvidence({
-      baseline:recentStarter.role,durations:durationProfile.durations,durationWeights:durationProfile.duration_weights,
+      baseline:regularStarter.role,durations:durationProfile.durations,durationWeights:durationProfile.duration_weights,
       fixtureKickoff:targetKickoffs.get(Number(x.club_id))||new Date(kickoff).toISOString(),evidence:event,
       sameSlotStarter:player&&event?official.directCompetitor(player,event):false,
       availability,
@@ -1056,7 +1097,8 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
       durations:adjusted.applied?adjusted.durations:durationProfile.durations,
       duration_weights:adjusted.applied?adjusted.duration_weights:durationProfile.duration_weights,
       source_note:`intraday refresh from ${sourceBenchmark}; role baseline ${stableRoleBenchmark}; source ${latestSourceAt}`
-        +` • starter-duration-source-gated-v2 ${durationProfile.reason}`
+        +` • starter-duration-source-gated-v2 ${durationProfile.reason} • starter-duration-long-window-v3`
+        +(regularStarter.applied||String(stableInput.source_note||"").includes("season-starter-reliability-v1")?` • season-starter-reliability-v1 +${regularStarter.delta.toFixed(4)}`:"")
         +(momentum.rising?` • momentum-v1 +${momentumBoost}`:"")
         +(recentStarter.applied||String(stableInput.source_note||"").includes("verified-recent-starter-v1")?` • verified-recent-starter-v1 +${recentStarter.delta.toFixed(4)}`:"")
         +(xaReconcile.adjusted?` • defender-xa-source-window-v1 ${xaReconcile.source_minutes}dk`:"")
@@ -1353,7 +1395,7 @@ Deno.serve(async(req:Request)=>{
       }
       if(!benchmark)return Response.json({ok:false,error:"AUDIT_BENCHMARK_MISSING"},{status:409})
       const [players,matches,fixtures,shares,projections,matchPreds,goalConfig,meta,teamStats,tactical]=await Promise.all([
-        sb.from("scout_replay_player_inputs").select("player_id,club_id,position,rates,availability").eq("gameweek",gw).eq("benchmark_version",benchmark),
+        sb.from("scout_replay_player_inputs").select("player_id,club_id,position,rates,availability,source_note").eq("gameweek",gw).eq("benchmark_version",benchmark),
         sb.from("scout_replay_match_inputs").select("match_id,home_team_id,away_team_id,home_lambda,away_lambda,source_note").eq("gameweek",gw).eq("benchmark_version",benchmark),
         sb.from("scout_match_history").select("match_id,home_team_id,away_team_id").eq("season","2026-27").eq("gameweek",gw),
         sb.from("scout_role_signals").select("player_id,team_goal_share,team_assist_share").eq("run_id",runId),
@@ -1376,6 +1418,11 @@ Deno.serve(async(req:Request)=>{
         (matches.data||[]).some((m:any)=>!String(m.source_note||"").includes(TEAM_ELO_POLICY))){
         return Response.json({ok:false,pass:false,error:"SOURCE_VERIFIED_TEAM_ELO_PROVENANCE_MISSING",
           run_id:runId,benchmark,no_writes:true},{status:409})
+      }
+      if(gw>=12&&run.is_current!==true&&
+        (players.data||[]).some((r:any)=>!String(r.source_note||"").includes("starter-duration-long-window-v3"))){
+        return Response.json({ok:false,pass:false,error:"STARTER_DURATION_LONG_WINDOW_PROVENANCE_MISSING",
+          run_id:runId,gameweek:gw,benchmark,no_writes:true},{status:409})
       }
       const prep=auditMatchAllocation({
         gameweek:gw,fixtures:fixtures.data||[],matchInputs:matches.data||[],
