@@ -934,7 +934,7 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
     if(!verifiedXiEvidence.has(id))verifiedXiEvidence.set(id,[])
     verifiedXiEvidence.get(id)!.push(xi)
   }
-  const longerMinuteHistory=weeklyMomentumRows
+  const longerMinuteHistory=new Map(weeklyMomentumRows)
   for(const [playerId,weekly] of longerMinuteHistory){
     weeklyMomentumRows.set(playerId,weekly.slice(0,5))
   }
