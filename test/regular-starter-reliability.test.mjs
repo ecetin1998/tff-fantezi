@@ -67,3 +67,34 @@ test('long-minute history is independently copied before the five-week attack wi
   assert.match(src,/weeklyMomentumRows\.set\(playerId,weekly\.slice\(0,5\)\)/)
   assert.match(src,/weekly:longerMinuteHistory\.get\(Number\(x\.player_id\)\)\|\|\[\]/)
 })
+
+test('isolated 27-minute verified starter exit cannot dominate an eight-start 90-minute history',()=>{
+ const long=[fin(10,90),fin(9,90),fin(8,90),fin(7,90)]
+ const short={gameweek:11,minutes:27,started:true,verified:true,observed_at:'2026-11-09T12:00:00Z'}
+ const x=starterDurationProfile({position:'DEF',seasonStarts:8,
+   weekly:[fin(11,27),...long],verified:[short],targetWeek:12,cutoffAt:cutoff})
+ assert.deepEqual(x.durations,[27,90,90,90,90])
+ assert.ok(x.duration_weights[0]<=.13,JSON.stringify(x))
+ assert.ok(x.duration_weights[0]>0,'sourced short stint must not be deleted')
+ assert.ok(Math.abs(x.duration_weights.reduce((a,b)=>a+b,0)-1)<1e-9)
+ assert.match(x.reason,/single_short_starter_shrunk/)
+})
+test('repeated verified short starts preserve genuine reduced-minute trends',()=>{
+ const verified=[
+  {gameweek:11,minutes:27,started:true,verified:true,observed_at:'2026-11-09T12:00:00Z'},
+  {gameweek:10,minutes:45,started:true,verified:true,observed_at:'2026-11-09T12:00:00Z'}
+ ]
+ const x=starterDurationProfile({position:'MID',seasonStarts:9,
+   verified,weekly:[fin(9,90),fin(8,90),fin(7,90)],
+   targetWeek:12,cutoffAt:cutoff})
+ assert.deepEqual(x.durations,[27,45,90,90,90])
+ assert.ok(x.duration_weights[0]>.30,JSON.stringify(x))
+ assert.doesNotMatch(x.reason,/single_short_starter_shrunk/)
+})
+test('low-sample cameo players never obtain stable-season outlier protection',()=>{
+ const x=starterDurationProfile({position:'MID',seasonStarts:2,
+   verified:[{gameweek:11,minutes:27,started:true,verified:true,observed_at:'2026-11-09T12:00:00Z'}],
+   weekly:[fin(10,90),fin(9,90),fin(8,90)],
+   targetWeek:12,cutoffAt:cutoff})
+ assert.ok(x.duration_weights[0]>.30)
+})
