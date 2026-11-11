@@ -29,3 +29,12 @@ test('separate source table cannot be accessed directly with anon or authenticat
  assert.match(schema,/enable row level security/)
  assert.match(schema,/revoke all on table public\.scout_verified_team_match_advanced from anon,authenticated/)
 })
+
+test('MH12 refreshed simulation refuses stale or post-kickoff team advanced sources',()=>{
+ const worker=readFileSync(new URL('../supabase/functions/weekly-model-lifecycle/index.ts',import.meta.url),'utf8')
+ assert.match(worker,/MH12_VERIFIED_TEAM_ADVANCED_SOURCE_COVERAGE_MISSING/)
+ assert.match(worker,/verified_team_advanced_v1:verifiedTeamAdvanced/)
+ assert.match(worker,/sourceRows\.length!==72/)
+ assert.match(worker,/pairs\.size!==72/)
+ assert.match(worker,/Date\.parse\(r\.source_observed_at\)>=firstKickoff/)
+})
