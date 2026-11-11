@@ -1,0 +1,21 @@
+name: MH8-11 team source schema probe
+on:
+  push:
+    branches: [feat/source-verified-team-match-metrics-mh8-11]
+    paths:
+      - scripts/probe_team_stat_schema.py
+      - data/source-evidence/gw8-11-team-advanced-source-manifest.json
+      - .github/workflows/gw8-11-team-source-schema.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: python -m pip install beautifulsoup4
+      - run: python scripts/probe_team_stat_schema.py

@@ -1,0 +1,32 @@
+name: MH8-11 verified team advanced facts (read only)
+on:
+  push:
+    branches: [feat/source-verified-team-match-metrics-mh8-11]
+    paths:
+      - scripts/extract_gw8_11_team_source.py
+      - test/gw8_11_team_source_test.py
+      - data/source-evidence/gw8-11-team-advanced-source-manifest.json
+      - .github/workflows/gw8-11-team-facts.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  source_audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 14
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: python -m pip install beautifulsoup4
+      - run: python -m unittest discover -s test -p gw8_11_team_source_test.py -v
+      - name: Source-verify 36 fixtures and each team's observed shot and xG totals
+        run: |
+          python scripts/extract_gw8_11_team_source.py --output gw8-11-team-advanced-observed.json
+          jq -e '.safe_for_review and .matches==36 and .no_db_writes and .no_fantasy_writes' gw8-11-team-advanced-observed.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: gw8-11-team-advanced-observed
+          path: gw8-11-team-advanced-observed.json
+          if-no-files-found: ignore

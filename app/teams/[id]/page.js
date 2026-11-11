@@ -160,8 +160,9 @@ export default async function TeamPage({params}){
     {isPro?<section className="card profile-card team-tactical-profile">
       <div className="panel-head">
         <div><span className="eyebrow">GÜÇLÜ / ZAYIF YANLAR</span><h2>Atak ve savunma profili</h2></div>
-        <small>{hasAdvancedProfile?`Detay profil MH${tactical.advanced_profile_through_gameweek} • ${tactical.advanced_profile_matches} maç`:tacticalCoverage==='event_complete'?'Detay olay verisi tam':'Genel hücum/savunma profili'}</small>
+        <small>{hasAdvancedProfile?`xG / şut MH${advancedWeek} • Ayrıntılı olay MH${tactical.advanced_profile_through_gameweek} (${tactical.advanced_profile_matches} maç)`:tacticalCoverage==='event_complete'?'Detay olay verisi tam':'Genel hücum/savunma profili'}</small>
       </div>
+      <p className="muted">xG, şut ve güç endeksleri MH{advancedWeek} kaynaklıdır. Büyük şans, ceza sahası dokunuşu ve diğer ayrıntılı aksiyonların eski dönem kapsamı ayrıca belirtilir.</p>
       <div className="team-detail-stat-grid team-core-stat-grid">
         <div className="card"><span>Hücum gücü</span><b>{idx(tactical?.attack_strength_index)}</b><small>lig ortalaması = 1.00</small></div>
         <div className="card"><span>Savunma gücü</span><b>{idx(tactical?.defense_strength_index)}</b><small>yüksek değer daha iyi</small></div>
