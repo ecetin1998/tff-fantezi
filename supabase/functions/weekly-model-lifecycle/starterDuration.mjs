@@ -40,7 +40,23 @@ export function starterDurationProfile({
   const ordered=[...starters.entries()].sort((a,b)=>b[0]-a[0]).slice(0,5)
   if(!ordered.length)return unavailable
   const durations=ordered.map(([,row])=>row.minutes)
-  return {durations,duration_weights:weighted(durations),
-    reason:verifiedCount?"verified_starter_stints":"60_plus_final_proxy",
+  let durationWeights=weighted(durations)
+  // A single verified early exit in an otherwise stable starter's season
+  // is a real observation, not proof of a 33% future early-sub probability.
+  // Keep that observed stint in the support, but shrink its *weight* toward
+  // the source-backed season incidence (one of >=7 starts). If multiple
+  // recent short starts exist, leave the trend untouched.
+  const isolatedShort=Number(seasonStarts)>=7&&durations.length>=4&&
+    ordered[0][1].verified===true&&durations[0]<60&&
+    durations.slice(1).every(m=>m>=60)&&
+    durations.slice(1).filter(m=>m>=70).length>=3
+  if(isolatedShort&&durationWeights[0]>.14){
+    const originalWeight=durationWeights[0]
+    const cap=Math.min(.14,1/Number(seasonStarts))
+    durationWeights=[cap,...durationWeights.slice(1).map(w=>w*(1-cap)/(1-originalWeight))]
+  }
+  return {durations,duration_weights:durationWeights,
+    reason:(verifiedCount?"verified_starter_stints":"60_plus_final_proxy")+
+      (isolatedShort?"_single_short_starter_shrunk":""),
     verified_starts:verifiedCount}
 }
