@@ -1,6 +1,6 @@
 name: MH12 one-time authorized tactical production release
 
-# Explicit owner-requested release. Existing production and lifecycle workflows stay unchanged.
+# Explicit owner-requested retry; keep standard production workflows manual-only.
 on:
   push:
     branches: [main]
@@ -10,46 +10,94 @@ on:
 permissions:
   contents: read
   actions: write
+  pull-requests: write
+
+concurrency:
+  group: mh12-tactical-release-request
+  cancel-in-progress: false
 
 jobs:
   release:
-    if: startsWith(github.event.head_commit.message, 'chore(release): MH12 tactical data')
+    if: startsWith(github.event.head_commit.message, 'chore(release): retry MH12 tactical data')
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 90
     env:
       GH_TOKEN: ${{ github.token }}
+      PREVIOUS_SHA: 39f3028517b6cba5ad82e863e5f3caec9922a58d
+      PREVIOUS_MODEL: 411af538-88ed-456b-8279-3a953035a3de
+      BASE_URL: https://fanteziligrehberi.com
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 2
-      - name: Check exact owner-requested main release
+      - name: Check exact authorized main release
         shell: bash
         run: |
           set -euo pipefail
           test "$GITHUB_REF" = refs/heads/main
-          test "$(git rev-parse HEAD^)" = "8adf5e295f914746b372089a5b8f2e02d7c05532"
+          test "$(git rev-parse HEAD^)" = "$PREVIOUS_SHA"
           test "$(gh api "repos/$GITHUB_REPOSITORY/commits/main" --jq .sha)" = "$GITHUB_SHA"
           for workflow in cloudflare-deploy.yml weekly-model-lifecycle.yml; do
             gh api "repos/$GITHUB_REPOSITORY/actions/workflows/$workflow" --jq .state | grep -qx active
           done
-      - name: Dispatch approved production workflow and verify success
+          gh pr comment 458 --body "Owner-requested release retry started: https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+      - name: Adopt existing deployment or dispatch production
         shell: bash
         run: |
           set -euo pipefail
-          gh workflow run cloudflare-deploy.yml --ref main
-          run_id=""
-          for attempt in {1..24}; do
-            run_id="$(gh run list --workflow cloudflare-deploy.yml --branch main --commit "$GITHUB_SHA" --event workflow_dispatch --limit 5 --json databaseId --jq '.[0].databaseId // empty')"
-            if [[ -n "$run_id" ]]; then break; fi
-            sleep 5
+          # Let the earlier one-time request finish before considering a retry.
+          prior="$(gh run list --workflow mh12-tactical-one-time-release.yml --branch main --limit 20 --json databaseId,status --jq ".[] | select(.databaseId != $GITHUB_RUN_ID and .status != \"completed\") | .databaseId" | head -1)"
+          if [[ -n "$prior" ]]; then gh run watch "$prior" --exit-status --interval 10 || true; fi
+          active="$(gh run list --workflow cloudflare-deploy.yml --branch main --limit 20 --json databaseId,status --jq '.[] | select(.status != "completed") | .databaseId' | head -1)"
+          if [[ -n "$active" ]]; then gh run watch "$active" --exit-status --interval 10 || true; fi
+          live_sha="$(curl -fsSL --max-time 30 "$BASE_URL/api/health" | jq -r '.sha' || true)"
+          if [[ "$live_sha" != "$PREVIOUS_SHA" && "$live_sha" != "$GITHUB_SHA" ]]; then
+            test "$(gh api "repos/$GITHUB_REPOSITORY/commits/main" --jq .sha)" = "$GITHUB_SHA"
+            gh workflow run cloudflare-deploy.yml --ref main
+            run_id=""
+            for attempt in {1..24}; do
+              run_id="$(gh run list --workflow cloudflare-deploy.yml --branch main --commit "$GITHUB_SHA" --event workflow_dispatch --limit 5 --json databaseId --jq '.[0].databaseId // empty')"
+              if [[ -n "$run_id" ]]; then break; fi
+              sleep 5
+            done
+            test -n "$run_id"
+            gh pr comment 458 --body "Production deploy requested: https://github.com/$GITHUB_REPOSITORY/actions/runs/$run_id"
+            gh run watch "$run_id" --exit-status --interval 10
+            live_sha="$(curl -fsSL --max-time 30 "$BASE_URL/api/health" | jq -er '.sha')"
+            test "$live_sha" = "$GITHUB_SHA"
+          fi
+          gh pr comment 458 --body "Production application SHA verified: $live_sha (contains the MH11 tactical updates)."
+      - name: Adopt or dispatch signed MH12 lifecycle
+        shell: bash
+        run: |
+          set -euo pipefail
+          active="$(gh run list --workflow weekly-model-lifecycle.yml --branch main --limit 20 --json databaseId,status --jq '.[] | select(.status != "completed") | .databaseId' | head -1)"
+          if [[ -n "$active" ]]; then gh run watch "$active" --exit-status --interval 10 || true; fi
+          current="$(curl -fsSL --max-time 40 -H 'Cache-Control: no-cache' "$BASE_URL/api/scout-data?section=matches" | jq -er '.current_run | select(.gameweek==12 and .status=="ready" and .is_current==true and .simulation_count==50000) | .id' || true)"
+          if [[ -z "$current" || "$current" == "$PREVIOUS_MODEL" ]]; then
+            test "$(gh api "repos/$GITHUB_REPOSITORY/commits/main" --jq .sha)" = "$GITHUB_SHA"
+            gh workflow run weekly-model-lifecycle.yml --ref main
+            run_id=""
+            for attempt in {1..24}; do
+              run_id="$(gh run list --workflow weekly-model-lifecycle.yml --branch main --commit "$GITHUB_SHA" --event workflow_dispatch --limit 5 --json databaseId --jq '.[0].databaseId // empty')"
+              if [[ -n "$run_id" ]]; then break; fi
+              sleep 5
+            done
+            test -n "$run_id"
+            gh pr comment 458 --body "MH12 50K lifecycle requested: https://github.com/$GITHUB_REPOSITORY/actions/runs/$run_id"
+            gh run watch "$run_id" --exit-status --interval 10
+          fi
+          # Verify the public current model is NEW, not merely a successful workflow.
+          for attempt in {1..12}; do
+            current="$(curl -fsSL --max-time 40 -H 'Cache-Control: no-cache' "$BASE_URL/api/scout-data?section=matches" | jq -er '.current_run | select(.gameweek==12 and .status=="ready" and .is_current==true and .simulation_count==50000) | .id' || true)"
+            if [[ -n "$current" && "$current" != "$PREVIOUS_MODEL" ]]; then
+              gh pr comment 458 --body "Verified new active MH12 model: $current (50,000 simulations)."
+              exit 0
+            fi
+            sleep 10
           done
-          test -n "$run_id"
-          echo "Production workflow: https://github.com/$GITHUB_REPOSITORY/actions/runs/$run_id"
-          gh run watch "$run_id" --exit-status --interval 10
-      - name: Request signed current-MH lifecycle after verified deployment
-        shell: bash
-        run: |
-          set -euo pipefail
-          test "$(gh api "repos/$GITHUB_REPOSITORY/commits/main" --jq .sha)" = "$GITHUB_SHA"
-          gh workflow run weekly-model-lifecycle.yml --ref main
-          echo "Current-MH lifecycle requested. Its own QA and release gates remain mandatory."
+          echo "New active model was not independently verified."
+          exit 1
+      - name: Report failure
+        if: failure()
+        run: gh pr comment 458 --body "Release retry did not finish verification. Inspect https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID for the exact failed gate."
