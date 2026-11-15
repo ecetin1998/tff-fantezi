@@ -228,7 +228,7 @@ export default async function TeamPage({params}){
         <div className="card"><span>Orta / maç</span><b>{num(tactical?.crosses_per_match,1)}</b><small>başarı {pctShare(tactical?.cross_success_rate)} • MH{tactical?.advanced_profile_through_gameweek||'—'}</small></div>
         <div className="card"><span>Çalım / maç</span><b>{num(tactical?.takeons_per_match,1)}</b><small>başarı {pctShare(tactical?.takeon_success_rate)} • MH{tactical?.advanced_profile_through_gameweek||'—'}</small></div></>}
         <div className="card"><span>Üretilen şans / maç</span><b>{num(tactical?.chances_created_per_match,1)}</b><small>oyuncu aksiyon toplamı</small></div>
-        <div className="card"><span>PPDA</span><b>{num(tactical?.ppda_avg,1)}</b><small>MH{tactical?.advanced_profile_through_gameweek||'—'} kaynak • düşük değer daha agresif baskı</small></div>
+        <div className="card"><span>PPDA</span><b>{num(actions?.ppda_published??tactical?.ppda_avg,1)}</b><small>MH{actions?.ppda_through_gameweek||tactical?.advanced_profile_through_gameweek||'—'} kaynak • düşük değer daha agresif baskı{actions?.ppda_latest_match!=null?` • MH${actions.ppda_latest_match_gameweek} maç: ${num(actions.ppda_latest_match,1)}`:''}</small></div>
       </div>:null}
       {hasInferredChannels?<div className="profile-grid team-detail-history-grid">
         <div className="card">
@@ -379,7 +379,7 @@ export default async function TeamPage({params}){
             <div><span>Toplam xGA</span><b>{num(s?.xga_total)}</b></div>
             <div><span>Rakip isabetli şut / maç</span><b>{oppSotPerMatch===null?'—':num(oppSotPerMatch,1)}</b><small>{advancedMatches} kaynaklı maç</small></div>
             <div><span>xGA − yenen gol</span><b>{defensiveDelta===null?'—':(defensiveDelta>0?'+':'')+num(defensiveDelta)}</b><small>{hasAlignedGoals?'Eş dönem':'Dönemler farklı'}</small></div>
-            <div><span>PPDA</span><b>{num(s?.ppda)}</b></div>
+            <div><span>PPDA</span><b>{num(actions?.ppda_published??s?.ppda,1)}</b>{actions?.ppda_through_gameweek?<small>MH{actions.ppda_through_gameweek} sezon özeti</small>:null}</div>
           </div>
         </div>
         {s?.coverage_note?<small className="team-profile-coverage">{s.coverage_note}</small>:null}
