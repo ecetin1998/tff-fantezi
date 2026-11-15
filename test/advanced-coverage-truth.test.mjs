@@ -67,3 +67,17 @@ test("shot zones cover 99 fixtures independently of event coverage",()=>{
  assert.match(s,/hücumun başladığı kanalı/)
  assert.match(read("lib/data.js"),/shot_zone_profile/)
 })
+
+test("published crossing and dribble samples do not imply event completeness",()=>{
+ const sql=read("supabase/migrations/20261115212000_mh11_team_source_actions.sql")
+ assert.match(sql,/if n<>18/)
+ assert.match(sql,/s\.through_gameweek=11 and s\.matches_played=11/)
+ assert.match(sql,/published rounded averages/)
+ assert.doesNotMatch(sql,/advanced_profile_through_gameweek\s*=/)
+ assert.doesNotMatch(sql,/takeon_success_rate\s*=/)
+ const page=read("app/teams/[id]/page.js")
+ assert.match(page,/actions\.through_gameweek/)
+ assert.match(page,/Çalım denemesi \/ maç/)
+ assert.match(page,/İsabetli orta \/ maç/)
+ assert.match(read("lib/data.js"),/source_action_profile/)
+})
