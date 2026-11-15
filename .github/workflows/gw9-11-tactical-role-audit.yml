@@ -1,0 +1,24 @@
+name: MH9–11 tactical role source audit
+on:
+  pull_request:
+    paths:
+      - "scripts/audit_gw9_11_tactical_roles.py"
+      - "data/source-evidence/gw9-11-role-identity-snapshot.json"
+      - ".github/workflows/gw9-11-tactical-role-audit.yml"
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python3 -m pip install beautifulsoup4
+      - run: python3 scripts/audit_gw9_11_tactical_roles.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: gw9-11-tactical-role-audit
+          path: gw9-11-tactical-role-audit.json
