@@ -92,3 +92,18 @@ test("published PPDA coverage remains distinct from match readings",()=>{
  assert.doesNotMatch(sql,/ppda_avg\s*=/)
  assert.match(read("app/teams/[id]/page.js"),/actions\?\.ppda_through_gameweek/)
 })
+
+test("player-summed action evidence preserves independent provider periods",()=>{
+ const sql=read("supabase/migrations/20261115211100_mh11_team_action_pressing.sql")
+ assert.match(sql,/if n<>18/)
+ assert.match(sql,/'season_reported_through_gameweek',10/)
+ assert.match(sql,/e\.dribble_successes<=e\.dribble_attempts/)
+ assert.doesNotMatch(sql,/advanced_profile_through_gameweek\s*=/)
+ assert.doesNotMatch(sql,/ppda_avg\s*=/)
+ const page=read("app/teams/[id]/page.js")
+ assert.match(page,/playerActions\?\.matches>0/)
+ assert.match(page,/Başarılı çalım \/ maç/)
+ assert.match(page,/Kilit pas \/ maç/)
+ assert.match(page,/playerActions\?\.pressing\?\.mh11_match_value!=null/)
+ assert.match(read("lib/data.js"),/tactical_action_profile/)
+})
