@@ -69,6 +69,12 @@ export default async function TeamPage({params}){
   const hasEventProfile=Number(tactical?.event_shot_sample||0)>0
   const hasAdvancedProfile=Number(tactical?.advanced_profile_matches||0)>0
   const aggregateWeek=Number(tactical?.aggregate_through_gameweek||0)||Number(tactical?.advanced_profile_through_gameweek||0)
+  const actions=tactical?.source_action_profile
+  const playerActions=tactical?.tactical_action_profile
+  const zones=tactical?.shot_zone_profile
+  const hasZones=Number(zones?.matches||0)>0
+  const zoneShare=(n,d)=>Number(d)>0?pct(Number(n)/Number(d)):'—'
+  const zoneRate=(n,d)=>Number(d)>0?num(Number(n)/Number(d),1):'—'
   const hasInferredChannels=tactical?.inferred_attack_left_share!==null&&tactical?.inferred_attack_left_share!==undefined
   const idx=v=>v===null||v===undefined?'—':Number(v).toFixed(2)+'×'
   const pctShare=v=>v===null||v===undefined?'—':(Number(v)*100).toFixed(0)+'%'
@@ -178,12 +184,30 @@ export default async function TeamPage({params}){
       <p className="muted">Bu bölüm MH{recent.first_gameweek}–MH{recent.through_gameweek} maçlarından bağımsız doğrulanan değerleri gösterir. Alttaki tarihsel detay profili ayrı bir kaynak dönemine ait olabilir.</p>
     </section>:null}
 
+    {hasZones?<section className="card profile-card team-tactical-profile">
+      <div className="panel-head">
+        <div><span className="eyebrow">ŞUT BÖLGELERİ • HÜCUM / SAVUNMA</span><h2>Ceza sahası tehdidi</h2></div>
+        <small>MH{zones.first_gameweek}–MH{zones.through_gameweek} • {zones.matches} maç</small>
+      </div>
+      <div className="team-detail-stat-grid team-core-stat-grid">
+        <div className="card"><span>İçeriden şut / maç</span><b>{zoneRate(zones.inside,zones.matches)}</b><small>{zones.inside} / {zones.shots} şut • {zoneShare(zones.inside,zones.shots)}</small></div>
+        <div className="card"><span>Dışarıdan şut / maç</span><b>{zoneRate(zones.outside,zones.matches)}</b><small>{zones.outside} şut • {zoneShare(zones.outside,zones.shots)}</small></div>
+        <div className="card"><span>Rakibe verilen içeriden şut / maç</span><b>{zoneRate(zones.opponent_inside,zones.matches)}</b><small>{zones.opponent_inside} / {zones.opponent_shots} şut • {zoneShare(zones.opponent_inside,zones.opponent_shots)}</small></div>
+        <div className="card"><span>Rakibe verilen dışarıdan şut / maç</span><b>{zoneRate(zones.opponent_outside,zones.matches)}</b><small>{zones.opponent_outside} şut • {zoneShare(zones.opponent_outside,zones.opponent_shots)}</small></div>
+      </div>
+      {Number(zones.recent_matches)>0?<div className="team-detail-stat-grid team-core-stat-grid">
+        <div className="card"><span>Son {zones.recent_matches} maç • içeriden şut</span><b>{zoneRate(zones.recent_inside,zones.recent_matches)}</b><small>MH{zones.recent_first_gameweek}–MH{zones.through_gameweek} • {zoneShare(zones.recent_inside,zones.recent_shots)} pay</small></div>
+        <div className="card"><span>Son {zones.recent_matches} maç • rakibe içeriden şut</span><b>{zoneRate(zones.recent_opponent_inside,zones.recent_matches)}</b><small>{zoneShare(zones.recent_opponent_inside,zones.recent_opponent_shots)} pay</small></div>
+      </div>:null}
+      <p className="muted">Maç bazında gözlenen şut bölgesi istatistikleri. Şutun başladığı bölge, hücumun başladığı kanalı veya gol bölgesini göstermez. Kaynakların şut sayımı farklılaşabilir; oranlar bu veri setinin kendi toplamından hesaplanır.{Number(zones.shot_total_mismatches)>0?' Karşılaştırılan '+zones.compared_matches+' maçın '+zones.shot_total_mismatches+' tanesinde toplam farklıdır.':''}</p>
+    </section>:null}
+
     {isPro?<section className="card profile-card team-tactical-profile">
       <div className="panel-head">
         <div><span className="eyebrow">GÜÇLÜ / ZAYIF YANLAR</span><h2>Atak ve savunma profili</h2></div>
         <small>{hasAdvancedProfile?`xG / şut MH${advancedWeek} • Sezon özeti MH${aggregateWeek||'—'} • Ayrıntılı olay MH${tactical.advanced_profile_through_gameweek} (${tactical.advanced_profile_matches} maç)`:tacticalCoverage==='event_complete'?'Detay olay verisi tam':'Genel hücum/savunma profili'}</small>
       </div>
-      <p className="muted">xG, şut ve güç endeksleri MH{advancedWeek} kaynaklıdır. Büyük şans, ceza sahası dokunuşu ve diğer ayrıntılı aksiyonların eski dönem kapsamı ayrıca belirtilir.</p>
+      <p className="muted">xG, şut ve güç endeksleri MH{advancedWeek} kaynaklıdır. Büyük şans, ceza sahası dokunuşu ve sezon özeti MH{aggregateWeek||'—'} kapsamındadır. PPDA, çalım, orta ve hücum kanalı gibi ayrıntılı aksiyonların kendi kaynak dönemi ayrıdır.</p>
       <div className="team-detail-stat-grid team-core-stat-grid">
         <div className="card"><span>Hücum gücü</span><b>{idx(tactical?.attack_strength_index)}</b><small>lig ortalaması = 1.00</small></div>
         <div className="card"><span>Savunma gücü</span><b>{idx(tactical?.defense_strength_index)}</b><small>yüksek değer daha iyi</small></div>
@@ -196,13 +220,17 @@ export default async function TeamPage({params}){
       </div>
       {hasAdvancedProfile?<div className="team-detail-stat-grid team-core-stat-grid">
         <div className="card"><span>Ceza sahası dokunuşu / maç</span><b>{num(tactical?.touches_in_box_per_match,1)}</b><small>rakip ceza sahası baskısı</small></div>
-        <div className="card"><span>Şut isabeti</span><b>{pctShare(tactical?.shot_accuracy)}</b><small>isabetli şut / toplam şut</small></div>
+        <div className="card"><span>Şut isabeti</span><b>{pctShare(tactical?.shot_accuracy)}</b><small>ayrıntılı kaynak MH{tactical?.advanced_profile_through_gameweek||'—'}</small></div>
         <div className="card"><span>Duran top xG payı</span><b>{pctShare(tactical?.set_piece_xg_share)}</b><small>{num(tactical?.set_piece_xg_per_match,2)} xG/maç</small></div>
         <div className="card"><span>Rakip duran top xG payı</span><b>{pctShare(tactical?.opponent_set_piece_xg_share)}</b><small>{num(tactical?.opponent_set_piece_xg_per_match,2)} xGA/maç</small></div>
-        <div className="card"><span>Orta / maç</span><b>{num(tactical?.crosses_per_match,1)}</b><small>başarı {pctShare(tactical?.cross_success_rate)}</small></div>
-        <div className="card"><span>Çalım / maç</span><b>{num(tactical?.takeons_per_match,1)}</b><small>başarı {pctShare(tactical?.takeon_success_rate)}</small></div>
-        <div className="card"><span>Üretilen şans / maç</span><b>{num(tactical?.chances_created_per_match,1)}</b><small>oyuncu aksiyon toplamı</small></div>
-        <div className="card"><span>PPDA</span><b>{num(tactical?.ppda_avg,1)}</b><small>düşük değer daha agresif baskı</small></div>
+        {actions?.matches>0?<><div className="card"><span>İsabetli orta / maç</span><b>{num(actions.accurate_crosses_per_match,1)}</b><small>başarı {pctShare(actions.cross_success_rate)} • MH{actions.through_gameweek}</small></div>
+        <div className="card"><span>Çalım denemesi / maç</span><b>{num(actions.dribbles_attempted_per_match,1)}</b><small>MH{actions.through_gameweek} • {actions.matches} maç</small></div>
+        <div className="card"><span>Rakip çalım denemesi / maç</span><b>{num(actions.opponent_dribbles_attempted_per_match,1)}</b><small>MH{actions.through_gameweek} • {actions.matches} maç</small></div></>:<>
+        <div className="card"><span>Orta / maç</span><b>{num(tactical?.crosses_per_match,1)}</b><small>başarı {pctShare(tactical?.cross_success_rate)} • MH{tactical?.advanced_profile_through_gameweek||'—'}</small></div>
+        <div className="card"><span>Çalım / maç</span><b>{num(tactical?.takeons_per_match,1)}</b><small>başarı {pctShare(tactical?.takeon_success_rate)} • MH{tactical?.advanced_profile_through_gameweek||'—'}</small></div></>}
+        {playerActions?.matches>0?<><div className="card"><span>Başarılı çalım / maç</span><b>{zoneRate(playerActions.dribbles?.successful,playerActions.matches)}</b><small>başarı {zoneShare(playerActions.dribbles?.successful,playerActions.dribbles?.attempted)} • oyuncu toplamı • MH{playerActions.through_gameweek}</small></div>
+        <div className="card"><span>Kilit pas / maç</span><b>{zoneRate(playerActions.key_passes?.total,playerActions.matches)}</b><small>oyuncu toplamı • MH{playerActions.through_gameweek}</small></div></>:<div className="card"><span>Üretilen şans / maç</span><b>{num(tactical?.chances_created_per_match,1)}</b><small>oyuncu aksiyon toplamı • MH{tactical?.advanced_profile_through_gameweek||'—'}</small></div>}
+        <div className="card"><span>PPDA</span><b>{num(actions?.ppda_published??tactical?.ppda_avg,1)}</b><small>MH{actions?.ppda_through_gameweek||tactical?.advanced_profile_through_gameweek||'—'} kaynak • düşük değer daha agresif baskı{playerActions?.pressing?.mh11_match_value!=null?` • MH11 maç: ${num(playerActions.pressing.mh11_match_value,2)}`:actions?.ppda_latest_match!=null?` • MH${actions.ppda_latest_match_gameweek} maç: ${num(actions.ppda_latest_match,1)}`:''}</small></div>
       </div>:null}
       {hasInferredChannels?<div className="profile-grid team-detail-history-grid">
         <div className="card">
@@ -353,7 +381,7 @@ export default async function TeamPage({params}){
             <div><span>Toplam xGA</span><b>{num(s?.xga_total)}</b></div>
             <div><span>Rakip isabetli şut / maç</span><b>{oppSotPerMatch===null?'—':num(oppSotPerMatch,1)}</b><small>{advancedMatches} kaynaklı maç</small></div>
             <div><span>xGA − yenen gol</span><b>{defensiveDelta===null?'—':(defensiveDelta>0?'+':'')+num(defensiveDelta)}</b><small>{hasAlignedGoals?'Eş dönem':'Dönemler farklı'}</small></div>
-            <div><span>PPDA</span><b>{num(s?.ppda)}</b></div>
+            <div><span>PPDA</span><b>{num(actions?.ppda_published??s?.ppda,1)}</b>{actions?.ppda_through_gameweek?<small>MH{actions.ppda_through_gameweek} sezon özeti</small>:null}</div>
           </div>
         </div>
         {s?.coverage_note?<small className="team-profile-coverage">{s.coverage_note}</small>:null}
