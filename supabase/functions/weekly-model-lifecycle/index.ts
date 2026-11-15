@@ -352,7 +352,7 @@ async function prepare(sb:any,current:any,status:any,body:any={}){
     sb.from("scout_teams").select("id,name"),
     sb.from("scout_player_projections").select("player_id,confidence,data_confidence").eq("run_id",current.id),
     sb.from("scout_player_tactical_role_observations")
-      .select("player_id,team_id,gameweek,role,side,minutes,started,verified,observed_at")
+      .select("player_id,team_id,gameweek,role,side,minutes,started,verified,observed_at,source_position_label")
       .eq("season","2026-27").gte("gameweek",Math.max(1,target-3)).lt("gameweek",target)
       .eq("verified",true),
     sb.from("scout_match_history").select("gameweek,match_id,kickoff_at,home_team_id,away_team_id,home_goals,away_goals,match_status,fantasy_closure")
@@ -788,7 +788,7 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
     sb.from("scout_verified_weekly_attack").select("player_id,gameweek,xg,xa,observed_at")
       .eq("season","2026-27").eq("gameweek",gw-1),
     sb.from("scout_player_tactical_role_observations")
-      .select("player_id,team_id,gameweek,role,side,minutes,started,verified,observed_at")
+      .select("player_id,team_id,gameweek,role,side,minutes,started,verified,observed_at,source_position_label")
       .eq("season","2026-27").gte("gameweek",Math.max(1,gw-3)).lt("gameweek",gw)
       .eq("verified",true),
     sb.from("scout_match_history").select("gameweek,match_id,kickoff_at,home_team_id,away_team_id,home_goals,away_goals,match_status,fantasy_closure")
