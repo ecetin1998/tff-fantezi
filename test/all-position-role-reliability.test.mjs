@@ -2,6 +2,7 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import {readFileSync} from 'node:fs'
 import {calibrateAttackRates as adjust} from '../supabase/functions/weekly-model-lifecycle/roleAwareAttackRates.mjs'
+import {regularStarterReliability} from '../supabase/functions/weekly-model-lifecycle/regularStarterReliability.mjs'
 import {currentTacticalRole} from '../supabase/functions/weekly-model-lifecycle/recentTacticalRole.mjs'
 
 const metrics=(role,position,overrides={})=>adjust({
@@ -68,4 +69,57 @@ test('weekly and intraday use the same source-trusted taxonomy and no double cal
  assert.match(text,/roleObservedAt/)
  assert.match(text,/sub_role:tactical\.role/)
  assert.doesNotMatch(text,/scout_player_season_stats"\)\.update\(/)
+})
+
+test('Kahveci verified central AM and Greenwood right wing are separate roles, with no fantasy category change',()=>{
+ const rows=[{gameweek:9,role:'AM',side:'C',minutes:78},{gameweek:10,role:'AM',side:'C',minutes:90},{gameweek:11,role:'AM',side:'C',minutes:57}]
+  .map(x=>({...x,started:true,verified:true,team_id:6,observed_at:'2026-11-15T21:11:29Z'}))
+ const irfan=currentTacticalRole({baseRole:'W',baseSide:'R',evidence:rows,targetWeek:12,teamId:6,cutoffAt:'2026-11-21T16:00:00Z'})
+ assert.equal(irfan.role,'AM')
+ assert.equal(irfan.side,'C')
+ assert.equal(irfan.trustedMatches,3)
+ assert.equal(currentTacticalRole({baseRole:'W',baseSide:'R',evidence:rows,targetWeek:12,teamId:7,cutoffAt:'2026-11-21T16:00:00Z'}).role,'W')
+ assert.equal(currentTacticalRole({baseRole:'W',baseSide:'R',evidence:rows,targetWeek:12,teamId:6,cutoffAt:'2026-11-15T21:00:00Z'}).role,'W')
+})
+test('a repeated flank role may be versatile rather than retaining a stale single side',()=>{
+ const evidence=[{gameweek:9,role:'W',side:'L'},{gameweek:10,role:'W',side:'R'},{gameweek:11,role:'W',side:'L'}].map(x=>({...x,started:true,verified:true,minutes:80}))
+ const role=currentTacticalRole({baseRole:'W',baseSide:'L',evidence,targetWeek:12})
+ assert.equal(role.side,'BOTH')
+ assert.equal(role.role,'W')
+})
+
+test('flat advanced 4-1-4-1 geometry is compatible with an established attacking-midfielder role',()=>{
+ const evidence=[{gameweek:9,role:'CM',side:'C',source_position_label:'formation:4-1-4-1;line:3;x:0.678;y:0.375',minutes:90},
+ {gameweek:10,role:'CM',side:'C',source_position_label:'formation:4-1-4-1;line:3;x:0.678;y:0.375',minutes:73},
+ {gameweek:11,role:'CM',side:'L',source_position_label:'formation:4-3-3;line:2;x:0.613;y:0.210',minutes:80}].map(x=>({...x,started:true,verified:true}))
+ assert.equal(currentTacticalRole({baseRole:'AM',baseSide:'C',evidence,targetWeek:12}).role,'AM')
+ assert.equal(currentTacticalRole({baseRole:'AM',baseSide:'C',evidence:evidence.map(x=>({...x,source_position_label:'explicit:CM'})),targetWeek:12}).role,'CM')
+})
+test('a winger starting as a fullback in repeated verified layouts is not kept as a winger',()=>{
+ const evidence=[9,10,11].map(gameweek=>({gameweek,role:'FB',side:'R',minutes:75,started:true,verified:true,source_position_label:'formation:4-2-3-1;line:1;x:0.292;y:0.875'}))
+ assert.equal(currentTacticalRole({baseRole:'W',baseSide:'R',evidence,targetWeek:12}).role,'FB')
+})
+
+test('geometry-only ambiguous formation roles preserve compatible reviewed roles',()=>{
+ const rows=[9,10,11].map(gameweek=>({gameweek,role:'CM',side:'C',started:true,verified:true,minutes:80,source_position_label:'formation:4-1-4-1;line:3;x:0.678;y:0.375'}))
+ assert.equal(currentTacticalRole({baseRole:'AM',baseSide:'C',evidence:rows,targetWeek:12}).role,'AM')
+ const wings=rows.map(row=>({...row,role:'WM',side:'R'}))
+ assert.equal(currentTacticalRole({baseRole:'W',baseSide:'R',evidence:wings,targetWeek:12}).role,'W')
+ const explicit=rows.map(row=>({...row,source_position_label:'CM'}))
+ assert.equal(currentTacticalRole({baseRole:'AM',baseSide:'C',evidence:explicit,targetWeek:12}).role,'CM')
+})
+
+test('three verified current-club starts prevent a false demotion after a 57-minute exit',()=>{
+ const weekly=[78,90,57].map((minutes,i)=>({gameweek:9+i,minutes,is_final:true,source_updated_at:'2026-11-15T20:00:00Z'}))
+ const tactical=weekly.map(row=>({...row,team_id:6,started:true,verified:true,observed_at:'2026-11-15T21:11:29Z'}))
+ const args={baseline:.6862166666666667,seasonStarts:8,matchesPlayed:10,weekly,tactical,teamId:6,targetWeek:12,cutoffAt:'2026-11-21T16:00:00Z',availability:1}
+ const result=regularStarterReliability(args)
+ assert.equal(result.reason,'three_verified_recent_starts_and_regular_season')
+ assert.equal(result.role,.75)
+ assert.equal(regularStarterReliability({...args,tactical:tactical.slice(1)}).applied,false)
+ assert.equal(regularStarterReliability({...args,teamId:7}).applied,false)
+ assert.equal(regularStarterReliability({...args,availability:.5}).applied,false)
+ assert.equal(regularStarterReliability({...args,alreadyApplied:true}).applied,false)
+ assert.equal(regularStarterReliability({...args,tactical:tactical.map(row=>({...row,observed_at:'2026-11-22T00:00:00Z'}))}).applied,false)
+ assert.equal(regularStarterReliability({...args,tactical:tactical.map(row=>({...row,minutes:90}))}).applied,false)
 })
