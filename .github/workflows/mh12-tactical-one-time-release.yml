@@ -18,12 +18,13 @@ concurrency:
 
 jobs:
   release:
-    if: startsWith(github.event.head_commit.message, 'chore(release): retry MH12 tactical data')
+    if: >-
+      startsWith(github.event.head_commit.message, 'chore(release): repair MH12 tactical data')
     runs-on: ubuntu-latest
     timeout-minutes: 90
     env:
       GH_TOKEN: ${{ github.token }}
-      PREVIOUS_SHA: 39f3028517b6cba5ad82e863e5f3caec9922a58d
+      PREVIOUS_SHA: df2e40179d16aa723c6d21abda08836703e693dd
       PREVIOUS_MODEL: 411af538-88ed-456b-8279-3a953035a3de
       BASE_URL: https://fanteziligrehberi.com
     steps:
@@ -61,12 +62,12 @@ jobs:
               sleep 5
             done
             test -n "$run_id"
-            gh pr comment 458 --body "Production deploy requested: https://github.com/$GITHUB_REPOSITORY/actions/runs/$run_id"
+            gh pr comment 458 --body "Production deploy requested: https://github.com/$GITHUB_REPOSITORY/actions/runs/$run_id" || echo "Status comment unavailable"
             gh run watch "$run_id" --exit-status --interval 10
             live_sha="$(curl -fsSL --max-time 30 "$BASE_URL/api/health" | jq -er '.sha')"
             test "$live_sha" = "$GITHUB_SHA"
           fi
-          gh pr comment 458 --body "Production application SHA verified: $live_sha (contains the MH11 tactical updates)."
+          gh pr comment 458 --body "Production application SHA verified: $live_sha (contains the MH11 tactical updates)." || echo "Status comment unavailable"
       - name: Adopt or dispatch signed MH12 lifecycle
         shell: bash
         run: |
@@ -84,14 +85,14 @@ jobs:
               sleep 5
             done
             test -n "$run_id"
-            gh pr comment 458 --body "MH12 50K lifecycle requested: https://github.com/$GITHUB_REPOSITORY/actions/runs/$run_id"
+            gh pr comment 458 --body "MH12 50K lifecycle requested: https://github.com/$GITHUB_REPOSITORY/actions/runs/$run_id" || echo "Status comment unavailable"
             gh run watch "$run_id" --exit-status --interval 10
           fi
           # Verify the public current model is NEW, not merely a successful workflow.
           for attempt in {1..12}; do
             current="$(curl -fsSL --max-time 40 -H 'Cache-Control: no-cache' "$BASE_URL/api/scout-data?section=matches" | jq -er '.current_run | select(.gameweek==12 and .status=="ready" and .is_current==true) | .id' || true)"
             if [[ -n "$current" && "$current" != "$PREVIOUS_MODEL" ]]; then
-              gh pr comment 458 --body "Verified new active MH12 model on public API: $current. Draw count is validated by the signed lifecycle and Supabase."
+              gh pr comment 458 --body "Verified new active MH12 model on public API: $current. Draw count is validated by the signed lifecycle and Supabase." || echo "Status comment unavailable"
               exit 0
             fi
             sleep 10
@@ -100,4 +101,5 @@ jobs:
           exit 1
       - name: Report failure
         if: failure()
-        run: gh pr comment 458 --body "Release retry did not finish verification. Inspect https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID for the exact failed gate."
+        run: |
+          gh pr comment 458 --body "Release retry did not finish verification. Inspect https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID for the exact failed gate." || echo "Status comment unavailable"
