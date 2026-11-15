@@ -493,7 +493,7 @@ async function prepare(sb:any,current:any,status:any,body:any={}){
     if(recentStarter.applied)roleProb=recentStarter.role
     const regularStarter=regularStarterReliability({
       baseline:roleProb,seasonStarts:s.starts,matchesPlayed:s.matches_played,
-      weekly:minuteHistory,verified:verifiedStarts,targetWeek:target,
+      weekly:minuteHistory,verified:verifiedStarts,tactical:tacticalEvidence.get(id)||[],teamId:p.team_id,targetWeek:target,
       cutoffAt:teamKickoffs.get(Number(p.team_id))||targetKickoff,
       availability:n(av.availability_probability,1)
     })
@@ -993,7 +993,7 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
     const regularStarter=regularStarterReliability({
       baseline:recentStarter.role,seasonStarts:stats?.starts,matchesPlayed:stats?.matches_played,
       weekly:longerMinuteHistory.get(Number(x.player_id))||[],verified:verifiedStarts,
-      targetWeek:gw,cutoffAt:targetKickoffs.get(Number(x.club_id))||new Date(kickoff).toISOString(),
+      tactical:tacticalEvidence.get(Number(x.player_id))||[],teamId:player?.team_id||x.club_id,targetWeek:gw,cutoffAt:targetKickoffs.get(Number(x.club_id))||new Date(kickoff).toISOString(),
       availability,alreadyApplied:String(stableInput.source_note||"").includes("season-starter-reliability-v1")
     })
     const durationProfile=starterDurationProfile({
