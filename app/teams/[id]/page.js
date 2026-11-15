@@ -69,6 +69,7 @@ export default async function TeamPage({params}){
   const hasEventProfile=Number(tactical?.event_shot_sample||0)>0
   const hasAdvancedProfile=Number(tactical?.advanced_profile_matches||0)>0
   const aggregateWeek=Number(tactical?.aggregate_through_gameweek||0)||Number(tactical?.advanced_profile_through_gameweek||0)
+  const actions=tactical?.source_action_profile
   const zones=tactical?.shot_zone_profile
   const hasZones=Number(zones?.matches||0)>0
   const zoneShare=(n,d)=>Number(d)>0?pct(Number(n)/Number(d)):'—'
@@ -221,8 +222,11 @@ export default async function TeamPage({params}){
         <div className="card"><span>Şut isabeti</span><b>{pctShare(tactical?.shot_accuracy)}</b><small>ayrıntılı kaynak MH{tactical?.advanced_profile_through_gameweek||'—'}</small></div>
         <div className="card"><span>Duran top xG payı</span><b>{pctShare(tactical?.set_piece_xg_share)}</b><small>{num(tactical?.set_piece_xg_per_match,2)} xG/maç</small></div>
         <div className="card"><span>Rakip duran top xG payı</span><b>{pctShare(tactical?.opponent_set_piece_xg_share)}</b><small>{num(tactical?.opponent_set_piece_xg_per_match,2)} xGA/maç</small></div>
-        <div className="card"><span>Orta / maç</span><b>{num(tactical?.crosses_per_match,1)}</b><small>başarı {pctShare(tactical?.cross_success_rate)}</small></div>
-        <div className="card"><span>Çalım / maç</span><b>{num(tactical?.takeons_per_match,1)}</b><small>başarı {pctShare(tactical?.takeon_success_rate)}</small></div>
+        {actions?.matches>0?<><div className="card"><span>İsabetli orta / maç</span><b>{num(actions.accurate_crosses_per_match,1)}</b><small>başarı {pctShare(actions.cross_success_rate)} • MH{actions.through_gameweek}</small></div>
+        <div className="card"><span>Çalım denemesi / maç</span><b>{num(actions.dribbles_attempted_per_match,1)}</b><small>MH{actions.through_gameweek} • {actions.matches} maç</small></div>
+        <div className="card"><span>Rakip çalım denemesi / maç</span><b>{num(actions.opponent_dribbles_attempted_per_match,1)}</b><small>MH{actions.through_gameweek} • {actions.matches} maç</small></div></>:<>
+        <div className="card"><span>Orta / maç</span><b>{num(tactical?.crosses_per_match,1)}</b><small>başarı {pctShare(tactical?.cross_success_rate)} • MH{tactical?.advanced_profile_through_gameweek||'—'}</small></div>
+        <div className="card"><span>Çalım / maç</span><b>{num(tactical?.takeons_per_match,1)}</b><small>başarı {pctShare(tactical?.takeon_success_rate)} • MH{tactical?.advanced_profile_through_gameweek||'—'}</small></div></>}
         <div className="card"><span>Üretilen şans / maç</span><b>{num(tactical?.chances_created_per_match,1)}</b><small>oyuncu aksiyon toplamı</small></div>
         <div className="card"><span>PPDA</span><b>{num(tactical?.ppda_avg,1)}</b><small>MH{tactical?.advanced_profile_through_gameweek||'—'} kaynak • düşük değer daha agresif baskı</small></div>
       </div>:null}
