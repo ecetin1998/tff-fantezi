@@ -311,7 +311,7 @@ export default async function TeamPage({params}){
             <div><span>Kontradan yenilen</span><b>{pctShare(tactical?.conceded_counter_share)}</b></div>
           </div>
         </div>
-      </div>:<p className="muted">Gerçek hücum başlangıç yönü, kafa gollerinin tam konumu ve rakibin gol bölgesi için tam olay-seviyesi kaynak henüz yok. Şut bölgeleri ve gol türleri yukarıda kendi kapsamlarıyla gösterilir; türetilen yön profili gözlenen olay konumu değildir.</p>}
+      </div>:<p className="muted">Gerçek hücum başlangıç yönü, kafa gollerinin tam konumu ve rakibin gol bölgesi için tam olay-seviyesi kaynak henüz yok. Şut bölgeleri ve gol türleri yukarıda kendi kapsamlarıyla gösterilir; türetilen yön profili gözlenen olay konumu gibi sunulmaz.</p>}
     </section>:<AccessGate
       compact
       tier="pro"
