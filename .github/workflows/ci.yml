@@ -29,7 +29,21 @@ jobs:
       - name: Install
         run: npm ci --no-audit --no-fund
       - name: Python test dependencies
-        run: python3 -m pip install --disable-pip-version-check pytest beautifulsoup4
+        run: python3 -m pip install --disable-pip-version-check pytest beautifulsoup4 pyyaml
+      - name: Validate one-time release workflow syntax
+        run: |
+          python3 - <<'PY'
+          import pathlib, subprocess, yaml
+          path = pathlib.Path(".github/workflows/mh12-tactical-one-time-release.yml")
+          if path.exists():
+              doc = yaml.load(path.read_text(), Loader=yaml.BaseLoader)
+              assert "on" in doc and "push" in doc["on"]
+              job = doc["jobs"]["release"]
+              assert job["if"].startswith("startsWith(")
+              for step in job["steps"]:
+                  if "run" in step:
+                      subprocess.run(["bash", "-n"], input=step["run"], text=True, check=True)
+          PY
       - name: Lint
         run: npm run lint
       - name: Test
