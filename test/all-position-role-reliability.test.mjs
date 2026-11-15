@@ -86,3 +86,15 @@ test('a repeated flank role may be versatile rather than retaining a stale singl
  assert.equal(role.side,'BOTH')
  assert.equal(role.role,'W')
 })
+
+test('flat advanced 4-1-4-1 geometry is compatible with an established attacking-midfielder role',()=>{
+ const evidence=[{gameweek:9,role:'CM',side:'C',source_position_label:'formation:4-1-4-1;line:3;x:0.678;y:0.375',minutes:90},
+ {gameweek:10,role:'CM',side:'C',source_position_label:'formation:4-1-4-1;line:3;x:0.678;y:0.375',minutes:73},
+ {gameweek:11,role:'CM',side:'L',source_position_label:'formation:4-3-3;line:2;x:0.613;y:0.210',minutes:80}].map(x=>({...x,started:true,verified:true}))
+ assert.equal(currentTacticalRole({baseRole:'AM',baseSide:'C',evidence,targetWeek:12}).role,'AM')
+ assert.equal(currentTacticalRole({baseRole:'AM',baseSide:'C',evidence:evidence.map(x=>({...x,source_position_label:'explicit:CM'})),targetWeek:12}).role,'CM')
+})
+test('a winger starting as a fullback in repeated verified layouts is not kept as a winger',()=>{
+ const evidence=[9,10,11].map(gameweek=>({gameweek,role:'FB',side:'R',minutes:75,started:true,verified:true,source_position_label:'formation:4-2-3-1;line:1;x:0.292;y:0.875'}))
+ assert.equal(currentTacticalRole({baseRole:'W',baseSide:'R',evidence,targetWeek:12}).role,'FB')
+})
