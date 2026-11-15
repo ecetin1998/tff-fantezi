@@ -98,3 +98,12 @@ test('a winger starting as a fullback in repeated verified layouts is not kept a
  const evidence=[9,10,11].map(gameweek=>({gameweek,role:'FB',side:'R',minutes:75,started:true,verified:true,source_position_label:'formation:4-2-3-1;line:1;x:0.292;y:0.875'}))
  assert.equal(currentTacticalRole({baseRole:'W',baseSide:'R',evidence,targetWeek:12}).role,'FB')
 })
+
+test('geometry-only ambiguous formation roles preserve compatible reviewed roles',()=>{
+ const rows=[9,10,11].map(gameweek=>({gameweek,role:'CM',side:'C',started:true,verified:true,minutes:80,source_position_label:'formation:4-1-4-1;line:3;x:0.678;y:0.375'}))
+ assert.equal(currentTacticalRole({baseRole:'AM',baseSide:'C',evidence:rows,targetWeek:12}).role,'AM')
+ const wings=rows.map(row=>({...row,role:'WM',side:'R'}))
+ assert.equal(currentTacticalRole({baseRole:'W',baseSide:'R',evidence:wings,targetWeek:12}).role,'W')
+ const explicit=rows.map(row=>({...row,source_position_label:'CM'}))
+ assert.equal(currentTacticalRole({baseRole:'AM',baseSide:'C',evidence:explicit,targetWeek:12}).role,'CM')
+})
