@@ -2,6 +2,7 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import {readFileSync} from 'node:fs'
 import {calibrateAttackRates as adjust} from '../supabase/functions/weekly-model-lifecycle/roleAwareAttackRates.mjs'
+import {regularStarterReliability} from '../supabase/functions/weekly-model-lifecycle/regularStarterReliability.mjs'
 import {currentTacticalRole} from '../supabase/functions/weekly-model-lifecycle/recentTacticalRole.mjs'
 
 const metrics=(role,position,overrides={})=>adjust({
@@ -106,4 +107,19 @@ test('geometry-only ambiguous formation roles preserve compatible reviewed roles
  assert.equal(currentTacticalRole({baseRole:'W',baseSide:'R',evidence:wings,targetWeek:12}).role,'W')
  const explicit=rows.map(row=>({...row,source_position_label:'CM'}))
  assert.equal(currentTacticalRole({baseRole:'AM',baseSide:'C',evidence:explicit,targetWeek:12}).role,'CM')
+})
+
+test('three verified current-club starts prevent a false demotion after a 57-minute exit',()=>{
+ const weekly=[78,90,57].map((minutes,i)=>({gameweek:9+i,minutes,is_final:true,source_updated_at:'2026-11-15T20:00:00Z'}))
+ const tactical=weekly.map(row=>({...row,team_id:6,started:true,verified:true,observed_at:'2026-11-15T21:11:29Z'}))
+ const args={baseline:.6862166666666667,seasonStarts:8,matchesPlayed:10,weekly,tactical,teamId:6,targetWeek:12,cutoffAt:'2026-11-21T16:00:00Z',availability:1}
+ const result=regularStarterReliability(args)
+ assert.equal(result.reason,'three_verified_recent_starts_and_regular_season')
+ assert.equal(result.role,.75)
+ assert.equal(regularStarterReliability({...args,tactical:tactical.slice(1)}).applied,false)
+ assert.equal(regularStarterReliability({...args,teamId:7}).applied,false)
+ assert.equal(regularStarterReliability({...args,availability:.5}).applied,false)
+ assert.equal(regularStarterReliability({...args,alreadyApplied:true}).applied,false)
+ assert.equal(regularStarterReliability({...args,tactical:tactical.map(row=>({...row,observed_at:'2026-11-22T00:00:00Z'}))}).applied,false)
+ assert.equal(regularStarterReliability({...args,tactical:tactical.map(row=>({...row,minutes:90}))}).applied,false)
 })
