@@ -70,6 +70,7 @@ export default async function TeamPage({params}){
   const hasAdvancedProfile=Number(tactical?.advanced_profile_matches||0)>0
   const aggregateWeek=Number(tactical?.aggregate_through_gameweek||0)||Number(tactical?.advanced_profile_through_gameweek||0)
   const actions=tactical?.source_action_profile
+  const playerActions=tactical?.tactical_action_profile
   const zones=tactical?.shot_zone_profile
   const hasZones=Number(zones?.matches||0)>0
   const zoneShare=(n,d)=>Number(d)>0?pct(Number(n)/Number(d)):'—'
@@ -227,8 +228,9 @@ export default async function TeamPage({params}){
         <div className="card"><span>Rakip çalım denemesi / maç</span><b>{num(actions.opponent_dribbles_attempted_per_match,1)}</b><small>MH{actions.through_gameweek} • {actions.matches} maç</small></div></>:<>
         <div className="card"><span>Orta / maç</span><b>{num(tactical?.crosses_per_match,1)}</b><small>başarı {pctShare(tactical?.cross_success_rate)} • MH{tactical?.advanced_profile_through_gameweek||'—'}</small></div>
         <div className="card"><span>Çalım / maç</span><b>{num(tactical?.takeons_per_match,1)}</b><small>başarı {pctShare(tactical?.takeon_success_rate)} • MH{tactical?.advanced_profile_through_gameweek||'—'}</small></div></>}
-        <div className="card"><span>Üretilen şans / maç</span><b>{num(tactical?.chances_created_per_match,1)}</b><small>oyuncu aksiyon toplamı</small></div>
-        <div className="card"><span>PPDA</span><b>{num(actions?.ppda_published??tactical?.ppda_avg,1)}</b><small>MH{actions?.ppda_through_gameweek||tactical?.advanced_profile_through_gameweek||'—'} kaynak • düşük değer daha agresif baskı{actions?.ppda_latest_match!=null?` • MH${actions.ppda_latest_match_gameweek} maç: ${num(actions.ppda_latest_match,1)}`:''}</small></div>
+        {playerActions?.matches>0?<><div className="card"><span>Başarılı çalım / maç</span><b>{zoneRate(playerActions.dribbles?.successful,playerActions.matches)}</b><small>başarı {zoneShare(playerActions.dribbles?.successful,playerActions.dribbles?.attempted)} • oyuncu toplamı • MH{playerActions.through_gameweek}</small></div>
+        <div className="card"><span>Kilit pas / maç</span><b>{zoneRate(playerActions.key_passes?.total,playerActions.matches)}</b><small>oyuncu toplamı • MH{playerActions.through_gameweek}</small></div></>:<div className="card"><span>Üretilen şans / maç</span><b>{num(tactical?.chances_created_per_match,1)}</b><small>oyuncu aksiyon toplamı • MH{tactical?.advanced_profile_through_gameweek||'—'}</small></div>}
+        <div className="card"><span>PPDA</span><b>{num(actions?.ppda_published??tactical?.ppda_avg,1)}</b><small>MH{actions?.ppda_through_gameweek||tactical?.advanced_profile_through_gameweek||'—'} kaynak • düşük değer daha agresif baskı{playerActions?.pressing?.mh11_match_value!=null?` • MH11 maç: ${num(playerActions.pressing.mh11_match_value,2)}`:actions?.ppda_latest_match!=null?` • MH${actions.ppda_latest_match_gameweek} maç: ${num(actions.ppda_latest_match,1)}`:''}</small></div>
       </div>:null}
       {hasInferredChannels?<div className="profile-grid team-detail-history-grid">
         <div className="card">
