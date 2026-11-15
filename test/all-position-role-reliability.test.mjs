@@ -69,3 +69,20 @@ test('weekly and intraday use the same source-trusted taxonomy and no double cal
  assert.match(text,/sub_role:tactical\.role/)
  assert.doesNotMatch(text,/scout_player_season_stats"\)\.update\(/)
 })
+
+test('Kahveci verified central AM and Greenwood right wing are separate roles, with no fantasy category change',()=>{
+ const rows=[{gameweek:9,role:'AM',side:'C',minutes:78},{gameweek:10,role:'AM',side:'C',minutes:90},{gameweek:11,role:'AM',side:'C',minutes:57}]
+  .map(x=>({...x,started:true,verified:true,team_id:6,observed_at:'2026-11-15T21:11:29Z'}))
+ const irfan=currentTacticalRole({baseRole:'W',baseSide:'R',evidence:rows,targetWeek:12,teamId:6,cutoffAt:'2026-11-21T16:00:00Z'})
+ assert.equal(irfan.role,'AM')
+ assert.equal(irfan.side,'C')
+ assert.equal(irfan.trustedMatches,3)
+ assert.equal(currentTacticalRole({baseRole:'W',baseSide:'R',evidence:rows,targetWeek:12,teamId:7,cutoffAt:'2026-11-21T16:00:00Z'}).role,'W')
+ assert.equal(currentTacticalRole({baseRole:'W',baseSide:'R',evidence:rows,targetWeek:12,teamId:6,cutoffAt:'2026-11-15T21:00:00Z'}).role,'W')
+})
+test('a repeated flank role may be versatile rather than retaining a stale single side',()=>{
+ const evidence=[{gameweek:9,role:'W',side:'L'},{gameweek:10,role:'W',side:'R'},{gameweek:11,role:'W',side:'L'}].map(x=>({...x,started:true,verified:true,minutes:80}))
+ const role=currentTacticalRole({baseRole:'W',baseSide:'L',evidence,targetWeek:12})
+ assert.equal(role.side,'BOTH')
+ assert.equal(role.role,'W')
+})
