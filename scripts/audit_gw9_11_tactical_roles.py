@@ -44,7 +44,7 @@ def slots(team):
                 if role=="CB" and n==3:side="C"
             elif i==len(lines)-1:
                 role="W" if flank else "ST"
-            elif i==len(lines)-2 and len(lines)>=5 and shape[-1]<=2:
+            elif i==len(lines)-2 and len(lines)>=5 and shape[-1]<=2 and n<=3:
                 role="W" if flank else "AM"
             elif i==2 and shape[1]==3 and n>=4 and flank: role="WB"
             elif i==2 and len(lines)>=5 and n<=2: role="DM"
@@ -66,7 +66,7 @@ def main():
     assert len(records)==27 and len(by)==len(identity)==844
     rows=[];failures=[];matches=[]
     for rec in records:
-        mid=rec["match_id"];w=rec["gameweek"];src=rec["candidate_fotmob_url"]
+        mid=rec["match_id"];w=rec["gameweek"];src=rec["candidate_fotmob_url"].replace("https://www.fotmob.com/tr/matches/","https://www.fotmob.com/matches/",1).replace("https://www.fotmob.com/en-GB/matches/","https://www.fotmob.com/matches/",1)
         try:
             detail=None
             for candidate in candidates(fetch_html(src))[:5]:
