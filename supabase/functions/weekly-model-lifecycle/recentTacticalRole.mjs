@@ -1,6 +1,17 @@
 // Match-specific observed tactical roles; never changes a player's registered
 // Fantasy position. Use only verified lineup slots, never a generic player profile.
 export const ROLE_SET=new Set(['GK','CB','FB','WB','DM','CM','AM','WM','W','SS','ST']);
+// Formation lines are not proof of tactical intent. Match the reviewed
+// database policy when a geometry-only label is compatible with the prior.
+function compatibleRole(row,baseRole){
+  const label=String(row.source_position_label||'')
+  if(label.startsWith('formation:4-1-4-1;line:3;')&&
+     ((row.role==='CM'&&baseRole==='AM')||(row.role==='WM'&&baseRole==='W')))return baseRole
+  if(label.startsWith('formation:')&&row.role==='CM'&&baseRole==='DM'&&
+     !label.startsWith('formation:4-1-4-1;line:3;'))return baseRole
+  if(/^formation:[345]-2-/.test(label)&&row.role==='DM'&&baseRole==='CM')return baseRole
+  return row.role
+}
 const number=v=>typeof v==='number'&&Number.isFinite(v)?v:Number(v)
 // A source-confirmed formation slot cannot always distinguish duties.
 // Never turn a compatible AM into a CM, or a winger into a wide midfielder,
