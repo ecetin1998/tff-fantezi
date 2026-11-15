@@ -107,3 +107,17 @@ test("player-summed action evidence preserves independent provider periods",()=>
  assert.match(page,/playerActions\?\.pressing\?\.mh11_match_value!=null/)
  assert.match(read("lib/data.js"),/tactical_action_profile/)
 })
+
+test("goal type profiles reconcile all goals without inferring attack origin",()=>{
+ const sql=read("supabase/migrations/20261115214000_mh11_team_goal_type_profile.sql")
+ assert.match(sql,/if n<>18/)
+ assert.match(sql,/s\.goals_for=e\.goals/)
+ assert.match(sql,/e\.goals=e\.penalties\+e\.headers\+e\.inside_non_header\+e\.outside_non_header\+e\.opponent_own_goals/)
+ assert.doesNotMatch(sql,/advanced_profile_through_gameweek\s*=/)
+ assert.doesNotMatch(sql,/attack_left_share\s*=/)
+ const page=read("app/teams/[id]/page.js")
+ assert.match(page,/Goller nasıl geldi\?/)
+ assert.match(page,/inside_non_header/)
+ assert.match(page,/kafa ve penaltı gollerini içermez/)
+ assert.match(read("lib/data.js"),/goal_type_profile/)
+})

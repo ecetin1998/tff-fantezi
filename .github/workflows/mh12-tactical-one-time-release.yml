@@ -1,0 +1,55 @@
+name: MH12 one-time authorized tactical production release
+
+# Explicit owner-requested release. Existing production and lifecycle workflows stay unchanged.
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/mh12-tactical-one-time-release.yml"
+
+permissions:
+  contents: read
+  actions: write
+
+jobs:
+  release:
+    if: startsWith(github.event.head_commit.message, 'chore(release): MH12 tactical data')
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - name: Check exact owner-requested main release
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF" = refs/heads/main
+          test "$(git rev-parse HEAD^)" = "8adf5e295f914746b372089a5b8f2e02d7c05532"
+          test "$(gh api "repos/$GITHUB_REPOSITORY/commits/main" --jq .sha)" = "$GITHUB_SHA"
+          for workflow in cloudflare-deploy.yml weekly-model-lifecycle.yml; do
+            gh api "repos/$GITHUB_REPOSITORY/actions/workflows/$workflow" --jq .state | grep -qx active
+          done
+      - name: Dispatch approved production workflow and verify success
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh workflow run cloudflare-deploy.yml --ref main
+          run_id=""
+          for attempt in {1..24}; do
+            run_id="$(gh run list --workflow cloudflare-deploy.yml --branch main --commit "$GITHUB_SHA" --event workflow_dispatch --limit 5 --json databaseId --jq '.[0].databaseId // empty')"
+            if [[ -n "$run_id" ]]; then break; fi
+            sleep 5
+          done
+          test -n "$run_id"
+          echo "Production workflow: https://github.com/$GITHUB_REPOSITORY/actions/runs/$run_id"
+          gh run watch "$run_id" --exit-status --interval 10
+      - name: Request signed current-MH lifecycle after verified deployment
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(gh api "repos/$GITHUB_REPOSITORY/commits/main" --jq .sha)" = "$GITHUB_SHA"
+          gh workflow run weekly-model-lifecycle.yml --ref main
+          echo "Current-MH lifecycle requested. Its own QA and release gates remain mandatory."

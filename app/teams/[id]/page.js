@@ -71,6 +71,7 @@ export default async function TeamPage({params}){
   const aggregateWeek=Number(tactical?.aggregate_through_gameweek||0)||Number(tactical?.advanced_profile_through_gameweek||0)
   const actions=tactical?.source_action_profile
   const playerActions=tactical?.tactical_action_profile
+  const goalTypes=tactical?.goal_type_profile
   const zones=tactical?.shot_zone_profile
   const hasZones=Number(zones?.matches||0)>0
   const zoneShare=(n,d)=>Number(d)>0?pct(Number(n)/Number(d)):'—'
@@ -202,6 +203,15 @@ export default async function TeamPage({params}){
       <p className="muted">Maç bazında gözlenen şut bölgesi istatistikleri. Şutun başladığı bölge, hücumun başladığı kanalı veya gol bölgesini göstermez. Kaynakların şut sayımı farklılaşabilir; oranlar bu veri setinin kendi toplamından hesaplanır.{Number(zones.shot_total_mismatches)>0?' Karşılaştırılan '+zones.compared_matches+' maçın '+zones.shot_total_mismatches+' tanesinde toplam farklıdır.':''}</p>
     </section>:null}
 
+    {goalTypes?.matches>0?<section className="card profile-card team-tactical-profile">
+      <div className="panel-head"><div><span className="eyebrow">GOL TÜRLERİ</span><h2>Goller nasıl geldi?</h2></div><small>MH1–MH{goalTypes.through_gameweek} • {goalTypes.goals} gol</small></div>
+      <div className="team-detail-stat-grid team-core-stat-grid">
+        {[['Ceza sahası içi (normal vuruş)','inside_non_header'],['Ceza sahası dışı (normal vuruş)','outside_non_header'],['Kafa golü','headers'],['Penaltı','penalties'],['Rakibin kendi kalesine attığı','opponent_own_goals']].map(([label,key])=><div className="card" key={key}><span>{label}</span><b>{goalTypes[key]??'—'}</b><small>{goalTypes[key]==null?'—':zoneShare(goalTypes[key],goalTypes.goals)} • gol payı</small></div>)}
+      </div>
+      <p className="muted">Her gol bir kategoride sayılır. Ceza sahası içi/dışı normal vuruşlar, kafa ve penaltı gollerini içermez. Kafa gollerinin tam konumu veya hücum başlangıç yönü çıkarılmaz.</p>
+      <a className="muted" href={goalTypes.source_url} target="_blank" rel="noreferrer">Kaynak: All90 • FotMob / TFF / ESPN</a>
+    </section>:null}
+
     {isPro?<section className="card profile-card team-tactical-profile">
       <div className="panel-head">
         <div><span className="eyebrow">GÜÇLÜ / ZAYIF YANLAR</span><h2>Atak ve savunma profili</h2></div>
@@ -301,7 +311,7 @@ export default async function TeamPage({params}){
             <div><span>Kontradan yenilen</span><b>{pctShare(tactical?.conceded_counter_share)}</b></div>
           </div>
         </div>
-      </div>:<p className="muted">Gerçek gol/şut koordinatı, ceza sahası–uzak mesafe ve kontra kırılımları için olay-seviyesi kaynak henüz yok. Yukarıdaki yön profili gerçek saha rolleri ve aksiyonlardan türetilmiştir; gözlenen olay konumu gibi sunulmaz.</p>}
+      </div>:<p className="muted">Gerçek hücum başlangıç yönü, kafa gollerinin tam konumu ve rakibin gol bölgesi için tam olay-seviyesi kaynak henüz yok. Şut bölgeleri ve gol türleri yukarıda kendi kapsamlarıyla gösterilir; türetilen yön profili gözlenen olay konumu gibi sunulmaz.</p>}
     </section>:<AccessGate
       compact
       tier="pro"
