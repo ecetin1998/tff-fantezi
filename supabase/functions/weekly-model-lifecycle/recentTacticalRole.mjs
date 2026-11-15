@@ -2,6 +2,22 @@
 // Fantasy position. Use only verified lineup slots, never a generic player profile.
 export const ROLE_SET=new Set(['GK','CB','FB','WB','DM','CM','AM','WM','W','SS','ST']);
 const number=v=>typeof v==='number'&&Number.isFinite(v)?v:Number(v)
+// A source-confirmed formation slot cannot always distinguish duties.
+// Never turn a compatible AM into a CM, or a winger into a wide midfielder,
+// solely from the 4-1-4-1 provider's flat fourth line. Similarly a central
+// midfield geometry cannot reliably distinguish a holding from a box-to-box
+// player. A literal source role label, when available, takes precedence.
+export function roleForVerifiedSlot(row,baseRole){
+  const label=String(row.source_position_label||'');
+  if(!label.startsWith('formation:'))return row.role;
+  if(label.startsWith('formation:4-1-4-1;line:3;')){
+    if(row.role==='CM'&&baseRole==='AM')return 'AM';
+    if(row.role==='WM'&&baseRole==='W')return 'W';
+  }
+  if(row.role==='CM'&&baseRole==='DM'&&!label.startsWith('formation:4-1-4-1;line:3;'))return 'DM';
+  if(row.role==='DM'&&baseRole==='CM'&&/^formation:[345]-2-/.test(label))return 'CM';
+  return row.role;
+}
 export function currentTacticalRole({baseRole,baseSide,evidence=[],targetWeek,teamId=null,cutoffAt=null}={}){
   const fallback={role:baseRole||null,side:baseSide||null,changed:false,
     trustedMatches:0,reason:'insufficient_verified_lineups'}
@@ -20,7 +36,7 @@ export function currentTacticalRole({baseRole,baseSide,evidence=[],targetWeek,te
   if(recent.length<2)return {...fallback,trustedMatches:recent.length};
   const byRole=new Map();
   for(const row of recent){
-    const key=String(row.role);
+    const key=String(roleForVerifiedSlot(row,baseRole));
     if(!byRole.has(key))byRole.set(key,{count:0,minutes:0,rows:[]});
     const target=byRole.get(key);
     target.count++;target.minutes+=number(row.minutes);target.rows.push(row);
