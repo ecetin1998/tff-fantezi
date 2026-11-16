@@ -54,7 +54,7 @@ CREATE OR REPLACE VIEW public.scout_highlightly_fetch_requirements WITH (securit
      LEFT JOIN weekly_attack a ON a.season = h.season AND a.match_id = h.match_id
      LEFT JOIN team_evidence t ON t.season = h.season AND t.match_id = h.match_id
      LEFT JOIN lineup_evidence l ON l.season = h.season AND l.match_id = h.match_id
-  WHERE h.season = '2026-27'::text AND h.match_status = 'Bitti'::text;;
+  WHERE h.season = '2026-27'::text AND h.match_status = 'Bitti'::text;
 REVOKE ALL ON public.scout_highlightly_fetch_requirements FROM PUBLIC,anon,authenticated;
 GRANT SELECT ON public.scout_highlightly_fetch_requirements TO service_role;
 
@@ -78,6 +78,6 @@ CREATE OR REPLACE VIEW public.scout_highlightly_targeted_readiness WITH (securit
                    FROM scout_match_history
                   WHERE scout_match_history.season = '2026-27'::text
                   GROUP BY scout_match_history.gameweek
-                 HAVING count(*) = 9 AND bool_and(scout_match_history.match_status = 'Bitti'::text AND scout_match_history.fantasy_closure = 'KAPANDI'::text)) closed));;
+                 HAVING count(*) = 9 AND bool_and(scout_match_history.match_status = 'Bitti'::text AND scout_match_history.fantasy_closure = 'KAPANDI'::text)) closed));
 REVOKE ALL ON public.scout_highlightly_targeted_readiness FROM PUBLIC,anon,authenticated;
 GRANT SELECT ON public.scout_highlightly_targeted_readiness TO service_role;
