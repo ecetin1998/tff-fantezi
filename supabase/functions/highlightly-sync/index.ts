@@ -63,9 +63,14 @@ function equalHash(a,b) {
   return bad===0;
 }
 async function getData(sb,table,cols="*") {
-  const {data,error} = await sb.from(table).select(cols).limit(1000);
-  assert(error,"READ_"+table);
-  return data || [];
+  const rows=[];
+  for(let start=0;start<12000;start+=500) {
+    const {data,error}=await sb.from(table).select(cols).range(start,start+499);
+    assert(error,"READ_"+table);
+    rows.push(...(data||[]));
+    if((data||[]).length<500) return rows;
+  }
+  throw new Error("READ_PAGINATION_CAP_"+table);
 }
 async function main(req) {
   if(req.method!=="POST") return json({error:"not found"},404);
