@@ -78,3 +78,25 @@ test("availability refresh rebuilds when current projection availability disagre
   assert.match(s,/source_coverage:coverage\.coverage,changed:changed\+outOfSync/);
   assert.match(s,/model_refresh_required:rebuildRequired/);
 });
+
+test("shared given name does not merge independent secondary reports",()=>{
+  const names=(a,b)=>{
+    const aa=a.toLowerCase().split(" "), bb=b.toLowerCase().split(" ");
+    return aa.filter(x=>bb.includes(x)).length/Math.min(aa.length,bb.length);
+  };
+  const players=[{id:37,team_id:1,full_name:"Chibuike Godfrey Nwaiwu"}];
+  const teams=[{id:1,name:"Trabzonspor"}];
+  assert.equal(matchSupplementaryPlayer({
+    player:"Chibuike Another",team:"Trabzonspor"
+  },players,teams,names).playerId,undefined);
+  assert.equal(matchSupplementaryPlayer({
+    player:"Chibuike Nwaiwu",team:"Trabzonspor"
+  },players,teams,names).playerId,37);
+});
+
+test("ambiguous source aliases are screened before PostgREST multi-row upsert",async()=>{
+  const {readFileSync}=await import("node:fs");
+  const src=readFileSync(new URL("../supabase/functions/refresh-availability/index.ts",import.meta.url),"utf8");
+  assert.match(src,/const ambiguousIds=new Set/);
+  assert.match(src,/ambiguousIds\.has\(Number\(identity\.playerId\)\)/);
+});
