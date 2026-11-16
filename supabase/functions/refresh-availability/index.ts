@@ -508,15 +508,29 @@ Deno.serve(async(req:Request)=>{
     const write=await sb.from("scout_availability").upsert(rows,{onConflict:"run_id,player_id"})
     if(write.error)throw write.error
 
+    // Detect staleness from prior manually verified suspensions, even when
+    // the availability feed itself produces the same row on this refresh.
+    const projectionsQ=await sb.from("scout_player_projections")
+      .select("player_id,availability_probability").eq("run_id",runId)
+    if(projectionsQ.error)throw projectionsQ.error
+    const projectedAvailability=new Map<number,number>((projectionsQ.data||[])
+      .map((p:any)=>[Number(p.player_id),Number(p.availability_probability)]))
+    const outOfSync=rows.filter((a:any)=>
+      projectedAvailability.has(Number(a.player_id)) &&
+      Math.abs(Number(a.availability_probability)-Number(projectedAvailability.get(Number(a.player_id))))>0.001
+    ).length
+    const rebuildRequired=changed>0||outOfSync>0
+
     return Response.json({
       ok:true,run_id:runId,source_updated_at:sourceUpdated,checked_at:now,
       parsed:parsed.length,matched:matched.length,
       unmatched:coverage.critical,source_ignored_inactive:coverage.skippedInactive,
-      source_unlisted:coverage.skippedUnlisted,source_coverage:coverage.coverage,changed,
+      source_unlisted:coverage.skippedUnlisted,source_coverage:coverage.coverage,changed:changed+outOfSync,
+      source_changed:changed,projection_availability_mismatches:outOfSync,
       injuries:rows.filter((r:any)=>r.availability_type==="injuries").length,
       suspensions:rows.filter((r:any)=>r.availability_type==="suspensions").length,
       baselines:rows.filter((r:any)=>r.availability_type==="baseline").length,
-      model_refresh_required:changed>0,
+      model_refresh_required:rebuildRequired,
       secondary_source:secondaryUsable?"wmrtips":"unavailable",
       secondary_claims:secondaryRows.length,
       secondary_matched:secondaryMatched,secondary_unmatched:secondaryUnmatched,
