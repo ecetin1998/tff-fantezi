@@ -67,3 +67,14 @@ test("primary + supplementary suspension confirms only the affected fixture wind
   assert.equal(verifyWmrSuspension(req).verified,true);
   assert.equal(verifyWmrSuspension({...req,kickoffAt:"2026-11-30T16:00:00Z"}).verified,false);
 });
+
+// Staleness guard: manual/source-verified availability changes must trigger
+// the existing GitHub 50K pipeline, not leave xFP implying 90 minutes.
+test("availability refresh rebuilds when current projection availability disagrees",async()=>{
+  const {readFileSync}=await import("node:fs");
+  const s=readFileSync(new URL("../supabase/functions/refresh-availability/index.ts",import.meta.url),"utf8");
+  assert.match(s,/Math\.abs\(Number\(a\.availability_probability\)-Number\(projectedAvailability\.get/);
+  assert.match(s,/const rebuildRequired=changed>0\|\|outOfSync>0/);
+  assert.match(s,/source_coverage:coverage\.coverage,changed:changed\+outOfSync/);
+  assert.match(s,/model_refresh_required:rebuildRequired/);
+});
