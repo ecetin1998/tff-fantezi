@@ -1,93 +1,105 @@
-// Read-only Highlightly Süper Lig coverage probe. No database writes and no guessed zeroes.
-// Usage: HIGHLIGHTLY_API_KEY=... node scripts/highlightly-coverage-probe.mjs --date 2026-11-08
-// Or:    HIGHLIGHTLY_API_KEY=... node scripts/highlightly-coverage-probe.mjs --match-id 123456
-const base = "https://soccer.highlightly.net"
+// Highlightly Süper Lig free-plan coverage probe — read-only, never writes model data.
+// Secret stays server-side: HIGHLIGHTLY_API_KEY=... node scripts/highlightly-coverage-probe.mjs --date 2026-11-08
+// Or with a known provider match ID: ... --match-id 1348375393
+// --limit N (1..9, default 3) bounds quota usage. One date query + 3 per match.
+// 2026-27 Süper Lig Highlightly league ID: 173537 (verified 2026-11-16).
+const BASE = "https://soccer.highlightly.net"
+const LEAGUE_ID = 173537
 const key = process.env.HIGHLIGHTLY_API_KEY
 const argv = process.argv.slice(2)
-const arg = name => argv[argv.indexOf(name) + 1]
-const date = argv.includes("--date") ? arg("--date") : null
-const matchId = argv.includes("--match-id") ? arg("--match-id") : null
-const maxMatches = argv.includes("--limit") ? Number(arg("--limit")) : 3
+const arg = name => argv.includes(name) ? argv[argv.indexOf(name) + 1] : null
+const date = arg("--date")
+const matchId = arg("--match-id")
+const limit = arg("--limit") === null ? 3 : Number(arg("--limit"))
 
-if (!key) {
-  console.error("HIGHLIGHTLY_API_KEY gerekli. Anahtarı koda, loglara veya public ortama koymayın.")
-  process.exit(2)
-}
-if (Boolean(date) === Boolean(matchId) ||
+if (!key || (Boolean(date) === Boolean(matchId)) ||
     (date && !/^\d{4}-\d{2}-\d{2}$/.test(date)) ||
     (matchId && !/^\d+$/.test(matchId)) ||
-    !Number.isInteger(maxMatches) || maxMatches < 1 || maxMatches > 9) {
-  console.error("Kullanım: --date YYYY-MM-DD [--limit 1..9] VEYA --match-id <provider-match-id>")
+    !Number.isInteger(limit) || limit < 1 || limit > 9) {
+  console.error("HIGHLIGHTLY_API_KEY gerekli. --date YYYY-MM-DD [--limit 1..9] veya --match-id <id> verin.")
   process.exit(2)
 }
+
 let requests = 0
-let quotaRemaining = null
-async function get(path) {
-  requests++
-  const res = await fetch(base + path, {
-    headers: {"x-rapidapi-key": key, accept: "application/json"},
+let remaining = null
+async function request(path) {
+  const r = await fetch(BASE + path, {
+    headers: {"x-rapidapi-key": key, "accept": "application/json"},
     signal: AbortSignal.timeout(12000)
   })
-  const remaining = res.headers.get("x-ratelimit-requests-remaining")
-  if (remaining != null) quotaRemaining = Number(remaining)
-  if (!res.ok) throw new Error(`Highlightly HTTP ${res.status} for ${path.split("?")[0]}`)
-  return res.json()
+  requests++
+  const header = r.headers.get("x-ratelimit-requests-remaining")
+  if (header != null) remaining = Number(header)
+  if (!r.ok) throw new Error(`Highlightly HTTP ${r.status}: ${path.split("?")[0]}`)
+  return r.json()
 }
-const clean = name => String(name || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase()
-function summarizeBox(body) {
-  const teams = Array.isArray(body) ? body : []
-  const totals = {playerRows: 0, minuteObserved: 0, xgObserved: 0, xaObserved: 0,
-    shotsObserved: 0, keyPassesObserved: 0, savesObserved: 0}
-  const byTeam = teams.map(({team, players}) => {
-    const roster = Array.isArray(players) ? players : []
-    for (const p of roster) {
-      totals.playerRows++
-      if (p.minutesPlayed !== null && p.minutesPlayed !== undefined) totals.minuteObserved++
-      const stats = Array.isArray(p.statistics) ? p.statistics[0] : null
-      if (!stats) continue
-      for (const [field, key] of [
-        ["expectedGoals", "xgObserved"], ["expectedAssists", "xaObserved"],
-        ["shotsTotal", "shotsObserved"], ["passesKey", "keyPassesObserved"],
-        ["goalsSaved", "savesObserved"]
-      ]) if (stats[field] !== null && stats[field] !== undefined) totals[key]++
-    }
-    return {providerTeamId: team?.id ?? null, team: team?.name ?? null, playerRows: roster.length}
-  })
-  return {byTeam, totals}
-}
-async function probe(id, fixture=null) {
-  try {
-    const box = await get(`/box-score/${id}`)
-    const teamStatistics = await get(`/statistics/${id}`)
-    return {
-      providerMatchId: id,
-      fixture,
-      boxScore: summarizeBox(box),
-      teamStatisticsRows: Array.isArray(teamStatistics) ? teamStatistics.length : null,
-      providerFieldsOptional: true
-    }
-  } catch (error) {
-    return {providerMatchId: id, fixture, error: String(error.message)}
+const nonnull = value => value !== null && value !== undefined
+function boxCoverage(data) {
+  const teamRows = Array.isArray(data) ? data : []
+  const players = teamRows.flatMap(t => Array.isArray(t.players) ? t.players : [])
+  const got = name => players.filter(p => nonnull(p.statistics?.[name])).length
+  return {
+    teams:teamRows.map(t => ({id:t.team?.id ?? null,name:t.team?.name ?? null,roster:t.players?.length ?? 0})),
+    rosterRows:players.length,played:players.filter(p=>Number(p.minutesPlayed)>0).length,
+    minutesObserved:players.filter(p=>nonnull(p.minutesPlayed)).length,
+    starters:players.filter(p=>p.isSubstitute===false && Number(p.minutesPlayed)>0).length,
+    fields:{
+      xg:got("expectedGoals"),xa:got("expectedAssists"),
+      shots:got("shotsTotal"),onTarget:got("shotsOnTarget"),
+      keyPasses:got("passesKey"),saves:got("goalsSaved"),
+      goals:got("goalsScored"),assists:got("assists"),yellow:got("cardsYellow"),red:got("cardsRed")
+    },
+    note:"Missing xG/xA is UNKNOWN, not zero. Some reserves with no attempts have null xG."
   }
 }
-let matches = []
-if (matchId) {
-  matches = [{id: Number(matchId)}]
-} else {
-  const result = await get(`/matches?date=${encodeURIComponent(date)}&countryCode=TR&limit=100`)
-  const all = Array.isArray(result.data) ? result.data : []
-  matches = all.filter(m => clean(m.league?.name).includes("super lig")).slice(0,maxMatches)
+function statsCoverage(data) {
+  const teams = Array.isArray(data) ? data : []
+  return teams.map(t=>{
+    const rows = Array.isArray(t.statistics) ? t.statistics : []
+    return {
+      team:t.team?.name ?? null,metrics:rows.length,
+      xg:rows.find(x=>x.displayName==="Expected Goals")?.value ?? null,
+      xa:rows.find(x=>x.displayName==="Expected Assists")?.value ?? null,
+      possession:rows.find(x=>x.displayName==="Possession")?.value ?? null,
+      shotsOnTarget:rows.find(x=>x.displayName==="Shots on target")?.value ?? null
+    }
+  })
 }
-const results = []
-for (const m of matches) {
-  const fixture = m.homeTeam && m.awayTeam
-    ? `${m.homeTeam.name} - ${m.awayTeam.name}` : null
-  results.push(await probe(m.id, fixture))
-  if (quotaRemaining === 0) break
+function lineupCoverage(body) {
+  const count = team => (team?.initialLineup||[]).reduce((sum,row)=>sum+(Array.isArray(row)?row.length:0),0)
+  return ["homeTeam","awayTeam"].map(k=>({
+    team:body?.[k]?.name ?? null,formation:body?.[k]?.formation ?? null,
+    starters:count(body?.[k])
+  }))
 }
-console.log(JSON.stringify({
-  source: "Highlightly", date, matchId, matchesFound: matches.length,
-  requests, quotaRemaining, results,
-  caution: "Read-only probe. Optional xG/xA absent != zero. Verify match/team/player IDs against official fixtures before ingesting. No output is official fantasy points."
-},null,2))
-if (!results.length || results.every(x=>x.error)) process.exitCode=1
+const outputs = []
+let matches
+try {
+  if (matchId) {
+    matches = [{id:Number(matchId)}]
+  } else {
+    const res=await request(`/matches?date=${encodeURIComponent(date)}&leagueId=${LEAGUE_ID}&limit=100`)
+    matches = (Array.isArray(res.data)?res.data:[]).slice(0,limit)
+  }
+  for (const m of matches) {
+    const obj={matchId:m.id,fixture:m.homeTeam?.name && m.awayTeam?.name
+      ? `${m.homeTeam.name} - ${m.awayTeam.name}` : null,
+      gameweek:m.round??null};
+    for (const [field,path,parser] of [
+      ["boxScore",`/box-score/${m.id}`,boxCoverage],
+      ["teamStatistics",`/statistics/${m.id}`,statsCoverage],
+      ["lineups",`/lineups/${m.id}`,lineupCoverage]
+    ]) {
+      if (remaining===0) {obj.quotaExhausted=true;break}
+      try {obj[field]=parser(await request(path))}
+      catch(e){obj[field+"Error"]=e.message}
+    }
+    outputs.push(obj)
+  }
+  console.log(JSON.stringify({
+    source:"Highlightly",leagueId:LEAGUE_ID,season:2026,date,queries:requests,
+    remaining,results:outputs,noWrites:true,
+    sourceCaveat:"Cross-check provider IDs, xG source differences and data rights before ingesting."
+  },null,2))
+  if (!outputs.length || outputs.every(x=>x.boxScoreError)) process.exitCode=1
+}catch(e){console.error("Highlightly coverage test failed: "+e.message);process.exitCode=1}
