@@ -69,7 +69,8 @@ async function getData(sb,table,cols="*") {
     scout_match_history:["season","match_id"],
     scout_highlightly_matches:["season","match_id"],
     scout_players:["id"],
-    scout_highlightly_player_matches:["season","match_id","provider_player_id"]
+    scout_highlightly_player_matches:["season","match_id","provider_player_id"],
+    scout_highlightly_player_aliases:["season","provider_player_id","team_id"]
   };
   for(let start=0;start<12000;start+=500) {
     let query=sb.from(table).select(cols);
@@ -199,6 +200,12 @@ async function main(req) {
       if(!activeByTeam.has(p.team_id))activeByTeam.set(p.team_id,[]);
       activeByTeam.get(p.team_id).push(p);
     }
+    const aliasRows=await getData(sb,"scout_highlightly_player_aliases",
+      "provider_player_id,team_id,player_id,provider_name");
+    const verifiedAliases=new Map(aliasRows.map(a=>[
+      Number(a.provider_player_id)+":"+Number(a.team_id),
+      {playerId:Number(a.player_id),sourceName:normalized(a.provider_name)}
+    ]));
     const legacyMap=new Map();
     // Initial known provider identity mappings are stable across matches, but verify team as well.
     const mapRows=await getData(sb,"scout_highlightly_player_matches",
@@ -236,8 +243,15 @@ async function main(req) {
               if(!Number.isInteger(Number(p.id)) || !p.name)throw new Error("INVALID_BOX_PLAYER");
               const v=p.statistics??{};
               const known=legacyMap.get(Number(p.id));
-              const resolved=known?.club===club && known?.value!=null
-                ?known.value:uniqueMatch(p,activeByTeam.get(club)||[]);
+              const alias=verifiedAliases.get(Number(p.id)+":"+club);
+              if(alias && alias.sourceName!==normalized(p.fullName||p.name))
+                throw new Error("VERIFIED_ALIAS_PROVIDER_NAME_DRIFT");
+              if(alias && known?.club===club && known.value!=null &&
+                 known.value!==alias.playerId)
+                throw new Error("VERIFIED_ALIAS_HISTORICAL_CONFLICT");
+              const resolved=alias?.playerId ??
+                (known?.club===club && known?.value!=null
+                  ?known.value:uniqueMatch(p,activeByTeam.get(club)||[]));
               rows.push({
                 season:SEASON,gameweek:week,match_id:matchId,
                 provider_player_id:Number(p.id),provider_team_id:side.team?.id??null,
@@ -255,6 +269,9 @@ async function main(req) {
             }
           }
           if(rows.length<34)throw new Error("INVALID_BOX_ROSTER_TOTAL");
+          const linkedIds=rows.map(r=>r.player_id).filter(id=>id!=null);
+          if(new Set(linkedIds).size!==linkedIds.length)
+            throw new Error("AMBIGUOUS_CANONICAL_PLAYER_IN_SAME_MATCH");
           await upsert("scout_highlightly_player_matches",rows,"season,match_id,provider_player_id");
           patch.box_done=true;patch.box_updated_at=clock();
           for(const row of rows)if(row.player_id!=null){
