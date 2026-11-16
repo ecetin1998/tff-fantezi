@@ -64,8 +64,18 @@ function equalHash(a,b) {
 }
 async function getData(sb,table,cols="*") {
   const rows=[];
+  const sortColumns = {
+    scout_highlightly_sync_control:["id"],
+    scout_match_history:["season","match_id"],
+    scout_highlightly_matches:["season","match_id"],
+    scout_players:["id"],
+    scout_highlightly_player_matches:["season","match_id","provider_player_id"]
+  };
   for(let start=0;start<12000;start+=500) {
-    const {data,error}=await sb.from(table).select(cols).range(start,start+499);
+    let query=sb.from(table).select(cols);
+    for(const column of sortColumns[table]||[])
+      query=query.order(column,{ascending:true});
+    const {data,error}=await query.range(start,start+499);
     assert(error,"READ_"+table);
     rows.push(...(data||[]));
     if((data||[]).length<500) return rows;
