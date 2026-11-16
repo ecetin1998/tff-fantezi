@@ -70,7 +70,8 @@ async function getData(sb,table,cols="*") {
     scout_highlightly_matches:["season","match_id"],
     scout_players:["id"],
     scout_highlightly_player_matches:["season","match_id","provider_player_id"],
-    scout_highlightly_player_aliases:["season","provider_player_id","team_id"]
+    scout_highlightly_player_aliases:["season","provider_player_id","team_id"],
+    scout_highlightly_fetch_requirements:["season","match_id"]
   };
   for(let start=0;start<12000;start+=500) {
     let query=sb.from(table).select(cols);
@@ -217,9 +218,21 @@ async function main(req) {
         legacyMap.set(id,{value:null,club:null});
     }
 
+    // Match x endpoint coverage is audited against existing independent
+    // VERIFIED sources. Skip a provider call only when the specific evidence
+    // already exists (e.g. team xG from FotMob or player attack from MH8+).
+    // Never mark an uncalled Highlightly endpoint as provider*_done.
+    const requirements=await getData(sb,"scout_highlightly_fetch_requirements",
+      "season,match_id,gameweek,need_box,need_stats,need_lineups,policy");
+    const byMatchRequirement=new Map(requirements
+      .filter(x=>x.season===SEASON).map(x=>[Number(x.match_id),x]));
     const toProcess=registered
       .filter(x=>finished.some(h=>Number(h.match_id)===Number(x.match_id)))
-      .filter(x=>!x.box_done || !x.stats_done || !x.lineups_done)
+      .map(x=>({...x,need:byMatchRequirement.get(Number(x.match_id))}))
+      .filter(x=>x.need &&
+        ((!x.box_done&&x.need.need_box) ||
+         (!x.stats_done&&x.need.need_stats) ||
+         (!x.lineups_done&&x.need.need_lineups)))
       .sort((a,b)=>Number(b.gameweek)-Number(a.gameweek)||Number(a.match_id)-Number(b.match_id))
       .slice(0,7);
     for(const m of toProcess) {
@@ -228,7 +241,7 @@ async function main(req) {
       const sideIds=new Set([Number(m.home_team_id),Number(m.away_team_id)]);
       const patch={updated_at:clock(),last_error:null};
       try {
-        if(!m.box_done) {
+        if(!m.box_done && m.need.need_box) {
           const box=await provider("/box-score/"+pid);
           if(!Array.isArray(box)||box.length!==2)throw new Error("INVALID_BOX_TEAM_COUNT");
           const rows=[];
@@ -279,7 +292,7 @@ async function main(req) {
               legacyMap.set(row.provider_player_id,{value:row.player_id,club:row.team_id});
           }
         }
-        if(!m.stats_done) {
+        if(!m.stats_done && m.need.need_stats) {
           const stats=await provider("/statistics/"+pid);
           if(!Array.isArray(stats)||stats.length!==2)throw new Error("INVALID_STATS_TEAM_COUNT");
           const rows=stats.map(t=>{
@@ -313,7 +326,7 @@ async function main(req) {
           await upsert("scout_highlightly_team_matches",rows,"season,match_id,team_id");
           patch.stats_done=true;patch.stats_updated_at=clock();
         }
-        if(!m.lineups_done) {
+        if(!m.lineups_done && m.need.need_lineups) {
           const lineups=await provider("/lineups/"+pid);
           const rows=["homeTeam","awayTeam"].map(field=>{
             const team=lineups?.[field],club=teamId(team?.name);
@@ -355,6 +368,8 @@ async function main(req) {
       status:"ok",mapped,unmapped_count:mappedUnknown.length,
       mappedUnknown:mappedUnknown.slice(0,12),processed,providerRequests,
       provider_remaining:remaining,requests_integration_today:used,budget,
+      eligible_target_matches:toProcess.length,
+      strategy:"only-verified-evidence-gaps",
       failures:failures.slice(0,8),published_model_unchanged:true
     });
   }catch(e){

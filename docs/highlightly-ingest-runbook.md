@@ -35,3 +35,27 @@ FROM public.scout_highlightly_player_matches;
 Bu veri şu anda ayrı sağlayıcı kanalıdır. Oyuncu sezon advanced_through_gameweek ve takım ayrıntılı olay kanallarını, yalnızca Highlightly genel metrikleri var diye MH11'e taşımıyoruz. Geçmiş 99 maçın verileri dolduktan, oyuncu kimlikleri çözüldükten ve çoklu kaynak farkları kontrol edildikten sonra, xFP aday motoru 30+ dakika aktif oyuncular ve leakage-safe frozen holdout üzerinde test edilmelidir. Ancak başarılı QA, backtest ve aday 50K sonrası current model değişir.
 
 İlk entegrasyon PR #462 ile ana dala birleştirildi. 17 Kasım'da MH12 kadro kapanışı (21 Kasım 12:30 TR) öncesi güvenlik payı için dördüncü cron çalışması eklendi. 16/99 tam veri aktarımı ve kalan 83 maç için her günlük tam kotada azami 24 maç ilerleme hedefleniyor. Teorik tamamlanma 20 Kasım 11:15 TR, ancak provider kota reseti, veri kapsaması ve başarısız istekler nedeniyle garanti değildir. 99/99 tamamlanması yeni xFP hesaplamasının tamamlandığı anlamına gelmez.
+
+## Seçici geçmiş aktarım — 17 Kasım 2026
+
+**Geçerli politika:** Bütün maçları yeniden çekmek yerine başka doğrulanmış kaynakta eksik kalan **endpointleri** tamamla. Bu karar veritabanındaki `scout_highlightly_fetch_requirements` görünümünde maç bazında ve gerçek veri üzerinden yeniden hesaplanır.
+
+- **Oyuncu box score:** Aynı maç için en az 22 oyuncu ve en az 10 oyuncuda gözlemlenmiş xG/xA olan doğrulanmış `scout_verified_weekly_attack` varsa yeniden çağırma. Bunlar minimum *kapsam eşiği*; oyuncuların her opsiyonel metriğinin mevcut olduğunu ispatlamaz. Eksik mikro-metrikler sonraki QA'da ayrıca kontrol edilir.
+- **Takım statistics:** `scout_verified_team_match_advanced` içinde her iki takımın xG, xGA, şut ve isabetli şutları mevcutsa yeniden çağırma. FotMob/Highlightly xG ölçekleri karıştırılmaz.
+- **İlk 11:** Yakın geçmişte her iki takımın 11 doğrulanmış ilk 11 oyuncusu yoksa Highlightly lineup iste; daha eski MH1–MH6 ilk 11 isteklerini güncel rol modeline katkısı sınırlı olduğu için şimdilik ertele. Daha sonra gerektiğinde bu politika genişletilebilir.
+- Yakalanan provider verileri source-specific kalır. Atlanan endpoint için `box_done`, `stats_done`, `lineups_done` bayraklarını sahte şekilde true yapma.
+
+**Canlı kapsam ölçümü (17 Kasım 2026):** 99 tamamlanmış maçın 27'si mevcut verilerle yeterli; 16 maçın üç Highlightly endpointi de eskiden çekilmiş. İhtiyaç duyulan en az **63 box + 63 takım stats + 18 lineup = 144 API çağrısı**. Önceki kalan 83 maç × üç endpoint = 249 çağrıyla karşılaştırıldığında 105 çağrı azalıyor. Günlük toplam güvenlik sınırı 72 istek değişmedi.
+
+İzleme sorgusu:
+
+```sql
+SELECT * FROM public.scout_highlightly_targeted_readiness;
+SELECT gameweek, count(*) FILTER(WHERE need_box) box,
+  count(*) FILTER(WHERE need_stats) stats,
+  count(*) FILTER(WHERE need_lineups) lineups
+FROM public.scout_highlightly_fetch_requirements
+GROUP BY gameweek ORDER BY gameweek DESC;
+```
+
+**Çıkış kapısı:** `targeted_coverage_complete=true` yalnız kaynak bazında yeterli veri olduğunu gösterir. Oyuncu/team advanced sezon profili, kaynak karşılaştırma, kimlik QA, frozen holdout backtest ve yeni 50K bunlardan ayrı onaylanır. Aynı run sonuçlarının prod'a geçirildiği iddia edilmez.
