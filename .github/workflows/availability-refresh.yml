@@ -1,6 +1,11 @@
 name: Availability refresh
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - 'supabase/functions/refresh-availability/**'
+      - '.github/workflows/availability-refresh.yml'
   schedule:
     - cron: '13 */6 * * *'
   workflow_dispatch:
