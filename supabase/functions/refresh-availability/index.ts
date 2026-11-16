@@ -362,11 +362,25 @@ Deno.serve(async(req:Request)=>{
 
     let secondaryApplied=0,secondaryPending=0,secondaryMatched=0,secondaryUnmatched=0
     const secondaryObservations:any[]=[]
-    for(const row of secondaryRows){
-      const identity=matchSupplementaryPlayer(row,playersQ.data||[],teamsQ.data||[],nameScore)
-      if(identity.playerId===undefined){
+    const candidates=secondaryRows.map(row=>({
+      row,identity:matchSupplementaryPlayer(row,playersQ.data||[],teamsQ.data||[],nameScore)
+    }))
+    // A public feed may contain several aliases which fuzzy-match one
+    // Fantasy player. Never pick one arbitrarily or send duplicate upsert keys.
+    const hits=new Map<number,number>()
+    for(const {identity} of candidates){
+      if(identity.playerId===undefined)continue
+      const id=Number(identity.playerId)
+      hits.set(id,(hits.get(id)||0)+1)
+    }
+    const ambiguousIds=new Set<number>(
+      [...hits.entries()].filter(([,count])=>count>1).map(([id])=>id)
+    )
+    if(ambiguousIds.size)console.warn("availability_secondary_ambiguous_identity",ambiguousIds.size)
+    for(const {row,identity} of candidates){
+      if(identity.playerId===undefined || ambiguousIds.has(Number(identity.playerId))){
         secondaryUnmatched++
-        continue // Do not write an unconfirmed person to the current fantasy roster.
+        continue // Never auto-label a player from ambiguous source identities.
       }
       secondaryMatched++
       const playerId=Number(identity.playerId),teamId=Number(identity.teamId)

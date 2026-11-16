@@ -48,7 +48,17 @@ export function matchSupplementaryPlayer(row, players, teams, nameScore) {
     (row.team.toLowerCase() === "amedspor" && normalizeAvailabilityName(t.name) === "amed") ||
     (row.team.toLowerCase() === "gaziantep fk" && normalizeAvailabilityName(t.name) === "gaziantep"));
   if (!club) return {reason:"team_not_matched"};
+  const sourceTokens=normalizeAvailabilityName(row.player).split(" ").filter(Boolean);
+  // Don't mistake a shared given name or a short_label for identity. A
+  // surname and another full-name token must corroborate each other.
   const options = players.filter(p => Number(p.team_id) === Number(club.id))
+    .filter(p => {
+      const fullTokens=normalizeAvailabilityName(p.full_name).split(" ").filter(Boolean);
+      return sourceTokens.length===1
+        ?fullTokens.length===1 && fullTokens[0]===sourceTokens[0]
+        :sourceTokens.length>=2 && fullTokens.includes(sourceTokens[0]) &&
+         fullTokens.includes(sourceTokens.at(-1));
+    })
     .map(p => ({
       player:p,
       score:Math.max(...[p.full_name,p.display_name,p.short_label]
