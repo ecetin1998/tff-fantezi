@@ -1,5 +1,6 @@
 import {createClient} from "https://esm.sh/@supabase/supabase-js@2"
 import {assessAvailabilityCoverage,crossTeamIdentitySupported} from "./coverage.mjs"
+import {SECONDARY_URL,parseWmrAvailability,matchSupplementaryPlayer,verifyWmrSuspension} from "./secondarySources.mjs"
 
 const AUDIENCE="tff-fantezi-scout"
 const ISSUER="https://token.actions.githubusercontent.com"
@@ -185,10 +186,34 @@ Deno.serve(async(req:Request)=>{
     if(parsed.length<20)return Response.json({error:"availability source parse coverage too low",parsed:parsed.length},{status:409})
     const sourceUpdated=sourceUpdatedAt(html)
     const now=new Date().toISOString()
+    // Independent secondary feed. A failed fetch cannot negate a verified primary report.
+    // A secondary-only injury is queued for review rather than automatically labeling a player injured.
+    let secondaryRows:any[]=[]
+    let secondaryUsable=false
+    try {
+      const secondaryResponse=await fetch(SECONDARY_URL,{
+        headers:{"user-agent":"FanteziLigRehberi/1.0 availability multi-source verification"},
+        signal:AbortSignal.timeout(12000)
+      })
+      if(secondaryResponse.ok) {
+        const body=await secondaryResponse.text()
+        const claims=parseWmrAvailability(body)
+        if(claims.length>=15 && claims.length<=300) {
+          secondaryRows=claims
+          secondaryUsable=true
+        } else {
+          console.warn("availability_secondary_coverage_low",claims.length)
+        }
+      } else console.warn("availability_secondary_http",secondaryResponse.status)
+    }catch(error) {
+      console.warn("availability_secondary_fetch_error",String(error))
+    }
 
     const runQ=await sb.from("scout_model_runs").select("id,gameweek").eq("is_current",true).eq("status","ready").limit(1).single()
     if(runQ.error)throw runQ.error
     const runId=runQ.data.id
+    const targetWeek=Number(runQ.data.gameweek)
+    const previousWeek=targetWeek-1
     const [playersQ,teamsQ,predictedFixturesQ,fixturesQ,inactivePlayersQ]=await Promise.all([
       sb.from("scout_players").select("id,full_name,display_name,short_label,team_id").eq("active",true),
       sb.from("scout_teams").select("id,name"),
@@ -197,6 +222,39 @@ Deno.serve(async(req:Request)=>{
       sb.from("scout_players").select("id,full_name,display_name,short_label,team_id").eq("active",false),
     ])
     for(const q of [playersQ,teamsQ,predictedFixturesQ,fixturesQ,inactivePlayersQ])if(q.error)throw q.error
+    // Source-specific cross-checks: season yellow count, last finished week's
+    // card event, and (only as fallback) the independent Highlightly box score.
+    const [cardsQ,priorWeekQ,highlightlyQ]=await Promise.all([
+      sb.from("scout_player_season_stats")
+        .select("player_id,yellow_cards,through_gameweek").eq("season","2026-27")
+        .eq("through_gameweek",previousWeek),
+      sb.from("scout_match_player_evidence")
+        .select("player_id,gameweek,yellow_cards,red_cards,source_url").eq("season","2026-27")
+        .eq("gameweek",previousWeek),
+      sb.from("scout_highlightly_player_matches")
+        .select("player_id,gameweek,yellow_cards,red_cards")
+        .eq("season","2026-27").eq("gameweek",previousWeek).not("player_id","is",null)
+    ])
+    // If any cross-check feed is unavailable, do not claim verified card suspensions
+    // based on a single injury website. The primary source still works normally.
+    const secondaryCardsReady=!cardsQ.error && (!priorWeekQ.error || !highlightlyQ.error)
+    if(!secondaryCardsReady)console.warn("availability_secondary_card_crosscheck_unavailable")
+    const seasonCards=new Map<number,number>((cardsQ.data||[])
+      .map((x:any)=>[Number(x.player_id),Number(x.yellow_cards)]))
+    const officialCardEvidence=new Map<number,{yellow:number,red:number}>()
+    for(const row of priorWeekQ.data||[]){
+      const playerId=Number(row.player_id),v=officialCardEvidence.get(playerId)||{yellow:0,red:0}
+      v.yellow+=Number(row.yellow_cards||0)
+      v.red+=Number(row.red_cards||0)
+      officialCardEvidence.set(playerId,v)
+    }
+    const highlightlyCardEvidence=new Map<number,{yellow:number,red:number}>()
+    for(const row of highlightlyQ.data||[]){
+      const playerId=Number(row.player_id),v=highlightlyCardEvidence.get(playerId)||{yellow:0,red:0}
+      v.yellow+=Number(row.yellow_cards||0)
+      v.red+=Number(row.red_cards||0)
+      highlightlyCardEvidence.set(playerId,v)
+    }
     const teams=new Map<number,string>((teamsQ.data||[]).map((t:any)=>[Number(t.id),String(t.name)]))
     const teamBySource=new Map<string,number>()
     for(const row of parsed){
@@ -302,9 +360,85 @@ Deno.serve(async(req:Request)=>{
       })
     }
 
+    let secondaryApplied=0,secondaryPending=0,secondaryMatched=0,secondaryUnmatched=0
+    const secondaryObservations:any[]=[]
+    for(const row of secondaryRows){
+      const identity=matchSupplementaryPlayer(row,playersQ.data||[],teamsQ.data||[],nameScore)
+      if(identity.playerId===undefined){
+        secondaryUnmatched++
+        continue // Do not write an unconfirmed person to the current fantasy roster.
+      }
+      secondaryMatched++
+      const playerId=Number(identity.playerId),teamId=Number(identity.teamId)
+      const primary=next.get(playerId)
+      const fixture=fixturesByTeam.get(teamId)
+      const kickoff=fixture?.kickoff_at||fixture?.match_date||null
+      const official=officialCardEvidence.get(playerId)
+      const hl=highlightlyCardEvidence.get(playerId)
+      const evidence=official||hl||{yellow:0,red:0}
+      const proof=row.kind==="suspensions" && secondaryCardsReady
+        ?verifyWmrSuspension({
+            row,kickoffAt:kickoff,primaryKind:primary?.availability_type,
+            cumulativeYellow:seasonCards.get(playerId),
+            lastWeekYellow:evidence.yellow,lastWeekRed:evidence.red,
+            targetGameweek:targetWeek,evidenceGameweek:previousWeek
+          })
+        :{verified:false,reason:row.kind==="injuries"?"injury_needs_second_source":"crosscheck_unavailable"}
+      const verified=(row.kind==="injuries" && primary?.availability_type==="injuries") ||
+        (row.kind==="suspensions" && proof.verified)
+      const decision=verified?(row.kind==="injuries"?"primary_and_secondary":proof.reason):proof.reason
+      secondaryObservations.push({
+        season:"2026-27",gameweek:targetWeek,player_id:playerId,team_id:teamId,
+        source:"wmrtips",source_player:row.player,source_team:row.team,
+        availability_type:row.kind,reason:row.reason||null,source_url:SECONDARY_URL,
+        source_start:row.start,source_return:row.returnDate,
+        verified,decision_reason:decision,
+        evidence:{cumulativeYellow:seasonCards.get(playerId)??null,
+          lastWeekYellow:evidence.yellow,lastWeekRed:evidence.red,
+          cardsFrom:official?"scout_match_player_evidence":hl?"highlightly":"unknown",
+          primaryType:primary?.availability_type||"baseline",
+          fixtureKickoff:kickoff||null},
+        observed_at:now
+      })
+      if(row.kind==="suspensions" && verified && fixture){
+        // A genuine newly-reached card threshold beats the absence of a
+        // player on the primary exceptions list, without changing official points.
+        next.set(playerId,{
+          ...primary,run_id:runId,player_id:playerId,
+          availability_type:"suspensions",availability_probability:0,
+          reason:row.reason||"Sarı kart cezası",
+          canonical_reason:row.reason||"Sarı kart cezası",
+          checked_at:now,source_url:SECONDARY_URL,
+          source_reason:row.reason||"Sarı kart cezası",
+          injury_date:null,suspension_end:row.returnDate,
+          expected_return:null,expected_return_date:null,
+          suspension_fixture:formatFixture(fixture,teams),
+          detail_source_label:"availability_multi_source_verified",
+          detail_source_url:SECONDARY_URL,detail_source_updated_at:now
+        })
+        secondaryApplied++
+      } else if(!verified) secondaryPending++
+    }
+    if(secondaryObservations.length) {
+      const writeEvidence=await sb.from("scout_availability_source_observations")
+        .upsert(secondaryObservations,{onConflict:"season,gameweek,player_id,source"})
+      if(writeEvidence.error)throw writeEvidence.error
+    }
+
     for(const old of current.values()){
       if(next.has(Number(old.player_id)))continue
       const oldId=Number(old.player_id)
+      const oldFixture=fixturesByTeam.get(activePlayerTeam.get(oldId)!)
+      const oldDate=String(oldFixture?.kickoff_at||oldFixture?.match_date||"").slice(0,10)
+      if(!secondaryUsable &&
+          old.detail_source_label==="availability_multi_source_verified" &&
+          old.availability_type==="suspensions" && old.suspension_end &&
+          oldDate && old.suspension_end>oldDate){
+        // Temporary source outage must not silently clear a previously
+        // independently confirmed ban before the actual banned fixture.
+        next.set(oldId,{...old})
+        continue
+      }
       if(uncertainTeams.has(activePlayerTeam.get(oldId)!) &&
           old.availability_type!=="baseline"){
         // Unknown source alias: leave pre-existing injury intact rather than
@@ -383,6 +517,11 @@ Deno.serve(async(req:Request)=>{
       suspensions:rows.filter((r:any)=>r.availability_type==="suspensions").length,
       baselines:rows.filter((r:any)=>r.availability_type==="baseline").length,
       model_refresh_required:changed>0,
+      secondary_source:secondaryUsable?"wmrtips":"unavailable",
+      secondary_claims:secondaryRows.length,
+      secondary_matched:secondaryMatched,secondary_unmatched:secondaryUnmatched,
+      secondary_verified_and_applied:secondaryApplied,
+      secondary_needs_review:secondaryPending,
     })
   }catch(error:any){
     return Response.json({error:String(error?.message||error)},{status:500})
