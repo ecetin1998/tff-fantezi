@@ -12,8 +12,8 @@
 ## Canlı uygulama
 
 - Edge Function: highlightly-sync, yalnız Supabase Vault cron token ile erişilebilir.
-- Cron: fantezi-highlightly-supplementary-sync (job id 3); 04:15, 12:15, 20:15 UTC saatlerinde çalıştırılır.
-- Her çağrı maksimum 7 maçı tamamlar; toplam 72 entegrasyon API isteği/gün, sağlayıcıda en az 10 istek güvenlik payı bırakılır.
+- Cron: fantezi-highlightly-supplementary-sync (job id 3); 04:15, 08:15, 12:15, 20:15 UTC (Türkiye 07:15, 11:15, 15:15, 23:15) saatlerinde çalıştırılır.
+- Her çağrı maksimum 7 maçı tamamlar; dört çağrı toplamında 72 entegrasyon API isteği/gün, sağlayıcıda en az 10 istek güvenlik payı bırakılır.
 - İşlem yarıda kesilirse eksik maçlar tekrar işlenir; API kimlikleri ve zaman damgaları korunur.
 - Gelecekteki MH biten maçları aynı sistemde otomatik kaynak olarak toplanır; TFF resmî sonuç kaynağı değişmez.
 - Veri katmanları: scout_highlightly_matches, scout_highlightly_player_matches, scout_highlightly_team_matches, scout_highlightly_lineups. Kaynak bazlı ayrı sezon rollupları mevcuttur.
@@ -34,4 +34,4 @@ FROM public.scout_highlightly_player_matches;
 
 Bu veri şu anda ayrı sağlayıcı kanalıdır. Oyuncu sezon advanced_through_gameweek ve takım ayrıntılı olay kanallarını, yalnızca Highlightly genel metrikleri var diye MH11'e taşımıyoruz. Geçmiş 99 maçın verileri dolduktan, oyuncu kimlikleri çözüldükten ve çoklu kaynak farkları kontrol edildikten sonra, xFP aday motoru 30+ dakika aktif oyuncular ve leakage-safe frozen holdout üzerinde test edilmelidir. Ancak başarılı QA, backtest ve aday 50K sonrası current model değişir.
 
-Repo dalı: audit/mh12-source-freshness-20261117, PR #462. Scheduler Edge fonksiyonunda canlı, kod GitHub PR'ında gözden geçiriliyor.
+İlk entegrasyon PR #462 ile ana dala birleştirildi. 17 Kasım'da MH12 kadro kapanışı (21 Kasım 12:30 TR) öncesi güvenlik payı için dördüncü cron çalışması eklendi. 16/99 tam veri aktarımı ve kalan 83 maç için her günlük tam kotada azami 24 maç ilerleme hedefleniyor. Teorik tamamlanma 20 Kasım 11:15 TR, ancak provider kota reseti, veri kapsaması ve başarısız istekler nedeniyle garanti değildir. 99/99 tamamlanması yeni xFP hesaplamasının tamamlandığı anlamına gelmez.
