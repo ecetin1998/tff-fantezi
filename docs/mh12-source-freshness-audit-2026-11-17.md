@@ -15,11 +15,11 @@ Bu belge **canlı Supabase** (`nnoagjayvrwyjtizhnfz`) üzerinden yapılan kaynak
 ## Eklenen, üretimi etkilemeyen araçlar
 
 - `scripts/audit-source-freshness.sql`: güncel kapanmış MH'yi bulur; tüm aktif oyuncu/takım kaynak katmanlarını denetler; gelişmiş veri açığı olan her oyuncu/takım için ayrıntılı sıra oluşturur. Canlı DB üzerinde read-only çalıştırılarak doğrulandı.
-- `scripts/highlightly-coverage-probe.mjs`: yalnız `HIGHLIGHTLY_API_KEY` ortam değişkeniyle sağlayıcıya bağlanır. `--date YYYY-MM-DD [--limit 1..9]` veya `--match-id <provider_id>` çalıştırılır. İlgili lig/maç için match box-score ve team statistics kapsamasını **salt okunur** ölçer; veri yazmaz. API key olmadan dış servis testi yapılamadı.
+- `scripts/highlightly-coverage-probe.mjs`: yalnız `HIGHLIGHTLY_API_KEY` ortam değişkeniyle sağlayıcıya bağlanır. `--date YYYY-MM-DD [--limit 1..9]` veya `--match-id <provider_id>` çalıştırılır. İlgili lig/maç için match box-score ve team statistics kapsamasını **salt okunur** ölçer; veri yazmaz. Bu raporun sonuna canlı Highlightly BASIC plan kapsam testinin doğrulanmış sonuçları eklendi.
 
 ## Bedava API kabul ölçütü
 
-Highlightly Basic ücretsiz planı günlük 100 istek sunuyor. Box-score; dakika, pozisyon, şut, kilit pas, kurtarış gibi alanları ve **varsa** xG/xA'yı taşıyabiliyor. Ancak 2026/27 Süper Lig için gerçek maç başına kapsama doğrulanmadı. Sadece belgeye bakarak eksikleri kapatılmış saymayacağız.
+Highlightly Basic ücretsiz planı günlük 100 istek sunuyor. Box-score; dakika, pozisyon, şut, kilit pas, kurtarış gibi alanları ve **varsa** xG/xA'yı taşıyabiliyor. 2026/27 Süper Lig kapsaması canlı API'de doğrulandı (ligId 173537). Ancak 99 maçın her birindeki alanlar tek tek indirilip denetlenmeden *tüm gelişmiş istatistikler tamam* denemez.
 
 1. Önce MH11'den bir gerçek maçtaki iki takım ve 22 başlangıç oyuncusu, dakika ve bonus dışı skor olayları kaynağa karşı eşleştirilmeli.
 2. xG/xA, şut, kilit pas, kurtarış gibi alanların gerçek doluluğu maç/oyuncu bazında belirlenmeli. Opsiyonel değer eksikse NULL kalmalı; 0 yalnız sağlayıcı açıkça 0 döndürürse yazılmalı.
@@ -31,6 +31,38 @@ Highlightly Basic ücretsiz planı günlük 100 istek sunuyor. Box-score; dakika
 ## Güvenlik ve açık engeller
 
 - API anahtarı uygulama koduna, istemci ortamına, GitHub commit'ine veya loglara yazılmayacak; üretimde Supabase Secrets üzerinden kullanılacak.
-- Highlightly ücretsiz katmanda Süper Lig 2026/27 verisi ve yeniden kullanım/uygulamada yayınlama izni **gerçek hesap ve kullanım şartlarıyla** doğrulanmalı.
+- Highlightly ücretsiz BASIC planında 2026/27 Süper Lig fixture, box-score, statistics ve lineups erişimi gerçek hesapla doğrulandı. Kullanım koşulları §6.1 uygulamalarda saklama/dağıtıma izin verir; API'nin doğrudan yeniden satılması/proxy edilmesi yasak. Veri kaynağı belirtilecek, aynı kaynağın önemli bölümünün rakip veritabanı olarak aynalanmasına gidilmeyecek.
 - Ücretsiz API kapsaması yetersizse ücretli otomatik yükseltme yok; mevcut doğrulanmış kaynaklar korunur ve alternatif ücretsiz kaynak aranır.
-- Bu dal **canlıyı değiştirmez**; dış API key henüz tanımlı olmadığı için boş gelişmiş alanlar bu PR ile doldurulmadı.
+- Bu dal **canlıyı değiştirmez**; API key Supabase Secrets içinde doğrulandı. API yalnız geçici sunucu tarafı testte kullanıldı, boş gelişmiş alanlar bu PR ile doldurulmadı.
+
+## Canlı Highlightly API doğrulama sonuçları (16 Kasım 2026 21:25 UTC)
+
+Anahtar yalnız Supabase Edge secret'ta okundu, dışarıya gönderilmedi. 39/100 günlük istek tüketildi, son yanıtta **61 istek** kalmıştı.
+
+- **BASIC ücretsiz plan ve lig doğrulandı:** Türk Süper Lig için `leagueId=173537`, sezon 2026. ASCII `Super Lig` adı **sıfır sonuç** veriyor; `Süper Lig` ya da kalıcı leagueId kullanılmalı. Önceki sıfır sonuç yanlış arama filtresindendi.
+- `GET /matches?leagueId=173537&season=2026` toplam **225 yayınlanmış fikstür** döndürdü (3 sayfa, sırasıyla 100+100+25). MH1–MH11'de **11 × 9 = 99/99** maç listelendi ve 99'u da `Finished` durumunda.
+- Gerçek `/box-score/{id}` verisi **3 adet MH10–MH11 ve 5 adet MH1,3,5,7,9** maçında test edildi. 8/8 örnekte çalıştı. Çift takım toplamı her maçta 41–42 oyuncu; dakika, gol, asist, şut, kilit pas, kart, kurtarış alanları mevcut. İlk beş eski örnekte oynayan oyuncu sayıları 30–32 idi; tüm yedekler oynadı varsayılmamalı.
+- MH1,3,5,7,9 için **5/5 örnek maçta** `/statistics/{id}` iki takım için ayrı ayrı **40 istatistik** döndürdü; xG ve xA dahil. MH11'deki 4/4 bağımsız maçın /statistics endpoint'i de aynı 40 metrikle çalıştı.
+- MH11 için **4/4** `/lineups/{id}` iki takımın da 11 başlangıç oyuncusu ve formasyonunu döndürdü.
+- Oyuncu `statistics` biçimi **nesne** (`p.statistics.expectedGoals`), dizi değil. İlk probe'daki Tip Hatası bu beklenti uyuşmazlığıydı; GitHub probe kodu düzeltildi. Opsiyonel oyuncu xG/xA null kalabiliyor; doğrulanmadan sıfır yapılmayacak.
+- Canlı örnek: Çorum FK–Fenerbahçe MH11 maçında **Ederson 9 kurtarış** ve 0 gol yeme; sağlayıcının oyuncu/kaleci olay düzeyi gerçek ölçümleri var.
+
+### Kaynaklar arası önemli fark — otomatik üzerine yazma YASAK
+
+MH11'de mevcut bağımsız FotMob veri katmanı ile Highlightly aynı maçlar için küçük fakat **anlamlı** xG farkları gösterdi:
+
+| MH11 maç | Mevcut FotMob ev xG / depl. xG | Highlightly ev xG / depl. xG |
+|---|---|---|
+| Galatasaray – Amed | 1.73 / 1.39 | 1.47 / 1.25 |
+| Çorum – Fenerbahçe | 2.27 / 1.17 | 2.00 / 1.30 |
+| Beşiktaş – Gençlerbirliği | 3.94 / 0.29 | 4.09 / 0.18 |
+
+Bu farkların kaynağı sağlayıcı metrik yöntemleri olabilir. Kaynağı belli eski xG değerlerinin üzerine yazma, kaynak sürümlerini ayrı tut; model için aynı ölçek içinde tutarlı sağlayıcı seç. Puanlandırma resmî veri katmanıyla ayrı tutulmalı.
+
+### Ücretsiz istek bütçesi
+
+- Geriye dönük **99 maça** yalnız 1 box-score + 1 statistics sorgusu: **198 API isteği**, eski bütün maçlara lineup da istenirse **297 istek**. Fikstür listeleme + kalite doğrulama istekleri bunların üstüne eklenir. Ücretsiz 100/gün sınırından dolayı işlemler günlük kotaya bölünerek yapılabilir.
+- Gelecek her haftada 9 maçı box-score + statistics + lineups ile almak **27 istek**; doğrulama ve yeniden denemeler için limit içinde geniş pay kalır.
+- Günlük kotayı sıfırlamadan tekrar çağrılar yapma; maç bitmeden /box-score tamamlandı sayma; 429 olduğunda ertesi güne bırak.
+- Bir sonraki adım: kimlik eşleme + kaynağın raw/staging saklanması + karşılaştırma QA; ardından 456 oyuncu ve 18 takımın ileri verilerini kaynak penceresi tutarlı biçimde MH11'e taşımak. Başarılı olunca ayrı candidate 50K/backtest.
+
