@@ -260,7 +260,10 @@ async function main(req) {
               provider_team_id:t.team?.id??null,
               xg:optionalNumber(byName("Expected Goals")),
               xa:optionalNumber(byName("Expected Assists")),
-              shots:optionalInt(byName("Shots")),
+              shots:optionalInt(byName("Shots")) ??
+                (byName("Shots within penalty area")!=null && byName("Shots outside penalty area")!=null
+                  ? optionalInt(byName("Shots within penalty area")) + optionalInt(byName("Shots outside penalty area"))
+                  : null),
               shots_on_target:optionalInt(byName("Shots on target")),
               big_chances:optionalInt(byName("Big Chances Created")),
               key_passes:optionalInt(byName("Key Passes")),
