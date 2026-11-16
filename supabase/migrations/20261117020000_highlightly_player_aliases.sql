@@ -30,7 +30,8 @@ WITH candidates(provider_player_id, team_id, player_id, provider_name, canonical
  (29083838,12,351,'Ibrahim Olawoyin','Ibrahim Olawoyin Olasunkanmi','omitted final name; shirt mismatch'),
  (98920325,16,501,'Christ Sadia','Christ Otiniel Sadia','omitted middle name; shirt mismatch'),
  (100661218,3,93,'Mecit Deniz','Mecit Sercan Deniz','omitted middle name'),
- (88688614,11,341,'Ayaz Özcan','Furkan Ayaz Özcan','omitted first name; shirt mismatch')
+ (88688614,11,341,'Ayaz Özcan','Furkan Ayaz Özcan','omitted first name; shirt mismatch'),
+ (32141872,8,611,'Mohammed Baba Diomandé','Mohamed Baba Diomandé','provider name spelling; TFF Çorum FK roster / FotMob / BeSoccer corroborated')
 )
 INSERT INTO public.scout_highlightly_player_aliases (
   season,provider_player_id,team_id,player_id,provider_name,canonical_name,
@@ -53,7 +54,7 @@ DO $$
 BEGIN
   IF (SELECT count(*) FROM public.scout_highlightly_player_aliases WHERE season='2026-27'
       AND provider_player_id IN (429702,68476191,18286695,100019633,76817118,55107717,
-      26069113,29083838,98920325,100661218,88688614)) <> 11 THEN
+      26069113,29083838,98920325,100661218,88688614,32141872)) <> 12 THEN
     RAISE EXCEPTION 'Highlightly aliases not all validated; no backfill allowed';
   END IF;
   IF EXISTS (
