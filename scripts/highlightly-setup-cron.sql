@@ -9,7 +9,7 @@ INSERT INTO public.scout_highlightly_sync_control(id,auth_sha256,daily_budget)
 SELECT 1,encode(sha256(convert_to(decrypted_secret,'UTF8')),'hex'),72
 FROM vault.decrypted_secrets WHERE name='scout_highlightly_cron_auth'
 ON CONFLICT(id) DO UPDATE SET auth_sha256=excluded.auth_sha256;
-SELECT cron.schedule('fantezi-highlightly-supplementary-sync','15 4,12,20 * * *',
+SELECT cron.schedule('fantezi-highlightly-supplementary-sync','15 4,8,12,20 * * *',
   $job$
   SELECT net.http_post(
     url=>'https://nnoagjayvrwyjtizhnfz.supabase.co/functions/v1/highlightly-sync',
@@ -18,4 +18,4 @@ SELECT cron.schedule('fantezi-highlightly-supplementary-sync','15 4,12,20 * * *'
       'x-sync-auth',(SELECT decrypted_secret FROM vault.decrypted_secrets WHERE name='scout_highlightly_cron_auth')),
     body=>'{}'::jsonb,timeout_milliseconds=>140000);
   $job$);
--- Stop if needed: SELECT cron.unschedule('fantezi-highlightly-supplementary-sync');
+-- Four invocations/day, UTC 04:15 08:15 12:15 20:15 (TR 07:15,11:15,15:15,23:15).\n-- 72 calls/day max across all invocations, 10 provider calls reserved.\n-- Stop if needed: SELECT cron.unschedule('fantezi-highlightly-supplementary-sync');
