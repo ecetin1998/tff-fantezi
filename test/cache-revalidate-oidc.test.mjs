@@ -85,6 +85,7 @@ test('workflow-specific events are enforced even for valid signed JWTs',async()=
  const availability='ecetin1998/tff-fantezi/.github/workflows/availability-refresh.yml@refs/heads/main'
  assert.equal(await check(jwt({...validClaims,event_name:'push'})),true)
  assert.equal(await check(jwt({...validClaims,workflow_ref:availability,event_name:'push'})),true)
+ assert.equal(await check(jwt({...validClaims,workflow_ref:availability,event_name:'pull_request'})),false)
  assert.equal(await check(jwt({...validClaims,workflow_ref:availability,event_name:'workflow_dispatch'})),true)
 })
 test('expiry is strict and timestamps cannot be coerced or stretched',async()=>{
