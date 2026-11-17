@@ -214,6 +214,11 @@ Deno.serve(async(req:Request)=>{
     const runId=runQ.data.id
     const targetWeek=Number(runQ.data.gameweek)
     const previousWeek=targetWeek-1
+    // Official multi-match sanctions outrank a lagging exceptions feed.
+    const verdictsQ=await sb.from("scout_verified_disciplinary_cases")
+      .select("player_id,team_id,offense_gameweek,affected_gameweeks,reason,source_name,source_url")
+      .eq("season","2026-27").lt("offense_gameweek",targetWeek)
+    if(verdictsQ.error)throw verdictsQ.error
     const [playersQ,teamsQ,predictedFixturesQ,fixturesQ,inactivePlayersQ]=await Promise.all([
       sb.from("scout_players").select("id,full_name,display_name,short_label,team_id").eq("active",true),
       sb.from("scout_teams").select("id,name"),
@@ -510,6 +515,127 @@ Deno.serve(async(req:Request)=>{
       })
     }
 
+    // Always compare ALL 456 active players to both reports, and preserve
+    // source-only injuries as *risk*, not as confirmed 0%-availability injuries
+    // or incorrectly certain healthy baselines.
+    const availablePlayerIds=new Set((playersQ.data||[]).map((p:any)=>Number(p.id)))
+    let sourceOnlyRisks=0,longTermConfirmed=0,officialBanApplied=0,expiredBanCleared=0
+    for(const obs of secondaryObservations){
+      const id=Number(obs.player_id)
+      if(!availablePlayerIds.has(id) || obs.availability_type!=="injuries")continue
+      const prior=next.get(id)
+      if(!prior)continue
+      const kickoff=fixturesByTeam.get(Number(obs.team_id))?.kickoff_at||
+        fixturesByTeam.get(Number(obs.team_id))?.match_date||null
+      const date=String(kickoff||"").slice(0,10)
+      if(prior.availability_type==="baseline" && !obs.verified &&
+        (!obs.source_return || !date || obs.source_return>date)){
+        next.set(id,{
+          ...prior,availability_type:"risk",availability_probability:0.65,
+          reason:"Tek kaynakta sakatlık bildirimi: "+(obs.reason||"durumu belirsiz"),
+          canonical_reason:"Tek kaynakta sakatlık bildirimi: "+(obs.reason||"durumu belirsiz"),
+          checked_at:now,source_url:SECONDARY_URL,source_reason:obs.reason||null,
+          detail_source_label:"availability_secondary_unconfirmed",
+          detail_source_url:SECONDARY_URL,detail_source_updated_at:now
+        })
+        sourceOnlyRisks++
+      }
+      // An ACL / Achilles / ligament injury with two corroborating sources
+      // and 60+ days to return cannot plausibly be 50% available this week.
+      if(prior.availability_type==="injuries" && obs.verified &&
+        obs.source_return && date &&
+        (Date.parse(obs.source_return+"T12:00:00Z")-
+          Date.parse(date+"T12:00:00Z")) >= 60*86400000 &&
+        /bağ|asıl|aşil|kırık|tendon|ameliyat|çapraz/i.test(
+          String(prior.reason||"")+" "+String(obs.reason||"")) &&
+        Number(prior.availability_probability)>0){
+        next.set(id,{
+          ...prior,availability_probability:0,
+          expected_return_date:obs.source_return,expected_return:null,
+          checked_at:now,detail_source_label:"availability_two_source_longterm_verified",
+          detail_source_url:SECONDARY_URL,detail_source_updated_at:now
+        })
+        longTermConfirmed++
+      }
+    }
+
+    const verdictsByPlayer=new Map<number,any[]>()
+    for(const v of verdictsQ.data||[]){
+      const id=Number(v.player_id)
+      if(!availablePlayerIds.has(id) ||
+        Number(activePlayerTeam.get(id))!==Number(v.team_id))continue
+      const existing=verdictsByPlayer.get(id)||[]
+      existing.push(v)
+      verdictsByPlayer.set(id,existing)
+    }
+    for(const [id,verdicts] of verdictsByPlayer){
+      const old=next.get(id)
+      if(!old)continue
+      const valid=verdicts.filter(v=>Array.isArray(v.affected_gameweeks)&&
+        v.affected_gameweeks.some((n:number)=>Number(n)===targetWeek))
+      if(valid.length){
+        const latest=valid.sort((a:any,b:any)=>b.offense_gameweek-a.offense_gameweek)[0]
+        const fixture=fixturesByTeam.get(Number(latest.team_id))
+        if(!fixture)throw new Error("official_suspension_missing_team_fixture:"+id)
+        next.set(id,{
+          ...old,availability_type:"suspensions",availability_probability:0,
+          reason:latest.reason,canonical_reason:latest.reason,
+          suspension_end:null,injury_date:null,expected_return:null,
+          expected_return_date:null,suspension_fixture:formatFixture(fixture,teams),
+          checked_at:now,source_url:latest.source_url,source_reason:latest.reason,
+          detail_source_label:"tff_official_disciplinary_verdict",
+          detail_source_url:latest.source_url,detail_source_updated_at:now
+        })
+        officialBanApplied++
+      }else if(old.availability_type==="suspensions"){
+        // A completed official verdict cannot be extended by a third-party
+        // site's undated, unverified "one match ban" copy.
+        const newIndependentProof=secondaryObservations.some(o=>
+          Number(o.player_id)===id && o.availability_type==="suspensions" &&
+          o.verified && o.decision_reason!=="primary_and_secondary")
+        if(!newIndependentProof){
+          next.set(id,{
+            ...old,availability_type:"baseline",availability_probability:1,
+            reason:null,canonical_reason:null,suspension_end:null,
+            suspension_fixture:null,injury_date:null,expected_return:null,
+            expected_return_date:null,checked_at:now,
+            detail_source_label:"tff_official_suspension_served",
+            detail_source_url:verdicts[0].source_url,
+            detail_source_updated_at:now
+          })
+          expiredBanCleared++
+        }
+      }
+    }
+
+    // A primary list can omit players even when a more authoritative,
+    // individually reviewed injury/training report exists. These curated
+    // entries are evidence, not predicted certainty: a training return is
+    // "risk", while a verified operation far beyond kickoff is unavailable.
+    const verifiedHealthQ=await sb.from("scout_verified_health_observations")
+      .select("player_id,team_id,first_gameweek,last_gameweek,availability_type,availability_probability,reason,source_url,source_label")
+      .eq("season","2026-27").lte("first_gameweek",targetWeek)
+      .gte("last_gameweek",targetWeek)
+    if(verifiedHealthQ.error)throw verifiedHealthQ.error
+    let independentHealthApplied=0
+    for(const health of verifiedHealthQ.data||[]){
+      const id=Number(health.player_id),old=next.get(id)
+      if(!old||Number(activePlayerTeam.get(id))!==Number(health.team_id))continue
+      if(verdictsByPlayer.get(id)?.some((v:any)=>
+        v.affected_gameweeks?.includes(targetWeek)))continue
+      next.set(id,{
+        ...old,availability_type:health.availability_type,
+        availability_probability:Number(health.availability_probability),
+        reason:health.reason,canonical_reason:health.reason,
+        checked_at:now,source_url:health.source_url,source_reason:health.reason,
+        injury_date:old.injury_date||null,
+        detail_source_label:"independently_verified_health_update",
+        detail_source_url:health.source_url,detail_source_updated_at:now,
+        expected_return:null,expected_return_date:null
+      })
+      independentHealthApplied++
+    }
+
     const comparable=(r:any)=>JSON.stringify([
       r?.availability_type,Number(r?.availability_probability??1),r?.canonical_reason||null,
       r?.injury_date||null,r?.suspension_end||null,r?.expected_return||null,r?.expected_return_date||null,r?.suspension_fixture||null
@@ -550,6 +676,9 @@ Deno.serve(async(req:Request)=>{
       secondary_matched:secondaryMatched,secondary_unmatched:secondaryUnmatched,
       secondary_verified_and_applied:secondaryApplied,
       secondary_needs_review:secondaryPending,
+      official_ban_applied:officialBanApplied,expired_ban_cleared:expiredBanCleared,
+      source_only_injury_risks:sourceOnlyRisks,long_term_confirmed_absences:longTermConfirmed,
+      independent_health_applied:independentHealthApplied,
     })
   }catch(error:any){
     return Response.json({error:String(error?.message||error)},{status:500})
