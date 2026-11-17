@@ -1,7 +1,6 @@
 -- FIFA / Opta verified player nickname: "Sontje Hansen" is
 -- Misjonne Juniffer Naigelino Hansen, Gaziantep player 844.
 -- https://theanalyst.com/players/6683/sontje-hansen
--- https://www.fotmob.com/tr/players/967759/drissa-camara (not name source)
 -- https://www.fussballnationalmannschaft.net/wp-content/uploads/2026/06/fussball-wm-2026-kaderliste-fifa-english.pdf
 DO $$
 BEGIN
