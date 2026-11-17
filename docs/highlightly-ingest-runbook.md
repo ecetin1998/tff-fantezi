@@ -97,3 +97,16 @@ SELECT team_id,count(*) AS played,sum(shots) AS shots,
  round(sum(xa),4) AS source_xa
 FROM public.scout_verified_weekly_attack WHERE match_id=317838 GROUP BY team_id;
 \`\`\`
+
+
+## MH12 — Gece kota yenilenir yenilenmez hızlandırılmış aktarım (17–21 Kasım 2026)
+
+- **Canlı Supabase cron job 4**: `fantezi-highlightly-mh12-night-sprint`, UTC `5,35 0-3 * * *`.
+- **Türkiye saatleri:** **03.05, 03.35, 04.05, 04.35, 05.05, 05.35, 06.05, 06.35**. İlk yürütme **18 Kasım Çarşamba 03.05 TR**.
+- Mevcut ana cron job 3 (`fantezi-highlightly-supplementary-sync`) **korunuyor**: 07.15, 11.15, 15.15, 23.15 TR.
+- Böylece ücretsiz kaynak sağlayıcı kotası ve entegrasyonun yerel günlük sayacı UTC 00:00 / Türkiye 03:00 civarında yenilendiğinde, ilk gerçek istek 5 dakika sonra yapılır. Kaynağın günlük kotası yenilenmezse Edge Function kendisini koruyarak `provider_remaining<=10` sonrasında yeni istek yapmaz.
+- Edge Function, **iki cron birlikte çalışsa bile** lease/lock ile çift çalışmayı reddeder ve günlük **72 isteği** aşmaz; sağlayıcıda **en az 10 istek rezervi** korunur. Başarılı her çalışmada bir seferde en fazla 7 maç işlenir.
+- **Geçicidir:** 22 Kasım 2026'da ilk gece slotunda kendisini `cron.unschedule` ile kaldırır; ana kaynak senkronizasyonu devam eder. Gerektiğinde elle durdur: `SELECT cron.unschedule('fantezi-highlightly-mh12-night-sprint');`
+- **17 Kasım akşamı gerçek baz:** 60/99 maç yeterli, 77 eksik endpoint API çağrısı (38 box +39 stats); 72/72 günlük yerel istek harcanmış, sağlayıcıda 28 kaldığı görülmüş. Yeni kota altında yaklaşık bir tam gün + kalan birkaç istek gerekir; eksik provider veri ve beklenmedik hatalar plana etki edebilir.
+- **ÖNEMLİ:** Kaynak aktarımının bitmesi = 456 oyuncunun sezon advanced profili, 18 takımın profil senkronizasyonu, backtest ve MH12 yeni 50K simülasyonunun bitmesi **değildir**. Üretimde mevcut MH12 tahminleri korunur.
+- Script: `scripts/highlightly-mh12-night-sprint.sql`.
