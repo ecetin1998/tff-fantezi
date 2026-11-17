@@ -29,8 +29,8 @@ const check=(t,opts={})=>verifyRevalidateGithubOidc(t,{fetchJwks,nowSec:now,...o
 test('exact signed schedule workflow token is accepted',async()=>{
  assert.equal(await check(jwt(validClaims)),true)
 })
-test('signed availability workflow is accepted for schedule and dispatch only',async()=>{
- for(const event_name of ['schedule','workflow_dispatch']){
+test('signed availability workflow is accepted for signed main push, schedule and dispatch',async()=>{
+ for(const event_name of ['schedule','workflow_dispatch','push']){
   const claims={...validClaims,event_name,
    workflow_ref:'ecetin1998/tff-fantezi/.github/workflows/availability-refresh.yml@refs/heads/main'}
   assert.equal(await check(jwt(claims)),true)
@@ -84,7 +84,7 @@ test('route and both GitHub workflows use signed token; legacy manual secret sta
 test('workflow-specific events are enforced even for valid signed JWTs',async()=>{
  const availability='ecetin1998/tff-fantezi/.github/workflows/availability-refresh.yml@refs/heads/main'
  assert.equal(await check(jwt({...validClaims,event_name:'push'})),true)
- assert.equal(await check(jwt({...validClaims,workflow_ref:availability,event_name:'push'})),false)
+ assert.equal(await check(jwt({...validClaims,workflow_ref:availability,event_name:'push'})),true)
  assert.equal(await check(jwt({...validClaims,workflow_ref:availability,event_name:'workflow_dispatch'})),true)
 })
 test('expiry is strict and timestamps cannot be coerced or stretched',async()=>{
