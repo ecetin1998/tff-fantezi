@@ -110,3 +110,20 @@ FROM public.scout_verified_weekly_attack WHERE match_id=317838 GROUP BY team_id;
 - **17 Kasım akşamı gerçek baz:** 60/99 maç yeterli, 77 eksik endpoint API çağrısı (38 box +39 stats); 72/72 günlük yerel istek harcanmış, sağlayıcıda 28 kaldığı görülmüş. Yeni kota altında yaklaşık bir tam gün + kalan birkaç istek gerekir; eksik provider veri ve beklenmedik hatalar plana etki edebilir.
 - **ÖNEMLİ:** Kaynak aktarımının bitmesi = 456 oyuncunun sezon advanced profili, 18 takımın profil senkronizasyonu, backtest ve MH12 yeni 50K simülasyonunun bitmesi **değildir**. Üretimde mevcut MH12 tahminleri korunur.
 - Script: `scripts/highlightly-mh12-night-sprint.sql`.
+
+
+## MH12: tüm 456 oyuncunun sakatlık ve ceza uygunluk denetimi — 18 Kasım 2026
+
+- Kaynaklar: 456 aktif oyuncu, mevcut scout_availability, WmR ikinci kaynak gözlemleri, kanonik MH11 kart kayıtları, TFF PFDK/Tahkim tarihli cezalar ve bağımsız sağlık açıklamaları. Eski bir üçüncü taraf ceza satırı resmî tamamlanan cezayı uzatamaz.
+- İlk audit: 436 uygun, 20 tutarsızlık (1 süresi bitmiş resmî ceza, 1 eksik resmî ceza, 3 uzun dönem iki kaynaklı sakatlıkta hatalı %50, 15 tek kaynaklı sakatlık riskinin hiç gösterilmemesi).
+- TFF 29 Ekim: Abdülkerim Bardakcı (id=533) 2 maç MH10–11 tamam, MH12 cezasız. Archie Brown (id=182) 3 maç MH10–12, MH12 cezalı. Kaynak: https://www.tff.org/default.aspx?ftxtID=51771&pageID=246
+- TFF 5 Kasım: Samuel Leo Beat Ballet (id=600) 3 maç MH11–13, MH12 cezalı. Tahkim 13 Kasım onadı. Kaynaklar: https://www.tff.org/default.aspx?ftxtID=51836&pageID=246 ve https://www.tff.org/default.aspx?ftxtID=51950&pageID=247
+- Nwaiwu, Orkun Kökçü, Elson Mendes da Silva ve Metehan Baltacı resmî maç kartıyla ve çoklu kaynakla doğrulanıp MH12 cezaları korundu.
+- Adil Demirbağ, Dimitrios Goutas ve Kamil Ahmet Çörekçi: 60+ gün ve iki kaynakla uzun sakatlık doğrulandığı için mevcut %50 ihtimal %0 yapıldı.
+- Can Bozdoğan: Rizespor tarafından bildirilen ayak bileği ameliyatı ve 6–12 hafta sakatlık, %0. Emre Kılınç: antrenmana döndüğü doğrulandı fakat maça dönüş teyitli değil, %75 risk. Noah Sonko Sundberg ve Wagner Pina: yeni sakatlık/kas sorunları %50 risk. Kanıt ve geri alma için scout_verified_health_observations tablosu.
+- Başka kaynaktaki 15 ancak birincil listede bulunmayan kişi: 12 kişi %65 belirsiz risk; 3 kişi bağımsız ek kaynakla değerlendirildi. Tek kaynaktan %0 sakatlık veya kesin %100 dönüş çıkarılmadı.
+- Yeni güvenli altyapı: scout_verified_disciplinary_cases; scout_verified_health_observations; scout_availability_full_audit. 456/456 kayıt denetlendi; 21 değişiklik öncesi/sonrası snapshot scout_availability_bulk_audit_log içinde.
+- Mevcut kaynak katmanı MH12 sonucu: 6 cezalı, 53 sakat, 12 teyit bekleyen risk, 385 normal; audit tutarsızlıkları sıfır. Bu kaynak QA durumudur; kesin maç kadrosu değildir.
+- ÖNEMLİ: scout_player_projections halen 20 oyuncuda eski 50K tahminlerini taşıyor. Aday 50K yenileme ve tüm QA kapıları tamamlanmadan tahmin doğruluğu iddia edilmez. Cloudflare prod deploy manuel GH Actions ile gerçekleşir.
+
+Kontrol SQL: SELECT audit_issue,count(*) FROM scout_availability_full_audit GROUP BY audit_issue;
