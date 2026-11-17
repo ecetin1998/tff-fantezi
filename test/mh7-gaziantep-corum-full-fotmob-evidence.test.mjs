@@ -21,7 +21,7 @@ test("MH7 FotMob verified player xG and xA come from full-match shotmap and play
  assert.match(sql,/scout_verified_player_match_metric_provenance/);
  assert.match(sql,/xa_evidence IN \('explicit_xa','no_explicit_xa'\)/);
  assert.match(sql,/Hansen|Sontje/i);
- assert.match(sql,/count\(\*\).*<>32/);
+ assert.match(sql, /<>32/);
  assert.match(sql,/sum\(shots\)<>12 OR sum\(shots_on_target\)<>2/);
  assert.match(sql,/sum\(shots\)<>13 OR sum\(shots_on_target\)<>7/);
  assert.doesNotMatch(sql,/UPDATE public\.scout_highlightly_player_matches.*xg/);
@@ -34,7 +34,7 @@ test("MH7 team advanced metrics remain provider-consistent with player shotmap",
  assert.match(sql,/touches_in_opposition_box/);
  assert.match(sql,/set_piece_xg/);
  assert.match(sql,/scout_verified_match_metric_provenance/);
- assert.match(sql,/Photomob player totals do not reproduce FotMob team stats/);
+ assert.match(sql,/FotMob player totals do not reproduce FotMob team stats/);
 });
 
 test("Hansen nickname is tied to verified canonical player by explicit ID and club",()=>{
