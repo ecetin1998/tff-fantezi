@@ -106,7 +106,7 @@ async function main(req) {
   if (!lock.data) return json({status:"already_running"});
   let used = lock.data.quota_day===today ? lock.data.requests_used : 0;
   let remaining = lock.data.quota_day===today ? lock.data.provider_remaining : null;
-  let processed=0,mapped=0,failures=[],mappedUnknown=[],providerRequests=0;
+  let processed=0,mapped=0,failures=[],sourceGaps=[],mappedUnknown=[],providerRequests=0;
   const budget = lock.data.daily_budget;
   async function recordQuota() {
     const {error}=await sb.from("scout_highlightly_sync_control")
@@ -321,10 +321,19 @@ async function main(req) {
                 .map(x=>[x.displayName,x.value])),observed_at:clock()
             };
           });
-          if(new Set(rows.map(x=>x.team_id)).size!==2 || rows.some(x=>x.xg===null))
-            throw new Error("TEAM_ADVANCED_INCOMPLETE");
+          if(new Set(rows.map(x=>x.team_id)).size!==2)
+            throw new Error("INVALID_STATS_TEAM_COVERAGE");
+          // A provider may omit xG for historical matches. Capture the
+          // available statistics once, but keep missing xG as NULL. Mark the
+          // endpoint as fetched, not the model evidence as complete.
+          const noXgTeams=rows.filter(x=>x.xg===null).map(x=>x.team_id);
           await upsert("scout_highlightly_team_matches",rows,"season,match_id,team_id");
           patch.stats_done=true;patch.stats_updated_at=clock();
+          if(noXgTeams.length) {
+            const diagnostic="SOURCE_TEAM_XG_UNAVAILABLE:"+noXgTeams.join(",");
+            patch.last_error=diagnostic;
+            sourceGaps.push({match_id:matchId,week,missing_xg_team_ids:noXgTeams});
+          }
         }
         if(!m.lineups_done && m.need.need_lineups) {
           const lineups=await provider("/lineups/"+pid);
@@ -360,7 +369,8 @@ async function main(req) {
 
     const {error:finishErr}=await sb.from("scout_highlightly_sync_control").update({
       last_success_at:clock(),last_error:failures[0]?.error ||
-        (mappedUnknown.length?"UNMAPPED_MATCHES_"+mappedUnknown.length:null),
+        (sourceGaps.length?"SOURCE_TEAM_XG_UNAVAILABLE:"+sourceGaps.length:
+        (mappedUnknown.length?"UNMAPPED_MATCHES_"+mappedUnknown.length:null)),
       updated_at:clock()
     }).eq("id",1).eq("lease_owner",leaseId);
     assert(finishErr,"FINISH");
@@ -370,7 +380,8 @@ async function main(req) {
       provider_remaining:remaining,requests_integration_today:used,budget,
       eligible_target_matches:toProcess.length,
       strategy:"only-verified-evidence-gaps",
-      failures:failures.slice(0,8),published_model_unchanged:true
+      failures:failures.slice(0,8),sourceGaps:sourceGaps.slice(0,8),
+      published_model_unchanged:true
     });
   }catch(e){
     const msg=String(e?.message||e).slice(0,220);
