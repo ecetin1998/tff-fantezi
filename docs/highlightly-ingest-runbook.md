@@ -59,3 +59,17 @@ GROUP BY gameweek ORDER BY gameweek DESC;
 ```
 
 **Çıkış kapısı:** `targeted_coverage_complete=true` yalnız kaynak bazında yeterli veri olduğunu gösterir. Oyuncu/team advanced sezon profili, kaynak karşılaştırma, kimlik QA, frozen holdout backtest ve yeni 50K bunlardan ayrı onaylanır. Aynı run sonuçlarının prod'a geçirildiği iddia edilmez.
+
+
+## MH7 Gaziantep–Çorum FK kaynak anomalisi (17 Kasım 2026)
+
+Maç: **317838**, Highlightly: **1348346459**, 11 Ekim 2026 (Gaziantep 0–3 Çorum).
+
+Sağlayıcının gerçek yanıtı günlük ücretsiz bütçeden **tek tanı isteği** kullanılarak güvenli Vault kimlik doğrulaması altında incelendi:
+- \`/box-score\`: 42 oyuncu kayıtlı, 32'si oynadı; hepsinde \`expectedGoals=null\` ve \`expectedAssists=null\`; diğer şut ve gol ölçümleri mevcut.
+- \`/statistics\`: iki takım da dönüyor ancak **her takım için yalnız 15 metrik** var; hiçbirinde \`Expected Goals\` veya \`Expected Assists\` anahtarı yok.
+- Gaziantep: 1 isabetli şut, 7 dışarı giden şut; Çorum: 7 isabetli şut, 4 dışarı giden şut. Dolayısıyla yanlış takım adını eşlemekten veya xG isminin büyük/küçük harf farkından kaynaklanmıyor.
+- Eski kod \`rows.some(x=>x.xg===null)\` ile \`TEAM_ADVANCED_INCOMPLETE\` fırlatıyor. Bu, aynı çağrıyı tekrar tekrar yapıyor ve **ilk 11/formasyon kaydına hiç geçmiyordu**.
+- Yeni kod kaynakta bulunan kısmi takım istatistiklerini kaydeder; xG/xA \`NULL\` kalır; uyarı \`SOURCE_TEAM_XG_UNAVAILABLE:<team_ids>\` olarak görünür; \`stats_done\` yalnız endpoint alındı demektir; sonraki lineups çağrısı normal devam eder.
+- \`scout_highlightly_targeted_readiness\` view, iki takım için gerçek sayısal xG ve yeterli oyuncu xG/xA olmadan bu maçı **yeterli kaynak verisi var** saymaz. \`unresolved_provider_team_xg\` ve \`unresolved_provider_player_xg\` ayrı izlenir; API tekrarları aynı null değer için harcanmaz.
+- Resmî fantasy puanları, mevcut MH12 50K tahminleri, kaynak bazlı xG serileri değiştirilmez. Alternatif sağlayıcı xG kullanılacaksa aynı tarih/pencere/sağlayıcı yöntemi kontrolü ve ölçüm ölçeği ayrıştırması zorunludur.
