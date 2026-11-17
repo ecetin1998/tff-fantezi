@@ -86,7 +86,7 @@ BEGIN
  (abs(sum(xg)-0.99)>0.015 OR sum(shots)<>12 OR sum(shots_on_target)<>2))
  OR (team_id=8 AND
  (abs(sum(xg)-2.67)>0.015 OR sum(shots)<>13 OR sum(shots_on_target)<>7))
- ) THEN RAISE EXCEPTION 'Photomob player totals do not reproduce FotMob team stats'; END IF;
+ ) THEN RAISE EXCEPTION 'FotMob player totals do not reproduce FotMob team stats'; END IF;
  IF (SELECT count(*) FROM public.scout_verified_match_metric_provenance
  WHERE season='2026-27' AND gameweek=7 AND match_id=317838
  AND source_name='FotMob')<>22
