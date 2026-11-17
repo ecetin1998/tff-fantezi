@@ -73,3 +73,27 @@ Sağlayıcının gerçek yanıtı günlük ücretsiz bütçeden **tek tanı iste
 - Yeni kod kaynakta bulunan kısmi takım istatistiklerini kaydeder; xG/xA \`NULL\` kalır; uyarı \`SOURCE_TEAM_XG_UNAVAILABLE:<team_ids>\` olarak görünür; \`stats_done\` yalnız endpoint alındı demektir; sonraki lineups çağrısı normal devam eder.
 - \`scout_highlightly_targeted_readiness\` view, iki takım için gerçek sayısal xG ve yeterli oyuncu xG/xA olmadan bu maçı **yeterli kaynak verisi var** saymaz. \`unresolved_provider_team_xg\` ve \`unresolved_provider_player_xg\` ayrı izlenir; API tekrarları aynı null değer için harcanmaz.
 - Resmî fantasy puanları, mevcut MH12 50K tahminleri, kaynak bazlı xG serileri değiştirilmez. Alternatif sağlayıcı xG kullanılacaksa aynı tarih/pencere/sağlayıcı yöntemi kontrolü ve ölçüm ölçeği ayrıştırması zorunludur.
+
+
+## MH7 Gaziantep–Çorum FK: eksik FotMob verilerinin doğrulanmış tamamlanması
+
+**17 Kasım 2026, maç 317838 (11 Ekim 2026, Gaziantep 0–3 Çorum), FotMob matchId 5904758.**
+
+- Kaynak: [FotMob maç](https://www.fotmob.com/tr/matches/gaziantep-fk-vs-corum-fk/tzrbrsj), arka uçta **güncel** \`/api/data/matchDetails?matchId=5904758\` üzerinden 200 durumlu, 264 KB civarında tam maç yanıtı doğrulandı. Eski \`/api/matchDetails\` uç noktası 404 dönüyor.
+- Aynı FotMob kaydında takım **xG Gaziantep 0.99, Çorum 2.67**; şut **12/13**, isabetli şut **2/7**, net fırsat **2/3**, kurtarış **4/2**, sahip olma **%54/%46**. Tarih, takımlar, sonuç ve ilk 11 gerçek kayıttan doğrulandı.
+- FotMob maç şut haritası 12+13 şuttaki \`expectedGoals\` toplamları: Gaziantep **0.9919**, Çorum **2.6728** (son ekranda iki ondalık 0.99/2.67). Bu, manuel olarak yaratılmış veya gol sayısından türetilmiş xG değildir.
+- \`scout_verified_weekly_attack\`: **32 süre almış oyuncunun** özgün FotMob kimlikleri kanonik oyuncularla açık eşlendi. Bütün 32 kişi için xG (şut haritası toplamı veya doğrulanmış şut yoksa 0), xA, şut, isabetli şut, pozisyon hazırlama verisi işlendi. xA 25 kişide doğrudan görüntülenen değer, kalan 7 kişide gözlenen xG+xA ve katkı eksikliğinden çıkarılan sıfır olarak \`scout_verified_player_match_metric_provenance.xa_evidence\` içinde ayrıldı.
+- \`scout_verified_team_match_advanced\`: 2 takım için FotMob kaynaklı ve maçla tutarlı toplu veriler; \`scout_verified_match_metric_provenance\`: 22 alanın URL ve hesap kaynağı. **Highlightly'ın xG/xA alanları hâlâ kaynağa özgü NULL kalır**; sağlayıcı eksikliği gizlenmez.
+- Sontje Hansen'in “Misjonne Juniffer Naigelino Hansen” olduğu FIFA ve Opta Analyst kaynaklarıyla doğrulandı, kalıcı \`scout_highlightly_player_aliases\` kaydı sayesinde MH5–MH7'nin 3 oyuncu-maç kaydı doğru kişiye bağlandı.
+- \`scout_highlightly_fetch_requirements\` artık bu maç için \`need_box=false\`, \`need_stats=false\` döndürür. Sağlayıcıdan eskiden alınan ilk 11/formasyon kayıtları durur; rollerin ayrı \`scout_player_tactical_role_observations\` tablosuna doğrulanmadan yazılması otomatik varsayılmaz.
+- Fantezi puanlarını, canlı MH12 modelini veya oyuncu dakika geçmişini değiştirmez. Gelecekteki model kalibrasyonuna **kaynak penceresi ve geçmiş tahminlerin donmuş hali** doğrulandıktan sonra girer. xgEdge gibi farklı xG modelinin takım ve oyuncu xG değerleri FotMob ile karıştırılmaz.
+
+SQL kontrol:
+\`\`\`sql
+SELECT team_id,xg,xga,shots,shots_on_target,keeper_saves,source_kind
+FROM public.scout_verified_team_match_advanced WHERE match_id=317838 ORDER BY team_id;
+SELECT team_id,count(*) AS played,sum(shots) AS shots,
+ sum(shots_on_target) AS sot,round(sum(xg),4) AS source_xg,
+ round(sum(xa),4) AS source_xa
+FROM public.scout_verified_weekly_attack WHERE match_id=317838 GROUP BY team_id;
+\`\`\`
