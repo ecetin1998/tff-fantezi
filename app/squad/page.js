@@ -86,11 +86,11 @@ export default async function Squad({searchParams}){
       reportServerError('squad:p2-advanced-overlay',error,{run_id:run?.id})
       return []
     }):Promise.resolve([])
-  const [recommendation,pageResult,decisionAdvancedRows]=await Promise.all([
+  const [recommendation,pageResult]=await Promise.all([
     recommendationPromise,
     pageResultPromise,
-    advancedPromise
   ])
+  const decisionAdvancedRows=await advancedPromise
   const {members:recommended,recommendation:recommendedMeta}=recommendation
   const {data:pageData,error:pageError}=pageResult
   if(pageError)reportServerError('squad:pageData',pageError,{gameweek:run?.gameweek})
