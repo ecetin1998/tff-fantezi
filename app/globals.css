@@ -157,3 +157,17 @@ button,input,select,textarea{font:inherit}
 .player-compare-metric-row .is-better{color:#187048}
 .player-compare-empty{padding:.6rem 0}
 @media(max-width:620px){.player-compare-selectors{grid-template-columns:minmax(0,1fr)}.player-compare-metric-row{grid-template-columns:minmax(0,.9fr) repeat(2,minmax(0,1fr));gap:.3rem;padding:.55rem .45rem}.player-compare-metric-row>b,.player-compare-metric-row>a{font-size:.78rem}}
+
+
+/* P1 personalized home: user-scoped, server-rendered decision signals. */
+.home-decision-center{margin-block:1rem 1.35rem;min-width:0}
+.home-decision-center .home-section-head{margin-bottom:.8rem}
+.home-personal-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.75rem}
+.home-personal-grid>div{display:flex;flex-direction:column;gap:.45rem;min-width:0;padding:.95rem;border:1px solid var(--border-color,rgba(20,58,86,.16));border-radius:12px;background:var(--surface-soft,rgba(240,248,253,.55))}
+.home-personal-grid>div>span{font-size:.8rem;color:var(--muted,#597087);font-weight:750}
+.home-personal-grid>div>strong{font-size:clamp(1.05rem,2vw,1.45rem);overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
+.home-personal-grid>div>strong small{font-size:.8rem;font-weight:700}
+.home-personal-grid>div>p{margin:0;font-size:.82rem;line-height:1.5;color:var(--muted,#597087)}
+.home-personal-grid>div>p>a{font-weight:800;text-decoration:underline;text-underline-offset:2px}
+.home-personal-disclaimer{margin:.75rem 0 0;font-size:.77rem;line-height:1.5;color:var(--muted,#597087)}
+@media(max-width:860px){.home-personal-grid{grid-template-columns:minmax(0,1fr)}.home-personal-grid>div{padding:.8rem}}
