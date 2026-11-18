@@ -1,0 +1,54 @@
+name: P0 as-of paired historical shadow test (one-time)
+on:
+  push:
+    branches: [main]
+    paths: [".github/workflows/p0-asof-shadow-once.yml"]
+permissions:
+  contents: read
+  id-token: write
+jobs:
+  paired-shadow:
+    if: >-
+      github.event.head_commit.message == 'chore(p0): run paired as-of historical shadow'
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    env:
+      URL: https://nnoagjayvrwyjtizhnfz.supabase.co/functions/v1/run-live-sim-chunk
+    steps:
+      - name: Confirm as-of archived control and trial snapshots, run 10K draws per week
+        shell: bash
+        run: |
+          set -euo pipefail
+          get_token() {
+            TOKEN="$(curl -fsSL --max-time 30 \
+              -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+              "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=tff-fantezi-scout" | jq -er '.value')"
+            echo "::add-mask::$TOKEN"
+          }
+          get_token
+          for week in 9 10 11; do
+            for model in control trial; do
+              bench="p0-asof-20261118-mh${week}-${model}"
+              curl --fail-with-body -sS --max-time 240 --retry 2 --retry-delay 2 \
+                -H "Authorization: Bearer $TOKEN" \
+                "$URL?gw=$week&run=00000000-0000-0000-0000-000000000009&benchmark=$bench&mode=reset" \
+                | jq -e '.ok==true and .mode=="reset"' >/dev/null
+            done
+            for part in $(seq 0 19); do
+              if (( part > 0 && part % 6 == 0 )); then get_token; fi
+              seed=$((2026100000 + week * 10000 + part * 500))
+              for model in control trial; do
+                bench="p0-asof-20261118-mh${week}-${model}"
+                curl --fail-with-body -sS --max-time 240 --retry 2 --retry-delay 2 \
+                  -H "Authorization: Bearer $TOKEN" \
+                  "$URL?gw=$week&run=00000000-0000-0000-0000-000000000009&benchmark=$bench&draws=500&seed=$seed" \
+                  | jq -e '.ok==true and .draws==500 and .players==456' >/dev/null
+              done
+              if ((part % 5 == 4)); then echo "MH$week paired shadow completed $(((part+1)*500))/10000 per model"; fi
+            done
+          done
+          {
+            echo "### P0 source-cutoff historical 10K paired Monte Carlo runs"
+            echo "MH9, MH10, MH11; two completely separate source-frozen input benchmarks per week."
+            echo "10,000 draws per contender, matching random seeds. NO FINALIZE, NO PROMOTE, NO LIVE MODIFICATION."
+          } >> "$GITHUB_STEP_SUMMARY"
