@@ -15,7 +15,8 @@ concurrency:
 
 jobs:
   shadow:
-    if: ${{ github.event.head_commit.message == 'chore(p0): run isolated 50K shadow validation' }}
+    if: >-
+      github.event.head_commit.message == 'chore(p0): run isolated 50K shadow validation'
     runs-on: ubuntu-latest
     timeout-minutes: 50
     env:
@@ -86,7 +87,7 @@ jobs:
           echo "$result" | jq -e '.pass == true and .no_writes == true and .allocation.pass == true and .distribution.pass == true'
           {
             echo "### P0 MH12 shadow 50K completed without promotion"
-            echo "- Run: `$RUN_ID`"
-            echo "- Benchmark: `$BENCHMARK`"
+            echo "- Run ID: $RUN_ID"
+            echo "- Benchmark: $BENCHMARK"
             echo "- Review detailed source and player deltas before publishing"
           } >> "$GITHUB_STEP_SUMMARY"
