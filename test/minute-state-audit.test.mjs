@@ -52,3 +52,41 @@ test('future-week forecasts, missing probabilities and inferred DNP are not used
  const invalid=x();invalid.projections[1].appearance_probability=.2;
  assert.equal(minuteStateAudit(invalid).overall.invalid_frozen_predictions,1);
 });
+
+test('independent full match absence plus final owner-approved zero forms third state',()=>{
+ const d=x();
+ d.evidence.push({gameweek:11,match_id:42,player_id:13,started:false,
+  verified_first_11:false,verified_substitution:false,minutes:0,
+  evidence_note:'Player not named in full match participation list: sourced full-match absence',
+  source_url:'https://www.tff.org/match',updated_at:'2026-11-07T21:00:00Z'});
+ const r=minuteStateAudit(d);
+ assert.equal(r.overall.confirmed_unused,1);
+ assert.equal(r.overall.unknown_unused_excluded,0);
+ assert.equal(r.overall.full_three_state_scope,true);
+ assert.ok(r.overall.complete_state_brier>0);
+ assert.equal(r.overall.known_playing_state_n,13);
+});
+test('unsourced or inferred zero never becomes verified unused',()=>{
+ for(const change of [
+  {evidence_note:'unconfirmed zero'}, {source_url:null},
+  {updated_at:'2026-11-01T00:00:00Z'}, {verified_substitution:true},
+ ]){
+  const d=x();
+  d.evidence.push({...{
+   gameweek:11,match_id:42,player_id:13,started:false,
+   verified_first_11:false,verified_substitution:false,minutes:0,
+   evidence_note:'Player not named in full match participation list: sourced full-match absence',
+   source_url:'https://www.tff.org/match',updated_at:'2026-11-07T21:00:00Z'
+  },...change});
+  const r=minuteStateAudit(d);
+  assert.equal(r.overall.confirmed_unused,0);
+  assert.equal(r.overall.full_three_state_scope,false);
+ }
+ const d=x();
+ d.evidence.push({gameweek:11,match_id:42,player_id:13,started:false,verified_first_11:false,
+   verified_substitution:false,minutes:0,
+   evidence_note:'Player not named in full match participation list: sourced full-match absence',
+   source_url:'https://www.tff.org/match',updated_at:'2026-11-07T21:00:00Z'});
+ d.actuals[12].source_kind='inferred_score_from_events';
+ assert.equal(minuteStateAudit(d).overall.confirmed_unused,0);
+});
