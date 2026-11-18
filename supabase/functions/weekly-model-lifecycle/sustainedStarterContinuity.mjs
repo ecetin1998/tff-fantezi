@@ -38,7 +38,7 @@ export function sustainedStarterContinuity({
     const kind=String(row?.source_kind||"")
     const independent=kind==="fresh_closed_actual"||
       kind==="independently_calculated_source_events"||
-      /^mh\\d+_owner_approved_independent_score_events$/.test(kind)
+      /^mh\d+_owner_approved_independent_score_events$/.test(kind)
     if(!row||!independent||row.is_final!==true||trustedMinute(row)===null||
       trustedMinute(row)<60||imported===null||observed===null||
       imported>cutoff||observed>cutoff){
