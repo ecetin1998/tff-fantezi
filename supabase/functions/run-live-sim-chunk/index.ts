@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import {selectVerifiedFormation} from "./formationScenario.mjs";
 
 const GITHUB_OIDC_AUDIENCE="tff-fantezi-scout";
 const GITHUB_OIDC_ISSUER="https://token.actions.githubusercontent.com";
@@ -288,6 +289,7 @@ Deno.serve(async(req)=>{
     const useNb=Boolean(goalDist?.gate_passed)&&String(goalDist?.distribution||"").toUpperCase()==="NB2"&&num(goalDist?.alpha_used)>0;
     const goalAlpha=useNb?num(goalDist.alpha_used):0;
     const quotas=meta.team_formations||{};
+    const verifiedFormationScenarios=meta.lineup_factors?.verified_formation_scenarios_v1||{};
     const adj=new Map();
     for(const a of aq.data||[])if(!adj.has(Number(a.player_id)))adj.set(Number(a.player_id),a);
     const allocation=P.map(p=>allocationFor(p,adj.get(p.id),GAMEWEEK));
@@ -357,8 +359,15 @@ Deno.serve(async(req)=>{
       const ids=teams[club]||[];
       const available=new Set(ids.filter(i=>random()<P[i].avail));
       const used=new Set();
+      const eligibleCounts=Object.fromEntries(positions.map(pos=>[
+        pos,ids.filter(i=>P[i].pos===pos&&P[i].avail>0).length
+      ]));
+      const formation=selectVerifiedFormation(
+        quotas[String(club)]||{},verifiedFormationScenarios[String(club)],
+        random,eligibleCounts
+      );
       for(const pos of positions){
-        const k=num(quotas[String(club)]?.[pos],0);
+        const k=num(formation[pos],0);
         if(!k)continue;
         const loc=ids.filter(i=>P[i].pos===pos);
         if(loc.filter(i=>available.has(i)).length<k){
