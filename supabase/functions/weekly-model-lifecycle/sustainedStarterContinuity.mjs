@@ -35,7 +35,11 @@ export function sustainedStarterContinuity({
   for(const week of [target-2,target-1]){
     const row=byWeek.get(week)
     const imported=timestamp(row?.created_at),observed=timestamp(row?.source_updated_at)
-    if(!row||row.is_final!==true||trustedMinute(row)===null||
+    const kind=String(row?.source_kind||"")
+    const independent=kind==="fresh_closed_actual"||
+      kind==="independently_calculated_source_events"||
+      /^mh\\d+_owner_approved_independent_score_events$/.test(kind)
+    if(!row||!independent||row.is_final!==true||trustedMinute(row)===null||
       trustedMinute(row)<60||imported===null||observed===null||
       imported>cutoff||observed>cutoff){
       return no(prior,"two_consecutive_pre_kickoff_60_plus_missing")
