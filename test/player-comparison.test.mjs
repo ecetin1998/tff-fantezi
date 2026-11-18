@@ -31,7 +31,7 @@ test('comparison UI stays compact, accessible and uses existing permission-gated
  const ui=readFileSync(resolve(root,'components/PlayerComparison.js'),'utf8')
  const css=readFileSync(resolve(root,'components/PlayerComparison.module.css'),'utf8')
  assert.match(ui,/aria-labelledby="compare-title"/)
- assert.match(ui,/<label htmlFor=\{selectId\}>/)
+ assert.match(ui,/<label htmlFor=\{inputId\}>/)
  assert.match(ui,/searchComparisonPlayers\(list,query,otherId,10\)/)
  assert.match(ui,/role="combobox"/)
  assert.match(ui,/role="listbox"/)
