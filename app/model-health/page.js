@@ -70,6 +70,7 @@ export default async function ModelHealth(){
             <span>{label}</span>
             <div><strong>{pct(metric?.predicted)}</strong><span aria-hidden="true">→</span><strong>{pct(metric?.observed)}</strong></div>
             <small>Model → gerçekleşen • Brier {dec(brier)}</small>
+            <small>Gerçekleşen %95 aralık: {pct(metric?.observed_ci95?.lower)}–{pct(metric?.observed_ci95?.upper)}</small>
           </div>)}
         </div>
         <div className="model-calibration-table-wrap">
@@ -82,7 +83,7 @@ export default async function ModelHealth(){
             </tr>)}</tbody>
           </table>
         </div>
-        <p className="model-calibration-disclaimer">Brier için düşük değer daha iyi. {warnings?'3+ gol oranında gözlemsel fark belirgin; bağımsız yeni hafta doğrulaması olmadan model ağırlığını değiştirme.':'Bu örneklemde otomatik ağırlık değişikliğini gerektiren bir terfi kararı verilmedi.'} Beş haftalık yaklaşık 45 maçlık geçmiş, bağımsız ileriye dönük kalibrasyon kanıtı değildir. Eşikler yalnız inceleme amaçlıdır.</p>
+        <p className="model-calibration-disclaimer">Brier için düşük değer daha iyi. {warnings?'3+ gol oranında gözlemsel fark belirgin; bağımsız yeni hafta doğrulaması olmadan model ağırlığını değiştirme.':'Bu örneklemde otomatik ağırlık değişikliğini gerektiren bir terfi kararı verilmedi.'} Görülen %95 Wilson aralıkları örneklem belirsizliğini gösterir; maçlar arası bağımlılığı veya veri seçimini düzeltmez. Beş haftalık yaklaşık 45 maçlık geçmiş, bağımsız ileriye dönük kalibrasyon kanıtı değildir. Eşikler yalnız inceleme amaçlıdır.</p>
       </div>:<p className="model-calibration-explain">Kapsamı doğrulanmış maç öncesi tahmin ile kapanmış maç sonuçları şu anda eşleştirilemedi. Tahmin yoksa başarı veya %0 gösterilmez.</p>}
     </section>
   </div>
