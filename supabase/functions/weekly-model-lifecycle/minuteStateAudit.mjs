@@ -170,7 +170,7 @@ export function minuteStateAudit({weeks=[],fixtures=[],players=[],projections=[]
     }
   }
   return {ok:true,mode:"read_only",no_writes:true,auto_promote:false,
-    evidence_policy:"complete_verified_team_XI;source_verified_bench_entry;positive_minutes_matched_to_final",
+    evidence_policy:"complete_verified_team_XI;source_verified_bench_entry;positive_minutes_matched_to_final;explicit_sourced_full_match_absence",
     zero_policy:"unconfirmed_zero_is_unknown_never_DNP",
     caveat:"observed_state_brier_diagnostic is selection-biased when unused is unknown. complete_state_brier exists only when all XI-cohort players have verified starter, entered-sub, or explicitly reconciled unused labels",
     eligible_weeks:[...byWeek.keys()].sort((a,b)=>a-b),skipped_weeks:skipped,
