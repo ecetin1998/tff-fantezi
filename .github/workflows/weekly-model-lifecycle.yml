@@ -213,8 +213,8 @@ jobs:
           # The Github code SHA is not proof that the matching Edge version
           # was deployed BEFORE prepare_current began. Require its measured
           # source note coverage to avoid publishing stale-model 50K outputs.
-          if [[ "$(printf '%s' "$response" | jq -r '.refresh_required // false')" == "true" &&
-                "$(printf '%s' "$response" | jq -r '.gameweek // 0')" == "12" ]]; then
+          if [[ "$(printf '%s' "$response" | jq -r '.refresh_required // false')" == "true" ]] &&
+             [[ "$(printf '%s' "$response" | jq -r '.gameweek // 0')" == "12" ]]; then
             used="$(printf '%s' "$response" | jq -r '.source_window_applied_players // 0')"
             test "$used" -ge 100 || {
               echo "::error title=New source window not consumed::Only $used players. Stop before 50K; deploy Edge and retry."
