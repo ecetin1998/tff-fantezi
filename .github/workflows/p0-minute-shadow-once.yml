@@ -1,0 +1,51 @@
+name: P0 verified playing-time shadow audit once
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/p0-minute-shadow-once.yml"
+permissions:
+  contents: read
+  id-token: write
+jobs:
+  audit:
+    if: >-
+      github.event.head_commit.message == 'chore(p0): run verified minute state shadow audit'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      FUNCTION_URL: https://nnoagjayvrwyjtizhnfz.supabase.co/functions/v1/weekly-model-lifecycle-p0-minute-shadow
+    steps:
+      - name: Read-only frozen accuracy on shadow Edge (never promote)
+        shell: bash
+        run: |
+          set -euo pipefail
+          token="$(curl -fsSL --max-time 30 \
+            -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+            "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=tff-fantezi-scout" | jq -er '.value')"
+          echo "::add-mask::$token"
+          curl -fsS --max-time 180 -X POST \
+            -H "Authorization: Bearer $token" -H 'Content-Type: application/json' \
+            --data '{"action":"diagnose_backtest"}' \
+            "$FUNCTION_URL" > minute-state-shadow.json
+          jq -e '.ok == true and .no_writes == true and .minute_state_audit.ok == true and .minute_state_audit.auto_promote == false and .minute_state_audit.no_writes == true and (.minute_state_audit.overall.xi_n > 500) and (.minute_state_audit.by_week | length >= 2)' minute-state-shadow.json
+          {
+            echo "### P0 playing-time shadow (READ ONLY)"
+            echo "| MH | Verified full XIs | XI Brier | Sourced starts | Sourced substitutions | Active 30+ minute MAE | Missed 60+ | Unknown unused |"
+            echo "|---|---:|---:|---:|---:|---:|---:|---:|"
+            jq -r '.minute_state_audit.by_week[] |
+              "| MH" + (.gameweek|tostring) +
+              " | " + (.complete_verified_xi_teams|tostring) +
+              " | " + (.xi_brier|tostring) +
+              " | " + (.confirmed_starters|tostring) +
+              " | " + (.confirmed_substitutes|tostring) +
+              " | " + (.ex_ante_30_minute_mae|tostring) +
+              " | " + (.missed_60_plus_forecast_under_30|tostring) +
+              " | " + (.unknown_unused_excluded|tostring) + " |"' minute-state-shadow.json
+            echo "Zero/unused remain UNKNOWN unless independently sourced, no auto tuning."
+          } >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: p0-minute-state-shadow
+          path: minute-state-shadow.json
+          retention-days: 60
