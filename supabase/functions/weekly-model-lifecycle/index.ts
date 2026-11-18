@@ -1026,6 +1026,12 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
       availability,alreadyApplied:String(stableInput.source_note||"").includes("verified-recent-starter-v1")
     })
     const stats=sourceStatsMap.get(Number(x.player_id)) as any
+    const seasonMins=Number(stats?.minutes||0)
+    const actionsAligned=seasonMins>=270&&stats?.advanced_actions_through_gameweek!=null&&
+      Number(stats.advanced_actions_through_gameweek)===Number(stats.through_gameweek)&&
+      Number(stats.advanced_actions_verified_appearances)===Number(stats.advanced_actions_played_appearances)
+    const keysObserved=actionsAligned&&
+      !String(stats?.advanced_actions_source||"").includes("keypasses missing")
     const verifiedStarts=verifiedXiEvidence.get(Number(x.player_id))||[]
     const regularStarter=regularStarterReliability({
       baseline:recentStarter.role,seasonStarts:stats?.starts,matchesPlayed:stats?.matches_played,
@@ -1106,12 +1112,6 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
         xaPer90:xaUpdate.rate,assistsPer90:n(stableRates[2],rates[2]),
         hasSourcedXg:stats?.xg_total!=null
       })
-    const seasonMins=Number(stats?.minutes||0)
-    const actionsAligned=seasonMins>=270&&stats?.advanced_actions_through_gameweek!=null&&
-      Number(stats.advanced_actions_through_gameweek)===Number(stats.through_gameweek)&&
-      Number(stats.advanced_actions_verified_appearances)===Number(stats.advanced_actions_played_appearances)
-    const keysObserved=actionsAligned&&
-      !String(stats?.advanced_actions_source||"").includes("keypasses missing")
     const trustedAdvanced=actionsAligned||Number(stats?.advanced_through_gameweek)>=gw-2
     const form=String(stableInput.source_note||"").includes("recent-attack-form-v2")
       ?{xgPer90:calibrated.xgPer90,xaPer90:calibrated.xaPer90,applied:false}
