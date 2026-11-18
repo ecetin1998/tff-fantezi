@@ -64,3 +64,39 @@ test('a large observed vs predicted gap is diagnostic only',()=>{
  assert.equal(r.over25_outside_observed_ci95,true)
  assert.equal(r.auto_promote,false)
 })
+
+test('frozen scored goal rates include MAE and reference log-loss without replacing model coefficients',()=>{
+ const forecasts=[
+  {...prob(11),home_xg:1.5,away_xg:.7},
+  {...prob(12),home_xg:1,away_xg:1},
+  {...prob(13),home_xg:null,away_xg:5}
+ ]
+ const result=frozenMatchCalibration({weeks:[wk],actuals,forecasts})
+ assert.equal(result.overall.matches,3)
+ assert.equal(result.overall.goals.samples,2)
+ assert.equal(result.overall.goals.home.predicted,1.25)
+ assert.equal(result.overall.goals.home.observed,1)
+ assert.equal(result.overall.goals.home.mae,.75)
+ assert.equal(result.overall.goals.away.predicted,.85)
+ assert.equal(result.overall.goals.away.observed,.5)
+ assert.equal(result.overall.goals.away.mae,.65)
+ assert.ok(result.overall.goals.poisson_reference_nll>=0)
+ assert.equal(result.weeks[0].goals.samples,2)
+ assert.equal(result.auto_promote,false)
+})
+test('negative / absent goal rates are excluded from goal error, not from valid probability calibration',()=>{
+ const invalid=frozenMatchCalibration({weeks:[wk],actuals,forecasts:[
+  {...prob(11),home_xg:-1,away_xg:.3},
+  {...prob(12),home_xg:0,away_xg:12},
+ ]})
+ assert.equal(invalid.overall.matches,2)
+ assert.equal(invalid.overall.goals.samples,0)
+ assert.equal(invalid.overall.goals.home.mae,null)
+ assert.equal(invalid.overall.goals.poisson_reference_nll,null)
+})
+test('goal rates never count for a week frozen after kickoff',()=>{
+ const late=frozenMatchCalibration({weeks:[{...wk,snapshot_at:'2026-11-07T16:00:00Z'}],
+  forecasts:[{...prob(13),home_xg:1.3,away_xg:1}],actuals:[actuals[2]]})
+ assert.equal(late.overall.matches,0)
+ assert.equal(late.overall.goals.samples,0)
+})
