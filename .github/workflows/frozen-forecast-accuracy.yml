@@ -7,6 +7,8 @@ on:
       - "supabase/functions/weekly-model-lifecycle/frozenAccuracy.mjs"
       - "supabase/functions/weekly-model-lifecycle/sourceCoverage.mjs"
       - "supabase/functions/weekly-model-lifecycle/modelActionCandidates.mjs"
+      - "supabase/functions/weekly-model-lifecycle/minuteStateAudit.mjs"
+      - "supabase/functions/weekly-model-lifecycle/formationChallenger.mjs"
   workflow_dispatch:
   schedule:
     # 11:45 Turkish time every Monday; only CLOSED historical weeks are read.
@@ -98,6 +100,26 @@ jobs:
               " | " + (.band.baseline_mae|tostring) +
               " | " + (.band.trial_mae|tostring) + " |"' frozen-accuracy.json
             echo "Retrospective shadow results are NOT independent holdouts. Never change live forecasts from this report."
+
+            echo ""
+            echo "### P0 source-verified XI / substitute / minutes diagnostics"
+            # Older Edge version may not yet expose this new read-only field.
+            if jq -e '.minute_state_audit.ok == true and .minute_state_audit.no_writes == true and .minute_state_audit.auto_promote == false' frozen-accuracy.json >/dev/null 2>&1; then
+              echo "| MH | Complete team XIs | XI Brier | Verified starters | Verified bench | 30+ minute MAE (ex-ante) | Missed 60+ | Unknown unused |"
+              echo "|---|---:|---:|---:|---:|---:|---:|---:|"
+              jq -r '.minute_state_audit.by_week[] |
+                "| MH" + (.gameweek|tostring) +
+                " | " + (.complete_verified_xi_teams|tostring) +
+                " | " + (.xi_brier|tostring) +
+                " | " + (.confirmed_starters|tostring) +
+                " | " + (.confirmed_substitutes|tostring) +
+                " | " + (.ex_ante_30_minute_mae|tostring) +
+                " | " + (.missed_60_plus_forecast_under_30|tostring) +
+                " | " + (.unknown_unused_excluded|tostring) + " |"' frozen-accuracy.json
+              echo "Unknown 0-minute records excluded: no invented unused/DNP outcomes. Starter/sub score is **diagnostic only**, NOT a proper full three-state Brier without source-confirmed unused."
+            else
+              echo "Minute state read-only audit not yet active in deployed Edge version; existing accuracy report is unaffected."
+            fi
           } >> "$GITHUB_STEP_SUMMARY"
       - name: Audit current MH source coverage (read-only)
         shell: bash
