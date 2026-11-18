@@ -8,6 +8,7 @@ import {fixtureBadge,playerLabel,playerFixtureMeta} from '@/lib/playerPresentati
 import {playerRoleLabel} from '@/lib/playerRole'
 import AccessGate from '@/components/AccessGate'
 import MultiSelectFilter from '@/components/MultiSelectFilter'
+import PlayerComparison from '@/components/PlayerComparison'
 
 const posLabel=p=>({GK:'KL',DEF:'DEF',MID:'OS',FWD:'FOR'}[p]||p||'—')
 const PAGE_SIZE=50
@@ -174,6 +175,7 @@ export default function PlayersTable({players,total,page,pageCount,teams,filters
     </div>:null}
 
     <div className="table-summary">{isVisitor?<><b>İlk {visiblePlayers.length}</b> oyuncu • xFP sıralaması • tüm oyuncu havuzu ücretsiz üyelikle açılır</>:<><b>{effectiveTotal}</b> oyuncu • {isPro?'Gelişmiş analiz görünümü':'ücretsiz üye görünümü'}</>}</div>
+    {!isVisitor?<PlayerComparison key={runId||'none'} players={staticPool?pool:players} isPro={isPro} proReady={overlayReady}/>:null}
     {isPro&&!overlayReady&&!overlayError?<div className="table-summary" role="status" aria-live="polite">Gelişmiş P90 ve 6+ puan verileri yükleniyor...</div>:null}
     {isPro&&overlayError?<div className="alert error" role="alert">Gelişmiş P90 ve 6+ istatistikleri yüklenemedi.{overlayRequestId?' Hata kodu: '+overlayRequestId:''} <button type="button" onClick={()=>setOverlayRetry(n=>n+1)}>Yeniden dene</button></div>:null}
     <div className="projection-legend">
