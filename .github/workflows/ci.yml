@@ -66,3 +66,5 @@ jobs:
         run: npm run build
       - name: Route runtime
         run: bash scripts/runtime-route-test.sh
+      - name: Verify production Cloudflare build tooling resolves
+        run: bash scripts/install-cloudflare-build-tooling.sh
