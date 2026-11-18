@@ -665,7 +665,8 @@ async function prepare(sb:any,current:any,status:any,body:any={}){
     source_note:key+" • generated from closed MH"+current.gameweek,
     formations:priorMetaQ.data.formations,team_formations:verifiedFormations.formations,
     lineup_factors:{...(priorMetaQ.data.lineup_factors||{}),goalkeeper_sot_v1:keeperShotEvidence,
-      verified_formations_v1:verifiedFormations.changed_teams}
+      verified_formations_v1:verifiedFormations.changed_teams,
+      verified_formation_scenarios_v1:verifiedFormations.scenarios}
   }
   for(const [table,rows] of [
     ["scout_replay_input_meta",[meta]],["scout_replay_match_inputs",matchInputs],
@@ -1261,6 +1262,7 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
     team_formations:verifiedFormations.formations,
     lineup_factors:{...(latestMetaQ.data.lineup_factors||{}),goalkeeper_sot_v1:keeperShotEvidence,
       verified_formations_v1:verifiedFormations.changed_teams,
+      verified_formation_scenarios_v1:verifiedFormations.scenarios,
       verified_team_advanced_v1:verifiedTeamAdvanced},
     source_note:`intraday refresh from ${sourceBenchmark}; source ${latestSourceAt}`+
       (feedback?` • active-fwd-event-share-v1 • baseline ${feedback.config.baselineRunId} • holdouts MH8/MH9 passed`:"")}
@@ -1513,6 +1515,13 @@ Deno.serve(async(req:Request)=>{
       // is NOT proof a newly deployed Edge Function prepared those inputs.
       if(gw>=12&&run.is_current!==true&&!Array.isArray(meta.data?.lineup_factors?.verified_formations_v1)){
         return Response.json({ok:false,pass:false,error:"SOURCE_VERIFIED_FORMATION_INPUT_PROVENANCE_MISSING",
+          run_id:runId,gameweek:gw,benchmark,no_writes:true},{status:409})
+      }
+      if(gw>=12&&run.is_current!==true&&
+        (!meta.data?.lineup_factors?.verified_formation_scenarios_v1||
+         typeof meta.data.lineup_factors.verified_formation_scenarios_v1!=="object"||
+         Array.isArray(meta.data.lineup_factors.verified_formation_scenarios_v1))){
+        return Response.json({ok:false,pass:false,error:"SOURCE_VERIFIED_FORMATION_SCENARIOS_PROVENANCE_MISSING",
           run_id:runId,gameweek:gw,benchmark,no_writes:true},{status:409})
       }
       if(gw>=12&&run.is_current!==true&&

@@ -9,8 +9,8 @@ export function verifiedLineupFormations({
   targetWeek,cutoffAt,players=[],evidence=[],matches=[],baseFormations={}
 }={}){
   const target=Number(targetWeek),cutoff=stamp(cutoffAt)
-  const formations={...baseFormations},changed=[]
-  const emptyResult={formations,changed_teams:[],policy:"two_complete_previous_verified_XIs",sample_count:0}
+  const formations={...baseFormations},changed=[],scenarios={}
+  const emptyResult={formations,changed_teams:[],scenarios,policy:"two_complete_previous_verified_XIs",sample_count:0}
   if(!Number.isInteger(target)||target<3||cutoff===null)return emptyResult
   const teamByPlayer=new Map(players.map(p=>[Number(p.id),Number(p.team_id)]))
   const posByPlayer=new Map(players.map(p=>[Number(p.id),String(p.position)]))
@@ -42,8 +42,16 @@ export function verifiedLineupFormations({
     const prev=groups.get(teamId+":"+(target-1)),older=groups.get(teamId+":"+(target-2))
     if(!prev||!older||prev.duplicate||older.duplicate)continue
     if(prev.ids.size!==11||older.ids.size!==11||
-       prev.counts.GK!==1||older.counts.GK!==1||
-       !same(prev.counts,older.counts))continue
+       prev.counts.GK!==1||older.counts.GK!==1)continue
+    // If two independent closed XIs disagree, preserve both observed
+    // Fantasy-registered formations. Never invent an extra striker quota.
+    if(!same(prev.counts,older.counts)){
+      scenarios[String(teamId)]=[
+        {formation:{...prev.counts},weight:.6,evidence_week:target-1},
+        {formation:{...older.counts},weight:.4,evidence_week:target-2}
+      ]
+      continue
+    }
     const newQuota=prev.counts
     const oldQuota=formations[String(teamId)]
     // Only source-supported 11-player registered-position counts can replace
@@ -54,5 +62,5 @@ export function verifiedLineupFormations({
         evidence_weeks:[target-2,target-1]})
     }
   }
-  return {formations,changed_teams:changed,policy:"two_complete_previous_verified_XIs",sample_count:groups.size}
+  return {formations,changed_teams:changed,scenarios,policy:"two_complete_previous_verified_XIs_with_conflict_scenarios",sample_count:groups.size}
 }

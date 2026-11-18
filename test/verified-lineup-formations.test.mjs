@@ -65,3 +65,31 @@ test('auditing an unpublished MH12 run refuses stale formation metadata even wit
  assert.match(worker,/Array\.isArray\(meta\.data\?\.lineup_factors\?\.verified_formations_v1\)/)
  assert.match(worker,/select\("own_goal_fraction,lineup_factors"\)/)
 })
+
+test('two different full verified XIs create two scenarios without overwriting the base quota',()=>{
+ const older=make(10,17,4000,{GK:1,DEF:4,MID:5,FWD:1})
+ const recent=make(11,17,5000,{GK:1,DEF:4,MID:6,FWD:0})
+ const q=calibrate({targetWeek:12,cutoffAt:kickoff,
+   players:[...older.players,...recent.players],
+   evidence:[...older.evidence,...recent.evidence],
+   matches:[...older.matches,...recent.matches],
+   baseFormations:{"17":{GK:1,DEF:4,MID:5,FWD:1}}})
+ assert.deepEqual(q.formations["17"],{GK:1,DEF:4,MID:5,FWD:1})
+ assert.deepEqual(q.scenarios["17"],[
+   {formation:{GK:1,DEF:4,MID:6,FWD:0},weight:.6,evidence_week:11},
+   {formation:{GK:1,DEF:4,MID:5,FWD:1},weight:.4,evidence_week:10}
+ ])
+ const incomplete=calibrate({targetWeek:12,cutoffAt:kickoff,
+   players:[...older.players,...recent.players],
+   evidence:[...older.evidence,...recent.evidence.slice(1)],
+   matches:[...older.matches,...recent.matches],
+   baseFormations:{"17":{GK:1,DEF:4,MID:5,FWD:1}}})
+ assert.equal(incomplete.scenarios["17"],undefined)
+})
+test('the builder persists sourced alternative scenarios and scorer uses safe selector',()=>{
+ const worker=readFileSync(new URL('../supabase/functions/weekly-model-lifecycle/index.ts',import.meta.url),'utf8')
+ const scorer=readFileSync(new URL('../supabase/functions/run-live-sim-chunk/index.ts',import.meta.url),'utf8')
+ assert.equal((worker.match(/verified_formation_scenarios_v1:verifiedFormations.scenarios/g)||[]).length,2)
+ assert.match(scorer,/selectVerifiedFormation\(/)
+ assert.match(scorer,/eligibleCounts/)
+})
