@@ -21,6 +21,13 @@ test('one-XI, duplicated week, non-positive weight and invalid quota fail closed
   assert.deepEqual(selectVerifiedFormation(base,bad,()=>.01,eligible),base)
  }
 })
+test('candidate audit and 50K runner reject stale formation provenance',async()=>{
+ const {readFileSync}=await import('node:fs')
+ const worker=readFileSync(new URL('../supabase/functions/weekly-model-lifecycle/index.ts',import.meta.url),'utf8')
+ const runner=readFileSync(new URL('../supabase/functions/run-live-sim-chunk/index.ts',import.meta.url),'utf8')
+ assert.match(worker,/SOURCE_VERIFIED_FORMATION_SCENARIOS_PROVENANCE_MISSING/)
+ assert.match(runner,/SOURCE_VERIFIED_FORMATION_SCENARIOS_PROVENANCE_MISSING/)
+})
 test('insufficient eligible registered players force prior safe quota',()=>{
  assert.deepEqual(selectVerifiedFormation(base,options,()=>.01,{...eligible,MID:5}),base)
 })
