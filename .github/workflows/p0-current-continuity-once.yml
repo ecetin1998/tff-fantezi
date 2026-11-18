@@ -1,0 +1,108 @@
+name: P0 sustained-starter current 50K shadow and QA (one-time)
+on:
+  push:
+    branches: [main]
+    paths: [".github/workflows/p0-current-continuity-once.yml"]
+permissions:
+  contents: read
+  id-token: write
+jobs:
+  candidate:
+    if: >-
+      github.event.head_commit.message == 'chore(p0): run sustained starter current 50K shadow'
+    runs-on: ubuntu-latest
+    timeout-minutes: 58
+    env:
+      URL: https://nnoagjayvrwyjtizhnfz.supabase.co/functions/v1
+      CANDIDATE_SHA: b3788fa67a5600f6a59c6b5fb18f427fa0bc1de8
+    steps:
+      - name: Prepare MH12 from frozen policy code without production promotion
+        id: prepare
+        shell: bash
+        run: |
+          set -euo pipefail
+          mint() {
+            TOKEN="$(curl -fsSL --max-time 30 \
+              -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+              "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=tff-fantezi-scout" | jq -er '.value')"
+            echo "::add-mask::$TOKEN"
+          }
+          mint
+          response="$(jq -nc --arg sha "$CANDIDATE_SHA" '{action:"prepare_current",code_sha:$sha}' |
+            curl --fail-with-body -sS --max-time 240 -X POST \
+              -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
+              --data-binary @- "$URL/weekly-model-lifecycle-p0-continuity-shadow")"
+          echo "$response" | jq .
+          echo "$response" | jq -e '.refresh_required == true and .gameweek==12 and (.source_window_applied_players >= 100) and (.run_id != null) and (.benchmark != null)'
+          echo "run_id=$(echo "$response" | jq -er '.run_id')" >> "$GITHUB_OUTPUT"
+          echo "bench=$(echo "$response" | jq -er '.benchmark')" >> "$GITHUB_OUTPUT"
+      - name: Run candidate 50K with new two-week source gate
+        env:
+          RUN_ID: ${{ steps.prepare.outputs.run_id }}
+          BENCH: ${{ steps.prepare.outputs.bench }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mint() {
+            TOKEN="$(curl -fsSL --max-time 30 \
+              -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+              "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=tff-fantezi-scout" | jq -er '.value')"
+            echo "::add-mask::$TOKEN"
+          }
+          mint
+          endpoint="$URL/run-live-sim-chunk-p0-continuity-shadow"
+          common="gw=12&run=$RUN_ID&benchmark=$BENCH"
+          curl --fail-with-body -sS --max-time 240 \
+            -H "Authorization: Bearer $TOKEN" "$endpoint?mode=reset&$common" |
+            jq -e '.ok==true' >/dev/null
+          for part in $(seq 0 99); do
+            if (( part > 0 && part % 9 == 0 )); then mint; fi
+            seed=$((2026000000 + 12 * 100000 + part * 500 + 1))
+            curl --fail-with-body -sS --max-time 240 --retry 2 --retry-delay 2 \
+              -H "Authorization: Bearer $TOKEN" \
+              "$endpoint?$common&draws=500&seed=$seed" |
+              jq -e '.ok==true and .draws==500 and .players==456' >/dev/null
+            if (( part % 10 == 9 )); then echo "P0 candidate $(((part+1)*500))/50000 draws"; fi
+          done
+          mint
+          curl --fail-with-body -sS --max-time 240 \
+            -H "Authorization: Bearer $TOKEN" \
+            "$endpoint?mode=finalize&$common" |
+            jq -e '.ok==true and .draws==50000 and .modal_players==456'
+      - name: Optimize legal 15-player squads and run QA gates, no publication
+        env:
+          RUN_ID: ${{ steps.prepare.outputs.run_id }}
+          BENCH: ${{ steps.prepare.outputs.bench }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mint() {
+            TOKEN="$(curl -fsSL --max-time 30 \
+              -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+              "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=tff-fantezi-scout" | jq -er '.value')"
+            echo "::add-mask::$TOKEN"
+          }
+          mint
+          for mode in recommended alternative; do
+            curl --fail-with-body -sS --max-time 300 \
+              -H "Authorization: Bearer $TOKEN" \
+              "$URL/run-staging-optimizer?mode=$mode&run=$RUN_ID" | jq -e '.ok==true'
+          done
+          for stage in qa integrity bugfix; do
+            mint
+            jq -nc --arg run "$RUN_ID" --arg stage "$stage" '{stage:$stage,run_id:$run}' |
+              curl --fail-with-body -sS --max-time 180 \
+                -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
+                --data-binary @- "$URL/model-refresh-control" | jq -e '.pass==true or .ok==true'
+          done
+          mint
+          jq -nc --arg run "$RUN_ID" --arg bench "$BENCH" '{action:"audit_run",run_id:$run,benchmark:$bench}' |
+            curl --fail-with-body -sS --max-time 180 \
+              -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
+              --data-binary @- "$URL/weekly-model-lifecycle-p0-continuity-shadow" |
+            jq -e '.ok==true and .pass==true and .no_writes==true'
+          {
+            echo "### P0 source-frozen two-week continuity candidate: 50K validated"
+            echo "- Run ID: $RUN_ID"
+            echo "- Historical 50K is separately paired; this candidate NEVER promotes itself"
+          } >> "$GITHUB_STEP_SUMMARY"
