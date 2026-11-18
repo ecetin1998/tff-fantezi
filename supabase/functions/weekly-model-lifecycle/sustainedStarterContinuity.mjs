@@ -41,7 +41,7 @@ export function sustainedStarterContinuity({
       /^mh\d+_owner_approved_independent_score_events$/.test(kind)
     if(!row||!independent||row.is_final!==true||trustedMinute(row)===null||
       trustedMinute(row)<60||imported===null||observed===null||
-      imported>cutoff||observed>cutoff){
+      imported>=cutoff||observed>=cutoff){
       return no(prior,"two_consecutive_pre_kickoff_60_plus_missing")
     }
   }
