@@ -48,7 +48,7 @@ export function minuteStateAudit({weeks=[],fixtures=[],players=[],projections=[]
   const byWeek=new Map(),byRun=new Map(),cutoff=new Map(),fixtureById=new Map();
   for(const f of fixtures){
     const week=num(f.gameweek),date=stamp(f.kickoff_at);
-    if(!Number.isInteger(week)||date===null||!Number.isInteger(num(f.match_id)))continue;
+    if(!Number.isInteger(week)||date===null||!finite(f.match_id)||!Number.isInteger(num(f.match_id)))continue;
     cutoff.set(week,Math.min(date,cutoff.get(week)??Infinity));
     fixtureById.set(key(week,f.match_id),f);
   }
@@ -57,7 +57,7 @@ export function minuteStateAudit({weeks=[],fixtures=[],players=[],projections=[]
     const week=num(w.gameweek),frozen=stamp(w.snapshot_at),first=cutoff.get(week);
     if(w.status!=="closed"||w.prediction_mode!=="live_frozen"||!w.run_id||
       !Number.isInteger(week)||!Number.isFinite(first)||frozen===null||frozen>=first||
-      !Number.isInteger(num(w.training_through_gameweek))||
+      !finite(w.training_through_gameweek)||!Number.isInteger(num(w.training_through_gameweek))||
       num(w.training_through_gameweek)>=week){skipped.push(week);continue;}
     byWeek.set(week,w);byRun.set(String(w.run_id),week);
   }
