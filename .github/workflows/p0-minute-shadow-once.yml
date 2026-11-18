@@ -10,7 +10,7 @@ permissions:
 jobs:
   audit:
     if: >-
-      github.event.head_commit.message == 'chore(p0): run verified minute state shadow audit'
+      github.event.head_commit.message == 'chore(p0): verify sourced full three state shadow audit'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     env:
@@ -28,7 +28,7 @@ jobs:
             -H "Authorization: Bearer $token" -H 'Content-Type: application/json' \
             --data '{"action":"diagnose_backtest"}' \
             "$FUNCTION_URL" > minute-state-shadow.json
-          jq -e '.ok == true and .no_writes == true and .minute_state_audit.ok == true and .minute_state_audit.auto_promote == false and .minute_state_audit.no_writes == true and (.minute_state_audit.overall.xi_n > 500) and (.minute_state_audit.by_week | length >= 2)' minute-state-shadow.json
+          jq -e '.ok == true and .no_writes == true and .minute_state_audit.ok == true and .minute_state_audit.auto_promote == false and .minute_state_audit.no_writes == true and (.minute_state_audit.overall.xi_n > 500) and ((.minute_state_audit.by_week | length >= 2) and (.minute_state_audit.overall.confirmed_unused > 100) and ([.minute_state_audit.by_week[] | select(.gameweek == 11 and .confirmed_unused > 100)] | length == 1))' minute-state-shadow.json
           {
             echo "### P0 playing-time shadow (READ ONLY)"
             echo "| MH | Verified full XIs | XI Brier | Sourced starts | Sourced substitutions | Active 30+ minute MAE | Missed 60+ | Unknown unused |"
