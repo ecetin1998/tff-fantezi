@@ -13,7 +13,6 @@ function uniqueRows(rows,idfn){
 }
 const validActual=row=>row?.is_final===true&&finite(row.minutes)&&finite(row.points)&&
  (Number(row.minutes)>0||Number(row.minutes)===0&&row.source_kind==="fresh_closed_actual");
-const exact=(a,b)=>a.length===b.length&&a.every(x=>b.includes(x));
 const groupStat=()=>({xiN:0,baseXI:0,trialXI:0,minutesN:0,baseMin:0,trialMin:0,xfpN:0,baseFP:0,trialFP:0,
   selectedActualStarts:0,lowConfidenceZerosExcluded:0,invalidLineups:0});
 const summarize=(s)=>({
