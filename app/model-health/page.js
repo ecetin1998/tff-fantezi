@@ -73,17 +73,33 @@ export default async function ModelHealth(){
             <small>Gerçekleşen %95 aralık: {pct(metric?.observed_ci95?.lower)}–{pct(metric?.observed_ci95?.upper)}</small>
           </div>)}
         </div>
+        {summary.goals?.samples>0?<div className="model-calibration-grid" aria-label="Ev ve deplasman gol beklentisi doğruluğu">
+          {[
+            ['Ev gol beklentisi',summary.goals.home],
+            ['Deplasman gol beklentisi',summary.goals.away]
+          ].map(([label,row])=><div key={label}>
+            <span>{label}</span>
+            <div><strong>{dec(row?.predicted)}</strong><span aria-hidden="true">→</span><strong>{dec(row?.observed)}</strong></div>
+            <small>Maç başı gol • mutlak hata {dec(row?.mae)}</small>
+          </div>)}
+          <div>
+            <span>Poisson referans skoru</span>
+            <div><strong>{dec(summary.goals.poisson_reference_nll)}</strong></div>
+            <small>Maç başı takım log-kayıp ortalaması • {summary.goals.samples} maç</small>
+          </div>
+        </div>:null}
+        <p className="model-calibration-explain">Gol MAE ve Poisson referans skoru, maç öncesi tahmin edilen ev/deplasman gol ortalamaları üzerinden hesaplanır. Canlı NB2 motorunun birebir olasılık skoru değildir; model otomatik güncellenmez.</p>
         <div className="model-calibration-table-wrap">
           <table className="model-calibration-table">
-            <thead><tr><th>Hafta</th><th>Maç</th><th>1X2 Brier</th><th>3+ gol model</th><th>3+ gol gerçek</th><th>KG Brier</th></tr></thead>
+            <thead><tr><th>Hafta</th><th>Maç</th><th>1X2 Brier</th><th>3+ gol model</th><th>3+ gol gerçek</th><th>KG Brier</th><th>Ev gol MAE</th><th>Dep gol MAE</th></tr></thead>
             <tbody>{calibration.weeks.map(w=><tr key={w.gameweek}>
               <td>MH{w.gameweek}</td><td>{w.matches}</td><td>{dec(w.result_brier)}</td>
               <td>{pct(w.over25.predicted)}</td><td>{pct(w.over25.observed)}</td>
-              <td>{dec(w.btts_brier)}</td>
+              <td>{dec(w.btts_brier)}</td><td>{dec(w.goals?.home?.mae)}</td><td>{dec(w.goals?.away?.mae)}</td>
             </tr>)}</tbody>
           </table>
         </div>
-        <p className="model-calibration-disclaimer">Brier için düşük değer daha iyi. {warnings?'3+ gol oranında gözlemsel fark belirgin; bağımsız yeni hafta doğrulaması olmadan model ağırlığını değiştirme.':'Bu örneklemde otomatik ağırlık değişikliğini gerektiren bir terfi kararı verilmedi.'} Görülen %95 Wilson aralıkları örneklem belirsizliğini gösterir; maçlar arası bağımlılığı veya veri seçimini düzeltmez. Beş haftalık yaklaşık 45 maçlık geçmiş, bağımsız ileriye dönük kalibrasyon kanıtı değildir. Eşikler yalnız inceleme amaçlıdır.</p>
+        <p className="model-calibration-disclaimer">Brier için düşük değer daha iyi. {warnings?'3+ gol oranında gözlemsel fark belirgin; bağımsız yeni hafta doğrulaması olmadan model ağırlığını değiştirme.':'Bu örneklemde otomatik ağırlık değişikliğini gerektiren bir terfi kararı verilmedi.'} Görülen %95 Wilson aralıkları örneklem belirsizliğini gösterir; maçlar arası bağımlılığı veya veri seçimini düzeltmez. Bu tarihsel örneklem, model ağırlığını değiştirmek için tek başına bağımsız ileriye dönük doğrulama kanıtı değildir. Eşikler yalnız inceleme amaçlıdır.</p>
       </div>:<p className="model-calibration-explain">Kapsamı doğrulanmış maç öncesi tahmin ile kapanmış maç sonuçları şu anda eşleştirilemedi. Tahmin yoksa başarı veya %0 gösterilmez.</p>}
     </section>
   </div>
