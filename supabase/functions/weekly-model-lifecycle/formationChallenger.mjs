@@ -14,7 +14,7 @@ function uniqueRows(rows,idfn){
 const validActual=row=>row?.is_final===true&&finite(row.minutes)&&finite(row.points)&&
  (Number(row.minutes)>0||Number(row.minutes)===0&&row.source_kind==="fresh_closed_actual");
 const groupStat=()=>({xiN:0,baseXI:0,trialXI:0,minutesN:0,baseMin:0,trialMin:0,xfpN:0,baseFP:0,trialFP:0,
-  selectedActualStarts:0,lowConfidenceZerosExcluded:0,invalidLineups:0});
+  selectedActualStarts:0,lowConfidenceZerosExcluded:0,invalidLineups:0,missingChallenger:0});
 const summarize=(s)=>({
  xi_sample:s.xiN,champion_xi_brier:s.xiN?round(s.baseXI/s.xiN):null,
  challenger_xi_brier:s.xiN?round(s.trialXI/s.xiN):null,
@@ -26,7 +26,7 @@ const summarize=(s)=>({
  challenger_xfp_mae:s.xfpN?round(s.trialFP/s.xfpN):null,
  xfp_mae_gain:s.xfpN?round((s.baseFP-s.trialFP)/s.xfpN):null,
  verified_starters:s.selectedActualStarts,unverified_zero_excluded:s.lowConfidenceZerosExcluded,
- incomplete_or_contradictory_lineups:s.invalidLineups
+ incomplete_or_contradictory_lineups:s.invalidLineups,missing_challenger_player_rows:s.missingChallenger
 });
 export function compareFrozenLineupCandidates({
  weeks=[],fixtures=[],champion=[],challenger=[],verifiedXi=[],actuals=[]
@@ -79,8 +79,10 @@ export function compareFrozenLineupCandidates({
   }
   for(const row of all){
    const k=key(g.gameweek,row.player_id),other=trial.get(k);
-   if(!other||Number(other.club_id)!==g.team||
-     !okProb(row.xi_probability)||!okProb(other.xi_probability))continue;
+   if(!other||Number(other.club_id)!==g.team||!okProb(other.xi_probability)){
+     s.missingChallenger++;continue;
+   }
+   if(!okProb(row.xi_probability))continue;
    const y=g.ids.includes(Number(row.player_id))?1:0;
    s.xiN++;s.baseXI+=(Number(row.xi_probability)-y)**2;
    s.trialXI+=(Number(other.xi_probability)-y)**2;
@@ -102,11 +104,15 @@ export function compareFrozenLineupCandidates({
  const report=[...perWeek.entries()].sort(([a],[b])=>a-b)
    .map(([gameweek,s])=>({gameweek,...summarize(s)}));
  const qualified=report.filter(w=>w.xi_sample>=100&&w.minute_sample>=30&&
-   w.xi_brier_gain>0&&w.minute_mae_gain>=0&&w.xfp_mae_gain>=0);
+   w.xi_brier_gain>0&&w.minute_mae_gain>=0&&w.xfp_mae_gain>=0&&
+   w.incomplete_or_contradictory_lineups===0&&w.missing_challenger_player_rows===0);
  return {mode:"shadow_only",write_mode:"read_only",auto_promote:false,
    source_policy:"closed_week;frozen_snapshot_before_first_kickoff;challenger_input_cutoff_lte_frozen;verified_full_team_XI",
    eligible_weeks:[...allowed].sort((a,b)=>a-b),blocked_weeks:blocked,
    compared_weeks:report.length,passing_weeks:qualified.length,
-   ready_for_review:qualified.length>=2&&qualified.length===report.length&&blocked.length===0,
+   // Never pass two cherry-picked complete weeks while a third eligible
+   // frozen week is missing its XI/forecast comparison altogether.
+   ready_for_review:allowed.size>=2&&report.length===allowed.size&&
+      qualified.length===allowed.size&&blocked.length===0,
    per_week:report};
 }
