@@ -2556,3 +2556,99 @@
 .scope :global(.player-identity-pills){flex-wrap:wrap;row-gap:5px}
 .scope :global(.player-role-caption),.scope :global(.player-model-note){white-space:normal;overflow-wrap:anywhere}
 }
+
+/* P1: backtest readability and accessible type sizes on desktop and mobile. */
+.scope :global(.backtest-page) :global(.backtest-hero) p,
+.scope :global(.backtest-page) :global(.backtest-explainer) p,
+.scope :global(.backtest-page) :global(.learning-card) p,
+.scope :global(.backtest-page) :global(.learning-card) strong,
+.scope :global(.backtest-page) :global(.learning-card) small,
+.scope :global(.backtest-page) :global(.backtest-notes) span,
+.scope :global(.backtest-page) :global(.learning-rule-grid) span,
+.scope :global(.backtest-page) :global(.metric-guide-grid) p,
+.scope :global(.backtest-page) :global(.empty-learning-state){
+  font-size:var(--type-label);
+  line-height:1.5;
+}
+.scope :global(.backtest-page) :global(.backtest-live-badge) small,
+.scope :global(.backtest-page) :global(.backtest-live-badge) span,
+.scope :global(.backtest-page) :global(.backtest-summary-grid) span,
+.scope :global(.backtest-page) :global(.backtest-summary-grid) small,
+.scope :global(.backtest-page) :global(.panel-head)>small,
+.scope :global(.backtest-page) :global(.backtest-notes) b,
+.scope :global(.backtest-page) :global(.learning-card)>div span,
+.scope :global(.backtest-page) :global(.learning-card)>div em,
+.scope :global(.backtest-page) :global(.learning-rule-grid) b,
+.scope :global(.backtest-page) :global(.backtest-mode),
+.scope :global(.backtest-page) :global(.replay-status){
+  font-size:var(--type-caption);
+  line-height:1.4;
+}
+.scope :global(.backtest-page) :global(.metric-guide-grid) b,
+.scope :global(.backtest-page) :global(.backtest-explainer) b{
+  font-size:var(--type-label);
+  line-height:1.4;
+}
+.scope :global(.backtest-page) :global(.backtest-table){
+  width:100%;
+  font-size:var(--type-label);
+  line-height:1.45;
+}
+.scope :global(.backtest-page) :global(.backtest-table) th{
+  font-size:var(--type-caption);
+  padding:10px 9px;
+}
+.scope :global(.backtest-page) :global(.backtest-table) td{
+  padding:10px 9px;
+}
+.scope :global(.backtest-page) :global(.table-scroll){
+  max-width:100%;
+  min-width:0;
+  overflow-x:auto;
+  -webkit-overflow-scrolling:touch;
+}
+.scope :global(.backtest-page) :global(.backtest-notes)>div{
+  grid-template-columns:minmax(48px,max-content) minmax(0,1fr);
+  gap:10px;
+  padding:10px;
+}
+.scope :global(.backtest-page) :global(.learning-card)>div{
+  flex-wrap:wrap;
+}
+.scope :global(.backtest-page) :global(.backtest-summary-grid)>:global(.card),
+.scope :global(.backtest-page) :global(.learning-card){
+  min-width:0;
+}
+@media(max-width:620px){
+  .scope :global(.backtest-page) :global(.backtest-live-badge){
+    display:flex;
+    flex-direction:column;
+    align-items:flex-start;
+    gap:5px;
+    text-align:left;
+  }
+  .scope :global(.backtest-page) :global(.backtest-live-badge) b{
+    max-width:100%;
+    margin:0;
+    font-size:20px;
+    line-height:1.2;
+    text-align:left;
+    overflow-wrap:anywhere;
+  }
+  .scope :global(.backtest-page) :global(.backtest-live-badge) span{
+    text-align:left;
+  }
+  .scope :global(.backtest-page) :global(.backtest-summary-grid){
+    gap:8px;
+  }
+  .scope :global(.backtest-page) :global(.backtest-summary-grid) :global(.card){
+    padding:12px;
+  }
+  .scope :global(.backtest-page) :global(.backtest-table){
+    min-width:740px;
+  }
+  .scope :global(.backtest-page) :global(.metric-guide-grid)>div,
+  .scope :global(.backtest-page) :global(.learning-card){
+    padding:12px;
+  }
+}
