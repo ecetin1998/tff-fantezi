@@ -1,0 +1,51 @@
+name: P0 frozen historical paired 50K completion (one-time)
+on:
+  push:
+    branches: [main]
+    paths: [".github/workflows/p0-asof-50k-finish-once.yml"]
+permissions:
+  contents: read
+  id-token: write
+jobs:
+  week:
+    if: >-
+      github.event.head_commit.message == 'chore(p0): complete three-week as-of paired 50K'
+    runs-on: ubuntu-latest
+    timeout-minutes: 58
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        week: [9, 10, 11]
+    env:
+      URL: https://nnoagjayvrwyjtizhnfz.supabase.co/functions/v1/run-live-sim-chunk
+      WEEK: ${{ matrix.week }}
+    steps:
+      - name: Continue the paired Monte Carlo from 10K to 50K without touching published forecasts
+        shell: bash
+        run: |
+          set -euo pipefail
+          token() {
+            TOKEN="$(curl -fsSL --max-time 30 \
+              -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+              "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=tff-fantezi-scout" | jq -er '.value')"
+            echo "::add-mask::$TOKEN"
+          }
+          token
+          for part in $(seq 20 99); do
+            if (( part > 20 && part % 7 == 0 )); then token; fi
+            seed=$((2026100000 + WEEK * 10000 + part * 500))
+            for model in control consecutive; do
+              benchmark="p0-asof-20261118-mh${WEEK}-${model}"
+              curl --fail-with-body --silent --show-error --max-time 240 --retry 2 --retry-delay 3 \
+                -H "Authorization: Bearer $TOKEN" \
+                "$URL?gw=$WEEK&run=00000000-0000-0000-0000-000000000009&benchmark=$benchmark&draws=500&seed=$seed" \
+                | jq -e '.ok==true and .draws==500 and .players==456' >/dev/null
+            done
+            if (( part % 10 == 9 )); then echo "MH$WEEK paired $(((part+1)*500))/50000 per model"; fi
+          done
+          {
+            echo "### MH$WEEK: Paired 50K freeze-source backtest"
+            echo "Control and consecutive-60 candidate use the same 50,000 draws per player."
+            echo "Neither is finalized, promoted, nor connected to published forecasts."
+          } >> "$GITHUB_STEP_SUMMARY"
