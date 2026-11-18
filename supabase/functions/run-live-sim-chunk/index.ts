@@ -269,6 +269,11 @@ Deno.serve(async(req)=>{
     // An older MH12+ input can pass arithmetic QA while using short bench
     // appearances as starter exit times. Never score/publish those inputs.
     if(GAMEWEEK>=12){
+      const missingContinuity=P.filter(p=>!String(p.source_note).includes("two-week-continuity-checked-v1"));
+      if(missingContinuity.length)return Response.json({
+        error:"TWO_WEEK_STARTER_CONTINUITY_PROVENANCE_MISSING",gameweek:GAMEWEEK,
+        rows:missingContinuity.length,policy_version:SCORER_POLICY_VERSION
+      },{status:409});
       const stale=P.filter(p=>!String(p.source_note).includes("starter-duration-source-gated-v2"));
       if(stale.length)return Response.json({
         error:"STARTER_DURATION_SOURCE_POLICY_MISSING",gameweek:GAMEWEEK,
