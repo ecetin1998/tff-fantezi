@@ -18,6 +18,21 @@ const proper=p=>finite(p?.xi_probability)&&finite(p?.appearance_probability)&&fi
   num(p.appearance_probability)>=num(p.xi_probability)&&num(p.appearance_probability)<=1&&
   num(p.x_minutes)>=0&&num(p.x_minutes)<=180;
 const freshActual=row=>row?.is_final===true&&finite(row.minutes)&&num(row.minutes)>0&&finite(row.points);
+// A final zero needs a full-match, independently source-reconciled absence.
+// Simply omitting a player from an XI or inferring a 0/0 is NOT verification.
+const independentlyUnused=(e,a,fixture)=>{
+ const note=String(e?.evidence_note||"");
+ const kind=String(a?.source_kind||"");
+ const observed=stamp(e?.updated_at),kickoff=stamp(fixture?.kickoff_at);
+ return e?.started===false&&e?.verified_first_11===false&&
+  e?.verified_substitution===false&&source(e)&&finite(e?.minutes)&&num(e.minutes)===0&&
+  note.includes("sourced full-match absence")&&
+  note.includes("full match participation list")&&
+  observed!==null&&kickoff!==null&&observed>kickoff&&
+  a?.is_final===true&&finite(a.minutes)&&num(a.minutes)===0&&
+  finite(a.points)&&num(a.points)===0&&
+  (kind==="fresh_closed_actual"||/^mh\d+_owner_approved_independent_score_events$/.test(kind));
+};
 function stat(){return {xiN:0,xiLoss:0,sourceXI:0,stateN:0,stateLoss:0,starterState:0,subState:0,
   unusedState:0,unverifiedUnused:0,unmatchedActual:0,exAnteN:0,exAnteMinAbs:0,
   verifiedActiveN:0,verifiedActiveMinAbs:0,startersMinuteN:0,startersMinuteAbs:0,
@@ -28,6 +43,8 @@ function view(s){return {
   known_playing_state_n:s.stateN,
   // Biased when unused outcomes are unverified; NEVER use for promotion.
   observed_state_brier_diagnostic:s.stateN?round(s.stateLoss/s.stateN):null,
+  complete_state_brier:s.xiN>0&&s.stateN===s.xiN?round(s.stateLoss/s.stateN):null,
+  full_three_state_scope:s.xiN>0&&s.stateN===s.xiN,
   confirmed_starters:s.starterState,confirmed_substitutes:s.subState,confirmed_unused:s.unusedState,
   unknown_unused_excluded:s.unverifiedUnused,unmatched_played_evidence:s.unmatchedActual,
   ex_ante_30_minute_sample:s.exAnteN,
@@ -86,7 +103,7 @@ export function minuteStateAudit({weeks=[],fixtures=[],players=[],projections=[]
     evidenceByPlayer.get(rosterKey).push(row);
     if(row.started!==true||row.verified_first_11!==true)continue;
     const groupKey=key(week,row.match_id,p.team_id);
-    if(!groups.has(groupKey))groups.set(groupKey,{week,team:num(p.team_id),ids:new Set(),invalid:false});
+    if(!groups.has(groupKey))groups.set(groupKey,{week,team:num(p.team_id),matchId:num(row.match_id),ids:new Set(),invalid:false});
     const g=groups.get(groupKey);
     if(!source(row)||!finite(row.minutes)||num(row.minutes)<=0||
       !Number.isInteger(num(row.player_id))||g.ids.has(num(row.player_id)))g.invalid=true;
@@ -111,15 +128,18 @@ export function minuteStateAudit({weeks=[],fixtures=[],players=[],projections=[]
       if(!proper(p)){for(const x of s)x.invalidPredictions++;continue;}
       const started=group.ids.has(id),xi=num(p.xi_probability),app=num(p.appearance_probability),xmins=num(p.x_minutes);
       for(const x of s){x.xiN++;x.xiLoss+=(xi-Number(started))**2;}
-      const eventRows=evidenceByPlayer.get(k)||[];
+      const eventRows=(evidenceByPlayer.get(k)||[]).filter(e=>num(e.match_id)===group.matchId);
+      const fixture=fixtureById.get(key(group.week,group.matchId));
       const stateRows=eventRows.filter(x=>source(x)&&finite(x.minutes)&&num(x.minutes)>0);
       const matching=stateRows.filter(x=>started
         ?x.started===true&&x.verified_first_11===true
         :x.started===false&&x.verified_substitution===true);
       const value=actual.get(k);
-      const matched=matching.length===1&&!actualDuplicates.has(k)&&freshActual(value)&&
+      const matched=matching.length===1&&eventRows.length===1&&!actualDuplicates.has(k)&&freshActual(value)&&
         Math.abs(num(value.minutes)-num(matching[0].minutes))<.05;
-      if(!matched){
+      const unused=!started&&eventRows.length===1&&!actualDuplicates.has(k)&&
+        independentlyUnused(eventRows[0],value,fixture);
+      if(!matched&&!unused){
         if(stateRows.length||value&&finite(value.minutes)&&num(value.minutes)>0){
           for(const x of s)x.unmatchedActual++;
         }else if(!started){for(const x of s)x.unverifiedUnused++;}
@@ -128,11 +148,17 @@ export function minuteStateAudit({weeks=[],fixtures=[],players=[],projections=[]
       // Source-confirmed starts and substitutions only; other 0/0 outcomes are
       // deliberately excluded from three-state scoring and exposure metrics.
       const probs=[xi,Math.max(0,app-xi),Math.max(0,1-app)];
-      const state=started?0:1;
+      const state=unused?2:started?0:1;
       const loss=probs.reduce((sum,pv,i)=>sum+(pv-Number(i===state))**2,0);
       const y=num(value.minutes),error=Math.abs(xmins-y),forecast30=xmins>=30,forecast60=xmins>=60;
       for(const x of s){
         x.stateN++;x.stateLoss+=loss;
+        if(unused){
+          x.unusedState++;
+          if(forecast30){x.exAnteN++;x.exAnteMinAbs+=xmins;x.forecast30++;}
+          if(forecast60)x.forecast60++;
+          continue;
+        }
         if(started){x.starterState++;x.startersMinuteN++;x.startersMinuteAbs+=error;}
         else{x.subState++;x.subsMinuteN++;x.subsMinuteAbs+=error;}
         x.verifiedActiveN++;x.verifiedActiveMinAbs+=error;
@@ -144,9 +170,9 @@ export function minuteStateAudit({weeks=[],fixtures=[],players=[],projections=[]
     }
   }
   return {ok:true,mode:"read_only",no_writes:true,auto_promote:false,
-    evidence_policy:"complete_verified_team_XI;source_verified_bench_entry;positive_minutes_matched_to_final",
+    evidence_policy:"complete_verified_team_XI;source_verified_bench_entry;positive_minutes_matched_to_final;explicit_sourced_full_match_absence",
     zero_policy:"unconfirmed_zero_is_unknown_never_DNP",
-    caveat:"observed_state_brier_diagnostic uses confirmed starters/substitutes only; not proper full three-state Brier without independently verified unused players",
+    caveat:"observed_state_brier_diagnostic is selection-biased when unused is unknown. complete_state_brier exists only when all XI-cohort players have verified starter, entered-sub, or explicitly reconciled unused labels",
     eligible_weeks:[...byWeek.keys()].sort((a,b)=>a-b),skipped_weeks:skipped,
     overall:view(total),
     by_week:[...byWeekStat.entries()].sort(([a],[b])=>a-b).map(([gameweek,s])=>({gameweek,...view(s)})),

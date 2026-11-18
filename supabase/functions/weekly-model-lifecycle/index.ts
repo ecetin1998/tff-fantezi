@@ -1471,7 +1471,7 @@ Deno.serve(async(req:Request)=>{
         getAll("scout_player_projections","run_id,player_id,xi_probability,appearance_probability,x_minutes",
           q=>q.in("run_id",weeks.map(w=>w.run_id)).order("run_id").order("player_id")),
         getAll("scout_match_player_evidence",
-          "gameweek,match_id,player_id,started,verified_first_11,verified_substitution,minutes,source_url,updated_at",
+          "gameweek,match_id,player_id,started,verified_first_11,verified_substitution,minutes,source_url,evidence_note,updated_at",
           q=>q.eq("season","2026-27").in("gameweek",weekIds).order("gameweek").order("match_id").order("player_id"))
       ])
       const report=frozenAccuracyReport({weeks,players,positions,weeklyPositions,fixtures})
