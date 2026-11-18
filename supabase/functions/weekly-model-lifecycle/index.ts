@@ -23,6 +23,7 @@ import {teamEloMatchFactor,TEAM_ELO_POLICY} from "./teamElo.mjs"
 import {credibleAttackWeights} from "./defenderOpportunity.mjs"
 import {frozenAccuracyReport} from "./frozenAccuracy.mjs"
 import {evaluateModelActionCandidates} from "./modelActionCandidates.mjs"
+import {minuteStateAudit} from "./minuteStateAudit.mjs"
 import {sourceCoverageReport} from "./sourceCoverage.mjs"
 import {FORWARD_LEARNING_V1,verifyForwardHistory,parseForwardExperiment,forwardFeedbackRate} from "./activeForwardFeedback.mjs"
 
@@ -1435,7 +1436,7 @@ Deno.serve(async(req:Request)=>{
       // Include only completed live_frozen PRE-KICKOFF snapshots, never the
       // rolling current run, training replay, or incomplete actuals.
       const weeksQ=await sb.from("scout_backtest_weeks")
-        .select("gameweek,run_id,prediction_mode,status,snapshot_at,prediction_count,actual_count")
+        .select("gameweek,run_id,prediction_mode,status,snapshot_at,training_through_gameweek,prediction_count,actual_count")
         .eq("status","closed").eq("prediction_mode","live_frozen")
         .order("gameweek",{ascending:false}).limit(8)
       if(weeksQ.error)throw weeksQ.error
@@ -1454,25 +1455,34 @@ Deno.serve(async(req:Request)=>{
         }
         throw new Error("FROZEN_BACKTEST_PAGINATION_LIMIT")
       }
-      const [players,positions,weeklyPositions,fixtures,availability]=await Promise.all([
+      const [players,positions,weeklyPositions,fixtures,availability,frozenProjections,verifiedXi]=await Promise.all([
         getAll("scout_backtest_players",
           "gameweek,player_id,prediction_mode,predicted_xfp,actual_points,predicted_minutes,actual_minutes,six_plus_probability,p25,p90",
           q=>q.in("gameweek",weekIds).eq("prediction_mode","live_frozen")
             .not("actual_points","is",null).order("gameweek").order("player_id")),
-        getAll("scout_players","id,position",q=>q.order("id")),
-        getAll("scout_player_weekly_points","gameweek,player_id,position,minutes,points,source_kind,is_final,source_updated_at",
+        getAll("scout_players","id,position,team_id",q=>q.order("id")),
+        getAll("scout_player_weekly_points","gameweek,player_id,position,match_id,minutes,points,source_kind,is_final,source_updated_at",
           q=>q.in("gameweek",[...new Set([...weekIds,...weekIds.map(w=>w-1).filter(w=>w>=1)])])
             .eq("is_final",true).order("gameweek").order("player_id")),
-        getAll("scout_match_history","gameweek,kickoff_at",
+        getAll("scout_match_history","gameweek,match_id,home_team_id,away_team_id,kickoff_at",
           q=>q.eq("season","2026-27").in("gameweek",weekIds).order("gameweek").order("kickoff_at")),
         getAll("scout_availability","run_id,player_id,availability_probability",
-          q=>q.in("run_id",weeks.map(w=>w.run_id)).order("run_id").order("player_id"))
+          q=>q.in("run_id",weeks.map(w=>w.run_id)).order("run_id").order("player_id")),
+        getAll("scout_player_projections","run_id,player_id,xi_probability,appearance_probability,x_minutes",
+          q=>q.in("run_id",weeks.map(w=>w.run_id)).order("run_id").order("player_id")),
+        getAll("scout_match_player_evidence",
+          "gameweek,match_id,player_id,started,verified_first_11,verified_substitution,minutes,source_url,updated_at",
+          q=>q.eq("season","2026-27").in("gameweek",weekIds).order("gameweek").order("match_id").order("player_id"))
       ])
       const report=frozenAccuracyReport({weeks,players,positions,weeklyPositions,fixtures})
       const model_action_trials=evaluateModelActionCandidates({
         weeks,players,weeklyActuals:weeklyPositions,availability,fixtures
       })
-      return Response.json({...report,model_action_trials})
+      const minute_state_audit=minuteStateAudit({
+        weeks,fixtures,players:positions,projections:frozenProjections,
+        evidence:verifiedXi,actuals:weeklyPositions
+      })
+      return Response.json({...report,model_action_trials,minute_state_audit})
     }
     if(action==="audit_run"){
       // Always inspect actual replay inputs + probabilities, never a stale

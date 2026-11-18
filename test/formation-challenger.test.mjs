@@ -44,3 +44,23 @@ test('no partial ten-player lineup or contradictory duplicates enter scoring',()
  const e=input();e.verifiedXi.push({...e.verifiedXi[0]})
  assert.equal(compare(e).per_week[0].incomplete_or_contradictory_lineups,1)
 })
+
+test('shadow promotion gate cannot cherry-pick only two of three eligible frozen weeks',()=>{
+ const a=input();
+ const next={...w,gameweek:9,champion_snapshot_at:'2026-10-20T10:00:00Z',
+   challenger_input_cutoff_at:'2026-10-20T09:00:00Z',challenger_training_through:8};
+ const third={...w,gameweek:8,champion_snapshot_at:'2026-10-10T10:00:00Z',
+   challenger_input_cutoff_at:'2026-10-10T09:00:00Z',challenger_training_through:7};
+ a.weeks.push(next,third);
+ a.fixtures.push({...f,gameweek:9,match_id:101,kickoff_at:'2026-10-23T17:00:00Z'});
+ a.fixtures.push({...f,gameweek:8,match_id:102,kickoff_at:'2026-10-16T17:00:00Z'});
+ const result=compare(a);
+ assert.deepEqual(result.eligible_weeks,[8,9,10]);
+ assert.equal(result.ready_for_review,false);
+});
+test('missing challenger player rows are counted and cannot be hidden',()=>{
+ const a=input();a.challenger=a.challenger.filter(x=>x.player_id!==5);
+ const r=compare(a);
+ assert.equal(r.per_week[0].missing_challenger_player_rows,1);
+ assert.equal(r.auto_promote,false);
+});
