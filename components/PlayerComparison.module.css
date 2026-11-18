@@ -1,0 +1,101 @@
+/* P1 - self-contained comparison layout. Avoids the old details/card grid
+ * collision, without affecting the player table or theme-wide controls. */
+.panel:global(.card){
+  display:block;
+  width:100%;
+  height:auto;
+  min-height:0;
+  margin:12px 0 18px;
+  padding:20px 22px 18px;
+  overflow:visible;
+  border:1px solid #cbdfee;
+  border-radius:18px;
+  background:#ffffff;
+  color:#172744;
+  box-shadow:0 8px 28px rgba(25,80,120,.06);
+}
+.heading{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;min-width:0}
+.headingCopy{flex:1 1 auto;min-width:0}
+.eyebrow{display:block;margin:0 0 5px;color:#006fca;font-size:11px;font-weight:850;letter-spacing:.09em}
+.headingCopy h2{margin:0;color:#172744;font-size:clamp(18px,2vw,23px);font-weight:850;line-height:1.25;letter-spacing:-.02em}
+.headingCopy p{margin:6px 0 0;color:#60758d;font-size:12px;line-height:1.45}
+.headingActions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.poolCount{display:inline-flex;align-items:center;min-height:29px;padding:5px 10px;border:1px solid #d2e5f2;border-radius:999px;background:#f0f8ff;color:#28658f;font-size:11px;font-weight:750;white-space:nowrap}
+.reset{min-height:29px;padding:5px 11px;border:1px solid #dae4ec;border-radius:999px;background:#fff;color:#46627c;font-size:11px;font-weight:750}
+.reset:hover{background:#f3f8fc}
+.reset:focus-visible,.pickerCard select:focus-visible,.playerDetails a:focus-visible,.metrics a:focus-visible{outline:3px solid #0099ff;outline-offset:2px}
+.pickerGrid{display:grid;grid-template-columns:minmax(0,1fr) 32px minmax(0,1fr);align-items:center;gap:12px;margin-top:16px}
+.pickerCard{display:flex;flex-direction:column;gap:8px;min-width:0;min-height:0;padding:14px;border:1px solid #d7e5ee;border-radius:14px;background:#f9fcff}
+.pickerTop{display:flex;align-items:center;justify-content:space-between;min-width:0;gap:8px}
+.pickerTop label{color:#3d5870;font-size:12px;font-weight:800}
+.chosen{padding:4px 8px;border-radius:999px;background:#e4f6ed;color:#18734e;font-size:10px;font-weight:800}
+.pickerCard select{display:block;width:100%;max-width:100%;min-width:0;min-height:43px;padding:10px 32px 10px 11px;appearance:auto;border:1px solid #b9d4e7;border-radius:10px;background:#ffffff;color:#172744;font-size:13px;font-weight:650;line-height:1.35}
+.pickerCard select:hover{border-color:#55a9e1}
+.versus{display:grid;place-items:center;width:32px;height:32px;border:1px solid #c6deef;border-radius:50%;background:#eaf6ff;color:#0873b6;font-size:10px;font-weight:900}
+.pickerHint{min-height:20px;margin:0;color:#7389a0;font-size:11px;line-height:1.4}
+.playerPreview{display:flex;justify-content:space-between;align-items:center;gap:10px;min-width:0;padding:10px 11px;border:1px solid #dfecf4;border-radius:11px;background:#ffffff}
+.playerDetails{min-width:0;flex:1}
+.playerDetails a{display:block;min-width:0;color:#0b5e99;font-size:12px;font-weight:850;line-height:1.3;text-decoration:underline;text-decoration-color:transparent;text-underline-offset:2px;overflow-wrap:anywhere}
+.playerDetails a:hover{text-decoration-color:currentColor}
+.playerDetails span{display:block;margin-top:3px;color:#6a7f95;font-size:10px;line-height:1.4;overflow-wrap:anywhere}
+.playerStats{display:flex;align-items:center;gap:12px;flex-shrink:0}
+.playerStats>span{display:flex;flex-direction:column;gap:2px;align-items:flex-end}
+.playerStats small{color:#6f8499;font-size:10px}
+.playerStats strong{color:#223a52;font-size:13px;font-weight:850;font-variant-numeric:tabular-nums}
+.results{display:grid;gap:13px;margin-top:14px;min-width:0}
+.insightGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.insight{display:grid;align-content:start;gap:4px;min-width:0;padding:12px 14px;border:1px solid #d4e7f3;border-radius:12px;background:#f1f9ff}
+.insight>span{color:#47738f;font-size:10px;font-weight:800;letter-spacing:.02em}
+.insight>strong{color:#16466f;font-size:14px;font-weight:850;line-height:1.3;overflow-wrap:anywhere}
+.insight>small{color:#66869d;font-size:10px;line-height:1.4}
+.metricsWrap{min-width:0;border:1px solid #dce8f1;border-radius:13px;overflow:hidden}
+.metrics{width:100%;border-collapse:collapse;table-layout:fixed;color:#273f56}
+.metrics thead{background:#eaf5fc}
+.metrics th,.metrics td{padding:10px 12px;overflow-wrap:anywhere}
+.metrics thead th{color:#4b6980;font-size:11px;font-weight:800;line-height:1.4}
+.metrics thead th:first-child,.metrics thead th:last-child{width:34%}
+.metrics thead th:nth-child(2){width:32%;text-align:center}
+.metrics thead th:first-child{text-align:left}
+.metrics thead th:last-child{text-align:right}
+.metrics thead a{color:#0868a7;text-decoration:underline;text-underline-offset:2px}
+.metrics tbody tr+tr{border-top:1px solid #e5edf3}
+.metrics tbody tr:nth-child(even){background:#fbfdff}
+.metrics tbody th{text-align:center;color:#60758b;font-size:11px;font-weight:700;line-height:1.4}
+.metrics tbody td{text-align:left;font-size:13px;font-weight:850;font-variant-numeric:tabular-nums}
+.metrics tbody td:last-child{text-align:right}
+.metrics tbody td.better{color:#087c55;background:#eaf8f1}
+.empty{display:flex;align-items:center;justify-content:center;gap:9px;min-height:46px;margin-top:13px;padding:9px 12px;border:1px dashed #d0e3f0;border-radius:11px;background:#f7fbfe}
+.emptyIcon{display:grid;place-items:center;flex:none;width:26px;height:26px;border-radius:50%;background:#e5f3fc;color:#0776b8;font-size:15px}
+.empty p{margin:0;color:#5f7890;font-size:12px;line-height:1.4}
+.notice,.disclaimer{margin:10px 0 0;color:#617b91;font-size:11px;line-height:1.5}
+@media(max-width:900px){
+ .panel:global(.card){padding:17px}
+ .playerPreview{align-items:flex-start;flex-direction:column}
+ .playerStats{align-self:stretch}
+ .playerStats>span{align-items:flex-start}
+}
+@media(max-width:620px){
+ .panel:global(.card){padding:14px;margin:10px 0 16px;border-radius:16px}
+ .heading{gap:10px;flex-wrap:wrap}
+ .headingActions{justify-content:flex-start}
+ .pickerGrid{grid-template-columns:minmax(0,1fr);gap:7px;margin-top:12px}
+ .versus{margin:-1px auto}
+ .pickerCard{padding:11px;gap:7px}
+ .playerPreview{flex-direction:row;align-items:center;gap:8px}
+ .playerStats{align-self:auto;gap:9px}
+ .playerStats>span{align-items:flex-end}
+ .insightGrid{gap:7px}
+ .insight{padding:10px}
+ .insight>strong{font-size:12px}
+ .metrics th,.metrics td{padding:9px 6px}
+ .metrics thead th{font-size:10px}
+ .metrics tbody th{font-size:10px}
+ .metrics tbody td{font-size:12px}
+}
+@media(max-width:390px){
+ .playerPreview{flex-direction:column;align-items:flex-start}
+ .playerStats{align-self:stretch}
+ .playerStats>span{align-items:flex-start}
+ .insightGrid{grid-template-columns:minmax(0,1fr)}
+}
+@media(prefers-reduced-motion:reduce){.panel:global(.card){scroll-behavior:auto}}
