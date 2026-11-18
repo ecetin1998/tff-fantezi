@@ -12,7 +12,7 @@ const pct=n=>n===null||n===undefined?'—':Math.round(Number(n)*100)+'%'
 const MODES=[{id:'balanced',label:'Dengeli'},{id:'safe',label:'Güvenli'},{id:'ceiling',label:'Yüksek tavan'}]
 
 export default function SquadDecisionLab({players=[],ids=[],xiIds=[],captainId=null,
-  initialCount=0,freeTransfersRemaining=1,managerCard='none',locked=false,
+  initialCount=0,freeTransfersRemaining=1,managerCard='none',captainMultiplier=2,locked=false,
   plan='free',advancedRows=[],onApply}){
   const [mode,setMode]=useState('balanced')
   // Premium values are supplied only after server-side subscription verification
@@ -33,17 +33,17 @@ export default function SquadDecisionLab({players=[],ids=[],xiIds=[],captainId=n
   const map=useMemo(()=>new Map(enriched.map(p=>[Number(p.id),p])),[enriched])
   const captain=map.get(Number(captainId))
   const currentRisk=useMemo(()=>squadFragility(xiIds,map),[xiIds,map])
-  const captainChoices=useMemo(()=>captainOptions(xiIds,captainId,map,2),[xiIds,captainId,map])
+  const captainChoices=useMemo(()=>captainOptions(xiIds,captainId,map,captainMultiplier),[xiIds,captainId,map,captainMultiplier])
   const risers=useMemo(()=>risingPlayers(enriched,ids,6),[enriched,ids])
   const canCeiling=plan==='pro'&&enriched.some(p=>Number.isFinite(Number(p.projection?.p90))&&p.projection?.p90!==null)
   const activeMode=mode==='ceiling'&&!canCeiling?'balanced':mode
   const eligible=ids.length===15&&initialCount===15&&managerCard==='none'&&!locked
   const suggestions=useMemo(()=>eligible?rankSingleTransfers({
     ids,pool:enriched,playerMap:map,budget:BUDGET,freeRemaining:freeTransfersRemaining,
-    hitCost:Number(TRANSFER_RULES.hit_cost)||4,clubMax:MAX_PLAYERS_PER_CLUB,mode:activeMode,
+    hitCost:Number(TRANSFER_RULES.hit_cost)||4,clubMax:MAX_PLAYERS_PER_CLUB,mode:activeMode,captainMultiplier,
     scoreFn:(nextIds,options)=>scoreSquad(nextIds,{...options,weeks:[0]}),
     maxResults:5
-  }):[],[eligible,ids,enriched,map,freeTransfersRemaining,activeMode])
+  }):[],[eligible,ids,enriched,map,freeTransfersRemaining,activeMode,captainMultiplier])
   return <section className={'card '+styles.lab} aria-labelledby="squad-decision-lab-title">
     <header className={styles.head}>
       <div><span className={styles.eyebrow}>MH • KARAR ARAÇLARI</span>
