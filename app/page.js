@@ -104,22 +104,40 @@ export default async function Home(){
 
 
     {mySquad?<section className="card home-decision-center" aria-labelledby="home-decision-title">
-      <div className="home-section-head">
-        <div><span className="eyebrow">MH{run?.gameweek||'—'} • KİŞİSEL KARAR MERKEZİ</span><h2 id="home-decision-title">Kadrona göre hızlı kontroller</h2></div>
-        <Link href="/squad" className="home-guide-link">Benim Kadrom →</Link>
+      <div className="home-decision-head">
+        <div className="home-decision-heading">
+          <span className="eyebrow">MH{run?.gameweek||'—'} • KİŞİSEL KARAR MERKEZİ</span>
+          <h2 id="home-decision-title">Kadronun özeti</h2>
+        </div>
+        <Link href="/squad" className="home-decision-link">Kadroyu aç <span aria-hidden="true">→</span></Link>
       </div>
-      {mySquad.hasSquad?<div className="home-personal-grid">
-        <div><span>İlk 11 + kaptan beklentisi</span><strong>{Number(mySquad.xiXfp||0).toFixed(1)} <small>xFP</small></strong><p>Kaydedilmiş ilk 11 ve seçili kaptanın ek puan beklentisi</p></div>
-        <div><span>Kadro risk kontrolleri</span><strong>{Number(mySquad.riskCount||0)}</strong><p>{mySquad.riskPlayer?<><Link href={'/players/'+mySquad.riskPlayer.player_id}>{playerLabel(mySquad.riskPlayer)}</Link> dahil; ilk 11, süre veya uygunluk sinyallerini incele.</>:'Oynama uygunluğu, ilk 11 ve dakika eşiklerinde belirgin uyarı yok.'}</p></div>
-        <div><span>Kaptan kontrolü</span><strong>{myCaptain?playerLabel(myCaptain):'Kaptan seçilmedi'}</strong><p>{captainAlternative?<><Link href={'/players/'+captainAlternative.player_id}>{playerLabel(captainAlternative)}</Link> ilk 11'inde daha yüksek xFP beklenen bir alternatif. Kaptanı değerlendir.</>:myCaptain?'İlk 11 içindeki yüksek xFP adaylarıyla karşılaştır.':'Kadronu açıp kaptanını seç.'}</p></div>
-      </div>:<p className="projection-explainer">Henüz kayıtlı 15 kişilik kadron yok. Kadronu kaydettiğinde ilk 11 xFP’si, kaptan ve risk kontrolleri burada görünür.</p>}
-      <p className="home-personal-disclaimer">Risk eşiği: uygunluk %80 altı, ilk 11 ihtimali %55 altı veya beklenen süre 45 dk altı. Bu değerler kesin oynamama ya da transfer tavsiyesi değildir.</p>
+      {mySquad.hasSquad?<div className="home-decision-grid">
+        <div className="home-decision-item home-decision-points">
+          <span className="home-decision-label">İlk 11 + kaptan</span>
+          <div className="home-decision-value"><strong>{Number(mySquad.xiXfp||0).toFixed(1)}</strong><span>xFP</span></div>
+          <p>Kaydedilmiş kadronun toplam beklentisi</p>
+        </div>
+        <div className={'home-decision-item home-decision-risk'+(Number(mySquad.riskCount||0)>0?' has-risk':' is-clear')}>
+          <span className="home-decision-label">Oynama riski</span>
+          <div className="home-decision-value"><strong>{Number(mySquad.riskCount||0)}</strong><span>{Number(mySquad.riskCount||0)>0?'Kontrol gerekli':'Uyarı yok'}</span></div>
+          <p>{mySquad.riskPlayer?<><Link href={'/players/'+mySquad.riskPlayer.player_id}>{playerLabel(mySquad.riskPlayer)}</Link> için dakika ve ilk 11 sinyallerine bak.</>:'Kadronun ana süre ve uygunluk eşiklerinde uyarı yok.'}</p>
+        </div>
+        <div className="home-decision-item home-decision-captain">
+          <span className="home-decision-label">Kaptan tercihin</span>
+          <strong className="home-decision-captain-name">{myCaptain?playerLabel(myCaptain):'Kaptan seçilmedi'}</strong>
+          <p>{captainAlternative?<><Link href={'/players/'+captainAlternative.player_id}>{playerLabel(captainAlternative)}</Link> daha yüksek xFP’li bir alternatif.</>:myCaptain?'Kaptanını diğer ilk 11 adaylarıyla karşılaştır.':'Kadro ekranından kaptanını belirle.'}</p>
+        </div>
+      </div>:<p className="home-decision-empty">Henüz kayıtlı 15 kişilik kadron yok. Kadronu kaydettiğinde bu haftanın xFP, kaptan ve risk özeti burada görünecek.</p>}
+      {mySquad.hasSquad?<details className="home-decision-method">
+        <summary>Risk eşikleri nasıl hesaplanıyor?</summary>
+        <p>Oynama uygunluğu %80, ilk 11 ihtimali %55 veya beklenen süre 45 dakikanın altındaysa kontrol önerilir. Bu kesin oynamama ya da transfer tavsiyesi değildir.</p>
+      </details>:null}
     </section>:null}
 
     <section className="home-feature-section">
       <div className="home-section-head">
-        <div><span className="eyebrow">MH{run?.gameweek||'—'} HIZLI BAKIŞ</span><h2>Bu hafta fantezi lig kadrosu için ne yapmalı?</h2></div>
-        <p>{best?<>MH{run?.gameweek} için modelin en yüksek beklenen puanlı oyuncusu {playerLabel(best)} ({best.team}). Kaptan adaylarını, önerilen kadroyu ve maç olasılıklarını aşağıdan incele.</>:'Kaptan adaylarını, önerilen kadroyu ve maç olasılıklarını aşağıdan incele.'}</p>
+        <div><span className="eyebrow">MH{run?.gameweek||'—'} HIZLI BAKIŞ</span><h2>Bu hafta ne yapmalı?</h2></div>
+        <p>Önerilen kadroyu, kaptan adaylarını ve oyuncu uygunluğunu tek yerden karşılaştır.</p>
       </div>
       <div className="home-feature-grid">
         <Link href="/squads" className="card home-feature-card">
