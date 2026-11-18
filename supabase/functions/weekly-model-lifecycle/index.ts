@@ -11,6 +11,7 @@ import {blendVerifiedAttackRate} from "./mh8Attack.mjs"
 import {calibrateAttackRates} from "./roleAwareAttackRates.mjs"
 import {starterDurationProfile} from "./starterDuration.mjs"
 import {regularStarterReliability} from "./regularStarterReliability.mjs"
+import {sustainedStarterContinuity} from "./sustainedStarterContinuity.mjs"
 import {restoreVerifiedSuspensionReturn} from "./suspensionReturn.mjs"
 import {verifiedLineupFormations} from "./verifiedLineupFormations.mjs"
 import {recentAttackForm,fetchRecentAttackEvidence,groupRecentAttack} from "./recentAttackForm.mjs"
@@ -513,6 +514,12 @@ async function prepare(sb:any,current:any,status:any,body:any={}){
       availability:n(av.availability_probability,1)
     })
     if(regularStarter.applied)roleProb=regularStarter.role
+    const sustainedStarter=sustainedStarterContinuity({
+      baseline:roleProb,position:p.position,weekly:minuteHistory,
+      targetWeek:target,cutoffAt:teamKickoffs.get(Number(p.team_id))||targetKickoff,
+      availability:n(av.availability_probability,1)
+    })
+    if(sustainedStarter.applied)roleProb=sustainedStarter.role
     // Suspended 0-minute fixtures must not be mistaken for rotation.
     // Restore sourced PRE-ban regular-start role only after the TFF ban ends.
     const banReturn=restoreVerifiedSuspensionReturn({
@@ -605,7 +612,7 @@ async function prepare(sb:any,current:any,status:any,body:any={}){
       bench_weight:n(prior.bench_weight,1),durations,duration_weights:durationWeights,rates,
       data_confidence:prior.data_confidence||projMap.get(id)?.confidence||"medium",
       has_individual_prior:Boolean(prior.has_individual_prior),
-      source_note:key+" • starter-duration-source-gated-v2 "+durationProfile.reason+" • starter-duration-long-window-v3 • starter-duration-single-short-shrink-v4"+(regularStarter.applied?" • season-starter-reliability-v1 +"+regularStarter.delta.toFixed(4):"")+(banReturn.applied?" • verified-suspension-return-v1 +"+banReturn.delta.toFixed(4):"")+(calibrated.applied?" • role-aware-attack-v1":"")+(form.applied?" • recent-attack-form-v2":"")+(attackForm.applied&&!form.applied?" • lagged-verified-form-v1":"")+(covered.aligned&&covered.advancedWeek<target-1?" • source-window-attack-v1":"")+(recentSourceRates.usedXg||recentSourceRates.usedXa?" • recent-mh8-11-fotmob-window-v1":"")+(tactical.reason==="multi_match_verified_lineup"?" • tactical-role-evidence-v1 "+tactical.role+":"+String(tactical.side||"unknown"):"")+(momentum.rising?" • momentum-v1 +"+momentum.role_uplift:"")+(recentStarter.applied?" • verified-recent-starter-v1 +"+recentStarter.delta.toFixed(4):"")+(xaReconcile.adjusted?" • defender-xa-source-window-v1 "+xaReconcile.source_minutes+"dk":"")+(officialShift.applied?" • resmî maç: "+event.match_ref:""),
+      source_note:key+" • starter-duration-source-gated-v2 "+durationProfile.reason+" • starter-duration-long-window-v3 • starter-duration-single-short-shrink-v4"+(regularStarter.applied?" • season-starter-reliability-v1 +"+regularStarter.delta.toFixed(4):"")+(sustainedStarter.applied?" • sustained-starter-continuity-v1 +"+sustainedStarter.delta.toFixed(4):"")+(banReturn.applied?" • verified-suspension-return-v1 +"+banReturn.delta.toFixed(4):"")+(calibrated.applied?" • role-aware-attack-v1":"")+(form.applied?" • recent-attack-form-v2":"")+(attackForm.applied&&!form.applied?" • lagged-verified-form-v1":"")+(covered.aligned&&covered.advancedWeek<target-1?" • source-window-attack-v1":"")+(recentSourceRates.usedXg||recentSourceRates.usedXa?" • recent-mh8-11-fotmob-window-v1":"")+(tactical.reason==="multi_match_verified_lineup"?" • tactical-role-evidence-v1 "+tactical.role+":"+String(tactical.side||"unknown"):"")+(momentum.rising?" • momentum-v1 +"+momentum.role_uplift:"")+(recentStarter.applied?" • verified-recent-starter-v1 +"+recentStarter.delta.toFixed(4):"")+(xaReconcile.adjusted?" • defender-xa-source-window-v1 "+xaReconcile.source_minutes+"dk":"")+(officialShift.applied?" • resmî maç: "+event.match_ref:""),
       sub_role:tactical.role||prior.sub_role||null,role_side:tactical.side||prior.role_side||null,
       effective_xa_per90:attackForm.xaPer90
     })
