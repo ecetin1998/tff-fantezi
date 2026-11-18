@@ -15,7 +15,11 @@ WITH official AS (
  FROM official w JOIN scout_highlightly_player_matches h
  ON h.season='2026-27' AND h.player_id=w.player_id
  AND h.match_id=w.match_id AND h.gameweek=w.gameweek
- AND abs(h.minutes-w.minutes)<=2
+ AND (abs(h.minutes-w.minutes)<=2 OR
+   -- Existing same-canonical-match identity is verified; limited minute
+   -- discrepancy on source-confirmed ZERO action must not erase zero shots.
+   (abs(h.minutes-w.minutes)<=8 AND h.shots=0
+     AND h.shots_on_target=0 AND h.key_passes=0))
 )
 INSERT INTO scout_player_advanced_baseline(
  season,player_id,through_gameweek,shots,shots_on_target,
