@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import SquadBuilder from '@/components/SquadBuilder'
 import {createClient} from '@/lib/supabase/server'
-import {getAuthState,getSquadPlayerPool,getRecommendation} from '@/lib/data'
+import {getAuthState,getSquadPlayerPool,getRecommendation,getProOverlayForRun} from '@/lib/data'
 import {BUDGET,FORMATIONS,SQUAD_SIZE} from '@/lib/rules'
 import {playerLabel} from '@/lib/playerPresentation'
 import {reportServerError} from '@/lib/observability'
@@ -74,9 +74,22 @@ export default async function Squad({searchParams}){
   const pageResultPromise=run?.gameweek
     ?supabasePromise.then(supabase=>supabase.rpc('scout_my_squad_page',{p_gameweek:run.gameweek}))
     :Promise.resolve({data:null,error:null})
-  const [recommendation,pageResult]=await Promise.all([
+  const advancedPromise=auth.plan==='pro'&&run?.id
+    ?getProOverlayForRun(run.id).then(rows=>(rows||[]).map(row=>({
+      player_id:Number(row.player_id),p90:row.p90??null,
+      six_plus_probability:row.six_plus_probability??null,
+      last2_minutes:row.last2_minutes??null,
+      previous2_minutes:row.previous2_minutes??null,
+      last2_xi_probability:row.last2_xi_probability??null,
+      previous2_xi_probability:row.previous2_xi_probability??null
+    }))).catch(error=>{
+      reportServerError('squad:p2-advanced-overlay',error,{run_id:run?.id})
+      return []
+    }):Promise.resolve([])
+  const [recommendation,pageResult,decisionAdvancedRows]=await Promise.all([
     recommendationPromise,
     pageResultPromise,
+    advancedPromise
   ])
   const {members:recommended,recommendation:recommendedMeta}=recommendation
   const {data:pageData,error:pageError}=pageResult
@@ -121,7 +134,8 @@ export default async function Squad({searchParams}){
     <SquadBuilder players={players} initialState={initialState} recommendedState={recommendedState}
       initialManagerCard={initialManagerCard} recommendedRunId={recommendedMeta?.run_id||null} poolRunId={run?.id||null}
       plan={auth.plan} gameweek={run?.gameweek} deadlineAt={gameweekRow?.deadline_at||null} locked={locked}
-      transferScenarios={[]} transferRights={pageData?.transfer_rights||null}/>
+      transferScenarios={[]} transferRights={pageData?.transfer_rights||null}
+      decisionAdvancedRows={decisionAdvancedRows}/>
 
     <section className="card squad-history-card">
       <div className="squad-history-head">
