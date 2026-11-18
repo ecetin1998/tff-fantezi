@@ -10,6 +10,7 @@ import ManagerCardPicker from '@/components/ManagerCardPicker'
 import MultiSelectFilter from '@/components/MultiSelectFilter'
 import {ATTACK_FORMATIONS,MANAGER_CARDS,MANAGER_CARD_NONE,captainMultiplierForCard,managerCardInfo,normalizeManagerCard,squadLimitsForCard} from '@/lib/managerCards'
 import {scoreSquad} from '@/lib/squadScoring'
+import SquadDecisionLab from '@/components/SquadDecisionLab'
 const POS_ORDER={GK:0,DEF:1,MID:2,FWD:3}
 const posLabel={GK:'KL',DEF:'DEF',MID:'OS',FWD:'FOR'}
 const ATTACK_FORMATION_MAP=Object.freeze(Object.fromEntries(ATTACK_FORMATIONS.map(value=>{
@@ -110,7 +111,7 @@ function formationFromXIIds(ids,map,formationMap=FORMATION_MAP){
   return formationMap[key]?key:null
 }
 
-export default function SquadBuilder({ players, initialState=[], recommendedState=[], initialManagerCard=MANAGER_CARD_NONE, plan='free', gameweek, deadlineAt=null, locked=false, transferScenarios=[], futurePlan=null, transferRights=null, recommendedRunId=null, poolRunId=null }){
+export default function SquadBuilder({ players, initialState=[], recommendedState=[], initialManagerCard=MANAGER_CARD_NONE, plan='free', gameweek, deadlineAt=null, locked=false, transferScenarios=[], futurePlan=null, transferRights=null, recommendedRunId=null, poolRunId=null, decisionAdvancedRows=[] }){
   const map=useMemo(()=>new Map(players.map(p=>[p.id,p])),[players])
   const normalizedInitialManagerCard=plan==='pro'?normalizeManagerCard(initialManagerCard):MANAGER_CARD_NONE
   const initialFormationMap=useMemo(()=>formationMapForCard(normalizedInitialManagerCard),[normalizedInitialManagerCard])
@@ -335,6 +336,19 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
     setFormation(modelMove.plan.key)
     setXiIds(modelMove.plan.lineup)
     setCaptainId(modelMove.plan.captain?.id||null)
+    setSwapTarget(null)
+  }
+
+  function applyDecisionTransfer(move){
+    if(isLocked||managerCard!==MANAGER_CARD_NONE||!move?.nextIds||!move?.plan||
+      !ids.includes(Number(move.outgoing?.id))||ids.includes(Number(move.incoming?.id)))return
+    const lineup=move.plan.lineup||[]
+    const updated=move.nextIds.map(Number)
+    if(updated.length!==SQUAD_SIZE||lineup.length!==STARTING_XI_SIZE||!lineup.every(id=>updated.includes(id)))return
+    setIds(updated)
+    setFormation(move.plan.key)
+    setXiIds(lineup)
+    setCaptainId(move.plan.captain?.id||null)
     setSwapTarget(null)
   }
 
@@ -909,6 +923,11 @@ export default function SquadBuilder({ players, initialState=[], recommendedStat
         </form>
       </div>
     </section>
+
+    <SquadDecisionLab players={players} ids={ids} xiIds={xiIds} captainId={captainId}
+      initialCount={initialIds.length} freeTransfersRemaining={freeTransfersRemaining}
+      managerCard={managerCard} captainMultiplier={captainMultiplier}
+      locked={isLocked} plan={plan} advancedRows={decisionAdvancedRows} onApply={applyDecisionTransfer}/>
 
     <section className="card squad-insight-bar">
       <div className="squad-model-guidance">
