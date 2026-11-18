@@ -181,7 +181,7 @@ a AS(
  FROM scout_player_advanced_weekly WHERE season='2026-27'
  AND gameweek BETWEEN 6 AND 11 GROUP BY player_id
 ),
-full AS(
+full_actions AS(
  SELECT o.player_id,o.played_6_11,coalesce(a.weekly_evidence,0) evidence,
  b.shots+coalesce(a.shots,0) shots,
  b.shots_on_target+coalesce(a.shots_on_target,0) shots_on_target,
@@ -191,15 +191,15 @@ full AS(
  LEFT JOIN a ON a.player_id=o.player_id
 )
 UPDATE scout_player_season_stats s SET
- shots=full.shots,shots_on_target=full.shots_on_target,
- key_passes=full.key_passes,
+ shots=full_actions.shots,shots_on_target=full_actions.shots_on_target,
+ key_passes=full_actions.key_passes,
  advanced_actions_through_gameweek=11,
  advanced_actions_source='GW1-5 Sahadan baseline + GW6-11 source-verified per-week actions (FotMob/Highlightly)',
- advanced_actions_verified_appearances=full.evidence,
- advanced_actions_played_appearances=full.played_6_11,updated_at=now()
-FROM full WHERE s.season='2026-27' AND s.player_id=full.player_id
- AND s.through_gameweek=11 AND full.evidence=full.played_6_11
- AND full.shots>=full.shots_on_target;
+ advanced_actions_verified_appearances=full_actions.evidence,
+ advanced_actions_played_appearances=full_actions.played_6_11,updated_at=now()
+FROM full_actions WHERE s.season='2026-27' AND s.player_id=full_actions.player_id
+ AND s.through_gameweek=11 AND full_actions.evidence=full_actions.played_6_11
+ AND full_actions.shots>=full_actions.shots_on_target;
 
 -- For incompletely covered players, expose the gap and DO NOT overwrite
 -- existing historic action counts or misrepresent missing as 0.
