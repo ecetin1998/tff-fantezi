@@ -15,6 +15,34 @@ const winner=(row,left,right)=>{
 }
 const posLabel=p=>({GK:'KL',DEF:'DEF',MID:'OS',FWD:'FOR'}[p]||p||'—')
 
+function PlayerPicker({side,player,value,onChange,otherId,list}){
+  const label=side===1?'1. Oyuncu':'2. Oyuncu'
+  const selectId='player-compare-'+side
+  return <div className={styles.pickerCard}>
+    <div className={styles.pickerTop}>
+      <label htmlFor={selectId}>{label}</label>
+      {player?<span className={styles.chosen}>Seçildi</span>:null}
+    </div>
+    <select id={selectId} value={value} onChange={event=>onChange(event.target.value)} aria-label={label}>
+      <option value="">Oyuncu seç…</option>
+      {list.map(p=><option key={p.id} value={String(p.id)} disabled={String(p.id)===otherId}>
+        {playerLabel(p)} · {p.team} ({posLabel(p.position)})
+      </option>)}
+    </select>
+    {player?<div className={styles.playerPreview}>
+      <div className={styles.playerDetails}>
+        <Link href={'/players/'+player.id}>{playerLabel(player)}</Link>
+        <span>{playerFixtureMeta(player)}</span>
+      </div>
+      <div className={styles.playerStats}>
+        <span><small>xFP</small><strong>{decimal(player.projection?.xfp)}</strong></span>
+        <span><small>Fiyat</small><strong>{decimal(player.price,1)}m</strong></span>
+      </div>
+    </div>:<p className={styles.pickerHint}>Seçtiğinde oyuncu özeti burada görünecek.</p>}
+  </div>
+}
+
+
 export default function PlayerComparison({players=[],isPro=false,proReady=false}){
   const [leftId,setLeftId]=useState('')
   const [rightId,setRightId]=useState('')
@@ -28,32 +56,6 @@ export default function PlayerComparison({players=[],isPro=false,proReady=false}
   const xfpRow=rows.find(row=>row.key==='xfp')
   const valueRow=rows.find(row=>row.key==='value')
 
-  function PlayerPicker({side,player,value,onChange,otherId}){
-    const label=side===1?'1. Oyuncu':'2. Oyuncu'
-    const selectId='player-compare-'+side
-    return <div className={styles.pickerCard}>
-      <div className={styles.pickerTop}>
-        <label htmlFor={selectId}>{label}</label>
-        {player?<span className={styles.chosen}>Seçildi</span>:null}
-      </div>
-      <select id={selectId} value={value} onChange={event=>onChange(event.target.value)} aria-label={label}>
-        <option value="">Oyuncu seç…</option>
-        {list.map(p=><option key={p.id} value={String(p.id)} disabled={String(p.id)===otherId}>
-          {playerLabel(p)} · {p.team} ({posLabel(p.position)})
-        </option>)}
-      </select>
-      {player?<div className={styles.playerPreview}>
-        <div className={styles.playerDetails}>
-          <Link href={'/players/'+player.id}>{playerLabel(player)}</Link>
-          <span>{playerFixtureMeta(player)}</span>
-        </div>
-        <div className={styles.playerStats}>
-          <span><small>xFP</small><strong>{decimal(player.projection?.xfp)}</strong></span>
-          <span><small>Fiyat</small><strong>{decimal(player.price,1)}m</strong></span>
-        </div>
-      </div>:<p className={styles.pickerHint}>Seçtiğinde oyuncu özeti burada görünecek.</p>}
-    </div>
-  }
 
   return <section className={'card player-compare-panel '+styles.panel} id="player-compare-panel" aria-labelledby="compare-title">
     <div className={styles.heading}>
@@ -68,9 +70,9 @@ export default function PlayerComparison({players=[],isPro=false,proReady=false}
       </div>
     </div>
     <div className={styles.pickerGrid}>
-      <PlayerPicker side={1} player={first} value={leftId} onChange={setLeftId} otherId={rightId}/>
+      <PlayerPicker side={1} player={first} value={leftId} onChange={setLeftId} otherId={rightId} list={list}/>
       <span className={styles.versus} aria-hidden="true">VS</span>
-      <PlayerPicker side={2} player={second} value={rightId} onChange={setRightId} otherId={leftId}/>
+      <PlayerPicker side={2} player={second} value={rightId} onChange={setRightId} otherId={leftId} list={list}/>
     </div>
     {ready?<div className={styles.results}>
       <div className={styles.insightGrid} aria-label="Metrik üstünlükleri">
