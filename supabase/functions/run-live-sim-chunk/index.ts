@@ -275,6 +275,13 @@ Deno.serve(async(req)=>{
         rows:stale.length,policy_version:SCORER_POLICY_VERSION
       },{status:409});
     }
+    if(GAMEWEEK>=12){
+      const stale=P.filter(p=>!String(p.source_note).includes("sustained-starter-policy-v1"));
+      if(stale.length)return Response.json({
+        error:"SUSTAINED_STARTER_POLICY_SOURCE_PROVENANCE_MISSING",gameweek:GAMEWEEK,
+        rows:stale.length,policy_version:SCORER_POLICY_VERSION
+      },{status:409});
+    }
     const M=P.length;
     const matches=(mq.data||[]).map(x=>({
       match_id:Number(x.match_id),home_id:Number(x.home_team_id),away_id:Number(x.away_team_id),
