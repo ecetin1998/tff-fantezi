@@ -19,7 +19,7 @@ export default async function Home(){
   // current run; never place it in the globally shared home overview cache.
   const mySquad=savedSquad?.run?.id===run?.id?savedSquad:null
   const myCaptain=mySquad?.captain||null
-  const captainAlternative=mySquad?.topPlayer?.player_id!==myCaptain?.player_id&&
+  const captainAlternative=myCaptain&&mySquad?.topPlayer?.player_id!==myCaptain?.player_id&&
     Number(mySquad?.topPlayer?.xfp||0)>Number(myCaptain?.xfp||0)+.25?mySquad?.topPlayer:null
   const latestDataAt=run?.decision_data_at||run?.source_updated_at||null
   const sourceUpdated=latestDataAt?new Intl.DateTimeFormat('tr-TR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit',timeZone:'Europe/Istanbul'}).format(new Date(latestDataAt)):'—'
