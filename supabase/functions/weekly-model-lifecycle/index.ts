@@ -535,6 +535,13 @@ async function prepare(sb:any,current:any,status:any,body:any={}){
     const minutes=Math.max(0,n(s.minutes))
     const priorRates=(prior.rates||[]).map(Number)
     const covered=alignAttackSourceWindow({stats:s,weekly:rows,targetWeek:target})
+    // Explicit event/action completeness through MH11; xG/xA source
+    // windows remain separate and their historic totals are NOT relabeled.
+    const actionsAligned=minutes>=270&&
+      Number(s.advanced_actions_through_gameweek)===Number(s.through_gameweek)&&
+      Number(s.advanced_actions_verified_appearances)===Number(s.advanced_actions_played_appearances)
+    const keysObserved=actionsAligned&&
+      !String(s.advanced_actions_source||"").includes("keypasses missing")
     const xg90=covered.aligned&&covered.xgPer90!==null?covered.xgPer90:per90(s.xg_total,minutes,n(priorRates[0]))
     const g90=per90(s.goals,minutes,n(priorRates[1]))
     const a90=per90(s.assists,minutes,n(priorRates[2]))
@@ -547,28 +554,31 @@ async function prepare(sb:any,current:any,status:any,body:any={}){
     const shots90=per90(s.shots,minutes,n(priorRates[10]))
     const sot90=per90(s.shots_on_target,minutes,n(priorRates[11]))
     const calibrated=calibrateAttackRates({
-      position:p.position,role:tactical.role,seasonMinutes:covered.aligned?covered.coveredMinutes:minutes,
+      position:p.position,role:tactical.role,seasonMinutes:actionsAligned?minutes:covered.aligned?covered.coveredMinutes:minutes,
       seasonWeek:s.through_gameweek==null?null:Number(s.through_gameweek),
       advancedWeek:s.advanced_through_gameweek==null?null:Number(s.advanced_through_gameweek),
       shots:s.shots==null?null:Number(s.shots),keyPasses:s.key_passes==null?null:Number(s.key_passes),
       xgPer90:xg90,goalsPer90:g90,xaPer90:xa90,assistsPer90:a90,
       hasSourcedXg:s.xg_total!=null
     })
-    const trustedAdvanced=Number(s.advanced_through_gameweek)>=target-2
+    const trustedAdvanced=actionsAligned||Number(s.advanced_through_gameweek)>=target-2
     const form=recentAttackForm({
       position:p.position,targetWeek:target,cutoffAt:targetKickoff,weekly:rows,
       advanced:recentAdvanced.get(id)||[],verified:recentVerified.get(id)||[],
-      seasonShotsPer90:covered.aligned?covered.shotsPer90:trustedAdvanced?shots90:null,
-      seasonKeyPassesPer90:covered.aligned?covered.keyPassesPer90:trustedAdvanced&&minutes>0&&s.key_passes!=null
-        ?90*n(s.key_passes)/minutes:null,
+      seasonShotsPer90:actionsAligned?shots90:covered.aligned?covered.shotsPer90:trustedAdvanced?shots90:null,
+      seasonKeyPassesPer90:keysObserved&&minutes>0&&s.key_passes!=null
+        ?90*n(s.key_passes)/minutes
+        :actionsAligned?null:covered.aligned?covered.keyPassesPer90:
+          trustedAdvanced&&minutes>0&&s.key_passes!=null?90*n(s.key_passes)/minutes:null,
       xgPer90:calibrated.xgPer90,xaPer90:calibrated.xaPer90
     })
     // New evidence channels are explicitly missing (-1) unless a complete,
     // same-gameweek season stats window exists. Never misread absent
     // provider actions as verified zero opportunities.
-    const opportunityAligned=minutes>=270&&s.advanced_through_gameweek!=null&&
-      s.through_gameweek!=null&&Number(s.advanced_through_gameweek)===Number(s.through_gameweek)
-    const keyPass90=opportunityAligned&&s.key_passes!=null
+    const opportunityAligned=actionsAligned||
+      (minutes>=270&&s.advanced_through_gameweek!=null&&
+      s.through_gameweek!=null&&Number(s.advanced_through_gameweek)===Number(s.through_gameweek))
+    const keyPass90=opportunityAligned&&(!actionsAligned||keysObserved)&&s.key_passes!=null
       ?90*n(s.key_passes)/minutes:-1
     const trustedShots90=opportunityAligned&&s.shots!=null?90*n(s.shots)/minutes:-1
     const attackForm=form.applied?form:laggedVerifiedAttackForm({
@@ -911,7 +921,7 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
     stableRoleBenchmark===sourceBenchmark
       ?Promise.resolve({data:null,error:null})
       :sb.from("scout_replay_player_inputs").select("player_id,role_probability,durations,duration_weights,source_note,rates").eq("gameweek",gw).eq("benchmark_version",stableRoleBenchmark).order("player_id"),
-    sb.from("scout_player_season_stats").select("player_id,through_gameweek,advanced_through_gameweek,minutes,starts,matches_played,shots,key_passes,goals,assists,xg_total,xa_total,xa_per90,xa_model_per90,xa_source")
+    sb.from("scout_player_season_stats").select("player_id,through_gameweek,advanced_through_gameweek,advanced_actions_through_gameweek,advanced_actions_source,advanced_actions_verified_appearances,advanced_actions_played_appearances,minutes,starts,matches_played,shots,key_passes,goals,assists,xg_total,xa_total,xa_per90,xa_model_per90,xa_source")
       .eq("season","2026-27").eq("through_gameweek",gw-1),
     fetchTrustedWeeklyEvidence(sb,gw),
     stableRoleBenchmark===sourceBenchmark
@@ -1085,7 +1095,8 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
       ?{xgPer90:xgUpdate.rate,goalsPer90:n(stableRates[1],rates[1]),xaPer90:xaUpdate.rate,applied:false}
       :calibrateAttackRates({
         position:player?.position||x.position,role:tactical.role,
-        seasonMinutes:stats?.minutes==null?null:(covered.aligned?covered.coveredMinutes:Number(stats.minutes)),
+        seasonMinutes:stats?.minutes==null?null:(actionsAligned?Number(stats.minutes):
+          covered.aligned?covered.coveredMinutes:Number(stats.minutes)),
         seasonWeek:stats?.through_gameweek==null?null:Number(stats.through_gameweek),
         advancedWeek:stats?.advanced_through_gameweek==null?null:Number(stats.advanced_through_gameweek),
         shots:stats?.shots==null?null:Number(stats.shots),
@@ -1096,7 +1107,12 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
         hasSourcedXg:stats?.xg_total!=null
       })
     const seasonMins=Number(stats?.minutes||0)
-    const trustedAdvanced=Number(stats?.advanced_through_gameweek)>=gw-2
+    const actionsAligned=seasonMins>=270&&stats?.advanced_actions_through_gameweek!=null&&
+      Number(stats.advanced_actions_through_gameweek)===Number(stats.through_gameweek)&&
+      Number(stats.advanced_actions_verified_appearances)===Number(stats.advanced_actions_played_appearances)
+    const keysObserved=actionsAligned&&
+      !String(stats?.advanced_actions_source||"").includes("keypasses missing")
+    const trustedAdvanced=actionsAligned||Number(stats?.advanced_through_gameweek)>=gw-2
     const form=String(stableInput.source_note||"").includes("recent-attack-form-v2")
       ?{xgPer90:calibrated.xgPer90,xaPer90:calibrated.xaPer90,applied:false}
       :recentAttackForm({
@@ -1104,9 +1120,13 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
         weekly:weeklyMomentumRows.get(Number(x.player_id))||[],
         advanced:recentAdvanced.get(Number(x.player_id))||[],
         verified:recentVerified.get(Number(x.player_id))||[],
-        seasonShotsPer90:covered.aligned?covered.shotsPer90:trustedAdvanced?n(stableRates[10],0):null,
-        seasonKeyPassesPer90:covered.aligned?covered.keyPassesPer90:trustedAdvanced&&seasonMins>0&&stats?.key_passes!=null
-          ?90*Number(stats.key_passes)/seasonMins:null,
+        seasonShotsPer90:actionsAligned&&seasonMins>0?90*Number(stats.shots)/seasonMins:
+          covered.aligned?covered.shotsPer90:trustedAdvanced?n(stableRates[10],0):null,
+        seasonKeyPassesPer90:keysObserved&&seasonMins>0&&stats?.key_passes!=null
+          ?90*Number(stats.key_passes)/seasonMins
+          :actionsAligned?null:covered.aligned?covered.keyPassesPer90:
+            trustedAdvanced&&seasonMins>0&&stats?.key_passes!=null
+              ?90*Number(stats.key_passes)/seasonMins:null,
         xgPer90:calibrated.xgPer90,xaPer90:calibrated.xaPer90
       })
     const laggedInStableSource=String(stableInput.source_note||"").includes("lagged-verified-form-v1")
@@ -1121,9 +1141,10 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
     rates[3]=attackForm.xaPer90
     // Rebuild from current SOURCE season stats, not recursively from the
     // previous simulation. Mark unavailable/stale actions as unknown.
-    const alignedOpportunity=seasonMins>=270&&stats?.advanced_through_gameweek!=null&&
-      stats?.through_gameweek!=null&&Number(stats.advanced_through_gameweek)===Number(stats.through_gameweek)
-    rates[12]=alignedOpportunity&&stats?.key_passes!=null?90*Number(stats.key_passes)/seasonMins:-1
+    const alignedOpportunity=actionsAligned||(seasonMins>=270&&stats?.advanced_through_gameweek!=null&&
+      stats?.through_gameweek!=null&&Number(stats.advanced_through_gameweek)===Number(stats.through_gameweek))
+    rates[12]=alignedOpportunity&&(!actionsAligned||keysObserved)&&stats?.key_passes!=null?
+      90*Number(stats.key_passes)/seasonMins:-1
     rates[13]=alignedOpportunity&&stats?.shots!=null?90*Number(stats.shots)/seasonMins:-1
     const reference=feedback?.reference.get(Number(x.player_id)) as any
     rates[14]=forwardFeedbackRate(x.position,reference?.xfp,reference?.x_minutes,
@@ -1141,6 +1162,7 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
         +(banReturn.applied||String(stableInput.source_note||"").includes("verified-suspension-return-v1")?` • verified-suspension-return-v1 +${banReturn.delta.toFixed(4)}`:"")
         +(momentum.rising?` • momentum-v1 +${momentumBoost}`:"")
         +(recentStarter.applied||String(stableInput.source_note||"").includes("verified-recent-starter-v1")?` • verified-recent-starter-v1 +${recentStarter.delta.toFixed(4)}`:"")
+        +(actionsAligned?" • source-reconciled-actions-mh11-v1":"")
         +(xaReconcile.adjusted?` • defender-xa-source-window-v1 ${xaReconcile.source_minutes}dk`:"")
         +(xgUpdate.applied||xaUpdate.applied?` • mh8-attack-source-v1 ${xgUpdate.applied?"xg":""}${xaUpdate.applied?"+xa":""}`:"")
         +(calibrated.applied||alreadyCalibrated?` • role-aware-attack-v1`:"")
