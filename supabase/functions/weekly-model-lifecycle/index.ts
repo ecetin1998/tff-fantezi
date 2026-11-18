@@ -1518,6 +1518,13 @@ Deno.serve(async(req:Request)=>{
           run_id:runId,gameweek:gw,benchmark,no_writes:true},{status:409})
       }
       if(gw>=12&&run.is_current!==true&&
+        (!meta.data?.lineup_factors?.verified_formation_scenarios_v1||
+         typeof meta.data.lineup_factors.verified_formation_scenarios_v1!=="object"||
+         Array.isArray(meta.data.lineup_factors.verified_formation_scenarios_v1))){
+        return Response.json({ok:false,pass:false,error:"SOURCE_VERIFIED_FORMATION_SCENARIOS_PROVENANCE_MISSING",
+          run_id:runId,gameweek:gw,benchmark,no_writes:true},{status:409})
+      }
+      if(gw>=12&&run.is_current!==true&&
         (matches.data||[]).some((m:any)=>!String(m.source_note||"").includes(TEAM_ELO_POLICY))){
         return Response.json({ok:false,pass:false,error:"SOURCE_VERIFIED_TEAM_ELO_PROVENANCE_MISSING",
           run_id:runId,benchmark,no_writes:true},{status:409})
