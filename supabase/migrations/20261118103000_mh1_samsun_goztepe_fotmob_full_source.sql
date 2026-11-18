@@ -44,7 +44,7 @@ INSERT INTO public.scout_highlightly_player_aliases
  (season,provider_player_id,team_id,player_id,provider_name,canonical_name,
   verification_method,evidence)
 VALUES ('2026-27',101699507,15,441,'Badra Diabbate Ali','Ali Badra Diabaté',
- 'independently_matched_team_and_90_minutes',
+ 'team_full_name_review',
  jsonb_build_object('fotmob_player_id',1883406,
    'fotmob_name','Ali Diabaté','fotmob_match_id',5904712,
    'highlightly_match_ids',jsonb_build_array(317792,317796),
