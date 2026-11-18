@@ -281,6 +281,12 @@ Deno.serve(async(req)=>{
       home_lambda:num(x.home_lambda),away_lambda:num(x.away_lambda)
     }));
     const meta=metaq.data||{};
+    if(GAMEWEEK>=12&&(!meta.lineup_factors?.verified_formation_scenarios_v1||
+      typeof meta.lineup_factors.verified_formation_scenarios_v1!=="object"||
+      Array.isArray(meta.lineup_factors.verified_formation_scenarios_v1))){
+      return Response.json({error:"SOURCE_VERIFIED_FORMATION_SCENARIOS_PROVENANCE_MISSING",
+        gameweek:GAMEWEEK,policy_version:SCORER_POLICY_VERSION},{status:409});
+    }
     const keeperSotTeams=meta.lineup_factors?.goalkeeper_sot_v1?.teams||{};
     const temperature=num(meta.temperature,1.7);
     const assistFraction=num(meta.assist_fraction,.67);
