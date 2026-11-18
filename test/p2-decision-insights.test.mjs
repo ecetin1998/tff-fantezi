@@ -3,7 +3,6 @@ import assert from 'node:assert/strict'
 import {captainOptions,rankSingleTransfers,risingPlayers,squadFragility} from '../lib/squadDecisionInsights.mjs'
 import {readFileSync} from 'node:fs'
 
-const positions=['GK','GK',...'DEF'.split('').slice(0,0)]
 const squadPos=['GK','GK','DEF','DEF','DEF','DEF','DEF','MID','MID','MID','MID','MID','FWD','FWD','FWD']
 const pool=Array.from({length:15},(_,i)=>({
  id:i+1,active:true,position:squadPos[i],team_id:i%9+1,price:5,
