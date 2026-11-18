@@ -1069,6 +1069,13 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
       tactical:tacticalEvidence.get(Number(x.player_id))||[],teamId:player?.team_id||x.club_id,targetWeek:gw,cutoffAt:targetKickoffs.get(Number(x.club_id))||new Date(kickoff).toISOString(),
       availability,alreadyApplied:String(stableInput.source_note||"").includes("season-starter-reliability-v1")
     })
+    const sustainedPreviouslyApplied=String(stableInput.source_note||"").includes("sustained-starter-continuity-v1")
+    const sustainedStarter=sustainedStarterContinuity({
+      baseline:regularStarter.role,position:player?.position||x.position,
+      weekly:longerMinuteHistory.get(Number(x.player_id))||[],
+      targetWeek:gw,cutoffAt:targetKickoffs.get(Number(x.club_id))||new Date(kickoff).toISOString(),
+      availability,alreadyApplied:sustainedPreviouslyApplied
+    })
     const durationProfile=starterDurationProfile({
       position:player?.position||x.position,seasonStarts:stats?.starts,
       weekly:longerMinuteHistory.get(Number(x.player_id))||[],
@@ -1076,7 +1083,7 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
       targetWeek:gw,cutoffAt:targetKickoffs.get(Number(x.club_id))||new Date(kickoff).toISOString()
     })
     const banReturn=restoreVerifiedSuspensionReturn({
-      baseline:regularStarter.role,targetWeek:gw,availability,
+      baseline:sustainedStarter.role,targetWeek:gw,availability,
       seasonStarts:stats?.starts,matchesPlayed:stats?.matches_played,
       cases:suspensionCasesByPlayer.get(Number(x.player_id))||[],
       weekly:longerMinuteHistory.get(Number(x.player_id))||[],
@@ -1193,6 +1200,7 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
       source_note:`intraday refresh from ${sourceBenchmark}; role baseline ${stableRoleBenchmark}; source ${latestSourceAt}`
         +` • starter-duration-source-gated-v2 ${durationProfile.reason} • starter-duration-long-window-v3 • starter-duration-single-short-shrink-v4`
         +(regularStarter.applied||String(stableInput.source_note||"").includes("season-starter-reliability-v1")?` • season-starter-reliability-v1 +${regularStarter.delta.toFixed(4)}`:"")
+        +(sustainedStarter.applied||sustainedPreviouslyApplied?` • sustained-starter-continuity-v1 +${sustainedStarter.delta.toFixed(4)}`:"")
         +(banReturn.applied||String(stableInput.source_note||"").includes("verified-suspension-return-v1")?` • verified-suspension-return-v1 +${banReturn.delta.toFixed(4)}`:"")
         +(recentSourceRates.usedXg||recentSourceRates.usedXa?" • recent-mh8-11-fotmob-window-v1":"")
         +(momentum.rising?` • momentum-v1 +${momentumBoost}`:"")
