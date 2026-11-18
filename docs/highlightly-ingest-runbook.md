@@ -127,3 +127,17 @@ FROM public.scout_verified_weekly_attack WHERE match_id=317838 GROUP BY team_id;
 - ÖNEMLİ: scout_player_projections halen 20 oyuncuda eski 50K tahminlerini taşıyor. Aday 50K yenileme ve tüm QA kapıları tamamlanmadan tahmin doğruluğu iddia edilmez. Cloudflare prod deploy manuel GH Actions ile gerçekleşir.
 
 Kontrol SQL: SELECT audit_issue,count(*) FROM scout_availability_full_audit GROUP BY audit_issue;
+
+
+## 18 Kasım 2026 — 99/99 tarihsel maç kaynağı tamamlandı
+
+- Saat 10.15 Türkiye: doğrulanmış yeterli maç sayısı **96/99**, bekleyen **5** Highlightly API endpointi (MH1 maç 317790/317791/317792), günlük iç limit 72/72, sağlayıcı 28 ücretsiz istek.
+- Kullanıcı onayıyla yalnız bir seferlik günlük iç sınır **72→80** yapılıp Vault kimlik doğrulamalı `highlightly-sync` manuel çağrıldı (pg_net request 966). 3 maç işlendi, **tam 5 API çağrısı** kullanıldı, HTTP 200, sağlayıcıda **23** kaldı, 0 API hata. Sınır tekrar **72** yapıldı; bugünkü `requests_used` audit değeri 77 olarak korunuyor. Haricî sağlayıcı rezervi 10 istek korundu.
+- Highlightly her üç maçta box ve team stats uç noktalarını başarıyla yakaladı. Yalnız **MH1 Samsunspor 3–3 Göztepe** (17.08.2026, match 317792, Highlightly id 1348303909) 30 süre alan oyuncunun tamamında xG ve xA verisini NULL döndürdü. Daha fazla Highlightly tekrarına API harcamadık.
+- Alternatif teyitli kaynak **FotMob matchDetails** `matchId=5904712` (kaynak: https://www.fotmob.com/api/data/matchDetails?matchId=5904712 ; sayfa https://www.fotmob.com/matches/goztepe-vs-samsunspor/14l32o ). Tam 3–3 maç, 2026-08-17, 40 oyuncu kaydı ve 41 şut ile doğrulandı.
+- **Samsunspor xG 2.80** / FotMob şut haritası toplamı 2.7956, **Göztepe xG 1.71** / şut haritası toplamı ~1.7125. Şutlar **21–20**, kaleyi bulan **3–7**, maç sonunda 3–3. Kaynaklar takım advanced tablolarında 2/2 kaydedildi, 22 takım metriği alan bazlı URL denetimine yazıldı.
+- **30/30 süre alan oyuncunun xG** verisi (şut başına FotMob xG veya hiç şut yoksa 0) kaynaklı eşlendi; **25 doğrudan xA**, **4 kaynaktaki katkısızlık ve xGI üzerinden teyitli sıfır**, **1 belirsiz xA**. Ogün Bayrak'ın 1 oluşturulan pozisyonu var ama API xA/xGI yayımlamıyor; bu yüzden `scout_verified_weekly_attack.xa=NULL`, `scout_verified_player_source_missing_metrics` tablosunda **ölçülmemiş** olarak izleniyor; sıfır uydurulmadı.
+- Tarihsel oyuncu eşleştirmesi: Highlightly `Badra Diabbate Ali` (id 101699507) = FotMob `Ali Diabaté` (id 1883406) = kanonik `Ali Badra Diabaté` (id 441, Samsunspor); MH1–MH2'deki 2 bağlantı kaynakla doğrulanıp güncellendi, oyuncunun `active=false` mevcut durumu **değiştirilmedi**.
+- **99/99** `scout_highlightly_targeted_readiness.sufficient_matches`, `targeted_coverage_complete=true`, `pending_box=0`, `pending_stats=0`, `pending_lineups=0`, `unresolved_provider_player_xg=0`, `unresolved_provider_team_xg=0`, `pending_api_calls_minimum=0`. Bu kaynak düzeyi yeterlilik ölçütüdür; Ogün xA ölçümündeki tekil kaynak eksikliği ayrıca işaretlenmiştir.
+- **ÖNEMLİ:** `source_reconciled_to_player_and_team_profiles=false`; 456 oyuncu ve 18 takım gelişmiş sezon profilleri MH11'e taşınmış sayılmaz. Aktif MH12 50K tahminleri ve fantasy puanları bu veri aktarımında **değişmedi**. Kalibrasyon, sezon profili uzlaştırması ve sonrasında simülasyon yeniden koşusu ayrı QA kapılarıyla yapılmalıdır.
+- Tekrarlanabilir SQL migration: `supabase/migrations/20261118103000_mh1_samsun_goztepe_fotmob_full_source.sql`, regresyon testi: `test/mh1-samsun-goztepe-fotmob-evidence.test.mjs`.
