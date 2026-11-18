@@ -11,6 +11,7 @@ import {blendVerifiedAttackRate} from "./mh8Attack.mjs"
 import {calibrateAttackRates} from "./roleAwareAttackRates.mjs"
 import {starterDurationProfile} from "./starterDuration.mjs"
 import {regularStarterReliability} from "./regularStarterReliability.mjs"
+import {twoWeekStarterContinuity,P0_MINUTE_CONTINUITY_POLICY} from "./twoWeekStarterContinuity.mjs"
 import {restoreVerifiedSuspensionReturn} from "./suspensionReturn.mjs"
 import {verifiedLineupFormations} from "./verifiedLineupFormations.mjs"
 import {recentAttackForm,fetchRecentAttackEvidence,groupRecentAttack} from "./recentAttackForm.mjs"
@@ -513,6 +514,12 @@ async function prepare(sb:any,current:any,status:any,body:any={}){
       availability:n(av.availability_probability,1)
     })
     if(regularStarter.applied)roleProb=regularStarter.role
+    const twoWeekContinuity=twoWeekStarterContinuity({
+      baseline:roleProb,position:p.position,weekly:minuteHistory,
+      targetWeek:target,cutoffAt:teamKickoffs.get(Number(p.team_id))||targetKickoff,
+      availability:n(av.availability_probability,1)
+    })
+    if(twoWeekContinuity.applied)roleProb=twoWeekContinuity.role
     // Suspended 0-minute fixtures must not be mistaken for rotation.
     // Restore sourced PRE-ban regular-start role only after the TFF ban ends.
     const banReturn=restoreVerifiedSuspensionReturn({
@@ -605,7 +612,7 @@ async function prepare(sb:any,current:any,status:any,body:any={}){
       bench_weight:n(prior.bench_weight,1),durations,duration_weights:durationWeights,rates,
       data_confidence:prior.data_confidence||projMap.get(id)?.confidence||"medium",
       has_individual_prior:Boolean(prior.has_individual_prior),
-      source_note:key+" • starter-duration-source-gated-v2 "+durationProfile.reason+" • starter-duration-long-window-v3 • starter-duration-single-short-shrink-v4"+(regularStarter.applied?" • season-starter-reliability-v1 +"+regularStarter.delta.toFixed(4):"")+(banReturn.applied?" • verified-suspension-return-v1 +"+banReturn.delta.toFixed(4):"")+(calibrated.applied?" • role-aware-attack-v1":"")+(form.applied?" • recent-attack-form-v2":"")+(attackForm.applied&&!form.applied?" • lagged-verified-form-v1":"")+(covered.aligned&&covered.advancedWeek<target-1?" • source-window-attack-v1":"")+(recentSourceRates.usedXg||recentSourceRates.usedXa?" • recent-mh8-11-fotmob-window-v1":"")+(tactical.reason==="multi_match_verified_lineup"?" • tactical-role-evidence-v1 "+tactical.role+":"+String(tactical.side||"unknown"):"")+(momentum.rising?" • momentum-v1 +"+momentum.role_uplift:"")+(recentStarter.applied?" • verified-recent-starter-v1 +"+recentStarter.delta.toFixed(4):"")+(xaReconcile.adjusted?" • defender-xa-source-window-v1 "+xaReconcile.source_minutes+"dk":"")+(officialShift.applied?" • resmî maç: "+event.match_ref:""),
+      source_note:key+" • starter-duration-source-gated-v2 "+durationProfile.reason+" • starter-duration-long-window-v3 • starter-duration-single-short-shrink-v4 • "+P0_MINUTE_CONTINUITY_POLICY+(twoWeekContinuity.applied?" +"+twoWeekContinuity.delta.toFixed(4):"")+(regularStarter.applied?" • season-starter-reliability-v1 +"+regularStarter.delta.toFixed(4):"")+(banReturn.applied?" • verified-suspension-return-v1 +"+banReturn.delta.toFixed(4):"")+(calibrated.applied?" • role-aware-attack-v1":"")+(form.applied?" • recent-attack-form-v2":"")+(attackForm.applied&&!form.applied?" • lagged-verified-form-v1":"")+(covered.aligned&&covered.advancedWeek<target-1?" • source-window-attack-v1":"")+(recentSourceRates.usedXg||recentSourceRates.usedXa?" • recent-mh8-11-fotmob-window-v1":"")+(tactical.reason==="multi_match_verified_lineup"?" • tactical-role-evidence-v1 "+tactical.role+":"+String(tactical.side||"unknown"):"")+(momentum.rising?" • momentum-v1 +"+momentum.role_uplift:"")+(recentStarter.applied?" • verified-recent-starter-v1 +"+recentStarter.delta.toFixed(4):"")+(xaReconcile.adjusted?" • defender-xa-source-window-v1 "+xaReconcile.source_minutes+"dk":"")+(officialShift.applied?" • resmî maç: "+event.match_ref:""),
       sub_role:tactical.role||prior.sub_role||null,role_side:tactical.side||prior.role_side||null,
       effective_xa_per90:attackForm.xaPer90
     })
@@ -1062,6 +1069,12 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
       tactical:tacticalEvidence.get(Number(x.player_id))||[],teamId:player?.team_id||x.club_id,targetWeek:gw,cutoffAt:targetKickoffs.get(Number(x.club_id))||new Date(kickoff).toISOString(),
       availability,alreadyApplied:String(stableInput.source_note||"").includes("season-starter-reliability-v1")
     })
+    const twoWeekContinuity=twoWeekStarterContinuity({
+      baseline:regularStarter.role,position:player?.position||x.position,
+      weekly:longerMinuteHistory.get(Number(x.player_id))||[],targetWeek:gw,
+      cutoffAt:targetKickoffs.get(Number(x.club_id))||new Date(kickoff).toISOString(),
+      availability,alreadyApplied:String(stableInput.source_note||"").includes(P0_MINUTE_CONTINUITY_POLICY)
+    })
     const durationProfile=starterDurationProfile({
       position:player?.position||x.position,seasonStarts:stats?.starts,
       weekly:longerMinuteHistory.get(Number(x.player_id))||[],
@@ -1069,7 +1082,7 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
       targetWeek:gw,cutoffAt:targetKickoffs.get(Number(x.club_id))||new Date(kickoff).toISOString()
     })
     const banReturn=restoreVerifiedSuspensionReturn({
-      baseline:regularStarter.role,targetWeek:gw,availability,
+      baseline:twoWeekContinuity.role,targetWeek:gw,availability,
       seasonStarts:stats?.starts,matchesPlayed:stats?.matches_played,
       cases:suspensionCasesByPlayer.get(Number(x.player_id))||[],
       weekly:longerMinuteHistory.get(Number(x.player_id))||[],
@@ -1184,7 +1197,8 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
       durations:adjusted.applied?adjusted.durations:durationProfile.durations,
       duration_weights:adjusted.applied?adjusted.duration_weights:durationProfile.duration_weights,
       source_note:`intraday refresh from ${sourceBenchmark}; role baseline ${stableRoleBenchmark}; source ${latestSourceAt}`
-        +` • starter-duration-source-gated-v2 ${durationProfile.reason} • starter-duration-long-window-v3 • starter-duration-single-short-shrink-v4`
+        +` • starter-duration-source-gated-v2 ${durationProfile.reason} • starter-duration-long-window-v3 • starter-duration-single-short-shrink-v4 • ${P0_MINUTE_CONTINUITY_POLICY}`+
+          (twoWeekContinuity.applied?` +${twoWeekContinuity.delta.toFixed(4)}`:"")
         +(regularStarter.applied||String(stableInput.source_note||"").includes("season-starter-reliability-v1")?` • season-starter-reliability-v1 +${regularStarter.delta.toFixed(4)}`:"")
         +(banReturn.applied||String(stableInput.source_note||"").includes("verified-suspension-return-v1")?` • verified-suspension-return-v1 +${banReturn.delta.toFixed(4)}`:"")
         +(recentSourceRates.usedXg||recentSourceRates.usedXa?" • recent-mh8-11-fotmob-window-v1":"")
@@ -1542,6 +1556,12 @@ Deno.serve(async(req:Request)=>{
       if(gw>=12&&run.is_current!==true&&
         (players.data||[]).some((r:any)=>!String(r.source_note||"").includes("starter-duration-long-window-v3"))){
         return Response.json({ok:false,pass:false,error:"STARTER_DURATION_LONG_WINDOW_PROVENANCE_MISSING",
+          run_id:runId,gameweek:gw,benchmark,no_writes:true},{status:409})
+      }
+      if(gw>=12&&run.is_current!==true&&
+        (players.data||[]).some((r:any)=>!String(r.source_note||"").includes(P0_MINUTE_CONTINUITY_POLICY))){
+        return Response.json({ok:false,pass:false,
+          error:"TWO_WEEK_STARTER_CONTINUITY_PROVENANCE_MISSING",
           run_id:runId,gameweek:gw,benchmark,no_writes:true},{status:409})
       }
       if(gw>=12&&run.is_current!==true&&
