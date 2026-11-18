@@ -8,6 +8,7 @@ import { teamCssVars } from '@/lib/teamThemes'
 import { availabilityDetailLine, availabilityIsIssue } from '@/lib/availability'
 import {playerLabel,predictionConfidenceLabel} from '@/lib/playerPresentation'
 import {playerRoleLabel} from '@/lib/playerRole'
+import {playerEvidenceSummary,xfpComponents} from '@/lib/playerEvidence.mjs'
 
 export const revalidate=300
 export const dynamic='force-dynamic'
@@ -63,6 +64,9 @@ export default async function PlayerPage({ params }){
   const advancedRecent=pro?.advancedRecent||[]
   const observed=(value,d=2)=>value===null||value===undefined?'—':Number(value).toFixed(d)
   const p={...(data.projection||{}),...(pro?.projection||{})}
+  const evidence=playerEvidenceSummary({run,player,season:s,availability:a})
+  const evidenceCards=[evidence.role,evidence.xa,evidence.stats,evidence.actions,evidence.availability,evidence.model]
+  const xfpDetail=xfpComponents(p)
   const replay=[...(data.replay||[]).filter(row=>row.history_mode!=='live_frozen'),...(pro?.history||[]).map(row=>({...row,history_mode:'live_frozen'}))].sort((a,b)=>Number(a.gameweek)-Number(b.gameweek)).slice(-12)
   const closedWeeks=[...(weekly||[])].sort((x,y)=>Number(x.gameweek||0)-Number(y.gameweek||0))
   const playedWeeks=closedWeeks.filter(w=>Number(w.minutes||0)>0)
@@ -219,6 +223,35 @@ export default async function PlayerPage({ params }){
         </div>
       </div>
       <MetricGrid items={decisionMetrics} className="decision-metrics"/>
+    </section>
+
+    <section className="card profile-card player-xfp-breakdown" aria-labelledby="xfp-breakdown-title">
+      <div className="player-detail-section-head">
+        <div><span className="eyebrow">xFP'NİN İÇİNDE NE VAR?</span><h2 id="xfp-breakdown-title">Puan beklentisinin bileşenleri</h2></div>
+      </div>
+      {xfpDetail.available?<div className="player-xfp-equation" aria-label="Temel beklenti artı beklenen bonus eşittir xFP">
+        <div><span>Temel puan beklentisi</span><strong>{num(xfpDetail.core)}</strong><small>Oynama, gol, asist, gol yememe ve diğer puan olaylarının ortalaması</small></div>
+        <span className="player-xfp-equation-symbol" aria-hidden="true">+</span>
+        <div><span>Beklenen bonus</span><strong>{num(xfpDetail.bonus)}</strong><small>Simüle edilen bonus puan katkısı</small></div>
+        <span className="player-xfp-equation-symbol" aria-hidden="true">=</span>
+        <div className="player-xfp-equation-total"><span>Toplam xFP</span><strong>{num(xfpDetail.total)}</strong><small>{xfpDetail.reconciliation}</small></div>
+      </div>:<p className="projection-explainer">Bu oyuncunun xFP alt bileşenleri henüz yayımlanmamış. Eksik tutarı sıfır olarak yorumlama.</p>}
+      <div className="player-xfp-signals">{xfpDetail.available?xfpDetail.inputSignals.map(signal=>
+        <span key={signal.label}><b>{signal.value}</b> {signal.label}</span>):null}</div>
+      <p className="projection-explainer">Bu bir <strong>mevcut modelin puan dökümüdür</strong>; son güncellemeden hangi kaynağın kaç xFP değiştirdiğini gösteren nedensel bir fark analizi değildir. Gol ve asist tahminleri temel bileşenin içindedir.</p>
+    </section>
+
+    <section className="card profile-card player-evidence-card" aria-labelledby="player-source-title">
+      <div className="player-detail-section-head">
+        <div><span className="eyebrow">KAYNAK & GÜNCELLİK</span><h2 id="player-source-title">Bu tahmin hangi verilere dayanıyor?</h2></div>
+      </div>
+      <p className="projection-explainer">Rol, xA, maç aksiyonları ve sakatlık kontrolü <strong>farklı zamanlarda güncellenebilir</strong>. Tek bir model tarihi bütün verilerin yeni olduğu anlamına gelmez.</p>
+      <div className="player-evidence-grid">{evidenceCards.map(item=>
+        <div key={item.title} className={'player-evidence-item'+(item.missing>0||item.prior?' is-older':'')}>
+          <span>{item.title}</span><b>{item.value}</b><small>{item.detail}</small>
+        </div>
+      )}</div>
+      <p className="projection-explainer player-evidence-disclaimer">Kaynak güven katsayısı, maç sonucunu doğru tahmin etme yüzdesi değildir. “Öncül”, oyuncuya özel güncel maç gözlemi yerine kullanılan başlangıç varsayımını ifade eder.</p>
     </section>
 
     {isPro?<div className="profile-grid player-profile-main-grid">

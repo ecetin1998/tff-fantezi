@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import SignupSuccessDialog from '@/components/SignupSuccessDialog'
-import { getHomeOverview } from '@/lib/data'
+import { getHomeOverview, getMySquadOverview } from '@/lib/data'
 import { teamCssVars, teamHref } from '@/lib/teamThemes'
 import {playerLabel} from '@/lib/playerPresentation'
 
@@ -13,8 +13,14 @@ export const metadata={
 }
 
 export default async function Home(){
-  const overview=await getHomeOverview()
+  const [overview,savedSquad]=await Promise.all([getHomeOverview(),getMySquadOverview()])
   const {run,best,value,teamXfpLeader,top25,playerCount,matchCount}=overview
+  // Use per-request authenticated squad data only when it belongs to this exact
+  // current run; never place it in the globally shared home overview cache.
+  const mySquad=savedSquad?.run?.id===run?.id?savedSquad:null
+  const myCaptain=mySquad?.captain||null
+  const captainAlternative=myCaptain&&mySquad?.topPlayer?.player_id!==myCaptain?.player_id&&
+    Number(mySquad?.topPlayer?.xfp||0)>Number(myCaptain?.xfp||0)+.25?mySquad?.topPlayer:null
   const latestDataAt=run?.decision_data_at||run?.source_updated_at||null
   const sourceUpdated=latestDataAt?new Intl.DateTimeFormat('tr-TR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit',timeZone:'Europe/Istanbul'}).format(new Date(latestDataAt)):'—'
   const modelUpdated=run?.generated_at?new Intl.DateTimeFormat('tr-TR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit',timeZone:'Europe/Istanbul'}).format(new Date(run.generated_at)):'—'
@@ -96,6 +102,19 @@ export default async function Home(){
     </section>
 
 
+
+    {mySquad?<section className="card home-decision-center" aria-labelledby="home-decision-title">
+      <div className="home-section-head">
+        <div><span className="eyebrow">MH{run?.gameweek||'—'} • KİŞİSEL KARAR MERKEZİ</span><h2 id="home-decision-title">Kadrona göre hızlı kontroller</h2></div>
+        <Link href="/squad" className="home-guide-link">Benim Kadrom →</Link>
+      </div>
+      {mySquad.hasSquad?<div className="home-personal-grid">
+        <div><span>İlk 11 + kaptan beklentisi</span><strong>{Number(mySquad.xiXfp||0).toFixed(1)} <small>xFP</small></strong><p>Kaydedilmiş ilk 11 ve seçili kaptanın ek puan beklentisi</p></div>
+        <div><span>Kadro risk kontrolleri</span><strong>{Number(mySquad.riskCount||0)}</strong><p>{mySquad.riskPlayer?<><Link href={'/players/'+mySquad.riskPlayer.player_id}>{playerLabel(mySquad.riskPlayer)}</Link> dahil; ilk 11, süre veya uygunluk sinyallerini incele.</>:'Oynama uygunluğu, ilk 11 ve dakika eşiklerinde belirgin uyarı yok.'}</p></div>
+        <div><span>Kaptan kontrolü</span><strong>{myCaptain?playerLabel(myCaptain):'Kaptan seçilmedi'}</strong><p>{captainAlternative?<><Link href={'/players/'+captainAlternative.player_id}>{playerLabel(captainAlternative)}</Link> ilk 11'inde daha yüksek xFP beklenen bir alternatif. Kaptanı değerlendir.</>:myCaptain?'İlk 11 içindeki yüksek xFP adaylarıyla karşılaştır.':'Kadronu açıp kaptanını seç.'}</p></div>
+      </div>:<p className="projection-explainer">Henüz kayıtlı 15 kişilik kadron yok. Kadronu kaydettiğinde ilk 11 xFP’si, kaptan ve risk kontrolleri burada görünür.</p>}
+      <p className="home-personal-disclaimer">Risk eşiği: uygunluk %80 altı, ilk 11 ihtimali %55 altı veya beklenen süre 45 dk altı. Bu değerler kesin oynamama ya da transfer tavsiyesi değildir.</p>
+    </section>:null}
 
     <section className="home-feature-section">
       <div className="home-section-head">
