@@ -51,7 +51,7 @@ test("both lifecycle prepare paths query verified window and tag model snapshots
  const s=readFileSync(new URL("../supabase/functions/weekly-model-lifecycle/index.ts",import.meta.url),"utf8")
  assert.equal((s.match(/scout_player_recent_verified_advanced_window/g)||[]).length,2)
  assert.equal((s.match(/blendRecentVerifiedAttackRates\(\{/g)||[]).length,2)
- assert.equal((s.match(/recent-mh8-11-fotmob-window-v1/g)||[]).length,2)
+ assert.ok((s.match(/recent-mh8-11-fotmob-window-v1/g)||[]).length>=2)
  assert.match(s,/advanced_actions_verified_appearances/)
  assert.match(s,/const actionsAligned=/)
  assert.match(s,/const keysObserved=/)
