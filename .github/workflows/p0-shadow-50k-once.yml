@@ -1,0 +1,92 @@
+name: P0 shadow 50K current-week candidate (one-time)
+
+on:
+  push:
+    branches: [main]
+    paths: [".github/workflows/p0-shadow-50k-once.yml"]
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: p0-shadow-once
+  cancel-in-progress: false
+
+jobs:
+  shadow:
+    if: ${{ github.event.head_commit.message == 'chore(p0): run isolated 50K shadow validation' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    env:
+      FUNCTIONS_URL: https://nnoagjayvrwyjtizhnfz.supabase.co/functions/v1
+      OIDC_AUDIENCE: tff-fantezi-scout
+      CANDIDATE_SHA: 89dadbbc097aaaebb216e01b0c585c3bbf85166f
+    steps:
+      - uses: actions/checkout@v4
+      - name: Prepare current MH12 shadow inputs (no promotion)
+        id: prepare
+        shell: bash
+        run: |
+          set -euo pipefail
+          token="$(curl -fsSL --max-time 30 -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=$OIDC_AUDIENCE" | jq -er '.value')"
+          echo "::add-mask::$token"
+          result="$(jq -nc --arg sha "$CANDIDATE_SHA" '{action:"prepare_current",code_sha:$sha}' |
+            curl --fail-with-body --silent --show-error --max-time 240 -X POST
+              -H "Authorization: Bearer $token" -H 'Content-Type: application/json'
+              --data-binary @- "$FUNCTIONS_URL/weekly-model-lifecycle-p0-shadow")"
+          echo "$result" | jq .
+          echo "$result" | jq -e '.ok == true and .refresh_required == true and .gameweek == 12 and (.source_window_applied_players >= 100)'
+          echo "run_id=$(echo "$result" | jq -r '.run_id')" >> "$GITHUB_OUTPUT"
+          echo "benchmark=$(echo "$result" | jq -r '.benchmark')" >> "$GITHUB_OUTPUT"
+      - name: Run candidate 50,000 simulation draws only (no promote)
+        shell: bash
+        env:
+          RUN_ID: ${{ steps.prepare.outputs.run_id }}
+          BENCHMARK: ${{ steps.prepare.outputs.benchmark }}
+        run: |
+          set -euo pipefail
+          mint() {
+            token="$(curl -fsSL --max-time 30 -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=$OIDC_AUDIENCE" | jq -er '.value')"
+            echo "::add-mask::$token"
+          }
+          mint
+          endpoint="$FUNCTIONS_URL/run-live-sim-chunk-p0-shadow"
+          common="gw=12&run=$RUN_ID&benchmark=$BENCHMARK"
+          curl --fail-with-body -sS --max-time 240 --retry 3 --retry-delay 2
+            -H "Authorization: Bearer $token" "$endpoint?mode=reset&$common" |
+            jq -e '.ok == true'
+          for part in $(seq 0 99); do
+            if (( part > 0 && part % 9 == 0 )); then mint; fi
+            seed=$((2026000000 + 12 * 100000 + part * 500 + 1))
+            curl --fail-with-body -sS --max-time 240 --retry 3 --retry-delay 2
+              -H "Authorization: Bearer $token"
+              "$endpoint?$common&draws=500&seed=$seed" |
+              jq -e -c '.ok == true and .draws == 500' >/dev/null
+            if (( part % 10 == 9 )); then echo "Completed $((part+1))/100 candidate chunks"; fi
+          done
+          mint
+          curl --fail-with-body -sS --max-time 240 --retry 3 --retry-delay 2
+            -H "Authorization: Bearer $token" "$endpoint?mode=finalize&$common" |
+            jq -e '.ok == true and .draws >= 50000'
+      - name: Audit shadow candidate without promotion
+        shell: bash
+        env:
+          RUN_ID: ${{ steps.prepare.outputs.run_id }}
+          BENCHMARK: ${{ steps.prepare.outputs.benchmark }}
+        run: |
+          set -euo pipefail
+          token="$(curl -fsSL --max-time 30 -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=$OIDC_AUDIENCE" | jq -er '.value')"
+          echo "::add-mask::$token"
+          result="$(jq -nc --arg run "$RUN_ID" --arg bench "$BENCHMARK" '{action:"audit_run",run_id:$run,benchmark:$bench}' |
+            curl --fail-with-body --silent --show-error --max-time 240
+              -H "Authorization: Bearer $token" -H 'Content-Type: application/json'
+              --data-binary @- "$FUNCTIONS_URL/weekly-model-lifecycle-p0-shadow")"
+          echo "$result" | jq .
+          echo "$result" | jq -e '.pass == true and .no_writes == true and .allocation.pass == true and .distribution.pass == true'
+          {
+            echo "### P0 MH12 shadow 50K completed without promotion"
+            echo "- Run: `$RUN_ID`"
+            echo "- Benchmark: `$BENCHMARK`"
+            echo "- Review detailed source and player deltas before publishing"
+          } >> "$GITHUB_STEP_SUMMARY"
