@@ -1,0 +1,44 @@
+name: P0 as-of consecutive-starter shadow (one-time)
+on:
+  push:
+    branches: [main]
+    paths: [".github/workflows/p0-asof-consecutive-once.yml"]
+permissions:
+  contents: read
+  id-token: write
+jobs:
+  shadow:
+    if: >-
+      github.event.head_commit.message == 'chore(p0): run as-of consecutive starter shadow'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      URL: https://nnoagjayvrwyjtizhnfz.supabase.co/functions/v1/run-live-sim-chunk
+    steps:
+      - name: Simulate three closed weeks with two verified 60+ games (no promotion)
+        shell: bash
+        run: |
+          set -euo pipefail
+          get_token() {
+            TOKEN="$(curl -fsSL --max-time 30 -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+             "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=tff-fantezi-scout" | jq -er '.value')"
+            echo "::add-mask::$TOKEN"
+          }
+          get_token
+          for week in 9 10 11; do
+            bench="p0-asof-20261118-mh${week}-consecutive"
+            curl --fail-with-body -sS --max-time 240 \
+              -H "Authorization: Bearer $TOKEN" \
+              "$URL?gw=$week&run=00000000-0000-0000-0000-000000000009&benchmark=$bench&mode=reset" \
+              | jq -e '.ok==true and .mode=="reset"' >/dev/null
+            for part in $(seq 0 19); do
+              if (( part > 0 && part % 6 == 0 )); then get_token; fi
+              seed=$((2026100000 + week * 10000 + part * 500))
+              curl --fail-with-body -sS --max-time 240 --retry 2 --retry-delay 2 \
+                -H "Authorization: Bearer $TOKEN" \
+                "$URL?gw=$week&run=00000000-0000-0000-0000-000000000009&benchmark=$bench&draws=500&seed=$seed" \
+                | jq -e '.ok==true and .draws==500 and .players==456' >/dev/null
+              if (( part % 5 == 4 )); then echo "MH$week consecutive shadow $(((part+1)*500))/10000 draws"; fi
+            done
+          done
+          echo "10K paired-seed MC for all MH9-11. READ-ONLY forecast shadow: NO FINALIZE / NO PROMOTION." >> "$GITHUB_STEP_SUMMARY"
