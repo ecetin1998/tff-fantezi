@@ -15,6 +15,7 @@ import {restoreVerifiedSuspensionReturn} from "./suspensionReturn.mjs"
 import {verifiedLineupFormations} from "./verifiedLineupFormations.mjs"
 import {recentAttackForm,fetchRecentAttackEvidence,groupRecentAttack} from "./recentAttackForm.mjs"
 import {alignAttackSourceWindow} from "./sourceWindowAttack.mjs"
+import {blendRecentVerifiedAttackRates} from "./recentVerifiedSeasonWindow.mjs"
 import {laggedVerifiedAttackForm} from "./laggedVerifiedAttackForm.mjs"
 import {currentTacticalRole} from "./recentTacticalRole.mjs"
 import {applyTeamMatchForm,recalibrateAnchoredMatchForm,auditMatchAllocation,auditRealizedModel} from "./teamRecentForm.mjs"
@@ -340,7 +341,7 @@ async function prepare(sb:any,current:any,status:any,body:any={}){
   }
 
   const [
-    playersQ,rolesQ,availabilityQ,statsQ,teamStatsQ,fixturesQ,weeklyQ,priorInputsQ,teamsQ,currentProjQ,tacticalQ,teamHistoryQ,recentAttackQ,verifiedXiQ,disciplinaryQ
+    playersQ,rolesQ,availabilityQ,statsQ,teamStatsQ,fixturesQ,weeklyQ,priorInputsQ,teamsQ,currentProjQ,tacticalQ,teamHistoryQ,recentAttackQ,verifiedXiQ,disciplinaryQ,verifiedWindowQ
   ]=await Promise.all([
     sb.from("scout_players").select("id,full_name,team_id,position,price,primary_role,role_side,active").eq("active",true),
     sb.from("scout_role_signals").select("*").eq("run_id",current.id),
@@ -365,9 +366,12 @@ async function prepare(sb:any,current:any,status:any,body:any={}){
       .eq("started",true).eq("verified_first_11",true),
     sb.from("scout_verified_disciplinary_cases")
       .select("player_id,team_id,offense_gameweek,affected_gameweeks")
-      .eq("season","2026-27").lt("offense_gameweek",target)
+      .eq("season","2026-27").lt("offense_gameweek",target),
+    sb.from("scout_player_recent_verified_advanced_window")
+      .select("player_id,from_gameweek,to_gameweek,played_games,played_minutes,xg_observed_games,xg_observed_minutes,xa_observed_games,xa_observed_minutes,xg_per90,xa_per90,source_name")
+      .eq("season","2026-27").eq("to_gameweek",target-1)
   ])
-  for(const q of [playersQ,rolesQ,availabilityQ,statsQ,teamStatsQ,fixturesQ,weeklyQ,priorInputsQ,teamsQ,currentProjQ,tacticalQ,teamHistoryQ,recentAttackQ,verifiedXiQ,disciplinaryQ])if(q.error)throw q.error
+  for(const q of [playersQ,rolesQ,availabilityQ,statsQ,teamStatsQ,fixturesQ,weeklyQ,priorInputsQ,teamsQ,currentProjQ,tacticalQ,teamHistoryQ,recentAttackQ,verifiedXiQ,disciplinaryQ,verifiedWindowQ])if(q.error)throw q.error
   const players=playersQ.data||[]
   if((availabilityQ.data||[]).length<players.length)throw new Error("AVAILABILITY_COVERAGE_INCOMPLETE")
   if((teamStatsQ.data||[]).length!==18)throw new Error("TEAM_STATS_INCOMPLETE")
@@ -389,6 +393,7 @@ async function prepare(sb:any,current:any,status:any,body:any={}){
   const roleMap=new Map((rolesQ.data||[]).map((x:any)=>[Number(x.player_id),x]))
   const avMap=new Map((availabilityQ.data||[]).map((x:any)=>[Number(x.player_id),x]))
   const statsMap=new Map((statsQ.data||[]).map((x:any)=>[Number(x.player_id),x]))
+  const verifiedWindowMap=new Map((verifiedWindowQ.data||[]).map((x:any)=>[Number(x.player_id),x]))
   const teamStats=new Map((teamStatsQ.data||[]).map((x:any)=>[Number(x.team_id),x]))
   const priorMap=new Map((priorInputsQ.data||[]).map((x:any)=>[Number(x.player_id),x]))
   const teamNames=new Map((teamsQ.data||[]).map((x:any)=>[Number(x.id),x.name]))
@@ -585,7 +590,11 @@ async function prepare(sb:any,current:any,status:any,body:any={}){
       position:p.position,targetWeek:target,cutoffAt:targetKickoff,weekly:rows,
       verified:recentVerified.get(id)||[],xgPer90:form.xgPer90,xaPer90:form.xaPer90
     })
-    const rates=[attackForm.xgPer90,calibrated.goalsPer90,a90,attackForm.xaPer90,
+    const recentSourceRates=blendRecentVerifiedAttackRates({
+      xgPer90:attackForm.xgPer90,xaPer90:attackForm.xaPer90,
+      window:verifiedWindowMap.get(id),targetWeek:target
+    })
+    const rates=[recentSourceRates.xgPer90,calibrated.goalsPer90,a90,recentSourceRates.xaPer90,
       yc90,rc90,saves90,n(priorRates[7]),n(priorRates[8]),n(priorRates[9]),shots90,sot90,
       keyPass90,trustedShots90]
     const availability=clamp(0,1,n(av.availability_probability,1))
@@ -595,7 +604,7 @@ async function prepare(sb:any,current:any,status:any,body:any={}){
       bench_weight:n(prior.bench_weight,1),durations,duration_weights:durationWeights,rates,
       data_confidence:prior.data_confidence||projMap.get(id)?.confidence||"medium",
       has_individual_prior:Boolean(prior.has_individual_prior),
-      source_note:key+" • starter-duration-source-gated-v2 "+durationProfile.reason+" • starter-duration-long-window-v3 • starter-duration-single-short-shrink-v4"+(regularStarter.applied?" • season-starter-reliability-v1 +"+regularStarter.delta.toFixed(4):"")+(banReturn.applied?" • verified-suspension-return-v1 +"+banReturn.delta.toFixed(4):"")+(calibrated.applied?" • role-aware-attack-v1":"")+(form.applied?" • recent-attack-form-v2":"")+(attackForm.applied&&!form.applied?" • lagged-verified-form-v1":"")+(covered.aligned&&covered.advancedWeek<target-1?" • source-window-attack-v1":"")+(tactical.reason==="multi_match_verified_lineup"?" • tactical-role-evidence-v1 "+tactical.role+":"+String(tactical.side||"unknown"):"")+(momentum.rising?" • momentum-v1 +"+momentum.role_uplift:"")+(recentStarter.applied?" • verified-recent-starter-v1 +"+recentStarter.delta.toFixed(4):"")+(xaReconcile.adjusted?" • defender-xa-source-window-v1 "+xaReconcile.source_minutes+"dk":"")+(officialShift.applied?" • resmî maç: "+event.match_ref:""),
+      source_note:key+" • starter-duration-source-gated-v2 "+durationProfile.reason+" • starter-duration-long-window-v3 • starter-duration-single-short-shrink-v4"+(regularStarter.applied?" • season-starter-reliability-v1 +"+regularStarter.delta.toFixed(4):"")+(banReturn.applied?" • verified-suspension-return-v1 +"+banReturn.delta.toFixed(4):"")+(calibrated.applied?" • role-aware-attack-v1":"")+(form.applied?" • recent-attack-form-v2":"")+(attackForm.applied&&!form.applied?" • lagged-verified-form-v1":"")+(covered.aligned&&covered.advancedWeek<target-1?" • source-window-attack-v1":"")+(recentSourceRates.usedXg||recentSourceRates.usedXa?" • recent-mh8-11-fotmob-window-v1":"")+(tactical.reason==="multi_match_verified_lineup"?" • tactical-role-evidence-v1 "+tactical.role+":"+String(tactical.side||"unknown"):"")+(momentum.rising?" • momentum-v1 +"+momentum.role_uplift:"")+(recentStarter.applied?" • verified-recent-starter-v1 +"+recentStarter.delta.toFixed(4):"")+(xaReconcile.adjusted?" • defender-xa-source-window-v1 "+xaReconcile.source_minutes+"dk":"")+(officialShift.applied?" • resmî maç: "+event.match_ref:""),
       sub_role:tactical.role||prior.sub_role||null,role_side:tactical.side||prior.role_side||null,
       effective_xa_per90:attackForm.xaPer90
     })
@@ -799,7 +808,7 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
       throw new Error("PRE_KICKOFF_BACKTEST_SNAPSHOT_REQUIRED")
   }
 
-  const [latestMetaQ,stableMetaQ,availabilityQ,rolesQ,goalConfigQ,playersUpdatedQ,currentProjectionQ,officialQ,playersQ,teamFixturesQ,attackSourceQ,tacticalQ,teamHistoryQ,recentAttackQ,disciplinaryQ]=await Promise.all([
+  const [latestMetaQ,stableMetaQ,availabilityQ,rolesQ,goalConfigQ,playersUpdatedQ,currentProjectionQ,officialQ,playersQ,teamFixturesQ,attackSourceQ,tacticalQ,teamHistoryQ,recentAttackQ,disciplinaryQ,verifiedWindowQ]=await Promise.all([
     sb.from("scout_replay_input_meta").select("*").eq("gameweek",gw)
       .lt("created_at",new Date(kickoff).toISOString()).order("created_at",{ascending:false}).limit(1).maybeSingle(),
     sb.from("scout_replay_input_meta").select("benchmark_version").eq("gameweek",gw)
@@ -825,9 +834,12 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
     fetchRecentAttackEvidence(sb,gw),
     sb.from("scout_verified_disciplinary_cases")
       .select("player_id,team_id,offense_gameweek,affected_gameweeks")
-      .eq("season","2026-27").lt("offense_gameweek",gw)
+      .eq("season","2026-27").lt("offense_gameweek",gw),
+    sb.from("scout_player_recent_verified_advanced_window")
+      .select("player_id,from_gameweek,to_gameweek,played_games,played_minutes,xg_observed_games,xg_observed_minutes,xa_observed_games,xa_observed_minutes,xg_per90,xa_per90,source_name")
+      .eq("season","2026-27").eq("to_gameweek",gw-1)
   ])
-  for(const q of [latestMetaQ,stableMetaQ,availabilityQ,rolesQ,goalConfigQ,playersUpdatedQ,currentProjectionQ,officialQ,playersQ,teamFixturesQ,attackSourceQ,tacticalQ,teamHistoryQ,recentAttackQ,disciplinaryQ])if(q.error)throw q.error
+  for(const q of [latestMetaQ,stableMetaQ,availabilityQ,rolesQ,goalConfigQ,playersUpdatedQ,currentProjectionQ,officialQ,playersQ,teamFixturesQ,attackSourceQ,tacticalQ,teamHistoryQ,recentAttackQ,disciplinaryQ,verifiedWindowQ])if(q.error)throw q.error
   if(!latestMetaQ.data)return {refresh_required:false,reason:"CURRENT_SIM_INPUT_META_MISSING"}
 
   const availabilityTimes=(availabilityQ.data||[])
@@ -972,6 +984,7 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
     weeklyMomentumRows.set(playerId,weekly.slice(0,5))
   }
   const sourceStatsMap=new Map((sourceStatsQ.data||[]).map((x:any)=>[Number(x.player_id),x]))
+  const verifiedWindowMap=new Map((verifiedWindowQ.data||[]).map((x:any)=>[Number(x.player_id),x]))
   const recentAdvanced=groupRecentAttack(recentAttackQ.data?.advanced||[])
   const recentVerified=groupRecentAttack(recentAttackQ.data?.verified||[])
   const attackEvidence=new Map((attackSourceQ.data||[]).map((x:any)=>[Number(x.player_id),x]))
@@ -1136,9 +1149,13 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
       verified:recentVerified.get(Number(x.player_id))||[],
       xgPer90:form.xgPer90,xaPer90:form.xaPer90
     })
-    rates[0]=attackForm.xgPer90
+    const recentSourceRates=blendRecentVerifiedAttackRates({
+      xgPer90:attackForm.xgPer90,xaPer90:attackForm.xaPer90,
+      window:verifiedWindowMap.get(Number(x.player_id)),targetWeek:gw
+    })
+    rates[0]=recentSourceRates.xgPer90
     rates[1]=calibrated.goalsPer90
-    rates[3]=attackForm.xaPer90
+    rates[3]=recentSourceRates.xaPer90
     // Rebuild from current SOURCE season stats, not recursively from the
     // previous simulation. Mark unavailable/stale actions as unknown.
     const alignedOpportunity=actionsAligned||(seasonMins>=270&&stats?.advanced_through_gameweek!=null&&
@@ -1160,6 +1177,7 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
         +` • starter-duration-source-gated-v2 ${durationProfile.reason} • starter-duration-long-window-v3 • starter-duration-single-short-shrink-v4`
         +(regularStarter.applied||String(stableInput.source_note||"").includes("season-starter-reliability-v1")?` • season-starter-reliability-v1 +${regularStarter.delta.toFixed(4)}`:"")
         +(banReturn.applied||String(stableInput.source_note||"").includes("verified-suspension-return-v1")?` • verified-suspension-return-v1 +${banReturn.delta.toFixed(4)}`:"")
+        +(recentSourceRates.usedXg||recentSourceRates.usedXa?" • recent-mh8-11-fotmob-window-v1":"")
         +(momentum.rising?` • momentum-v1 +${momentumBoost}`:"")
         +(recentStarter.applied||String(stableInput.source_note||"").includes("verified-recent-starter-v1")?` • verified-recent-starter-v1 +${recentStarter.delta.toFixed(4)}`:"")
         +(actionsAligned?" • source-reconciled-actions-mh11-v1":"")
