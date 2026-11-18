@@ -210,6 +210,18 @@ jobs:
           response="$(jq -n --arg sha "$GITHUB_SHA" '{action:"prepare_current",code_sha:$sha}' |             curl --show-error --silent --max-time 240               -H "Authorization: Bearer $OIDC_TOKEN"               -H "Content-Type: application/json"               --data-binary @- "$FUNCTIONS_URL/weekly-model-lifecycle")"
           echo "$response" | jq .
           test "$(printf '%s' "$response" | jq -r '.ok // false')" = "true"
+          # The Github code SHA is not proof that the matching Edge version
+          # was deployed BEFORE prepare_current began. Require its measured
+          # source note coverage to avoid publishing stale-model 50K outputs.
+          if [[ "$(printf '%s' "$response" | jq -r '.refresh_required // false')" == "true" ]] &&
+             [[ "$(printf '%s' "$response" | jq -r '.gameweek // 0')" == "12" ]]; then
+            used="$(printf '%s' "$response" | jq -r '.source_window_applied_players // 0')"
+            test "$used" -ge 100 || {
+              echo "::error title=New source window not consumed::Only $used players. Stop before 50K; deploy Edge and retry."
+              exit 1
+            }
+            echo "- MH12 verified source-window rates used: $used players" >> "$GITHUB_STEP_SUMMARY"
+          fi
           echo "refresh=$(printf '%s' "$response" | jq -r '.refresh_required // false')" >> "$GITHUB_OUTPUT"
           echo "snapshot=$(printf '%s' "$response" | jq -r '.snapshot_allowed // false')" >> "$GITHUB_OUTPUT"
           echo "run_id=$(printf '%s' "$response" | jq -r '.run_id // empty')" >> "$GITHUB_OUTPUT"
