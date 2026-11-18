@@ -1255,3 +1255,46 @@
   .scope :global(.home-feature-card){padding:15px;gap:10px;min-height:0}
   .scope :global(.home-feature-card)>div>p{font-size:12px}
 }
+
+
+/* P1 per-player run journal: optional Pro detail, open only on request. */
+.scope :global(.player-journal){padding:18px 20px;min-width:0;max-width:100%}
+.scope :global(.player-journal-toggle){display:flex;align-items:center;justify-content:space-between;gap:16px;cursor:pointer;list-style:none;min-height:36px}
+.scope :global(.player-journal-toggle)::-webkit-details-marker{display:none}
+.scope :global(.player-journal-toggle)>span:first-child{display:grid;gap:5px;min-width:0}
+.scope :global(.player-journal-toggle) :global(.eyebrow){font-size:10px;letter-spacing:.08em;color:#0873b8;font-weight:800}
+.scope :global(.player-journal-toggle) b{display:block;font-size:19px;line-height:1.25;letter-spacing:-.02em;color:#193455}
+.scope :global(.player-journal-action){display:inline-flex;flex:0 0 auto;gap:8px;align-items:center;padding:8px 10px;border:1px solid #c7e3f4;border-radius:9px;background:#edf8ff;font-weight:750;font-size:11px;color:#096fad}
+.scope :global(.player-journal-toggle):focus-visible{outline:3px solid #83c9f7;outline-offset:4px;border-radius:6px}
+.scope :global(.player-journal)[open] :global(.player-journal-action)>span{transform:rotate(180deg)}
+.scope :global(.player-journal-body){margin-top:14px;padding-top:12px;border-top:1px solid #dcebf5}
+.scope :global(.player-journal-list){display:grid;gap:9px;margin:14px 0}
+.scope :global(.player-journal-row){min-width:0;padding:13px 14px;border:1px solid #d8e9f4;border-radius:12px;background:#fbfdff}
+.scope :global(.player-journal-row-title){display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:10px}
+.scope :global(.player-journal-row-title)>span{font-weight:850;font-size:12px;color:#223d5b}
+.scope :global(.player-journal-row-title)>b{font-size:10px;font-weight:750;border-radius:8px;padding:3px 7px;background:#edf4fa;color:#466d89}
+.scope :global(.player-journal-row-title)>:global(.player-journal-live){background:#e5f7f0;color:#167d62}
+.scope :global(.player-journal-metrics){display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.scope :global(.player-journal-metrics)>div{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 8px;min-width:0;padding:9px 10px;border-radius:9px;background:#f0f8ff}
+.scope :global(.player-journal-metrics) small{width:100%;color:#58718b;font-size:11px;font-weight:750}
+.scope :global(.player-journal-metrics) b{font-size:13px;color:#203953;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.scope :global(.player-journal-metrics) b>span{color:#718ca0;font-weight:600}
+.scope :global(.player-journal-metrics) em{font-style:normal;font-weight:850;font-size:12px;color:#54718a;font-variant-numeric:tabular-nums}
+.scope :global(.player-journal-metrics) em:global(.is-up){color:#167b61}
+.scope :global(.player-journal-metrics) em:global(.is-down){color:#b04c3f}
+.scope :global(.player-journal-context){display:block;font-size:11px;line-height:1.5;margin-top:9px;color:#58718b}
+.scope :global(.player-journal-empty){font-size:12px;color:#58718b;line-height:1.5}
+@media(max-width:780px){
+ .scope :global(.player-journal){padding:14px}
+ .scope :global(.player-journal-metrics){grid-template-columns:1fr}
+ .scope :global(.player-journal-metrics)>div{display:grid;grid-template-columns:95px minmax(0,1fr) auto;align-items:center}
+ .scope :global(.player-journal-metrics) small{width:auto}
+}
+@media(max-width:450px){
+ .scope :global(.player-journal-toggle) b{font-size:16px}
+ .scope :global(.player-journal-action){font-size:10px;padding:7px}
+ .scope :global(.player-journal-metrics)>div{grid-template-columns:1fr auto;gap:5px}
+ .scope :global(.player-journal-metrics) small{grid-column:1/-1}
+ .scope :global(.player-journal-metrics) b{font-size:12px}
+ .scope :global(.player-journal-metrics) em{font-size:11px}
+}
