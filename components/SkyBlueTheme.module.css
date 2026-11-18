@@ -1298,3 +1298,28 @@
  .scope :global(.player-journal-metrics) b{font-size:12px}
  .scope :global(.player-journal-metrics) em{font-size:11px}
 }
+
+
+/* P1 admin-only frozen match probability health: readable on desktop and mobile. */
+.scope :global(.model-match-calibration){margin-top:16px;padding:20px;min-width:0}
+.scope :global(.model-match-calibration) :global(.panel-head){align-items:center;gap:12px;flex-wrap:wrap}
+.scope :global(.model-match-calibration) :global(.panel-head) h2{font-size:21px;line-height:1.2;letter-spacing:-.02em}
+.scope :global(.model-calibration-state){display:inline-flex;align-items:center;gap:5px;padding:7px 10px;border:1px solid #c4dfec;border-radius:9px;font-weight:800;font-size:11px;background:#eef8fd;color:#116991}
+.scope :global(.model-calibration-state):global(.needs-review){background:#fff3e8;border-color:#eed5ac;color:#996016}
+.scope :global(.model-calibration-explain){font-size:12.5px;line-height:1.55;color:#526c86;margin:13px 0}
+.scope :global(.model-calibration-grid){display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;min-width:0}
+.scope :global(.model-calibration-grid)>div{display:grid;gap:7px;min-width:0;border:1px solid #d8e9f4;border-radius:12px;background:#f9fcff;padding:14px}
+.scope :global(.model-calibration-grid)>div>span{font-size:11px;font-weight:800;color:#496a83}
+.scope :global(.model-calibration-grid)>div>div{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.scope :global(.model-calibration-grid)>div>div strong{font-size:18px;font-weight:850;color:#1e3d5c;font-variant-numeric:tabular-nums}
+.scope :global(.model-calibration-grid)>div>div span{font-size:13px;color:#92a9bd}
+.scope :global(.model-calibration-grid)>div>small{font-size:10.5px;line-height:1.5;color:#59768d}
+.scope :global(.model-calibration-table-wrap){max-width:100%;min-width:0;overflow-x:auto;margin-top:13px;border:1px solid #dceaf3;border-radius:12px}
+.scope :global(.model-calibration-table){border-collapse:collapse;width:100%;min-width:570px;font-size:12px;color:#24415e}
+.scope :global(.model-calibration-table) th{text-align:left;background:#edf7fc;color:#45657d;font-weight:800}
+.scope :global(.model-calibration-table) th,
+.scope :global(.model-calibration-table) td{padding:11px 12px;border-bottom:1px solid #e1ebf2;white-space:nowrap;font-variant-numeric:tabular-nums}
+.scope :global(.model-calibration-table) tr:last-child td{border-bottom:0}
+.scope :global(.model-calibration-disclaimer){font-size:11px;line-height:1.55;color:#61798f;margin:13px 0 0}
+@media(max-width:920px){.scope :global(.model-calibration-grid){grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:530px){.scope :global(.model-match-calibration){padding:15px}.scope :global(.model-calibration-grid){grid-template-columns:minmax(0,1fr)}.scope :global(.model-calibration-grid)>div{padding:12px}.scope :global(.model-calibration-grid)>div>div strong{font-size:17px}}
