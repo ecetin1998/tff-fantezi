@@ -961,7 +961,15 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
     .order("generated_at",{ascending:false}).limit(1).maybeSingle()
   if(existing.error)throw existing.error
   if(existing.data){
+    const reusedQ=await sb.from("scout_replay_player_inputs")
+      .select("player_id",{head:true,count:"exact"}).eq("gameweek",gw)
+      .eq("benchmark_version",benchmark)
+      .ilike("source_note","%recent-mh8-11-fotmob-window-v1%")
+    if(reusedQ.error)throw reusedQ.error
+    if(gw===12&&Number(reusedQ.count||0)<100)
+      throw new Error("RECENT_SOURCE_WINDOW_REUSED_CANDIDATE_UNVERIFIED")
     return {
+      source_window_applied_players:Number(reusedQ.count||0),
       refresh_required:true,reused:true,snapshot_allowed:snapshotAllowed,run_id:existing.data.id,parent_run_id:current.id,gameweek:gw,benchmark,
       latest_source_at:latestSourceAt,deadline_at:new Date(deadline).toISOString(),
       min_interval_hours:minInterval,input_snapshot_hash:existing.data.input_snapshot_hash||null
@@ -1192,6 +1200,18 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
         +(rates[14]<1?` • active-fwd-event-share-v1 factor=${rates[14]}`:"")
     }
   })
+  // Deployment race gate: code_sha comes from GitHub, which alone does not
+  // prove that the Supabase Edge deployment had the matching code when this
+  // request began. Never start 50K before the verified source window is
+  // actually observed in the prepared player input source notes.
+  const sourceWindowAppliedPlayers=inputRows.filter((row:any)=>
+    String(row.source_note||"").includes("recent-mh8-11-fotmob-window-v1")).length
+  if(gw===12&&((verifiedWindowQ.data||[]).length!==inputRows.length ||
+      sourceWindowAppliedPlayers<100)){
+    throw new Error("RECENT_SOURCE_WINDOW_NOT_CONSUMED: fetched="+
+      (verifiedWindowQ.data||[]).length+" expected="+inputRows.length+
+      " applied="+sourceWindowAppliedPlayers)
+  }
   const runId=crypto.randomUUID()
   const anchoredMatchInputs=new Map(((stableMatchesQ.data||matchesQ.data)||[]).map((x:any)=>[Number(x.match_id),x]))
   // Anchored non-intraday match lambdas prevent the same form boost
@@ -1345,7 +1365,8 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
   return {
     refresh_required:true,snapshot_allowed:snapshotAllowed,run_id:runId,parent_run_id:current.id,gameweek:gw,benchmark,
     latest_source_at:latestSourceAt,deadline_at:new Date(deadline).toISOString(),
-    min_interval_hours:minInterval,input_snapshot_hash:inputHash
+    min_interval_hours:minInterval,input_snapshot_hash:inputHash,
+    source_window_applied_players:sourceWindowAppliedPlayers
   }
 }
 
