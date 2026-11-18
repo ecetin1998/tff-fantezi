@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { getAuthState, getPlayerDetail, getPlayerDetailPro } from '@/lib/data'
+import { getAuthState, getPlayerDetail, getPlayerDetailPro, getPlayerForecastJournal } from '@/lib/data'
 import AccessGate from '@/components/AccessGate'
 import WeeklyPointsChart from '@/components/WeeklyPointsChart'
 import PredictionHistoryChartEnhancer from '@/components/PredictionHistoryChartEnhancer'
@@ -24,6 +24,16 @@ export async function generateMetadata({params}){
 const pct=v=>`${(Number(v||0)*100).toFixed(0)}%`
 const num=(v,d=2)=>Number(v||0).toFixed(d)
 const venue=v=>v==='HOME'?'Ev':v==='AWAY'?'Dep':'—'
+const journalTime=v=>{
+  const time=Date.parse(v||'')
+  return Number.isFinite(time)?new Intl.DateTimeFormat('tr-TR',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit',timeZone:'Europe/Istanbul'}).format(new Date(time)):'—'
+}
+const journalDelta=(v,unit='')=>{
+  if(v===null||v===undefined||!Number.isFinite(Number(v)))return '—'
+  const x=Number(v),digits=unit===' yüzde puan'?1:unit===' dk'?0:2
+  const n=unit===' yüzde puan'?x*100:x
+  return (n>0?'+':'')+n.toFixed(digits).replace('.',',')+unit
+}
 const posLabel=p=>({GK:'KL',DEF:'DEF',MID:'OS',FWD:'FOR'}[p]||p||'—')
 const xaSourceLabel=value=>{
   const source=String(value||'')
@@ -58,7 +68,7 @@ export default async function PlayerPage({ params }){
     />
   </div>
 
-  const pro=await getPlayerDetailPro(id,data.run?.id)
+  const [pro,forecastJournal]=await Promise.all([getPlayerDetailPro(id,data.run?.id),getPlayerForecastJournal(id,data.run?.id)])
   const {run,player,availability:a,season:s,modelFeatures:mf,weekly,matches=[]}=data
   const r=pro?.role||null
   const advancedRecent=pro?.advancedRecent||[]
@@ -240,6 +250,31 @@ export default async function PlayerPage({ params }){
         <span key={signal.label}><b>{signal.value}</b> {signal.label}</span>):null}</div>
       <p className="projection-explainer">Bu bir <strong>mevcut modelin puan dökümüdür</strong>; son güncellemeden hangi kaynağın kaç xFP değiştirdiğini gösteren nedensel bir fark analizi değildir. Gol ve asist tahminleri temel bileşenin içindedir.</p>
     </section>
+
+    <details className="card profile-card player-journal" aria-labelledby="player-journal-title">
+      <summary className="player-journal-toggle">
+        <span><small className="eyebrow">MH{run?.gameweek||'—'} • MODEL TAKİBİ</small><b id="player-journal-title">Tahmin nasıl değişti?</b></span>
+        <span className="player-journal-action">Geçmişi göster <span aria-hidden="true">⌄</span></span>
+      </summary>
+      <div className="player-journal-body">
+        <p className="projection-explainer">Aynı maç haftasının tamamlanmış 50K koşularını karşılaştırıyoruz. Önceki koşuların hepsi geçmişte canlıya çıkmış olmayabilir; bunlar <strong>model değişim kayıtlarıdır</strong>, kaynak değişiminin kesin nedeni değildir.</p>
+        {forecastJournal?.entries?.length?<div className="player-journal-list">
+          {forecastJournal.entries.map(entry=><div className="player-journal-row" key={entry.id}>
+            <div className="player-journal-row-title">
+              <span>{journalTime(entry.at)}</span>
+              {entry.isCurrent?<b className="player-journal-live">Güncel 50K</b>:<b>Önceki 50K</b>}
+            </div>
+            <div className="player-journal-metrics">
+              <div><small>xFP</small><b>{num(entry.old.xfp)} <span aria-hidden="true">→</span> {num(entry.current.xfp)}</b><em className={Number(entry.changes.xfp)>=0?'is-up':'is-down'}>{journalDelta(entry.changes.xfp)}</em></div>
+              <div><small>İlk 11</small><b>{pct(entry.old.xi)} <span aria-hidden="true">→</span> {pct(entry.current.xi)}</b><em className={Number(entry.changes.xi)>=0?'is-up':'is-down'}>{journalDelta(entry.changes.xi,' yüzde puan')}</em></div>
+              <div><small>Beklenen dakika</small><b>{num(entry.old.minutes,0)} <span aria-hidden="true">→</span> {num(entry.current.minutes,0)}</b><em className={Number(entry.changes.minutes)>=0?'is-up':'is-down'}>{journalDelta(entry.changes.minutes,' dk')}</em></div>
+            </div>
+            <small className="player-journal-context">{entry.sourceTimestampShift===true?'Genel kaynak kontrol zamanı farklı.':entry.sourceTimestampShift===false?'Genel kaynak zaman damgası aynı.':'Kaynak zamanı karşılaştırılamıyor.'} {entry.modelLabelShift?'Model sürümü etiketi de farklı.':''} {entry.reason}</small>
+          </div>)}
+        </div>:<p className="player-journal-empty">{forecastJournal?.note||'Karşılaştırılabilir tamamlanmış geçmiş koşu bulunamadı.'}</p>}
+        {forecastJournal?.entries?.length?<p className="projection-explainer">{forecastJournal.note} Farklar, sadece bu oyuncunun tahmini için ölçülür. Kaynak günü değişmiş olsa bile bunun xFP farkını tek başına yarattığı kanıtlanmış değildir.</p>:null}
+      </div>
+    </details>
 
     <section className="card profile-card player-evidence-card" aria-labelledby="player-source-title">
       <div className="player-detail-section-head">
