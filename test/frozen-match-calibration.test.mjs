@@ -41,3 +41,26 @@ test('small sample never claims promotion even when predicted 3+ gap is large',(
  assert.equal(r.over25_review,false)
  assert.equal(r.over25_gap,-.2167)
 })
+test('Wilson intervals expose sampling uncertainty without model promotion',()=>{
+ const r=frozenMatchCalibration({weeks:[wk],actuals,forecasts:[prob(11),prob(12),prob(13)]})
+ const metric=r.overall.over25
+ assert.equal(metric.observed_ci95.lower<metric.observed,true)
+ assert.equal(metric.observed_ci95.upper>metric.observed,true)
+ assert.equal(r.over25_outside_observed_ci95,false)
+ const empty=frozenMatchCalibration()
+ assert.equal(empty.overall.over25.observed_ci95,null)
+ assert.equal(empty.over25_outside_observed_ci95,false)
+})
+test('a large observed vs predicted gap is diagnostic only',()=>{
+ const forecasts=Array.from({length:45},(_,i)=>({...prob(i+100),over25_probability:.10}))
+ const events=Array.from({length:45},(_,i)=>({
+  gameweek:11,match_id:i+100,kickoff_at:'2026-11-06T17:00:00Z',
+  match_status:'Bitti',fantasy_closure:'KAPANDI',
+  home_goals:i<36?2:0,away_goals:i<36?1:0
+ }))
+ const r=frozenMatchCalibration({weeks:[wk],actuals:events,forecasts})
+ assert.equal(r.overall.matches,45)
+ assert.equal(r.over25_review,true)
+ assert.equal(r.over25_outside_observed_ci95,true)
+ assert.equal(r.auto_promote,false)
+})
