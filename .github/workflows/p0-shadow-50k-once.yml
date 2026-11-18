@@ -32,8 +32,8 @@ jobs:
           token="$(curl -fsSL --max-time 30 -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=$OIDC_AUDIENCE" | jq -er '.value')"
           echo "::add-mask::$token"
           result="$(jq -nc --arg sha "$CANDIDATE_SHA" '{action:"prepare_current",code_sha:$sha}' |
-            curl --fail-with-body --silent --show-error --max-time 240 -X POST
-              -H "Authorization: Bearer $token" -H 'Content-Type: application/json'
+            curl --fail-with-body --silent --show-error --max-time 240 -X POST \
+              -H "Authorization: Bearer $token" -H 'Content-Type: application/json' \
               --data-binary @- "$FUNCTIONS_URL/weekly-model-lifecycle-p0-shadow")"
           echo "$result" | jq .
           echo "$result" | jq -e '.ok == true and .refresh_required == true and .gameweek == 12 and (.source_window_applied_players >= 100)'
@@ -53,20 +53,20 @@ jobs:
           mint
           endpoint="$FUNCTIONS_URL/run-live-sim-chunk-p0-shadow"
           common="gw=12&run=$RUN_ID&benchmark=$BENCHMARK"
-          curl --fail-with-body -sS --max-time 240 --retry 3 --retry-delay 2
+          curl --fail-with-body -sS --max-time 240 --retry 3 --retry-delay 2 \
             -H "Authorization: Bearer $token" "$endpoint?mode=reset&$common" |
             jq -e '.ok == true'
           for part in $(seq 0 99); do
             if (( part > 0 && part % 9 == 0 )); then mint; fi
             seed=$((2026000000 + 12 * 100000 + part * 500 + 1))
-            curl --fail-with-body -sS --max-time 240 --retry 3 --retry-delay 2
-              -H "Authorization: Bearer $token"
+            curl --fail-with-body -sS --max-time 240 --retry 3 --retry-delay 2 \
+              -H "Authorization: Bearer $token" \
               "$endpoint?$common&draws=500&seed=$seed" |
               jq -e -c '.ok == true and .draws == 500' >/dev/null
             if (( part % 10 == 9 )); then echo "Completed $((part+1))/100 candidate chunks"; fi
           done
           mint
-          curl --fail-with-body -sS --max-time 240 --retry 3 --retry-delay 2
+          curl --fail-with-body -sS --max-time 240 --retry 3 --retry-delay 2 \
             -H "Authorization: Bearer $token" "$endpoint?mode=finalize&$common" |
             jq -e '.ok == true and .draws >= 50000'
       - name: Audit shadow candidate without promotion
@@ -79,8 +79,8 @@ jobs:
           token="$(curl -fsSL --max-time 30 -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=$OIDC_AUDIENCE" | jq -er '.value')"
           echo "::add-mask::$token"
           result="$(jq -nc --arg run "$RUN_ID" --arg bench "$BENCHMARK" '{action:"audit_run",run_id:$run,benchmark:$bench}' |
-            curl --fail-with-body --silent --show-error --max-time 240
-              -H "Authorization: Bearer $token" -H 'Content-Type: application/json'
+            curl --fail-with-body --silent --show-error --max-time 240 \
+              -H "Authorization: Bearer $token" -H 'Content-Type: application/json' \
               --data-binary @- "$FUNCTIONS_URL/weekly-model-lifecycle-p0-shadow")"
           echo "$result" | jq .
           echo "$result" | jq -e '.pass == true and .no_writes == true and .allocation.pass == true and .distribution.pass == true'
