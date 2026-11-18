@@ -1,0 +1,55 @@
+name: P0 shadow optimizer plus full model QA (one-time)
+
+on:
+  push:
+    branches: [main]
+    paths: [".github/workflows/p0-shadow-final-qa-once.yml"]
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  shadow-final:
+    if: >-
+      github.event.head_commit.message == 'chore(p0): finalize shadow optimizer and qa'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      FUNCTIONS_URL: https://nnoagjayvrwyjtizhnfz.supabase.co/functions/v1
+      OIDC_AUDIENCE: tff-fantezi-scout
+      RUN_ID: eac53194-1ce5-49c8-95cc-b91a2d7cee82
+      PARENT_ID: bfdbfb68-3d38-497a-a561-ba296be0dfe8
+    steps:
+      - name: Create both legal candidate squads without promoting
+        shell: bash
+        run: |
+          set -euo pipefail
+          token="$(curl -fsSL --max-time 30 -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=$OIDC_AUDIENCE" | jq -er '.value')"
+          echo "::add-mask::$token"
+          for mode in recommended alternative; do
+            curl -fsSL --max-time 300 --retry 3 --retry-delay 2 \
+              -H "Authorization: Bearer $token" \
+              "$FUNCTIONS_URL/run-staging-optimizer?mode=$mode&run=$RUN_ID" |
+              jq -e '.ok == true'
+          done
+      - name: Source-backed full QA and inherited model gate (no promotion)
+        shell: bash
+        run: |
+          set -euo pipefail
+          token="$(curl -fsSL --max-time 30 -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=$OIDC_AUDIENCE" | jq -er '.value')"
+          echo "::add-mask::$token"
+          for stage in qa integrity bugfix; do
+            result="$(jq -nc --arg run "$RUN_ID" --arg stage "$stage" '{stage:$stage,run_id:$run}' |
+              curl --fail-with-body -sS --max-time 180 \
+                -H "Authorization: Bearer $token" -H 'Content-Type: application/json' \
+                --data-binary @- "$FUNCTIONS_URL/model-refresh-control")"
+            echo "$result" | jq .
+            echo "$result" | jq -e '.pass == true or .ok == true'
+          done
+          result="$(jq -nc --arg run "$RUN_ID" --arg parent "$PARENT_ID" '{stage:"model_gate",run_id:$run,parent_run_id:$parent}' |
+            curl --fail-with-body -sS --max-time 180 \
+              -H "Authorization: Bearer $token" -H 'Content-Type: application/json' \
+              --data-binary @- "$FUNCTIONS_URL/model-refresh-control")"
+          echo "$result" | jq .
+          echo "$result" | jq -e '.pass == true or .ok == true'
