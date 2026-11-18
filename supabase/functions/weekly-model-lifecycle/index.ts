@@ -612,7 +612,7 @@ async function prepare(sb:any,current:any,status:any,body:any={}){
       bench_weight:n(prior.bench_weight,1),durations,duration_weights:durationWeights,rates,
       data_confidence:prior.data_confidence||projMap.get(id)?.confidence||"medium",
       has_individual_prior:Boolean(prior.has_individual_prior),
-      source_note:key+" • starter-duration-source-gated-v2 "+durationProfile.reason+" • starter-duration-long-window-v3 • starter-duration-single-short-shrink-v4"+(regularStarter.applied?" • season-starter-reliability-v1 +"+regularStarter.delta.toFixed(4):"")+(sustainedStarter.applied?" • sustained-starter-continuity-v1 +"+sustainedStarter.delta.toFixed(4):"")+(banReturn.applied?" • verified-suspension-return-v1 +"+banReturn.delta.toFixed(4):"")+(calibrated.applied?" • role-aware-attack-v1":"")+(form.applied?" • recent-attack-form-v2":"")+(attackForm.applied&&!form.applied?" • lagged-verified-form-v1":"")+(covered.aligned&&covered.advancedWeek<target-1?" • source-window-attack-v1":"")+(recentSourceRates.usedXg||recentSourceRates.usedXa?" • recent-mh8-11-fotmob-window-v1":"")+(tactical.reason==="multi_match_verified_lineup"?" • tactical-role-evidence-v1 "+tactical.role+":"+String(tactical.side||"unknown"):"")+(momentum.rising?" • momentum-v1 +"+momentum.role_uplift:"")+(recentStarter.applied?" • verified-recent-starter-v1 +"+recentStarter.delta.toFixed(4):"")+(xaReconcile.adjusted?" • defender-xa-source-window-v1 "+xaReconcile.source_minutes+"dk":"")+(officialShift.applied?" • resmî maç: "+event.match_ref:""),
+      source_note:key+" • starter-duration-source-gated-v2 "+durationProfile.reason+" • starter-duration-long-window-v3 • starter-duration-single-short-shrink-v4 • sustained-starter-policy-v1"+(regularStarter.applied?" • season-starter-reliability-v1 +"+regularStarter.delta.toFixed(4):"")+(sustainedStarter.applied?" • sustained-starter-continuity-v1 +"+sustainedStarter.delta.toFixed(4):"")+(banReturn.applied?" • verified-suspension-return-v1 +"+banReturn.delta.toFixed(4):"")+(calibrated.applied?" • role-aware-attack-v1":"")+(form.applied?" • recent-attack-form-v2":"")+(attackForm.applied&&!form.applied?" • lagged-verified-form-v1":"")+(covered.aligned&&covered.advancedWeek<target-1?" • source-window-attack-v1":"")+(recentSourceRates.usedXg||recentSourceRates.usedXa?" • recent-mh8-11-fotmob-window-v1":"")+(tactical.reason==="multi_match_verified_lineup"?" • tactical-role-evidence-v1 "+tactical.role+":"+String(tactical.side||"unknown"):"")+(momentum.rising?" • momentum-v1 +"+momentum.role_uplift:"")+(recentStarter.applied?" • verified-recent-starter-v1 +"+recentStarter.delta.toFixed(4):"")+(xaReconcile.adjusted?" • defender-xa-source-window-v1 "+xaReconcile.source_minutes+"dk":"")+(officialShift.applied?" • resmî maç: "+event.match_ref:""),
       sub_role:tactical.role||prior.sub_role||null,role_side:tactical.side||prior.role_side||null,
       effective_xa_per90:attackForm.xaPer90
     })
@@ -1198,7 +1198,7 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
       durations:adjusted.applied?adjusted.durations:durationProfile.durations,
       duration_weights:adjusted.applied?adjusted.duration_weights:durationProfile.duration_weights,
       source_note:`intraday refresh from ${sourceBenchmark}; role baseline ${stableRoleBenchmark}; source ${latestSourceAt}`
-        +` • starter-duration-source-gated-v2 ${durationProfile.reason} • starter-duration-long-window-v3 • starter-duration-single-short-shrink-v4`
+        +` • starter-duration-source-gated-v2 ${durationProfile.reason} • starter-duration-long-window-v3 • starter-duration-single-short-shrink-v4 • sustained-starter-policy-v1`
         +(regularStarter.applied||String(stableInput.source_note||"").includes("season-starter-reliability-v1")?` • season-starter-reliability-v1 +${regularStarter.delta.toFixed(4)}`:"")
         +(sustainedStarter.applied||sustainedPreviouslyApplied?` • sustained-starter-continuity-v1 +${sustainedStarter.delta.toFixed(4)}`:"")
         +(banReturn.applied||String(stableInput.source_note||"").includes("verified-suspension-return-v1")?` • verified-suspension-return-v1 +${banReturn.delta.toFixed(4)}`:"")
@@ -1562,6 +1562,14 @@ Deno.serve(async(req:Request)=>{
       if(gw>=12&&run.is_current!==true&&
         (players.data||[]).some((r:any)=>!String(r.source_note||"").includes("starter-duration-single-short-shrink-v4"))){
         return Response.json({ok:false,pass:false,error:"STARTER_DURATION_SINGLE_SHORT_OUTLIER_POLICY_MISSING",
+          run_id:runId,gameweek:gw,benchmark,no_writes:true},{status:409})
+      }
+      // A new challenger cannot pass arithmetic QA with a stale Edge deployment
+      // that silently omitted source-frozen two-week continuity calibration.
+      if(gw>=12&&run.is_current!==true&&
+        (players.data||[]).some((r:any)=>!String(r.source_note||"").includes("sustained-starter-policy-v1"))){
+        return Response.json({ok:false,pass:false,
+          error:"SUSTAINED_STARTER_POLICY_SOURCE_PROVENANCE_MISSING",
           run_id:runId,gameweek:gw,benchmark,no_writes:true},{status:409})
       }
       const prep=auditMatchAllocation({
