@@ -48,3 +48,22 @@ test('comparison UI stays compact, accessible and uses existing permission-gated
  assert.match(css,/@media\(max-width:620px\)/)
  assert.match(css,/\.pickerGrid\{grid-template-columns:minmax\(0,1fr\)/)
 })
+
+test('player comparison precedes the table tools and filters sit immediately above the player results',async()=>{
+ const {readFileSync}=await import('node:fs')
+ const {fileURLToPath}=await import('node:url')
+ const {dirname,resolve}=await import('node:path')
+ const root=resolve(dirname(fileURLToPath(import.meta.url)),'..')
+ const ui=readFileSync(resolve(root,'components/PlayersTable.js'),'utf8')
+ const compare=ui.indexOf('    {!isVisitor?<PlayerComparison')
+ const legend=ui.indexOf('    <div className="projection-legend">')
+ const summary=ui.indexOf('    <div className="table-summary">{isVisitor?')
+ const filters=ui.indexOf('    {!isVisitor?<div className="filters player-filters">')
+ const results=ui.indexOf('    {!visiblePlayers.length?')
+ assert.ok(compare>=0&&compare<legend&&legend<summary&&summary<filters&&filters<results,
+   'comparison first; explanations and membership prompts before summary; filters immediately above the table')
+ assert.match(ui.slice(summary,results),/MultiSelectFilter ariaLabel="Takım filtreleri"/)
+ assert.match(ui.slice(summary,results),/MultiSelectFilter ariaLabel="Mevki filtreleri"/)
+ assert.equal((ui.match(/<PlayerComparison /g)||[]).length,1)
+ assert.equal((ui.slice(filters,results).match(/<div className="table-summary"/g)||[]).length,0)
+})
