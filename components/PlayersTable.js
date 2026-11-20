@@ -153,6 +153,23 @@ export default function PlayersTable({players,total,page,pageCount,teams,filters
   const offset=(Math.max(1,Number(effectivePage||1))-1)*PAGE_SIZE
 
   return <>
+    {!isVisitor?<PlayerComparison key={runId||'none'} players={staticPool?pool:players} isPro={isPro} proReady={overlayReady}/>:null}
+
+    {isPro&&!overlayReady&&!overlayError?<div className="table-summary" role="status" aria-live="polite">Gelişmiş P90 ve 6+ puan verileri yükleniyor...</div>:null}
+    {isPro&&overlayError?<div className="alert error" role="alert">Gelişmiş P90 ve 6+ istatistikleri yüklenemedi.{overlayRequestId?' Hata kodu: '+overlayRequestId:''} <button type="button" onClick={()=>setOverlayRetry(n=>n+1)}>Yeniden dene</button></div>:null}
+    <div className="projection-legend">
+      Karar metrikleri: <b>İlk 11</b> + <b>xDakika</b> oynama ihtimalini, <b>xFP</b> ortalama beklentiyi, <b>Tipik puan</b> en sık üç sonucun ağırlıklı ortalamasının en yakın tam sayıya yuvarlanmış hâlidir.
+      {isPro?<span> <b>P25/P90</b>, <b>6+</b>, <b>xG</b> ve <b>xA</b> Gelişmiş üyelik dağılım/üretim katmanlarıdır.</span>:<span> Puan dağılımı, 6+ ihtimali ve xG/xA detayları Gelişmiş üyelikte açılır.</span>}
+    </div>
+    {!isVisitor&&!isPro?<AccessGate
+      compact
+      tier="pro"
+      eyebrow="GELİŞMİŞ ANALİZ"
+      title="Tavan ve üretim metriklerini aç."
+      description="P25/P90 dağılımı, 6+ ihtimali, xG/xA ve gelişmiş rol analizi Gelişmiş üyelikte görünür."
+    />:null}
+
+    <div className="table-summary">{isVisitor?<><b>İlk {visiblePlayers.length}</b> oyuncu • xFP sıralaması • tüm oyuncu havuzu ücretsiz üyelikle açılır</>:<><b>{effectiveTotal}</b> oyuncu • {isPro?'Gelişmiş analiz görünümü':'ücretsiz üye görünümü'}</>}</div>
     {accessPending&&isVisitor?<div className="filters player-filters" aria-label="Filtreler hazırlanıyor" aria-busy="true">
       <input disabled placeholder="Oyuncu, takım veya rakip ara..." aria-label="Oyuncu arama yükleniyor"/>
       <select disabled aria-label="Takım filtresi yükleniyor"><option>Tüm takımlar</option></select>
@@ -173,22 +190,6 @@ export default function PlayersTable({players,total,page,pageCount,teams,filters
         <option value="points">Toplam puana göre</option><option value="value">F/P'ye göre</option><option value="price">Fiyata göre</option>
       </select>
     </div>:null}
-
-    <div className="table-summary">{isVisitor?<><b>İlk {visiblePlayers.length}</b> oyuncu • xFP sıralaması • tüm oyuncu havuzu ücretsiz üyelikle açılır</>:<><b>{effectiveTotal}</b> oyuncu • {isPro?'Gelişmiş analiz görünümü':'ücretsiz üye görünümü'}</>}</div>
-    {!isVisitor?<PlayerComparison key={runId||'none'} players={staticPool?pool:players} isPro={isPro} proReady={overlayReady}/>:null}
-    {isPro&&!overlayReady&&!overlayError?<div className="table-summary" role="status" aria-live="polite">Gelişmiş P90 ve 6+ puan verileri yükleniyor...</div>:null}
-    {isPro&&overlayError?<div className="alert error" role="alert">Gelişmiş P90 ve 6+ istatistikleri yüklenemedi.{overlayRequestId?' Hata kodu: '+overlayRequestId:''} <button type="button" onClick={()=>setOverlayRetry(n=>n+1)}>Yeniden dene</button></div>:null}
-    <div className="projection-legend">
-      Karar metrikleri: <b>İlk 11</b> + <b>xDakika</b> oynama ihtimalini, <b>xFP</b> ortalama beklentiyi, <b>Tipik puan</b> en sık üç sonucun ağırlıklı ortalamasının en yakın tam sayıya yuvarlanmış hâlidir.
-      {isPro?<span> <b>P25/P90</b>, <b>6+</b>, <b>xG</b> ve <b>xA</b> Gelişmiş üyelik dağılım/üretim katmanlarıdır.</span>:<span> Puan dağılımı, 6+ ihtimali ve xG/xA detayları Gelişmiş üyelikte açılır.</span>}
-    </div>
-    {!isVisitor&&!isPro?<AccessGate
-      compact
-      tier="pro"
-      eyebrow="GELİŞMİŞ ANALİZ"
-      title="Tavan ve üretim metriklerini aç."
-      description="P25/P90 dağılımı, 6+ ihtimali, xG/xA ve gelişmiş rol analizi Gelişmiş üyelikte görünür."
-    />:null}
 
     {!visiblePlayers.length?<div className="card empty-filter-state">Bu filtrelerle eşleşen oyuncu bulunamadı.</div>:<>
       <div className="player-card-list">
