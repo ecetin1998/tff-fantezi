@@ -109,3 +109,48 @@ export function mh11OwnerApprovedAdvancedLagAccepted({gameweek,activePlayers,sta
     weekly.reduce((sum,w)=>sum+Number(w.points),0)===806 &&
     weekly.reduce((sum,w)=>sum+Number(w.bonus_points),0)===79;
 }
+
+
+/**
+ * MH12 owner-approved independent actuals -> MH13 forecasting.
+ * 266 truly observed Highlightly advanced-match inputs were persisted with their
+ * real source. Twelve last-minute TFF-confirmed substitutions were incorrectly
+ * zeroed by the upstream box and DO NOT HAVE observed xG/xA. Preserve their
+ * advanced_through_gameweek rather than forge zero advanced stats or claim MH12
+ * coverage. This exception is restricted to those twelve verified identities
+ * and to the exact, closed, source-backed MH12 ledger.
+ */
+export function mh12OwnerApprovedAdvancedLagAccepted({gameweek,activePlayers,stats,teamStats,matches,weekly}) {
+  if(Number(gameweek)!==12 || !Array.isArray(activePlayers) || activePlayers.length!==456 ||
+     !Array.isArray(stats) || stats.length!==456 ||
+     !Array.isArray(teamStats) || teamStats.length!==18 ||
+     !Array.isArray(matches) || matches.length!==9 ||
+     !Array.isArray(weekly) || weekly.length!==456) return false;
+  const ids=new Set(activePlayers.map(p=>Number(p.id)));
+  if(ids.size!==456 || new Set(stats.map(s=>Number(s.player_id))).size!==456 ||
+     new Set(teamStats.map(t=>Number(t.team_id))).size!==18 ||
+     new Set(matches.map(m=>Number(m.match_id))).size!==9 ||
+     new Set(weekly.map(w=>Number(w.player_id))).size!==456)return false;
+  if(matches.some(m=>m.match_status!=="Bitti"||m.fantasy_closure!=="KAPANDI"))return false;
+  if(weekly.some(w=>!ids.has(Number(w.player_id)) || w.is_final!==true ||
+     w.source_kind!=="mh12_owner_approved_independent_score_events" ||
+     !Number.isFinite(Number(w.minutes))||Number(w.minutes)<0||Number(w.minutes)>90||
+     !Number.isInteger(Number(w.points))||!Number.isInteger(Number(w.base_points))||
+     !Number.isInteger(Number(w.bonus_points))||
+     Number(w.points)!==Number(w.base_points)+Number(w.bonus_points)||
+     Number(w.bonus_points)<0||Number(w.bonus_points)>3||
+     (Number(w.minutes)===0&&Number(w.points)!==0)))return false;
+  const observed=weekly.filter(w=>Number(w.minutes)>0);
+  if(observed.length!==278||weekly.length-observed.length!==178||
+     weekly.reduce((n,w)=>n+Number(w.points),0)!==742 ||
+     weekly.reduce((n,w)=>n+Number(w.bonus_points),0)!==81)return false;
+  const expectedLag=new Set([215,220,275,284,423,428,431,443,448,515,1372,1504]);
+  const playedIds=new Set(observed.map(w=>Number(w.player_id)));
+  const lagged=new Set(stats.filter(s=>playedIds.has(Number(s.player_id)) &&
+     Number(s.advanced_through_gameweek||0)<12).map(s=>Number(s.player_id)));
+  if(lagged.size!==expectedLag.size ||
+     [...lagged].some(id=>!expectedLag.has(id)))return false;
+  return stats.every(s=>ids.has(Number(s.player_id)) &&
+    Number(s.through_gameweek)===12 &&
+    Number(s.advanced_through_gameweek||0)<=12);
+}
