@@ -1,5 +1,5 @@
 import {createClient} from "https://esm.sh/@supabase/supabase-js@2"
-import {mh8CalculatedAdvancedLagAccepted,mh10OwnerApprovedAdvancedLagAccepted,mh11OwnerApprovedAdvancedLagAccepted} from "./mh8AdvancedLag.mjs"
+import {mh8CalculatedAdvancedLagAccepted,mh10OwnerApprovedAdvancedLagAccepted,mh11OwnerApprovedAdvancedLagAccepted,mh12OwnerApprovedAdvancedLagAccepted} from "./mh8AdvancedLag.mjs"
 
 const AUDIENCE="tff-fantezi-scout"
 const ISSUER="https://token.actions.githubusercontent.com"
@@ -135,7 +135,8 @@ Deno.serve(async(req:Request)=>{
       }
       const acceptedLag=mh8CalculatedAdvancedLagAccepted(lagInputs)||
         mh10OwnerApprovedAdvancedLagAccepted(lagInputs)||
-        mh11OwnerApprovedAdvancedLagAccepted(lagInputs)
+        mh11OwnerApprovedAdvancedLagAccepted(lagInputs)||
+        mh12OwnerApprovedAdvancedLagAccepted(lagInputs)
       const fixtureCount=(histQ.data||[]).length
       const finalMatches=new Set((weeklyQ.data||[]).filter((x:any)=>x.is_final).map((x:any)=>String(x.match_id))).size
       const targetTeams=new Set((targetQ.data||[]).flatMap((x:any)=>[Number(x.home_team_id),Number(x.away_team_id)]))
@@ -191,7 +192,8 @@ Deno.serve(async(req:Request)=>{
       }
       const acceptedLag=mh8CalculatedAdvancedLagAccepted(lagInputs)||
         mh10OwnerApprovedAdvancedLagAccepted(lagInputs)||
-        mh11OwnerApprovedAdvancedLagAccepted(lagInputs)
+        mh11OwnerApprovedAdvancedLagAccepted(lagInputs)||
+        mh12OwnerApprovedAdvancedLagAccepted(lagInputs)
       const participantIds=new Set((participantsQ.data||[]).map((x:any)=>Number(x.player_id)))
       const markers=new Map((statsQ.data||[]).map((x:any)=>[Number(x.player_id),Number(x.advanced_through_gameweek||0)]))
       const remaining=[...participantIds].filter((id:number)=>(markers.get(id)||0)<observedGw)
