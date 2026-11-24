@@ -56,3 +56,13 @@ test("both lifecycle prepare paths query verified window and tag model snapshots
  assert.match(s,/const actionsAligned=/)
  assert.match(s,/const keysObserved=/)
 })
+
+
+test("MH13 uses MH9–12 FotMob exposure; incomplete xA retains stable prior",()=>{
+ const w={...win,from_gameweek:9,to_gameweek:12,source_name:"FotMob_MH9_12_verified_match_level_exposure"}
+ const r=blendRecentVerifiedAttackRates({xgPer90:.22,xaPer90:.13,window:w,targetWeek:13})
+ assert.equal(r.usedXg,true);assert.equal(r.xaPer90,.13);assert.equal(r.usedXa,false)
+ const complete=blendRecentVerifiedAttackRates({xgPer90:.22,xaPer90:.13,window:{...w,xa_observed_games:4,xa_observed_minutes:330},targetWeek:13})
+ assert.equal(complete.usedXa,true)
+ assert.equal(blendRecentVerifiedAttackRates({xgPer90:.22,xaPer90:.13,window:win,targetWeek:13}).usedXg,false)
+})

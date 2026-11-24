@@ -612,7 +612,7 @@ async function prepare(sb:any,current:any,status:any,body:any={}){
       bench_weight:n(prior.bench_weight,1),durations,duration_weights:durationWeights,rates,
       data_confidence:prior.data_confidence||projMap.get(id)?.confidence||"medium",
       has_individual_prior:Boolean(prior.has_individual_prior),
-      source_note:key+" • starter-duration-source-gated-v2 "+durationProfile.reason+" • starter-duration-long-window-v3 • starter-duration-single-short-shrink-v4 • sustained-starter-policy-v1"+(regularStarter.applied?" • season-starter-reliability-v1 +"+regularStarter.delta.toFixed(4):"")+(sustainedStarter.applied?" • sustained-starter-continuity-v1 +"+sustainedStarter.delta.toFixed(4):"")+(banReturn.applied?" • verified-suspension-return-v1 +"+banReturn.delta.toFixed(4):"")+(calibrated.applied?" • role-aware-attack-v1":"")+(form.applied?" • recent-attack-form-v2":"")+(attackForm.applied&&!form.applied?" • lagged-verified-form-v1":"")+(covered.aligned&&covered.advancedWeek<target-1?" • source-window-attack-v1":"")+(recentSourceRates.usedXg||recentSourceRates.usedXa?" • recent-mh8-11-fotmob-window-v1":"")+(tactical.reason==="multi_match_verified_lineup"?" • tactical-role-evidence-v1 "+tactical.role+":"+String(tactical.side||"unknown"):"")+(momentum.rising?" • momentum-v1 +"+momentum.role_uplift:"")+(recentStarter.applied?" • verified-recent-starter-v1 +"+recentStarter.delta.toFixed(4):"")+(xaReconcile.adjusted?" • defender-xa-source-window-v1 "+xaReconcile.source_minutes+"dk":"")+(officialShift.applied?" • resmî maç: "+event.match_ref:""),
+      source_note:key+" • starter-duration-source-gated-v2 "+durationProfile.reason+" • starter-duration-long-window-v3 • starter-duration-single-short-shrink-v4 • sustained-starter-policy-v1"+(regularStarter.applied?" • season-starter-reliability-v1 +"+regularStarter.delta.toFixed(4):"")+(sustainedStarter.applied?" • sustained-starter-continuity-v1 +"+sustainedStarter.delta.toFixed(4):"")+(banReturn.applied?" • verified-suspension-return-v1 +"+banReturn.delta.toFixed(4):"")+(calibrated.applied?" • role-aware-attack-v1":"")+(form.applied?" • recent-attack-form-v2":"")+(attackForm.applied&&!form.applied?" • lagged-verified-form-v1":"")+(covered.aligned&&covered.advancedWeek<target-1?" • source-window-attack-v1":"")+(recentSourceRates.usedXg||recentSourceRates.usedXa?(target===12?" • recent-mh8-11-fotmob-window-v1":` • recent-mh${target-4}-${target-1}-fotmob-window-v1`):"")+(tactical.reason==="multi_match_verified_lineup"?" • tactical-role-evidence-v1 "+tactical.role+":"+String(tactical.side||"unknown"):"")+(momentum.rising?" • momentum-v1 +"+momentum.role_uplift:"")+(recentStarter.applied?" • verified-recent-starter-v1 +"+recentStarter.delta.toFixed(4):"")+(xaReconcile.adjusted?" • defender-xa-source-window-v1 "+xaReconcile.source_minutes+"dk":"")+(officialShift.applied?" • resmî maç: "+event.match_ref:""),
       sub_role:tactical.role||prior.sub_role||null,role_side:tactical.side||prior.role_side||null,
       effective_xa_per90:attackForm.xaPer90
     })
@@ -973,9 +973,9 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
     const reusedQ=await sb.from("scout_replay_player_inputs")
       .select("player_id",{head:true,count:"exact"}).eq("gameweek",gw)
       .eq("benchmark_version",benchmark)
-      .ilike("source_note","%recent-mh8-11-fotmob-window-v1%")
+      .ilike("source_note",gw===12?"%recent-mh8-11-fotmob-window-v1%":`%recent-mh${gw-4}-${gw-1}-fotmob-window-v1%`)
     if(reusedQ.error)throw reusedQ.error
-    if(gw===12&&Number(reusedQ.count||0)<100)
+    if((gw===12||gw===13)&&Number(reusedQ.count||0)<100)
       throw new Error("RECENT_SOURCE_WINDOW_REUSED_CANDIDATE_UNVERIFIED")
     return {
       source_window_applied_players:Number(reusedQ.count||0),
@@ -1202,7 +1202,7 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
         +(regularStarter.applied||String(stableInput.source_note||"").includes("season-starter-reliability-v1")?` • season-starter-reliability-v1 +${regularStarter.delta.toFixed(4)}`:"")
         +(sustainedStarter.applied||sustainedPreviouslyApplied?` • sustained-starter-continuity-v1 +${sustainedStarter.delta.toFixed(4)}`:"")
         +(banReturn.applied||String(stableInput.source_note||"").includes("verified-suspension-return-v1")?` • verified-suspension-return-v1 +${banReturn.delta.toFixed(4)}`:"")
-        +(recentSourceRates.usedXg||recentSourceRates.usedXa?" • recent-mh8-11-fotmob-window-v1":"")
+        +(recentSourceRates.usedXg||recentSourceRates.usedXa?(gw===12?" • recent-mh8-11-fotmob-window-v1":` • recent-mh${gw-4}-${gw-1}-fotmob-window-v1`):"")
         +(momentum.rising?` • momentum-v1 +${momentumBoost}`:"")
         +(recentStarter.applied||String(stableInput.source_note||"").includes("verified-recent-starter-v1")?` • verified-recent-starter-v1 +${recentStarter.delta.toFixed(4)}`:"")
         +(actionsAligned?" • source-reconciled-actions-mh11-v1":"")
@@ -1222,7 +1222,10 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
   // request began. Never start 50K before the verified source window is
   // actually observed in the prepared player input source notes.
   const sourceWindowAppliedPlayers=inputRows.filter((row:any)=>
-    String(row.source_note||"").includes("recent-mh8-11-fotmob-window-v1")).length
+    String(row.source_note||"").includes(gw===12?"recent-mh8-11-fotmob-window-v1":`recent-mh${gw-4}-${gw-1}-fotmob-window-v1`)).length
+  if(gw===13&&((verifiedWindowQ.data||[]).length!==inputRows.length||sourceWindowAppliedPlayers<100)){
+    throw new Error("RECENT_MH13_SOURCE_WINDOW_NOT_CONSUMED: "+sourceWindowAppliedPlayers)
+  }
   if(gw===12&&((verifiedWindowQ.data||[]).length!==inputRows.length ||
       sourceWindowAppliedPlayers<100)){
     throw new Error("RECENT_SOURCE_WINDOW_NOT_CONSUMED: fetched="+
