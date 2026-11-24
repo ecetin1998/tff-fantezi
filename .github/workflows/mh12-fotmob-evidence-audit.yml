@@ -27,12 +27,12 @@ jobs:
           fixtures = [
             (5904803,34045,"Trabzonspor","Eyüpspor",1,0),
             (5904804,34042,"Kasımpaşa","Alanyaspor",2,1),
-            (5904805,34046,"Başakşehir","Çorum FK",4,2),
+            (5904805,34038,"Başakşehir","Çorum FK",4,2),
             (5904806,34037,"Amed","Rizespor",0,2),
             (5904807,34041,"Gençlerbirliği","Gaziantep",1,0),
             (5904808,34044,"Konyaspor","Beşiktaş",2,4),
             (5904809,34040,"Galatasaray","Samsunspor",2,1),
-            (5904810,34038,"Kocaelispor","Fenerbahçe",2,2),
+            (5904810,34043,"Kocaelispor","Fenerbahçe",2,2),
             (5904811,34039,"Erzurumspor","Göztepe",0,1),
           ]
           report=[]
@@ -58,9 +58,14 @@ jobs:
                           raw=stats.get(str(pid)) or {}
                           explicit=extract_explicit_stat_values(raw)
                           actions=explicit_attack_metrics(raw)
+                          source_stats={}
+                          for group in raw.get("stats") or []:
+                              for label,stat in (group.get("stats") or {}).items():
+                                  if isinstance(stat,dict) and stat.get("key"):
+                                      source_stats[stat["key"]]={"label":label,"stat":stat.get("stat"),"value":stat.get("value")}
                           shots=[s for s in shotmap or [] if s.get("playerId")==pid and not s.get("isOwnGoal") and s.get("eventType")!="OwnGoal"]
-                          rows.append({"side":side,"shirt":p.get("shirtNumber"),"provider_player_id":pid,"name":p.get("name"),"minutes":explicit.get("minutes_played"),"assists":explicit.get("assists"),"goals":explicit.get("goals"),**actions,"shotmap_count":len(shots) if shotmap is not None else None,"shotmap_xg":sum(s["expectedGoals"] for s in shots) if shotmap is not None and all(isinstance(s.get("expectedGoals"),(float,int)) for s in shots) else None})
-                  item.update(verified=True,rows=rows,shotmap_count=len(shotmap) if shotmap is not None else None)
+                          rows.append({"side":side,"shirt":p.get("shirtNumber"),"provider_player_id":pid,"name":p.get("name"),"minutes":explicit.get("minutes_played"),"assists":explicit.get("assists"),"goals":explicit.get("goals"),**actions,"source_stats":source_stats,"shotmap_count":len(shots) if shotmap is not None else None,"shotmap_xg":sum(s["expectedGoals"] for s in shots) if shotmap is not None and all(isinstance(s.get("expectedGoals"),(float,int)) for s in shots) else None})
+                  item.update(verified=True,rows=rows,shotmap_count=len(shotmap) if shotmap is not None else None,shotmap=shotmap,match_time=(d.get("general") or {}).get("matchTimeUTC"))
               except Exception as e:
                   item["error"]=str(e)[:200]
               report.append(item)
