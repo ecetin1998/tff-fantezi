@@ -39,3 +39,9 @@ test('pool and scout suggestions show club / position / opponent (venue) instead
  assert.match(ui,/<Item p=\{p\}\/>/)
  assert.match(css,/\.pText small\{[^}]*white-space:normal;overflow-wrap:anywhere/)
 })
+
+test('draft always renders the entire eligible filtered pool without a show-all toggle',()=>{
+ assert.match(ui,/className=\{s\.pool\}>\{filtered\.map\(/)
+ assert.doesNotMatch(ui,/filtered\.slice\(0,35\)|\bsetAll\b|Tüm \{filtered\.length\} oyuncuyu göster/)
+ assert.match(css,/\.pool\{[^}]*overflow:auto/)
+})

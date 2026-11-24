@@ -56,3 +56,7 @@ assert.doesNotMatch(playersTable,/confidenceLabel/,'Player list must not show lo
 assert.doesNotMatch(playersTable,/>\{confidenceLabel\(p\.projection\)\} güven</,'Player cards must stay free of confidence text.')
 
 console.log('player presentation contract passed')
+
+assert.match(playersTable,/<span>\{playerFixtureMeta\(p\)\}<\/span>/,'Mobile header keeps opponent and venue.')
+assert.doesNotMatch(playersTable,/Rakip: \{p\.projection/,'Mobile cards must not repeat the opponent.')
+assert.match(playersTable,/\{playerNote\(p\)\?<div className="mobile-fixture"><em>\{playerNote\(p\)\}<\/em><\/div>:null\}/,'Availability warnings stay visible only when needed.')
