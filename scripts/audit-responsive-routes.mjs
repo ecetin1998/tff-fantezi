@@ -17,7 +17,7 @@ const routes=[
   '/profile','/forgot-password','/backtest','/model-health'
 ]
 const critical=['/','/players','/matches','/squads','/squad']
-const viewports=[360,390,768,1280]
+const viewports=[320,360,390,430,768,1280]
 const out='artifacts/responsive-audit'
 await mkdir(out,{recursive:true})
 
@@ -54,7 +54,7 @@ try{
     const context=await browser.newContext({viewport:{width,height:844},deviceScaleFactor:1,isMobile:width<=390,hasTouch:width<=390})
     for(const path of requested){
       const page=await context.newPage()
-      const record={width,path,status:null,overflow:0,suspectCount:0,suspects:[],pickerCount:0,pickerCollisions:[],error:null}
+      const record={width,path,status:null,overflow:0,suspectCount:0,suspects:[],pickerCount:0,pickerCollisions:[],playerCardCount:0,playerCardCollisions:[],error:null}
       try{
         const response=await page.goto(BASE+path,{waitUntil:'domcontentloaded',timeout:12000})
         record.status=response?.status()||null
@@ -78,6 +78,23 @@ try{
             host.innerHTML='<aside class="player-picker"><div class="picker-table-head"><span class="picker-shirt-head"></span>'+['Oyuncu','Fiyat','xFP','Puan'].map(t=>'<button type="button">'+t+'</button>').join('')+'<span class="picker-action-head"></span></div><div class="picker-list">'+names.map(([name,meta,price,points,xfp,chosen])=>'<div class="picker-player picker-player-v3 '+(chosen?'chosen':'')+'"><div class="picker-player-content"><div class="picker-player-identity"><div class="picker-shirt-wrap"><span class="fantasy-shirt tiny OS"><i>OS</i></span></div><div class="picker-copy"><b>'+safe(name)+'</b><small class="squad-fixture-meta">'+safe(meta)+'</small></div></div><div class="picker-player-facts"><span class="picker-value price">'+safe(price)+'</span><span class="picker-fact-divider">•</span><span class="picker-value points">'+safe(points)+'</span></div></div><div class="picker-value xfp"><strong>'+safe(xfp)+'</strong><small>xFP</small></div><button class="'+(chosen?'picker-remove-player':'picker-add-player')+'" type="button">'+(chosen?'−':'+')+'</button></div>').join('')+'</div></aside>'
             document.querySelector('main')?.appendChild(host)
             return true
+          })
+        }
+        // Test the exact production card classes with short and long names,
+        // including the Pro metric layout, without requiring a Pro login.
+        if(path==='/players'&&width<=768){
+          await page.evaluate(()=>{
+            const host=document.createElement('div')
+            host.className='player-card-list'
+            host.setAttribute('data-audit-player-cards','true')
+            const names=['Eldor Shomurodov','Mohamed Salah Hamed Mahrous Ghaly']
+            for(const name of names){
+              const card=document.createElement('a')
+              card.className='card mobile-player-card team-accent-card'
+              card.innerHTML='<div class="mobile-player-top"><div class="mobile-card-badges"><span class="weekly-rank">#1</span><span class="pos MID">OS</span></div><div class="mobile-player-name"><b>'+name+'</b><span>Trabzonspor • OS • vs Göztepe (Dep)</span></div><div class="mobile-xfp"><strong>6.40</strong><small>xFP</small><em>99 toplam puan · 12.0m</em></div></div><div class="mobile-player-metrics">'+[['İlk 11','100%'],['xDakika','89'],['Tipik puan','4'],['6+ puan','44%'],['P90','14.0']].map(([label,value])=>'<div><span>'+label+'</span><b>'+value+'</b></div>').join('')+'</div>'
+              host.appendChild(card)
+            }
+            document.querySelector('main')?.appendChild(host)
           })
         }
         const data=await page.evaluate(()=>{
@@ -107,13 +124,29 @@ try{
             }
             return null
           }).filter(Boolean)
-          return {viewportWidth,docWidth,suspects,collisions,pickerCount:cardRects.length}
+          const playerCards=[...document.querySelectorAll('.mobile-player-card')].filter(el=>el.getBoundingClientRect().width>0)
+          const playerCardCollisions=playerCards.flatMap((card,index)=>{
+            const header=card.querySelector('.mobile-player-top')?.getBoundingClientRect()
+            const score=card.querySelector('.mobile-xfp')?.getBoundingClientRect()
+            const metrics=card.querySelector('.mobile-player-metrics')?.getBoundingClientRect()
+            const name=card.querySelector('.mobile-player-name')?.getBoundingClientRect()
+            if(!header||!score||!metrics||!name)return [{index,reason:'missing group'}]
+            const problems=[]
+            if(score.bottom>header.bottom+1||score.bottom>metrics.top-2)problems.push({index,reason:'xFP extends below header or touches metrics'})
+            if(name.right>score.left+1&&name.bottom>score.top+1&&score.bottom>name.top+1)problems.push({index,reason:'name overlaps xFP'})
+            return problems
+          })
+          return {viewportWidth,docWidth,suspects,collisions,pickerCount:cardRects.length,playerCardCount:playerCards.length,playerCardCollisions}
+
         })
         record.overflow=Math.max(0,data.docWidth-data.viewportWidth)
         record.suspects=data.suspects
         record.suspectCount=data.suspects.length
         record.pickerCollisions=data.collisions
         record.pickerCount=data.pickerCount
+        record.playerCardCount=data.playerCardCount
+        record.playerCardCollisions=data.playerCardCollisions
+        if(path==='/players'&&width<=768&&data.playerCardCount<2)throw new Error('Mobile player card fixtures not visible')
         const suffix=path==='/'?'home':path.replaceAll('/','-').replace(/^-/, '')
         await page.screenshot({path:out+'/'+width+'-'+suffix+'.png',fullPage:width===390&&critical.includes(path),animations:'disabled',timeout:12000})
       }catch(e){
@@ -131,7 +164,7 @@ try{
   server.stdout?.destroy()
   server.stderr?.destroy()
 }
-const criticalIssues=all.filter(x=>x.overflow>4||x.pickerCollisions.length>0||x.error)
+const criticalIssues=all.filter(x=>x.overflow>4||x.pickerCollisions.length>0||x.playerCardCollisions.length>0||x.error)
 const report={
   generated_at:new Date().toISOString(),
   routesChecked:all.length,
@@ -141,6 +174,6 @@ const report={
   all
 }
 await writeFile(out+'/report.json',JSON.stringify(report,null,2))
-for(const x of all)console.log([x.width,x.path,'HTTP '+x.status,'horizontal '+x.overflow+'px','potential '+x.suspectCount,'picker '+x.pickerCount,'collisions '+x.pickerCollisions.length,x.error||''].join(' | '))
+for(const x of all)console.log([x.width,x.path,'HTTP '+x.status,'horizontal '+x.overflow+'px','potential '+x.suspectCount,'picker '+x.pickerCount,'collisions '+x.pickerCollisions.length,'player cards '+x.playerCardCount,'player card collisions '+x.playerCardCollisions.length,x.error||''].join(' | '))
 console.log('RESPONSIVE AUDIT: '+all.length+' routes, '+criticalIssues.length+' flagged; artifacts: '+out)
 if(criticalIssues.length)process.exitCode=1

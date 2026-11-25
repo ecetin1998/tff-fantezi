@@ -1046,7 +1046,7 @@
     width:100%;
   }
 
-  /* Player header: explicitly reserve space for the xFP badge. */
+  /* Player header: xFP stays in the grid flow so the tallest item sets row height. */
   .scope :global(.mobile-player-card){
     min-width:0;
     overflow:hidden;
@@ -1055,12 +1055,12 @@
   .scope :global(.mobile-player-top){
     position:relative;
     display:grid;
-    grid-template-columns:auto minmax(0,1fr);
+    grid-template-columns:auto minmax(0,1fr) 92px;
     align-items:center;
     gap:10px;
     min-width:0;
     min-height:56px;
-    padding-right:102px;
+    padding-right:0;
   }
   .scope :global(.mobile-card-badges){
     min-width:0;
@@ -1093,8 +1093,12 @@
   }
 
   .scope :global(.mobile-xfp){
-    top:12px;
-    right:12px;
+    position:static;
+    inset:auto;
+    grid-column:3;
+    grid-row:1;
+    align-self:center;
+    margin:0;
     width:92px;
     min-width:92px;
     max-width:92px;
@@ -1150,6 +1154,7 @@
   .scope :global(.mobile-player-metrics){
     grid-template-columns:repeat(4,minmax(0,1fr));
     gap:7px;
+    margin-top:10px;
   }
   .scope :global(.mobile-player-metrics)>div{
     min-width:0;
@@ -1180,7 +1185,8 @@
     padding:12px;
   }
   .scope :global(.mobile-player-top){
-    padding-right:92px;
+    grid-template-columns:auto minmax(0,1fr) 84px;
+    padding-right:0;
     gap:8px;
   }
   .scope :global(.mobile-card-badges){
@@ -1191,8 +1197,6 @@
     font-size:13.5px;
   }
   .scope :global(.mobile-xfp){
-    top:10px;
-    right:10px;
     width:84px;
     min-width:84px;
     max-width:84px;
@@ -1220,7 +1224,8 @@
     grid-column:1;
   }
   .scope :global(.mobile-player-top){
-    padding-right:86px;
+    grid-template-columns:auto minmax(0,1fr) 80px;
+    padding-right:0;
   }
   .scope :global(.mobile-xfp){
     width:80px;
