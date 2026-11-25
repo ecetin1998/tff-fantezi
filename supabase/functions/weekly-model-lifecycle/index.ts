@@ -999,7 +999,11 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
     if(reusedQ.error)throw reusedQ.error
     if((gw===12||gw===13)&&Number(reusedQ.count||0)<100)
       throw new Error("RECENT_SOURCE_WINDOW_REUSED_CANDIDATE_UNVERIFIED")
+    const policyQ=await sb.from("scout_replay_player_inputs").select("player_id",{head:true,count:"exact"}).eq("gameweek",gw).eq("benchmark_version",benchmark).ilike("source_note","%verified-xi-ban-return-v2%")
+    if(policyQ.error)throw policyQ.error
+    if(Number(policyQ.count||0)!==Number(inputsQ.data?.length||0))throw new Error("SUSPENSION_POLICY_REUSED_CANDIDATE_UNVERIFIED")
     return {
+      suspension_return_policy:"verified-xi-ban-return-v2",
       source_window_applied_players:Number(reusedQ.count||0),
       refresh_required:true,reused:true,snapshot_allowed:snapshotAllowed,run_id:existing.data.id,parent_run_id:current.id,gameweek:gw,benchmark,
       latest_source_at:latestSourceAt,deadline_at:new Date(deadline).toISOString(),
@@ -1068,7 +1072,8 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
       evidence:tacticalEvidence.get(Number(x.player_id))||[],targetWeek:gw,
       teamId:player?.team_id||x.club_id,cutoffAt:targetKickoffs.get(Number(x.club_id))||new Date(kickoff).toISOString()
     })
-    const momentum=risingMinutesMomentum(weeklyMomentumRows.get(Number(x.player_id))||[],gw,availability)
+    const roleRows=roleRowsWithoutVerifiedBans(longerMinuteHistory.get(Number(x.player_id))||[],suspensionCasesByPlayer.get(Number(x.player_id))||[],player?.team_id||x.club_id,gw,targetKickoffs.get(Number(x.club_id))||new Date(kickoff).toISOString()).slice(0,5)
+    const momentum=risingMinutesMomentum(roleRows,gw,availability)
     // Never add the same rise twice: non-intraday inputs may already include it.
     const momentumBoost=String(stableInput.source_note||"").includes("momentum-v1")
       ?0:momentum.role_uplift
@@ -1222,7 +1227,7 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
       durations:adjusted.applied?adjusted.durations:durationProfile.durations,
       duration_weights:adjusted.applied?adjusted.duration_weights:durationProfile.duration_weights,
       source_note:`intraday refresh from ${sourceBenchmark}; role baseline ${stableRoleBenchmark}; source ${latestSourceAt}`
-        +` • starter-duration-source-gated-v2 ${durationProfile.reason} • starter-duration-long-window-v3 • starter-duration-single-short-shrink-v4 • sustained-starter-policy-v1`
+        +` • starter-duration-source-gated-v2 ${durationProfile.reason} • starter-duration-long-window-v3 • starter-duration-single-short-shrink-v4 • sustained-starter-policy-v1 • verified-xi-ban-return-v2`
         +(regularStarter.applied||String(stableInput.source_note||"").includes("season-starter-reliability-v1")?` • season-starter-reliability-v1 +${regularStarter.delta.toFixed(4)}`:"")
         +(sustainedStarter.applied||sustainedPreviouslyApplied?` • sustained-starter-continuity-v1 +${sustainedStarter.delta.toFixed(4)}`:"")
         +(banReturn.applied||String(stableInput.source_note||"").includes("verified-suspension-return-v1")?` • verified-suspension-return-v1 +${banReturn.delta.toFixed(4)}`:"")
@@ -1411,7 +1416,9 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
     refresh_required:true,snapshot_allowed:snapshotAllowed,run_id:runId,parent_run_id:current.id,gameweek:gw,benchmark,
     latest_source_at:latestSourceAt,deadline_at:new Date(deadline).toISOString(),
     min_interval_hours:minInterval,input_snapshot_hash:inputHash,
-    source_window_applied_players:sourceWindowAppliedPlayers
+    source_window_applied_players:sourceWindowAppliedPlayers,
+    suspension_return_policy:"verified-xi-ban-return-v2",
+    suspension_return_applied_players:inputRows.filter((row:any)=>String(row.source_note||"").includes("verified-suspension-return-v1")).length
   }
 }
 

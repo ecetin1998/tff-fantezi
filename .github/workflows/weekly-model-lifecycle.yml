@@ -222,6 +222,9 @@ jobs:
             }
             echo "- MH12 verified source-window rates used: $used players" >> "$GITHUB_STEP_SUMMARY"
           fi
+          if [[ "$(printf '%s' "$response" | jq -r '.refresh_required // false')" == "true" ]]; then
+            test "$(printf '%s' "$response" | jq -r '.suspension_return_policy // empty')" = "verified-xi-ban-return-v2" || { echo "::error::Suspension policy not deployed; refusing stale candidate"; exit 1; }
+          fi
           echo "refresh=$(printf '%s' "$response" | jq -r '.refresh_required // false')" >> "$GITHUB_OUTPUT"
           echo "snapshot=$(printf '%s' "$response" | jq -r '.snapshot_allowed // false')" >> "$GITHUB_OUTPUT"
           echo "run_id=$(printf '%s' "$response" | jq -r '.run_id // empty')" >> "$GITHUB_OUTPUT"
