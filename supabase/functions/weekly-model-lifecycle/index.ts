@@ -13,6 +13,7 @@ import {starterDurationProfile} from "./starterDuration.mjs"
 import {regularStarterReliability} from "./regularStarterReliability.mjs"
 import {sustainedStarterContinuity} from "./sustainedStarterContinuity.mjs"
 import {restoreVerifiedSuspensionReturn} from "./suspensionReturn.mjs"
+import {fetchSuspensionStartEvidence,roleRowsWithoutVerifiedBans} from "./suspensionReturn.mjs"
 import {verifiedLineupFormations} from "./verifiedLineupFormations.mjs"
 import {recentAttackForm,fetchRecentAttackEvidence,groupRecentAttack} from "./recentAttackForm.mjs"
 import {alignAttackSourceWindow} from "./sourceWindowAttack.mjs"
@@ -75,10 +76,10 @@ const newer=(...xs:any[])=>xs.filter(Boolean).map(x=>new Date(x).getTime()).filt
 
 const officialEvidenceQuery=(sb:any)=>sb.from("scout_official_external_appearances")
   .select("match_ref,player_id,team_id,competition,finished_at,squad_status,started,minutes,source_url,source_updated_at")
-  .gte("finished_at",new Date(Date.now()-22*86400000).toISOString())
+  .gte("finished_at",new Date(Date.now()-35*86400000).toISOString())
   .lte("finished_at",new Date().toISOString())
   .order("finished_at",{ascending:false}).limit(10000)
-function officialMatchEvidence(rows:any[],players:any[]){
+function officialMatchEvidence(rows:any[],players:any[],cases:any[]=[],history:any[]=[],targetWeek=0){
   const known=new Map(players.map((p:any)=>[Number(p.id),p]))
   const latest=new Map<number,any>(),starters=new Map<string,Set<number>>()
   for(const e of rows||[]){
@@ -91,17 +92,35 @@ function officialMatchEvidence(rows:any[],players:any[]){
       starters.get(key)!.add(id)
     }
   }
+  function sameSlot(player:any,p:any){
+    if(!p||p.position!==player.position)return false
+    const role=String(player.primary_role||"").toUpperCase(),other=String(p.primary_role||"").toUpperCase()
+    const side=String(player.role_side||"").toUpperCase()
+    if(player.position==="GK"||(player.position==="FWD"&&role==="ST"&&other===role))return true
+    return player.position==="DEF"&&["FB","WB"].includes(role)&&["FB","WB"].includes(other)&&["L","R"].includes(side)&&side===String(p.role_side||"").toUpperCase()
+  }
   function directCompetitor(player:any,event:any){
-    const role=String(player.primary_role||"").toUpperCase()
-    if(!((player.position==="FWD"&&role==="ST")||player.position==="GK"))return false
     const ids=starters.get(String(event.match_ref)+"|"+player.team_id)||new Set()
-    return [...ids].some(id=>{
-      if(id===Number(player.id))return false
-      const p=known.get(id)
-      return p?.position===player.position&&String(p.primary_role||"").toUpperCase()===role
+    return [...ids].some(id=>id!==Number(player.id)&&sameSlot(player,known.get(id)))
+  }
+  // A club match during a served league ban is meaningful even when the
+  // forced absence spans >21 days. Never extend stale evidence for others.
+  function banRelated(player:any,event:any){
+    if(!player||!event||!["UEFA_CL","UEFA_EL","UEFA_ECL","TFF_CUP"].includes(event.competition))return false
+    const ids=starters.get(String(event.match_ref)+"|"+player.team_id)||new Set()
+    const t=Date.parse(event.finished_at)
+    return cases.some(c=>{
+      const weeks=(c.affected_gameweeks||[]).map(Number)
+      if(!weeks.length||Math.max(...weeks)!==targetWeek-1||Number(c.team_id)!==Number(player.team_id))return false
+      const returning=known.get(Number(c.player_id))
+      if(!ids.has(Number(c.player_id))||!(Number(c.player_id)===Number(player.id)||(!event.started&&event.squad_status==="unused"&&sameSlot(player,returning))))return false
+      const fixtures=history.filter(m=>weeks.includes(Number(m.gameweek))&&(Number(m.home_team_id)===Number(c.team_id)||Number(m.away_team_id)===Number(c.team_id)))
+      if(new Set(fixtures.map(m=>Number(m.gameweek))).size!==weeks.length)return false
+      const times=fixtures.map(m=>Date.parse(m.kickoff_at))
+      return t>=Math.min(...times)&&t<=Math.max(...times)+2*86400000
     })
   }
-  return {latest,directCompetitor}
+  return {latest,directCompetitor,banRelated}
 }
 const sourceRevision=(value:any)=>new Date(value).toISOString().replace(/[-:TZ.]/g,"").slice(0,14)
 const ageHours=(value:any)=>{
@@ -379,7 +398,7 @@ async function prepare(sb:any,current:any,status:any,body:any={}){
   if((teamStatsQ.data||[]).length!==18)throw new Error("TEAM_STATS_INCOMPLETE")
   if(!(fixturesQ.data||[]).length)throw new Error("TARGET_FIXTURES_MISSING")
 
-  const official=officialMatchEvidence(officialQ.data||[],players)
+  const official=officialMatchEvidence(officialQ.data||[],players,disciplinaryQ.data||[],teamHistoryQ.data||[],target)
   const targetKickoff=(fixturesQ.data||[])[0]?.kickoff_at||new Date().toISOString()
   const teamKickoffs=new Map<number,string>()
   for(const match of fixturesQ.data||[]){
@@ -392,6 +411,7 @@ async function prepare(sb:any,current:any,status:any,body:any={}){
     const id=Number(c.player_id),list=suspensionCasesByPlayer.get(id)||[]
     list.push(c);suspensionCasesByPlayer.set(id,list)
   }
+  const suspensionStartEvidence=await fetchSuspensionStartEvidence(sb,disciplinaryQ.data||[],target)
   const roleMap=new Map((rolesQ.data||[]).map((x:any)=>[Number(x.player_id),x]))
   const avMap=new Map((availabilityQ.data||[]).map((x:any)=>[Number(x.player_id),x]))
   const statsMap=new Map((statsQ.data||[]).map((x:any)=>[Number(x.player_id),x]))
@@ -484,7 +504,8 @@ async function prepare(sb:any,current:any,status:any,body:any={}){
     // Independently calculated MH8 0-minute entries can mean "not in
     // source", not verified DNP. Never teach role/bench probabilities
     // that they are real zero-minute appearances.
-    const trustedRows=rows.filter(x=>trustedMinute(x)!==null)
+    const roleRows=roleRowsWithoutVerifiedBans(minuteHistory,suspensionCasesByPlayer.get(id)||[],p.team_id,target,teamKickoffs.get(Number(p.team_id))||targetKickoff).slice(0,5)
+    const trustedRows=roleRows.filter(x=>trustedMinute(x)!==null)
     const durationProfile=starterDurationProfile({
       position:p.position,seasonStarts:s.starts,weekly:minuteHistory,
       verified:[...verifiedStarts.map(z=>({...z,verified:true,observed_at:z.updated_at})),...(tacticalEvidence.get(id)||[])],targetWeek:target,
@@ -496,7 +517,7 @@ async function prepare(sb:any,current:any,status:any,body:any={}){
     let roleProb=clamp(.01,.995,.65*n(r.predicted_xi_probability,n(prior.role_probability,.5))+.35*recentMinuteRate)
     // Existing minute weighting already gives recent games credit. Add only
     // a small residual uplift for a *sustained*, independently evidenced rise.
-    const momentum=risingMinutesMomentum(rows,target,n(av.availability_probability,1))
+    const momentum=risingMinutesMomentum(roleRows,target,n(av.availability_probability,1))
     if(momentum.rising)roleProb=clamp(.01,.995,roleProb+momentum.role_uplift)
     // Sourced 60+ minutes in the immediately prior week are stronger lineup
     // evidence than a stale season-average role. Keep correction bounded;
@@ -526,7 +547,7 @@ async function prepare(sb:any,current:any,status:any,body:any={}){
       baseline:roleProb,targetWeek:target,availability:n(av.availability_probability,1),
       seasonStarts:s.starts,matchesPlayed:s.matches_played,
       cases:suspensionCasesByPlayer.get(id)||[],weekly:minuteHistory,
-      tactical:tacticalEvidence.get(id)||[],teamId:p.team_id,
+      tactical:[...(tacticalEvidence.get(id)||[]),...(suspensionStartEvidence.get(id)||[])],teamId:p.team_id,
       cutoffAt:teamKickoffs.get(Number(p.team_id))||targetKickoff
     })
     if(banReturn.applied)roleProb=banReturn.role
@@ -535,6 +556,7 @@ async function prepare(sb:any,current:any,status:any,body:any={}){
       baseline:roleProb,durations,durationWeights,
       fixtureKickoff:teamKickoffs.get(Number(p.team_id))||targetKickoff,
       evidence:event,sameSlotStarter:event?official.directCompetitor(p,event):false,
+      banRelated:official.banRelated(p,event),
       availability:n(av.availability_probability,1)
     })
     if(officialShift.applied){
@@ -626,7 +648,7 @@ async function prepare(sb:any,current:any,status:any,body:any={}){
       availability_source:"weekly-lifecycle",availability_probability:availability,
       top25_score:null,top25_rank:null,top25_model_version:null,confidence:projMap.get(id)?.confidence||"medium"
     })
-    const {last2Min,prev2Min,last2Xi,prev2Xi,trend:d}=roleTrendFromWeeklyEvidence(rows,target)
+    const {last2Min,prev2Min,last2Xi,prev2Xi,trend:d}=roleTrendFromWeeklyEvidence(roleRows,target)
     const signal=officialShift.applied&&event.started&&Number(event.minutes)>=75
       ?"RESMÎ MAÇTA İLK 11":officialShift.applied&&event.squad_status==="unused"
       ?"RESMÎ MAÇTA YEDEK":banReturn.applied?"CEZADAN DÖNÜŞ":momentum.rising?momentum.signal:d!==null&&d>.20?"ROL YÜKSELİYOR":d!==null&&d<-.20?"ROL DÜŞÜYOR":"BELİRGİN DEĞİŞİM YOK"
@@ -1016,10 +1038,11 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
     const id=Number(c.player_id),list=suspensionCasesByPlayer.get(id)||[]
     list.push(c);suspensionCasesByPlayer.set(id,list)
   }
+  const suspensionStartEvidence=await fetchSuspensionStartEvidence(sb,disciplinaryQ.data||[],gw)
   const avMap=new Map((availabilityQ.data||[]).map((x:any)=>[Number(x.player_id),x]))
   const roleMap=new Map((rolesQ.data||[]).map((x:any)=>[Number(x.player_id),x]))
   const projectionMap=new Map((currentProjectionQ.data||[]).map((x:any)=>[Number(x.player_id),x]))
-  const official=officialMatchEvidence(officialQ.data||[],playersQ.data||[])
+  const official=officialMatchEvidence(officialQ.data||[],playersQ.data||[],disciplinaryQ.data||[],teamHistoryQ.data||[],gw)
   const officialPlayers=new Map((playersQ.data||[]).map((p:any)=>[Number(p.id),p]))
   const targetKickoffs=new Map<number,string>()
   for(const match of teamFixturesQ.data||[]){
@@ -1087,7 +1110,7 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
       seasonStarts:stats?.starts,matchesPlayed:stats?.matches_played,
       cases:suspensionCasesByPlayer.get(Number(x.player_id))||[],
       weekly:longerMinuteHistory.get(Number(x.player_id))||[],
-      tactical:tacticalEvidence.get(Number(x.player_id))||[],
+      tactical:[...(tacticalEvidence.get(Number(x.player_id))||[]),...(suspensionStartEvidence.get(Number(x.player_id))||[])],
       teamId:player?.team_id||x.club_id,
       cutoffAt:targetKickoffs.get(Number(x.club_id))||new Date(kickoff).toISOString(),
       alreadyApplied:String(stableInput.source_note||"").includes("verified-suspension-return-v1")
@@ -1096,6 +1119,7 @@ async function prepareCurrentRefresh(sb:any,current:any,body:any={}){
       baseline:banReturn.role,durations:durationProfile.durations,durationWeights:durationProfile.duration_weights,
       fixtureKickoff:targetKickoffs.get(Number(x.club_id))||new Date(kickoff).toISOString(),evidence:event,
       sameSlotStarter:player&&event?official.directCompetitor(player,event):false,
+      banRelated:official.banRelated(player,event),
       availability,
     })
     const rates=(x.rates||[]).map(Number)

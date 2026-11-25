@@ -53,7 +53,7 @@ export function restoreVerifiedSuspensionReturn({
     Number.isInteger(Number(x.gameweek))&&
     Number(x.gameweek)<lastBanStart&&
     Number(x.gameweek)>=lastBanStart-4&&
-    Number(x.minutes)>=65&&timestamp(x.observed_at)!==null&&
+    Number(x.minutes)>=65&&(!x.provider_xi||(weekly||[]).some(w=>Number(w.gameweek)===Number(x.gameweek)&&Number(w.match_id)===Number(x.match_id)&&w.is_final===true&&Number(w.minutes)>=65&&Math.abs(Number(w.minutes)-Number(x.minutes))<=10&&timestamp(w.source_updated_at)!==null&&timestamp(w.source_updated_at)<cutoff))&&timestamp(x.observed_at)!==null&&
     timestamp(x.observed_at)<cutoff)
   const distinct=[...new Set(preStarts.map(x=>Number(x.gameweek)))]
   if(distinct.length<2)return unchanged(role,"pre_ban_verified_starters_insufficient")
@@ -69,4 +69,41 @@ export function restoreVerifiedSuspensionReturn({
     evidence_weeks:distinct.sort((a,b)=>b-a).slice(0,3),
     ban_weeks:banWeeks,smoothed_starter_rate:smoothed
   }
+}
+
+/** Supplement tactical history with exact provider XI membership, never minutes alone.
+ * Only completed, explicitly documented bans can trigger this fallback. */
+export async function fetchSuspensionStartEvidence(sb,cases,targetWeek){
+  const eligible=(cases||[]).filter(c=>Array.isArray(c.affected_gameweeks)&&c.affected_gameweeks.length&&Math.max(...c.affected_gameweeks.map(Number))===Number(targetWeek)-1)
+  const out=new Map()
+  for(const c of eligible){
+    const first=Math.min(...c.affected_gameweeks.map(Number)),id=Number(c.player_id),team=Number(c.team_id)
+    const [p,l]=await Promise.all([
+      sb.from("scout_highlightly_player_matches").select("player_id,team_id,gameweek,match_id,provider_player_id,minutes,is_substitute,observed_at").eq("season","2026-27").eq("player_id",id).eq("team_id",team).gte("gameweek",Math.max(1,first-4)).lt("gameweek",first),
+      sb.from("scout_highlightly_lineups").select("team_id,gameweek,match_id,starter_count,lineup,observed_at").eq("season","2026-27").eq("team_id",team).gte("gameweek",Math.max(1,first-4)).lt("gameweek",first)
+    ])
+    if(p.error)throw p.error
+    if(l.error)throw l.error
+    out.set(id,verifiedProviderStarts(p.data||[],l.data||[]))
+  }
+  return out
+}
+export function verifiedProviderStarts(players,lineups){
+  return players.flatMap(p=>{
+    if(p.is_substitute!==false||p.provider_player_id==null||Number(p.minutes)<65)return []
+    const l=lineups.find(x=>Number(x.match_id)===Number(p.match_id)&&Number(x.team_id)===Number(p.team_id)&&Number(x.gameweek)===Number(p.gameweek)&&Number(x.starter_count)===11)
+    const members=l?.lineup?.initialLineup
+    if(!Array.isArray(members))return []
+    const xi=members.flat()
+    if(xi.length!==11||new Set(xi.map(x=>String(x.id))).size!==11||!xi.some(x=>String(x.id)===String(p.provider_player_id)))return []
+    const times=[timestamp(p.observed_at),timestamp(l.observed_at)]
+    if(times.some(x=>x===null))return []
+    return [{...p,started:true,verified:true,provider_xi:true,observed_at:new Date(Math.max(...times)).toISOString()}]
+  })
+}
+export function roleRowsWithoutVerifiedBans(weekly,cases,teamId,targetWeek,cutoffAt){
+  const cutoff=timestamp(cutoffAt)
+  if(cutoff===null)return weekly
+  const weeks=new Set((cases||[]).filter(c=>Number(c.team_id)===Number(teamId)&&Array.isArray(c.affected_gameweeks)).flatMap(c=>c.affected_gameweeks.map(Number).filter(w=>w<Number(targetWeek))))
+  return (weekly||[]).filter(w=>!(weeks.has(Number(w.gameweek))&&w.is_final===true&&w.minutes!=null&&Number(w.minutes)===0&&timestamp(w.source_updated_at)!==null&&timestamp(w.source_updated_at)<cutoff))
 }

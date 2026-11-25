@@ -32,7 +32,7 @@ export function applyOfficialMinutesEvidence(input) {
   const ageDays=(startMs-finishedMs)/86400000;
   // Competition action strictly between source cutoff and next game, recent
   // enough to inform next-week rotations. No future or stale evidence.
-  if(!Number.isFinite(ageDays) || ageDays<=0 || ageDays>21) return original;
+  if(!Number.isFinite(ageDays) || ageDays<=0 || ageDays>(input.banRelated===true?35:21)) return original;
   const minutes=clamp(0,90,num(e.minutes));
   const started=e.started===true;
   const benchUnused=e.squad_status==="unused" && !started && minutes===0;

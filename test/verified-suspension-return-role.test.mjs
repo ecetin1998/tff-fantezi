@@ -65,3 +65,17 @@ test("both current week and next week pipelines fetch same TFF verified bans",()
  assert.match(s,/banReturn\.applied\?"CEZADAN DÖNÜŞ"/)
  assert.match(s,/baseline:banReturn\.role/)
 })
+
+test("exact provider lineup restores a missing tactical observation without inventing a start",async()=>{
+ const {verifiedProviderStarts,roleRowsWithoutVerifiedBans}=await import("../supabase/functions/weekly-model-lifecycle/suspensionReturn.mjs")
+ const provider={gameweek:7,team_id:17,match_id:123,provider_player_id:77,minutes:77,is_substitute:false,observed_at:"2026-11-15T00:00:00Z"}
+ const lineup={gameweek:7,team_id:17,match_id:123,starter_count:11,observed_at:"2026-11-15T00:00:00Z",lineup:{initialLineup:[[{id:77},...Array.from({length:10},(_,i)=>({id:i+1}))]]}}
+ const proof=verifiedProviderStarts([provider],[lineup])
+ assert.equal(proof.length,1)
+ const history=weekly.map(w=>({...w,match_id:w.gameweek===7?123:456}))
+ assert.equal(restoreVerifiedSuspensionReturn({...params,weekly:history,tactical:[tactical[0],...proof]}).applied,true)
+ assert.equal(restoreVerifiedSuspensionReturn({...params,weekly,tactical:[tactical[0],...proof]}).applied,false)
+ assert.equal(verifiedProviderStarts([{...provider,is_substitute:true}],[lineup]).length,0)
+ assert.equal(roleRowsWithoutVerifiedBans(history,[caseRecord],17,12,now).length,3)
+ assert.equal(roleRowsWithoutVerifiedBans(history,[caseRecord],6,12,now).length,5)
+})
