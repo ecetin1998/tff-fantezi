@@ -100,3 +100,13 @@ test("ambiguous source aliases are screened before PostgREST multi-row upsert",a
   assert.match(src,/const ambiguousIds=new Set/);
   assert.match(src,/ambiguousIds\.has\(Number\(identity\.playerId\)\)/);
 });
+
+test("public availability reasons translate internal English tokens without altering the source",async()=>{
+  const {readFileSync}=await import("node:fs");
+  const source=readFileSync(new URL("../lib/availability.js",import.meta.url),"utf8");
+  const {availabilityReason}=await import("data:text/javascript;base64,"+Buffer.from(source).toString("base64"));
+  const row={canonical_reason:"MH12 dördüncü sarı kart, MH13 bir maç ceza; mevcut availability ile uyumlu."};
+  assert.equal(availabilityReason(row),"MH12 dördüncü sarı kart, MH13 bir maç ceza; mevcut oynama durumu ile uyumlu.");
+  assert.match(row.canonical_reason,/availability/);
+  assert.doesNotMatch(availabilityReason({canonical_reason:"Availability kontrolü"}),/\bavailability\b/i);
+});
