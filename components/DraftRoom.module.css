@@ -13,8 +13,14 @@
 .hero p{margin-top:10px;font-size:14px}
 .heroScore{display:grid;place-items:center;min-width:100px;padding:18px 14px;border-radius:18px;background:linear-gradient(135deg,#e6f6f1,#f7fcfa);border:1px solid #c5e6df}
 .heroScore strong{font-size:32px;color:var(--a)}.heroScore span{font-size:10px;letter-spacing:.13em;color:#4b6574;font-weight:850}
-.columns{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.columns{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;align-items:start}
 .panel{border:1px solid #e0e7ef;border-radius:19px;padding:22px;background:#fff;box-shadow:0 12px 34px rgba(35,48,83,.065);display:grid;gap:13px;min-width:0}
+/* Independent lobby cards: the short invitation form must not stretch to the height of room creation. */
+.columns>.panel{align-content:start;align-self:start;grid-auto-rows:max-content}
+.columns>.panel>label{min-width:0}
+.columns>.panel>.primary,.columns>.panel>.secondary{width:100%}
+.columns>.panel>.opponentSwitch{margin:2px 0 4px}
+@media(min-width:661px){.columns{grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr)}.columns>.panel{gap:11px}.columns>.panel>.opponentSwitch button{min-height:70px;padding:11px 13px}}
 .panel label{display:grid;gap:6px;color:#3b4a65;font-size:12px;font-weight:750}
 .panel input,.panel select{width:100%;box-sizing:border-box;min-height:44px;padding:10px 12px;color:#24324c;background:#f9fbfe;border:1px solid #dbe3ef;border-radius:11px;outline:none}
 .panel input:focus,.panel select:focus{border-color:#0b8e82;box-shadow:0 0 0 3px rgba(11,142,130,.12)}
