@@ -185,8 +185,9 @@ export default function DraftRoom({initialRoom='',initialInvite=''}) {
   const timer=setInterval(()=>{void advance()},2000)
   return()=>{active=false;clearInterval(timer)}
  },[id,room?.draft_kind,room?.rules_version,room?.status,call,refresh])
+ const hasBots=Boolean(room?.teams?.some(t=>t.is_bot))
  useEffect(()=>{
-  if(!id||room?.opponent_mode!=='computer'||room?.status!=='drafting')return
+  if(!id||!hasBots||room?.status!=='drafting')return
   let alive=true,working=false
   const move=async()=>{
    if(working||document.visibilityState==='hidden')return
@@ -200,7 +201,7 @@ export default function DraftRoom({initialRoom='',initialInvite=''}) {
   void move()
   const timer=setInterval(()=>{void move()},1650)
   return()=>{alive=false;clearInterval(timer)}
- },[id,room?.opponent_mode,room?.status,call,refresh])
+ },[id,hasBots,room?.status,call,refresh])
  const action=async fn=>{
   setBusy(true);setProblem('');setMessage('')
   try{await fn()}catch(e){setProblem(errorText(e))}
@@ -290,13 +291,13 @@ export default function DraftRoom({initialRoom='',initialInvite=''}) {
   {!id&&<div className={s.columns}>
    <div className={s.panel}><small className={s.eyebrow}>YENİ ODA</small><h2>Draft odası oluştur</h2>
     <div className={s.opponentSwitch} role="group" aria-label="Draft rakip modu">
-     <button type="button" className={opponentMode==='friends'?s.opponentActive:''} aria-pressed={opponentMode==='friends'} onClick={()=>setOpponentMode('friends')}><span>👥 Arkadaşlara Karşı</span><small>Davet koduyla birlikte oyna</small></button>
+     <button type="button" className={opponentMode==='friends'?s.opponentActive:''} aria-pressed={opponentMode==='friends'} onClick={()=>setOpponentMode('friends')}><span>👥 Arkadaşlara Karşı</span><small>Davet kodu + isteğe bağlı botlar</small></button>
      <button type="button" className={opponentMode==='computer'?s.opponentActive:''} aria-pressed={opponentMode==='computer'} onClick={()=>setOpponentMode('computer')}><span>🤖 Bilgisayara Karşı</span><small>1–7 bot · tek başına oyna</small></button>
     </div>
-    <p>{opponentMode==='computer'?'Diğer takımları bilgisayar yönetir. Davet göndermeden hemen drafta geçebilirsin.':'İlk takım senin olacak; diğer menajerler davet koduyla kendi takımlarına katılır.'}</p>
+    <p>{opponentMode==='computer'?'Diğer takımları bilgisayar yönetir. Davet göndermeden hemen drafta geçebilirsin.':'İlk takım senin olacak; arkadaşların davet koduyla katılır. Boş yerleri lobide botlarla doldurabilirsin.'}</p>
     <label>Katılımcı sayısı<select value={teamCount} onChange={e=>setTeamCount(Number(e.target.value))}>{Array.from({length:7},(_,i)=>i+2).map(n=><option value={n} key={n}>{n} kişi</option>)}</select></label>
     <label>Senin takım adın<input maxLength={40} placeholder="Örn. Bilanço" value={myName} onChange={e=>setMyName(e.target.value)}/></label>
-    <p>{opponentMode==='computer'?`${teamCount-1} bilgisayar rakibi xFP, forma ve bütçe kurallarına göre seçer.`:'Diğer menajerler davet koduyla katılırken kendi takım isimlerini kendileri belirler.'}</p>
+    <p>{opponentMode==='computer'?`${teamCount-1} bilgisayar rakibi xFP, forma ve bütçe kurallarına göre seçer.`:'Toplam kontenjanı seç; boş koltuklara lobiden farklı karakterlerde bot ekleyebilirsin.'}</p>
     <label>Draft biçimi<select value={mode} onChange={e=>setMode(e.target.value)}><option value="snake">Klasik · Snake</option><option value="linear">Klasik · Normal</option><option value="auction">Açık Artırma · 100 kredi</option></select></label>{mode==='auction'&&<p>Her takım 100 krediyle başlar. Sırayla oyuncu aday gösterilir; eksik kadrolar 1 krediyle tamamlanabilir.</p>}
     {timerSliders(mode)}
     <button className={s.primary} disabled={busy||!myName.trim()} onClick={()=>action(async()=>{
@@ -321,7 +322,7 @@ export default function DraftRoom({initialRoom='',initialInvite=''}) {
    <div className={s.panel}><small className={s.eyebrow}>KATILIM</small><h2>Davet kodun var mı?</h2><p>Arkadaşının kodunu gir, kendi takım adını yaz ve odaya katıl.</p>
     <label>Davet kodu<input maxLength={12} autoCapitalize="characters" placeholder="Örn. AX7K9M2P" value={code} onChange={e=>{setCode(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g,''));setLobby(null)}}/></label>
     <button className={s.secondary} disabled={busy||![8,12].includes(code.length)} onClick={()=>action(async()=>setLobby(await call('scout_draft_lobby',{p_code:code})))}>Odayı bul</button>
-    {lobby&&<><div className={s.seats}>{lobby.teams.map(t=><div className={s.seat} key={t.team_index}><strong>{t.occupied?t.name:'Boş takım'}</strong><span>{t.occupied?'Katıldı':'Katılınabilir'}</span></div>)}</div>
+    {lobby&&<><div className={s.seats}>{lobby.teams.map(t=><div className={s.seat} key={t.team_index}><strong>{t.occupied?t.name:'Boş takım'}</strong><span>{t.is_bot?'🤖 Bilgisayar':t.occupied?'Katıldı':'Katılınabilir'}</span></div>)}</div>
     <label>Senin takım adın<input maxLength={40} placeholder="Kendi takım adını yaz" value={joinName} onChange={e=>setJoinName(e.target.value)}/></label>
     <button className={s.primary} disabled={busy||lobby.status!=='lobby'||!joinName.trim()||lobby.teams.every(t=>t.occupied)} onClick={()=>action(async()=>openRoom(await call('scout_draft_join_named',{p_code:code,p_team_name:joinName.trim()})))}>Kendi adımla katıl →</button></>}
    </div>
@@ -350,12 +351,13 @@ export default function DraftRoom({initialRoom='',initialInvite=''}) {
        <button className={s.secondary} disabled={busy} onClick={()=>action(async()=>{await saveTimerSettings(id);setMessage('Süreler kaydedildi.')})}>Süre ayarlarını kaydet</button>
       </>:<p>{isAuction?'Oyuncu '+(room.auction_bid_seconds??15)+' sn · her teklifte +'+(room.auction_extension_seconds??5)+' sn':Number(room.rules_version||1)>=2?'Her seçim '+(room.classic_pick_seconds??60)+' sn.':'Bu odada süre sınırı yok.'}</p>}
     </div>
-    <div className={s.seats}>{teams.map(t=><div className={s.seat} key={t.id}><small>Katılım yeri {t.team_index}</small><strong>{t.team_name}</strong><span>{t.mine?'SEN':t.is_bot?'🤖 Bilgisayar':t.occupied?'Katıldı':'Boş'}</span></div>)}</div>
+    <div className={s.seats}>{teams.map(t=><div className={s.seat} key={t.id}><small>Katılım yeri {t.team_index}</small><strong>{t.team_name}</strong><span>{t.mine?'SEN':t.is_bot?'🤖 Bilgisayar':t.occupied?'Katıldı':'Boş'}</span>{room.is_host&&room.opponent_mode!=='computer'&&(!t.occupied||t.is_bot)&&<button type="button" className={s.secondary} disabled={busy} onClick={()=>action(async()=>{await call('scout_draft_set_lobby_bot',{p_room_id:id,p_team_index:t.team_index,p_enabled:!t.is_bot});await refresh()})}>{t.is_bot?'Botu kaldır':'+ Bot ekle'}</button>}</div>)}</div>
+    {room.is_host&&room.opponent_mode!=='computer'&&teams.some(t=>!t.occupied)&&<><p>Arkadaşlarına ayırmadığın boş koltukları farklı karakterlerde botlarla doldurabilirsin.</p><button type="button" className={s.secondary} disabled={busy} onClick={()=>action(async()=>{try{for(const t of teams.filter(t=>!t.occupied)){await call('scout_draft_set_lobby_bot',{p_room_id:id,p_team_index:t.team_index,p_enabled:true})}}finally{await refresh()}})}>🤖 Tüm boş yerlere bot ekle</button></>}
     <p className={s.drawNotice}>🎲 Seçim sırası, draft başlatıldığı anda tüm takımlar arasında rastgele belirlenir. Oda kurucusu da kuraya katılır. {isAuction?'Açık artırmada aday gösterme sırası kura sonucunu izler.':room.mode==='snake'?'Snake draftta ikinci tur ters sırayla oynanır.':'Normal draftta her tur aynı kura sırası kullanılır.'}</p>
     {room.is_host?<button className={s.primary} disabled={busy||teams.some(t=>!t.occupied)} onClick={()=>action(async()=>{await call('scout_draft_start',{p_room_id:id});await refresh()})}>Draftı başlat →</button>:<p>Yönetici kurayı tamamlayınca seçimler başlayacak.</p>}
    </div>}
    {room.status==='drafting'&&<div className={s.drawResult}><strong>🎲 Kura sonucu</strong><span>{teams.map(t=>'#'+t.draft_order+' '+t.team_name).join(' → ')}</span></div>}
-   {['drafting','finished'].includes(room.status)&&<div className={s.turn}><div><small>{room.status==='finished'?String(totalPicks)+'/'+String(totalPicks)+' TAMAMLANDI':isAuction?'AÇIK ARTIRMA · '+picked.length+'/'+totalPicks+' oyuncu':'TUR '+round+' · SEÇİM '+room.next_pick+'/'+totalPicks}</small><h2>{room.status==='finished'?'Draft tamamlandı!':inCompletion?(nominator?.team_name||'Sıradaki takım')+' kadrosunu tamamlıyor':isAuction?lot?'Teklif zamanı':(nominator?.team_name||'Sıradaki takım')+' oyuncu gösterecek':current?.team_name+' seçiyor'}</h2><p>{inCompletion?'1 kredi sabit fiyatla sıradaki takım eksik oyuncularını seçiyor.':isAuction?'Oyuncular sırayla aday gösterilir; geçerli teklifler süreye +'+(room.auction_extension_seconds??5)+' sn ekler.':canPick?'Sıra sende. Havuzdan oyuncu seç.':room.opponent_mode==='computer'?'Bilgisayar rakipleri otomatik seçim yapar.':'Seçimler tüm ekranlara otomatik yansır.'}</p></div>
+   {['drafting','finished'].includes(room.status)&&<div className={s.turn}><div><small>{room.status==='finished'?String(totalPicks)+'/'+String(totalPicks)+' TAMAMLANDI':isAuction?'AÇIK ARTIRMA · '+picked.length+'/'+totalPicks+' oyuncu':'TUR '+round+' · SEÇİM '+room.next_pick+'/'+totalPicks}</small><h2>{room.status==='finished'?'Draft tamamlandı!':inCompletion?(nominator?.team_name||'Sıradaki takım')+' kadrosunu tamamlıyor':isAuction?lot?'Teklif zamanı':(nominator?.team_name||'Sıradaki takım')+' oyuncu gösterecek':current?.team_name+' seçiyor'}</h2><p>{inCompletion?'1 kredi sabit fiyatla sıradaki takım eksik oyuncularını seçiyor.':isAuction?'Oyuncular sırayla aday gösterilir; geçerli teklifler süreye +'+(room.auction_extension_seconds??5)+' sn ekler.':canPick?'Sıra sende. Havuzdan oyuncu seç.':hasBots?'Bilgisayar rakipleri otomatik seçim yapar.':'Seçimler tüm ekranlara otomatik yansır.'}</p></div>
     {!isAuction&&room.status==='drafting'&&classicSecondsLeft!==null&&<div className={s.countdown+(classicSecondsLeft<=10?' '+s.countdownUrgent:'')}><strong>{classicSecondsLeft} sn</strong><small>Seçim süresi · bitince otomatik xFP</small></div>}
     {room.is_host&&!isAuction&&<button className={s.secondary} disabled={busy||room.next_pick<=1} onClick={()=>action(async()=>{await call('scout_draft_undo',{p_room_id:id});await refresh()})}>↶ Son seçimi geri al</button>}</div>}
    {room.status==='finished'&&!room.lineup_required&&<DraftLiveStandings roomId={id}/>}
